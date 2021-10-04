@@ -4,6 +4,7 @@ import { Observable, of, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { AuthUtils } from 'app/core/auth/auth.utils';
 import { UserService } from 'app/core/user/user.service';
+import { AppConfig } from 'app/config/service.config';
 
 @Injectable()
 export class AuthService
@@ -15,9 +16,10 @@ export class AuthService
      */
     constructor(
         private _httpClient: HttpClient,
-        private _userService: UserService
+        private _userService: UserService,
+        private _apiServer: AppConfig,
     )
-    {
+    {        
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -74,6 +76,8 @@ export class AuthService
             return throwError('User is already logged in.');
         }
 
+        //miqdaad
+        console.log("here: " +this._apiServer.settings);
         return this._httpClient.post('api/auth/sign-in', credentials).pipe(
             switchMap((response: any) => {
 

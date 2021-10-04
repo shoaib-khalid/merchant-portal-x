@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ExtraOptions, PreloadAllModules, RouterModule } from '@angular/router';
@@ -12,6 +12,7 @@ import { mockApiServices } from 'app/mock-api';
 import { LayoutModule } from 'app/layout/layout.module';
 import { AppComponent } from 'app/app.component';
 import { appRoutes } from 'app/app.routing';
+import { AppConfig } from 'app/config/service.config';
 
 const routerConfig: ExtraOptions = {
     preloadingStrategy       : PreloadAllModules,
@@ -41,10 +42,21 @@ const routerConfig: ExtraOptions = {
         // 3rd party modules that require global configuration via forRoot
         MarkdownModule.forRoot({})
     ],
+    providers: [
+        AppConfig,
+        { provide: APP_INITIALIZER,
+          useFactory: initializeApp,
+          deps: [AppConfig], 
+          multi: true 
+        }
+    ],
     bootstrap   : [
         AppComponent
     ]
 })
 export class AppModule
 {
+}
+export function initializeApp(appConfig: AppConfig) {
+    return () => appConfig.load();
 }
