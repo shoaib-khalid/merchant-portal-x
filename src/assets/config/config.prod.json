@@ -10,5 +10,6 @@
         "reportService":        "https://api.symplified.biz/report-service/v1",
         "deliveryService":      "https://api.symplified.biz/delivery-service/v1"
     },
-    "storeFrontUrl":".symplified.store"
+    "storeFrontUrl":".symplified.store",
+    "logging": 0
 }

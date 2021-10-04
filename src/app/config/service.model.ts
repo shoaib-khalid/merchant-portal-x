@@ -13,4 +13,5 @@ export interface IAppConfig {
 
     };
     storeFrontUrl:string;
+    logging: number;
 }

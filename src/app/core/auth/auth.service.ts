@@ -6,6 +6,7 @@ import { AuthUtils } from 'app/core/auth/auth.utils';
 import { UserService } from 'app/core/user/user.service';
 import { AppConfig } from 'app/config/service.config';
 import { GenerateJwt } from 'app/core/jwt/generate.jwt';
+import { LogService } from 'app/core/logging/log.service'
 
 @Injectable()
 export class AuthService
@@ -19,7 +20,8 @@ export class AuthService
         private _httpClient: HttpClient,
         private _userService: UserService,
         private _apiServer: AppConfig,
-        private _genJwt: GenerateJwt
+        private _genJwt: GenerateJwt,
+        private _logging: LogService
     )
     {        
     }
@@ -124,7 +126,7 @@ export class AuthService
                     "user": user
                 };
 
-                console.log(newResponse);
+                this._logging.debug("New Generate JWT Response",newResponse,"test");
                 // return of(response); // original
                 return of(newResponse);
             })

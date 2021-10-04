@@ -13,7 +13,6 @@ import { LayoutModule } from 'app/layout/layout.module';
 import { AppComponent } from 'app/app.component';
 import { appRoutes } from 'app/app.routing';
 import { AppConfig } from 'app/config/service.config';
-
 const routerConfig: ExtraOptions = {
     preloadingStrategy       : PreloadAllModules,
     scrollPositionRestoration: 'enabled'
@@ -44,7 +43,8 @@ const routerConfig: ExtraOptions = {
     ],
     providers: [
         AppConfig,
-        { provide: APP_INITIALIZER,
+        { 
+          provide: APP_INITIALIZER,
           useFactory: initializeApp,
           deps: [AppConfig], 
           multi: true 

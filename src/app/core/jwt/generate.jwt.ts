@@ -33,7 +33,6 @@ export class GenerateJwt {
         }
         const encodedPlayload = btoa(JSON.stringify(claims))
         
-        
         // create the signature part you have to take the encoded header, 
         // the encoded payload, a secret, the algorithm specified in the header, 
         // and sign that.
@@ -41,7 +40,6 @@ export class GenerateJwt {
         const encodedSignature = btoa(signature)
         
         const jwt = `${encodedHeaders}.${encodedPlayload}.${encodedSignature}`
-        console.log({jwt})
 
         return jwt;
     }
