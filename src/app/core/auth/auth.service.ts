@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { AuthUtils } from 'app/core/auth/auth.utils';
 import { UserService } from 'app/core/user/user.service';
 import { AppConfig } from 'app/config/service.config';
+import { GenerateJwt } from 'app/core/jwt/generate.jwt';
 
 @Injectable()
 export class AuthService
@@ -18,6 +19,7 @@ export class AuthService
         private _httpClient: HttpClient,
         private _userService: UserService,
         private _apiServer: AppConfig,
+        private _genJwt: GenerateJwt
     )
     {        
     }
@@ -68,7 +70,7 @@ export class AuthService
      *
      * @param credentials
      */
-    signIn(credentials: { email: string; password: string }): Observable<any>
+    signIn(credentials: { username: string; password: string }): Observable<any>
     {
         // Throw error, if the user is already logged in
         if ( this._authenticated )
@@ -77,21 +79,54 @@ export class AuthService
         }
 
         //miqdaad
-        console.log("here: " +this._apiServer.settings);
-        return this._httpClient.post('api/auth/sign-in', credentials).pipe(
+        // console.log("here: " +this._apiServer.settings.apiServer.userService);
+        let userService = this._apiServer.settings.apiServer.userService;
+        let token = "accessToken"
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${token}`)
+        };
+        
+        return this._httpClient.post(userService + '/clients/authenticate', credentials, header).pipe(
             switchMap((response: any) => {
 
+                // Generate jwt manually since Kalsym User Service does not have JWT
+                let jwtPayload = {
+                    iat: response.data.session.created,
+                    iss: 'Fuse',
+                    exp: response.data.session.expiry
+                }
+
+                // this._genJwt.generate(jwtPayload,role,secret)
+                let token = this._genJwt.generate(jwtPayload,response.data.role,response.data.session.accessToken);
+                
                 // Store the access token in the local storage
-                this.accessToken = response.accessToken;
+                this.accessToken = token;
 
                 // Set the authenticated flag to true
                 this._authenticated = true;
 
                 // Store the user on the user service
-                this._userService.user = response.user;
+                let user = {
+                    "id": response.data.session.ownerId,
+                    "name": response.data.session.username,
+                    "email": credentials.username,
+                    "avatar": "assets/images/avatars/brian-hughes.jpg",
+                    "status": "online"
+                };
 
+                this._userService.user = user;
+                
+                
                 // Return a new observable with the response
-                return of(response);
+                let newResponse = {
+                    "accessToken": this.accessToken,
+                    "tokenType": "bearer",
+                    "user": user
+                };
+
+                console.log(newResponse);
+                // return of(response); // original
+                return of(newResponse);
             })
         );
     }

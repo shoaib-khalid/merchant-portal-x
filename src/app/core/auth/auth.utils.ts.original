@@ -1,8 +1,8 @@
 // -----------------------------------------------------------------------------------------------------
 // @ AUTH UTILITIES
 //
-// Custom Methods for Kalsym User Service
-// https://api.symplified.it/user-service/v1/swagger-ui/index.html?configUrl=/user-service/v1/v3/api-docs/swagger-config#/
+// Methods are derivations of the Auth0 Angular-JWT helper service methods
+// https://github.com/auth0/angular2-jwt
 // -----------------------------------------------------------------------------------------------------
 
 export class AuthUtils
