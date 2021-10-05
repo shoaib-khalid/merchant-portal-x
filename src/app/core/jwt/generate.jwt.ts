@@ -13,7 +13,7 @@ export class GenerateJwt {
     {        
     }
 
-    generate(header,role,token) {
+    generate(header,payload,token) {
 
         const HMACSHA256 = (stringToSign, secret) => "not_implemented"
 
@@ -23,15 +23,12 @@ export class GenerateJwt {
 
         const encodedHeaders = btoa(JSON.stringify(header))
         
-        
         // The second part of the token is the payload, which contains the claims.
         // Claims are statements about an entity (typically, the user) and 
         // additional data. There are three types of claims: 
         // registered, public, and private claims.
-        const claims = {
-            "role": role
-        }
-        const encodedPlayload = btoa(JSON.stringify(claims))
+
+        const encodedPlayload = btoa(JSON.stringify(payload))
         
         // create the signature part you have to take the encoded header, 
         // the encoded payload, a secret, the algorithm specified in the header, 

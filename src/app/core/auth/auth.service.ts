@@ -43,6 +43,19 @@ export class AuthService
         return localStorage.getItem('accessToken') ?? '';
     }
 
+    /**
+     * Setter & getter for refresh token
+     */
+    set refreshToken(token: string)
+    {
+        localStorage.setItem('refreshToken', token);
+    }
+
+    get refreshToken(): string
+    {
+        return localStorage.getItem('refreshToken') ?? '';
+    }
+
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
@@ -80,8 +93,6 @@ export class AuthService
             return throwError('User is already logged in.');
         }
 
-        //miqdaad
-        // console.log("here: " +this._apiServer.settings.apiServer.userService);
         let userService = this._apiServer.settings.apiServer.userService;
         let token = "accessToken"
         const header = {
@@ -93,16 +104,19 @@ export class AuthService
 
                 // Generate jwt manually since Kalsym User Service does not have JWT
                 let jwtPayload = {
-                    iat: response.data.session.created,
+                    iat: Date.parse(response.data.session.created),
                     iss: 'Fuse',
-                    exp: response.data.session.expiry
+                    exp: Date.parse(response.data.session.expiry)
                 }
 
                 // this._genJwt.generate(jwtPayload,role,secret)
-                let token = this._genJwt.generate(jwtPayload,response.data.role,response.data.session.accessToken);
+                let token = this._genJwt.generate({ alg: "HS256", typ: "JWT"},jwtPayload,response.data.session.accessToken);
                 
                 // Store the access token in the local storage
                 this.accessToken = token;
+
+                // Store the refresh token in the local storage
+                this.refreshToken = response.data.session.refreshToken;
 
                 // Set the authenticated flag to true
                 this._authenticated = true;
@@ -139,24 +153,45 @@ export class AuthService
     signInUsingToken(): Observable<any>
     {
         // Renew token
-        return this._httpClient.post('api/auth/refresh-access-token', {
-            accessToken: this.accessToken
-        }).pipe(
+        let userService = this._apiServer.settings.apiServer.userService;
+        let token = "accessToken"
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${token}`)
+        };
+        
+        return this._httpClient.post(userService + '/clients/session/refresh',
+            this.refreshToken
+        ,header).pipe(
             catchError(() =>
-
                 // Return false
                 of(false)
             ),
             switchMap((response: any) => {
 
+                this._logging.debug("New Generate JWT Response",response,"test");
+
+                // Generate jwt manually since Kalsym User Service does not have JWT
+                let jwtPayload = {
+                    iat: Date.parse(response.data.session.created),
+                    iss: 'Fuse',
+                    exp: Date.parse(response.data.session.expiry)
+                }
+
+                // this._genJwt.generate(jwtPayload,role,secret)
+                let token = this._genJwt.generate({ alg: "HS256", typ: "JWT"},jwtPayload,response.data.session.accessToken);
+                
                 // Store the access token in the local storage
-                this.accessToken = response.accessToken;
+                this.accessToken = token;
+
+                // Store the refresh token in the local storage
+                this.refreshToken = response.data.session.refreshToken;
 
                 // Set the authenticated flag to true
                 this._authenticated = true;
 
                 // Store the user on the user service
-                this._userService.user = response.user;
+                // this._userService.user = response.user;
+                // this._userService.user = this._userService.user;
 
                 // Return true
                 return of(true);
