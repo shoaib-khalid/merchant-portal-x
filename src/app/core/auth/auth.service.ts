@@ -100,38 +100,41 @@ export class AuthService
         };
         
         return this._httpClient.post(userService + '/clients/authenticate', credentials, header).pipe(
-            switchMap((response: any) => {
+            switchMap(async (response: any) => {
 
                 // Generate jwt manually since Kalsym User Service does not have JWT
                 let jwtPayload = {
                     iat: Date.parse(response.data.session.created),
                     iss: 'Fuse',
-                    exp: Date.parse(response.data.session.expiry)
+                    exp: Date.parse(response.data.session.expiry),
+                    act: response.data.session.accessToken
                 }
-
+                
                 // this._genJwt.generate(jwtPayload,role,secret)
                 let token = this._genJwt.generate({ alg: "HS256", typ: "JWT"},jwtPayload,response.data.session.accessToken);
+
+                // get user info
+                let userData: any = await this._httpClient.get(userService + "/clients/" + response.data.session.ownerId, header).toPromise();
                 
                 // Store the access token in the local storage
                 this.accessToken = token;
-
+                
                 // Store the refresh token in the local storage
                 this.refreshToken = response.data.session.refreshToken;
-
+                
                 // Set the authenticated flag to true
                 this._authenticated = true;
-
+                
                 // Store the user on the user service
                 let user = {
-                    "id": response.data.session.ownerId,
-                    "name": response.data.session.username,
-                    "email": credentials.username,
-                    "avatar": "assets/images/avatars/brian-hughes.jpg",
+                    "id": userData.data.id,
+                    "name": userData.data.name,
+                    "email": userData.data.email,
+                    "avatar": "assets/images/logo/logo_symplified_bg.png",
                     "status": "online"
                 };
 
                 this._userService.user = user;
-                
                 
                 // Return a new observable with the response
                 let newResponse = {
@@ -166,7 +169,7 @@ export class AuthService
                 // Return false
                 of(false)
             ),
-            switchMap((response: any) => {
+            switchMap(async (response: any) => {
 
                 this._logging.debug("New Generate JWT Response",response,"test");
 
@@ -174,11 +177,14 @@ export class AuthService
                 let jwtPayload = {
                     iat: Date.parse(response.data.session.created),
                     iss: 'Fuse',
-                    exp: Date.parse(response.data.session.expiry)
+                    exp: Date.parse(response.data.session.expiry),
+                    act: response.data.session.accessToken
                 }
 
                 // this._genJwt.generate(jwtPayload,role,secret)
                 let token = this._genJwt.generate({ alg: "HS256", typ: "JWT"},jwtPayload,response.data.session.accessToken);
+
+                let userData: any = await this._httpClient.get(userService + "/clients/" + response.data.session.ownerId, header).toPromise();
                 
                 // Store the access token in the local storage
                 this.accessToken = token;
@@ -190,8 +196,16 @@ export class AuthService
                 this._authenticated = true;
 
                 // Store the user on the user service
-                // this._userService.user = response.user;
-                // this._userService.user = this._userService.user;
+                let user = {
+                    "id": userData.data.id,
+                    "name": userData.data.name,
+                    "email": userData.data.email,
+                    "avatar": "assets/images/logo/logo_symplified_bg.png",
+                    "status": "online"
+                };
+
+                // Store the user on the user service
+                this._userService.user = user;
 
                 // Return true
                 return of(true);

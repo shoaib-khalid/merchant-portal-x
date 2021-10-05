@@ -40,4 +40,9 @@ export class GenerateJwt {
 
         return jwt;
     }
+
+    getAccessToken(accessToken) {
+        return JSON.parse(atob(accessToken.split('.')[1])).act
+    }
+    
 }

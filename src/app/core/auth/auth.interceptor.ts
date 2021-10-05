@@ -4,6 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from 'app/core/auth/auth.service';
 import { AuthUtils } from 'app/core/auth/auth.utils';
+import { GenerateJwt } from 'app/core/jwt/generate.jwt';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor
@@ -11,7 +12,10 @@ export class AuthInterceptor implements HttpInterceptor
     /**
      * Constructor
      */
-    constructor(private _authService: AuthService)
+    constructor(
+        private _authService: AuthService,
+        private _getSignature: GenerateJwt
+    )
     {
     }
 
@@ -36,8 +40,10 @@ export class AuthInterceptor implements HttpInterceptor
         // the user out from the app.
         if ( this._authService.accessToken && !AuthUtils.isTokenExpired(this._authService.accessToken) )
         {
+            // retrive back original access token (not jwt) from generated jwt 
+            let accessToken = this._getSignature.getAccessToken(this._authService.accessToken);
             newReq = req.clone({
-                headers: req.headers.set('Authorization', 'Bearer ' + this._authService.accessToken)
+                headers: req.headers.set('Authorization', 'Bearer ' + accessToken)
             });
         }
 
