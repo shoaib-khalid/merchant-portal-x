@@ -3,8 +3,12 @@ import { Route } from '@angular/router';
 import { MerchantComponent } from 'app/modules/merchant/merchant.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ChooseVerticleComponent } from './choose-verticle/choose-verticle.component';
-import { StoresComponent } from './stores/stores.component';
-import { ProductsComponent } from './products/products.component';
+import { StoresManagementComponent } from './stores-management/stores-management.component';
+import { ProductsManagementComponent } from './products-management/products-management.component';
+import { OrdersManagementComponent } from './orders-management/orders-management.component';
+import { DiscountsManagementComponent } from './discounts-management/discounts-management.component';
+import { SocialMediaComponent } from './social-media/social-media.component';
+import { CustomerSupportComponent } from './customer-support/customer-support.component';
 
 export const merchantRoutes: Route[] = [
         // Merchant routes
@@ -15,8 +19,12 @@ export const merchantRoutes: Route[] = [
             children   : [
                 {path: 'dashboard', loadChildren: () => import('app/modules/merchant/dashboard/dashboard.module').then(m => m.DashboardModule), component  : DashboardComponent},
                 {path: 'choose-verticle', loadChildren: () => import('app/modules/merchant/choose-verticle/choose-verticle.module').then(m => m.ChooseVerticleModule), component  : ChooseVerticleComponent},
-                {path: 'stores', loadChildren: () => import('app/modules/merchant/stores/stores.module').then(m => m.StoresModule), component  : StoresComponent},
-                {path: 'products', loadChildren: () => import('app/modules/merchant/products/products.module').then(m => m.ProductsModule), component  : ProductsComponent},
+                {path: 'stores', loadChildren: () => import('app/modules/merchant/stores-management/stores-management.module').then(m => m.StoresManagementModule), component  : StoresManagementComponent},
+                {path: 'products', loadChildren: () => import('app/modules/merchant/products-management/products-management.module').then(m => m.ProductsManagementModule), component  : ProductsManagementComponent},
+                {path: 'orders', loadChildren: () => import('app/modules/merchant/orders-management/orders-management.module').then(m => m.OrdersManagementModule), component  : OrdersManagementComponent},
+                {path: 'discounts', loadChildren: () => import('app/modules/merchant/discounts-management/discounts-management.module').then(m => m.DiscountsManagementModule), component  : DiscountsManagementComponent},
+                {path: 'user-channels', loadChildren: () => import('app/modules/merchant/social-media/social-media.module').then(m => m.SocialMediaModule), component  : SocialMediaComponent},
+                {path: 'customer-support', loadChildren: () => import('app/modules/merchant/customer-support/customer-support.module').then(m => m.CustomerSupportModule), component  : CustomerSupportComponent},
             ]
         }
 ];

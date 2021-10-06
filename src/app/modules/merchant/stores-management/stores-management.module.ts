@@ -2,6 +2,6 @@ import { NgModule } from '@angular/core';
 
 @NgModule({
 })
-export class StoresModule
+export class StoresManagementModule
 {
 }
