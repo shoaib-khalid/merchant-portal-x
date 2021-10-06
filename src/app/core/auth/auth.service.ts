@@ -110,7 +110,7 @@ export class AuthService
                     act: response.data.session.accessToken
                 }
                 
-                // this._genJwt.generate(jwtPayload,role,secret)
+                // this._genJwt.generate(jwtheader,jwtpayload,secret)
                 let token = this._genJwt.generate({ alg: "HS256", typ: "JWT"},jwtPayload,response.data.session.accessToken);
 
                 // get user info
@@ -181,7 +181,7 @@ export class AuthService
                     act: response.data.session.accessToken
                 }
 
-                // this._genJwt.generate(jwtPayload,role,secret)
+                // this._genJwt.generate(jwtheader,jwtpayload,secret)
                 let token = this._genJwt.generate({ alg: "HS256", typ: "JWT"},jwtPayload,response.data.session.accessToken);
 
                 let userData: any = await this._httpClient.get(userService + "/clients/" + response.data.session.ownerId, header).toPromise();

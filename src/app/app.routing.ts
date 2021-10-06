@@ -8,8 +8,18 @@ import { InitialDataResolver } from 'app/app.resolvers';
 // tslint:disable:max-line-length
 export const appRoutes: Route[] = [
 
-    // Redirect empty path to '/example'
-    {path: '', pathMatch : 'full', redirectTo: 'example'},
+    // Landing routes
+    {
+        path: '',
+        component  : LayoutComponent,
+        pathMatch : 'full',
+        data: {
+            layout: 'empty'
+        },
+        children   : [
+            {path: '', loadChildren: () => import('app/modules/landing/home/home.module').then(m => m.LandingHomeModule)},
+        ]
+    },
 
     // Redirect signed in user to the '/example'
     //
@@ -47,21 +57,26 @@ export const appRoutes: Route[] = [
         },
         children: [
             {path: 'sign-out', loadChildren: () => import('app/modules/auth/sign-out/sign-out.module').then(m => m.AuthSignOutModule)},
-            {path: 'unlock-session', loadChildren: () => import('app/modules/auth/unlock-session/unlock-session.module').then(m => m.AuthUnlockSessionModule)}
+            {path: 'unlock-session', loadChildren: () => import('app/modules/auth/unlock-session/unlock-session.module').then(m => m.AuthUnlockSessionModule)},
         ]
     },
 
-    // Landing routes
+    // Merchant routes
     {
-        path: '',
+        path       : '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
         component  : LayoutComponent,
         data: {
-            layout: 'empty'
+            layout: 'classy'
+        },
+        resolve    : {
+            initialData: InitialDataResolver,
         },
         children   : [
-            {path: 'home', loadChildren: () => import('app/modules/landing/home/home.module').then(m => m.LandingHomeModule)},
+            {path: '', loadChildren: () => import('app/modules/merchant/merchant.module').then(m => m.MerchantModule)}
         ]
-    },
+    }, 
 
     // Admin routes
     {
@@ -69,11 +84,17 @@ export const appRoutes: Route[] = [
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
         component  : LayoutComponent,
+        data: {
+            layout: 'futuristic'
+        },
         resolve    : {
             initialData: InitialDataResolver,
         },
         children   : [
             {path: 'example', loadChildren: () => import('app/modules/admin/example/example.module').then(m => m.ExampleModule)},
         ]
-    }
+    },
+
+    // Redirect if not exists
+    {path: '**', redirectTo: '/'}
 ];
