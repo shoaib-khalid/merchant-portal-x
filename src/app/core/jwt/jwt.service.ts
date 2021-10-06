@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 @Injectable({
     providedIn: 'root'
 })
-export class GenerateJwt {
+export class JwtService {
 
     /**
      * Constructor
@@ -41,8 +41,8 @@ export class GenerateJwt {
         return jwt;
     }
 
-    getAccessToken(accessToken) {
-        return JSON.parse(atob(accessToken.split('.')[1])).act
+    getJwtPayload(accessToken) {
+        return JSON.parse(atob(accessToken.split('.')[1]))
     }
     
 }

@@ -5,7 +5,7 @@ import { catchError, switchMap } from 'rxjs/operators';
 import { AuthUtils } from 'app/core/auth/auth.utils';
 import { UserService } from 'app/core/user/user.service';
 import { AppConfig } from 'app/config/service.config';
-import { GenerateJwt } from 'app/core/jwt/generate.jwt';
+import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service'
 
 @Injectable()
@@ -20,7 +20,7 @@ export class AuthService
         private _httpClient: HttpClient,
         private _userService: UserService,
         private _apiServer: AppConfig,
-        private _genJwt: GenerateJwt,
+        private _jwt: JwtService,
         private _logging: LogService
     )
     {        
@@ -107,11 +107,12 @@ export class AuthService
                     iat: Date.parse(response.data.session.created),
                     iss: 'Fuse',
                     exp: Date.parse(response.data.session.expiry),
+                    role: response.data.role,
                     act: response.data.session.accessToken
                 }
                 
                 // this._genJwt.generate(jwtheader,jwtpayload,secret)
-                let token = this._genJwt.generate({ alg: "HS256", typ: "JWT"},jwtPayload,response.data.session.accessToken);
+                let token = this._jwt.generate({ alg: "HS256", typ: "JWT"},jwtPayload,response.data.session.accessToken);
 
                 // get user info
                 let userData: any = await this._httpClient.get(userService + "/clients/" + response.data.session.ownerId, header).toPromise();
@@ -131,7 +132,8 @@ export class AuthService
                     "name": userData.data.name,
                     "email": userData.data.email,
                     "avatar": "assets/images/logo/logo_symplified_bg.png",
-                    "status": "online"
+                    "status": "online",
+                    "role": userData.data.roleId
                 };
 
                 this._userService.user = user;
@@ -171,18 +173,21 @@ export class AuthService
             ),
             switchMap(async (response: any) => {
 
-                this._logging.debug("New Generate JWT Response",response,"test");
+                this._logging.debug("Response from User Service (backend) /clients/session/refresh",response);
 
                 // Generate jwt manually since Kalsym User Service does not have JWT
                 let jwtPayload = {
                     iat: Date.parse(response.data.session.created),
                     iss: 'Fuse',
                     exp: Date.parse(response.data.session.expiry),
+                    role: response.data.role,
                     act: response.data.session.accessToken
                 }
 
+                this._logging.debug("JWT generated at frontend",jwtPayload);
+
                 // this._genJwt.generate(jwtheader,jwtpayload,secret)
-                let token = this._genJwt.generate({ alg: "HS256", typ: "JWT"},jwtPayload,response.data.session.accessToken);
+                let token = this._jwt.generate({ alg: "HS256", typ: "JWT"},jwtPayload,response.data.session.accessToken);
 
                 let userData: any = await this._httpClient.get(userService + "/clients/" + response.data.session.ownerId, header).toPromise();
                 
@@ -201,8 +206,11 @@ export class AuthService
                     "name": userData.data.name,
                     "email": userData.data.email,
                     "avatar": "assets/images/logo/logo_symplified_bg.png",
-                    "status": "online"
+                    "status": "online",
+                    "role": userData.data.roleId
                 };
+
+                this._logging.debug("Data for User Service (Frontend)",user);
 
                 // Store the user on the user service
                 this._userService.user = user;

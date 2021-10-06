@@ -2,22 +2,40 @@ import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, CanActivateChild, CanLoad, Route, Router, RouterStateSnapshot, UrlSegment, UrlTree } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { AuthService } from 'app/core/auth/auth.service';
+import { JwtService } from 'app/core/jwt/jwt.service';
 import { switchMap } from 'rxjs/operators';
+import { LogService } from 'app/core/logging/log.service'
 
 @Injectable({
     providedIn: 'root'
 })
 export class AuthGuard implements CanActivate, CanActivateChild, CanLoad
 {
+    protected _userProfile:any;
     /**
      * Constructor
      */
     constructor(
         private _authService: AuthService,
-        private _router: Router
+        private _jwt: JwtService,
+        private _router: Router,
+        private _logging: LogService
     )
     {
     }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Accessors
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Setter & getter for access token
+     */
+ 
+     get accessToken(): string
+     {
+         return localStorage.getItem('accessToken') ?? '';
+     }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
@@ -31,6 +49,22 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanLoad
      */
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean
     {
+
+        let currentRole = this._jwt.getJwtPayload(this._authService.accessToken).role;
+        if (route.data.roles) {
+            // check if route is restricted by role
+            this._logging.debug("Required role to access route",route.data.roles);
+            this._logging.debug("Current user role",currentRole);
+            if (route.data.roles && route.data.roles.indexOf(currentRole) === -1) {
+                // role not authorised so redirect to home page
+                this._router.navigate(['/']);
+                return false;
+            }
+
+            // authorised so return true
+            return true;
+        }
+
         const redirectUrl = state.url === '/sign-out' ? '/' : state.url;
         return this._check(redirectUrl);
     }
@@ -90,4 +124,10 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanLoad
                        })
                    );
     }
+
+    // async _getUser(){
+    //     return (await (this._userService.get())).subscribe((data)=>{
+    //         this._userProfile = data;
+    //     });
+    // }
 }
