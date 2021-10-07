@@ -19,9 +19,24 @@ export const defaultNavigation: FuseNavigationItem[] = [
     {
         id   : 'products-management',
         title: 'Products Management',
-        type : 'basic',
+        type : 'collapsable',
         icon : 'heroicons_outline:cube',
-        link : '/products'
+        children: [
+            {
+                id   : 'apps.ecommerce.inventory',
+                title: 'Inventory',
+                type : 'basic',
+                link : '/products',
+                exactMatch: true
+            },
+            {
+                id   : 'apps.ecommerce.inventory',
+                title: 'Product Category',
+                type : 'basic',
+                link : '/products',
+                exactMatch: true
+            }
+        ],
     },
     {
         id   : 'orders-management',

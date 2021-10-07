@@ -9,7 +9,7 @@ import { brands as brandsData, categories as categoriesData, products as product
 export class ECommerceInventoryMockApi
 {
     private _categories: any[] = categoriesData;
-    private _brands: any[] = brandsData;
+    // private _brands: any[] = brandsData;
     private _products: any[] = productsData;
     private _tags: any[] = tagsData;
     private _vendors: any[] = vendorsData;
@@ -42,9 +42,11 @@ export class ECommerceInventoryMockApi
         // -----------------------------------------------------------------------------------------------------
         // @ Brands - GET
         // -----------------------------------------------------------------------------------------------------
-        this._fuseMockApiService
-            .onGet('api/apps/ecommerce/inventory/brands')
-            .reply(() => [200, cloneDeep(this._brands)]);
+        // this._fuseMockApiService
+        //     .onGet('api/apps/ecommerce/inventory/brands')
+        //     .reply(() => [200, cloneDeep(this._brands)]);
+
+        //     console.log(this._brands);
 
         // -----------------------------------------------------------------------------------------------------
         // @ Products - GET
@@ -52,6 +54,8 @@ export class ECommerceInventoryMockApi
         this._fuseMockApiService
             .onGet('api/apps/ecommerce/inventory/products', 300)
             .reply(({request}) => {
+
+                console.log(request);
 
                 // Get available queries
                 const search = request.params.get('search');
