@@ -124,10 +124,5 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanLoad
                        })
                    );
     }
-
-    // async _getUser(){
-    //     return (await (this._userService.get())).subscribe((data)=>{
-    //         this._userProfile = data;
-    //     });
-    // }
+    
 }

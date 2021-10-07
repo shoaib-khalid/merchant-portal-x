@@ -108,8 +108,15 @@ export class AuthService
                     iss: 'Fuse',
                     exp: Date.parse(response.data.session.expiry),
                     role: response.data.role,
-                    act: response.data.session.accessToken
+                    act: response.data.session.accessToken,
+                    uid: response.data.session.ownerId
                 }
+
+                this._logging.debug("JWT generated at frontend",jwtPayload);
+
+                const header = {
+                    headers: new HttpHeaders().set("Authorization", `Bearer ${response.data.session.accessToken}`)
+                };
                 
                 // this._genJwt.generate(jwtheader,jwtpayload,secret)
                 let token = this._jwt.generate({ alg: "HS256", typ: "JWT"},jwtPayload,response.data.session.accessToken);
@@ -137,6 +144,8 @@ export class AuthService
                 };
 
                 this._userService.user = user;
+
+                this._logging.debug("Data for User Service (Frontend)",user);
                 
                 // Return a new observable with the response
                 let newResponse = {
@@ -145,7 +154,7 @@ export class AuthService
                     "user": user
                 };
 
-                this._logging.debug("New Generate JWT Response",newResponse,"test");
+                this._logging.debug("New Generate JWT Response by (Frontend)",newResponse);
                 // return of(response); // original
                 return of(newResponse);
             })
@@ -181,13 +190,18 @@ export class AuthService
                     iss: 'Fuse',
                     exp: Date.parse(response.data.session.expiry),
                     role: response.data.role,
-                    act: response.data.session.accessToken
+                    act: response.data.session.accessToken,
+                    uid: response.data.session.ownerId
                 }
 
                 this._logging.debug("JWT generated at frontend",jwtPayload);
 
                 // this._genJwt.generate(jwtheader,jwtpayload,secret)
                 let token = this._jwt.generate({ alg: "HS256", typ: "JWT"},jwtPayload,response.data.session.accessToken);
+
+                const header = {
+                    headers: new HttpHeaders().set("Authorization", `Bearer ${response.data.session.accessToken}`)
+                };
 
                 let userData: any = await this._httpClient.get(userService + "/clients/" + response.data.session.ownerId, header).toPromise();
                 
@@ -207,7 +221,7 @@ export class AuthService
                     "email": userData.data.email,
                     "avatar": "assets/images/logo/logo_symplified_bg.png",
                     "status": "online",
-                    "role": userData.data.roleId
+                    "role": userData.data.roleId,
                 };
 
                 this._logging.debug("Data for User Service (Frontend)",user);
