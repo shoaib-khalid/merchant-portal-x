@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
-import { InventoryBrand, InventoryCategory, InventoryPagination, InventoryProduct, InventoryTag, InventoryVendor } from 'app/modules/merchant/products-management/inventory/inventory.types';
+import { InventoryBrand, InventoryCategory, InventoryPagination, InventoryProduct, InventoryTag, InventoryVendor } from 'app/core/product/inventory.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 
@@ -100,6 +100,15 @@ export class InventoryService
          return localStorage.getItem('accessToken') ?? '';
      }
 
+    /**
+     * Getter for storeId
+     */
+ 
+     get storeId$(): string
+     {
+         return localStorage.getItem('storeId') ?? '';
+     }
+
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
@@ -130,7 +139,7 @@ export class InventoryService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
 
-        return this._httpClient.get<any>(productService +'/stores/d757b7c4-eeb6-4e1f-8ec5-49f8f695e4d6/store-categories',header).pipe(
+        return this._httpClient.get<any>(productService + '/stores/' + this.storeId$ + '/store-categories',header).pipe(
             tap((categories) => {
                 this._categories.next(categories.data);
             })
@@ -164,7 +173,7 @@ export class InventoryService
             }
         };
 
-        return this._httpClient.get<any>(productService +'/stores/d757b7c4-eeb6-4e1f-8ec5-49f8f695e4d6/products', header).pipe(
+        return this._httpClient.get<any>(productService +'/stores/'+this.storeId$+'/products', header).pipe(
             tap((response) => {
                 let _pagination = {
                     length: response.data.totalElements,

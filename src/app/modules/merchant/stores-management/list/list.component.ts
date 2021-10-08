@@ -4,8 +4,9 @@ import { MatSelectChange } from '@angular/material/select';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { ChooseStoreService } from 'app/modules/merchant/choose-store/choose-store.service';
+import { ChooseStoreService } from 'app/modules/merchant/stores-management/choose-store.service';
 import { StoreCategory, Store } from 'app/core/store/store.types';
+import { InventoryService } from 'app/core/product/inventory.service'
 
 @Component({
     selector       : 'choose-store-list',
@@ -37,10 +38,29 @@ export class ChooseStoreListComponent implements OnInit, OnDestroy
         private _activatedRoute: ActivatedRoute,
         private _changeDetectorRef: ChangeDetectorRef,
         private _router: Router,
-        private _chooseStoreService: ChooseStoreService
+        private _chooseStoreService: ChooseStoreService,
+        private _inventoryService: InventoryService
+
     )
     {
     }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Accessors
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Setter & getter for storeId
+     */
+     set storeId(str: string)
+     {
+         localStorage.setItem('storeId', str);
+     }
+ 
+     get storeId$(): string
+     {
+         return localStorage.getItem('storeId') ?? '';
+     }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
@@ -161,7 +181,16 @@ export class ChooseStoreListComponent implements OnInit, OnDestroy
      * @param storeId
      */
 
-    pageRedirect(storeId: string){
-        
+    async pageRedirect(storeId: string){
+        this.storeId = storeId;
+        await this._inventoryService.getProducts().subscribe((response)=>{
+            console.log("HARE",response)
+
+            if (response["data"]["content"].length < 1)
+                this._router.navigateByUrl('/products/inventory')
+            else
+                this._router.navigateByUrl('/dashboard')
+        })
     }
+    
 }

@@ -5,7 +5,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { ChooseVerticleComponent } from './choose-verticle/choose-verticle.component';
 // import { ChooseStoreComponent } from './choose-store/choose-store.component';
 import { RedirectComponent } from './redirect/redirect.component';
-import { StoresManagementComponent } from './stores-management/stores-management.component';
+// import { StoresManagementComponent } from './stores-management/stores-management.component';
 // import { ProductsManagementComponent } from './products-management/products-management.component';
 // import { ECommerceComponent } from '../shared/ecommerce/ecommerce.component';
 import { OrdersManagementComponent } from './orders-management/orders-management.component';
@@ -21,10 +21,9 @@ export const merchantRoutes: Route[] = [
             // component  : MerchantComponent,
             children   : [
                 {path: 'choose-verticle', loadChildren: () => import('app/modules/merchant/choose-verticle/choose-verticle.module').then(m => m.ChooseVerticleModule), component  : ChooseVerticleComponent},
-                {path: 'choose-store', loadChildren: () => import('app/modules/merchant/choose-store/choose-store.module').then(m => m.ChooseStoreModule)},
+                {path: 'stores', loadChildren: () => import('app/modules/merchant/stores-management/choose-store.module').then(m => m.ChooseStoreModule)},
                 {path: 'redirect', loadChildren: () => import('app/modules/merchant/redirect/redirect.module').then(m => m.RedirectModule), component  : RedirectComponent},
                 {path: 'dashboard', loadChildren: () => import('app/modules/merchant/dashboard/dashboard.module').then(m => m.DashboardModule), component  : DashboardComponent},
-                {path: 'stores', loadChildren: () => import('app/modules/merchant/stores-management/stores-management.module').then(m => m.StoresManagementModule), component  : StoresManagementComponent},
                 {path: 'products', loadChildren: () => import('app/modules/merchant/products-management/products-management.module').then(m => m.ECommerceModule)},
                 {path: 'orders', loadChildren: () => import('app/modules/merchant/orders-management/orders-management.module').then(m => m.OrdersManagementModule), component  : OrdersManagementComponent},
                 {path: 'discounts', loadChildren: () => import('app/modules/merchant/discounts-management/discounts-management.module').then(m => m.DiscountsManagementModule), component  : DiscountsManagementComponent},

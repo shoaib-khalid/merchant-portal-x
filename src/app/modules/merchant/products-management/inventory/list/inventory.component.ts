@@ -7,8 +7,8 @@ import { merge, Observable, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { InventoryBrand, InventoryCategory, InventoryPagination, InventoryProduct, InventoryTag, InventoryVendor } from 'app/modules/merchant/products-management/inventory/inventory.types';
-import { InventoryService } from 'app/modules/merchant/products-management/inventory/inventory.service';
+import { InventoryBrand, InventoryCategory, InventoryPagination, InventoryProduct, InventoryTag, InventoryVendor } from 'app/core/product/inventory.types';
+import { InventoryService } from 'app/core/product/inventory.service';
 
 @Component({
     selector       : 'inventory-list',
