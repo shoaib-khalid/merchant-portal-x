@@ -1,7 +1,7 @@
 export interface StoreCategory
 {
     id?: string;
-    title?: string;
+    name?: string;
     slug?: string;
 }
 

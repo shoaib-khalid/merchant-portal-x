@@ -85,12 +85,12 @@ export class ChooseStoreService
                     {
                         id: "FnB",
                         slug: "FnB",
-                        title: "Food and Beverages"
+                        name: "Food and Beverages"
                     },
                     {
                         id: "ecommerce",
                         slug: "ecommerce",
-                        title: "E-commerce"   
+                        name: "E-commerce"   
                     }
                 ];
                 this._categories.next(_catagories);
@@ -138,16 +138,17 @@ export class ChooseStoreService
                 // this._stores.next(storeList);
                 // this.stores = storeList.sort(this.dynamicSort("name"));
                 console.log("DANDAN",storeList)
-                _storeList = storeList;
+                _storeList = storeList.sort(this.dynamicSort("name"));
 
                 let _stores = [];
                 _storeList.forEach(element => {
+                    console.log(element.storeDescription)
                     _stores.push(
                         {
                             id: element.id,
-                            title: element.name,
+                            name: element.name,
                             slug: element.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''),
-                            description: element.name,
+                            storeDescription: element.name,
                             duration: 30,
                             totalSteps: 3,
                             featured: true,
@@ -229,5 +230,21 @@ export class ChooseStoreService
                 return of(store);
             })
         );
+    }
+
+    // This fuction used to sort object
+    dynamicSort(property) {
+        var sortOrder = 1;
+        if(property[0] === "-") {
+            sortOrder = -1;
+            property = property.substr(1);
+        }
+        return function (a,b) {
+            /* next line works with strings and numbers, 
+                * and you may want to customize it to your needs
+                */
+            var result = (a[property].toLowerCase() < b[property].toLowerCase()) ? -1 : (a[property].toLowerCase() > b[property].toLowerCase()) ? 1 : 0;
+            return result * sortOrder;
+        }
     }
 }

@@ -18,7 +18,7 @@ export class ChooseStoreListComponent implements OnInit, OnDestroy
 {
     categories: StoreCategory[];
     stores: Store[];
-    filteredCourses: Store[];
+    filteredStores: Store[];
     filters: {
         categorySlug$: BehaviorSubject<string>;
         query$: BehaviorSubject<string>;
@@ -85,7 +85,7 @@ export class ChooseStoreListComponent implements OnInit, OnDestroy
         this._chooseStoreService.stores$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((stores: Store[]) => {
-                this.stores = this.filteredCourses = stores;
+                this.stores = this.filteredStores = stores;
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -96,18 +96,19 @@ export class ChooseStoreListComponent implements OnInit, OnDestroy
             .subscribe(([categorySlug, query, hideCompleted]) => {
 
                 // Reset the filtered stores
-                this.filteredCourses = this.stores;
+                this.filteredStores = this.stores;
 
                 // Filter by category
                 if ( categorySlug !== 'all' )
                 {
-                    this.filteredCourses = this.filteredCourses.filter(store => store.category === categorySlug);
+                    this.filteredStores = this.filteredStores.filter(store => store.category === categorySlug);
                 }
 
                 // Filter by search query
                 if ( query !== '' )
                 {
-                    this.filteredCourses = this.filteredCourses.filter(store => store.name.toLowerCase().includes(query.toLowerCase())
+                    console.log(query)
+                    this.filteredStores = this.filteredStores.filter(store => store.name.toLowerCase().includes(query.toLowerCase())
                         || store.storeDescription.toLowerCase().includes(query.toLowerCase())
                         || store.category.toLowerCase().includes(query.toLowerCase()));
                 }
@@ -115,7 +116,7 @@ export class ChooseStoreListComponent implements OnInit, OnDestroy
                 // Filter by completed
                 if ( hideCompleted )
                 {
-                    this.filteredCourses = this.filteredCourses.filter(store => store.progress.completed === 0);
+                    this.filteredStores = this.filteredStores.filter(store => store.progress.completed === 0);
                 }
             });
     }
