@@ -6,7 +6,7 @@ import { ChooseVerticleComponent } from './choose-verticle/choose-verticle.compo
 // import { ChooseStoreComponent } from './choose-store/choose-store.component';
 import { RedirectComponent } from './redirect/redirect.component';
 import { StoresManagementComponent } from './stores-management/stores-management.component';
-import { ProductsManagementComponent } from './products-management/products-management.component';
+// import { ProductsManagementComponent } from './products-management/products-management.component';
 // import { ECommerceComponent } from '../shared/ecommerce/ecommerce.component';
 import { OrdersManagementComponent } from './orders-management/orders-management.component';
 import { DiscountsManagementComponent } from './discounts-management/discounts-management.component';
@@ -25,7 +25,7 @@ export const merchantRoutes: Route[] = [
                 {path: 'redirect', loadChildren: () => import('app/modules/merchant/redirect/redirect.module').then(m => m.RedirectModule), component  : RedirectComponent},
                 {path: 'dashboard', loadChildren: () => import('app/modules/merchant/dashboard/dashboard.module').then(m => m.DashboardModule), component  : DashboardComponent},
                 {path: 'stores', loadChildren: () => import('app/modules/merchant/stores-management/stores-management.module').then(m => m.StoresManagementModule), component  : StoresManagementComponent},
-                {path: 'products', loadChildren: () => import('app/modules/shared/ecommerce/ecommerce.module').then(m => m.ECommerceModule)},
+                {path: 'products', loadChildren: () => import('app/modules/merchant/products-management/products-management.module').then(m => m.ECommerceModule)},
                 {path: 'orders', loadChildren: () => import('app/modules/merchant/orders-management/orders-management.module').then(m => m.OrdersManagementModule), component  : OrdersManagementComponent},
                 {path: 'discounts', loadChildren: () => import('app/modules/merchant/discounts-management/discounts-management.module').then(m => m.DiscountsManagementModule), component  : DiscountsManagementComponent},
                 {path: 'user-channels', loadChildren: () => import('app/modules/merchant/social-media/social-media.module').then(m => m.SocialMediaModule), component  : SocialMediaComponent},

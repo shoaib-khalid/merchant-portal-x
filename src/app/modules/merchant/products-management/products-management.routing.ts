@@ -1,11 +1,11 @@
 import { Route } from '@angular/router';
-import { InventoryComponent } from 'app/modules/shared/ecommerce/inventory/inventory.component';
-import { InventoryListComponent } from 'app/modules/shared/ecommerce/inventory/list/inventory.component';
-import { InventoryCategoriesResolver, InventoryProductsResolver, InventoryTagsResolver, InventoryVendorsResolver } from 'app/modules/shared/ecommerce/inventory/inventory.resolvers';
+import { InventoryComponent } from 'app/modules/merchant/products-management/inventory/inventory.component';
+import { InventoryListComponent } from 'app/modules/merchant/products-management/inventory/list/inventory.component';
+import { InventoryCategoriesResolver, InventoryProductsResolver, InventoryTagsResolver, InventoryVendorsResolver } from 'app/modules/merchant/products-management/inventory/inventory.resolvers';
 // import { InventoryBrandsResolver
 
 
-export const ecommerceRoutes: Route[] = [
+export const productsManagementRoutes: Route[] = [
     {
         path      : '',
         pathMatch : 'full',

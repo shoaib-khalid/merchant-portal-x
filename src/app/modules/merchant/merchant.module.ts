@@ -4,7 +4,7 @@ import { MerchantComponent } from 'app/modules/merchant/merchant.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ChooseVerticleComponent } from './choose-verticle/choose-verticle.component';
 import { StoresManagementComponent } from './stores-management/stores-management.component';
-import { ProductsManagementComponent } from './products-management/products-management.component';
+// import { ProductsManagementComponent } from './products-management/products-management.component';
 import { OrdersManagementComponent } from './orders-management/orders-management.component';
 import { DiscountsManagementComponent } from './discounts-management/discounts-management.component';
 import { SocialMediaComponent } from './social-media/social-media.component';
@@ -17,7 +17,7 @@ import { merchantRoutes } from 'app/modules/merchant/merchant.routing';
         DashboardComponent,
         ChooseVerticleComponent,
         StoresManagementComponent,
-        ProductsManagementComponent,
+        // ProductsManagementComponent,
         OrdersManagementComponent,
         DiscountsManagementComponent,
         SocialMediaComponent,
@@ -31,7 +31,7 @@ import { merchantRoutes } from 'app/modules/merchant/merchant.routing';
         DashboardComponent,
         ChooseVerticleComponent,
         StoresManagementComponent,
-        ProductsManagementComponent,
+        // ProductsManagementComponent,
         OrdersManagementComponent,
         DiscountsManagementComponent,
         SocialMediaComponent,
