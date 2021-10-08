@@ -4,6 +4,7 @@ import { Observable, of, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { AuthUtils } from 'app/core/auth/auth.utils';
 import { UserService } from 'app/core/user/user.service';
+import { StoreService } from 'app/core/store/store.service';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service'
@@ -19,6 +20,7 @@ export class AuthService
     constructor(
         private _httpClient: HttpClient,
         private _userService: UserService,
+        private _storeService: StoreService,
         private _apiServer: AppConfig,
         private _jwt: JwtService,
         private _logging: LogService
@@ -94,6 +96,7 @@ export class AuthService
         }
 
         let userService = this._apiServer.settings.apiServer.userService;
+        let productService = this._apiServer.settings.apiServer.productService;
         let token = "accessToken"
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${token}`)
@@ -114,7 +117,7 @@ export class AuthService
 
                 this._logging.debug("JWT generated at frontend",jwtPayload);
 
-                const header = {
+                let header: any = {
                     headers: new HttpHeaders().set("Authorization", `Bearer ${response.data.session.accessToken}`)
                 };
                 
@@ -124,6 +127,18 @@ export class AuthService
                 // get user info
                 let userData: any = await this._httpClient.get(userService + "/clients/" + response.data.session.ownerId, header).toPromise();
                 
+                // get store info
+                let _parameter = { 
+                    params: {
+                    "clientId": response.data.session.ownerId
+                    }
+                }
+                // append parameter to header
+                Object.assign(_parameter,header)
+                
+                // get store info
+                let storeData: any = await this._httpClient.get(productService + '/stores', header).toPromise();
+
                 // Store the access token in the local storage
                 this.accessToken = token;
                 
@@ -146,6 +161,19 @@ export class AuthService
                 this._userService.user = user;
 
                 this._logging.debug("Data for User Service (Frontend)",user);
+
+                // Store the stores on the store service
+                let stores = [];
+                (storeData.data.content).forEach(element => {
+                    stores.push({
+                        id: element.id,
+                        name: element.name
+                    })
+                });
+
+                this._storeService.store = stores;
+
+                this._logging.debug("Data for Store Service (Frontend)",stores);
                 
                 // Return a new observable with the response
                 let newResponse = {
@@ -168,6 +196,7 @@ export class AuthService
     {
         // Renew token
         let userService = this._apiServer.settings.apiServer.userService;
+        let productService = this._apiServer.settings.apiServer.productService;
         let token = "accessToken"
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${token}`)
@@ -199,12 +228,24 @@ export class AuthService
                 // this._genJwt.generate(jwtheader,jwtpayload,secret)
                 let token = this._jwt.generate({ alg: "HS256", typ: "JWT"},jwtPayload,response.data.session.accessToken);
 
-                const header = {
+                let header: any = {
                     headers: new HttpHeaders().set("Authorization", `Bearer ${response.data.session.accessToken}`)
                 };
 
                 let userData: any = await this._httpClient.get(userService + "/clients/" + response.data.session.ownerId, header).toPromise();
                 
+                // get store info
+                let _parameter = { 
+                    params: {
+                    "clientId": response.data.session.ownerId
+                    }
+                }
+                // append parameter to header
+                Object.assign(_parameter,header)
+                
+                // get store info
+                let storeData: any = await this._httpClient.get(productService + '/stores', header).toPromise();
+
                 // Store the access token in the local storage
                 this.accessToken = token;
 
@@ -228,6 +269,19 @@ export class AuthService
 
                 // Store the user on the user service
                 this._userService.user = user;
+
+                // Store the stores on the store service
+                let stores = [];
+                (storeData.data.content).forEach(element => {
+                    stores.push({
+                        id: element.id,
+                        name: element.name
+                    })
+                });
+
+                this._storeService.store = stores;
+
+                this._logging.debug("Data for Store Service (Frontend)",stores);
 
                 // Return true
                 return of(true);

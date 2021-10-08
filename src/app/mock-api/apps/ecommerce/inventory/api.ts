@@ -46,16 +46,12 @@ export class ECommerceInventoryMockApi
         //     .onGet('api/apps/ecommerce/inventory/brands')
         //     .reply(() => [200, cloneDeep(this._brands)]);
 
-        //     console.log(this._brands);
-
         // -----------------------------------------------------------------------------------------------------
         // @ Products - GET
         // -----------------------------------------------------------------------------------------------------
         this._fuseMockApiService
             .onGet('api/apps/ecommerce/inventory/products', 300)
             .reply(({request}) => {
-
-                console.log(request);
 
                 // Get available queries
                 const search = request.params.get('search');

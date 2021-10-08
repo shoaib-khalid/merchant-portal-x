@@ -5,6 +5,17 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+
+
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
+import { MatTabsModule } from '@angular/material/tabs';
+
 import { FuseNavigationModule } from '@fuse/components/navigation';
 import { FuseFullscreenModule } from '@fuse/components/fullscreen/fullscreen.module';
 import { LanguagesModule } from 'app/layout/common/languages/languages.module';
@@ -37,7 +48,8 @@ import { ClassyLayoutComponent } from 'app/layout/layouts/vertical/classy/classy
         SearchModule,
         ShortcutsModule,
         UserModule,
-        SharedModule
+        SharedModule,
+        MatSelectModule
     ],
     exports     : [
         ClassyLayoutComponent

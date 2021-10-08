@@ -33,7 +33,39 @@
                     *ngIf="!user.avatar"
                     [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
             </div>
+
+            <!-- Wallet -->
             <div class="flex flex-col items-center justify-center w-full mt-6">
+                <mat-form-field class="w-full">
+                    <!-- <mat-select> -->
+                    <mat-select
+                        [value]="stores[0]['id']"
+                        #storeSelector="matSelect"
+                        >
+                        <!-- <mat-select-trigger>
+                            <span class="flex items-center">
+                                <span>{{walletSelector.triggerValue}}</span>
+                                <span class="mx-1 text-hint">-</span>
+                                <span class="flex items-center font-mono">
+                                    <span>{{data.wallets[walletSelector.value]}}</span>
+                                    <span class="ml-1">{{walletSelector.value | uppercase}}</span>
+                                </span>
+                            </span>
+                        </mat-select-trigger> -->
+
+                        <mat-select-trigger>
+                            <span class="flex items-center">
+                                <span>{{ storeSelector.triggerValue }}</span>
+                            </span>
+                        </mat-select-trigger>
+                        <div *ngFor="let store of stores">
+                            <mat-option [value]="store.id">{{ store.name }}</mat-option>
+                        </div>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <div class="flex flex-col items-center justify-center w-full mt-1">
                 <div class="w-full whitespace-nowrap overflow-ellipsis overflow-hidden text-center leading-normal font-medium">
                     {{user.name}}
                 </div>
