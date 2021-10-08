@@ -87,7 +87,7 @@ export class StoreService
                 //     storeCount = content.length;
                 // }
                 
-                return this._store.next([{id:"ahsashha",name:"SDFSF"}]);
+                return this._store.next([{id:"ahsashha",name:"SDFSF",category:""}]);
             })
         );
     }

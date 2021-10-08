@@ -5,6 +5,7 @@ import { catchError, switchMap } from 'rxjs/operators';
 import { AuthUtils } from 'app/core/auth/auth.utils';
 import { UserService } from 'app/core/user/user.service';
 import { StoreService } from 'app/core/store/store.service';
+import { LocaleService } from 'app/core/locale/locale.service';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service'
@@ -21,6 +22,7 @@ export class AuthService
         private _httpClient: HttpClient,
         private _userService: UserService,
         private _storeService: StoreService,
+        private _localeService: LocaleService,
         private _apiServer: AppConfig,
         private _jwt: JwtService,
         private _logging: LogService
@@ -105,6 +107,15 @@ export class AuthService
         return this._httpClient.post(userService + '/clients/authenticate', credentials, header).pipe(
             switchMap(async (response: any) => {
 
+                this._logging.debug("Response from User Service (backend) /clients/authenticate",response);
+
+                /**
+                 * 
+                 *  JWT
+                 * 
+                 */
+
+
                 // Generate jwt manually since Kalsym User Service does not have JWT
                 let jwtPayload = {
                     iat: Date.parse(response.data.session.created),
@@ -117,7 +128,15 @@ export class AuthService
 
                 this._logging.debug("JWT generated at frontend",jwtPayload);
 
-                let header: any = {
+
+                /**
+                 * 
+                 *  USER SERVICE
+                 * 
+                 */
+
+
+                var header: any = {
                     headers: new HttpHeaders().set("Authorization", `Bearer ${response.data.session.accessToken}`)
                 };
                 
@@ -126,27 +145,6 @@ export class AuthService
 
                 // get user info
                 let userData: any = await this._httpClient.get(userService + "/clients/" + response.data.session.ownerId, header).toPromise();
-                
-                // get store info
-                let _parameter = { 
-                    params: {
-                    "clientId": response.data.session.ownerId
-                    }
-                }
-                // append parameter to header
-                Object.assign(_parameter,header)
-                
-                // get store info
-                let storeData: any = await this._httpClient.get(productService + '/stores', header).toPromise();
-
-                // Store the access token in the local storage
-                this.accessToken = token;
-                
-                // Store the refresh token in the local storage
-                this.refreshToken = response.data.session.refreshToken;
-                
-                // Set the authenticated flag to true
-                this._authenticated = true;
                 
                 // Store the user on the user service
                 let user = {
@@ -162,18 +160,51 @@ export class AuthService
 
                 this._logging.debug("Data for User Service (Frontend)",user);
 
+                /**
+                 * 
+                 *  STORE SERVICE
+                 * 
+                 */
+                
+                // get store info
+                var header: any = {
+                    headers: new HttpHeaders().set("Authorization", `Bearer ${response.data.session.accessToken}`),
+                    params: {
+                        "clientId": response.data.session.ownerId
+                    }
+                };
+
+                // get store info
+                let storeData: any = await this._httpClient.get(productService + '/stores', header).toPromise();
+
                 // Store the stores on the store service
                 let stores = [];
                 (storeData.data.content).forEach(element => {
                     stores.push({
                         id: element.id,
-                        name: element.name
+                        name: element.name,
+                        type: element.verticalCode
                     })
                 });
 
-                this._storeService.store = stores;
+                this._storeService.store = storeData.data.content;
 
                 this._logging.debug("Data for Store Service (Frontend)",stores);
+
+                /**
+                 * 
+                 *  PROCESS
+                 * 
+                 */
+
+                // Store the access token in the local storage
+                this.accessToken = token;
+                
+                // Store the refresh token in the local storage
+                this.refreshToken = response.data.session.refreshToken;
+                
+                // Set the authenticated flag to true
+                this._authenticated = true;
                 
                 // Return a new observable with the response
                 let newResponse = {
@@ -213,6 +244,13 @@ export class AuthService
 
                 this._logging.debug("Response from User Service (backend) /clients/session/refresh",response);
 
+                /**
+                 * 
+                 *  JWT
+                 * 
+                 */
+
+
                 // Generate jwt manually since Kalsym User Service does not have JWT
                 let jwtPayload = {
                     iat: Date.parse(response.data.session.created),
@@ -225,26 +263,114 @@ export class AuthService
 
                 this._logging.debug("JWT generated at frontend",jwtPayload);
 
+
+                /**
+                 * 
+                 *  USER SERVICE
+                 * 
+                 */
+
+
+                var header: any = {
+                    headers: new HttpHeaders().set("Authorization", `Bearer ${response.data.session.accessToken}`)
+                };
+                
                 // this._genJwt.generate(jwtheader,jwtpayload,secret)
                 let token = this._jwt.generate({ alg: "HS256", typ: "JWT"},jwtPayload,response.data.session.accessToken);
 
-                let header: any = {
-                    headers: new HttpHeaders().set("Authorization", `Bearer ${response.data.session.accessToken}`)
-                };
-
+                // get user info
                 let userData: any = await this._httpClient.get(userService + "/clients/" + response.data.session.ownerId, header).toPromise();
                 
-                // get store info
-                let _parameter = { 
-                    params: {
-                    "clientId": response.data.session.ownerId
-                    }
-                }
-                // append parameter to header
-                Object.assign(_parameter,header)
+                // Store the user on the user service
+                let user = {
+                    "id": userData.data.id,
+                    "name": userData.data.name,
+                    "email": userData.data.email,
+                    "avatar": "assets/images/logo/logo_symplified_bg.png",
+                    "status": "online",
+                    "role": userData.data.roleId
+                };
+
+                this._userService.user = user;
+
+                this._logging.debug("Data for User Service (Frontend)",user);
+
+                /**
+                 * 
+                 *  STORE SERVICE
+                 * 
+                 */
                 
                 // get store info
+                var header: any = {
+                    headers: new HttpHeaders().set("Authorization", `Bearer ${response.data.session.accessToken}`),
+                    params: {
+                        "clientId": response.data.session.ownerId
+                    }
+                };
+
+                console.log("HARE 22:",header)
+
+                // get store info
                 let storeData: any = await this._httpClient.get(productService + '/stores', header).toPromise();
+
+                // Store the stores on the store service
+                let stores = [];
+                (storeData.data.content).forEach(element => {
+                    stores.push({
+                        id: element.id,
+                        name: element.name,
+                        type: element.verticalCode
+                    })
+                });
+
+                this._storeService.store = stores;
+
+                this._logging.debug("Data for Store Service (Frontend)",stores);
+
+                /**
+                 * 
+                 *  REGION SERVICE
+                 * 
+                 */
+
+                // get extreme-ip-lookup info
+
+                let locale: any;
+                let ipLookup: any = await this._httpClient.get("https://extreme-ip-lookup.com/json").toPromise();
+                if (ipLookup.country == "Malaysia") {
+                    locale = {
+                        symplified_region: "SEA",
+                        continent: ipLookup.continent,
+                        country: ipLookup.country,
+                        countryCode: ipLookup.countryCode,
+                        region: ipLookup.region
+                    };
+                } else if (ipLookup.country == "Pakistan") {
+                    locale = {
+                        symplified_region: "SA",
+                        continent: ipLookup.continent,
+                        country: ipLookup.country,
+                        countryCode: ipLookup.countryCode,
+                        region: ipLookup.region
+                    };
+                } else {
+                    locale = {
+                        symplified_region: undefined,
+                        continent: ipLookup.continent,
+                        country: ipLookup.country,
+                        countryCode: ipLookup.countryCode,
+                        region: ipLookup.region
+                    };
+                }
+
+                this._localeService.locale = locale;
+
+                /**
+                 * 
+                 *  PROCESS
+                 * 
+                 */
 
                 // Store the access token in the local storage
                 this.accessToken = token;
@@ -254,34 +380,6 @@ export class AuthService
 
                 // Set the authenticated flag to true
                 this._authenticated = true;
-
-                // Store the user on the user service
-                let user = {
-                    "id": userData.data.id,
-                    "name": userData.data.name,
-                    "email": userData.data.email,
-                    "avatar": "assets/images/logo/logo_symplified_bg.png",
-                    "status": "online",
-                    "role": userData.data.roleId,
-                };
-
-                this._logging.debug("Data for User Service (Frontend)",user);
-
-                // Store the user on the user service
-                this._userService.user = user;
-
-                // Store the stores on the store service
-                let stores = [];
-                (storeData.data.content).forEach(element => {
-                    stores.push({
-                        id: element.id,
-                        name: element.name
-                    })
-                });
-
-                this._storeService.store = stores;
-
-                this._logging.debug("Data for Store Service (Frontend)",stores);
 
                 // Return true
                 return of(true);
