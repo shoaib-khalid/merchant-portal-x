@@ -34,8 +34,8 @@
                     [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
             </div>
 
-            <!-- Wallet -->
-            <div class="flex flex-col items-center justify-center w-full mt-6">
+            <!-- Select Store -->
+            <div *ngIf="stores[0]" class="flex flex-col items-center justify-center w-full mt-6">
                 <mat-form-field class="w-full">
                     <!-- <mat-select> -->
                     <mat-select

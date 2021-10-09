@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MerchantSetup } from 'app/core/merchant-setup/merchant-setup.status'
 import { MerchantSetupService } from 'app/core/merchant-setup/merchant-setup.service'
+import { StoreService } from 'app/core/store/store.service'
 import { LogService } from 'app/core/logging/log.service'
 
 @Component({
@@ -26,6 +27,7 @@ export class RedirectComponent implements OnInit, OnDestroy
         private _changeDetectorRef: ChangeDetectorRef,
         private _router: Router,
         private _merchantSetupService: MerchantSetupService,
+        private _storeService: StoreService,
         private _logging: LogService
     )
     {
@@ -58,19 +60,26 @@ export class RedirectComponent implements OnInit, OnDestroy
             
         if (this._merchantSetup.storeSetup == 0){
             // if no store Go to Choose Verticle
+            console.log("GOING TO ChooseVerticle")
             this.goToChooseVerticle();
         } else if (this._merchantSetup.storeSetup == 1){
             // if there is 1 store and already have product, go to Dashboard
             if (this._merchantSetup.productSetup === true){
+                console.log("GOING TO Dashboard")
                 this.goToDashboard();
             } else {
                 // if there is 1 store but no product, go to Add Products
+                // at this point, storeId still not saved in local storage (due to response of get store is in array of object), 
+                // due to nature of add product (for product service) - backend
+                // need to have store service object[0] to be saved in local storage
+                await this._storeService.setFirstStoreId();
                 this.goToAddProducts();
             }
         } else {
             // if there is more than 1 store
             // in goToChooseStore() there will be another checking and redirect to product OR dashboard 
             // depend on the store, whether if have product or not 
+            console.log("GOING TO ChooseStore")
             this.goToChooseStore();
         }
     }
@@ -133,7 +142,7 @@ export class RedirectComponent implements OnInit, OnDestroy
      */
      goToChooseStore(): void
      {
-         this._router.navigate(['/choose-store']);
+         this._router.navigate(['/stores']);
      }    
 }
 

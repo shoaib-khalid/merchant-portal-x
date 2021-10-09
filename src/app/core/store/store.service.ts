@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, Subject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { Store } from 'app/core/store/store.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
+import { takeUntil } from 'rxjs/operators';
 
 @Injectable({
     providedIn: 'root'
@@ -12,6 +13,7 @@ import { JwtService } from 'app/core/jwt/jwt.service';
 export class StoreService
 {
     private _store: BehaviorSubject<Store[] | null> = new BehaviorSubject(null);
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     /**
      * Constructor
@@ -43,6 +45,19 @@ export class StoreService
     {
         return this._store.asObservable();
     }
+
+    /**
+     * Setter & getter for storeId
+     */
+     set storeId(str: string)
+     {
+         localStorage.setItem('storeId', str);
+     }
+ 
+     get storeId$(): string
+     {
+         return localStorage.getItem('storeId') ?? '';
+     }
 
     /**
      * Getter for access token
@@ -104,5 +119,14 @@ export class StoreService
                 this._store.next(response);
             })
         );
+    }
+
+    setFirstStoreId(){
+        this.store$
+            .pipe((takeUntil(this._unsubscribeAll)))
+            .subscribe((storeList: Store[]) => {
+                this.storeId = storeList[0].id;
+            });  
+        // return this.storeId = this.store$.id;
     }
 }
