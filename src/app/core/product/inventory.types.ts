@@ -33,9 +33,9 @@ export interface InventoryPagination
 
 export interface InventoryCategory
 {
-    id: string;
-    parentCategoryId: string;
-    name: string;
+    id?: string;
+    parentCategoryId?: string;
+    name?: string;
     slug?: string;
 }
 

@@ -309,8 +309,6 @@ export class AuthService
                     }
                 };
 
-                console.log("HARE 22:",header)
-
                 // get store info
                 let storeData: any = await this._httpClient.get(productService + '/stores', header).toPromise();
 

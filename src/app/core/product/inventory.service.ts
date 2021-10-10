@@ -147,6 +147,109 @@ export class InventoryService
     }
 
     /**
+     * Create category
+     *
+     * @param category
+     */
+     createCategory(category: InventoryCategory): Observable<InventoryCategory>
+     {
+         return this.categories$.pipe(
+             take(1),
+             switchMap(categories => this._httpClient.post<InventoryCategory>('api/apps/ecommerce/inventory/category', {category}).pipe(
+                 map((newTag) => {
+ 
+                     // Update the categories with the new category
+                     this._tags.next([...categories, newTag]);
+ 
+                     // Return new category from observable
+                     return newTag;
+                 })
+             ))
+         );
+     }
+ 
+     /**
+      * Update the category
+      *
+      * @param id
+      * @param category
+      */
+     updateCategory(id: string, category: InventoryCategory): Observable<InventoryCategory>
+     {
+         return this.categories$.pipe(
+             take(1),
+             switchMap(categories => this._httpClient.patch<InventoryCategory>('api/apps/ecommerce/inventory/category', {
+                 id,
+                 category
+             }).pipe(
+                 map((updatedTag) => {
+ 
+                     // Find the index of the updated category
+                     const index = categories.findIndex(item => item.id === id);
+ 
+                     // Update the category
+                     categories[index] = updatedTag;
+ 
+                     // Update the categories
+                     this._tags.next(categories);
+ 
+                     // Return the updated category
+                     return updatedTag;
+                 })
+             ))
+         );
+     }
+ 
+     /**
+      * Delete the category
+      *
+      * @param id
+      */
+     deleteCategory(id: string): Observable<boolean>
+     {
+         return this.categories$.pipe(
+             take(1),
+             switchMap(categories => this._httpClient.delete('api/apps/ecommerce/inventory/category', {params: {id}}).pipe(
+                 map((isDeleted: boolean) => {
+ 
+                     // Find the index of the deleted category
+                     const index = categories.findIndex(item => item.id === id);
+ 
+                     // Delete the category
+                     categories.splice(index, 1);
+ 
+                     // Update the categories
+                     this._tags.next(categories);
+ 
+                     // Return the deleted status
+                     return isDeleted;
+                 }),
+                 filter(isDeleted => isDeleted),
+                 switchMap(isDeleted => this.products$.pipe(
+                     take(1),
+                     map((products) => {
+ 
+                         // Iterate through the contacts
+                         products.forEach((product) => {
+ 
+                             const tagIndex = product.tags.findIndex(category => category === id);
+ 
+                             // If the contact has the category, remove it
+                             if ( tagIndex > -1 )
+                             {
+                                 product.tags.splice(tagIndex, 1);
+                             }
+                         });
+ 
+                         // Return the deleted status
+                         return isDeleted;
+                     })
+                 ))
+             ))
+         );
+     }
+
+    /**
      * Get products
      *
      * @param page
@@ -184,6 +287,8 @@ export class InventoryService
                     endIndex: response.data.pageable.offset + response.data.pageable.numberOfElements - 1
                 }
                 this._pagination.next(_pagination);
+
+                
                 
                 let _newProducts: Array<any> = [];
                 (response.data.content).forEach(object => {
@@ -202,7 +307,7 @@ export class InventoryService
                         price: object.productInventories[0].price, // need looping
                         weight: 0,
                         thumbnail: object.thumbnailUrl,
-                        images: [object.productAssets[0].url],
+                        images: Object.keys(object.productAssets).map(function(key){return object.productAssets[key].url}), // need looping
                         active: true
                     });
                 });
@@ -247,11 +352,32 @@ export class InventoryService
      */
     createProduct(): Observable<InventoryProduct>
     {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        // const categoryId = await this.getCategoryId()
+
+        // const body = {
+        //     "categoryId": categoryId,
+        //     "name": this.title,
+        //     "status": this.productStatus,
+        //     "description": this.description,
+        //     "storeId": localStorage.getItem("storeId"),
+        //     "allowOutOfStockPurchases": this.continueSelling,
+        //     "trackQuantity": this.trackQuantity,
+        //     "minQuantityForAlarm": this.minQtyAlarm ? this.minQtyAlarm : -1
+        // };
+
         return this.products$.pipe(
             take(1),
             switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
+            // switchMap(products => this._httpClient.post<InventoryProduct>(productService +'/stores/'+this.storeId$+'/products', body , header).pipe(
                 map((newProduct) => {
-
                     // Update the products with the new product
                     this._products.next([newProduct, ...products]);
 

@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MatPaginator } from '@angular/material/paginator';
@@ -39,6 +39,7 @@ import { InventoryService } from 'app/core/product/inventory.service';
 })
 export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
 {
+    @ViewChild('avatarFileInput') private _avatarFileInput: ElementRef;
     @ViewChild(MatPaginator) private _paginator: MatPaginator;
     @ViewChild(MatSort) private _sort: MatSort;
 
@@ -46,6 +47,8 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
 
     // brands: InventoryBrand[];
     categories: InventoryCategory[];
+    filteredCategories: InventoryCategory[];
+    tags: InventoryTag[];
     filteredTags: InventoryTag[];
     flashMessage: 'success' | 'error' | null = null;
     isLoading: boolean = false;
@@ -53,10 +56,27 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     searchInputControl: FormControl = new FormControl();
     selectedProduct: InventoryProduct | null = null;
     selectedProductForm: FormGroup;
-    tags: InventoryTag[];
     tagsEditMode: boolean = false;
+    categoriesEditMode: boolean = false;
+    imagesEditMode: boolean = false;
     vendors: InventoryVendor[];
     private _unsubscribeAll: Subject<any> = new Subject<any>();
+    quillModules: any = {
+        toolbar: [
+            ['bold', 'italic', 'underline'],
+            [{align: []}, {list: 'ordered'}, {list: 'bullet'}],
+            [{link: function(value) {
+                    if (value) {
+                      var href = prompt('Enter the URL');
+                      this.quill.format('link', href);
+                    } else {
+                      this.quill.format('link', false);
+                    }
+                  }
+            }],
+            ['blockquote','clean']
+        ]
+    };
 
     /**
      * Constructor
@@ -122,6 +142,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
 
                 // Update the categories
                 this.categories = categories;
+                this.filteredCategories = categories;
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -303,6 +324,10 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         }
     }
 
+    resetCycleImages(){
+        this.selectedProductForm.get('currentImageIndex').setValue(0);
+    }
+
     /**
      * Toggle the tags edit mode
      */
@@ -482,6 +507,286 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     shouldShowCreateTagButton(inputValue: string): boolean
     {
         return !!!(inputValue === '' || this.tags.findIndex(tag => tag.title.toLowerCase() === inputValue.toLowerCase()) > -1);
+    }
+
+    /**
+     * 
+     * HERE
+     * 
+     */
+
+    /**
+     * Toggle the categories edit mode
+     */
+     toggleCategoriesEditMode(): void
+     {
+         this.categoriesEditMode = !this.categoriesEditMode;
+     }
+
+    /**
+     * Filter category
+     *
+     * @param event
+     */
+     filterCategories(event): void
+     {
+         // Get the value
+         const value = event.target.value.toLowerCase();
+ 
+         // Filter the categories
+         this.filteredCategories = this.categories.filter(category => category.name.toLowerCase().includes(value));
+     }
+ 
+     /**
+      * Filter category input key down event
+      *
+      * @param event
+      */
+      filterCategoriesInputKeyDown(event): void
+     {
+         // Return if the pressed key is not 'Enter'
+         if ( event.key !== 'Enter' )
+         {
+             return;
+         }
+ 
+         // If there is no category available...
+         if ( this.filteredCategories.length === 0 )
+         {
+             // Create the category
+             this.createCategory(event.target.value);
+ 
+             // Clear the input
+             event.target.value = '';
+ 
+             // Return
+             return;
+         }
+ 
+         // If there is a category...
+         const category = this.filteredCategories[0];
+         const isCategoryApplied = this.selectedProduct.category;
+ 
+         // If the found category is already applied to the product...
+         if ( isCategoryApplied )
+         {
+             // Remove the category from the product
+             this.removeCategoryFromProduct(category);
+         }
+         else
+         {
+             // Otherwise add the category to the product
+             this.addCategoryToProduct(category);
+         }
+     }
+
+    /**
+     * Create a new category
+     *
+     * @param title
+     */
+     createCategory(name: string): void
+     {
+         const category = {
+             name
+         };
+ 
+         // Create category on the server
+         this._inventoryService.createCategory(category)
+             .subscribe((response) => {
+ 
+                 // Add the category to the product
+                 this.addCategoryToProduct(response);
+             });
+     }
+ 
+     /**
+      * Update the category title
+      *
+      * @param category
+      * @param event
+      */
+     updateCategoryTitle(category: InventoryCategory, event): void
+     {
+         // Update the title on the category
+         category.name = event.target.value;
+ 
+         // Update the category on the server
+         this._inventoryService.updateCategory(category.id, category)
+             .pipe(debounceTime(300))
+             .subscribe();
+ 
+         // Mark for check
+         this._changeDetectorRef.markForCheck();
+     }
+ 
+     /**
+      * Delete the category
+      *
+      * @param category
+      */
+     deleteCategory(category: InventoryCategory): void
+     {
+         // Delete the category from the server
+         this._inventoryService.deleteCategory(category.id).subscribe();
+ 
+         // Mark for check
+         this._changeDetectorRef.markForCheck();
+     }
+
+    /**
+     * Add category to the product
+     *
+     * @param category
+     */
+     addCategoryToProduct(category: InventoryCategory): void
+     {
+         // Add the category
+         this.selectedProduct.category = category.id;
+ 
+         // Update the selected product form
+         this.selectedProductForm.get('category').patchValue(this.selectedProduct.category);
+ 
+         // Mark for check
+         this._changeDetectorRef.markForCheck();
+     }
+ 
+     /**
+      * Remove category from the product
+      *
+      * @param category
+      */
+     removeCategoryFromProduct(category: InventoryCategory): void
+     {
+         // Remove the category
+         this.selectedProduct.category = null;
+ 
+         // Update the selected product form
+         this.selectedProductForm.get('category').patchValue(this.selectedProduct.category);
+ 
+         // Mark for check
+         this._changeDetectorRef.markForCheck();
+     }
+ 
+    /**
+     * Toggle product category
+     *
+     * @param category
+     * @param change
+     */
+     toggleProductCategory(category: InventoryCategory, change: MatCheckboxChange): void
+     {
+         if ( change.checked )
+         {
+             this.addCategoryToProduct(category);
+         }
+         else
+         {
+             this.removeCategoryFromProduct(category);
+         }
+     }
+
+    /**
+     * Should the create category button be visible
+     *
+     * @param inputValue
+     */
+     shouldShowCreateCategoryButton(inputValue: string): boolean
+     {
+         return !!!(inputValue === '' || this.categories.findIndex(category => category.name.toLowerCase() === inputValue.toLowerCase()) > -1);
+     }
+
+
+    /**
+     * 
+     * HERE 2
+     * 
+     */
+
+    /**
+     * Toggle the categories edit mode
+     */
+     toggleImagesEditMode(): void
+     {
+         this.imagesEditMode = !this.imagesEditMode;
+     }
+     
+    /**
+     * Upload avatar
+     *
+     * @param fileList
+     */
+    uploadImages(fileList: FileList,imageIndex): Promise<void>
+    {
+        // Return if canceled
+        if ( !fileList.length )
+        {
+            return;
+        }
+
+        const allowedTypes = ['image/jpeg', 'image/png'];
+        const file = fileList[0];
+
+        // Return if the file is not allowed
+        if ( !allowedTypes.includes(file.type) )
+        {
+            return;
+        }
+        
+        var reader = new FileReader();
+        reader.readAsDataURL(file); 
+        reader.onload = (_event)  => {            
+            if(!imageIndex.length === true) {
+                this.selectedProduct.images.push(reader.result + "");
+            } else {
+                this.selectedProductForm.get('images').value[this.selectedProductForm.get('currentImageIndex').value] = reader.result + "";
+            }
+
+            this.imagesEditMode = false; 
+            this._changeDetectorRef.markForCheck();
+        }
+
+        const product = this.selectedProductForm.getRawValue();
+        
+        // // Get the product object
+        // const product = this.selectedProductForm.getRawValue();
+
+        // // Remove the currentImageIndex field
+        // delete product.currentImageIndex;
+
+        // // Update the product on the server
+        // this._inventoryService.updateProduct(product.id, product).subscribe(() => {
+
+        //     // Show a success message
+        //     this.showFlashMessage('success');
+        // });
+
+        // Update the selected product
+        
+        // this._inventoryService.uploadImages(this.selectedProduct.id, file).subscribe();
+    }
+
+    /**
+     * Remove the image
+     */
+    removeImage(): void
+    {
+        const index = this.selectedProductForm.get('currentImageIndex').value;
+        if (index > -1) {
+            this.selectedProductForm.get('images').value.splice(index, 1);
+        }
+
+        // // Get the form control for 'avatar'
+        // const avatarFormControl = this._inventoryService.get('avatar');
+
+        // // Set the avatar as null
+        // avatarFormControl.setValue(null);
+
+        // // Set the file input value as null
+        // this._avatarFileInput.nativeElement.value = null;
+
+        // // Update the contact
+        // this.contact.avatar = null;
     }
 
     /**

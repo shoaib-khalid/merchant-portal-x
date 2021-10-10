@@ -107,7 +107,6 @@ export class ChooseStoreListComponent implements OnInit, OnDestroy
                 // Filter by search query
                 if ( query !== '' )
                 {
-                    console.log(query)
                     this.filteredStores = this.filteredStores.filter(store => store.name.toLowerCase().includes(query.toLowerCase())
                         || store.storeDescription.toLowerCase().includes(query.toLowerCase())
                         || store.category.toLowerCase().includes(query.toLowerCase()));
@@ -185,7 +184,6 @@ export class ChooseStoreListComponent implements OnInit, OnDestroy
     async pageRedirect(storeId: string){
         this.storeId = storeId;
         await this._inventoryService.getProducts().subscribe((response)=>{
-            console.log("HARE",response)
 
             if (response["data"]["content"].length < 1)
                 this._router.navigateByUrl('/products/inventory')

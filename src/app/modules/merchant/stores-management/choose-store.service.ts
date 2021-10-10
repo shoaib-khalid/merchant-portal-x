@@ -80,7 +80,6 @@ export class ChooseStoreService
     {
         return this._httpClient.get<StoreCategory[]>('api/apps/academy/categories').pipe(
             tap((response: any) => {
-                console.log("CATAG: ",response)
                 let _catagories = [
                     {
                         id: "FnB",
@@ -137,12 +136,10 @@ export class ChooseStoreService
             .subscribe((storeList: Store[]) => {
                 // this._stores.next(storeList);
                 // this.stores = storeList.sort(this.dynamicSort("name"));
-                console.log("DANDAN",storeList)
                 _storeList = storeList.sort(this.dynamicSort("name"));
 
                 let _stores = [];
                 _storeList.forEach(element => {
-                    console.log(element.storeDescription)
                     _stores.push(
                         {
                             id: element.id,
@@ -162,8 +159,6 @@ export class ChooseStoreService
                         }
                     );
                 });
-
-                console.log("DUNDUN",_stores)
         
                 this._stores.next(_stores);
             });      

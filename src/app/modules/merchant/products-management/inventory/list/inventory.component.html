@@ -29,7 +29,7 @@
                 class="ml-4"
                 mat-flat-button
                 [color]="'primary'"
-                (click)="createProduct()">
+                (click)="createProduct(); imagesEditMode = true">
                 <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
                 <span class="ml-2 mr-1">Add</span>
             </button>
@@ -151,7 +151,7 @@
                                         <button
                                             class="min-w-10 min-h-7 h-7 px-2 leading-6"
                                             mat-stroked-button
-                                            (click)="toggleDetails(product.id)">
+                                            (click)="toggleDetails(product.id);resetCycleImages()">
                                             <mat-icon
                                                 class="icon-size-5"
                                                 [svgIcon]="selectedProduct?.id === product.id ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'"></mat-icon>
@@ -194,16 +194,104 @@
                                 <!-- Product images and status -->
                                 <div class="flex flex-col items-center sm:items-start mb-8 sm:mb-0">
                                     <div class="flex flex-col items-center">
-                                        <div class="w-32 h-44 border rounded overflow-hidden">
+                                        <!-- Image Frame -->
+                                        <div *ngIf="!imagesEditMode" class="w-32 h-44 border rounded overflow-hidden">
                                             <ng-container *ngIf="selectedProductForm.get('images').value.length; else noImage">
                                                 <img
                                                     class="w-full h-full object-cover"
                                                     [src]="selectedProductForm.get('images').value[selectedProductForm.get('currentImageIndex').value]">
                                             </ng-container>
                                             <ng-template #noImage>
-                                                <span class="flex items-center min-h-20 text-lg font-semibold">NO IMAGE</span>
+                                                <div
+                                                    class="flex items-center justify-center w-full h-full rounded overflow-hidden uppercase text-8xl font-bold leading-none bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                                                >
+                                                    <span class="text-md">NO IMAGE</span> 
+                                                </div>
                                             </ng-template>
                                         </div>
+                                        <!-- Edit Image Frame -->
+                                        <div *ngIf="imagesEditMode" class="flex flex-col items-center sm:items-start mb-8 sm:mb-0">
+                                            <div class="relative flex items-center justify-center w-32 h-44 rborder rounded overflow-hidden ring-4 ring-bg-card">
+                                                <!-- Upload / Remove Image to Overide Image -->
+                                                <div class="absolute inset-0 bg-black bg-opacity-50 z-10"></div>
+                                                <div class="absolute inset-0 flex items-center justify-center z-20">
+                                                    <!-- Add / Edit Image -->
+                                                    <div>
+                                                        <input
+                                                            id="image-file-input"
+                                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                            type="file"
+                                                            [multiple]="false"
+                                                            [accept]="'image/jpeg, image/png'"
+                                                            (change)="uploadImages(imageFileInput.files, selectedProductForm.get('images').value);refreshImage()"
+                                                            #imageFileInput>
+                                                        <label
+                                                            class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                            for="image-file-input"
+                                                            matRipple>
+                                                            <mat-icon
+                                                                class="text-white"
+                                                                [svgIcon]="'heroicons_outline:camera'"></mat-icon>
+                                                        </label>
+                                                    </div>
+                                                    <!-- Remove Image -->
+                                                    <div *ngIf="selectedProductForm.get('images').value.length">
+                                                        <button
+                                                            mat-icon-button
+                                                            (click)="removeImage();resetCycleImages()">
+                                                            <mat-icon
+                                                                class="text-white"
+                                                                [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <!-- View Image -->
+                                                <img
+                                                    class="object-cover w-full h-full"
+                                                    *ngIf="selectedProductForm.get('images').value.length"
+                                                    [src]="selectedProductForm.get('images').value[selectedProductForm.get('currentImageIndex').value]">
+                                                <!-- View No Image -->
+                                                <div
+                                                    class="flex items-center justify-center w-full h-full rounded overflow-hidden uppercase text-8xl font-bold leading-none bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                                                    *ngIf="!selectedProductForm.get('images').value.length">
+                                                    <span class="text-md">NO IMAGE</span> 
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col items-center w-full">
+                                        <!-- Add New Image -->
+                                        <div class="flex items-center mt-2 whitespace-nowrap">
+                                            <div>
+                                                <input
+                                                    id="image-file-input"
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="file"
+                                                    [multiple]="false"
+                                                    [accept]="'image/jpeg, image/png'"
+                                                    (change)="uploadImages(imageFileInput.files, []);refreshImage()"
+                                                    #imageFileInput>
+                                                <label
+                                                    class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                    for="image-file-input"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="icon-size-5"
+                                                        [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                                                </label>
+                                            </div>
+                                            <!-- Toggle Image Edit -->
+                                            <button
+                                                mat-icon-button
+                                                (click)="toggleImagesEditMode()">
+                                                <mat-icon
+                                                    class="icon-size-5"
+                                                    [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <!-- Image Cycle -->
                                         <div
                                             class="flex items-center mt-2 whitespace-nowrap"
                                             *ngIf="selectedProductForm.get('images').value.length">
@@ -248,212 +336,307 @@
                                                 [formControlName]="'name'">
                                         </mat-form-field>
 
-                                        <!-- SKU and Barcode -->
-                                        <div class="flex">
-                                            <mat-form-field class="w-1/3 pr-2">
-                                                <mat-label>SKU</mat-label>
-                                                <input
-                                                    matInput
-                                                    [formControlName]="'sku'">
-                                            </mat-form-field>
-                                            <mat-form-field class="w-2/3 pl-2">
-                                                <mat-label>Category</mat-label>
-                                                <mat-select [formControlName]="'category'">
-                                                    <ng-container *ngFor="let category of categories">
-                                                        <mat-option [value]="category.id">
-                                                            {{category.name}}
-                                                        </mat-option>
-                                                    </ng-container>
-                                                </mat-select>
-                                            </mat-form-field>
-                                            <!-- <mat-form-field class="w-2/3 pl-2">
-                                                <mat-label>Barcode</mat-label>
-                                                <input
-                                                    matInput
-                                                    [formControlName]="'barcode'">
-                                            </mat-form-field> -->
+                                        <!-- Description -->
+                                        <span class="mb-2 font-medium leading-tight">Description</span>
+                                        <div class="flex items-center -my-px w-full">
+                                            <quill-editor
+                                            class="w-full"
+                                                [formControlName]="'description'"
+                                                [modules]="quillModules"></quill-editor>
                                         </div>
 
                                         <hr>
 
-                                        <!-- Category, Brand & Vendor -->
-                                        <!-- <div class="flex"> -->
-                                            <!-- <mat-form-field class="w-1/3 pr-2">
-                                                <mat-label>Category</mat-label>
-                                                <mat-select [formControlName]="'category'">
-                                                    <ng-container *ngFor="let category of categories">
-                                                        <mat-option [value]="category.id">
-                                                            {{category.name}}
-                                                        </mat-option>
-                                                    </ng-container>
-                                                </mat-select>
-                                            </mat-form-field> -->
-                                            <!-- <mat-form-field class="w-1/3 px-2">
-                                                <mat-label>Brand</mat-label>
-                                                <mat-select [formControlName]="'brand'">
-                                                    <ng-container *ngFor="let brand of brands">
-                                                        <mat-option [value]="brand.id">
-                                                            {{brand.name}}
-                                                        </mat-option>
-                                                    </ng-container>
-                                                </mat-select>
-                                            </mat-form-field> -->
-                                            <!-- <mat-form-field class="w-1/3 pl-2">
-                                                <mat-label>Vendor</mat-label>
-                                                <mat-select [formControlName]="'vendor'">
-                                                    <ng-container *ngFor="let vendor of vendors">
-                                                        <mat-option [value]="vendor.id">
-                                                            {{vendor.name}}
-                                                        </mat-option>
-                                                    </ng-container>
-                                                </mat-select>
-                                            </mat-form-field> -->
-                                        <!-- </div> -->
-
                                         <!-- Stock and Reserved -->
                                         <div class="flex">
                                             <mat-form-field class="w-1/3 pr-2">
-                                                <mat-label>Stock</mat-label>
+                                                <mat-label>Available Stock</mat-label>
                                                 <input
                                                     type="number"
                                                     matInput
                                                     [formControlName]="'stock'">
                                             </mat-form-field>
-                                            <mat-form-field class="w-1/3 pl-2">
-                                                <mat-label>Reserved</mat-label>
-                                                <input
-                                                    type="number"
-                                                    matInput
-                                                    [formControlName]="'reserved'">
-                                            </mat-form-field>
+                                            <div class="w-2/3 pl-2">
+                                                <span class="mb-2 font-medium leading-tight">Continue selling when out of stock</span>
+                                                <div class="mt-3 flex items-center -my-px w-full">
+                                                    <mat-slide-toggle
+                                                        [formControlName]="'active'"
+                                                        [color]="'primary'">
+                                                        {{selectedProductForm.get('active').value === true ? 'Yes' : 'No'}}
+                                                    </mat-slide-toggle>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex">
+                                            <div class="w-1/3 pr-2">
+                                                <span class="mb-2 font-medium leading-tight">Low Stock Alarm</span>
+                                                <div class="mt-3 flex items-center -my-px w-full">
+                                                    <mat-slide-toggle
+                                                        [formControlName]="'active'"
+                                                        [color]="'primary'">
+                                                        {{selectedProductForm.get('active').value === true ? 'Active' : 'Disabled'}}
+                                                    </mat-slide-toggle>
+                                                </div>
+                                                <!-- <mat-form-field class="mt-0.5">
+                                                    <input
+                                                        type="number"
+                                                        matInput
+                                                        [formControlName]="'reserved'">
+                                                </mat-form-field> -->
+                                            </div>
+                                            <div class="w-1/3 pl-2">
+                                                <span class="mb-2 font-medium leading-tight">Track Stock</span>
+                                                <div class="mt-3 flex items-center -my-px w-full">
+                                                    <mat-slide-toggle
+                                                        [formControlName]="'active'"
+                                                        [color]="'primary'">
+                                                        {{selectedProductForm.get('active').value === true ? 'Active' : 'Disabled'}}
+                                                    </mat-slide-toggle>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
                                     <!-- Cost, Base price, Tax & Price -->
-                                    <div class="flex flex-col w-full lg:w-1/4 sm:pl-8">
-                                        <mat-form-field class="w-full">
-                                            <mat-label>Cost</mat-label>
-                                            <span matPrefix>$</span>
+                                    <div class="flex flex-col w-full lg:w-2/4 sm:pl-8">
+
+                                        
+                                        <!-- SKU -->
+                                        <div class="flex">
+                                        <mat-form-field class="w-1/3 pr-2">
+                                            <mat-label>SKU</mat-label>
                                             <input
                                                 matInput
-                                                [formControlName]="'cost'">
+                                                [formControlName]="'sku'">
                                         </mat-form-field>
-                                        <mat-form-field class="w-full">
-                                            <mat-label>Base Price</mat-label>
-                                            <span matPrefix>$</span>
-                                            <input
-                                                matInput
-                                                [formControlName]="'basePrice'">
-                                        </mat-form-field>
-                                        <mat-form-field class="w-full">
-                                            <mat-label>Tax</mat-label>
-                                            <span matSuffix>%</span>
-                                            <input
-                                                type="number"
-                                                matInput
-                                                [formControlName]="'taxPercent'">
-                                        </mat-form-field>
-                                        <mat-form-field class="w-full">
+
+                                            <mat-form-field class="w-1/3 pr-2">
                                             <mat-label>Price</mat-label>
                                             <span matSuffix>$</span>
                                             <input
                                                 matInput
                                                 [formControlName]="'price'">
                                         </mat-form-field>
-                                    </div>
 
-                                    <!-- Weight & Tags -->
-                                    <div class="flex flex-col w-full lg:w-1/4 sm:pl-8">
-                                        <mat-form-field class="w-full">
+                                            <mat-form-field class="w-1/3 pr-2">
                                             <mat-label>Weight</mat-label>
                                             <span matSuffix>lbs.</span>
                                             <input
                                                 matInput
                                                 [formControlName]="'weight'">
                                         </mat-form-field>
+                                        </div>
 
-                                        <!-- Tags -->
-                                        <span class="mb-px font-medium leading-tight">Tags</span>
-                                        <div class="mt-1.5 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden">
-                                            <!-- Header -->
-                                            <div class="flex items-center -my-px py-2 px-3">
-                                                <div class="flex items-center flex-auto min-w-0">
-                                                    <mat-icon
-                                                        class="icon-size-5"
-                                                        [svgIcon]="'heroicons_solid:search'"></mat-icon>
-                                                    <input
-                                                        class="min-w-0 ml-2 py-1 border-0"
-                                                        type="text"
-                                                        placeholder="Enter tag name"
-                                                        (input)="filterTags($event)"
-                                                        (keydown)="filterTagsInputKeyDown($event)"
-                                                        [maxLength]="50"
-                                                        #newTagInput>
-                                                </div>
-                                                <button
-                                                    class="ml-3 w-8 h-8 min-h-8"
-                                                    mat-icon-button
-                                                    (click)="toggleTagsEditMode()">
-                                                    <mat-icon
-                                                        *ngIf="!tagsEditMode"
-                                                        class="icon-size-5"
-                                                        [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
-                                                    <mat-icon
-                                                        *ngIf="tagsEditMode"
-                                                        class="icon-size-5"
-                                                        [svgIcon]="'heroicons_solid:check'"></mat-icon>
-                                                </button>
-                                            </div>
-                                            <!-- Available tags -->
-                                            <div class="h-44 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
-                                                <!-- Tags -->
-                                                <ng-container *ngIf="!tagsEditMode">
-                                                    <ng-container *ngFor="let tag of filteredTags; trackBy: trackByFn">
-                                                        <mat-checkbox
-                                                            class="flex items-center h-10 min-h-10 px-4"
-                                                            [color]="'primary'"
-                                                            [checked]="selectedProduct.tags.includes(tag.id)"
-                                                            (change)="toggleProductTag(tag, $event)">
-                                                            {{tag.title}}
-                                                        </mat-checkbox>
-                                                    </ng-container>
-                                                </ng-container>
-                                                <!-- Tags editing -->
-                                                <ng-container *ngIf="tagsEditMode">
-                                                    <div class="p-4 space-y-2">
-                                                        <ng-container *ngFor="let tag of filteredTags; trackBy: trackByFn">
-                                                            <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full">
-                                                                <input
-                                                                    matInput
-                                                                    [value]="tag.title"
-                                                                    (input)="updateTagTitle(tag, $event)">
-                                                                <button
-                                                                    mat-icon-button
-                                                                    (click)="deleteTag(tag)"
-                                                                    matSuffix>
-                                                                    <mat-icon
-                                                                        class="icon-size-5"
-                                                                        [svgIcon]="'heroicons_solid:trash'"></mat-icon>
-                                                                </button>
-                                                            </mat-form-field>
-                                                        </ng-container>
+                                        <div class="w-full mb-4">
+                                            <!-- Category -->
+                                            <span class="mb-px font-medium leading-tight">Category</span>
+                                            <div class="mt-0.5 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden">
+                                                <!-- Header -->
+                                                <div class="flex items-center -my-px py-2 px-3">
+                                                    <div class="flex items-center flex-auto min-w-0">
+                                                        <mat-icon
+                                                            class="icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                                        <input
+                                                            class="min-w-0 ml-2 py-1 border-0"
+                                                            type="text"
+                                                            placeholder="Enter Category name"
+                                                            (input)="filterCategories($event)"
+                                                            (keydown)="filterCategoriesInputKeyDown($event)"
+                                                            [maxLength]="50"
+                                                            #newCategoryInput>
                                                     </div>
-                                                </ng-container>
-                                                <div
-                                                    class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer border-t hover:bg-gray-50 dark:hover:bg-hover"
-                                                    *ngIf="shouldShowCreateTagButton(newTagInput.value)"
-                                                    (click)="createTag(newTagInput.value); newTagInput.value = ''"
-                                                    matRipple>
-                                                    <mat-icon
-                                                        class="mr-2 icon-size-5"
-                                                        [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
-                                                    <div class="break-all">Create "<b>{{newTagInput.value}}</b>"</div>
+                                                    <button
+                                                        class="ml-3 w-8 h-8 min-h-8"
+                                                        mat-icon-button
+                                                        (click)="toggleCategoriesEditMode()">
+                                                        <mat-icon
+                                                            *ngIf="!categoriesEditMode"
+                                                            class="icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                                                        <mat-icon
+                                                            *ngIf="categoriesEditMode"
+                                                            class="icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                                    </button>
+                                                </div>
+                                                <!-- Available categories -->
+                                                <div class="h-30 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
+                                                    <!-- Categories -->
+                                                    <ng-container *ngIf="!categoriesEditMode">
+                                                        <ng-container *ngFor="let category of filteredCategories; trackBy: trackByFn;">
+                                                            <mat-checkbox
+                                                                class="flex items-center h-10 min-h-10 px-4"
+                                                                [color]="'primary'"
+                                                                [checked]="selectedProduct.category.includes(category.id)"
+                                                                (change)="toggleProductCategory(category, $event)">
+                                                                {{category.name}}
+                                                            </mat-checkbox>
+                                                        </ng-container>
+                                                    </ng-container>
+                                                    <!-- Categories editing -->
+                                                    <ng-container *ngIf="categoriesEditMode">
+                                                        <div class="p-4 space-y-2">
+                                                            <ng-container *ngFor="let category of filteredCategories; trackBy: trackByFn">
+                                                                <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full">
+                                                                    <input
+                                                                        matInput
+                                                                        [value]="category.name"
+                                                                        (input)="updateCategoryTitle(category, $event)">
+                                                                    <button
+                                                                        mat-icon-button
+                                                                        (click)="deleteCategory(category)"
+                                                                        matSuffix>
+                                                                        <mat-icon
+                                                                            class="icon-size-5"
+                                                                            [svgIcon]="'heroicons_solid:trash'"></mat-icon>
+                                                                    </button>
+                                                                </mat-form-field>
+                                                            </ng-container>
+                                                        </div>
+                                                    </ng-container>
+                                                    <div
+                                                        class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer border-t hover:bg-gray-50 dark:hover:bg-hover"
+                                                        *ngIf="shouldShowCreateCategoryButton(newCategoryInput.value)"
+                                                        (click)="createCategory(newCategoryInput.value); newCategoryInput.value = ''"
+                                                        matRipple>
+                                                        <mat-icon
+                                                            class="mr-2 icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                                                        <div class="break-all">Create "<b>{{newCategoryInput.value}}</b>"</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <!-- Tags -->
+                                            <span class="mb-px font-medium leading-tight">Variant</span>
+                                            <div class="mt-1 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden">
+                                                <!-- Header -->
+                                                <div class="flex items-center -my-px py-3 px-3">
+                                                    <div class="flex items-center flex-auto min-w-0">
+                                                        <mat-icon
+                                                            class="icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                                        <input
+                                                            class="min-w-0 ml-2 py-1 border-0"
+                                                            type="text"
+                                                            placeholder="Enter tag name"
+                                                            (input)="filterTags($event)"
+                                                            (keydown)="filterTagsInputKeyDown($event)"
+                                                            [maxLength]="50"
+                                                            #newTagInput>
+                                                    </div>
+                                                    <button
+                                                        class="ml-3 w-8 h-8 min-h-8"
+                                                        mat-icon-button
+                                                        (click)="toggleTagsEditMode()">
+                                                        <mat-icon
+                                                            *ngIf="!tagsEditMode"
+                                                            class="icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                                                        <mat-icon
+                                                            *ngIf="tagsEditMode"
+                                                            class="icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                                    </button>
+                                                </div>
+                                                <!-- Available tags -->
+                                                <div class="h-30 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
+                                                    <!-- Tags -->
+                                                    <!-- <ng-container *ngIf="!tagsEditMode">
+                                                        <ng-container *ngFor="let tag of filteredTags; trackBy: trackByFn">
+                                                            <mat-checkbox
+                                                                class="flex items-center h-10 min-h-10 px-4"
+                                                                [color]="'primary'"
+                                                                [checked]="selectedProduct.tags.includes(tag.id)"
+                                                                (change)="toggleProductTag(tag, $event)">
+                                                                {{tag.title}}
+                                                            </mat-checkbox>
+                                                        </ng-container>
+                                                    </ng-container> -->
+                                                    <!-- Tags editing -->
+                                                    <ng-container *ngIf="!tagsEditMode">
+                                                        <div class="p-4 space-y-2">
+                                                            <ng-container *ngFor="let tag of filteredTags; trackBy: trackByFn">
+                                                                <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full">
+                                                                    <input
+                                                                        matInput
+                                                                        [value]="tag.title"
+                                                                        (input)="updateTagTitle(tag, $event)">
+                                                                    <button
+                                                                        mat-icon-button
+                                                                        (click)="deleteTag(tag)"
+                                                                        matSuffix>
+                                                                        <mat-icon
+                                                                            class="icon-size-5"
+                                                                            [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                                                                    </button>
+                                                                </mat-form-field>
+                                                            </ng-container>
+                                                        </div>
+                                                    </ng-container>
+                                                    <div
+                                                        class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer border-t hover:bg-gray-50 dark:hover:bg-hover"
+                                                        *ngIf="shouldShowCreateTagButton(newTagInput.value)"
+                                                        (click)="createTag(newTagInput.value); newTagInput.value = ''"
+                                                        matRipple>
+                                                        <mat-icon
+                                                            class="mr-2 icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                                                        <div class="break-all">Create "<b>{{newTagInput.value}}</b>"</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Variant List -->
+                                        <div class="mt-1">
+                                            <!-- Variant List Tags -->
+                                            <span class="mb-px font-medium leading-tight">Variant List</span>
+                                            <div class="mt-1.5 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-auto">
+                                                <div class="h-30 leading-none border-gray-300 dark:border-gray-500">
+                                                    <div class="flex flex-auto flex-wrap p-2">
+                                                        <!-- Tags -->
+                                                        
+                                                        <div class="w-full pl-2">
+                                                            <span class="mb-px font-small leading-tight">Variant 1</span>
+                                                            <div *ngIf="filteredTags.length" class="flex items-center  rounded-full">
+                                                                <div *ngFor="let tag of filteredTags; trackBy: trackByFn">
+                                                                    <div class="px-2 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                                        <span class="text-md font-small whitespace-nowrap">{{tag.title}}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <hr>
+                                                        <div class="w-full pl-2">
+                                                            <span class="mb-px font-small leading-tight">Variant 2</span>
+                                                            <div *ngIf="filteredTags.length" class="flex items-center  rounded-full">
+                                                                <div *ngFor="let tag of filteredTags; trackBy: trackByFn">
+                                                                    <div class="px-2 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                                        <span class="text-md font-small whitespace-nowrap">{{tag.title}}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- <ng-container *ngIf="filteredTags.length">
+                                                            <ng-container *ngFor="let tag of filteredTags; trackBy: trackByFn">
+                                                                <div class="flex items-center justify-center px-4 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                                    <span class="text-md font-medium whitespace-nowrap">{{tag.title}}</span>
+                                                                </div>
+                                                            </ng-container>
+                                                        </ng-container> -->
+                                                    </div>
+                                                    <!-- <div class="flex flex-col sm:flex-row p-2">
+                                                        test
+                                                    </div> -->
                                                 </div>
                                             </div>
                                         </div>
 
                                     </div>
-
                                 </div>
 
                             </div>

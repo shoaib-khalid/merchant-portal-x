@@ -11,6 +11,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatRippleModule } from '@angular/material/core';
 import { MatSortModule } from '@angular/material/sort';
 import { MatSelectModule } from '@angular/material/select';
+import { QuillModule } from 'ngx-quill';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SharedModule } from 'app/shared/shared.module';
@@ -31,6 +32,7 @@ import { productsManagementRoutes } from 'app/modules/merchant/products-manageme
         MatIconModule,
         MatInputModule,
         MatMenuModule,
+        QuillModule.forRoot(),
         MatPaginatorModule,
         MatProgressBarModule,
         MatRippleModule,
