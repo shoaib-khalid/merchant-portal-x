@@ -7,7 +7,7 @@ import { merge, Observable, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { InventoryBrand, InventoryCategory, InventoryPagination, InventoryProduct, InventoryTag, InventoryVendor } from 'app/core/product/inventory.types';
+import { InventoryBrand, InventoryCategory, InventoryPagination, InventoryProduct, InventoryVariant, InventoryVendor } from 'app/core/product/inventory.types';
 import { InventoryService } from 'app/core/product/inventory.service';
 
 @Component({
@@ -48,8 +48,8 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     // brands: InventoryBrand[];
     categories: InventoryCategory[];
     filteredCategories: InventoryCategory[];
-    tags: InventoryTag[];
-    filteredTags: InventoryTag[];
+    variants: InventoryVariant[];
+    filteredVariants: InventoryVariant[];
     flashMessage: 'success' | 'error' | null = null;
     isLoading: boolean = false;
     pagination: InventoryPagination;
@@ -105,7 +105,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
             category         : [''],
             name             : ['', [Validators.required]],
             description      : [''],
-            tags             : [[]],
+            variants             : [[]],
             sku              : [''],
             barcode          : [''],
             // brand            : [''],
@@ -163,14 +163,14 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         // Get the products
         this.products$ = this._inventoryService.products$;
 
-        // Get the tags
-        this._inventoryService.tags$
+        // Get the variants
+        this._inventoryService.variants$
             .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((tags: InventoryTag[]) => {
+            .subscribe((variants: InventoryVariant[]) => {
 
-                // Update the tags
-                this.tags = tags;
-                this.filteredTags = tags;
+                // Update the variants
+                this.variants = variants;
+                this.filteredVariants = variants;
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -329,33 +329,33 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     }
 
     /**
-     * Toggle the tags edit mode
+     * Toggle the variants edit mode
      */
-    toggleTagsEditMode(): void
+    toggleVariantsEditMode(): void
     {
         this.tagsEditMode = !this.tagsEditMode;
     }
 
     /**
-     * Filter tags
+     * Filter variants
      *
      * @param event
      */
-    filterTags(event): void
+    filterVariants(event): void
     {
         // Get the value
         const value = event.target.value.toLowerCase();
 
-        // Filter the tags
-        this.filteredTags = this.tags.filter(tag => tag.title.toLowerCase().includes(value));
+        // Filter the variants
+        this.filteredVariants = this.variants.filter(variant => variant.title.toLowerCase().includes(value));
     }
 
     /**
-     * Filter tags input key down event
+     * Filter variants input key down event
      *
      * @param event
      */
-    filterTagsInputKeyDown(event): void
+    filterVariantsInputKeyDown(event): void
     {
         // Return if the pressed key is not 'Enter'
         if ( event.key !== 'Enter' )
@@ -363,11 +363,11 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
             return;
         }
 
-        // If there is no tag available...
-        if ( this.filteredTags.length === 0 )
+        // If there is no variant available...
+        if ( this.filteredVariants.length === 0 )
         {
-            // Create the tag
-            this.createTag(event.target.value);
+            // Create the variant
+            this.createVariant(event.target.value);
 
             // Clear the input
             event.target.value = '';
@@ -376,56 +376,56 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
             return;
         }
 
-        // If there is a tag...
-        const tag = this.filteredTags[0];
-        const isTagApplied = this.selectedProduct.tags.find(id => id === tag.id);
+        // If there is a variant...
+        const variant = this.filteredVariants[0];
+        const isVariantApplied = this.selectedProduct.variants.find(id => id === variant.id);
 
-        // If the found tag is already applied to the product...
-        if ( isTagApplied )
+        // If the found variant is already applied to the product...
+        if ( isVariantApplied )
         {
-            // Remove the tag from the product
-            this.removeTagFromProduct(tag);
+            // Remove the variant from the product
+            this.removeVariantFromProduct(variant);
         }
         else
         {
-            // Otherwise add the tag to the product
-            this.addTagToProduct(tag);
+            // Otherwise add the variant to the product
+            this.addVariantToProduct(variant);
         }
     }
 
     /**
-     * Create a new tag
+     * Create a new variant
      *
      * @param title
      */
-    createTag(title: string): void
+    createVariant(title: string): void
     {
-        const tag = {
+        const variant = {
             title
         };
 
-        // Create tag on the server
-        this._inventoryService.createTag(tag)
+        // Create variant on the server
+        this._inventoryService.createVariant(variant)
             .subscribe((response) => {
 
-                // Add the tag to the product
-                this.addTagToProduct(response);
+                // Add the variant to the product
+                this.addVariantToProduct(response);
             });
     }
 
     /**
-     * Update the tag title
+     * Update the variant title
      *
-     * @param tag
+     * @param variant
      * @param event
      */
-    updateTagTitle(tag: InventoryTag, event): void
+    updateVariantTitle(variant: InventoryVariant, event): void
     {
-        // Update the title on the tag
-        tag.title = event.target.value;
+        // Update the title on the variant
+        variant.title = event.target.value;
 
-        // Update the tag on the server
-        this._inventoryService.updateTag(tag.id, tag)
+        // Update the variant on the server
+        this._inventoryService.updateVariant(variant.id, variant)
             .pipe(debounceTime(300))
             .subscribe();
 
@@ -434,79 +434,79 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     }
 
     /**
-     * Delete the tag
+     * Delete the variant
      *
-     * @param tag
+     * @param variant
      */
-    deleteTag(tag: InventoryTag): void
+    deleteVariant(variant: InventoryVariant): void
     {
-        // Delete the tag from the server
-        this._inventoryService.deleteTag(tag.id).subscribe();
+        // Delete the variant from the server
+        this._inventoryService.deleteVariant(variant.id).subscribe();
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
     }
 
     /**
-     * Add tag to the product
+     * Add variant to the product
      *
-     * @param tag
+     * @param variant
      */
-    addTagToProduct(tag: InventoryTag): void
+    addVariantToProduct(variant: InventoryVariant): void
     {
-        // Add the tag
-        this.selectedProduct.tags.unshift(tag.id);
+        // Add the variant
+        this.selectedProduct.variants.unshift(variant.id);
 
         // Update the selected product form
-        this.selectedProductForm.get('tags').patchValue(this.selectedProduct.tags);
+        this.selectedProductForm.get('variants').patchValue(this.selectedProduct.variants);
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
     }
 
     /**
-     * Remove tag from the product
+     * Remove variant from the product
      *
-     * @param tag
+     * @param variant
      */
-    removeTagFromProduct(tag: InventoryTag): void
+    removeVariantFromProduct(variant: InventoryVariant): void
     {
-        // Remove the tag
-        this.selectedProduct.tags.splice(this.selectedProduct.tags.findIndex(item => item === tag.id), 1);
+        // Remove the variant
+        this.selectedProduct.variants.splice(this.selectedProduct.variants.findIndex(item => item === variant.id), 1);
 
         // Update the selected product form
-        this.selectedProductForm.get('tags').patchValue(this.selectedProduct.tags);
+        this.selectedProductForm.get('variants').patchValue(this.selectedProduct.variants);
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
     }
 
     /**
-     * Toggle product tag
+     * Toggle product variant
      *
-     * @param tag
+     * @param variant
      * @param change
      */
-    toggleProductTag(tag: InventoryTag, change: MatCheckboxChange): void
+    toggleProductVariant(variant: InventoryVariant, change: MatCheckboxChange): void
     {
         if ( change.checked )
         {
-            this.addTagToProduct(tag);
+            this.addVariantToProduct(variant);
         }
         else
         {
-            this.removeTagFromProduct(tag);
+            this.removeVariantFromProduct(variant);
         }
     }
 
     /**
-     * Should the create tag button be visible
+     * Should the create variant button be visible
      *
      * @param inputValue
      */
-    shouldShowCreateTagButton(inputValue: string): boolean
+    shouldShowCreateVariantButton(inputValue: string): boolean
     {
-        return !!!(inputValue === '' || this.tags.findIndex(tag => tag.title.toLowerCase() === inputValue.toLowerCase()) > -1);
+        return !!!(inputValue === '' || this.variants.findIndex(variant => variant.title.toLowerCase() === inputValue.toLowerCase()) > -1);
     }
 
     /**
@@ -571,10 +571,12 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
          if ( isCategoryApplied )
          {
              // Remove the category from the product
+             console.log("HARE")
              this.removeCategoryFromProduct(category);
          }
          else
          {
+            console.log("HARE2")
              // Otherwise add the category to the product
              this.addCategoryToProduct(category);
          }

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { assign, cloneDeep } from 'lodash-es';
 import { FuseMockApiService, FuseMockApiUtils } from '@fuse/lib/mock-api';
-import { brands as brandsData, categories as categoriesData, products as productsData, tags as tagsData, vendors as vendorsData } from 'app/mock-api/apps/ecommerce/inventory/data';
+import { brands as brandsData, categories as categoriesData, products as productsData, variants as variantsData, vendors as vendorsData } from 'app/mock-api/apps/ecommerce/inventory/data';
 
 @Injectable({
     providedIn: 'root'
@@ -11,7 +11,7 @@ export class ECommerceInventoryMockApi
     private _categories: any[] = categoriesData;
     // private _brands: any[] = brandsData;
     private _products: any[] = productsData;
-    private _tags: any[] = tagsData;
+    private _variants: any[] = variantsData;
     private _vendors: any[] = vendorsData;
 
     /**
@@ -38,6 +38,58 @@ export class ECommerceInventoryMockApi
         this._fuseMockApiService
             .onGet('api/apps/ecommerce/inventory/categories')
             .reply(() => [200, cloneDeep(this._categories)]);
+
+
+        // -----------------------------------------------------------------------------------------------------
+        // @ Vatiants - POST
+        // -----------------------------------------------------------------------------------------------------
+        this._fuseMockApiService
+            .onPost('api/apps/ecommerce/inventory/category')
+            .reply(({request}) => {
+
+                // Get the category
+                const newVariant = cloneDeep(request.body.category);
+
+                // Generate a new GUID
+                newVariant.id = FuseMockApiUtils.guid();
+
+                // Unshift the new category
+                this._categories.unshift(newVariant);
+
+                // Return the response
+                return [200, newVariant];
+            });
+
+        // -----------------------------------------------------------------------------------------------------
+        // @ Vatiants - PATCH
+        // -----------------------------------------------------------------------------------------------------
+        this._fuseMockApiService
+            .onPatch('api/apps/ecommerce/inventory/category')
+            .reply(({request}) => {
+
+                // Get the id and category
+                const id = request.body.id;
+                const category = cloneDeep(request.body.category);
+
+                // Prepare the updated category
+                let updatedCategory = null;
+
+                // Find the category and update it
+                this._categories.forEach((item, index, categories) => {
+
+                    if ( item.id === id )
+                    {
+                        // Update the category
+                        categories[index] = assign({}, categories[index], category);
+
+                        // Store the updated category
+                        updatedCategory = categories[index];
+                    }
+                });
+
+                // Return the response
+                return [200, updatedCategory];
+            });
 
         // -----------------------------------------------------------------------------------------------------
         // @ Brands - GET
@@ -165,7 +217,7 @@ export class ECommerceInventoryMockApi
                     category   : '',
                     name       : 'A New Product',
                     description: '',
-                    tags       : [],
+                    variants       : [],
                     sku        : '',
                     barcode    : '',
                     brand      : '',
@@ -244,88 +296,88 @@ export class ECommerceInventoryMockApi
             });
 
         // -----------------------------------------------------------------------------------------------------
-        // @ Tags - GET
+        // @ Vatiants - GET
         // -----------------------------------------------------------------------------------------------------
         this._fuseMockApiService
-            .onGet('api/apps/ecommerce/inventory/tags')
-            .reply(() => [200, cloneDeep(this._tags)]);
+            .onGet('api/apps/ecommerce/inventory/variants')
+            .reply(() => [200, cloneDeep(this._variants)]);
 
         // -----------------------------------------------------------------------------------------------------
-        // @ Tags - POST
+        // @ Vatiants - POST
         // -----------------------------------------------------------------------------------------------------
         this._fuseMockApiService
-            .onPost('api/apps/ecommerce/inventory/tag')
+            .onPost('api/apps/ecommerce/inventory/variant')
             .reply(({request}) => {
 
-                // Get the tag
-                const newTag = cloneDeep(request.body.tag);
+                // Get the variant
+                const newVariant = cloneDeep(request.body.variant);
 
                 // Generate a new GUID
-                newTag.id = FuseMockApiUtils.guid();
+                newVariant.id = FuseMockApiUtils.guid();
 
-                // Unshift the new tag
-                this._tags.unshift(newTag);
+                // Unshift the new variant
+                this._variants.unshift(newVariant);
 
                 // Return the response
-                return [200, newTag];
+                return [200, newVariant];
             });
 
         // -----------------------------------------------------------------------------------------------------
-        // @ Tags - PATCH
+        // @ Vatiants - PATCH
         // -----------------------------------------------------------------------------------------------------
         this._fuseMockApiService
-            .onPatch('api/apps/ecommerce/inventory/tag')
+            .onPatch('api/apps/ecommerce/inventory/variant')
             .reply(({request}) => {
 
-                // Get the id and tag
+                // Get the id and variant
                 const id = request.body.id;
-                const tag = cloneDeep(request.body.tag);
+                const variant = cloneDeep(request.body.variant);
 
-                // Prepare the updated tag
-                let updatedTag = null;
+                // Prepare the updated variant
+                let updatedVariant = null;
 
-                // Find the tag and update it
-                this._tags.forEach((item, index, tags) => {
+                // Find the variant and update it
+                this._variants.forEach((item, index, variants) => {
 
                     if ( item.id === id )
                     {
-                        // Update the tag
-                        tags[index] = assign({}, tags[index], tag);
+                        // Update the variant
+                        variants[index] = assign({}, variants[index], variant);
 
-                        // Store the updated tag
-                        updatedTag = tags[index];
+                        // Store the updated variant
+                        updatedVariant = variants[index];
                     }
                 });
 
                 // Return the response
-                return [200, updatedTag];
+                return [200, updatedVariant];
             });
 
         // -----------------------------------------------------------------------------------------------------
-        // @ Tag - DELETE
+        // @ Variant - DELETE
         // -----------------------------------------------------------------------------------------------------
         this._fuseMockApiService
-            .onDelete('api/apps/ecommerce/inventory/tag')
+            .onDelete('api/apps/ecommerce/inventory/variant')
             .reply(({request}) => {
 
                 // Get the id
                 const id = request.params.get('id');
 
-                // Find the tag and delete it
-                this._tags.forEach((item, index) => {
+                // Find the variant and delete it
+                this._variants.forEach((item, index) => {
 
                     if ( item.id === id )
                     {
-                        this._tags.splice(index, 1);
+                        this._variants.splice(index, 1);
                     }
                 });
 
-                // Get the products that have the tag
-                const productsWithTag = this._products.filter(product => product.tags.indexOf(id) > -1);
+                // Get the products that have the variant
+                const productsWithVariant = this._products.filter(product => product.variants.indexOf(id) > -1);
 
-                // Iterate through them and delete the tag
-                productsWithTag.forEach((product) => {
-                    product.tags.splice(product.tags.indexOf(id), 1);
+                // Iterate through them and delete the variant
+                productsWithVariant.forEach((product) => {
+                    product.variants.splice(product.variants.indexOf(id), 1);
                 });
 
                 // Return the response

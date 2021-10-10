@@ -3,7 +3,7 @@ import { ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot } from '@a
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { InventoryService } from 'app/core/product/inventory.service';
-import { InventoryBrand, InventoryCategory, InventoryPagination, InventoryProduct, InventoryTag, InventoryVendor } from 'app/core/product/inventory.types';
+import { InventoryBrand, InventoryCategory, InventoryPagination, InventoryProduct, InventoryVariant, InventoryVendor } from 'app/core/product/inventory.types';
 
 // @Injectable({
 //     providedIn: 'root'
@@ -159,9 +159,9 @@ export class InventoryTagsResolver implements Resolve<any>
      * @param route
      * @param state
      */
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<InventoryTag[]>
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<InventoryVariant[]>
     {
-        return this._inventoryService.getTags();
+        return this._inventoryService.getVariants();
     }
 }
 

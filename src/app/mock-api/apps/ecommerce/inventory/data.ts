@@ -46,7 +46,7 @@ export const brands = [
         slug: 'zeon'
     }
 ];
-export const tags = [
+export const variants = [
     {
         id   : '167190fa-51b4-45fc-a742-8ce1b33d24ea',
         title: 'mens'
@@ -111,7 +111,7 @@ export const products = [
         category   : 'b899ec30-b85a-40ab-bb1f-18a596d5c6de',
         name       : 'Capmia Mens Chronograph Watch 44mm 5 ATM',
         description: 'Consequat esse in culpa commodo anim. Et ullamco anim amet est. Sunt dolore ex occaecat officia anim. In sit minim laborum nostrud. Consequat ex do velit voluptate do exercitation est adipisicing quis velit.',
-        tags       : [
+        variants       : [
             '167190fa-51b4-45fc-a742-8ce1b33d24ea',
             '7d6dd47e-7472-4f8b-93d4-46c114c44533',
             '8837b93f-388b-43cc-851d-4ca8f23f3a61',
@@ -142,7 +142,7 @@ export const products = [
         category   : '07986d93-d4eb-4de1-9448-2538407f7254',
         name       : 'Zeon Ladies Chronograph Watch 40mm 10 ATM',
         description: 'Nulla duis dolor fugiat culpa proident. Duis anim est excepteur occaecat adipisicing occaecat. Labore id laborum non elit proident est veniam officia eu. Labore aliqua nisi duis sint ex consequat nostrud excepteur duis ex incididunt adipisicing.',
-        tags       : [
+        variants       : [
             '3baea410-a7d6-4916-b79a-bdce50c37f95',
             '7d6dd47e-7472-4f8b-93d4-46c114c44533',
             '8f868ddb-d4a2-461d-bc3b-d7c8668687c3',
@@ -173,7 +173,7 @@ export const products = [
         category   : 'b899ec30-b85a-40ab-bb1f-18a596d5c6de',
         name       : 'Benton Mens Automatic Watch 44mm 5 ATM',
         description: 'Velit irure deserunt aliqua officia. Eiusmod quis sunt magna laboris aliquip non dolor consequat cupidatat dolore esse. Consectetur mollit officia laborum fugiat nulla duis ad excepteur do aliqua fugiat. Fugiat non laboris exercitation ipsum in incididunt.',
-        tags       : [
+        variants       : [
             '167190fa-51b4-45fc-a742-8ce1b33d24ea',
             '0fc39efd-f640-41f8-95a5-3f1d749df200',
             '8837b93f-388b-43cc-851d-4ca8f23f3a61',
@@ -204,7 +204,7 @@ export const products = [
         category   : 'b899ec30-b85a-40ab-bb1f-18a596d5c6de',
         name       : 'Capmia Mens Chronograph Watch 44mm 10 ATM',
         description: 'Velit nisi proident cupidatat exercitation occaecat et adipisicing nostrud id ex nostrud sint. Qui fugiat velit minim amet reprehenderit voluptate velit exercitation proident Lorem nisi culpa. Commodo quis officia officia eiusmod mollit aute fugiat duis quis minim culpa in. Exercitation laborum fugiat ex excepteur officia reprehenderit magna ipsum. Laboris dolore nostrud id labore sint consectetur aliqua tempor ea aute do.',
-        tags       : [
+        variants       : [
             '167190fa-51b4-45fc-a742-8ce1b33d24ea',
             '7d6dd47e-7472-4f8b-93d4-46c114c44533',
             '8837b93f-388b-43cc-851d-4ca8f23f3a61',
@@ -235,7 +235,7 @@ export const products = [
         category   : '07986d93-d4eb-4de1-9448-2538407f7254',
         name       : 'Benton Ladies Automatic Watch 40mm 5 ATM',
         description: 'Pariatur proident labore commodo consequat qui et. Ad labore fugiat consectetur ea magna dolore mollit consequat reprehenderit laborum ad mollit eiusmod. Esse laboris voluptate ullamco occaecat labore esse laboris enim ipsum aliquip ipsum. Ea ea proident eu enim anim mollit non consequat enim nulla.',
-        tags       : [
+        variants       : [
             '3baea410-a7d6-4916-b79a-bdce50c37f95',
             '0fc39efd-f640-41f8-95a5-3f1d749df200',
             '8f868ddb-d4a2-461d-bc3b-d7c8668687c3',
@@ -266,7 +266,7 @@ export const products = [
         category   : 'b899ec30-b85a-40ab-bb1f-18a596d5c6de',
         name       : 'Benton Mens Chronograph Watch 44mm 10 ATM',
         description: 'Nulla enim reprehenderit proident ut Lorem laborum cillum eiusmod est ex anim. Nisi non non laboris excepteur ullamco elit do duis anim esse labore aliqua adipisicing velit. Deserunt magna exercitation cillum amet.',
-        tags       : [
+        variants       : [
             '167190fa-51b4-45fc-a742-8ce1b33d24ea',
             '7d6dd47e-7472-4f8b-93d4-46c114c44533',
             '8837b93f-388b-43cc-851d-4ca8f23f3a61',
@@ -297,7 +297,7 @@ export const products = [
         category   : 'b899ec30-b85a-40ab-bb1f-18a596d5c6de',
         name       : 'Benton Mens Chronograph Watch 44mm 10 ATM',
         description: 'Esse culpa ut ullamco dolore quis adipisicing. Minim veniam quis magna officia non. In pariatur nostrud nisi eiusmod minim anim id. Commodo ex incididunt dolor ad id aliqua incididunt minim in Lorem reprehenderit. Commodo ullamco consectetur aliqua Lorem cupidatat esse veniam consectetur sint veniam duis commodo.',
-        tags       : [
+        variants       : [
             '167190fa-51b4-45fc-a742-8ce1b33d24ea',
             '7d6dd47e-7472-4f8b-93d4-46c114c44533',
             '8837b93f-388b-43cc-851d-4ca8f23f3a61',
@@ -328,7 +328,7 @@ export const products = [
         category   : 'ad12aa94-3863-47f8-acab-a638ef02a3e9',
         name       : 'Benton Unisex Automatic Watch 40mm 10 ATM',
         description: 'Anim duis nisi ut ex amet reprehenderit cillum consequat pariatur ipsum elit voluptate excepteur non. Anim enim proident laboris pariatur mollit quis incididunt labore. Incididunt tempor aliquip ex labore ad consequat cillum est sunt anim dolor. Dolore adipisicing non nulla cillum Lorem deserunt. Nostrud incididunt amet sint velit.',
-        tags       : [
+        variants       : [
             '8ec8f60d-552f-4216-9f11-462b95b1d306',
             '0fc39efd-f640-41f8-95a5-3f1d749df200',
             '8f868ddb-d4a2-461d-bc3b-d7c8668687c3',
@@ -359,7 +359,7 @@ export const products = [
         category   : '07986d93-d4eb-4de1-9448-2538407f7254',
         name       : 'Premera Ladies Chronograph Watch 40mm 5 ATM',
         description: 'Velit fugiat adipisicing ut quis anim deserunt ex culpa nostrud laborum. Consectetur duis velit esse commodo voluptate magna dolor in enim exercitation. Ea aliquip cupidatat aute dolor tempor magna id laboris nulla eiusmod ut amet. Veniam irure ex incididunt officia commodo eiusmod nostrud ad consequat commodo ad voluptate.',
-        tags       : [
+        variants       : [
             '3baea410-a7d6-4916-b79a-bdce50c37f95',
             '7d6dd47e-7472-4f8b-93d4-46c114c44533',
             '8f868ddb-d4a2-461d-bc3b-d7c8668687c3',
@@ -390,7 +390,7 @@ export const products = [
         category   : 'b899ec30-b85a-40ab-bb1f-18a596d5c6de',
         name       : 'Lara Mens Automatic Watch 44mm 10 ATM',
         description: 'Enim laboris ut non elit dolore est consectetur. Duis irure minim elit velit anim incididunt minim ipsum ullamco ad dolore sunt. Proident aute proident velit elit ex reprehenderit ut. Lorem laborum excepteur elit proident sunt ipsum incididunt id do. Occaecat proident proident qui aute officia cupidatat aliqua aliqua nostrud proident laboris est ad qui. Magna eiusmod amet ut pariatur esse nisi aliquip deserunt minim ad et ea occaecat. Sunt enim cupidatat id eiusmod ea aute quis excepteur irure commodo dolore excepteur.',
-        tags       : [
+        variants       : [
             '167190fa-51b4-45fc-a742-8ce1b33d24ea',
             '0fc39efd-f640-41f8-95a5-3f1d749df200',
             '8837b93f-388b-43cc-851d-4ca8f23f3a61',
@@ -421,7 +421,7 @@ export const products = [
         category   : 'b899ec30-b85a-40ab-bb1f-18a596d5c6de',
         name       : 'Lara Mens Chronograph Watch 44mm 5 ATM',
         description: 'Labore irure qui sunt consectetur. Elit nulla id cillum duis. Nulla nulla eu occaecat eiusmod duis irure id do esse. Ad eu incididunt voluptate amet nostrud ullamco mollit dolore occaecat cupidatat nisi reprehenderit. Proident fugiat laborum sit velit ea voluptate.',
-        tags       : [
+        variants       : [
             '167190fa-51b4-45fc-a742-8ce1b33d24ea',
             '7d6dd47e-7472-4f8b-93d4-46c114c44533',
             '8837b93f-388b-43cc-851d-4ca8f23f3a61',
@@ -452,7 +452,7 @@ export const products = [
         category   : 'ad12aa94-3863-47f8-acab-a638ef02a3e9',
         name       : 'Benton Unisex Automatic Watch 40mm 10 ATM',
         description: 'Esse nisi amet occaecat culpa aliqua est ad ea velit. Consectetur in voluptate sit pariatur eiusmod exercitation eu aute occaecat in duis. Voluptate consectetur eu commodo proident id sunt labore irure.',
-        tags       : [
+        variants       : [
             '8ec8f60d-552f-4216-9f11-462b95b1d306',
             '0fc39efd-f640-41f8-95a5-3f1d749df200',
             '8f868ddb-d4a2-461d-bc3b-d7c8668687c3',
@@ -483,7 +483,7 @@ export const products = [
         category   : 'b899ec30-b85a-40ab-bb1f-18a596d5c6de',
         name       : 'Zeon Mens Chronograph Watch 44mm 10 ATM',
         description: 'Eu irure do cupidatat esse in. Aliqua laborum deserunt qui Lorem deserunt minim fugiat deserunt voluptate minim. Anim nulla tempor eiusmod ad exercitation reprehenderit officia. Nisi proident labore eu anim excepteur aliqua occaecat. Laboris nostrud ipsum commodo cupidatat.',
-        tags       : [
+        variants       : [
             '167190fa-51b4-45fc-a742-8ce1b33d24ea',
             '7d6dd47e-7472-4f8b-93d4-46c114c44533',
             '8837b93f-388b-43cc-851d-4ca8f23f3a61',
@@ -514,7 +514,7 @@ export const products = [
         category   : 'ad12aa94-3863-47f8-acab-a638ef02a3e9',
         name       : 'Lara Unisex Chronograph Watch 40mm 5 ATM',
         description: 'Nulla nostrud aliquip consequat laborum ut enim exercitation. Aute dolor duis aliquip consequat minim officia. Nisi labore et magna et sunt consectetur id anim pariatur officia et esse ut. Ullamco dolor cillum consequat velit eiusmod consectetur. Ullamco reprehenderit tempor minim dolore officia do nisi cupidatat adipisicing fugiat velit.',
-        tags       : [
+        variants       : [
             '8ec8f60d-552f-4216-9f11-462b95b1d306',
             '7d6dd47e-7472-4f8b-93d4-46c114c44533',
             '8f868ddb-d4a2-461d-bc3b-d7c8668687c3',
@@ -545,7 +545,7 @@ export const products = [
         category   : 'b899ec30-b85a-40ab-bb1f-18a596d5c6de',
         name       : 'Premera Mens Automatic Watch 44mm 10 ATM',
         description: 'Veniam sint aliquip aliquip aliquip amet Lorem irure proident laborum et eiusmod aliqua. Aliquip deserunt voluptate magna ut quis magna dolor in dolore. Commodo adipisicing excepteur occaecat aute nisi in. Est aute ad ut incididunt anim ea commodo. Sunt excepteur duis sunt est laborum magna Lorem ullamco exercitation dolore irure.',
-        tags       : [
+        variants       : [
             '167190fa-51b4-45fc-a742-8ce1b33d24ea',
             '0fc39efd-f640-41f8-95a5-3f1d749df200',
             '8837b93f-388b-43cc-851d-4ca8f23f3a61',
@@ -576,7 +576,7 @@ export const products = [
         category   : '07986d93-d4eb-4de1-9448-2538407f7254',
         name       : 'Lara Ladies Chronograph Watch 40mm 5 ATM',
         description: 'Deserunt non deserunt ut do labore cupidatat duis veniam in non adipisicing officia esse id. Adipisicing Lorem sint excepteur culpa labore consequat incididunt nulla minim amet. Sint do et fugiat laborum exercitation reprehenderit ut non nostrud occaecat nisi et qui dolore. Amet eiusmod nulla est officia ad magna cillum non dolor ullamco officia incididunt.',
-        tags       : [
+        variants       : [
             '3baea410-a7d6-4916-b79a-bdce50c37f95',
             '7d6dd47e-7472-4f8b-93d4-46c114c44533',
             '8f868ddb-d4a2-461d-bc3b-d7c8668687c3',
@@ -607,7 +607,7 @@ export const products = [
         category   : '07986d93-d4eb-4de1-9448-2538407f7254',
         name       : 'Lara Ladies Chronograph Watch 40mm 5 ATM',
         description: 'Occaecat proident fugiat consectetur ullamco est. Duis non minim eiusmod magna dolor reprehenderit ad deserunt et qui amet. Tempor cillum dolore veniam Lorem sit ad pariatur et sint. Sunt anim et cupidatat Lorem proident fugiat incididunt incididunt minim non sint. Eiusmod quis et ullamco cillum et veniam do tempor officia sint.',
-        tags       : [
+        variants       : [
             '3baea410-a7d6-4916-b79a-bdce50c37f95',
             '7d6dd47e-7472-4f8b-93d4-46c114c44533',
             '8f868ddb-d4a2-461d-bc3b-d7c8668687c3',
@@ -638,7 +638,7 @@ export const products = [
         category   : 'b899ec30-b85a-40ab-bb1f-18a596d5c6de',
         name       : 'Zeon Mens Automatic Watch 44mm 10 ATM',
         description: 'Eiusmod magna tempor est est quis eu. Minim irure magna anim mollit non adipisicing aute. Nostrud aute consectetur eu in non laboris excepteur esse esse occaecat officia.',
-        tags       : [
+        variants       : [
             '167190fa-51b4-45fc-a742-8ce1b33d24ea',
             '0fc39efd-f640-41f8-95a5-3f1d749df200',
             '8837b93f-388b-43cc-851d-4ca8f23f3a61',
@@ -669,7 +669,7 @@ export const products = [
         category   : 'ad12aa94-3863-47f8-acab-a638ef02a3e9',
         name       : 'Lara Unisex Automatic Watch 40mm 10 ATM',
         description: 'Excepteur enim non qui consequat sunt exercitation laborum ipsum sunt. Sunt pariatur fugiat voluptate ipsum consectetur do magna culpa labore. Cupidatat non ex labore incididunt aliquip commodo est in. Consectetur mollit nisi aliquip cupidatat do laborum est ullamco velit aliqua fugiat qui adipisicing. Aute reprehenderit quis id sint nulla.',
-        tags       : [
+        variants       : [
             '8ec8f60d-552f-4216-9f11-462b95b1d306',
             '0fc39efd-f640-41f8-95a5-3f1d749df200',
             '8f868ddb-d4a2-461d-bc3b-d7c8668687c3',
@@ -700,7 +700,7 @@ export const products = [
         category   : '07986d93-d4eb-4de1-9448-2538407f7254',
         name       : 'Zeon Ladies Automatic Watch 40mm 10 ATM',
         description: 'Reprehenderit magna reprehenderit ex mollit Lorem labore ut. Duis consectetur aliqua cillum occaecat quis ex excepteur fugiat nulla nisi dolor minim. Elit voluptate exercitation nulla et ut adipisicing esse eu nisi amet eu. Ut cillum ipsum quis fugiat proident Lorem est aute ipsum sint dolore consequat.',
-        tags       : [
+        variants       : [
             '3baea410-a7d6-4916-b79a-bdce50c37f95',
             '0fc39efd-f640-41f8-95a5-3f1d749df200',
             '8f868ddb-d4a2-461d-bc3b-d7c8668687c3',
@@ -731,7 +731,7 @@ export const products = [
         category   : 'b899ec30-b85a-40ab-bb1f-18a596d5c6de',
         name       : 'Lara Mens Chronograph Watch 44mm 10 ATM',
         description: 'Officia eu magna eu amet fugiat qui ullamco eu. Occaecat dolore minim ad tempor consequat adipisicing non Lorem consequat. In nostrud incididunt adipisicing in. Irure occaecat aliquip deserunt minim officia ad excepteur do commodo magna.',
-        tags       : [
+        variants       : [
             '167190fa-51b4-45fc-a742-8ce1b33d24ea',
             '7d6dd47e-7472-4f8b-93d4-46c114c44533',
             '8837b93f-388b-43cc-851d-4ca8f23f3a61',
@@ -762,7 +762,7 @@ export const products = [
         category   : 'b899ec30-b85a-40ab-bb1f-18a596d5c6de',
         name       : 'Premera Mens Chronograph Watch 44mm 10 ATM',
         description: 'Duis id consequat ex officia nisi. Et reprehenderit tempor sunt nostrud. Duis dolore tempor anim non duis qui aute magna officia. Ullamco proident esse enim amet nostrud occaecat veniam. Nostrud ea eiusmod laborum id laborum veniam nulla. Voluptate proident ullamco exercitation id consequat dolore id pariatur esse nulla consectetur.',
-        tags       : [
+        variants       : [
             '167190fa-51b4-45fc-a742-8ce1b33d24ea',
             '7d6dd47e-7472-4f8b-93d4-46c114c44533',
             '8837b93f-388b-43cc-851d-4ca8f23f3a61',
@@ -793,7 +793,7 @@ export const products = [
         category   : 'ad12aa94-3863-47f8-acab-a638ef02a3e9',
         name       : 'Capmia Unisex Automatic Watch 40mm 10 ATM',
         description: 'Voluptate consectetur nisi aliquip cupidatat sunt labore. Adipisicing voluptate tempor sunt eu irure cupidatat laboris. Enim aliquip aute sit non laborum Lorem in enim duis eu deserunt. Laboris magna irure aute ut proident fugiat laborum aliquip tempor nostrud id. Et esse cupidatat sunt ullamco reprehenderit enim dolore ea in do esse esse id.',
-        tags       : [
+        variants       : [
             '8ec8f60d-552f-4216-9f11-462b95b1d306',
             '0fc39efd-f640-41f8-95a5-3f1d749df200',
             '8f868ddb-d4a2-461d-bc3b-d7c8668687c3',

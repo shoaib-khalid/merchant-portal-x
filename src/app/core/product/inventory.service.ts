@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
-import { InventoryBrand, InventoryCategory, InventoryPagination, InventoryProduct, InventoryTag, InventoryVendor } from 'app/core/product/inventory.types';
+import { InventoryBrand, InventoryCategory, InventoryPagination, InventoryProduct, InventoryVariant, InventoryVendor } from 'app/core/product/inventory.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 
@@ -17,7 +17,7 @@ export class InventoryService
     private _pagination: BehaviorSubject<InventoryPagination | null> = new BehaviorSubject(null);
     private _product: BehaviorSubject<InventoryProduct | null> = new BehaviorSubject(null);
     private _products: BehaviorSubject<InventoryProduct[] | null> = new BehaviorSubject(null);
-    private _tags: BehaviorSubject<InventoryTag[] | null> = new BehaviorSubject(null);
+    private _variants: BehaviorSubject<InventoryVariant[] | null> = new BehaviorSubject(null);
     private _vendors: BehaviorSubject<InventoryVendor[] | null> = new BehaviorSubject(null);
 
     /**
@@ -76,11 +76,11 @@ export class InventoryService
     }
 
     /**
-     * Getter for tags
+     * Getter for variants
      */
-    get tags$(): Observable<InventoryTag[]>
+    get variants$(): Observable<InventoryVariant[]>
     {
-        return this._tags.asObservable();
+        return this._variants.asObservable();
     }
 
     /**
@@ -156,13 +156,13 @@ export class InventoryService
          return this.categories$.pipe(
              take(1),
              switchMap(categories => this._httpClient.post<InventoryCategory>('api/apps/ecommerce/inventory/category', {category}).pipe(
-                 map((newTag) => {
- 
+                 map((newCategory) => {
+                    console.log("HARE2",newCategory)
                      // Update the categories with the new category
-                     this._tags.next([...categories, newTag]);
+                     this._categories.next([...categories, newCategory]);
  
                      // Return new category from observable
-                     return newTag;
+                     return newCategory;
                  })
              ))
          );
@@ -182,19 +182,19 @@ export class InventoryService
                  id,
                  category
              }).pipe(
-                 map((updatedTag) => {
+                 map((updatedCategories) => {
  
                      // Find the index of the updated category
                      const index = categories.findIndex(item => item.id === id);
  
                      // Update the category
-                     categories[index] = updatedTag;
+                     categories[index] = updatedCategories;
  
                      // Update the categories
-                     this._tags.next(categories);
+                     this._categories.next(categories);
  
                      // Return the updated category
-                     return updatedTag;
+                     return updatedCategories;
                  })
              ))
          );
@@ -219,7 +219,7 @@ export class InventoryService
                      categories.splice(index, 1);
  
                      // Update the categories
-                     this._tags.next(categories);
+                     this._variants.next(categories);
  
                      // Return the deleted status
                      return isDeleted;
@@ -232,12 +232,12 @@ export class InventoryService
                          // Iterate through the contacts
                          products.forEach((product) => {
  
-                             const tagIndex = product.tags.findIndex(category => category === id);
+                             const tagIndex = product.variants.findIndex(category => category === id);
  
                              // If the contact has the category, remove it
                              if ( tagIndex > -1 )
                              {
-                                 product.tags.splice(tagIndex, 1);
+                                 product.variants.splice(tagIndex, 1);
                              }
                          });
  
@@ -297,7 +297,7 @@ export class InventoryService
                         category: object.categoryId,
                         name: object.name,
                         description: object.description,
-                        tags: [], // array of string // to be ask albert
+                        variants: [], // array of string // to be ask albert
                         sku: object.productInventories[0].sku, // need looping
                         barcode: null,
                         stock: object.productInventories[0].quantity, // need looping
@@ -461,13 +461,13 @@ export class InventoryService
     }
 
     /**
-     * Get tags
+     * Get variants
      */
-    getTags(): Observable<InventoryTag[]>
+    getVariants(): Observable<InventoryVariant[]>
     {
-        return this._httpClient.get<InventoryTag[]>('api/apps/ecommerce/inventory/tags').pipe(
-            tap((tags) => {
-                this._tags.next(tags);
+        return this._httpClient.get<InventoryVariant[]>('api/apps/ecommerce/inventory/variants').pipe(
+            tap((variants) => {
+                this._variants.next(variants);
             })
         );
     }
@@ -477,18 +477,18 @@ export class InventoryService
      *
      * @param tag
      */
-    createTag(tag: InventoryTag): Observable<InventoryTag>
+    createVariant(tag: InventoryVariant): Observable<InventoryVariant>
     {
-        return this.tags$.pipe(
+        return this.variants$.pipe(
             take(1),
-            switchMap(tags => this._httpClient.post<InventoryTag>('api/apps/ecommerce/inventory/tag', {tag}).pipe(
-                map((newTag) => {
+            switchMap(variants => this._httpClient.post<InventoryVariant>('api/apps/ecommerce/inventory/tag', {tag}).pipe(
+                map((newVariant) => {
 
-                    // Update the tags with the new tag
-                    this._tags.next([...tags, newTag]);
+                    // Update the variants with the new tag
+                    this._variants.next([...variants, newVariant]);
 
                     // Return new tag from observable
-                    return newTag;
+                    return newVariant;
                 })
             ))
         );
@@ -500,27 +500,27 @@ export class InventoryService
      * @param id
      * @param tag
      */
-    updateTag(id: string, tag: InventoryTag): Observable<InventoryTag>
+    updateVariant(id: string, tag: InventoryVariant): Observable<InventoryVariant>
     {
-        return this.tags$.pipe(
+        return this.variants$.pipe(
             take(1),
-            switchMap(tags => this._httpClient.patch<InventoryTag>('api/apps/ecommerce/inventory/tag', {
+            switchMap(variants => this._httpClient.patch<InventoryVariant>('api/apps/ecommerce/inventory/tag', {
                 id,
                 tag
             }).pipe(
-                map((updatedTag) => {
+                map((updatedVariant) => {
 
                     // Find the index of the updated tag
-                    const index = tags.findIndex(item => item.id === id);
+                    const index = variants.findIndex(item => item.id === id);
 
                     // Update the tag
-                    tags[index] = updatedTag;
+                    variants[index] = updatedVariant;
 
-                    // Update the tags
-                    this._tags.next(tags);
+                    // Update the variants
+                    this._variants.next(variants);
 
                     // Return the updated tag
-                    return updatedTag;
+                    return updatedVariant;
                 })
             ))
         );
@@ -531,21 +531,21 @@ export class InventoryService
      *
      * @param id
      */
-    deleteTag(id: string): Observable<boolean>
+    deleteVariant(id: string): Observable<boolean>
     {
-        return this.tags$.pipe(
+        return this.variants$.pipe(
             take(1),
-            switchMap(tags => this._httpClient.delete('api/apps/ecommerce/inventory/tag', {params: {id}}).pipe(
+            switchMap(variants => this._httpClient.delete('api/apps/ecommerce/inventory/tag', {params: {id}}).pipe(
                 map((isDeleted: boolean) => {
 
                     // Find the index of the deleted tag
-                    const index = tags.findIndex(item => item.id === id);
+                    const index = variants.findIndex(item => item.id === id);
 
                     // Delete the tag
-                    tags.splice(index, 1);
+                    variants.splice(index, 1);
 
-                    // Update the tags
-                    this._tags.next(tags);
+                    // Update the variants
+                    this._variants.next(variants);
 
                     // Return the deleted status
                     return isDeleted;
@@ -558,12 +558,12 @@ export class InventoryService
                         // Iterate through the contacts
                         products.forEach((product) => {
 
-                            const tagIndex = product.tags.findIndex(tag => tag === id);
+                            const tagIndex = product.variants.findIndex(tag => tag === id);
 
                             // If the contact has the tag, remove it
                             if ( tagIndex > -1 )
                             {
-                                product.tags.splice(tagIndex, 1);
+                                product.variants.splice(tagIndex, 1);
                             }
                         });
 
