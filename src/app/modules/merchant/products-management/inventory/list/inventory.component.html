@@ -29,7 +29,7 @@
                 class="ml-4"
                 mat-flat-button
                 [color]="'primary'"
-                (click)="createProduct(); imagesEditMode = true">
+                (click)="createProduct()">
                 <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
                 <span class="ml-2 mr-1">Add</span>
             </button>
@@ -209,6 +209,7 @@
                                                 </div>
                                             </ng-template>
                                         </div>
+                                        
                                         <!-- Edit Image Frame -->
                                         <div *ngIf="imagesEditMode" class="flex flex-col items-center sm:items-start mb-8 sm:mb-0">
                                             <div class="relative flex items-center justify-center w-32 h-44 rborder rounded overflow-hidden ring-4 ring-bg-card">
@@ -258,8 +259,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="flex flex-col items-center w-full">
+
                                         <!-- Add New Image -->
                                         <div class="flex items-center mt-2 whitespace-nowrap">
                                             <div>
@@ -289,9 +289,7 @@
                                                     [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
                                             </button>
                                         </div>
-                                    </div>
-                                    <div class="flex flex-col items-center">
-                                        <!-- Image Cycle -->
+
                                         <div
                                             class="flex items-center mt-2 whitespace-nowrap"
                                             *ngIf="selectedProductForm.get('images').value.length">
@@ -314,6 +312,7 @@
                                             </button>
                                         </div>
                                     </div>
+                                    <!-- Product status -->
                                     <div class="flex flex-col mt-8">
                                         <span class="font-semibold mb-2">Product status</span>
                                         <mat-slide-toggle
@@ -337,17 +336,17 @@
                                         </mat-form-field>
 
                                         <!-- Description -->
-                                        <span class="mb-2 font-medium leading-tight">Description</span>
-                                        <div class="flex items-center -my-px w-full">
-                                            <quill-editor
-                                            class="w-full"
-                                                [formControlName]="'description'"
-                                                [modules]="quillModules"></quill-editor>
+                                        <div class="w-full mb-4">
+                                            <span class="mb-2 font-medium leading-tight">Description</span>
+                                            <div class="flex items-center -my-px w-full">
+                                                <quill-editor
+                                                class="w-full"
+                                                    [formControlName]="'description'"
+                                                    [modules]="quillModules"></quill-editor>
+                                            </div>
                                         </div>
 
-                                        <hr>
-
-                                        <!-- Stock and Reserved -->
+                                        <!-- SKU and Barcode -->
                                         <div class="flex">
                                             <mat-form-field class="w-1/3 pr-2">
                                                 <mat-label>Available Stock</mat-label>
@@ -367,6 +366,8 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <!-- Category, Brand & Vendor -->
                                         <div class="flex">
                                             <div class="w-1/3 pr-2">
                                                 <span class="mb-2 font-medium leading-tight">Low Stock Alarm</span>
@@ -396,309 +397,382 @@
                                             </div>
                                         </div>
                                     </div>
+                                    
+                                    <!-- SKU, Price, Weight, Category-->
+                                    <div class="flex flex-col w-full lg:w-1/4 sm:pl-8">
+                                        <!-- SKU -->
+                                        <mat-form-field class="w-full pr-2">
+                                            <mat-label>SKU</mat-label>
+                                            <input
+                                                matInput
+                                                [formControlName]="'sku'">
+                                        </mat-form-field>
 
-                                    <!-- Cost, Base price, Tax & Price -->
-                                    <div class="flex flex-col w-full lg:w-2/4 sm:pl-8">
+                                        <!-- Price -->
+                                        <mat-form-field class="w-full pr-2">
+                                            <mat-label>Price</mat-label>
+                                            <span matSuffix>$</span>
+                                            <input
+                                                matInput
+                                                [formControlName]="'price'">
+                                        </mat-form-field>
 
-                                        <!-- SKU, Price, Weight -->
-                                        <div class="flex">
-                                            <!-- SKU -->
-                                            <mat-form-field class="w-1/3 pr-2">
-                                                <mat-label>SKU</mat-label>
-                                                <input
-                                                    matInput
-                                                    [formControlName]="'sku'">
-                                            </mat-form-field>
-
-                                            <!-- Price -->
-                                            <mat-form-field class="w-1/3 pr-2">
-                                                <mat-label>Price</mat-label>
-                                                <span matSuffix>$</span>
-                                                <input
-                                                    matInput
-                                                    [formControlName]="'price'">
-                                            </mat-form-field>
-
-                                            <!-- Weight -->
-                                            <mat-form-field class="w-1/3 pr-2">
-                                                <mat-label>Weight</mat-label>
-                                                <span matSuffix>lbs.</span>
-                                                <input
-                                                    matInput
-                                                    [formControlName]="'weight'">
-                                            </mat-form-field>
-                                        </div>
+                                        <!-- Weight -->
+                                        <mat-form-field class="w-full pr-2">
+                                            <mat-label>Weight</mat-label>
+                                            <span matSuffix>lbs.</span>
+                                            <input
+                                                matInput
+                                                [formControlName]="'weight'">
+                                        </mat-form-field>
 
                                         <!-- Category -->
-                                        <div class="flex">
-                                            <div class="w-full">
-                                                <span class="mb-px font-medium leading-tight">Category</span>
-                                                <div class="mt-0.5 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden">
-                                                    <!-- Header -->
-                                                    <div class="flex items-center -my-px py-2 px-3">
-                                                        <div class="flex items-center flex-auto min-w-0">
-                                                            <mat-icon
-                                                                class="icon-size-5"
-                                                                [svgIcon]="'heroicons_solid:search'"></mat-icon>
-                                                            <input
-                                                                class="min-w-0 ml-2 py-1 border-0"
-                                                                type="text"
-                                                                placeholder="Enter Category name"
-                                                                (input)="filterCategories($event)"
-                                                                (keydown)="filterCategoriesInputKeyDown($event)"
-                                                                [maxLength]="50"
-                                                                #newCategoryInput>
-                                                        </div>
-                                                        <button
-                                                            class="ml-3 w-8 h-8 min-h-8"
-                                                            mat-icon-button
-                                                            (click)="toggleCategoriesEditMode()">
-                                                            <mat-icon
-                                                                *ngIf="!categoriesEditMode"
-                                                                class="icon-size-5"
-                                                                [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
-                                                            <mat-icon
-                                                                *ngIf="categoriesEditMode"
-                                                                class="icon-size-5"
-                                                                [svgIcon]="'heroicons_solid:check'"></mat-icon>
-                                                        </button>
+                                        <div class="w-full">
+                                            <span class="mb-px font-medium leading-tight">Category</span>
+                                            <div class="mt-0.5 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden">
+                                                <!-- Header -->
+                                                <div class="flex items-center -my-px py-2 px-3">
+                                                    <div class="flex items-center flex-auto min-w-0">
+                                                        <mat-icon
+                                                            class="icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                                        <input
+                                                            class="min-w-0 ml-2 py-1 border-0"
+                                                            type="text"
+                                                            placeholder="Enter Category name"
+                                                            (input)="filterCategories($event)"
+                                                            (keydown)="filterCategoriesInputKeyDown($event)"
+                                                            [maxLength]="50"
+                                                            #newCategoryInput>
                                                     </div>
-                                                    <!-- Available categories -->
-                                                    <div class="h-30 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
-                                                        <!-- Categories -->
-                                                        <ng-container *ngIf="!categoriesEditMode">
-                                                            <ng-container *ngFor="let category of filteredCategories; trackBy: trackByFn;">
-                                                                <mat-checkbox
-                                                                    class="flex items-center h-10 min-h-10 px-4"
-                                                                    [color]="'primary'"
-                                                                    [checked]="selectedProduct.category.includes(category.id)"
-                                                                    (change)="toggleProductCategory(category, $event)">
-                                                                    {{category.name}}
-                                                                </mat-checkbox>
-                                                            </ng-container>
-                                                        </ng-container>
-                                                        <!-- Categories editing -->
-                                                        <ng-container *ngIf="categoriesEditMode">
-                                                            <div class="p-4 space-y-2">
-                                                                <ng-container *ngFor="let category of filteredCategories; trackBy: trackByFn">
-                                                                    <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full">
-                                                                        <input
-                                                                            matInput
-                                                                            [value]="category.name"
-                                                                            (input)="updateCategoryTitle(category, $event)">
-                                                                        <button
-                                                                            mat-icon-button
-                                                                            (click)="deleteCategory(category)"
-                                                                            matSuffix>
-                                                                            <mat-icon
-                                                                                class="icon-size-5"
-                                                                                [svgIcon]="'heroicons_solid:trash'"></mat-icon>
-                                                                        </button>
-                                                                    </mat-form-field>
-                                                                </ng-container>
-                                                            </div>
-                                                        </ng-container>
-                                                        <div
-                                                            class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer border-t hover:bg-gray-50 dark:hover:bg-hover"
-                                                            *ngIf="shouldShowCreateCategoryButton(newCategoryInput.value)"
-                                                            (click)="createCategory(newCategoryInput.value); newCategoryInput.value = ''"
-                                                            matRipple>
-                                                            <mat-icon
-                                                                class="mr-2 icon-size-5"
-                                                                [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
-                                                            <div class="break-all">Create "<b>{{newCategoryInput.value}}</b>"</div>
-                                                        </div>
-                                                    </div>
+                                                    <button
+                                                        class="ml-3 w-8 h-8 min-h-8"
+                                                        mat-icon-button
+                                                        (click)="toggleCategoriesEditMode()">
+                                                        <mat-icon
+                                                            *ngIf="!categoriesEditMode"
+                                                            class="icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                                                        <mat-icon
+                                                            *ngIf="categoriesEditMode"
+                                                            class="icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                                    </button>
                                                 </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Variants -->
-                                        <div class="flex">
-                                            <div class="w-1/3">
-                                                <span class="mb-px font-medium leading-tight">Variant</span>
-                                                <div class="mt-1 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden">
-                                                    <!-- Header -->
-                                                    <div class="flex items-center -my-px py-3 px-3">
-                                                        <div class="flex items-center flex-auto min-w-0">
-                                                            <mat-icon
-                                                                class="icon-size-5"
-                                                                [svgIcon]="'heroicons_solid:search'"></mat-icon>
-                                                            <input
-                                                                class="min-w-0 ml-2 py-1 border-0"
-                                                                type="text"
-                                                                placeholder="Enter variant name"
-                                                                (input)="filterVariants($event)"
-                                                                (keydown)="filterVariantsInputKeyDown($event)"
-                                                                [maxLength]="50"
-                                                                #newVariantInput>
-                                                        </div>
-                                                        <button
-                                                            class="ml-3 w-8 h-8 min-h-8"
-                                                            mat-icon-button
-                                                            (click)="toggleVariantsEditMode()">
-                                                            <mat-icon
-                                                                *ngIf="!variantsEditMode"
-                                                                class="icon-size-5"
-                                                                [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
-                                                            <mat-icon
-                                                                *ngIf="variantsEditMode"
-                                                                class="icon-size-5"
-                                                                [svgIcon]="'heroicons_solid:check'"></mat-icon>
-                                                        </button>
-                                                    </div>
-                                                    <!-- Available variants -->
-                                                    <div class="h-30 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
-                                                        <!-- Variants -->
-                                                        <!-- <ng-container *ngIf="!variantsEditMode">
-                                                            <ng-container *ngFor="let variant of filteredVariants; trackBy: trackByFn">
-                                                                <mat-checkbox
-                                                                    class="flex items-center h-10 min-h-10 px-4"
-                                                                    [color]="'primary'"
-                                                                    [checked]="selectedProduct.variants.includes(variant.id)"
-                                                                    (change)="toggleProductVariant(variant, $event)">
-                                                                    {{variant.title}}
-                                                                </mat-checkbox>
-                                                            </ng-container>
-                                                        </ng-container> -->
-                                                        <!-- Variants editing -->
-                                                        <ng-container *ngIf="!variantsEditMode">
-                                                            <div class="p-4 space-y-2">
-                                                                <ng-container *ngFor="let variant of filteredVariants; trackBy: trackByFn">
-                                                                    <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full">
-                                                                        <input
-                                                                            class="cursor-pointer"
-                                                                            matInput
-                                                                            [value]="variant.title"
-                                                                            (input)="updateVariantTitle(variant, $event)"
-                                                                            readonly>
-                                                                        <button
-                                                                            mat-icon-button
-                                                                            (click)="deleteVariant(variant)"
-                                                                            matSuffix>
-                                                                            <mat-icon
-                                                                                class="icon-size-5"
-                                                                                [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
-                                                                        </button>
-                                                                    </mat-form-field>
-                                                                </ng-container>
-                                                            </div>
+                                                <!-- Available categories -->
+                                                <div class="h-30 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
+                                                    <!-- Categories -->
+                                                    <ng-container *ngIf="!categoriesEditMode">
+                                                        <ng-container *ngFor="let category of filteredCategories; trackBy: trackByFn;">
+                                                            <mat-checkbox
+                                                                class="flex items-center h-10 min-h-10 px-4"
+                                                                [color]="'primary'"
+                                                                [checked]="selectedProduct.category.includes(category.id)"
+                                                                (change)="toggleProductCategory(category, $event)">
+                                                                {{category.name}}
+                                                            </mat-checkbox>
                                                         </ng-container>
-                                                        <div
-                                                            class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer border-t hover:bg-gray-50 dark:hover:bg-hover"
-                                                            *ngIf="shouldShowCreateVariantButton(newVariantInput.value)"
-                                                            (click)="createVariant(newVariantInput.value); newVariantInput.value = ''"
-                                                            matRipple>
-                                                            <mat-icon
-                                                                class="mr-2 icon-size-5"
-                                                                [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
-                                                            <div class="break-all">Create "<b>{{newVariantInput.value}}</b>"</div>
+                                                    </ng-container>
+                                                    <!-- Categories editing -->
+                                                    <ng-container *ngIf="categoriesEditMode">
+                                                        <div class="p-4 space-y-2">
+                                                            <ng-container *ngFor="let category of filteredCategories; trackBy: trackByFn">
+                                                                <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full">
+                                                                    <input
+                                                                        matInput
+                                                                        [value]="category.name"
+                                                                        (input)="updateCategoryTitle(category, $event)">
+                                                                    <button
+                                                                        mat-icon-button
+                                                                        (click)="deleteCategory(category)"
+                                                                        matSuffix>
+                                                                        <mat-icon
+                                                                            class="icon-size-5"
+                                                                            [svgIcon]="'heroicons_solid:trash'"></mat-icon>
+                                                                    </button>
+                                                                </mat-form-field>
+                                                            </ng-container>
                                                         </div>
+                                                    </ng-container>
+                                                    <div
+                                                        class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer border-t hover:bg-gray-50 dark:hover:bg-hover"
+                                                        *ngIf="shouldShowCreateCategoryButton(newCategoryInput.value)"
+                                                        (click)="createCategory(newCategoryInput.value); newCategoryInput.value = ''"
+                                                        matRipple>
+                                                        <mat-icon
+                                                            class="mr-2 icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                                                        <div class="break-all">Create "<b>{{newCategoryInput.value}}</b>"</div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                            <div class="w-1/3">
-                                                <span class="mb-px font-medium leading-tight">Variant</span>
-                                                <div class="w-full mt-1 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-auto">
-                                                        <div class="flex flex-wrap pt-2 pl-2">
-                                                            <!-- Variants -->
-                                                            <div class="flex flex-col">
-                                                                <span class="w-full mb-px font-small leading-tight">Variant 1</span>
-                                                                <div *ngIf="filteredVariants.length" class="flex items-center rounded-full w-full">
-                                                                    <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                                        <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                            <mat-icon
-                                                                                class="icon-size-5 "
-                                                                                [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
-                                                                            <span class="ml-1.5 text-md font-medium whitespace-nowrap">Add</span>
-                                                                        </span>
-                                                                    </div>
-                                                                    <!-- <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                                        <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                            <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                                        </span>
-                                                                    </div> -->
-                                                                    <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                                        <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                            <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                                        </span>
-                                                                    </div>
-                                                                    <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                                        <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                            <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                                        </span>
-                                                                    </div>
-                                                                    <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                                        <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                            <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                                        </span>
-                                                                    </div>
-                                                                    <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                                        <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                            <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                                        </span>
-                                                                    </div>
-                                                                    <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                                        <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                            <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                                        </span>
-                                                                    </div>
-                                                                    <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                                        <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                            <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                                        </span>
-                                                                    </div>
-                                                                    <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                                        <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                            <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                                        </span>
-                                                                    </div>
-                                                                    <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                                        <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                            <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                                        </span>
-                                                                    </div>
-                                                                    <!-- <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                                        <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                            <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                                        </span>
-                                                                    </div> -->
-                                                                    <!-- <div *ngFor="let variant of filteredVariants; trackBy: trackByFn" 
-                                                                        class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                                        <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                            <span class="text-md font-small whitespace-nowrap">{{variant.title}}</span>
-                                                                        </span>
-                                                                    </div> -->
-                                                                </div>
-                                                            </div>
-                                                            <hr>
-                                                            <div class="w-full pl-2">
-                                                                <span class="mb-px font-small leading-tight">Variant 2</span>
-                                                                <div *ngIf="filteredVariants.length" class="flex items-center  rounded-full">
-                                                                    <div *ngFor="let variant of filteredVariants; trackBy: trackByFn">
-                                                                        <div class="px-2 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                                            <span class="text-md font-small whitespace-nowrap">{{variant.title}}</span>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <!-- <ng-container *ngIf="filteredVariants.length">
-                                                                <ng-container *ngFor="let variant of filteredVariants; trackBy: trackByFn">
-                                                                    <div class="flex items-center justify-center px-4 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                                        <span class="text-md font-medium whitespace-nowrap">{{variant.title}}</span>
-                                                                    </div>
-                                                                </ng-container>
-                                                            </ng-container> -->
-                                                        </div>
-                                                        <!-- <div class="flex flex-col sm:flex-row p-2">
-                                                            test
-                                                        </div> -->
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
 
+                                    <!-- Variants -->
+                                    <div class="flex flex-col w-full lg:w-1/4 sm:pl-8">
+                                        <!-- Variant View -->
+                                        <div class="w-full">
+                                            <span class="mb-px font-medium leading-tight">Variant</span>
+                                            <div class="mt-1 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden">
+                                                <!-- Header -->
+                                                <div class="flex items-center -my-px py-3 px-3">
+                                                    <div class="flex items-center flex-auto min-w-0">
+                                                        <mat-icon
+                                                            class="icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                                        <input
+                                                            class="min-w-0 ml-2 py-1 border-0"
+                                                            type="text"
+                                                            placeholder="Enter variant name"
+                                                            (input)="filterVariants($event)"
+                                                            (keydown)="filterVariantsInputKeyDown($event)"
+                                                            [maxLength]="50"
+                                                            #newVariantInput>
+                                                    </div>
+                                                    <button
+                                                        class="ml-3 w-8 h-8 min-h-8"
+                                                        mat-icon-button
+                                                        (click)="toggleVariantsEditMode()">
+                                                        <mat-icon
+                                                            *ngIf="!variantsEditMode"
+                                                            class="icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                                                        <mat-icon
+                                                            *ngIf="variantsEditMode"
+                                                            class="icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                                    </button>
+                                                </div>
+                                                <!-- Available variants -->
+                                                <div class="h-30 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
+                                                    <!-- Variants -->
+                                                    <!-- <ng-container *ngIf="!variantsEditMode">
+                                                        <ng-container *ngFor="let variant of filteredVariants; trackBy: trackByFn">
+                                                            <mat-checkbox
+                                                                class="flex items-center h-10 min-h-10 px-4"
+                                                                [color]="'primary'"
+                                                                [checked]="selectedProduct.variants.includes(variant.id)"
+                                                                (change)="toggleProductVariant(variant, $event)">
+                                                                {{variant.title}}
+                                                            </mat-checkbox>
+                                                        </ng-container>
+                                                    </ng-container> -->
+                                                    <!-- Variants editing -->
+                                                    <ng-container *ngIf="!variantsEditMode">
+                                                        <div class="p-4 space-y-2">
+                                                            <ng-container *ngFor="let variant of filteredVariants; trackBy: trackByFn">
+                                                                <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full">
+                                                                    <input
+                                                                        class="cursor-pointer"
+                                                                        matInput
+                                                                        [value]="variant.title"
+                                                                        (input)="updateVariantTitle(variant, $event)"
+                                                                        readonly>
+                                                                    <button
+                                                                        mat-icon-button
+                                                                        (click)="deleteVariant(variant)"
+                                                                        matSuffix>
+                                                                        <mat-icon
+                                                                            class="icon-size-5"
+                                                                            [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                                                                    </button>
+                                                                </mat-form-field>
+                                                            </ng-container>
+                                                        </div>
+                                                    </ng-container>
+                                                    <div
+                                                        class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer border-t hover:bg-gray-50 dark:hover:bg-hover"
+                                                        *ngIf="shouldShowCreateVariantButton(newVariantInput.value)"
+                                                        (click)="createVariant(newVariantInput.value); newVariantInput.value = ''"
+                                                        matRipple>
+                                                        <mat-icon
+                                                            class="mr-2 icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                                                        <div class="break-all">Create "<b>{{newVariantInput.value}}</b>"</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Variant List -->
+                                        <div class="w-full max-w-2xl">
+                                            <span class="mb-px font-medium leading-tight">Variant List</span>
+                                            <div class="w-full mt-1 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-auto">
+                                                <!-- Header -->
+                                                <div class="flex items-center -my-px py-3 px-3">
+                                                </div>
+                                                <!-- Variants List -->
+                                                <div class="h-30 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
+                                                    <span class="w-full mb-px font-small leading-tight">Variant 1</span>
+                                                    <div *ngIf="filteredVariants.length" class="flex items-center rounded-full w-full">
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <mat-icon
+                                                                    class="icon-size-5 "
+                                                                    [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Add</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
+                                                            </span>
+                                                        </div>
+                                                        
+                                                        <!-- <div *ngFor="let variant of filteredVariants; trackBy: trackByFn" 
+                                                            class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                <span class="text-md font-small whitespace-nowrap">{{variant.title}}</span>
+                                                            </span>
+                                                        </div> -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
                             </div>
 
                             <div class="flex items-center justify-between w-full border-t px-8 py-4">
@@ -742,16 +816,6 @@
 
             <ng-template #noProducts>
                 <div class="p-8 sm:p-16 border-t text-4xl font-semibold tracking-tight text-center">There are no products!</div>
-                <div class="p-8 sm:p-16 text-4xl font-semibold tracking-tight text-center">
-                    <button
-                        class="ml-4"
-                        mat-flat-button
-                        [color]="'primary'"
-                        (click)="createProduct()">
-                        <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
-                        <span class="ml-2 mr-1">Add Now</span>
-                    </button>
-                </div>
             </ng-template>
 
         </div>
