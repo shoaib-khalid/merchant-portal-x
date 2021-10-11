@@ -480,8 +480,6 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     addVariantToProduct(variant: InventoryVariant): void
     {
 
-        console.log("1",this.variants)
-
         // Add the variant
         this.selectedProduct.variants.unshift(variant);
 
@@ -489,9 +487,8 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         this.selectedProductForm.get('variants').patchValue(this.selectedProduct.variants);
 
         this.variants = this.selectedProduct.variants;
+        this.filteredVariants = this.selectedProduct.variants;
         
-        console.log("2",this.variants)
-
         // Mark for check
         this._changeDetectorRef.markForCheck();
     }
