@@ -558,7 +558,7 @@
                                     <!-- Variants -->
                                     <div class="flex flex-col w-full lg:w-1/4 sm:pl-8">
                                         <!-- Variant View -->
-                                        <div class="w-full">
+                                        <div class="w-full mb-4">
                                             <span class="mb-px font-medium leading-tight">Variant</span>
                                             <div class="mt-1 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden">
                                                 <!-- Header -->
@@ -578,7 +578,7 @@
                                                     </div>
                                                 </div>
                                                 <!-- Available variants -->
-                                                <div class="h-30 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
+                                                <div class="h-44 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
                                                     <!-- Variants -->
                                                     <ng-container *ngIf="!variantsEditMode">
                                                         <div class="p-4 space-y-2">
@@ -591,14 +591,28 @@
                                                                         (input)="updateVariantTitle(variant, $event)"
                                                                         (change)="toggleProductVariant(variant, $event)"
                                                                         readonly>
-                                                                    <!-- <button
+
+                                                                    <!-- <input
+                                                                        id="variant-remove-button"
+                                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                        type="button"
+                                                                        (click)="deleteVariant(variant)"
+                                                                        mat-icon-button>
+                                                                    <label 
+                                                                        class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                                        for="variant-remove-button"
+                                                                        matRipple>
+                                                                        <mat-icon
+                                                                            [svgIcon]="'heroicons_solid:trash'"></mat-icon>
+                                                                    </label>     -->
+                                                                    <button
                                                                         mat-icon-button
                                                                         (click)="deleteVariant(variant)"
                                                                         matSuffix>
                                                                         <mat-icon
                                                                             class="icon-size-5"
                                                                             [svgIcon]="'heroicons_solid:trash'"></mat-icon>
-                                                                    </button> -->
+                                                                    </button>
                                                                 </mat-form-field>
                                                             </ng-container>
                                                         </div>
@@ -618,182 +632,45 @@
                                         </div>
                                         <!-- Variant List -->
                                         <div class="w-full max-w-2xl">
-                                            <span class="mb-px font-medium leading-tight">Variant List</span>
-                                            <div class="w-full mt-1 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-auto">
-                                                <!-- Header -->
-                                                <div class="flex items-center -my-px py-3 px-3">
-                                                </div>
+                                            <span class="mt-2 mb-px font-medium leading-tight">Variant List</span>
+                                            <div class="w-full mt-2 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-auto">
                                                 <!-- Variants List -->
-                                                <div class="h-30 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
-                                                    <span class="w-full mb-px font-small leading-tight">Variant 1</span>
-                                                    <div *ngIf="filteredVariants.length" class="flex items-center rounded-full w-full">
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <mat-icon
-                                                                    class="icon-size-5 "
-                                                                    [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Add</span>
-                                                            </span>
+                                                <div class="h-44 m-2 leading-none overflow-y-auto border-gray-300 dark:border-gray-500">
+                                                    <div *ngIf="filteredVariants.length">
+                                                        <div *ngFor="let variant of filteredVariants; trackBy: trackByFn">
+                                                            <span class="w-full mb-px font-small leading-tight">{{variant.name}}</span>
+                                                            <div class="flex items-center rounded-full w-full">
+                                                                <div class="ml-0 m-1.5">
+                                                                    <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                        
+                                                                        <input
+                                                                            id="image-remove-button"
+                                                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                            type="button"
+                                                                            (click)="alert('ok')"
+                                                                            mat-icon-button>
+                                                                        <label 
+                                                                            class="flex items-center justify-center p-3 h-9 cursor-pointer rounded-full leading-9 text-gray-500 bg-gray-300 dark:text-gray-300 dark:bg-gray-700"
+                                                                            for="image-remove-button"
+                                                                            matRipple>
+                                                                            <span class="mx-1">Add</span>
+                                                                            <mat-icon
+                                                                                [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                                                                        </label>
+                                                                    </span>
+                                                                </div>
+                                                                <div *ngFor="let productVariantsAvailable of variant.productVariantsAvailable; trackBy: trackByFn" class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-300 dark:text-gray-300 dark:bg-gray-700">
+                                                                    <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                        <span class="ml-1.5 text-md font-medium whitespace-nowrap">{{productVariantsAvailable.value}}</span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-1.5 text-md font-medium whitespace-nowrap">Test 1</span>
-                                                            </span>
-                                                        </div>
-                                                        
-                                                        <!-- <div *ngFor="let variant of filteredVariants; trackBy: trackByFn" 
-                                                            class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="text-md font-small whitespace-nowrap">{{variant.title}}</span>
-                                                            </span>
-                                                        </div> -->
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
 

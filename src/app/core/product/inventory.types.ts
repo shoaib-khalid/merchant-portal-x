@@ -50,6 +50,14 @@ export interface InventoryVariant
 {
     id?: string;
     name?: string;
+    productVariantsAvailable?: InventoryVariantsAvailable[];
+}
+
+export interface InventoryVariantsAvailable
+{
+    id?: string;
+    value?: string;
+    productId?: string;
 }
 
 export interface InventoryVendor
