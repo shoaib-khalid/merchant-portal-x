@@ -157,7 +157,6 @@ export class InventoryService
              take(1),
              switchMap(categories => this._httpClient.post<InventoryCategory>('api/apps/ecommerce/inventory/category', {category}).pipe(
                  map((newCategory) => {
-                    console.log("HARE2",newCategory)
                      // Update the categories with the new category
                      this._categories.next([...categories, newCategory]);
  
@@ -297,7 +296,7 @@ export class InventoryService
                         category: object.categoryId,
                         name: object.name,
                         description: object.description,
-                        variants: [], // array of string // to be ask albert
+                        variants: object.productVariants, // array of string // to be ask albert
                         sku: object.productInventories[0].sku, // need looping
                         barcode: null,
                         stock: object.productInventories[0].quantity, // need looping
@@ -477,17 +476,17 @@ export class InventoryService
      *
      * @param tag
      */
-    createVariant(tag: InventoryVariant): Observable<InventoryVariant>
+    createVariant(variant: InventoryVariant): Observable<InventoryVariant>
     {
         return this.variants$.pipe(
             take(1),
-            switchMap(variants => this._httpClient.post<InventoryVariant>('api/apps/ecommerce/inventory/tag', {tag}).pipe(
+            switchMap(variants => this._httpClient.post<InventoryVariant>('api/apps/ecommerce/inventory/variant', {variant}).pipe(
                 map((newVariant) => {
 
-                    // Update the variants with the new tag
+                    // Update the variants with the new variant
                     this._variants.next([...variants, newVariant]);
 
-                    // Return new tag from observable
+                    // Return new variant from observable
                     return newVariant;
                 })
             ))
@@ -495,31 +494,31 @@ export class InventoryService
     }
 
     /**
-     * Update the tag
+     * Update the variant
      *
      * @param id
-     * @param tag
+     * @param variant
      */
-    updateVariant(id: string, tag: InventoryVariant): Observable<InventoryVariant>
+    updateVariant(id: string, variant: InventoryVariant): Observable<InventoryVariant>
     {
         return this.variants$.pipe(
             take(1),
-            switchMap(variants => this._httpClient.patch<InventoryVariant>('api/apps/ecommerce/inventory/tag', {
+            switchMap(variants => this._httpClient.patch<InventoryVariant>('api/apps/ecommerce/inventory/variant', {
                 id,
-                tag
+                variant
             }).pipe(
                 map((updatedVariant) => {
 
-                    // Find the index of the updated tag
+                    // Find the index of the updated variant
                     const index = variants.findIndex(item => item.id === id);
 
-                    // Update the tag
+                    // Update the variant
                     variants[index] = updatedVariant;
 
                     // Update the variants
                     this._variants.next(variants);
 
-                    // Return the updated tag
+                    // Return the updated variant
                     return updatedVariant;
                 })
             ))
@@ -527,7 +526,7 @@ export class InventoryService
     }
 
     /**
-     * Delete the tag
+     * Delete the variant
      *
      * @param id
      */
@@ -535,7 +534,7 @@ export class InventoryService
     {
         return this.variants$.pipe(
             take(1),
-            switchMap(variants => this._httpClient.delete('api/apps/ecommerce/inventory/tag', {params: {id}}).pipe(
+            switchMap(variants => this._httpClient.delete('api/apps/ecommerce/inventory/variant', {params: {id}}).pipe(
                 map((isDeleted: boolean) => {
 
                     // Find the index of the deleted tag

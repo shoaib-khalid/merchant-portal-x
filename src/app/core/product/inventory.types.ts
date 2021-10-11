@@ -4,7 +4,7 @@ export interface InventoryProduct
     category?: string;
     name: string; 
     description?: string; 
-    variants?: string[];
+    variants?: InventoryVariant[];
     sku?: string | null;
     barcode?: string | null;
     brand?: string | null;
@@ -49,7 +49,7 @@ export interface InventoryBrand
 export interface InventoryVariant
 {
     id?: string;
-    title?: string;
+    name?: string;
 }
 
 export interface InventoryVendor

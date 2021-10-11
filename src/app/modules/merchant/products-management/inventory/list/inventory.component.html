@@ -237,13 +237,20 @@
                                                     </div>
                                                     <!-- Remove Image -->
                                                     <div *ngIf="selectedProductForm.get('images').value.length">
-                                                        <button
-                                                            mat-icon-button
-                                                            (click)="removeImage();resetCycleImages()">
+                                                        <input
+                                                            id="image-remove-button"
+                                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                            type="button"
+                                                            (click)="removeImage();resetCycleImages()"
+                                                            mat-icon-button>
+                                                        <label 
+                                                            class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                            for="image-remove-button"
+                                                            matRipple>
                                                             <mat-icon
                                                                 class="text-white"
                                                                 [svgIcon]="'heroicons_outline:trash'"></mat-icon>
-                                                        </button>
+                                                        </label>
                                                     </div>
                                                 </div>
                                                 <!-- View Image -->
@@ -281,35 +288,65 @@
                                                 </label>
                                             </div>
                                             <!-- Toggle Image Edit -->
-                                            <button
-                                                mat-icon-button
-                                                (click)="toggleImagesEditMode()">
-                                                <mat-icon
-                                                    class="icon-size-5"
-                                                    [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
-                                            </button>
+                                            <div>
+                                                <input
+                                                    id="image-edit-button"
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="button"
+                                                    (click)="toggleImagesEditMode()"
+                                                    mat-icon-button
+                                                >
+                                                
+                                                <label 
+                                                    class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                    for="image-edit-button"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="icon-size-5"
+                                                        [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
+                                                </label>
+                                            </div>
                                         </div>
-
+                                        <!-- Image Cycle -->
                                         <div
                                             class="flex items-center mt-2 whitespace-nowrap"
                                             *ngIf="selectedProductForm.get('images').value.length">
-                                            <button
-                                                mat-icon-button
-                                                (click)="cycleImages(false)">
+                                            
+                                            <input
+                                                id="image-cycle-left"
+                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                type="button"
+                                                (click)="cycleImages(false)"
+                                                mat-icon-button>
+                                        
+                                            <label 
+                                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                for="image-cycle-left"
+                                                matRipple>
                                                 <mat-icon
                                                     class="icon-size-5"
                                                     [svgIcon]="'heroicons_solid:arrow-narrow-left'"></mat-icon>
-                                            </button>
+                                            </label>
+
                                             <span class="font-sm mx-2">
                                                 {{selectedProductForm.get('currentImageIndex').value + 1}} of {{selectedProductForm.get('images').value.length}}
                                             </span>
-                                            <button
-                                                mat-icon-button
-                                                (click)="cycleImages(true)">
+
+                                            <input
+                                                id="image-cycle-right"
+                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                type="button"
+                                                (click)="cycleImages(true)"
+                                                mat-icon-button>
+                                        
+                                            <label 
+                                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                for="image-cycle-left"
+                                                matRipple>
                                                 <mat-icon
                                                     class="icon-size-5"
                                                     [svgIcon]="'heroicons_solid:arrow-narrow-right'"></mat-icon>
-                                            </button>
+                                            </label>
                                         </div>
                                     </div>
                                     <!-- Product status -->
@@ -445,10 +482,18 @@
                                                             [maxLength]="50"
                                                             #newCategoryInput>
                                                     </div>
-                                                    <button
-                                                        class="ml-3 w-8 h-8 min-h-8"
-                                                        mat-icon-button
-                                                        (click)="toggleCategoriesEditMode()">
+
+                                                    <input
+                                                        id="category-edit-button"
+                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                        type="button"
+                                                        (click)="toggleCategoriesEditMode()"
+                                                        mat-icon-button>
+                                                    
+                                                    <label 
+                                                        class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                        for="category-edit-button"
+                                                        matRipple>
                                                         <mat-icon
                                                             *ngIf="!categoriesEditMode"
                                                             class="icon-size-5"
@@ -457,7 +502,8 @@
                                                             *ngIf="categoriesEditMode"
                                                             class="icon-size-5"
                                                             [svgIcon]="'heroicons_solid:check'"></mat-icon>
-                                                    </button>
+                                                    </label>
+
                                                 </div>
                                                 <!-- Available categories -->
                                                 <div class="h-30 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
@@ -530,35 +576,10 @@
                                                             [maxLength]="50"
                                                             #newVariantInput>
                                                     </div>
-                                                    <button
-                                                        class="ml-3 w-8 h-8 min-h-8"
-                                                        mat-icon-button
-                                                        (click)="toggleVariantsEditMode()">
-                                                        <mat-icon
-                                                            *ngIf="!variantsEditMode"
-                                                            class="icon-size-5"
-                                                            [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
-                                                        <mat-icon
-                                                            *ngIf="variantsEditMode"
-                                                            class="icon-size-5"
-                                                            [svgIcon]="'heroicons_solid:check'"></mat-icon>
-                                                    </button>
                                                 </div>
                                                 <!-- Available variants -->
                                                 <div class="h-30 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
                                                     <!-- Variants -->
-                                                    <!-- <ng-container *ngIf="!variantsEditMode">
-                                                        <ng-container *ngFor="let variant of filteredVariants; trackBy: trackByFn">
-                                                            <mat-checkbox
-                                                                class="flex items-center h-10 min-h-10 px-4"
-                                                                [color]="'primary'"
-                                                                [checked]="selectedProduct.variants.includes(variant.id)"
-                                                                (change)="toggleProductVariant(variant, $event)">
-                                                                {{variant.title}}
-                                                            </mat-checkbox>
-                                                        </ng-container>
-                                                    </ng-container> -->
-                                                    <!-- Variants editing -->
                                                     <ng-container *ngIf="!variantsEditMode">
                                                         <div class="p-4 space-y-2">
                                                             <ng-container *ngFor="let variant of filteredVariants; trackBy: trackByFn">
@@ -566,17 +587,18 @@
                                                                     <input
                                                                         class="cursor-pointer"
                                                                         matInput
-                                                                        [value]="variant.title"
+                                                                        [value]="variant.name"
                                                                         (input)="updateVariantTitle(variant, $event)"
+                                                                        (change)="toggleProductVariant(variant, $event)"
                                                                         readonly>
-                                                                    <button
+                                                                    <!-- <button
                                                                         mat-icon-button
                                                                         (click)="deleteVariant(variant)"
                                                                         matSuffix>
                                                                         <mat-icon
                                                                             class="icon-size-5"
-                                                                            [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
-                                                                    </button>
+                                                                            [svgIcon]="'heroicons_solid:trash'"></mat-icon>
+                                                                    </button> -->
                                                                 </mat-form-field>
                                                             </ng-container>
                                                         </div>
@@ -776,13 +798,29 @@
                             </div>
 
                             <div class="flex items-center justify-between w-full border-t px-8 py-4">
-                                <button
+                                <input
+                                    id="product-remove-button"
+                                    type="button"
+                                    (click)="deleteSelectedProduct()"
+                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                    mat-button>
+                                <label 
+                                    class="flex items-center justify-center h-10 px-4 border rounded border-red-300 dark:border-red-500 cursor-pointer hover:bg-hover"
+                                    for="product-remove-button"
+                                    matRipple>
+                                    <span>Delete</span>
+                                    <mat-icon
+                                        class="ml-1"
+                                        [color]="'warn'"
+                                        [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                </label>
+                                <!-- <button
                                     class="-ml-4"
                                     mat-button
                                     [color]="'warn'"
                                     (click)="deleteSelectedProduct()">
                                     Delete
-                                </button>
+                                </button> -->
                                 <div class="flex items-center">
                                     <div
                                         class="flex items-center mr-4"

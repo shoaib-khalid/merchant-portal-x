@@ -56,7 +56,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     searchInputControl: FormControl = new FormControl();
     selectedProduct: InventoryProduct | null = null;
     selectedProductForm: FormGroup;
-    tagsEditMode: boolean = false;
+    variantsEditMode: boolean = false;
     categoriesEditMode: boolean = false;
     imagesEditMode: boolean = false;
     vendors: InventoryVendor[];
@@ -164,9 +164,27 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         this.products$ = this._inventoryService.products$;
 
         // Get the variants
-        this._inventoryService.variants$
+
+        // Get the product by id
+        // this._inventoryService.getProductById(productId)
+        //     .subscribe((product) => {
+
+        //         // Set the selected product
+        //         this.selectedProduct = product;
+
+        //         // Fill the form
+        //         this.selectedProductForm.patchValue(product);
+
+        //         this.variants = product.variants;
+        //         this.filteredVariants = product.variants;
+
+        //         // Mark for check
+        //         this._changeDetectorRef.markForCheck();
+        //     });
+
+        this._inventoryService.products$
             .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((variants: InventoryVariant[]) => {
+            .subscribe((variants: InventoryProduct[]) => {
 
                 // Update the variants
                 this.variants = variants;
@@ -285,6 +303,10 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
 
                 // Fill the form
                 this.selectedProductForm.patchValue(product);
+                
+                // Set to this variants 
+                this.variants = product.variants;
+                this.filteredVariants = product.variants;
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -333,7 +355,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
      */
     toggleVariantsEditMode(): void
     {
-        this.tagsEditMode = !this.tagsEditMode;
+        this.variantsEditMode = !this.variantsEditMode;
     }
 
     /**
@@ -346,8 +368,11 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         // Get the value
         const value = event.target.value.toLowerCase();
 
+        console.log("value",value)
+        console.log("event",event)
+
         // Filter the variants
-        this.filteredVariants = this.variants.filter(variant => variant.title.toLowerCase().includes(value));
+        this.filteredVariants = this.variants.filter(variant => variant.name.toLowerCase().includes(value));
     }
 
     /**
@@ -398,12 +423,12 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
      *
      * @param title
      */
-    createVariant(title: string): void
+    createVariant(name: string): void
     {
         const variant = {
-            title
+            name
         };
-
+        
         // Create variant on the server
         this._inventoryService.createVariant(variant)
             .subscribe((response) => {
@@ -422,7 +447,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     updateVariantTitle(variant: InventoryVariant, event): void
     {
         // Update the title on the variant
-        variant.title = event.target.value;
+        variant.name = event.target.value;
 
         // Update the variant on the server
         this._inventoryService.updateVariant(variant.id, variant)
@@ -454,11 +479,18 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
      */
     addVariantToProduct(variant: InventoryVariant): void
     {
+
+        console.log("1",this.variants)
+
         // Add the variant
-        this.selectedProduct.variants.unshift(variant.id);
+        this.selectedProduct.variants.unshift(variant);
 
         // Update the selected product form
         this.selectedProductForm.get('variants').patchValue(this.selectedProduct.variants);
+
+        this.variants = this.selectedProduct.variants;
+        
+        console.log("2",this.variants)
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -506,7 +538,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
      */
     shouldShowCreateVariantButton(inputValue: string): boolean
     {
-        return !!!(inputValue === '' || this.variants.findIndex(variant => variant.title.toLowerCase() === inputValue.toLowerCase()) > -1);
+        return !!!(inputValue === '' || this.variants.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
     }
 
     /**
@@ -571,12 +603,10 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
          if ( isCategoryApplied )
          {
              // Remove the category from the product
-             console.log("HARE")
              this.removeCategoryFromProduct(category);
          }
          else
          {
-            console.log("HARE2")
              // Otherwise add the category to the product
              this.addCategoryToProduct(category);
          }
