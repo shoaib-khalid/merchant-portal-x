@@ -1,13 +1,15 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
+import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { TemplatePortal } from '@angular/cdk/portal';
 import { merge, Observable, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { InventoryBrand, InventoryCategory, InventoryPagination, InventoryProduct, InventoryVariant, InventoryVendor } from 'app/core/product/inventory.types';
+import { InventoryCategory, InventoryPagination, InventoryProduct, InventoryVariant, InventoryVariantsAvailable } from 'app/core/product/inventory.types';
 import { InventoryService } from 'app/core/product/inventory.service';
 
 @Component({
@@ -42,25 +44,32 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     @ViewChild('avatarFileInput') private _avatarFileInput: ElementRef;
     @ViewChild(MatPaginator) private _paginator: MatPaginator;
     @ViewChild(MatSort) private _sort: MatSort;
+    @ViewChild('variantsPanel') private _variantsPanel: TemplateRef<any>;
+    @ViewChild('variantsPanelOrigin') private _variantsPanelOrigin: ElementRef;
 
     products$: Observable<InventoryProduct[]>;
 
-    // brands: InventoryBrand[];
     categories: InventoryCategory[];
     filteredCategories: InventoryCategory[];
     variants: InventoryVariant[];
     filteredVariants: InventoryVariant[];
+    currentfilteredVariant: InventoryVariantsAvailable;
+
     flashMessage: 'success' | 'error' | null = null;
     isLoading: boolean = false;
     pagination: InventoryPagination;
     searchInputControl: FormControl = new FormControl();
+
     selectedProduct: InventoryProduct | null = null;
     selectedProductForm: FormGroup;
+
     variantsEditMode: boolean = false;
     categoriesEditMode: boolean = false;
     imagesEditMode: boolean = false;
-    vendors: InventoryVendor[];
+
     private _unsubscribeAll: Subject<any> = new Subject<any>();
+    private _variantsPanelOverlayRef: OverlayRef;
+
     quillModules: any = {
         toolbar: [
             ['bold', 'italic', 'underline'],
@@ -85,7 +94,10 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         private _changeDetectorRef: ChangeDetectorRef,
         private _fuseConfirmationService: FuseConfirmationService,
         private _formBuilder: FormBuilder,
-        private _inventoryService: InventoryService
+        private _inventoryService: InventoryService,
+        private _overlay: Overlay,
+        private _renderer2: Renderer2,
+        private _viewContainerRef: ViewContainerRef
     )
     {
     }
@@ -105,35 +117,20 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
             category         : [''],
             name             : ['', [Validators.required]],
             description      : [''],
-            variants             : [[]],
+            variants         : [[]],
             sku              : [''],
-            barcode          : [''],
-            // brand            : [''],
-            vendor           : [''],
             stock            : [''],
-            reserved         : [''],
-            cost             : [''],
-            basePrice        : [''],
             taxPercent       : [''],
             price            : [''],
             weight           : [''],
             thumbnail        : [''],
             images           : [[]],
             currentImageIndex: [0], // Image index that is currently being viewed
+            filteredVariant  : [0],
+            allowOutOfStockPurchases: [false],
+            trackQuantity    : [false],
             active           : [false]
         });
-
-        // Get the brands
-        // this._inventoryService.brands$
-        //     .pipe(takeUntil(this._unsubscribeAll))
-        //     .subscribe((brands: InventoryBrand[]) => {
-
-        //         // Update the brands
-        //         this.brands = brands;
-
-        //         // Mark for check
-        //         this._changeDetectorRef.markForCheck();
-        //     });
 
         // Get the categories
         this._inventoryService.categories$
@@ -164,24 +161,6 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         this.products$ = this._inventoryService.products$;
 
         // Get the variants
-
-        // Get the product by id
-        // this._inventoryService.getProductById(productId)
-        //     .subscribe((product) => {
-
-        //         // Set the selected product
-        //         this.selectedProduct = product;
-
-        //         // Fill the form
-        //         this.selectedProductForm.patchValue(product);
-
-        //         this.variants = product.variants;
-        //         this.filteredVariants = product.variants;
-
-        //         // Mark for check
-        //         this._changeDetectorRef.markForCheck();
-        //     });
-
         this._inventoryService.products$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((variants: InventoryProduct[]) => {
@@ -189,18 +168,6 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
                 // Update the variants
                 this.variants = variants;
                 this.filteredVariants = variants;
-
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            });
-
-        // Get the vendors
-        this._inventoryService.vendors$
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((vendors: InventoryVendor[]) => {
-
-                // Update the vendors
-                this.vendors = vendors;
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -273,6 +240,12 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         // Unsubscribe from all subscriptions
         this._unsubscribeAll.next();
         this._unsubscribeAll.complete();
+
+        // Dispose the overlays if they are still on the DOM
+        if ( this._variantsPanelOverlayRef )
+        {
+            this._variantsPanelOverlayRef.dispose();
+        }
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -350,6 +323,12 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         this.selectedProductForm.get('currentImageIndex').setValue(0);
     }
 
+    /**
+     * 
+     *  VARIANTS
+     * 
+     */
+    
     /**
      * Toggle the variants edit mode
      */
@@ -539,8 +518,179 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     }
 
     /**
+     * Open variants panel
+     */
+    openVariantsPanel(variantId): void
+    {
+        this.currentfilteredVariant = this.filteredVariants.find(obj => obj.id === variantId);
+        console.log("this.currentfilteredVariant",this.currentfilteredVariant)
+
+        // Create the overlay
+        this._variantsPanelOverlayRef = this._overlay.create({
+            backdropClass   : '',
+            hasBackdrop     : true,
+            scrollStrategy  : this._overlay.scrollStrategies.block(),
+            positionStrategy: this._overlay.position()
+                                .flexibleConnectedTo(this._variantsPanelOrigin.nativeElement)
+                                .withFlexibleDimensions(true)
+                                .withViewportMargin(64)
+                                .withLockedPosition(true)
+                                .withPositions([
+                                    {
+                                        originX : 'start',
+                                        originY : 'bottom',
+                                        overlayX: 'start',
+                                        overlayY: 'top'
+                                    }
+                                ])
+        });
+
+        // Subscribe to the attachments observable
+        this._variantsPanelOverlayRef.attachments().subscribe(() => {
+
+            // Add a class to the origin
+            this._renderer2.addClass(this._variantsPanelOrigin.nativeElement, 'panel-opened');
+
+            // Focus to the search input once the overlay has been attached
+            this._variantsPanelOverlayRef.overlayElement.querySelector('input').focus();
+        });
+
+        // Create a portal from the template
+        const templatePortal = new TemplatePortal(this._variantsPanel, this._viewContainerRef);
+
+        // Attach the portal to the overlay
+        this._variantsPanelOverlayRef.attach(templatePortal);
+
+        // Subscribe to the backdrop click
+        this._variantsPanelOverlayRef.backdropClick().subscribe(() => {
+
+            // Remove the class from the origin
+            this._renderer2.removeClass(this._variantsPanelOrigin.nativeElement, 'panel-opened');
+
+            // If overlay exists and attached...
+            if ( this._variantsPanelOverlayRef && this._variantsPanelOverlayRef.hasAttached() )
+            {
+                // Detach it
+                this._variantsPanelOverlayRef.detach();
+
+                // Reset the variant filter
+                this.filteredVariants = this.variants;
+
+                // Toggle the edit mode off
+                this.variantsEditMode = false;
+            }
+
+            // If template portal exists and attached...
+            if ( templatePortal && templatePortal.isAttached )
+            {
+                // Detach it
+                templatePortal.detach();
+            }
+        });
+    }
+    
+    /**
      * 
-     * HERE
+     *  VARIANTS LIST
+     * 
+     */
+
+
+    /**
+     * Create a new variant
+     *
+     * @param title
+     */
+     createVariantList(value: string): void
+     {
+         const variant = {
+             value
+         };
+         
+         // Create variant on the server
+         this._inventoryService.createVariantList(variant)
+             .subscribe((response) => {
+ 
+                 // Add the variant to the product
+                 this.addVariantToProduct(response);
+             });
+     }
+ 
+     /**
+      * Update the variant title
+      *
+      * @param variant
+      * @param event
+      */
+     updateVariantTitleList(variant: InventoryVariant, event): void
+     {
+         // Update the title on the variant
+         variant.name = event.target.value;
+ 
+         // Update the variant on the server
+         this._inventoryService.updateVariant(variant.id, variant)
+             .pipe(debounceTime(300))
+             .subscribe();
+ 
+         // Mark for check
+         this._changeDetectorRef.markForCheck();
+     }
+ 
+     /**
+      * Delete the variant
+      *
+      * @param variant
+      */
+     deleteVariantList(variant: InventoryVariant): void
+     {
+         // Delete the variant from the server
+         this._inventoryService.deleteVariant(variant.id).subscribe();
+ 
+         // Mark for check
+         this._changeDetectorRef.markForCheck();
+     }
+ 
+     /**
+      * Add variant to the product
+      *
+      * @param variant
+      */
+     addVariantListToProduct(variant: InventoryVariant): void
+     {
+ 
+         // Add the variant
+         this.selectedProduct.variants.unshift(variant);
+ 
+         // Update the selected product form
+         this.selectedProductForm.get('variants').patchValue(this.selectedProduct.variants);
+ 
+         this.variants = this.selectedProduct.variants;
+         this.filteredVariants = this.selectedProduct.variants;
+         
+         // Mark for check
+         this._changeDetectorRef.markForCheck();
+     }
+ 
+     /**
+      * Remove variant from the product
+      *
+      * @param variant
+      */
+     removeVariantListFromProduct(variant: InventoryVariant): void
+     {
+         // Remove the variant
+         this.selectedProduct.variants.splice(this.selectedProduct.variants.findIndex(item => item === variant.id), 1);
+ 
+         // Update the selected product form
+         this.selectedProductForm.get('variants').patchValue(this.selectedProduct.variants);
+ 
+         // Mark for check
+         this._changeDetectorRef.markForCheck();
+     }
+
+    /**
+     * 
+     * CATEGORY
      * 
      */
 
@@ -728,7 +878,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
 
     /**
      * 
-     * HERE 2
+     * IMAGES
      * 
      */
 
@@ -817,6 +967,12 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         // // Update the contact
         // this.contact.avatar = null;
     }
+
+    /**
+     * 
+     *  PRODUCTS
+     * 
+     */    
 
     /**
      * Create product
@@ -922,5 +1078,21 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     trackByFn(index: number, item: any): any
     {
         return item.id || index;
+    }
+
+    // This fuction used to sort object
+    dynamicSort(property) {
+        var sortOrder = 1;
+        if(property[0] === "-") {
+            sortOrder = -1;
+            property = property.substr(1);
+        }
+        return function (a,b) {
+            /* next line works with strings and numbers, 
+            * and you may want to customize it to your needs
+            */
+            var result = (a[property].toLowerCase() < b[property].toLowerCase()) ? -1 : (a[property].toLowerCase() > b[property].toLowerCase()) ? 1 : 0;
+            return result * sortOrder;
+        }
     }
 }

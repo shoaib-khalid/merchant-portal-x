@@ -51,6 +51,20 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
         return new Date().getFullYear();
     }
 
+    /**
+     * Setter & getter for storeId
+     */
+ 
+     get storeId$(): string
+     {
+         return localStorage.getItem('storeId') ?? '';
+     }
+
+    set storeId(str: string)
+    {
+        localStorage.setItem('storeId', str);
+    }
+
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
     // -----------------------------------------------------------------------------------------------------
@@ -137,5 +151,17 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
             var result = (a[property].toLowerCase() < b[property].toLowerCase()) ? -1 : (a[property].toLowerCase() > b[property].toLowerCase()) ? 1 : 0;
             return result * sortOrder;
         }
+    }
+
+    openStoreFront(domain){
+        console.log(domain);
+        window.location.href="https://"+ domain +"symplified.ai";
+    }
+
+    changeStore(storeId){
+        console.log(storeId);
+        this.storeId = storeId;
+        console.log("nnty tukat dari location reload kepada _changeDetectorRef.markForCheck()");
+        location.reload();
     }
 }

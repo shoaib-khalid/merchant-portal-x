@@ -36,23 +36,14 @@
 
             <!-- Select Store -->
             <div *ngIf="stores[0]" class="flex flex-col items-center justify-center w-full mt-6">
-                <mat-form-field class="w-full">
+                <div class="flex flex-row w-full">
+                <mat-form-field class="w-5/6">
                     <!-- <mat-select> -->
                     <mat-select
                         [value]="stores[0]['id']"
+                        (selectionChange)="changeStore($event.value)"
                         #storeSelector="matSelect"
                         >
-                        <!-- <mat-select-trigger>
-                            <span class="flex items-center">
-                                <span>{{walletSelector.triggerValue}}</span>
-                                <span class="mx-1 text-hint">-</span>
-                                <span class="flex items-center font-mono">
-                                    <span>{{data.wallets[walletSelector.value]}}</span>
-                                    <span class="ml-1">{{walletSelector.value | uppercase}}</span>
-                                </span>
-                            </span>
-                        </mat-select-trigger> -->
-
                         <mat-select-trigger>
                             <span class="flex items-center">
                                 <span>{{ storeSelector.triggerValue }}</span>
@@ -63,6 +54,23 @@
                         </div>
                     </mat-select>
                 </mat-form-field>
+                <span class="w-1/6 ml-1">
+                    <input
+                        id="see-store-button"
+                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                        type="button"
+                        (click)="openStoreFront(store.domain)"
+                        mat-icon-button>
+                    <label 
+                        class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                        for="see-store-button"
+                        matRipple>
+                        <mat-icon
+                            class="text-white"
+                            [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                    </label>
+                </span>
+                </div>
             </div>
 
             <div class="flex flex-col items-center justify-center w-full mt-1">

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
-import { InventoryBrand, InventoryCategory, InventoryPagination, InventoryProduct, InventoryVariant, InventoryVendor } from 'app/core/product/inventory.types';
+import { InventoryCategory, InventoryPagination, InventoryProduct, InventoryVariant, InventoryVariantsAvailable } from 'app/core/product/inventory.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 
@@ -12,13 +12,11 @@ import { JwtService } from 'app/core/jwt/jwt.service';
 export class InventoryService
 {
     // Private
-    // private _brands: BehaviorSubject<InventoryBrand[] | null> = new BehaviorSubject(null);
     private _categories: BehaviorSubject<InventoryCategory[] | null> = new BehaviorSubject(null);
     private _pagination: BehaviorSubject<InventoryPagination | null> = new BehaviorSubject(null);
     private _product: BehaviorSubject<InventoryProduct | null> = new BehaviorSubject(null);
     private _products: BehaviorSubject<InventoryProduct[] | null> = new BehaviorSubject(null);
     private _variants: BehaviorSubject<InventoryVariant[] | null> = new BehaviorSubject(null);
-    private _vendors: BehaviorSubject<InventoryVendor[] | null> = new BehaviorSubject(null);
 
     /**
      * Constructor
@@ -34,14 +32,6 @@ export class InventoryService
     // -----------------------------------------------------------------------------------------------------
     // @ Accessors
     // -----------------------------------------------------------------------------------------------------
-
-    /**
-     * Getter for brands
-     */
-    // get brands$(): Observable<InventoryBrand[]>
-    // {
-    //     return this._brands.asObservable();
-    // }
 
     /**
      * Getter for categories
@@ -81,14 +71,6 @@ export class InventoryService
     get variants$(): Observable<InventoryVariant[]>
     {
         return this._variants.asObservable();
-    }
-
-    /**
-     * Getter for vendors
-     */
-    get vendors$(): Observable<InventoryVendor[]>
-    {
-        return this._vendors.asObservable();
     }
 
     /**
@@ -231,12 +213,12 @@ export class InventoryService
                          // Iterate through the contacts
                          products.forEach((product) => {
  
-                             const tagIndex = product.variants.findIndex(category => category === id);
+                             const variantIndex = product.variants.findIndex(category => category === id);
  
                              // If the contact has the category, remove it
-                             if ( tagIndex > -1 )
+                             if ( variantIndex > -1 )
                              {
-                                 product.variants.splice(tagIndex, 1);
+                                 product.variants.splice(variantIndex, 1);
                              }
                          });
  
@@ -299,6 +281,8 @@ export class InventoryService
                         variants: object.productVariants, // array of string // to be ask albert
                         sku: object.productInventories[0].sku, // need looping
                         barcode: null,
+                        allowOutOfStockPurchases: object.allowOutOfStockPurchases,
+                        trackQuantity: object.trackQuantity,
                         stock: object.productInventories[0].quantity, // need looping
                         cost: 0,
                         basePrice: 0,
@@ -472,9 +456,9 @@ export class InventoryService
     }
 
     /**
-     * Create tag
+     * Create variant
      *
-     * @param tag
+     * @param variant
      */
     createVariant(variant: InventoryVariant): Observable<InventoryVariant>
     {
@@ -537,10 +521,10 @@ export class InventoryService
             switchMap(variants => this._httpClient.delete('api/apps/ecommerce/inventory/variant', {params: {id}}).pipe(
                 map((isDeleted: boolean) => {
 
-                    // Find the index of the deleted tag
+                    // Find the index of the deleted variant
                     const index = variants.findIndex(item => item.id === id);
 
-                    // Delete the tag
+                    // Delete the variant
                     variants.splice(index, 1);
 
                     // Update the variants
@@ -557,12 +541,12 @@ export class InventoryService
                         // Iterate through the contacts
                         products.forEach((product) => {
 
-                            const tagIndex = product.variants.findIndex(tag => tag === id);
+                            const variantIndex = product.variants.findIndex(variant => variant === id);
 
-                            // If the contact has the tag, remove it
-                            if ( tagIndex > -1 )
+                            // If the contact has the variant, remove it
+                            if ( variantIndex > -1 )
                             {
-                                product.variants.splice(tagIndex, 1);
+                                product.variants.splice(variantIndex, 1);
                             }
                         });
 
@@ -575,14 +559,117 @@ export class InventoryService
     }
 
     /**
-     * Get vendors
+     * Get variants
      */
-    getVendors(): Observable<InventoryVendor[]>
+    getVariantsList(): Observable<InventoryVariantsAvailable[]>
     {
-        return this._httpClient.get<InventoryVendor[]>('api/apps/ecommerce/inventory/vendors').pipe(
-            tap((vendors) => {
-                this._vendors.next(vendors);
+        return this._httpClient.get<InventoryVariant[]>('api/apps/ecommerce/inventory/variants').pipe(
+            tap((variants) => {
+                this._variants.next(variants);
             })
+        );
+    }
+ 
+    /**
+     * Create variant List
+     *
+     * @param variant
+    */
+    createVariantList(variant: InventoryVariantsAvailable): Observable<InventoryVariantsAvailable>
+    {
+        return this.variants$.pipe(
+            take(1),
+            switchMap(variants => this._httpClient.post<InventoryVariantsAvailable>('api/apps/ecommerce/inventory/variant', {variant}).pipe(
+                map((newVariant) => {
+
+                    // Update the variants with the new variant
+                    this._variants.next([...variants, newVariant]);
+
+                    // Return new variant from observable
+                    return newVariant;
+                })
+            ))
+        );
+     }
+ 
+    /**
+     * Update the variant List
+     *
+     * @param id
+     * @param variant
+    */
+    updateVariantList(id: string, variant: InventoryVariantsAvailable): Observable<InventoryVariantsAvailable>
+    {
+        return this.variants$.pipe(
+            take(1),
+            switchMap(variants => this._httpClient.patch<InventoryVariantsAvailable>('api/apps/ecommerce/inventory/variant', {
+                id,
+                variant
+            }).pipe(
+                map((updatedVariant) => {
+
+                    // Find the index of the updated variant
+                    const index = variants.findIndex(item => item.id === id);
+
+                    // Update the variant
+                    variants[index] = updatedVariant;
+
+                    // Update the variants
+                    this._variants.next(variants);
+
+                    // Return the updated variant
+                    return updatedVariant;
+                })
+            ))
+        );
+    }
+ 
+    /**
+      * Delete the variant List
+      *
+      * @param id
+     */
+    deleteVariantList(id: string): Observable<boolean>
+    {
+        return this.variants$.pipe(
+            take(1),
+            switchMap(variants => this._httpClient.delete('api/apps/ecommerce/inventory/variant', {params: {id}}).pipe(
+                map((isDeleted: boolean) => {
+
+                    // Find the index of the deleted variant
+                    const index = variants.findIndex(item => item.id === id);
+
+                    // Delete the variant
+                    variants.splice(index, 1);
+
+                    // Update the variants
+                    this._variants.next(variants);
+
+                    // Return the deleted status
+                    return isDeleted;
+                }),
+                filter(isDeleted => isDeleted),
+                switchMap(isDeleted => this.products$.pipe(
+                    take(1),
+                    map((products) => {
+
+                        // Iterate through the contacts
+                        products.forEach((product) => {
+
+                            const variantIndex = product.variants.findIndex(variant => variant === id);
+
+                            // If the contact has the variant, remove it
+                            if ( variantIndex > -1 )
+                            {
+                                product.variants.splice(variantIndex, 1);
+                            }
+                        });
+
+                        // Return the deleted status
+                        return isDeleted;
+                    })
+                ))
+            ))
         );
     }
 
