@@ -29,7 +29,7 @@
                 class="ml-4"
                 mat-flat-button
                 [color]="'primary'"
-                (click)="createProduct()">
+                (click)="initCreateProduct()">
                 <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
                 <span class="ml-2 mr-1">Add</span>
             </button>
@@ -636,7 +636,7 @@
                                             <div class="w-full mt-2 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-auto">
                                                 <!-- Variants List -->
                                                 <div class="h-44 m-2 leading-none overflow-y-auto border-gray-300 dark:border-gray-500">
-                                                    <div *ngIf="filteredVariants.length">
+                                                    <div *ngIf="filteredVariants">
                                                         <div *ngFor="let variant of filteredVariants; trackBy: trackByFn">
                                                             <span class="w-full mb-px font-small leading-tight">{{variant.name}}</span>
                                                             <div class="flex items-center rounded-full w-full">

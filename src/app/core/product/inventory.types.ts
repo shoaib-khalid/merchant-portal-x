@@ -1,20 +1,20 @@
 export interface InventoryProduct
 {
     id: string; 
-    category?: string;
-    name: string; 
-    description?: string; 
-    variants?: InventoryVariant[];
-    sku?: string | null;
-    stock: number;
-    taxPercent: number;
-    price: number;
-    weight: number;
     thumbnail: string;
     images: string[];
-    allowOutOfStockPurchases: boolean;
-    trackQuantity: boolean;
     active: boolean;
+    name: string; 
+    description?: string; 
+    stock: number;
+    allowOutOfStockPurchases: boolean;
+    minQuantityForAlarm: number;
+    trackQuantity: boolean;
+    sku?: string | null;
+    price: number;
+    weight: number;
+    category: string;
+    variants?: InventoryVariant[];
 }
 
 export interface InventoryPagination
@@ -47,4 +47,25 @@ export interface InventoryVariantsAvailable
     id?: string;
     value?: string;
     productId?: string;
+}
+
+// productInventories
+export interface InventoryProductX
+{
+    productId?: string;
+    itemCode?: string;
+    price?: number;
+    compareAtprice?: number;
+    quantity?: number;
+    sku?: string;
+    status?: string;
+}
+
+// productInventoryItems
+export interface InventoryProductItem
+{
+    productId?: string;
+    itemCode?: string;
+    productVariantAvailableId?: string;
+    sequenceNumber?: string;
 }

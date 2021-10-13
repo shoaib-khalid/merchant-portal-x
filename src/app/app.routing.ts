@@ -20,7 +20,15 @@ export const appRoutes: Route[] = [
         children   : [
             {path: '', loadChildren: () => import('app/modules/landing/home/home.module').then(m => m.LandingHomeModule)},
         ]
+        
     },
+    
+    // Error
+    {path: 'error', children: [
+        {path: '404', loadChildren: () => import('app/shared/error/error-404/error-404.module').then(m => m.Error404Module)},
+        {path: '500', loadChildren: () => import('app/shared/error/error-500/error-500.module').then(m => m.Error500Module)}
+    ]},
+    {path: 'coming-soon', loadChildren: () => import('app/shared/coming-soon/coming-soon.module').then(m => m.ComingSoonModule)},
 
     // Redirect signed in user to the '/example'
     //
@@ -43,7 +51,7 @@ export const appRoutes: Route[] = [
             {path: 'forgot-password', loadChildren: () => import('app/modules/auth/forgot-password/forgot-password.module').then(m => m.AuthForgotPasswordModule)},
             {path: 'reset-password', loadChildren: () => import('app/modules/auth/reset-password/reset-password.module').then(m => m.AuthResetPasswordModule)},
             {path: 'sign-in', loadChildren: () => import('app/modules/auth/sign-in/sign-in.module').then(m => m.AuthSignInModule)},
-            {path: 'sign-up', loadChildren: () => import('app/modules/auth/sign-up/sign-up.module').then(m => m.AuthSignUpModule)}
+            {path: 'sign-up', loadChildren: () => import('app/modules/auth/sign-up/sign-up.module').then(m => m.AuthSignUpModule)},
         ]
     },
 
@@ -76,7 +84,7 @@ export const appRoutes: Route[] = [
             initialData: InitialDataResolver,
         },
         children   : [
-            {path: '', loadChildren: () => import('app/modules/merchant/merchant.module').then(m => m.MerchantModule)}
+            {path: '', loadChildren: () => import('app/modules/merchant/merchant.module').then(m => m.MerchantModule)},
         ]
     }, 
 
@@ -99,5 +107,5 @@ export const appRoutes: Route[] = [
     },
 
     // Redirect if not exists
-    {path: '**', redirectTo: '/'}
+    // {path: '**', redirectTo: '/'}
 ];

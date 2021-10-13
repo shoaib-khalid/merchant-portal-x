@@ -40,7 +40,7 @@
                 <mat-form-field class="w-5/6">
                     <!-- <mat-select> -->
                     <mat-select
-                        [value]="stores[0]['id']"
+                        [value]="storeId$"
                         (selectionChange)="changeStore($event.value)"
                         #storeSelector="matSelect"
                         >
@@ -59,7 +59,7 @@
                         id="see-store-button"
                         class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                         type="button"
-                        (click)="openStoreFront(store.domain)"
+                        (click)="openStoreFront(storeId$)"
                         mat-icon-button>
                     <label 
                         class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"

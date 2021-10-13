@@ -1,20 +1,21 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, CanActivateChild, CanLoad, Route, Router, RouterStateSnapshot, UrlSegment, UrlTree } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { AuthService } from 'app/core/auth/auth.service';
 import { switchMap } from 'rxjs/operators';
+import { StoresService } from '../store.service';
 
 @Injectable({
     providedIn: 'root'
 })
-export class NoAuthGuard implements CanActivate, CanActivateChild, CanLoad
+export class WithStoreIdGuard implements CanActivate, CanActivateChild, CanLoad
 {
+
     /**
      * Constructor
      */
     constructor(
-        private _authService: AuthService,
-        private _router: Router
+        private _storesService: StoresService,
+        private _router: Router,
     )
     {
     }
@@ -31,7 +32,8 @@ export class NoAuthGuard implements CanActivate, CanActivateChild, CanLoad
      */
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean
     {
-        return this._check();
+        const redirectUrl = state.url === '/sign-out' ? '/' : state.url;
+        return this._check(redirectUrl);
     }
 
     /**
@@ -42,7 +44,8 @@ export class NoAuthGuard implements CanActivate, CanActivateChild, CanLoad
      */
     canActivateChild(childRoute: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree
     {
-        return this._check();
+        const redirectUrl = state.url === '/sign-out' ? '/' : state.url;
+        return this._check(redirectUrl);
     }
 
     /**
@@ -53,7 +56,7 @@ export class NoAuthGuard implements CanActivate, CanActivateChild, CanLoad
      */
     canLoad(route: Route, segments: UrlSegment[]): Observable<boolean> | Promise<boolean> | boolean
     {
-        return this._check();
+        return this._check('/');
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -63,28 +66,27 @@ export class NoAuthGuard implements CanActivate, CanActivateChild, CanLoad
     /**
      * Check the authenticated status
      *
+     * @param redirectURL
      * @private
      */
-    private _check(): Observable<boolean>
+    private _check(redirectURL: string): Observable<boolean>
     {
         // Check the authentication status
-        return this._authService.check()
-        .pipe(
-            switchMap((authenticated) => {
+        let storeId = this._storesService.storeId$;
+        
+        if (!storeId) {
+            // Redirect to the choose-store page
+            this._router.navigate(['stores']);
 
-                // If the user is authenticated...
-                if ( authenticated )
-                {
-                    // Redirect to the root
-                    this._router.navigate(['/dashboard']);
+            // Alert the user
+            alert("Please choose a store first");
 
-                    // Prevent the access
-                    return of(false);
-                }
+            // Prevent the access
+            return of(false);
+        }
 
-                // Allow the access
-                return of(true);
-            })
-        );
+        // Allow the access
+        return of(true);
     }
+    
 }

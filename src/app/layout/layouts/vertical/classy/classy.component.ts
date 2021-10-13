@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -9,7 +9,8 @@ import { NavigationService } from 'app/core/navigation/navigation.service';
 import { User } from 'app/core/user/user.types';
 import { UserService } from 'app/core/user/user.service';
 import { Store } from 'app/core/store/store.types';
-import { StoreService } from 'app/core/store/store.service';
+import { StoresService } from 'app/core/store/store.service';
+import { InventoryService } from 'app/core/product/inventory.service';
 
 @Component({
     selector     : 'classy-layout',
@@ -29,10 +30,11 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
      */
     constructor(
         private _activatedRoute: ActivatedRoute,
+        private _productChangeDetectorRef: InventoryService,
         private _router: Router,
         private _navigationService: NavigationService,
         private _userService: UserService,
-        private _storeService: StoreService,
+        private _storesService: StoresService,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
         private _fuseNavigationService: FuseNavigationService
     )
@@ -52,13 +54,17 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
     }
 
     /**
-     * Setter & getter for storeId
-     */
+     * Getter for storeId
+    */
  
-     get storeId$(): string
-     {
-         return localStorage.getItem('storeId') ?? '';
-     }
+    get storeId$(): string
+    {
+        return localStorage.getItem('storeId') ?? '';
+    }
+
+    /**
+     * Setter for storeId
+    */
 
     set storeId(str: string)
     {
@@ -89,7 +95,7 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
             });
 
         // Subscribe to the store service
-        this._storeService.store$
+        this._storesService.stores$
             .pipe((takeUntil(this._unsubscribeAll)))
             .subscribe((storeList: Store[]) => {
                 this.stores = storeList.sort(this.dynamicSort("name"));
@@ -153,15 +159,13 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
         }
     }
 
-    openStoreFront(domain){
-        console.log(domain);
-        window.location.href="https://"+ domain +"symplified.ai";
+    openStoreFront(storeId){
+        let currentStore = this.stores.find(obj => obj.id === storeId)
+        window.open("https://"+currentStore.domain+".symplified.ai",'_blank');
     }
 
     changeStore(storeId){
-        console.log(storeId);
         this.storeId = storeId;
-        console.log("nnty tukat dari location reload kepada _changeDetectorRef.markForCheck()");
-        location.reload();
+        this._router.navigate(['/dashboard'])
     }
 }

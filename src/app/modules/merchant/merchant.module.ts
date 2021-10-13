@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { MerchantComponent } from 'app/modules/merchant/merchant.component';
-import { DashboardComponent } from './dashboard/dashboard.component';
+// import { MerchantComponent } from 'app/modules/merchant/merchant.component';
+// import { DashboardComponent } from './dashboard/dashboard.component';
 import { ChooseVerticleComponent } from './choose-verticle/choose-verticle.component';
 // import { StoresManagementComponent } from './stores-management/stores-management.component';
 // import { ProductsManagementComponent } from './products-management/products-management.component';
@@ -13,8 +13,8 @@ import { merchantRoutes } from 'app/modules/merchant/merchant.routing';
 
 @NgModule({
     declarations: [
-        MerchantComponent,
-        DashboardComponent,
+        // MerchantComponent,
+        // DashboardComponent,
         ChooseVerticleComponent,
         // StoresManagementComponent,
         // ProductsManagementComponent,
@@ -27,8 +27,8 @@ import { merchantRoutes } from 'app/modules/merchant/merchant.routing';
         RouterModule.forChild(merchantRoutes),
     ],
     bootstrap   : [
-        MerchantComponent,
-        DashboardComponent,
+        // MerchantComponent,
+        // DashboardComponent,
         ChooseVerticleComponent,
         // StoresManagementComponent,
         // ProductsManagementComponent,

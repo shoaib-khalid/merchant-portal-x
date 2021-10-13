@@ -4,7 +4,7 @@ import { Observable, of, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { AuthUtils } from 'app/core/auth/auth.utils';
 import { UserService } from 'app/core/user/user.service';
-import { StoreService } from 'app/core/store/store.service';
+import { StoresService } from 'app/core/store/store.service';
 import { LocaleService } from 'app/core/locale/locale.service';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
@@ -21,7 +21,7 @@ export class AuthService
     constructor(
         private _httpClient: HttpClient,
         private _userService: UserService,
-        private _storeService: StoreService,
+        private _storesService: StoresService,
         private _localeService: LocaleService,
         private _apiServer: AppConfig,
         private _jwt: JwtService,
@@ -183,11 +183,12 @@ export class AuthService
                     stores.push({
                         id: element.id,
                         name: element.name,
-                        type: element.verticalCode
+                        type: element.verticalCode,
+                        domain: element.domain
                     })
                 });
 
-                this._storeService.store = storeData.data.content;
+                this._storesService.stores = storeData.data.content;
 
                 this._logging.debug("Data for Store Service (Frontend)",stores);
 
@@ -318,11 +319,12 @@ export class AuthService
                     stores.push({
                         id: element.id,
                         name: element.name,
-                        type: element.verticalCode
+                        type: element.verticalCode,
+                        domain: element.domain
                     })
                 });
 
-                this._storeService.store = stores;
+                this._storesService.stores = stores;
 
                 this._logging.debug("Data for Store Service (Frontend)",stores);
 

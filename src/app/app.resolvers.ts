@@ -7,7 +7,7 @@ import { NotificationsService } from 'app/layout/common/notifications/notificati
 import { QuickChatService } from 'app/layout/common/quick-chat/quick-chat.service';
 import { ShortcutsService } from 'app/layout/common/shortcuts/shortcuts.service';
 import { MerchantSetupService } from './core/merchant-setup/merchant-setup.service';
-import { StoreService } from './core/store/store.service';
+import { StoresService } from './core/store/store.service';
 // import { UserService } from 'app/core/user/user.service';
 
 @Injectable({
@@ -25,7 +25,7 @@ export class InitialDataResolver implements Resolve<any>
         private _quickChatService: QuickChatService,
         private _shortcutsService: ShortcutsService,
         private _merchantSetupService: MerchantSetupService,
-        private _storeService: StoreService
+        private _storesService: StoresService
         // private _userService: UserService,
     )
     {
@@ -51,7 +51,7 @@ export class InitialDataResolver implements Resolve<any>
             this._quickChatService.getChats(),
             this._shortcutsService.getAll(),
             this._merchantSetupService.get(),
-            this._storeService.get(),
+            this._storesService.get(),
             // this._userService.get(),
         ]);
     }

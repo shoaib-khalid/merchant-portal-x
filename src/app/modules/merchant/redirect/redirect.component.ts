@@ -4,7 +4,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MerchantSetup } from 'app/core/merchant-setup/merchant-setup.status'
 import { MerchantSetupService } from 'app/core/merchant-setup/merchant-setup.service'
-import { StoreService } from 'app/core/store/store.service'
+import { StoresService } from 'app/core/store/store.service'
 import { LogService } from 'app/core/logging/log.service'
 
 @Component({
@@ -27,7 +27,7 @@ export class RedirectComponent implements OnInit, OnDestroy
         private _changeDetectorRef: ChangeDetectorRef,
         private _router: Router,
         private _merchantSetupService: MerchantSetupService,
-        private _storeService: StoreService,
+        private _storesService: StoresService,
         private _logging: LogService
     )
     {
@@ -72,7 +72,7 @@ export class RedirectComponent implements OnInit, OnDestroy
                 // at this point, storeId still not saved in local storage (due to response of get store is in array of object), 
                 // due to nature of add product (for product service) - backend
                 // need to have store service object[0] to be saved in local storage
-                await this._storeService.setFirstStoreId();
+                await this._storesService.setFirstStoreId();
                 this.goToAddProducts();
             }
         } else {

@@ -7,7 +7,7 @@ import { switchMap } from 'rxjs/operators';
 @Injectable({
     providedIn: 'root'
 })
-export class NoAuthGuard implements CanActivate, CanActivateChild, CanLoad
+export class WithoutStoreIdGuard implements CanActivate, CanActivateChild, CanLoad
 {
     /**
      * Constructor
@@ -69,22 +69,22 @@ export class NoAuthGuard implements CanActivate, CanActivateChild, CanLoad
     {
         // Check the authentication status
         return this._authService.check()
-        .pipe(
-            switchMap((authenticated) => {
+                   .pipe(
+                       switchMap((authenticated) => {
 
-                // If the user is authenticated...
-                if ( authenticated )
-                {
-                    // Redirect to the root
-                    this._router.navigate(['/dashboard']);
+                           // If the user is authenticated...
+                           if ( authenticated )
+                           {
+                               // Redirect to the root
+                               this._router.navigate(['']);
 
-                    // Prevent the access
-                    return of(false);
-                }
+                               // Prevent the access
+                               return of(false);
+                           }
 
-                // Allow the access
-                return of(true);
-            })
-        );
+                           // Allow the access
+                           return of(true);
+                       })
+                   );
     }
 }

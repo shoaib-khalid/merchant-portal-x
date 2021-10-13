@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { StoreCategory, Store } from 'app/core/store/store.types';
-import { StoreService } from 'app/core/store/store.service';
+import { StoresService } from 'app/core/store/store.service';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { takeUntil } from 'rxjs/operators';
@@ -25,7 +25,7 @@ export class ChooseStoreService
      */
     constructor(
         private _httpClient: HttpClient,
-        private _storeService: StoreService,
+        private _storesService: StoresService,
         private _apiServer: AppConfig,
         private _jwt: JwtService
         )
@@ -131,7 +131,7 @@ export class ChooseStoreService
     getStores(): any {
 
         let _storeList;
-        this._storeService.store$
+        this._storesService.stores$
             .pipe((takeUntil(this._unsubscribeAll)))
             .subscribe((storeList: Store[]) => {
                 // this._stores.next(storeList);

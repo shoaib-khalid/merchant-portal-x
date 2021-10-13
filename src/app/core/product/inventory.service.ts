@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
-import { InventoryCategory, InventoryPagination, InventoryProduct, InventoryVariant, InventoryVariantsAvailable } from 'app/core/product/inventory.types';
+import { InventoryCategory, InventoryPagination, InventoryProduct, InventoryVariant, InventoryVariantsAvailable, InventoryProductX } from 'app/core/product/inventory.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 
@@ -12,11 +12,14 @@ import { JwtService } from 'app/core/jwt/jwt.service';
 export class InventoryService
 {
     // Private
-    private _categories: BehaviorSubject<InventoryCategory[] | null> = new BehaviorSubject(null);
-    private _pagination: BehaviorSubject<InventoryPagination | null> = new BehaviorSubject(null);
     private _product: BehaviorSubject<InventoryProduct | null> = new BehaviorSubject(null);
     private _products: BehaviorSubject<InventoryProduct[] | null> = new BehaviorSubject(null);
+    private _inventories: BehaviorSubject<InventoryProductX[] | null> = new BehaviorSubject(null);
+    private _categories: BehaviorSubject<InventoryCategory[] | null> = new BehaviorSubject(null);
+    private _pagination: BehaviorSubject<InventoryPagination | null> = new BehaviorSubject(null);
+    private _variant: BehaviorSubject<InventoryVariant | null> = new BehaviorSubject(null);
     private _variants: BehaviorSubject<InventoryVariant[] | null> = new BehaviorSubject(null);
+    private _variantTags: BehaviorSubject<InventoryVariantsAvailable[] | null> = new BehaviorSubject(null);
 
     /**
      * Constructor
@@ -66,12 +69,20 @@ export class InventoryService
     }
 
     /**
+     * Getter for products inventories
+     */
+     get inventories$(): Observable<InventoryProductX[]>
+     {
+         return this._inventories.asObservable();
+     }    
+
+    /**
      * Getter for variants
      */
-    get variants$(): Observable<InventoryVariant[]>
-    {
-        return this._variants.asObservable();
-    }
+     get variants$(): Observable<InventoryVariant[]>
+     {
+         return this._products.asObservable();
+     }
 
     /**
      * Getter for access token
@@ -96,31 +107,20 @@ export class InventoryService
     // -----------------------------------------------------------------------------------------------------
 
     /**
-     * Get brands
-     */
-    // getBrands(): Observable<InventoryBrand[]>
-    // {
-    //     return this._httpClient.get<InventoryBrand[]>('api/apps/ecommerce/inventory/brands').pipe(
-    //         tap((brands) => {
-    //             this._brands.next(brands);
-    //         })
-    //     );
-    // }
-
-    /**
      * Get categories
      */
-    getCategories(): Observable<InventoryCategory[]>
+    getCategories(name: string = null): Observable<InventoryCategory[]>
     {
 
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            name
         };
 
+        // product-service/v1/swagger-ui.html#/store-controller/putStoreCategoryByStoreIdUsingGET
         return this._httpClient.get<any>(productService + '/stores/' + this.storeId$ + '/store-categories',header).pipe(
             tap((categories) => {
                 this._categories.next(categories.data);
@@ -133,102 +133,134 @@ export class InventoryService
      *
      * @param category
      */
-     createCategory(category: InventoryCategory): Observable<InventoryCategory>
-     {
-         return this.categories$.pipe(
-             take(1),
-             switchMap(categories => this._httpClient.post<InventoryCategory>('api/apps/ecommerce/inventory/category', {category}).pipe(
-                 map((newCategory) => {
-                     // Update the categories with the new category
-                     this._categories.next([...categories, newCategory]);
+    createCategory(category: InventoryCategory, body = {}): Observable<InventoryCategory>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                name: category.name,
+                storeId: this.storeId$
+            }
+        };
+
+        // product-service/v1/swagger-ui.html#/store-category-controller/postStoreCategoryByStoreIdUsingPOST
+        return this.categories$.pipe(
+            take(1),
+            switchMap(categories => this._httpClient.post<any>(productService + '/store-categories', body , header).pipe(
+                map((newCategory) => {
+                    // Update the categories with the new category
+                    this._categories.next([...categories, newCategory.data]);
+
+                    // Return new category from observable
+                    return newCategory.data;
+                })
+            ))
+        );
+    }
  
-                     // Return new category from observable
-                     return newCategory;
-                 })
-             ))
-         );
-     }
+    /**
+     * Update the category
+     *
+     * @param id
+     * @param category
+     */
+    updateCategory(id: string, category: InventoryCategory): Observable<InventoryCategory>
+    {
+
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                name: category.name,
+                storeCategoryId: id,
+                storeId: this.storeId$
+            }
+        };
+
+        // product-service/v1/swagger-ui.html#/store-category-controller/putStoreProductAssetsByIdUsingPUT
+        return this.categories$.pipe(
+            take(1),
+            switchMap(categories => this._httpClient.put<InventoryCategory>(productService + '/store-categories',header)
+            .pipe(
+                map((updatedCategories) => {
+
+                    // Find the index of the updated category
+                    const index = categories.findIndex(item => item.id === id);
+
+                    // Update the category
+                    categories[index] = updatedCategories;
+
+                    // Update the categories
+                    this._categories.next(categories);
+
+                    // Return the updated category
+                    return updatedCategories;
+                })
+            ))
+        );
+    }
  
-     /**
-      * Update the category
-      *
-      * @param id
-      * @param category
-      */
-     updateCategory(id: string, category: InventoryCategory): Observable<InventoryCategory>
-     {
-         return this.categories$.pipe(
-             take(1),
-             switchMap(categories => this._httpClient.patch<InventoryCategory>('api/apps/ecommerce/inventory/category', {
-                 id,
-                 category
-             }).pipe(
-                 map((updatedCategories) => {
- 
-                     // Find the index of the updated category
-                     const index = categories.findIndex(item => item.id === id);
- 
-                     // Update the category
-                     categories[index] = updatedCategories;
- 
-                     // Update the categories
-                     this._categories.next(categories);
- 
-                     // Return the updated category
-                     return updatedCategories;
-                 })
-             ))
-         );
-     }
- 
-     /**
-      * Delete the category
-      *
-      * @param id
-      */
-     deleteCategory(id: string): Observable<boolean>
-     {
-         return this.categories$.pipe(
-             take(1),
-             switchMap(categories => this._httpClient.delete('api/apps/ecommerce/inventory/category', {params: {id}}).pipe(
-                 map((isDeleted: boolean) => {
- 
-                     // Find the index of the deleted category
-                     const index = categories.findIndex(item => item.id === id);
- 
-                     // Delete the category
-                     categories.splice(index, 1);
- 
-                     // Update the categories
-                     this._variants.next(categories);
- 
-                     // Return the deleted status
-                     return isDeleted;
-                 }),
-                 filter(isDeleted => isDeleted),
-                 switchMap(isDeleted => this.products$.pipe(
-                     take(1),
-                     map((products) => {
- 
-                         // Iterate through the contacts
-                         products.forEach((product) => {
- 
-                             const variantIndex = product.variants.findIndex(category => category === id);
- 
-                             // If the contact has the category, remove it
-                             if ( variantIndex > -1 )
-                             {
-                                 product.variants.splice(variantIndex, 1);
-                             }
-                         });
- 
-                         // Return the deleted status
-                         return isDeleted;
-                     })
-                 ))
-             ))
-         );
-     }
+    /**
+     * Delete the category
+     *
+     * @param id
+     */
+    deleteCategory(id: string): Observable<boolean>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                storeCategoryId: id,
+            }
+        };
+
+        // product-service/v1/swagger-ui.html#/store-category-controller
+        return this.categories$.pipe(
+            take(1),
+            switchMap(categories => this._httpClient.delete(productService + '/store-categories',header)
+            .pipe(
+                map((isDeleted: boolean) => {
+
+                    // Find the index of the deleted category
+                    const index = categories.findIndex(item => item.id === id);
+
+                    // Delete the category
+                    categories.splice(index, 1);
+
+                    // Update the categories
+                    this._categories.next(categories);
+
+                    // Return the deleted status
+                    return isDeleted;
+                }),
+                filter(isDeleted => isDeleted),
+                switchMap(isDeleted => this.products$.pipe(
+                    take(1),
+                    map((products) => {
+
+                        // Iterate through the products
+                        products.forEach((product) => {
+
+                            // remove that category in each products 
+                            product.category = "";
+
+                        });
+
+                        // Return the deleted status
+                        return isDeleted;
+                    })
+                ))
+            ))
+        );
+    }
 
     /**
      * Get products
@@ -244,7 +276,6 @@ export class InventoryService
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -268,34 +299,38 @@ export class InventoryService
                     endIndex: response.data.pageable.offset + response.data.pageable.numberOfElements - 1
                 }
                 this._pagination.next(_pagination);
-
-                
                 
                 let _newProducts: Array<any> = [];
+                let _newVariants: Array<any> = [];
+                let _newVariantTags: Array<any> = [];
                 (response.data.content).forEach(object => {
                     _newProducts.push({
                         id: object.id,
-                        category: object.categoryId,
+                        thumbnail: object.thumbnailUrl,
+                        images: Object.keys(object.productAssets).map(function(key){return object.productAssets[key].url}),
+                        active: object.status,
                         name: object.name,
                         description: object.description,
-                        variants: object.productVariants, // array of string // to be ask albert
-                        sku: object.productInventories[0].sku, // need looping
-                        barcode: null,
-                        allowOutOfStockPurchases: object.allowOutOfStockPurchases,
-                        trackQuantity: object.trackQuantity,
                         stock: object.productInventories[0].quantity, // need looping
-                        cost: 0,
-                        basePrice: 0,
-                        taxPercent: 0,
+                        allowOutOfStockPurchases: object.allowOutOfStockPurchases,
+                        minQuantityForAlarm: object.minQuantityForAlarm,
+                        trackQuantity: object.trackQuantity,
+                        sku: object.productInventories[0].sku, // need looping
                         price: object.productInventories[0].price, // need looping
                         weight: 0,
-                        thumbnail: object.thumbnailUrl,
-                        images: Object.keys(object.productAssets).map(function(key){return object.productAssets[key].url}), // need looping
-                        active: true
+                        category: object.categoryId,
+                        variants: object.productVariants
+                    });
+                    _newVariants.push(object.productVariants)
+                    _newVariantTags.push({
+                        id: Object.keys(object.productVariants).map(function(key){return object.productVariants[key].id}),
+                        value: Object.keys(object.productVariants).map(function(key){return object.productVariants[key].value}),
+                        productId: Object.keys(object.productVariants).map(function(key){return object.productVariants[key].productId}),
                     });
                 });
-
                 this._products.next(_newProducts);
+                this._variants.next(_newVariants);
+                this._variantTags.next(_newVariantTags);
             })
         );
     }
@@ -333,7 +368,7 @@ export class InventoryService
     /**
      * Create product
      */
-    createProduct(): Observable<InventoryProduct>
+    createProduct(categoryId): Observable<InventoryProduct>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -343,26 +378,29 @@ export class InventoryService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
 
-        // const categoryId = await this.getCategoryId()
+        const now = new Date();
+        const date = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate() + " " + now.getHours() + ":" + now.getMinutes()  + ":" + now.getSeconds();
 
-        // const body = {
-        //     "categoryId": categoryId,
-        //     "name": this.title,
-        //     "status": this.productStatus,
-        //     "description": this.description,
-        //     "storeId": localStorage.getItem("storeId"),
-        //     "allowOutOfStockPurchases": this.continueSelling,
-        //     "trackQuantity": this.trackQuantity,
-        //     "minQuantityForAlarm": this.minQtyAlarm ? this.minQtyAlarm : -1
-        // };
+        const body = {
+            "categoryId": categoryId,
+            "name": "A New Product " + date,
+            "status": "ACTIVE",
+            "description": "Tell us more about your product",
+            "storeId": this.storeId$,
+            "allowOutOfStockPurchases": false,
+            "trackQuantity": false,
+            "minQuantityForAlarm": -1
+        };
 
         return this.products$.pipe(
             take(1),
-            switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
-            // switchMap(products => this._httpClient.post<InventoryProduct>(productService +'/stores/'+this.storeId$+'/products', body , header).pipe(
+            // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
+            switchMap(products => this._httpClient.post<InventoryProduct>(productService +'/stores/'+this.storeId$+'/products', body , header).pipe(
                 map((newProduct) => {
+
+                    console.log("newProduct",newProduct)
                     // Update the products with the new product
-                    this._products.next([newProduct, ...products]);
+                    this._products.next([newProduct["data"], ...products]);
 
                     // Return the new product
                     return newProduct;
@@ -422,10 +460,18 @@ export class InventoryService
      */
     deleteProduct(id: string): Observable<boolean>
     {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+      
         return this.products$.pipe(
             take(1),
-            switchMap(products => this._httpClient.delete('api/apps/ecommerce/inventory/product', {params: {id}}).pipe(
-                map((isDeleted: boolean) => {
+            switchMap(products => this._httpClient.delete(productService +'/stores/'+this.storeId$+'/products/'+id, header).pipe(
+                map((status: number) => {
 
                     // Find the index of the deleted product
                     const index = products.findIndex(item => item.id === id);
@@ -436,8 +482,57 @@ export class InventoryService
                     // Update the products
                     this._products.next(products);
 
+                    let isDeleted:boolean = false;
+                    if (status === 200) {
+                        isDeleted = true
+                    }
+
                     // Return the deleted status
                     return isDeleted;
+                })
+            ))
+        );
+    }
+
+    addInventoryToProduct(product: InventoryProduct): Observable<InventoryProductX>{
+
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        const now = new Date();
+        const date = now.getFullYear() + "" + (now.getMonth()+1) + "" + now.getDate() + "" + now.getHours() + "" + now.getMinutes()  + "" + now.getSeconds();
+
+        const body = {
+            "productId": product.id,
+            "itemCode": product.id + date,
+            "price": 0,
+            "compareAtprice": 0,
+            "quantity": 0,
+            "sku": null,
+            "status": "AVAILABLE"
+        };
+
+        console.log("productId",product)
+
+        // return of();
+
+        return this.inventories$.pipe(
+            take(1),
+            // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
+            switchMap(products => this._httpClient.post<InventoryProduct>(productService +'/stores/'+this.storeId$+'/products/' + product.id + "/inventory", body , header).pipe(
+                map((newProduct) => {
+
+                    console.log("newProduct InventoryItem",newProduct)
+                    // Update the products with the new product
+                    // this._products.next([newProduct["data"], ...products]);
+
+                    // Return the new product
+                    return newProduct["data"];
                 })
             ))
         );
@@ -446,13 +541,88 @@ export class InventoryService
     /**
      * Get variants
      */
-    getVariants(): Observable<InventoryVariant[]>
-    {
-        return this._httpClient.get<InventoryVariant[]>('api/apps/ecommerce/inventory/variants').pipe(
-            tap((variants) => {
-                this._variants.next(variants);
-            })
+     getVariants(): Observable<InventoryVariant[]>
+     {
+         return this._httpClient.get<InventoryVariant[]>('api/apps/ecommerce/inventory/variants').pipe(
+             tap((variants) => {
+                 this._variants.next(variants);
+             })
+         );
+         
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        const now = new Date();
+        const date = now.getFullYear() + "" + (now.getMonth()+1) + "" + now.getDate() + "" + now.getHours() + "" + now.getMinutes()  + "" + now.getSeconds();
+
+        // const body = {
+        //     "productId": product.id,
+        //     "itemCode": product.id + date,
+        //     "price": 0,
+        //     "compareAtprice": 0,
+        //     "quantity": 0,
+        //     "sku": null,
+        //     "status": "AVAILABLE"
+        // };
+
+        // console.log("productId",product)
+
+        // // return of();
+
+        // return this.variants$.pipe(
+        //     take(1),
+        //     switchMap(products => this._httpClient.post<InventoryVariant[]>(productService +'/stores/'+this.storeId$+'/products/' + product.id + "/inventory", body , header).pipe(
+        //         map((newProduct) => {
+
+        //             console.log("newProduct InventoryItem",newProduct)
+        //             // Update the products with the new product
+        //             this._products.next([newProduct["data"], ...products]);
+
+        //             // Return the new product
+        //             return newProduct;
+        //         })
+        //     ))
+        // );
+
+        return of();
+    }
+
+    /**
+     * Get variants by productId
+     */
+
+    getVariantsByProductId(productId): Observable<InventoryVariant[]> {
+
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                productId: productId,
+                storeId: this.storeId$
+            }
+        };
+
+        // product-service/v1/swagger-ui.html#/store-category-controller/postStoreCategoryByStoreIdUsingPOST
+        return this.variants$.pipe(
+            take(1),
+            switchMap(variants => this._httpClient.get<any>(productService + '/stores/' + this.storeId$ + '/products/' + productId + '/variants' , header).pipe(
+                map((newVariants) => {
+                    // Update the variants with the new Variants
+                    this._variants.next([...variants, newVariants.data]);
+
+                    // Return new Variants from observable
+                    return newVariants.data;
+                })
+            ))
         );
+
     }
 
     /**

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject, Subject } from 'rxjs';
+import { Observable, of, BehaviorSubject, Subject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { Store } from 'app/core/store/store.types';
 import { AppConfig } from 'app/config/service.config';
@@ -10,9 +10,9 @@ import { takeUntil } from 'rxjs/operators';
 @Injectable({
     providedIn: 'root'
 })
-export class StoreService
+export class StoresService
 {
-    private _store: BehaviorSubject<Store[] | null> = new BehaviorSubject(null);
+    private _stores: BehaviorSubject<Store[] | null> = new BehaviorSubject(null);
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     /**
@@ -35,15 +35,15 @@ export class StoreService
      *
      * @param value
      */
-    set store(value: Store[])
+    set stores(value: Store[])
     {
         // Store the value
-        this._store.next(value);
+        this._stores.next(value);
     }
 
-    get store$(): Observable<Store[]>
+    get stores$(): Observable<Store[]>
     {
-        return this._store.asObservable();
+        return this._stores.asObservable();
     }
 
     /**
@@ -75,7 +75,7 @@ export class StoreService
     /**
      * Get the current logged in store data
      */
-    async get(): Promise<Observable<Store>>
+    async get(id: string = null): Promise<Observable<Store>>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -87,22 +87,15 @@ export class StoreService
                 "clientId": clientId
             }
         };
+
+        if (id !== null) { id = "/" + id } 
         
-        return await this._httpClient.get<any>(productService + '/stores', header)
+        return await this._httpClient.get<any>(productService + '/stores' + id, header)
         .pipe(
             tap((response) => {
-                // THIS STORE SERVICE HAVE NOT BEING USED , WHY ? IDK ... NEED TO DO SOMETHING HERE
-
-                // let storeCount: number;
-                // let content = response.data.content;
-
-                // if (content === undefined || content.length == 0) {
-                //     storeCount = 0;
-                // } else {
-                //     storeCount = content.length;
-                // }
-                
-                return this._store.next([{id:"ahsashha",name:"SDFSF",category:""}]);
+                // This part still havent been used ... IDK how to use it
+                let _newStores: Array<any> = [];
+                return this._stores.next(_newStores);
             })
         );
     }
@@ -116,17 +109,17 @@ export class StoreService
     {
         return this._httpClient.patch<Store[]>('api/common/store', {store}).pipe(
             map((response) => {
-                this._store.next(response);
+                this._stores.next(response);
             })
         );
     }
 
     setFirstStoreId(){
-        this.store$
+        this.stores$
             .pipe((takeUntil(this._unsubscribeAll)))
             .subscribe((storeList: Store[]) => {
                 this.storeId = storeList[0].id;
             });  
-        // return this.storeId = this.store$.id;
     }
+    
 }

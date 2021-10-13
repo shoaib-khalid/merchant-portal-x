@@ -1,6 +1,6 @@
-import { Store } from './store.types';
+// import { Store } from './store.types';
 
-export interface Stores
-{
-    list: Store[]
-}
+// export interface Stores
+// {
+//     list: Store[]
+// }

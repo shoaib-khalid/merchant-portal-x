@@ -145,6 +145,8 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             });
 
+            console.log("settle4")
+
         // Get the pagination
         this._inventoryService.pagination$
             .pipe(takeUntil(this._unsubscribeAll))
@@ -160,18 +162,22 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         // Get the products
         this.products$ = this._inventoryService.products$;
 
+        console.log("settle3")
+
         // Get the variants
         this._inventoryService.products$
             .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((variants: InventoryProduct[]) => {
+            .subscribe((products: InventoryProduct[]) => {
 
                 // Update the variants
-                this.variants = variants;
-                this.filteredVariants = variants;
+                // this.variants = products;
+                // this.filteredVariants = products;
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
+
+            console.log("settle2")
 
         // Subscribe to search input field value changes
         this.searchInputControl.valueChanges
@@ -188,6 +194,8 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
                 })
             )
             .subscribe();
+
+        console.log("settle")
     }
 
     /**
@@ -269,17 +277,43 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
 
         // Get the product by id
         this._inventoryService.getProductById(productId)
-            .subscribe((product) => {
+            .subscribe(async (product) => {
 
                 // Set the selected product
                 this.selectedProduct = product;
 
+                console.log("BLAKE PARE 0 ",this.selectedProduct)
+
                 // Fill the form
                 this.selectedProductForm.patchValue(product);
+
+                // New part still bugged
+                await this._inventoryService.getVariantsByProductId(product.id)
+                .pipe(takeUntil(this._unsubscribeAll))
+                .subscribe((variants: InventoryVariant[] = []) => {
+
+                    // Set to this variants 
+                    this.variants = variants;
+                    this.filteredVariants = variants;
+
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                });
                 
                 // Set to this variants 
                 this.variants = product.variants;
                 this.filteredVariants = product.variants;
+
+                
+                console.log("MAC MACE",product.category)
+
+                // Add the category
+                this.selectedProduct.category = product.category;
+
+                console.log("BLAKE PARE 2 ",this.selectedProduct.category)
+        
+                // Update the selected product form
+                this.selectedProductForm.get('category').patchValue(this.selectedProduct.category);
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -767,7 +801,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
      createCategory(name: string): void
      {
          const category = {
-             name
+             name,
          };
  
          // Create category on the server
@@ -820,8 +854,16 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
      */
      addCategoryToProduct(category: InventoryCategory): void
      {
+
+        console.log("DI SINI XX",category.id)
+
+        console.log("BLAKE PARE 1 ",this.selectedProduct)
+
+
          // Add the category
          this.selectedProduct.category = category.id;
+
+         console.log("BLAKE PARE 2 ",this.selectedProduct.category)
  
          // Update the selected product form
          this.selectedProductForm.get('category').patchValue(this.selectedProduct.category);
@@ -972,21 +1014,73 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
      * 
      *  PRODUCTS
      * 
-     */    
+     */ 
+
+    // this create product check category first before creating them
+    initCreateProduct(){
+        // get category by name = no-category
+        this._inventoryService.getCategories("no-category").subscribe(async (res)=>{
+            let _noCategory = res["data"].find(obj => obj.name === "no-category");
+
+            // if there is no category with "no-category" name, create one
+            console.log("logs this !!!",_noCategory)
+
+            if (_noCategory["name"] !== "no-category"){
+                await this._inventoryService.createCategory({
+                    name: "no-category"
+                }).subscribe((res)=>{
+                    if (res["status"] !== 201){
+                        console.log("error occur")
+                    } else {
+                        this.createProduct(_noCategory["id"]);
+                        console.log("create-product next");
+                    }
+                });
+            } else {
+                this.createProduct(_noCategory["id"]);
+                console.log("create-product next");
+            }
+        });
+    }
+
 
     /**
      * Create product
      */
-    createProduct(): void
+    createProduct(categoryId): void
     {
+
+        console.log("this problem", categoryId)
+
         // Create the product
-        this._inventoryService.createProduct().subscribe((newProduct) => {
+        this._inventoryService.createProduct(categoryId).subscribe(async (newProduct) => {
 
+            await this._inventoryService.addInventoryToProduct(newProduct["data"]).subscribe();
+
+
+            console.log("INI MARI",newProduct["data"])
+
+            
             // Go to new product
-            this.selectedProduct = newProduct;
+            this.selectedProduct = newProduct["data"];
+            
+            console.log("HUHUAHSBDI",newProduct["data"])
+            
+            console.log("this.selectedProduct",this.selectedProduct)
+            
+            this.selectedProduct.category = newProduct["data"].categoryId;
+            this.selectedProductForm.get('category').patchValue(this.selectedProduct.category);
 
+
+            this.variants = [];
+            this.filteredVariants = [];
+
+            // // add category to product
+            // this.addCategoryToProduct({
+            //     id: categoryId
+            // });
             // Fill the form
-            this.selectedProductForm.patchValue(newProduct);
+            this.selectedProductForm.patchValue(newProduct["data"]);
 
             // Mark for check
             this._changeDetectorRef.markForCheck();

@@ -24,6 +24,7 @@ export interface Store
         closeTime?: string;
         isOff?: boolean;
     };
+    type?: string;
     totalSteps?: number;
     updatedAt?: number;
     progress?: {
