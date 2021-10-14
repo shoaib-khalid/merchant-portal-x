@@ -14,16 +14,16 @@ import { TranslocoHttpLoader } from 'app/core/transloco/transloco.http-loader';
             useValue: translocoConfig({
                 availableLangs      : [
                     {
-                        id   : 'en',
-                        label: 'English'
+                        id   : 'my',
+                        label: 'Malaysia'
                     },
                     {
-                        id   : 'tr',
-                        label: 'Turkish'
-                    }
+                        id   : 'pk',
+                        label: 'Pakistan'
+                    },
                 ],
-                defaultLang         : 'en',
-                fallbackLang        : 'en',
+                defaultLang         : 'my',
+                fallbackLang        : 'my',
                 reRenderOnLangChange: true,
                 prodMode            : environment.production
             })

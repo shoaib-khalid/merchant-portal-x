@@ -1055,31 +1055,23 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         // Create the product
         this._inventoryService.createProduct(categoryId).subscribe(async (newProduct) => {
 
+            // Add Inventory to product
             await this._inventoryService.addInventoryToProduct(newProduct["data"]).subscribe();
-
-
-            console.log("INI MARI",newProduct["data"])
 
             
             // Go to new product
             this.selectedProduct = newProduct["data"];
-            
-            console.log("HUHUAHSBDI",newProduct["data"])
-            
-            console.log("this.selectedProduct",this.selectedProduct)
-            
+                                    
+            // Set Category to Product 
             this.selectedProduct.category = newProduct["data"].categoryId;
-            this.selectedProductForm.get('category').patchValue(this.selectedProduct.category);
 
+            // Set Price to 0 ... It's default anyway
+            this.selectedProduct.price = 0;
 
-            this.variants = [];
+            // Set filtered variants to empty array
             this.filteredVariants = [];
 
-            // // add category to product
-            // this.addCategoryToProduct({
-            //     id: categoryId
-            // });
-            // Fill the form
+            // Update current form with new product data
             this.selectedProductForm.patchValue(newProduct["data"]);
 
             // Mark for check

@@ -271,7 +271,7 @@ export class InventoryService
      * @param order
      * @param search
      */
-    getProducts(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = ''):
+    getProducts(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', status: string = 'ACTIVE,INACTIVE'):
         Observable<{ pagination: InventoryPagination; products: InventoryProduct[] }>
     {
         let productService = this._apiServer.settings.apiServer.productService;
@@ -284,7 +284,8 @@ export class InventoryService
                 pageSize: '' + size,
                 sortByCol: '' + sort,
                 sortingOrder: '' + order.toUpperCase(),
-                name: '' + search
+                name: '' + search,
+                status: '' + status
             }
         };
 
@@ -308,7 +309,7 @@ export class InventoryService
                         id: object.id,
                         thumbnail: object.thumbnailUrl,
                         images: Object.keys(object.productAssets).map(function(key){return object.productAssets[key].url}),
-                        active: object.status,
+                        active: (object.status === 'ACTIVE'),
                         name: object.name,
                         description: object.description,
                         stock: object.productInventories[0].quantity, // need looping
@@ -384,7 +385,7 @@ export class InventoryService
         const body = {
             "categoryId": categoryId,
             "name": "A New Product " + date,
-            "status": "ACTIVE",
+            "status": "INACTIVE",
             "description": "Tell us more about your product",
             "storeId": this.storeId$,
             "allowOutOfStockPurchases": false,

@@ -15,6 +15,7 @@ export interface InventoryProduct
     weight: number;
     category: string;
     variants?: InventoryVariant[];
+    status?: string;
 }
 
 export interface InventoryPagination
