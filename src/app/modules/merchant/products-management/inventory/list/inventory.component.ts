@@ -51,6 +51,8 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
 
     categories: InventoryCategory[];
     filteredCategories: InventoryCategory[];
+    checkedCategories: InventoryCategory[];
+    unCheckedCategories: InventoryCategory[];
     variants: InventoryVariant[];
     filteredVariants: InventoryVariant[];
     currentfilteredVariant: InventoryVariantsAvailable;
@@ -120,6 +122,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
             variants         : [[]],
             sku              : [''],
             stock            : [''],
+            minQuantityForAlarm: [''],
             taxPercent       : [''],
             price            : [''],
             weight           : [''],
@@ -140,6 +143,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
                 // Update the categories
                 this.categories = categories;
                 this.filteredCategories = categories;
+                this.unCheckedCategories = categories;
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -275,6 +279,8 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
             return;
         }
 
+        // console.log("are",this.selectedProduct.minQuantityForAlarm);
+
         // Get the product by id
         this._inventoryService.getProductById(productId)
             .subscribe(async (product) => {
@@ -305,15 +311,21 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
                 this.filteredVariants = product.variants;
 
                 
-                console.log("MAC MACE",product.category)
+                console.log("MAC MACE",product)
 
                 // Add the category
                 this.selectedProduct.category = product.category;
 
-                console.log("BLAKE PARE 2 ",this.selectedProduct.category)
+                // console.log("BLAKE PARE 2 ",this.selectedProduct.minQuantityForAlarm)
         
                 // Update the selected product form
                 this.selectedProductForm.get('category').patchValue(this.selectedProduct.category);
+
+
+                this.selectedProduct.minQuantityForAlarm = product.minQuantityForAlarm;
+
+                // Update the selected product form
+                this.selectedProductForm.get('minQuantityForAlarm').patchValue(this.selectedProduct.minQuantityForAlarm);
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -445,6 +457,8 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         // Create variant on the server
         this._inventoryService.createVariant(variant)
             .subscribe((response) => {
+
+                console.log("addVariantToProduct ",response )
 
                 // Add the variant to the product
                 this.addVariantToProduct(response);
@@ -1057,7 +1071,6 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
 
             // Add Inventory to product
             await this._inventoryService.addInventoryToProduct(newProduct["data"]).subscribe();
-
             
             // Go to new product
             this.selectedProduct = newProduct["data"];
@@ -1068,8 +1081,21 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
             // Set Price to 0 ... It's default anyway
             this.selectedProduct.price = 0;
 
+            // Set Stock to 1 ... It's default anyway
+            this.selectedProduct.stock = 1;
+
+            // Set Stock to 1 ... It's default anyway
+            this.selectedProduct.minQuantityForAlarm = -1;
+
+            
             // Set filtered variants to empty array
             this.filteredVariants = [];
+            
+            // Set variants to empty array
+            this.variants = [];
+
+            // Set selectedProduct variants to empty array
+            this.selectedProduct.variants = [];
 
             // Update current form with new product data
             this.selectedProductForm.patchValue(newProduct["data"]);

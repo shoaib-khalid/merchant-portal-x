@@ -513,7 +513,7 @@ export class InventoryService
             "itemCode": product.id + date,
             "price": 0,
             "compareAtprice": 0,
-            "quantity": 0,
+            "quantity": 1,
             "sku": null,
             "status": "AVAILABLE"
         };
