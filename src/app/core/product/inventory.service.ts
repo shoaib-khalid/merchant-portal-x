@@ -732,7 +732,7 @@ export class InventoryService
     /**
      * Get variants
      */
-    getVariantsList(): Observable<InventoryVariantsAvailable[]>
+    getVariantsTag(): Observable<InventoryVariantsAvailable[]>
     {
         return this._httpClient.get<InventoryVariant[]>('api/apps/ecommerce/inventory/variants').pipe(
             tap((variants) => {
@@ -742,11 +742,11 @@ export class InventoryService
     }
  
     /**
-     * Create variant List
+     * Create variant Tag
      *
      * @param variant
     */
-    createVariantList(variant: InventoryVariantsAvailable): Observable<InventoryVariantsAvailable>
+    createVariantTag(variant: InventoryVariantsAvailable): Observable<InventoryVariantsAvailable>
     {
         return this.variants$.pipe(
             take(1),
@@ -764,12 +764,12 @@ export class InventoryService
      }
  
     /**
-     * Update the variant List
+     * Update the variant Tag
      *
      * @param id
      * @param variant
     */
-    updateVariantList(id: string, variant: InventoryVariantsAvailable): Observable<InventoryVariantsAvailable>
+    updateVariantTag(id: string, variant: InventoryVariantsAvailable): Observable<InventoryVariantsAvailable>
     {
         return this.variants$.pipe(
             take(1),
@@ -796,11 +796,11 @@ export class InventoryService
     }
  
     /**
-      * Delete the variant List
+      * Delete the variant Tag
       *
       * @param id
      */
-    deleteVariantList(id: string): Observable<boolean>
+    deleteVariantTag(id: string): Observable<boolean>
     {
         return this.variants$.pipe(
             take(1),

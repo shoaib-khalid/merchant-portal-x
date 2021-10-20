@@ -686,9 +686,9 @@
                                                                         <input
                                                                             class="w-full min-w-0 py-1 border-0"
                                                                             type="text"
-                                                                            placeholder="Enter variant name"
-                                                                            (input)="filterVariants($event)"
-                                                                            (keydown)="filterVariantsInputKeyDown($event)"
+                                                                            placeholder="Enter variant tag value"
+                                                                            (input)="filterVariantsTag($event)"
+                                                                            (keydown)="filterVariantsTagInputKeyDown($event)"
                                                                             [maxLength]="30"
                                                                             #newVariantInput>
                                                                     </div>
@@ -696,13 +696,13 @@
                                                                 <button
                                                                     class="ml-1"
                                                                     mat-icon-button
-                                                                    (click)="toggleVariantsEditMode()">
+                                                                    (click)="toggleVariantsTagEditMode()">
                                                                     <mat-icon
-                                                                        *ngIf="!variantsEditMode"
+                                                                        *ngIf="!variantsTagEditMode"
                                                                         class="icon-size-5"
                                                                         [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
                                                                     <mat-icon
-                                                                        *ngIf="variantsEditMode"
+                                                                        *ngIf="variantsTagEditMode"
                                                                         class="icon-size-5"
                                                                         [svgIcon]="'heroicons_solid:check'"></mat-icon>
                                                                 </button>
@@ -710,8 +710,8 @@
                                                             <div
                                                                 class="flex flex-col max-h-64 py-2 border-t overflow-y-auto">
                                                                 <!-- Variants -->
-                                                                <ng-container *ngIf="!variantsEditMode">
-                                                                    <ng-container *ngFor="let variant of currentfilteredVariant.productVariantsAvailable; trackBy: trackByFn">
+                                                                <ng-container *ngIf="!variantsTagEditMode">
+                                                                    <ng-container *ngFor="let variant of variantsTag.productVariantsAvailable; trackBy: trackByFn">
                                                                         <div
                                                                             class="flex items-center h-10 min-h-10 px-4 cursor-pointer hover:bg-hover"
                                                                             (click)="toggleContactVariant(variant)"
@@ -727,9 +727,9 @@
                                                                     </ng-container>
                                                                 </ng-container>
                                                                 <!-- Variants editing -->
-                                                                <ng-container *ngIf="variantsEditMode">
+                                                                <ng-container *ngIf="variantsTagEditMode">
                                                                     <div class="py-2 space-y-2">
-                                                                        <ng-container *ngFor="let variant of currentfilteredVariant.productVariantsAvailable; trackBy: trackByFn">
+                                                                        <ng-container *ngFor="let variant of variantsTag.productVariantsAvailable; trackBy: trackByFn">
                                                                             <div class="flex items-center">
                                                                                 <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full mx-4">
                                                                                     <input
@@ -753,7 +753,7 @@
                                                                 <div
                                                                     class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer hover:bg-hover"
                                                                     *ngIf="shouldShowCreateVariantButton(newVariantInput.value)"
-                                                                    (click)="createVariantList(newVariantInput.value); newVariantInput.value = ''"
+                                                                    (click)="createVariantTag(newVariantInput.value); newVariantInput.value = ''"
                                                                     matRipple>
                                                                     <mat-icon
                                                                         class="mr-2 icon-size-5"

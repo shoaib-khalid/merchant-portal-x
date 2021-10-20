@@ -51,22 +51,30 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
 
     categories: InventoryCategory[];
     filteredCategories: InventoryCategory[];
+    categoriesEditMode: boolean = false;
+
     checkedCategories: InventoryCategory[];
     unCheckedCategories: InventoryCategory[];
+
     variants: InventoryVariant[];
     filteredVariants: InventoryVariant[];
-    currentfilteredVariant: InventoryVariantsAvailable;
+    variantsEditMode: boolean = false;
 
+    // variantTag: InventoryVariantsAvailable;
+    variantsTag: InventoryVariantsAvailable[];
+    filteredVariantsTag: InventoryVariantsAvailable[];
+    variantsTagEditMode: boolean = false;
+
+    
     flashMessage: 'success' | 'error' | null = null;
     isLoading: boolean = false;
     pagination: InventoryPagination;
     searchInputControl: FormControl = new FormControl();
-
+    
     selectedProduct: InventoryProduct | null = null;
     selectedProductForm: FormGroup;
 
-    variantsEditMode: boolean = false;
-    categoriesEditMode: boolean = false;
+
     imagesEditMode: boolean = false;
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -116,10 +124,11 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         // Create the selected product form
         this.selectedProductForm = this._formBuilder.group({
             id               : [''],
-            category         : [''],
             name             : ['', [Validators.required]],
             description      : [''],
+            category         : [''],
             variants         : [[]],
+            variantsTag      : [[]],
             sku              : [''],
             stock            : [''],
             minQuantityForAlarm: [''],
@@ -135,6 +144,19 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
             active           : [false]
         });
 
+
+        // Get the pagination
+        this._inventoryService.pagination$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((pagination: InventoryPagination) => {
+
+                // Update the pagination
+                this.pagination = pagination;
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+
         // Get the categories
         this._inventoryService.categories$
             .pipe(takeUntil(this._unsubscribeAll))
@@ -149,39 +171,8 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             });
 
-            console.log("settle4")
-
-        // Get the pagination
-        this._inventoryService.pagination$
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((pagination: InventoryPagination) => {
-
-                // Update the pagination
-                this.pagination = pagination;
-
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            });
-
         // Get the products
         this.products$ = this._inventoryService.products$;
-
-        console.log("settle3")
-
-        // Get the variants
-        this._inventoryService.products$
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((products: InventoryProduct[]) => {
-
-                // Update the variants
-                // this.variants = products;
-                // this.filteredVariants = products;
-
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            });
-
-            console.log("settle2")
 
         // Subscribe to search input field value changes
         this.searchInputControl.valueChanges
@@ -302,6 +293,9 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
                     this.variants = variants;
                     this.filteredVariants = variants;
 
+                    this.variantsTag = [];
+                    this.filteredVariantsTag = [];
+
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
                 });
@@ -310,7 +304,13 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
                 this.variants = product.variants;
                 this.filteredVariants = product.variants;
 
+                this.variantsTag = [];
+                this.filteredVariantsTag = [];
+
                 
+                this.selectedProduct.variantsTag = [];
+
+
                 console.log("MAC MACE",product)
 
                 // Add the category
@@ -570,9 +570,6 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
      */
     openVariantsPanel(variantId): void
     {
-        this.currentfilteredVariant = this.filteredVariants.find(obj => obj.id === variantId);
-        console.log("this.currentfilteredVariant",this.currentfilteredVariant)
-
         // Create the overlay
         this._variantsPanelOverlayRef = this._overlay.create({
             backdropClass   : '',
@@ -639,28 +636,97 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     
     /**
      * 
-     *  VARIANTS LIST
+     *  VARIANTS TAG
      * 
      */
 
+    /**
+     * Toggle the variants edit mode
+     */
+     toggleVariantsTagEditMode(): void
+     {
+         this.variantsTagEditMode = !this.variantsTagEditMode;
+     }
+
+    /**
+     * Filter variants
+     *
+     * @param event
+     */
+     filterVariantsTag(event): void
+     {
+         // Get the value
+         const value = event.target.value.toLowerCase();
+ 
+         console.log("value",value)
+         console.log("event",event)
+ 
+         // Filter the variants
+         this.filteredVariants = this.variants.filter(variant => variant.name.toLowerCase().includes(value));
+     }
+ 
+     /**
+      * Filter variants input key down event
+      *
+      * @param event
+      */
+     filterVariantsTagInputKeyDown(event): void
+     {
+         // Return if the pressed key is not 'Enter'
+         if ( event.key !== 'Enter' )
+         {
+             return;
+         }
+ 
+         // If there is no variant available...
+         if ( this.filteredVariants.length === 0 )
+         {
+             // Create the variant
+             this.createVariant(event.target.value);
+ 
+             // Clear the input
+             event.target.value = '';
+ 
+             // Return
+             return;
+         }
+ 
+         // If there is a variant...
+         const variant = this.filteredVariants[0];
+         const isVariantApplied = this.selectedProduct.variants.find(id => id === variant.id);
+ 
+         // If the found variant is already applied to the product...
+         if ( isVariantApplied )
+         {
+             // Remove the variant from the product
+             this.removeVariantFromProduct(variant);
+         }
+         else
+         {
+             // Otherwise add the variant to the product
+             this.addVariantToProduct(variant);
+         }
+     }
 
     /**
      * Create a new variant
      *
-     * @param title
+     * @param value
      */
-     createVariantList(value: string): void
+     createVariantTag(value: string): void
      {
          const variant = {
              value
          };
          
          // Create variant on the server
-         this._inventoryService.createVariantList(variant)
+         this._inventoryService.createVariantTag(variant)
              .subscribe((response) => {
  
+                 console.log("addVariantTagToProduct ",response )
+ 
                  // Add the variant to the product
-                 this.addVariantToProduct(response);
+                 this.addVariantTagToProduct(response);
              });
      }
  
@@ -703,17 +769,17 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
       *
       * @param variant
       */
-     addVariantListToProduct(variant: InventoryVariant): void
+     addVariantTagToProduct(variant: InventoryVariant): void
      {
  
          // Add the variant
-         this.selectedProduct.variants.unshift(variant);
+         this.selectedProduct.variantsTag.unshift(variant);
  
          // Update the selected product form
-         this.selectedProductForm.get('variants').patchValue(this.selectedProduct.variants);
+         this.selectedProductForm.get('variantsTag').patchValue(this.selectedProduct.variantsTag);
  
-         this.variants = this.selectedProduct.variants;
-         this.filteredVariants = this.selectedProduct.variants;
+        //  this.variantsTag = this.selectedProduct.variantsTag;
+        //  this.filteredVariantsTag = this.selectedProduct.variantsTag;
          
          // Mark for check
          this._changeDetectorRef.markForCheck();

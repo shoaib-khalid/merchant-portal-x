@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 import { ChooseVerticleComponent } from './choose-verticle/choose-verticle.component';
 // import { StoresManagementComponent } from './stores-management/stores-management.component';
 // import { ProductsManagementComponent } from './products-management/products-management.component';
-import { OrdersManagementComponent } from './orders-management/orders-management.component';
+// import { OrdersManagementComponent } from './orders-management/orders-management.component';
 import { DiscountsManagementComponent } from './discounts-management/discounts-management.component';
 import { SocialMediaComponent } from './social-media/social-media.component';
 import { CustomerSupportComponent } from './customer-support/customer-support.component';
@@ -18,7 +18,7 @@ import { merchantRoutes } from 'app/modules/merchant/merchant.routing';
         ChooseVerticleComponent,
         // StoresManagementComponent,
         // ProductsManagementComponent,
-        OrdersManagementComponent,
+        // OrdersManagementComponent,
         DiscountsManagementComponent,
         SocialMediaComponent,
         CustomerSupportComponent
@@ -32,7 +32,7 @@ import { merchantRoutes } from 'app/modules/merchant/merchant.routing';
         ChooseVerticleComponent,
         // StoresManagementComponent,
         // ProductsManagementComponent,
-        OrdersManagementComponent,
+        // OrdersManagementComponent,
         DiscountsManagementComponent,
         SocialMediaComponent,
         CustomerSupportComponent
