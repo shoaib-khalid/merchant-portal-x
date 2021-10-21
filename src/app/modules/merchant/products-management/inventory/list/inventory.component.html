@@ -481,7 +481,7 @@
                                                             placeholder="Enter Category name"
                                                             (input)="filterCategories($event)"
                                                             (keydown)="filterCategoriesInputKeyDown($event)"
-                                                            [maxLength]="50"
+                                                            [maxLength]="20"
                                                             #newCategoryInput>
                                                     </div>
 
@@ -511,7 +511,7 @@
                                                 <div class="h-30 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
                                                     <!-- Categories -->
                                                     <ng-container *ngIf="!categoriesEditMode">
-                                                        <ng-container *ngFor="let category of unCheckedCategories; trackBy: trackByFn;">
+                                                        <ng-container *ngFor="let category of filteredCategories; trackBy: trackByFn;">
                                                             <mat-checkbox
                                                                 class="flex items-center h-10 min-h-10 px-4"
                                                                 [color]="'primary'"
@@ -530,14 +530,20 @@
                                                                         matInput
                                                                         [value]="category.name"
                                                                         (input)="updateCategoryTitle(category, $event)">
-                                                                    <button
-                                                                        mat-icon-button
+                                                                    <input
+                                                                        [id]=" 'category-' + category.id"
+                                                                        type="button"
                                                                         (click)="deleteCategory(category)"
-                                                                        matSuffix>
+                                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                        mat-button>
+                                                                    <label 
+                                                                        class="flex items-center justify-center p-2 rounded-full cursor-pointer hover:bg-hover"
+                                                                        [for]="'category-' + category.id"
+                                                                        matRipple>
                                                                         <mat-icon
                                                                             class="icon-size-5"
                                                                             [svgIcon]="'heroicons_solid:trash'"></mat-icon>
-                                                                    </button>
+                                                                    </label>
                                                                 </mat-form-field>
                                                             </ng-container>
                                                         </div>
@@ -632,11 +638,11 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <!-- Variant List -->
+                                        <!-- Variant Tag -->
                                         <div class="w-full max-w-2xl">
-                                            <span class="mt-2 mb-px font-medium leading-tight">Variant List</span>
+                                            <span class="mt-2 mb-px font-medium leading-tight">Variant Tag</span>
                                             <div class="w-full mt-2 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-auto">
-                                                <!-- Variants List -->
+                                                <!-- Variants Tag -->
                                                 <div class="h-44 m-2 leading-none overflow-y-auto border-gray-300 dark:border-gray-500">
                                                     <div *ngIf="filteredVariants">
                                                         <div *ngFor="let variant of filteredVariants; trackBy: trackByFn">
@@ -645,15 +651,15 @@
                                                                 <div class="ml-0 m-1.5">
                                                                     <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
                                                                         <input
-                                                                            id="variantlist-edit-button"
+                                                                            [id]="'varianttag-edit-button-' + variant.id"
                                                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                                             type="button"
-                                                                            (click)="openVariantsPanel(variant.id)"
+                                                                            (click)="openVariantsPanel(variant)"
                                                                             mat-icon-button
                                                                             #variantsPanelOrigin>
                                                                         <label 
                                                                             class="flex items-center justify-center p-3 h-9 cursor-pointer rounded-full leading-9 bg-primary"
-                                                                            for="variantlist-edit-button"
+                                                                            [for]="'varianttag-edit-button-' + variant.id"
                                                                             matRipple>
                                                                             <span class="mx-1 text-white">Add</span>
                                                                             <mat-icon
@@ -711,7 +717,7 @@
                                                                 class="flex flex-col max-h-64 py-2 border-t overflow-y-auto">
                                                                 <!-- Variants -->
                                                                 <ng-container *ngIf="!variantsTagEditMode">
-                                                                    <ng-container *ngFor="let variant of variantsTag.productVariantsAvailable; trackBy: trackByFn">
+                                                                    <ng-container *ngFor="let variant of selectedVariant.productVariantsAvailable; trackBy: trackByFn">
                                                                         <div
                                                                             class="flex items-center h-10 min-h-10 px-4 cursor-pointer hover:bg-hover"
                                                                             (click)="toggleContactVariant(variant)"
@@ -729,7 +735,7 @@
                                                                 <!-- Variants editing -->
                                                                 <ng-container *ngIf="variantsTagEditMode">
                                                                     <div class="py-2 space-y-2">
-                                                                        <ng-container *ngFor="let variant of variantsTag.productVariantsAvailable; trackBy: trackByFn">
+                                                                        <ng-container *ngFor="let variant of variantsTag; trackBy: trackByFn">
                                                                             <div class="flex items-center">
                                                                                 <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full mx-4">
                                                                                     <input
@@ -752,7 +758,7 @@
                                                                 <!-- Create variant -->
                                                                 <div
                                                                     class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer hover:bg-hover"
-                                                                    *ngIf="shouldShowCreateVariantButton(newVariantInput.value)"
+                                                                    *ngIf="shouldShowCreateVariantTagButton(newVariantInput.value)"
                                                                     (click)="createVariantTag(newVariantInput.value); newVariantInput.value = ''"
                                                                     matRipple>
                                                                     <mat-icon

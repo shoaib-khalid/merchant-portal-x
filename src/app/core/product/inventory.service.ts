@@ -155,7 +155,7 @@ export class InventoryService
                     this._categories.next([...categories, newCategory.data]);
 
                     // Return new category from observable
-                    return newCategory.data;
+                    return newCategory;
                 })
             ))
         );
@@ -216,16 +216,13 @@ export class InventoryService
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
 
         const header = {
-            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
-            params: {
-                storeCategoryId: id,
-            }
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`)
         };
 
         // product-service/v1/swagger-ui.html#/store-category-controller
         return this.categories$.pipe(
             take(1),
-            switchMap(categories => this._httpClient.delete(productService + '/store-categories',header)
+            switchMap(categories => this._httpClient.delete(productService + '/store-categories/' + id ,header)
             .pipe(
                 map((isDeleted: boolean) => {
 
@@ -399,7 +396,6 @@ export class InventoryService
             switchMap(products => this._httpClient.post<InventoryProduct>(productService +'/stores/'+this.storeId$+'/products', body , header).pipe(
                 map((newProduct) => {
 
-                    console.log("newProduct",newProduct)
                     // Update the products with the new product
                     this._products.next([newProduct["data"], ...products]);
 
@@ -517,8 +513,6 @@ export class InventoryService
             "sku": null,
             "status": "AVAILABLE"
         };
-
-        console.log("productId",product)
 
         // return of();
 

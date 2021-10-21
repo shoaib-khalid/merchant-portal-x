@@ -56,16 +56,15 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     checkedCategories: InventoryCategory[];
     unCheckedCategories: InventoryCategory[];
 
-    variants: InventoryVariant[];
-    filteredVariants: InventoryVariant[];
+    variants: InventoryVariant[] = [];
+    filteredVariants: InventoryVariant[] = [];
     variantsEditMode: boolean = false;
 
     // variantTag: InventoryVariantsAvailable;
-    variantsTag: InventoryVariantsAvailable[];
-    filteredVariantsTag: InventoryVariantsAvailable[];
+    variantsTag: InventoryVariantsAvailable[] = [];
+    filteredVariantsTag: InventoryVariantsAvailable[] = [];
     variantsTagEditMode: boolean = false;
 
-    
     flashMessage: 'success' | 'error' | null = null;
     isLoading: boolean = false;
     pagination: InventoryPagination;
@@ -74,6 +73,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     selectedProduct: InventoryProduct | null = null;
     selectedProductForm: FormGroup;
 
+    selectedVariant: InventoryVariant | null = null;
 
     imagesEditMode: boolean = false;
 
@@ -189,8 +189,6 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
                 })
             )
             .subscribe();
-
-        console.log("settle")
     }
 
     /**
@@ -270,16 +268,12 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
             return;
         }
 
-        // console.log("are",this.selectedProduct.minQuantityForAlarm);
-
         // Get the product by id
         this._inventoryService.getProductById(productId)
             .subscribe(async (product) => {
 
                 // Set the selected product
                 this.selectedProduct = product;
-
-                console.log("BLAKE PARE 0 ",this.selectedProduct)
 
                 // Fill the form
                 this.selectedProductForm.patchValue(product);
@@ -293,8 +287,10 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
                     this.variants = variants;
                     this.filteredVariants = variants;
 
-                    this.variantsTag = [];
-                    this.filteredVariantsTag = [];
+                    variants.forEach(element => {
+                        this.variantsTag = element.productVariantsAvailable;
+                        this.filteredVariantsTag = element.productVariantsAvailable;
+                    });
 
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
@@ -304,19 +300,16 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
                 this.variants = product.variants;
                 this.filteredVariants = product.variants;
 
-                this.variantsTag = [];
-                this.filteredVariantsTag = [];
-
+                // Set to this variants 
+                (product.variants).forEach(element => {
+                    this.variantsTag = element.productVariantsAvailable;
+                    this.filteredVariantsTag = element.productVariantsAvailable;
+                });
                 
-                this.selectedProduct.variantsTag = [];
-
-
-                console.log("MAC MACE",product)
+                this.selectedProduct.variantsTag = this.variantsTag;
 
                 // Add the category
                 this.selectedProduct.category = product.category;
-
-                // console.log("BLAKE PARE 2 ",this.selectedProduct.minQuantityForAlarm)
         
                 // Update the selected product form
                 this.selectedProductForm.get('category').patchValue(this.selectedProduct.category);
@@ -393,9 +386,6 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         // Get the value
         const value = event.target.value.toLowerCase();
 
-        console.log("value",value)
-        console.log("event",event)
-
         // Filter the variants
         this.filteredVariants = this.variants.filter(variant => variant.name.toLowerCase().includes(value));
     }
@@ -457,9 +447,6 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         // Create variant on the server
         this._inventoryService.createVariant(variant)
             .subscribe((response) => {
-
-                console.log("addVariantToProduct ",response )
-
                 // Add the variant to the product
                 this.addVariantToProduct(response);
             });
@@ -568,8 +555,23 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     /**
      * Open variants panel
      */
-    openVariantsPanel(variantId): void
+    openVariantsPanel(variant: InventoryVariant): void
     {
+
+        this.selectedVariant = variant;
+        
+        if (this.selectedVariant){
+
+            // get index of filteredVariants that have same id with variantId
+            let index = this.filteredVariants.findIndex(x => x.id === variant.id);
+    
+            // get the object of filteredVariantsTag in filteredVariants
+            this.filteredVariantsTag = this.filteredVariants[index].productVariantsAvailable;
+
+        } else {
+            this.filteredVariantsTag = [];
+        }
+
         // Create the overlay
         this._variantsPanelOverlayRef = this._overlay.create({
             backdropClass   : '',
@@ -615,14 +617,15 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
             // If overlay exists and attached...
             if ( this._variantsPanelOverlayRef && this._variantsPanelOverlayRef.hasAttached() )
             {
+
                 // Detach it
                 this._variantsPanelOverlayRef.detach();
 
                 // Reset the variant filter
-                this.filteredVariants = this.variants;
+                this.filteredVariantsTag = this.variantsTag;
 
                 // Toggle the edit mode off
-                this.variantsEditMode = false;
+                this.variantsTagEditMode = false;
             }
 
             // If template portal exists and attached...
@@ -658,11 +661,8 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
          // Get the value
          const value = event.target.value.toLowerCase();
  
-         console.log("value",value)
-         console.log("event",event)
- 
          // Filter the variants
-         this.filteredVariants = this.variants.filter(variant => variant.name.toLowerCase().includes(value));
+         this.filteredVariantsTag = this.variantsTag.filter(variantTag => variantTag.value.toLowerCase().includes(value));
      }
  
      /**
@@ -679,10 +679,10 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
          }
  
          // If there is no variant available...
-         if ( this.filteredVariants.length === 0 )
+         if ( this.filteredVariantsTag.length === 0 )
          {
              // Create the variant
-             this.createVariant(event.target.value);
+             this.createVariantTag(event.target.value);
  
              // Clear the input
              event.target.value = '';
@@ -692,19 +692,20 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
          }
  
          // If there is a variant...
-         const variant = this.filteredVariants[0];
-         const isVariantApplied = this.selectedProduct.variants.find(id => id === variant.id);
+         const variantTag = this.filteredVariantsTag[0];
+         const isVariantTagApplied = this.selectedProduct.variantsTag.find(id => id === variantTag.id);
  
          // If the found variant is already applied to the product...
-         if ( isVariantApplied )
+         if ( isVariantTagApplied )
          {
              // Remove the variant from the product
-             this.removeVariantFromProduct(variant);
+             this.removeVariantTagFromProduct(variantTag);
          }
          else
          {
              // Otherwise add the variant to the product
-             this.addVariantToProduct(variant);
+             let variantId
+             this.addVariantTagToProduct(variantTag, variantId);
          }
      }
 
@@ -715,18 +716,15 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
      */
      createVariantTag(value: string): void
      {
-         const variant = {
+        const variant = {
              value
          };
          
          // Create variant on the server
          this._inventoryService.createVariantTag(variant)
-             .subscribe((response) => {
- 
-                 console.log("addVariantTagToProduct ",response )
- 
+             .subscribe((response) => { 
                  // Add the variant to the product
-                 this.addVariantTagToProduct(response);
+                 this.addVariantTagToProduct(response,this.selectedVariant.id);
              });
      }
  
@@ -755,7 +753,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
       *
       * @param variant
       */
-     deleteVariantList(variant: InventoryVariant): void
+     deleteVariantTag(variant: InventoryVariant): void
      {
          // Delete the variant from the server
          this._inventoryService.deleteVariant(variant.id).subscribe();
@@ -769,31 +767,37 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
       *
       * @param variant
       */
-     addVariantTagToProduct(variant: InventoryVariant): void
+     addVariantTagToProduct(variantTag: InventoryVariantsAvailable, variantId: string): void
      {
+
+        let index = (this.selectedProduct.variants).findIndex(item => item.id === variantId);
+        
+        if (!this.selectedProduct.variants[index].productVariantsAvailable) {
+            this.selectedProduct.variants[index].productVariantsAvailable = [];
+        }
+        
+        // Add the variantTag
+        this.selectedProduct.variants[index].productVariantsAvailable.unshift(variantTag);
  
-         // Add the variant
-         this.selectedProduct.variantsTag.unshift(variant);
- 
-         // Update the selected product form
-         this.selectedProductForm.get('variantsTag').patchValue(this.selectedProduct.variantsTag);
- 
-        //  this.variantsTag = this.selectedProduct.variantsTag;
-        //  this.filteredVariantsTag = this.selectedProduct.variantsTag;
-         
-         // Mark for check
-         this._changeDetectorRef.markForCheck();
+        // Update the selected product form
+        this.selectedProductForm.get('variants').patchValue(this.selectedProduct.variants);
+
+        this.variants = this.selectedProduct.variants;
+        this.filteredVariants = this.selectedProduct.variants;
+        
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
      }
  
      /**
-      * Remove variant from the product
+      * Remove variantTag from the product
       *
-      * @param variant
+      * @param variantTag
       */
-     removeVariantListFromProduct(variant: InventoryVariant): void
+     removeVariantTagFromProduct(variantTag: InventoryVariant): void
      {
-         // Remove the variant
-         this.selectedProduct.variants.splice(this.selectedProduct.variants.findIndex(item => item === variant.id), 1);
+         // Remove the variantTag
+         this.selectedProduct.variants.splice(this.selectedProduct.variants.findIndex(item => item === variantTag.id), 1);
  
          // Update the selected product form
          this.selectedProductForm.get('variants').patchValue(this.selectedProduct.variants);
@@ -801,6 +805,35 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
          // Mark for check
          this._changeDetectorRef.markForCheck();
      }
+
+    /**
+     * Toggle product variantTag
+     *
+     * @param variantTag
+     * @param change
+     */
+     toggleProductVariantTag(variantTag: InventoryVariant, change: MatCheckboxChange): void
+     {
+         if ( change.checked )
+         {
+             this.addVariantToProduct(variantTag);
+         }
+         else
+         {
+             this.removeVariantFromProduct(variantTag);
+         }
+     }
+ 
+     /**
+      * Should the create variantTag button be visible
+      *
+      * @param inputValue
+      */
+     shouldShowCreateVariantTagButton(inputValue: string): boolean
+     {
+         return !!!(inputValue === '' || this.variantsTag.findIndex(variantTag => variantTag.value.toLowerCase() === inputValue.toLowerCase()) > -1);
+     }
+
 
     /**
      * 
@@ -889,7 +922,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
              .subscribe((response) => {
  
                  // Add the category to the product
-                 this.addCategoryToProduct(response);
+                 this.addCategoryToProduct(response["data"]);
              });
      }
  
@@ -935,15 +968,8 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
      addCategoryToProduct(category: InventoryCategory): void
      {
 
-        console.log("DI SINI XX",category.id)
-
-        console.log("BLAKE PARE 1 ",this.selectedProduct)
-
-
          // Add the category
          this.selectedProduct.category = category.id;
-
-         console.log("BLAKE PARE 2 ",this.selectedProduct.category)
  
          // Update the selected product form
          this.selectedProductForm.get('category').patchValue(this.selectedProduct.category);
@@ -1100,25 +1126,24 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     initCreateProduct(){
         // get category by name = no-category
         this._inventoryService.getCategories("no-category").subscribe(async (res)=>{
+
             let _noCategory = res["data"].find(obj => obj.name === "no-category");
 
             // if there is no category with "no-category" name, create one
             console.log("logs this !!!",_noCategory)
 
-            if (_noCategory["name"] !== "no-category"){
+            if (!_noCategory || _noCategory["name"] !== "no-category"){
                 await this._inventoryService.createCategory({
                     name: "no-category"
                 }).subscribe((res)=>{
                     if (res["status"] !== 201){
-                        console.log("error occur")
+                        console.log("an error has occur",res)
                     } else {
-                        this.createProduct(_noCategory["id"]);
-                        console.log("create-product next");
+                        this.createProduct(res["data"].id);
                     }
                 });
             } else {
-                this.createProduct(_noCategory["id"]);
-                console.log("create-product next");
+                this.createProduct(_noCategory.id);
             }
         });
     }
@@ -1153,6 +1178,8 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
             // Set Stock to 1 ... It's default anyway
             this.selectedProduct.minQuantityForAlarm = -1;
 
+            // Set Image to null ... It's default anyway
+            this.selectedProduct.images = [];
             
             // Set filtered variants to empty array
             this.filteredVariants = [];

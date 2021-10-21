@@ -41,7 +41,7 @@ export class ECommerceInventoryMockApi
 
 
         // -----------------------------------------------------------------------------------------------------
-        // @ Vatiants - POST
+        // @ Variants - POST
         // -----------------------------------------------------------------------------------------------------
         this._fuseMockApiService
             .onPost('api/apps/ecommerce/inventory/category')
@@ -61,7 +61,7 @@ export class ECommerceInventoryMockApi
             });
 
         // -----------------------------------------------------------------------------------------------------
-        // @ Vatiants - PATCH
+        // @ Variants - PATCH
         // -----------------------------------------------------------------------------------------------------
         this._fuseMockApiService
             .onPatch('api/apps/ecommerce/inventory/category')
@@ -296,14 +296,14 @@ export class ECommerceInventoryMockApi
             });
 
         // -----------------------------------------------------------------------------------------------------
-        // @ Vatiants - GET
+        // @ Variants - GET
         // -----------------------------------------------------------------------------------------------------
         this._fuseMockApiService
             .onGet('api/apps/ecommerce/inventory/variants')
             .reply(() => [200, cloneDeep(this._variants)]);
 
         // -----------------------------------------------------------------------------------------------------
-        // @ Vatiants - POST
+        // @ Variants - POST
         // -----------------------------------------------------------------------------------------------------
         this._fuseMockApiService
             .onPost('api/apps/ecommerce/inventory/variant')
@@ -323,7 +323,7 @@ export class ECommerceInventoryMockApi
             });
 
         // -----------------------------------------------------------------------------------------------------
-        // @ Vatiants - PATCH
+        // @ Variants - PATCH
         // -----------------------------------------------------------------------------------------------------
         this._fuseMockApiService
             .onPatch('api/apps/ecommerce/inventory/variant')
