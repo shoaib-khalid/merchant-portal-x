@@ -58,6 +58,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     checkedCategories: InventoryCategory[];
     unCheckedCategories: InventoryCategory[];
 
+    showVariants: boolean = true;
     variants: InventoryVariant[] = [];
     filteredVariants: InventoryVariant[] = [];
     variantsEditMode: boolean = false;
@@ -132,6 +133,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
             name             : ['', [Validators.required]],
             description      : [''],
             categoryId       : [''],
+            isVariants       : [false],
             variants         : [[]],
             variantsTag      : [[]],
             sku              : [''],
@@ -652,6 +654,47 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
                 templatePortal.detach();
             }
         });
+    }
+
+    /**
+     * Delete the selected variants using the form data
+     */
+    deleteVariantConfirmation(): void
+    {
+
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title  : 'Delete product',
+            message: 'Are you sure you want to disable this variants? Current variants of this product will be remove permenantly!',
+            actions: {
+                confirm: {
+                    label: 'Delete'
+                }
+            }
+        });
+
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+
+            // If the confirm button pressed...
+            if ( result === 'confirmed' )
+            {
+
+                console.log("VARIANT DELETED")
+                // Close the details
+                // this.closeDetails();
+            } else {
+                // Update the selected product form
+                this.selectedProductForm.get('isVariants').patchValue(true);
+                
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            }
+        });
+    }
+
+    displayVariants(){
+        this.showVariants = !this.showVariants;
     }
     
     /**
