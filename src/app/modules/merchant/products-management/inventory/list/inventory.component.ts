@@ -11,6 +11,8 @@ import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { InventoryCategory, InventoryPagination, InventoryProduct, InventoryVariant, InventoryVariantsAvailable } from 'app/core/product/inventory.types';
 import { InventoryService } from 'app/core/product/inventory.service';
+import { Store } from 'app/core/store/store.types';
+import { StoresService } from 'app/core/store/store.service';
 
 @Component({
     selector       : 'inventory-list',
@@ -69,6 +71,8 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     isLoading: boolean = false;
     pagination: InventoryPagination;
     searchInputControl: FormControl = new FormControl();
+
+    stores: Store[];
     
     selectedProduct: InventoryProduct | null = null;
     selectedProductForm: FormGroup;
@@ -105,6 +109,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         private _fuseConfirmationService: FuseConfirmationService,
         private _formBuilder: FormBuilder,
         private _inventoryService: InventoryService,
+        private _storeService: StoresService,
         private _overlay: Overlay,
         private _renderer2: Renderer2,
         private _viewContainerRef: ViewContainerRef
@@ -144,6 +149,18 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
             status           : ['INACTIVE']
         });
 
+        // Get the stores
+        this._storeService.stores$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe((stores: Store[]) => {
+
+            // Update the pagination
+            this.stores = stores;
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
+    
 
         // Get the pagination
         this._inventoryService.pagination$
@@ -1203,34 +1220,49 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
      */
     updateSelectedProduct(): void
     {
+        
         // Get the product object
-        const product = this.selectedProductForm.getRawValue();
-        const constructProduct = {
-            id: product.id,
-            categoryId: product.categoryId,
-            name: product.name,
-            seoName: product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''),
-            status: product.status,
-            description: product.description,
-            storeId: product.storeId,
-            allowOutOfStockPurchases: product.allowOutOfStockPurchases,
-            trackQuantity: product.trackQuantity,
-            minQuantityForAlarm: product.minQuantityForAlarm
+        const productRaw = this.selectedProductForm.getRawValue();
+
+        // Get Current Store domain
+        const currentStoreIndex = (this.stores).findIndex(item => item.id === this._storeService.storeId$)
+
+        // Get
+        // let storeFrontDomain = this._apiServer.settings.storeFrontDomain;
+        let storeFrontDomain = 'symplified.ai';
+
+        let storeFrontURL = 'https://' + this.stores[currentStoreIndex].domain + '.' + storeFrontDomain;
+
+        // Generate product service (backend) body
+        const product = {
+            id: productRaw.id,
+            categoryId: productRaw.categoryId,
+            name: productRaw.name,
+            seoName: productRaw.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''),
+            seoUrl: storeFrontURL + '/product/name/' + productRaw.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''),
+            status: productRaw.status,
+            description: productRaw.description,
+            productInventories: productRaw.productInventories,
+            storeId: productRaw.storeId,
+            allowOutOfStockPurchases: productRaw.allowOutOfStockPurchases,
+            trackQuantity: productRaw.trackQuantity,
+            minQuantityForAlarm: productRaw.minQuantityForAlarm
         }
 
         // Remove the currentImageIndex field
-        delete product.currentImageIndex;
+        delete productRaw.currentImageIndex;
 
         console.log("updateSelectedProduct(): ",product)
+        
 
         // Update the product on the server
-        this._inventoryService.updateProduct(product.id, constructProduct).subscribe(() => {
+        this._inventoryService.updateProduct(productRaw.id, product).subscribe(() => {
 
             // Show a success message
             this.showFlashMessage('success');
         });
 
-        
+
     }
 
     /**

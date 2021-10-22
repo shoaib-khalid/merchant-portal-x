@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of, BehaviorSubject, Subject } from 'rxjs';
+import { Observable, of, ReplaySubject, Subject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { Store } from 'app/core/store/store.types';
 import { AppConfig } from 'app/config/service.config';
@@ -12,8 +12,9 @@ import { takeUntil } from 'rxjs/operators';
 })
 export class StoresService
 {
-    private _stores: BehaviorSubject<Store[] | null> = new BehaviorSubject(null);
+    private _stores: ReplaySubject<Store[]> = new ReplaySubject<Store[]>(1);
     private _unsubscribeAll: Subject<any> = new Subject<any>();
+    private _storeSubDomain: string;
 
     /**
      * Constructor
@@ -21,7 +22,7 @@ export class StoresService
     constructor(
         private _httpClient: HttpClient,
         private _apiServer: AppConfig,
-        private _jwt: JwtService
+        private _jwt: JwtService,
     )
     {
     }
@@ -31,7 +32,7 @@ export class StoresService
     // -----------------------------------------------------------------------------------------------------
 
     /**
-     * Setter & getter for store
+     * Setter for store
      *
      * @param value
      */
@@ -41,19 +42,27 @@ export class StoresService
         this._stores.next(value);
     }
 
+    /**
+     * Getter for store
+     *
+     */
     get stores$(): Observable<Store[]>
     {
         return this._stores.asObservable();
     }
 
     /**
-     * Setter & getter for storeId
+     * Setter for storeId
      */
      set storeId(str: string)
      {
          localStorage.setItem('storeId', str);
      }
- 
+
+    /**
+     * Getter for storeId
+     */
+
      get storeId$(): string
      {
          return localStorage.getItem('storeId') ?? '';
@@ -94,8 +103,10 @@ export class StoresService
         .pipe(
             tap((response) => {
                 // This part still havent been used ... IDK how to use it
-                let _newStores: Array<any> = [];
-                return this._stores.next(_newStores);
+                // let _newStores: Array<any> = [];
+                this._storeSubDomain = response;
+                console.log("HERO HERO",response)
+                return this._stores.next(response);
             })
         );
     }
@@ -120,6 +131,14 @@ export class StoresService
             .subscribe((storeList: Store[]) => {
                 this.storeId = storeList[0].id;
             });  
+    }
+
+    async getStoreBaseUrl(storeId: string){
+        let storeFrontDomain = this._apiServer.settings.storeFrontDomain;
+        console.log("storeId",storeId)
+        await console.log(this.get(storeId));
+        console.log("storeSubDomain",this._storeSubDomain)
+        return 'https://'  + storeFrontDomain;
     }
     
 }

@@ -6,6 +6,7 @@ export interface InventoryProduct
     active?: boolean;
     name: string; 
     description: string; 
+    productInventories?: InventoryProductX[];
     stock?: number;
     allowOutOfStockPurchases: boolean;
     minQuantityForAlarm: number;

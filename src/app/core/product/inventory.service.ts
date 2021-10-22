@@ -27,7 +27,7 @@ export class InventoryService
     constructor(
         private _httpClient: HttpClient,
         private _apiServer: AppConfig,
-        private _jwt: JwtService
+        private _jwt: JwtService,
     )
     {
     }
@@ -309,6 +309,7 @@ export class InventoryService
                         status: object.status,
                         name: object.name,
                         description: object.description,
+                        productInventories: object.productInventories,
                         stock: object.productInventories[0].quantity, // need looping
                         allowOutOfStockPurchases: object.allowOutOfStockPurchases,
                         minQuantityForAlarm: object.minQuantityForAlarm,
@@ -341,6 +342,8 @@ export class InventoryService
         return this._products.pipe(
             take(1),
             map((products) => {
+
+                console.log("products: ",products)
 
                 // Find the product
                 const product = products.find(item => item.id === id) || null;
@@ -421,20 +424,6 @@ export class InventoryService
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
-
-        const now = new Date();
-        const date = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate() + " " + now.getHours() + ":" + now.getMinutes()  + ":" + now.getSeconds();
-
-        // const body = {
-        //     // "categoryId": categoryId,
-        //     "name": "A New Product " + date,
-        //     "status": "INACTIVE",
-        //     "description": "Tell us more about your product",
-        //     "storeId": this.storeId$,
-        //     "allowOutOfStockPurchases": false,
-        //     "trackQuantity": false,
-        //     "minQuantityForAlarm": -1
-        // };
 
         return this.products$.pipe(
             take(1),

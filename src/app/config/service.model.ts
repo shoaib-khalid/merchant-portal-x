@@ -12,6 +12,6 @@ export interface IAppConfig {
         paymentService:string;
 
     };
-    storeFrontUrl:string;
+    storeFrontDomain:string;
     logging: number;
 }
