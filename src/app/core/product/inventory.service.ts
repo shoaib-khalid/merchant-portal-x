@@ -247,7 +247,7 @@ export class InventoryService
                         products.forEach((product) => {
 
                             // remove that category in each products 
-                            product.category = "";
+                            product.categoryId = "";
 
                         });
 
@@ -306,7 +306,7 @@ export class InventoryService
                         id: object.id,
                         thumbnail: object.thumbnailUrl,
                         images: Object.keys(object.productAssets).map(function(key){return object.productAssets[key].url}),
-                        active: (object.status === 'ACTIVE'),
+                        status: object.status,
                         name: object.name,
                         description: object.description,
                         stock: object.productInventories[0].quantity, // need looping
@@ -316,7 +316,7 @@ export class InventoryService
                         sku: object.productInventories[0].sku, // need looping
                         price: object.productInventories[0].price, // need looping
                         weight: 0,
-                        category: object.categoryId,
+                        categoryId: object.categoryId,
                         variants: object.productVariants
                     });
                     _newVariants.push(object.productVariants)
@@ -393,7 +393,7 @@ export class InventoryService
         return this.products$.pipe(
             take(1),
             // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
-            switchMap(products => this._httpClient.post<InventoryProduct>(productService +'/stores/'+this.storeId$+'/products', body , header).pipe(
+            switchMap(products => this._httpClient.post<InventoryProduct>(productService + '/stores/' + this.storeId$ + '/products', body , header).pipe(
                 map((newProduct) => {
 
                     // Update the products with the new product
@@ -414,25 +414,45 @@ export class InventoryService
      */
     updateProduct(id: string, product: InventoryProduct): Observable<InventoryProduct>
     {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        const now = new Date();
+        const date = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate() + " " + now.getHours() + ":" + now.getMinutes()  + ":" + now.getSeconds();
+
+        // const body = {
+        //     // "categoryId": categoryId,
+        //     "name": "A New Product " + date,
+        //     "status": "INACTIVE",
+        //     "description": "Tell us more about your product",
+        //     "storeId": this.storeId$,
+        //     "allowOutOfStockPurchases": false,
+        //     "trackQuantity": false,
+        //     "minQuantityForAlarm": -1
+        // };
+
         return this.products$.pipe(
             take(1),
-            switchMap(products => this._httpClient.patch<InventoryProduct>('api/apps/ecommerce/inventory/product', {
-                id,
-                product
-            }).pipe(
+            // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
+            switchMap(products => this._httpClient.put<InventoryProduct>(productService + '/stores/' + this.storeId$ + '/products/' + id, product , header).pipe(
                 map((updatedProduct) => {
 
                     // Find the index of the updated product
                     const index = products.findIndex(item => item.id === id);
 
                     // Update the product
-                    products[index] = updatedProduct;
+                    products[index] = updatedProduct["data"];
 
                     // Update the products
                     this._products.next(products);
 
                     // Return the updated product
-                    return updatedProduct;
+                    return updatedProduct["data"];
                 }),
                 switchMap(updatedProduct => this.product$.pipe(
                     take(1),
@@ -440,10 +460,10 @@ export class InventoryService
                     tap(() => {
 
                         // Update the product if it's selected
-                        this._product.next(updatedProduct);
+                        this._product.next(updatedProduct["data"]);
 
                         // Return the updated product
-                        return updatedProduct;
+                        return updatedProduct["data"];
                     })
                 ))
             ))
@@ -492,6 +512,48 @@ export class InventoryService
     }
 
     addInventoryToProduct(product: InventoryProduct): Observable<InventoryProductX>{
+
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        const now = new Date();
+        const date = now.getFullYear() + "" + (now.getMonth()+1) + "" + now.getDate() + "" + now.getHours() + "" + now.getMinutes()  + "" + now.getSeconds();
+
+        const body = {
+            "productId": product.id,
+            "itemCode": product.id + date,
+            "price": 0,
+            "compareAtprice": 0,
+            "quantity": 1,
+            "sku": null,
+            "status": "AVAILABLE"
+        };
+
+        // return of();
+
+        return this.inventories$.pipe(
+            take(1),
+            // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
+            switchMap(products => this._httpClient.post<InventoryProduct>(productService +'/stores/'+this.storeId$+'/products/' + product.id + "/inventory", body , header).pipe(
+                map((newProduct) => {
+
+                    console.log("newProduct InventoryItem",newProduct)
+                    // Update the products with the new product
+                    // this._products.next([newProduct["data"], ...products]);
+
+                    // Return the new product
+                    return newProduct["data"];
+                })
+            ))
+        );
+    }
+
+    updateInventoryToProduct(product: InventoryProduct): Observable<InventoryProductX>{
 
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;

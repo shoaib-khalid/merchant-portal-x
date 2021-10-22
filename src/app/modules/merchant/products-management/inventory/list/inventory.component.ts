@@ -126,7 +126,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
             id               : [''],
             name             : ['', [Validators.required]],
             description      : [''],
-            category         : [''],
+            categoryId       : [''],
             variants         : [[]],
             variantsTag      : [[]],
             sku              : [''],
@@ -141,7 +141,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
             filteredVariant  : [0],
             allowOutOfStockPurchases: [false],
             trackQuantity    : [false],
-            active           : [false]
+            status           : ['INACTIVE']
         });
 
 
@@ -309,10 +309,10 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
                 this.selectedProduct.variantsTag = this.variantsTag;
 
                 // Add the category
-                this.selectedProduct.category = product.category;
+                this.selectedProduct.categoryId = product.categoryId;
         
                 // Update the selected product form
-                this.selectedProductForm.get('category').patchValue(this.selectedProduct.category);
+                this.selectedProductForm.get('categoryId').patchValue(this.selectedProduct.categoryId);
 
 
                 this.selectedProduct.minQuantityForAlarm = product.minQuantityForAlarm;
@@ -891,7 +891,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
  
          // If there is a category...
          const category = this.filteredCategories[0];
-         const isCategoryApplied = this.selectedProduct.category;
+         const isCategoryApplied = this.selectedProduct.categoryId;
  
          // If the found category is already applied to the product...
          if ( isCategoryApplied )
@@ -969,10 +969,10 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
      {
 
          // Add the category
-         this.selectedProduct.category = category.id;
+         this.selectedProduct.categoryId = category.id;
  
          // Update the selected product form
-         this.selectedProductForm.get('category').patchValue(this.selectedProduct.category);
+         this.selectedProductForm.get('categoryId').patchValue(this.selectedProduct.categoryId);
  
          // Mark for check
          this._changeDetectorRef.markForCheck();
@@ -986,10 +986,10 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
      removeCategoryFromProduct(category: InventoryCategory): void
      {
          // Remove the category
-         this.selectedProduct.category = null;
+         this.selectedProduct.categoryId = null;
  
          // Update the selected product form
-         this.selectedProductForm.get('category').patchValue(this.selectedProduct.category);
+         this.selectedProductForm.get('categoryId').patchValue(this.selectedProduct.categoryId);
  
          // Mark for check
          this._changeDetectorRef.markForCheck();
@@ -1167,7 +1167,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
             this.selectedProduct = newProduct["data"];
                                     
             // Set Category to Product 
-            this.selectedProduct.category = newProduct["data"].categoryId;
+            this.selectedProduct.categoryId = newProduct["data"].categoryId;
 
             // Set Price to 0 ... It's default anyway
             this.selectedProduct.price = 0;
@@ -1205,16 +1205,32 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     {
         // Get the product object
         const product = this.selectedProductForm.getRawValue();
+        const constructProduct = {
+            id: product.id,
+            categoryId: product.categoryId,
+            name: product.name,
+            seoName: product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''),
+            status: product.status,
+            description: product.description,
+            storeId: product.storeId,
+            allowOutOfStockPurchases: product.allowOutOfStockPurchases,
+            trackQuantity: product.trackQuantity,
+            minQuantityForAlarm: product.minQuantityForAlarm
+        }
 
         // Remove the currentImageIndex field
         delete product.currentImageIndex;
 
+        console.log("updateSelectedProduct(): ",product)
+
         // Update the product on the server
-        this._inventoryService.updateProduct(product.id, product).subscribe(() => {
+        this._inventoryService.updateProduct(product.id, constructProduct).subscribe(() => {
 
             // Show a success message
             this.showFlashMessage('success');
         });
+
+        
     }
 
     /**
@@ -1299,5 +1315,9 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
             var result = (a[property].toLowerCase() < b[property].toLowerCase()) ? -1 : (a[property].toLowerCase() > b[property].toLowerCase()) ? 1 : 0;
             return result * sortOrder;
         }
+    }
+
+    changeStatus(something){
+        console.log("",something);
     }
 }

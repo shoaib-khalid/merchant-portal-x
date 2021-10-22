@@ -1,22 +1,22 @@
 export interface InventoryProduct
 {
     id: string; 
-    thumbnail: string;
-    images: string[];
-    active: boolean;
+    thumbnail?: string;
+    images?: string[];
+    active?: boolean;
     name: string; 
-    description?: string; 
-    stock: number;
+    description: string; 
+    stock?: number;
     allowOutOfStockPurchases: boolean;
     minQuantityForAlarm: number;
     trackQuantity: boolean;
     sku?: string | null;
-    price: number;
-    weight: number;
-    category: string;
+    price?: number;
+    weight?: number;
+    categoryId: string;
     variants?: InventoryVariant[];
     variantsTag?: InventoryVariantsAvailable[];
-    status?: string;
+    status: string;
 }
 
 export interface InventoryPagination
