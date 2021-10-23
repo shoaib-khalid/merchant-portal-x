@@ -63,62 +63,6 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     filteredVariants: InventoryVariant[] = [];
     variantsEditMode: boolean = false;
 
-    budget:any = {
-        columns: ['variant', 'sku', 'price', 'quantity', 'image', 'upload', 'status'],
-        rows   : [
-            {
-                id                 : 1,
-                variant            : 'Blue/M',
-                sku                : 1234,
-                price              : 14000,
-                quantity           : 94,
-                image              : 880,
-                upload             : 5.92,
-                status             : 'ACTIVE'
-            },
-            {
-                id                 : 2,
-                variant            : 'Blue/S',
-                sku                : 1234,
-                price              : 14000,
-                quantity           : 94,
-                image              : 880,
-                upload             : 5.92,
-                status             : 'ACTIVE'
-            },
-            {
-                id                 : 3,
-                variant            : 'Blue/L',
-                sku                : 1234,
-                price              : 14000,
-                quantity           : 94,
-                image              : 880,
-                upload             : 5.92,
-                status             : 'ACTIVE'
-            },
-            {
-                id                 : 4,
-                variant            : 'Red/M',
-                sku                : 1234,
-                price              : 14000,
-                quantity           : 94,
-                image              : 880,
-                upload             : 5.92,
-                status             : 'ACTIVE'
-            },
-            {
-                id                 : 5,
-                variant            : 'Red/S',
-                sku                : 1234,
-                price              : 14000,
-                quantity           : 94,
-                image              : 880,
-                upload             : 5.92,
-                status             : 'ACTIVE'
-            },
-        ]
-    };
-
     // variantTag: InventoryVariantsAvailable;
     variantsTag: InventoryVariantsAvailable[] = [];
     filteredVariantsTag: InventoryVariantsAvailable[] = [];
@@ -135,6 +79,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     selectedProductForm: FormGroup;
 
     selectedVariant: InventoryVariant | null = null;
+    selectedVariantList: InventoryVariant | null = null;
 
     imagesEditMode: boolean = false;
 
@@ -755,6 +700,56 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         this.showVariants = !this.showVariants;
     }
     
+    /**
+     * Toggle variant details
+     *
+     * @param variantId
+     */
+    toggleVariantDetails(variantId: string): void
+    {
+
+        
+        // If the variant is already selected...
+        if ( this.selectedVariantList && this.selectedVariantList.id === variantId )
+        {
+            console.log("X MASUK PON")
+            // Close the details
+            this.closeVariantDetails();
+            return;
+        }
+        
+        // Get variant list
+        let index = (this.variants).findIndex(item => item.id === variantId);
+        this.selectedVariantList = this.variants[index];
+
+        
+        console.log("index : ",index)
+        console.log("variantId : ",variantId);
+        console.log("this.variants : ",this.variants)
+        console.log("this.variants[index] : ",this.variants[index])
+        console.log("this.selectedVariantList : ",this.selectedVariantList);
+        
+        // Get the variant details by id
+        // this._inventoryService.getProductById(variantId)
+        //     .subscribe(async (variant) => {
+
+        //         // Set the selected variant
+        //         this.selectedVariantList = variant;
+
+        //     });
+            
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+    }
+
+    /**
+     * Close the details
+     */
+    closeVariantDetails(): void
+    {
+        this.selectedVariantList = null;
+    }
+
     /**
      * 
      *  VARIANTS TAG
