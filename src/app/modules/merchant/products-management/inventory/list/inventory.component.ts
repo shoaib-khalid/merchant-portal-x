@@ -63,6 +63,62 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     filteredVariants: InventoryVariant[] = [];
     variantsEditMode: boolean = false;
 
+    budget:any = {
+        columns: ['variant', 'sku', 'price', 'quantity', 'image', 'upload', 'status'],
+        rows   : [
+            {
+                id                 : 1,
+                variant            : 'Blue/M',
+                sku                : 1234,
+                price              : 14000,
+                quantity           : 94,
+                image              : 880,
+                upload             : 5.92,
+                status             : 'ACTIVE'
+            },
+            {
+                id                 : 2,
+                variant            : 'Blue/S',
+                sku                : 1234,
+                price              : 14000,
+                quantity           : 94,
+                image              : 880,
+                upload             : 5.92,
+                status             : 'ACTIVE'
+            },
+            {
+                id                 : 3,
+                variant            : 'Blue/L',
+                sku                : 1234,
+                price              : 14000,
+                quantity           : 94,
+                image              : 880,
+                upload             : 5.92,
+                status             : 'ACTIVE'
+            },
+            {
+                id                 : 4,
+                variant            : 'Red/M',
+                sku                : 1234,
+                price              : 14000,
+                quantity           : 94,
+                image              : 880,
+                upload             : 5.92,
+                status             : 'ACTIVE'
+            },
+            {
+                id                 : 5,
+                variant            : 'Red/S',
+                sku                : 1234,
+                price              : 14000,
+                quantity           : 94,
+                image              : 880,
+                upload             : 5.92,
+                status             : 'ACTIVE'
+            },
+        ]
+    };
+
     // variantTag: InventoryVariantsAvailable;
     variantsTag: InventoryVariantsAvailable[] = [];
     filteredVariantsTag: InventoryVariantsAvailable[] = [];
