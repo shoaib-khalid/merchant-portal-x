@@ -82,6 +82,8 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
 
     imagesEditMode: boolean = false;
 
+    // variantCombos: any = [];
+
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     private _variantsPanelOverlayRef: OverlayRef;
 

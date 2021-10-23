@@ -935,50 +935,56 @@
                                                 <div class="flex flex-col flex-auto overflow-x-auto">
                                                     <table
                                                         class="min-w-240 overflow-y-visible"
-                                                        mat-table>
-                                                        <thead>
-                                                            <th>Image</th>
-                                                            <th>Variant</th>
-                                                            <th>Price</th>
-                                                            <th>Quantity</th>
-                                                            <th>Sku</th>
-                                                            <th>Upload</th>
-                                                            <th>Unavailable</th>
-                                                        </thead>
-                                                        <!-- <tbody>
-                                                            <tr *ngFor="let combo of combos;index as i;">
-                                                                <td><img class="i-item-img" src="{{images[i].preview}}"
-                                                                        alt="" height="768px" width="1336px"></td>
-                                                                <td>{{combo.variant}}</td>
-                                                                <td><input type="number" class="form-control tc"
-                                                                        name="price-variant"
-                                                                        (keyup)="priceChanged($event,i)"
-                                                                        value="{{combo.prices}}"
-                                                                        placeholder="RM 0.00" />
-                                                                </td>
-                                                                <td> <input name="variant-quantity" type="number"
-                                                                        class="form-control" value="{{combo.quantity}}"
-                                                                        (keyup)="quantityChanged($event,i)" name=""
-                                                                        id="" min="0"></td>
-                                                                <td><input name="variant-sku" value="{{combo.sku}}"
-                                                                        (keyup)="skuChanged($event,i)" type="text"
-                                                                        class="form-control  tc" /> </td>
-                                                                <td>
-                                                                    <div class="custom-file">
-                                                                        <input type="file" multiple name="file-variant"
-                                                                            accept="image/*" class="custom-file-input"
-                                                                            (change)="onFileChanged($event,i)" />
-                                                                        <label class="custom-file-label"
-                                                                            for="inputGroupFile01"></label>
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <input class="form-control available"
-                                                                        type="checkbox" name="variant-unavailable"
-                                                                        (change)="inventoryUnAvailable($event,i)">
-                                                                </td>
-                                                            </tr>
-                                                        </tbody> -->
+                                                        mat-table
+                                                        [dataSource]="filteredVariants">
+
+                                                        <!-- Type -->
+                                                        <ng-container
+                                                            matColumnDef="type"
+                                                            sticky>
+                                                            <th
+                                                                mat-header-cell
+                                                                *matHeaderCellDef>
+                                                                Type
+                                                            </th>
+                                                            <td
+                                                                mat-cell
+                                                                *matCellDef="let budget">
+                                                                <span class="flex items-center">
+                                                                    <span
+                                                                        class="w-2 h-2 rounded-full"
+                                                                        [ngClass]="{'bg-blue-500': filteredVariants.id === 1,
+                                                                                    'bg-red-500': filteredVariants.id === 2,
+                                                                                    'bg-green-500': filteredVariants.id === 3,
+                                                                                    'bg-amber-500': filteredVariants.id === 4,
+                                                                                    'bg-indigo-500': filteredVariants.id === 5}"></span>
+                                                                    <span class="ml-3 leading-4">{{filteredVariants.id}}</span>
+                                                                </span>
+                                                            </td>
+                                                        </ng-container>
+
+                                                        <!-- Total -->
+                                                        <ng-container matColumnDef="Variant Name">
+                                                            <th
+                                                                mat-header-cell
+                                                                *matHeaderCellDef>
+                                                                Total Budget
+                                                            </th>
+                                                            <td
+                                                                mat-cell
+                                                                *matCellDef="let budget">
+                                                                <span class="font-medium text-right">
+                                                                    {{filteredVariants.name | currency:'USD'}}
+                                                                </span>
+                                                            </td>
+                                                        </ng-container>
+
+                                                        <tr
+                                                            mat-header-row
+                                                            *matHeaderRowDef="filteredVariants.name"></tr>
+                                                        <tr
+                                                            mat-row
+                                                            *matRowDef="let row; columns: filteredVariants.name;"></tr>
                                                     </table>
                                                 </div>
                                             </div>
