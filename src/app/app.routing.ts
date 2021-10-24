@@ -10,19 +10,14 @@ import { UserRole } from 'app/core/user/user.roles';
 export const appRoutes: Route[] = [
 
     // Landing routes
-    {
-        path: '',
-        component  : LayoutComponent,
-        pathMatch : 'full',
+    { 
+        path: '', 
+        component  : LayoutComponent, 
         data: {
             layout: 'empty'
         },
-        children   : [
-            {path: '', loadChildren: () => import('app/modules/landing/home/home.module').then(m => m.LandingHomeModule)},
-        ]
-        
-    },
-    
+        loadChildren: () => import('app/modules/landing/home/home.module').then(m => m.LandingHomeModule)
+    },    
     // Error
     {path: 'error', children: [
         {path: '404', loadChildren: () => import('app/shared/error/error-404/error-404.module').then(m => m.Error404Module)},
