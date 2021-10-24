@@ -9,7 +9,7 @@ import { merge, Observable, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { InventoryCategory, InventoryPagination, InventoryProduct, InventoryVariant, InventoryVariantsAvailable } from 'app/core/product/inventory.types';
+import { InventoryCategory, InventoryPagination, InventoryProduct, InventoryVariant, InventoryVariantsAvailable, InventoryProductX } from 'app/core/product/inventory.types';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { Store } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
@@ -81,9 +81,11 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     selectedVariant: InventoryVariant | null = null;
     selectedVariantList: InventoryVariant | null = null;
 
+    selectedItemCode: InventoryProductX | null = null;
+    variantCombos: any = [];
+
     imagesEditMode: boolean = false;
 
-    // variantCombos: any = [];
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     private _variantsPanelOverlayRef: OverlayRef;
@@ -297,6 +299,8 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
                 // Set the selected product
                 this.selectedProduct = product;
 
+                console.log("product", product)
+
                 // Fill the form
                 this.selectedProductForm.patchValue(product);
 
@@ -317,25 +321,84 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
                 });
+
+                console.log("product id", product.id)
                 
                 // Set to this variants 
                 this.variants = product.variants;
                 this.filteredVariants = product.variants;
 
                 // Set to this variants 
+                // let variantCombo:any = [];
                 (product.variants).forEach(element => {
                     this.variantsTag = element.productVariantsAvailable;
                     this.filteredVariantsTag = element.productVariantsAvailable;
+
+                    // variantCombo.push(Array.from(element.productVariantsAvailable, variantTag => variantTag.value));
                 });
                 
                 this.selectedProduct.variantsTag = this.variantsTag;
+
+                const getCombosName = ([head, ...[headTail, ...tailTail]]) => {
+                    if (!headTail) return head
+                  
+                    const combined = headTail.reduce((acc, x) => {
+                        
+                        return acc.concat(head.map(h => `${h} / ${x}`))
+                    }, [])
+                  
+                    return combine([combined, ...tailTail])
+                }
+
+                // Get variant combo from selected productInventories
+                (this.selectedProduct.productInventories).forEach(async item => {
+                    
+                    let variantCombosName: string = "";
+                    let variantCombosArr = [];
+                    (item.productInventoryItems).forEach(item => {
+                        // put to array variantCombosArr
+                        variantCombosArr.push(item.productVariantAvailableId);
+                        variantCombosName = this.getVariantCombosName(variantCombosArr);
+                    });
+
+                    this.variantCombos.push({
+                        itemCode: item.itemCode,
+                        name: variantCombosName
+                    });
+                });
+
+                console.log("variantCombos: ",this.variantCombos)
+
+                const combine = ([head, ...[headTail, ...tailTail]]) => {
+                    if (!headTail) return head
+                  
+                    const combined = headTail.reduce((acc, x) => {
+                      return acc.concat(head.map(h => `${h} / ${x}`))
+                    }, [])
+                  
+                    return combine([combined, ...tailTail])
+                }
+
+                // console.log("Possible Combos",combine(variantCombo));
+
+                // let totalCombo = 1;
+                // (this.filteredVariants).forEach(variantItem => {
+                //     totalCombo = totalCombo * this.filteredVariantsTag.length;
+                // });
+                
+                // for (let index = 0; index < totalCombo; index ++){
+                //     (this.filteredVariants).forEach(variantItem => {
+                //         this.variantCombos[index].name = variantItem.productVariantsAvailable[]
+                //     });
+                // }
+
+                // console.log("variantCombos",this.variantCombos)
 
                 // Add the category
                 this.selectedProduct.categoryId = product.categoryId;
         
                 // Update the selected product form
                 this.selectedProductForm.get('categoryId').patchValue(this.selectedProduct.categoryId);
-
 
                 this.selectedProduct.minQuantityForAlarm = product.minQuantityForAlarm;
 
@@ -345,6 +408,23 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
+    }
+
+    getVariantCombosName(variantCombosArr){
+        let variantCombosName: string = "";
+        // this features is to sort, due to native of this.variants always sorted by id
+        (this.variants).forEach(item => {
+            // here it will find the matched id, and print the combo name 
+            // it will print by this.variants.id ascending
+            variantCombosArr.forEach(variantId => {
+            // console.log("variantId :", variantId);
+                let index = item.productVariantsAvailable.findIndex(variant => variant.id === variantId);
+                if (index > -1) {
+                    variantCombosName += item.productVariantsAvailable[index].value + "/";
+                }
+            });
+        });
+        return variantCombosName.slice(0,-1);
     }
 
     /**
@@ -703,14 +783,13 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     /**
      * Toggle variant details
      *
-     * @param variantId
+     * @param itemCode
      */
-    toggleVariantDetails(variantId: string): void
+    toggleVariantDetails(itemCode: string): void
     {
 
-        
         // If the variant is already selected...
-        if ( this.selectedVariantList && this.selectedVariantList.id === variantId )
+        if ( this.selectedItemCode && this.selectedItemCode.itemCode === itemCode )
         {
             console.log("X MASUK PON")
             // Close the details
@@ -719,15 +798,15 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         }
         
         // Get variant list
-        let index = (this.variants).findIndex(item => item.id === variantId);
-        this.selectedVariantList = this.variants[index];
+        let index = (this.selectedProduct.productInventories).findIndex(item => item.itemCode === itemCode);
+        this.selectedItemCode = this.selectedProduct.productInventories[index];
 
         
         console.log("index : ",index)
-        console.log("variantId : ",variantId);
-        console.log("this.variants : ",this.variants)
-        console.log("this.variants[index] : ",this.variants[index])
-        console.log("this.selectedVariantList : ",this.selectedVariantList);
+        console.log("variantId : ",itemCode);
+        console.log("this.variants : ",this.selectedProduct.productInventories)
+        console.log("this.variants[index] : ",this.selectedProduct.productInventories[index])
+        console.log("this.selectedItemCode : ",this.selectedItemCode);
         
         // Get the variant details by id
         // this._inventoryService.getProductById(variantId)
@@ -747,7 +826,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
      */
     closeVariantDetails(): void
     {
-        this.selectedVariantList = null;
+        this.selectedItemCode = null;
     }
 
     /**

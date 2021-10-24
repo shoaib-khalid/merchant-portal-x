@@ -933,8 +933,8 @@
                                             <div class="font-medium tracking-tight mb-1 truncate">Variant Details</div>
                                             <div class="flex flex-auto overflow-hidden">
                                                 <div class="flex flex-col flex-auto sm:mb-18 overflow-hidden sm:overflow-y-auto">
-                                                    <ng-container *ngIf="filteredVariants">
-                                                        <ng-container *ngIf="filteredVariants.length > 0; else noVariants">
+                                                    <ng-container *ngIf="selectedProduct.productInventories">
+                                                        <ng-container *ngIf="selectedProduct.productInventories.length > 0; else noVariants">
                                                             <div class="grid">
                                                                 <!-- Header -->
                                                                 <div
@@ -946,7 +946,7 @@
                                                                         [mat-sort-header]="'sku'">
                                                                         SKU
                                                                     </div>
-                                                                    <div [mat-sort-header]="'name'">Name</div>
+                                                                    <div [mat-sort-header]="'vname'">Name</div>
                                                                     <div></div>
                                                                     <div
                                                                         class="hidden sm:block"
@@ -966,57 +966,57 @@
                                                                     <div class="hidden sm:block">Details</div>
                                                                 </div>
                                                                 <!-- Rows -->
-                                                                <ng-container *ngIf="filteredVariants">
-                                                                    <ng-container *ngFor="let filteredVariant of filteredVariants; trackBy: trackByFn">
+                                                                <ng-container *ngIf="variantCombos">
+                                                                    <ng-container *ngFor="let combos of variantCombos; trackBy: trackByFn">
                                                                         <div class="inventory-grid grid items-center gap-4 py-3 px-6 md:px-8 border-b">                                       
                                                                             <!-- SKU -->
                                                                             <div class="hidden md:block truncate">
-                                                                                {{filteredVariant.sku}}
+                                                                                {{combos.sku}}
                                                                             </div>
                                         
                                                                             <!-- Name -->
                                                                             <div class="truncate">
-                                                                                {{filteredVariant.name}}
+                                                                                {{combos.name}}
                                                                             </div>
 
                                                                             <div></div>
                                         
                                                                             <!-- Price -->
                                                                             <div class="hidden sm:block">
-                                                                                {{filteredVariant.price | currency:'USD':'symbol':'1.2-2'}}
+                                                                                {{combos.price | currency:'USD':'symbol':'1.2-2'}}
                                                                             </div>
                                         
                                                                             <!-- Stock -->
                                                                             <div class="hidden lg:flex items-center">
-                                                                                <div class="min-w-4">{{filteredVariant.stock}}</div>
+                                                                                <div class="min-w-4">{{combos.stock}}</div>
                                                                                 <!-- Low stock -->
                                                                                 <div
                                                                                     class="flex items-end ml-2 w-1 h-4 bg-red-200 rounded overflow-hidden"
-                                                                                    *ngIf="filteredVariant.stock < 20">
+                                                                                    *ngIf="combos.stock < 20">
                                                                                     <div class="flex w-full h-1/3 bg-red-600"></div>
                                                                                 </div>
                                                                                 <!-- Medium stock -->
                                                                                 <div
                                                                                     class="flex items-end ml-2 w-1 h-4 bg-orange-200 rounded overflow-hidden"
-                                                                                    *ngIf="filteredVariant.stock >= 20 && filteredVariant.stock < 30">
+                                                                                    *ngIf="combos.stock >= 20 && combos.stock < 30">
                                                                                     <div class="flex w-full h-2/4 bg-orange-400"></div>
                                                                                 </div>
                                                                                 <!-- High stock -->
                                                                                 <div
                                                                                     class="flex items-end ml-2 w-1 h-4 bg-green-100 rounded overflow-hidden"
-                                                                                    *ngIf="filteredVariant.stock >= 30">
+                                                                                    *ngIf="combos.stock >= 30">
                                                                                     <div class="flex w-full h-full bg-green-400"></div>
                                                                                 </div>
                                                                             </div>
                                         
                                                                             <!-- Active -->
                                                                             <div class="hidden lg:block">
-                                                                                <ng-container *ngIf="filteredVariant.active">
+                                                                                <ng-container *ngIf="combos.active">
                                                                                     <mat-icon
                                                                                         class="text-green-400 icon-size-5"
                                                                                         [svgIcon]="'heroicons_solid:check'"></mat-icon>
                                                                                 </ng-container>
-                                                                                <ng-container *ngIf="!filteredVariant.active">
+                                                                                <ng-container *ngIf="!combos.active">
                                                                                     <mat-icon
                                                                                         class="text-gray-400 icon-size-5"
                                                                                         [svgIcon]="'heroicons_solid:x'"></mat-icon>
@@ -1028,15 +1028,15 @@
                                                                                 <button
                                                                                     class="min-w-10 min-h-7 h-7 px-2 leading-6"
                                                                                     mat-stroked-button
-                                                                                    (click)="toggleVariantDetails(filteredVariant.id)">
+                                                                                    (click)="toggleVariantDetails(combos.itemCode)">
                                                                                     <mat-icon
                                                                                         class="icon-size-5"
-                                                                                        [svgIcon]="selectedVariant?.id === filteredVariant.id ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'"></mat-icon>
+                                                                                        [svgIcon]="selectedItemCode?.itemCode === combos.itemCode ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'"></mat-icon>
                                                                                 </button>
                                                                             </div>
                                                                         </div>
                                                                         <div class="grid">
-                                                                            <ng-container *ngIf="selectedVariantList?.id === filteredVariant.id">
+                                                                            <ng-container *ngIf="selectedItemCode?.itemCode === combos.itemCode">
                                                                                 <ng-container *ngTemplateOutlet="rowVariantDetailsTemplate; context: {$implicit: variantlist}"></ng-container>
                                                                             </ng-container>
                                                                         </div>
@@ -1252,7 +1252,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="flex items-center justify-between w-full border-t px-8 py-4">
+                                    <div class="flex items-center justify-between w-full px-8">
                                         <input
                                             id="product-remove-button"
                                             type="button"

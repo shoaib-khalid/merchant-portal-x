@@ -55,7 +55,9 @@ export interface InventoryVariantsAvailable
 // productInventories
 export interface InventoryProductX
 {
+    name?: string;
     productId?: string;
+    productInventoryItems?: InventoryProductItem[];
     itemCode?: string;
     price?: number;
     compareAtprice?: number;
