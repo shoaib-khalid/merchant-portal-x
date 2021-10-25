@@ -409,9 +409,23 @@ export class AuthService
      *
      * @param user
      */
-    signUp(user: { name: string; email: string; password: string; company: string }): Observable<any>
+    signUp(user: { name: string; email: string; password: string; username: string }): Observable<any>
     {
-        return this._httpClient.post('api/auth/sign-up', user);
+        let userService = this._apiServer.settings.apiServer.userService;
+        const header: any = {
+            headers: new HttpHeaders().set("Authorization", `Bearer accessToken`)
+        };
+        const body = {
+            "deactivated": true,
+            "email": user.email,
+            "locked": true,
+            "name": user.name,
+            "username": user.username,
+            "password": user.password,
+            "roleId": "STORE_OWNER"
+          };
+        
+        return this._httpClient.post(userService + '/clients/register', body, header);
     }
 
     /**

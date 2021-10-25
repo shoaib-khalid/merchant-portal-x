@@ -44,6 +44,18 @@
                     </mat-error>
                 </mat-form-field>
 
+                <!-- Username field -->
+                <mat-form-field class="w-full">
+                    <mat-label>Username</mat-label>
+                    <input
+                        id="username-confirm"
+                        matInput
+                        [formControlName]="'username'">
+                    <mat-error *ngIf="signUpForm.get('username').hasError('required')">
+                        Username is required
+                    </mat-error>
+                </mat-form-field>
+
                 <!-- Email field -->
                 <mat-form-field class="w-full">
                     <mat-label>Email address</mat-label>
@@ -85,15 +97,6 @@
                     <mat-error>
                         Password is required
                     </mat-error>
-                </mat-form-field>
-
-                <!-- Company field -->
-                <mat-form-field class="w-full">
-                    <mat-label>Company</mat-label>
-                    <input
-                        id="company-confirm"
-                        matInput
-                        [formControlName]="'company'">
                 </mat-form-field>
 
                 <!-- ToS and PP -->
