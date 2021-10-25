@@ -1,12 +1,14 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 
 @Component({
     selector     : 'choose-verticle-page',
     templateUrl  : './choose-verticle.component.html',
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChooseVerticleComponent
 {
+    yearlyBilling: boolean = true;
     /**
      * Constructor
      */

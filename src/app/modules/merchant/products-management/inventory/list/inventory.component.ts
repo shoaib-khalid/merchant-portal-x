@@ -58,7 +58,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     checkedCategories: InventoryCategory[];
     unCheckedCategories: InventoryCategory[];
 
-    showVariants: boolean = true;
+    showVariants: boolean = false;
     variants: InventoryVariant[] = [];
     filteredVariants: InventoryVariant[] = [];
     variantsEditMode: boolean = false;

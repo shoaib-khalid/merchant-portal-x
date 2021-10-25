@@ -1,7 +1,7 @@
 import { Route } from '@angular/router';
 import { WithStoreIdGuard } from 'app/core/store/guards/withStoreId.guard';
 import { WithoutStoreIdGuard } from 'app/core/store/guards/withoutStoreId.guard';
-import { ChooseVerticleComponent } from './choose-verticle/choose-verticle.component';
+import { ChooseVerticleComponent } from './stores-management/choose-verticle/choose-verticle.component';
 import { RedirectComponent } from './redirect/redirect.component';
 // import { OrdersManagementComponent } from './orders-management/orders-management.component';
 import { DiscountsManagementComponent } from './discounts-management/discounts-management.component';
@@ -26,10 +26,14 @@ export const merchantRoutes: Route[] = [
         {
             path       : '',
             children   : [
-                {path: 'stores', loadChildren: () => import('app/modules/merchant/stores-management/choose-store.module').then(m => m.ChooseStoreModule)},
-                {path: 'choose-verticle', loadChildren: () => import('app/modules/merchant/choose-verticle/choose-verticle.module').then(m => m.ChooseVerticleModule), component  : ChooseVerticleComponent},
                 {path: 'customer-support', loadChildren: () => import('app/modules/merchant/customer-support/customer-support.module').then(m => m.CustomerSupportModule), component  : CustomerSupportComponent},
                 {path: 'redirect', loadChildren: () => import('app/modules/merchant/redirect/redirect.module').then(m => m.RedirectModule), component  : RedirectComponent},
             ]
-        }
+        },
+        {
+            path       : 'stores',
+            children   : [
+                {path: '', loadChildren: () => import('app/modules/merchant/stores-management/choose-store.module').then(m => m.ChooseStoreModule)}
+            ]
+        },
 ]; 

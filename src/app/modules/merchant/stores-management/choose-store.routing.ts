@@ -1,8 +1,9 @@
 import { Route } from '@angular/router';
 import { ChooseStoreComponent } from 'app/modules/merchant/stores-management/choose-store.component';
-import { ChooseStoreListComponent } from 'app/modules/merchant/stores-management/list/list.component';
+import { ChooseStoreListComponent } from 'app/modules/merchant/stores-management/stores-list/list.component';
 // import { ChooseStoreDetailsComponent } from 'app/modules/merchant/choose-store/details/details.component';
 import { ChooseStoreCategoriesResolver, ChooseStoreResolver, ChooseStoresResolver } from 'app/modules/merchant/stores-management/choose-store.resolvers';
+import { ChooseVerticleComponent } from './choose-verticle/choose-verticle.component';
 
 export const academyRoutes: Route[] = [
     {
@@ -20,9 +21,12 @@ export const academyRoutes: Route[] = [
                     stores: ChooseStoresResolver
                 }
             },
+
+            {path: 'choose-verticle', loadChildren: () => import('app/modules/merchant/stores-management/choose-verticle/choose-verticle.module').then(m => m.ChooseVerticleModule)},
+
             // {
-            //     path     : ':id',
-            //     component: ChooseStoreDetailsComponent,
+            //     path     : 'choose-verticle',
+            //     component: ChooseVerticleComponent,
             //     resolve  : {
             //         course: ChooseStoreResolver
             //     }

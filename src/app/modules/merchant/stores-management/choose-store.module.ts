@@ -14,7 +14,7 @@ import { SharedModule } from 'app/shared/shared.module';
 import { academyRoutes } from 'app/modules/merchant/stores-management/choose-store.routing';
 import { ChooseStoreComponent } from 'app/modules/merchant/stores-management/choose-store.component';
 // import { ChooseStoreDetailsComponent } from 'app/modules/merchant/choose-store/details/details.component';
-import { ChooseStoreListComponent } from 'app/modules/merchant/stores-management/list/list.component';
+import { ChooseStoreListComponent } from 'app/modules/merchant/stores-management/stores-list/list.component';
 import { MatTabsModule } from '@angular/material/tabs';
 
 @NgModule({

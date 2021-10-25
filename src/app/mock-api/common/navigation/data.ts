@@ -12,9 +12,31 @@ export const defaultNavigation: FuseNavigationItem[] = [
     {
         id   : 'stores-management',
         title: 'Stores Management',
-        type : 'basic',
+        type : 'collapsable',
         icon : 'heroicons_outline:office-building',
-        link : '/stores'
+        children: [
+            {
+                id   : 'apps.stores-management.setup',
+                title: 'Create Store',
+                type : 'basic',
+                link : '/stores/store-setup',
+                exactMatch: true
+            },
+            {
+                id   : 'apps.stores-management.list',
+                title: 'Product Category',
+                type : 'basic',
+                link : '/stores',
+                exactMatch: true
+            },
+            {
+                id   : 'apps.stores-management.setup',
+                title: 'Choose Verticle',
+                type : 'basic',
+                link : '/stores/choose-verticle',
+                exactMatch: true
+            }
+        ],
     },
     {
         id   : 'products-management',
