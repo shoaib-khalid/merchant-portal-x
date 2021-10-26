@@ -1,29 +1,29 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewEncapsulation } from '@angular/core';
-import { ChooseVerticleService } from 'app/modules/merchant/stores-management/choose-verticle/choose-verticle.service';
+import { ChooseVerticalService } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.service';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { Verticle } from 'app/modules/merchant/stores-management/choose-verticle/choose-verticle.types';
+import { Vertical } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.types';
 import { LocaleService } from 'app/core/locale/locale.service';
 import { Locale } from 'app/core/locale/locale.types';
 
 @Component({
-    selector       : 'choose-verticle-list',
+    selector       : 'choose-vertical-list',
     templateUrl    : './list.component.html',
     encapsulation  : ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ChooseVerticleListComponent
+export class ChooseVerticalListComponent
 {
     yearlyBilling: boolean = true;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
-    verticles: Verticle[];
+    verticals: Vertical[];
 
     /**
      * Constructor
      */
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
-        private _chooseVerticleService: ChooseVerticleService,
+        private _chooseVerticalService: ChooseVerticalService,
         private _localeService: LocaleService,
     )
     {
@@ -39,14 +39,14 @@ export class ChooseVerticleListComponent
     ngOnInit(): void
     {
         // Get the categories
-        this._chooseVerticleService.verticles$
+        this._chooseVerticalService.verticals$
         .pipe(takeUntil(this._unsubscribeAll))
-        .subscribe((verticles: Verticle[]) => {
+        .subscribe((verticals: Vertical[]) => {
             this._localeService.locale$.subscribe((response: Locale)=>{
 
                 console.log("response",response)
                 let regionId = response.symplified_region;
-                this.verticles = this.getVerticleByRegionId(verticles,regionId);
+                this.verticals = this.getVerticalByRegionId(verticals,regionId);
     
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -68,8 +68,8 @@ export class ChooseVerticleListComponent
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
 
-    getVerticleByRegionId(verticles: Verticle[], regionId: string){
-        return verticles.filter(function (el) {
+    getVerticalByRegionId(verticals: Vertical[], regionId: string){
+        return verticals.filter(function (el) {
             return el.regionId === regionId;
         });
     }

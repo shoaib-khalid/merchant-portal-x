@@ -24,16 +24,16 @@ export const defaultNavigation: FuseNavigationItem[] = [
             },
             {
                 id   : 'apps.stores-management.list',
-                title: 'Product Category',
+                title: 'Choose Store',
                 type : 'basic',
                 link : '/stores',
                 exactMatch: true
             },
             {
                 id   : 'apps.stores-management.setup',
-                title: 'Choose Verticle',
+                title: 'Choose Vertical',
                 type : 'basic',
-                link : '/stores/choose-verticle',
+                link : '/stores/choose-vertical',
                 exactMatch: true
             }
         ],

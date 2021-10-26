@@ -2,20 +2,20 @@ import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { Verticle } from 'app/modules/merchant/stores-management/choose-verticle/choose-verticle.types';
-import { ChooseVerticleService } from 'app/modules/merchant/stores-management/choose-verticle/choose-verticle.service';
+import { Vertical } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.types';
+import { ChooseVerticalService } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.service';
 
 @Injectable({
     providedIn: 'root'
 })
-export class ChooseVerticlesResolver implements Resolve<any>
+export class ChooseVerticalsResolver implements Resolve<any>
 {
     /**
      * Constructor
      */
     constructor(
         private _router: Router,
-        private _chooseVerticleService: ChooseVerticleService
+        private _chooseVerticalService: ChooseVerticalService
     )
     {
     }
@@ -30,9 +30,9 @@ export class ChooseVerticlesResolver implements Resolve<any>
      * @param route
      * @param state
      */
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Verticle[]>
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Vertical[]>
     {
-        return this._chooseVerticleService.getVerticles()
+        return this._chooseVerticalService.getVerticals()
                    .pipe(
                        // Error here means the requested task is not available
                        catchError((error) => {
@@ -56,14 +56,14 @@ export class ChooseVerticlesResolver implements Resolve<any>
 @Injectable({
     providedIn: 'root'
 })
-export class ChooseVerticleResolver implements Resolve<any>
+export class ChooseVerticalResolver implements Resolve<any>
 {
     /**
      * Constructor
      */
     constructor(
         private _router: Router,
-        private _chooseVerticleService: ChooseVerticleService
+        private _chooseVerticalService: ChooseVerticalService
     )
     {
     }
@@ -78,9 +78,9 @@ export class ChooseVerticleResolver implements Resolve<any>
      * @param route
      * @param state
      */
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Verticle>
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Vertical>
     {
-        return this._chooseVerticleService.getVerticleById(route.paramMap.get('id'))
+        return this._chooseVerticalService.getVerticalById(route.paramMap.get('id'))
                    .pipe(
                        // Error here means the requested task is not available
                        catchError((error) => {

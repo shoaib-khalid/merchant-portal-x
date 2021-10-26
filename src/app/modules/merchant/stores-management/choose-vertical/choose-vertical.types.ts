@@ -1,4 +1,4 @@
-export interface Verticle
+export interface Vertical
 {
     code?: string;
     name?: string;

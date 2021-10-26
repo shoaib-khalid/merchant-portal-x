@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
-import { Verticle } from 'app/modules/merchant/stores-management/choose-verticle/choose-verticle.types';
+import { Vertical } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { takeUntil } from 'rxjs/operators';
@@ -11,11 +11,11 @@ import { Subject } from 'rxjs';
 @Injectable({
     providedIn: 'root'
 })
-export class ChooseVerticleService
+export class ChooseVerticalService
 {
     // Private
-    private _verticle: BehaviorSubject<Verticle | null> = new BehaviorSubject(null);
-    private _verticles: BehaviorSubject<Verticle[] | null> = new BehaviorSubject(null);
+    private _vertical: BehaviorSubject<Vertical | null> = new BehaviorSubject(null);
+    private _verticals: BehaviorSubject<Vertical[] | null> = new BehaviorSubject(null);
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     /**
@@ -34,19 +34,19 @@ export class ChooseVerticleService
     // -----------------------------------------------------------------------------------------------------
 
     /**
-     * Getter for verticles
+     * Getter for verticals
      */
-    get verticles$(): Observable<Verticle[]>
+    get verticals$(): Observable<Vertical[]>
     {
-        return this._verticles.asObservable();
+        return this._verticals.asObservable();
     }
 
     /**
-     * Getter for verticle
+     * Getter for vertical
      */
-    get verticle$(): Observable<Verticle>
+    get vertical$(): Observable<Vertical>
     {
-        return this._verticle.asObservable();
+        return this._vertical.asObservable();
     }
 
     /**
@@ -63,10 +63,10 @@ export class ChooseVerticleService
     // -----------------------------------------------------------------------------------------------------
 
     /**
-     * Get verticles
+     * Get verticals
      */
 
-    getVerticles(): Observable<Verticle[]> {
+    getVerticals(): Observable<Vertical[]> {
 
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -78,31 +78,31 @@ export class ChooseVerticleService
         
         return this._httpClient.get<any>(productService + '/region-verticals', header)
             .pipe(
-                map((verticle) => {
+                map((vertical) => {
 
-                    // Update the verticle
-                    this._verticles.next(verticle.data);
+                    // Update the vertical
+                    this._verticals.next(vertical.data);
 
-                    // Return the verticle
-                    return verticle.data;
+                    // Return the vertical
+                    return vertical.data;
                 }),
-                switchMap((verticle) => {
+                switchMap((vertical) => {
 
-                    if ( !verticle )
+                    if ( !vertical )
                     {
-                        return throwError('Could not found verticle with id of !');
+                        return throwError('Could not found vertical with id of !');
                     }
 
-                    return of(verticle);
+                    return of(vertical);
                 })
             );     
 
     }
 
     /**
-     * Get verticle by id
+     * Get vertical by id
      */
-    getVerticleById(id: string): Observable<Verticle>
+    getVerticalById(id: string): Observable<Vertical>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -115,24 +115,24 @@ export class ChooseVerticleService
             }
         };
         
-        return this._httpClient.get<any>(productService + '/verticles', header)
+        return this._httpClient.get<any>(productService + '/verticals', header)
         .pipe(
-            map((verticle) => {
+            map((vertical) => {
 
-                // Update the verticle
-                this._verticle.next(verticle.data.content);
+                // Update the vertical
+                this._vertical.next(vertical.data.content);
 
-                // Return the verticle
-                return verticle;
+                // Return the vertical
+                return vertical;
             }),
-            switchMap((verticle) => {
+            switchMap((vertical) => {
 
-                if ( !verticle )
+                if ( !vertical )
                 {
-                    return throwError('Could not found verticle with id of ' + id + '!');
+                    return throwError('Could not found vertical with id of ' + id + '!');
                 }
 
-                return of(verticle);
+                return of(vertical);
             })
         );
     }

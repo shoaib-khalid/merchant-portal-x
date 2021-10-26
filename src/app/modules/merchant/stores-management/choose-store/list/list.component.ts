@@ -87,6 +87,8 @@ export class ChooseStoreListComponent implements OnInit, OnDestroy
             .subscribe((stores: Store[]) => {
                 this.stores = this.filteredStores = stores;
 
+                console.log("filteredStores: ",stores);
+
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });

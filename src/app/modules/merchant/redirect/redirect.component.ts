@@ -59,9 +59,9 @@ export class RedirectComponent implements OnInit, OnDestroy
         this._logging.debug("Merchant Setup Status",this._merchantSetup);
             
         if (this._merchantSetup.storeSetup == 0){
-            // if no store Go to Choose Verticle
-            console.log("GOING TO ChooseVerticle")
-            this.goToChooseVerticle();
+            // if no store Go to Choose Vertical
+            console.log("GOING TO ChooseVertical")
+            this.goToChooseVertical();
         } else if (this._merchantSetup.storeSetup == 1){
             // if there is 1 store and already have product, go to Dashboard
             if (this._merchantSetup.productSetup === true){
@@ -122,11 +122,11 @@ export class RedirectComponent implements OnInit, OnDestroy
      }
 
     /**
-     * Redirect for Choose Verticle that already created
+     * Redirect for Choose Vertical that already created
      */
-    goToChooseVerticle(): void
+    goToChooseVertical(): void
     {
-        this._router.navigate(['/choose-verticle']);
+        this._router.navigate(['/choose-vertical']);
     }
 
     /**

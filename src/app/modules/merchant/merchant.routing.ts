@@ -1,7 +1,7 @@
 import { Route } from '@angular/router';
 import { WithStoreIdGuard } from 'app/core/store/guards/withStoreId.guard';
 import { WithoutStoreIdGuard } from 'app/core/store/guards/withoutStoreId.guard';
-// import { ChooseVerticleComponent } from './stores-management/choose-verticle/choose-verticle.component';
+// import { ChooseVerticalComponent } from './stores-management/choose-vertical/choose-vertical.component';
 import { RedirectComponent } from './redirect/redirect.component';
 // import { OrdersManagementComponent } from './orders-management/orders-management.component';
 import { DiscountsManagementComponent } from './discounts-management/discounts-management.component';
@@ -34,7 +34,7 @@ export const merchantRoutes: Route[] = [
             path       : 'stores',
             children   : [
                 {path: '', loadChildren: () => import('app/modules/merchant/stores-management/choose-store/choose-store.module').then(m => m.ChooseStoreModule)},
-                {path: 'choose-verticle', loadChildren: () => import('app/modules/merchant/stores-management/choose-verticle/choose-verticle.module').then(m => m.ChooseVerticleModule)}
+                {path: 'choose-vertical', loadChildren: () => import('app/modules/merchant/stores-management/choose-vertical/choose-vertical.module').then(m => m.ChooseVerticalModule)}
             ]
         },
 ]; 
