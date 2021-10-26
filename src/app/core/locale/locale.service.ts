@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, ReplaySubject } from 'rxjs';
+import { Observable, of, ReplaySubject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { Locale } from 'app/core/locale/locale.types';
+import { AvailableCountries, Locale } from 'app/core/locale/locale.types';
 import { AppConfig } from 'app/config/service.config';
 
 @Injectable({
@@ -68,14 +68,35 @@ export class LocaleService
     /**
      * Update the locale
      *
-     * @param locale
+     * @param country
      */
-    update(locale: Locale): Observable<any>
+    update(countryCode: string, symplified_region: string): Observable<any>
     {
-        return this._httpClient.patch<Locale>('api/common/locale', {locale}).pipe(
-            map((response) => {
-                this._locale.next(response);
-            })
-        );
+        let change: Locale = {
+            id: '',
+            name: '',
+            "symplified_region": symplified_region,
+            "countryCode": countryCode,
+        };
+        this._locale.next(change);
+
+        return of();
+    }
+
+    /**
+     * Get all Available countries
+     */
+
+    getAvailableCountries(): AvailableCountries{
+        return [
+            {
+                id: "my",
+                label: "Malaysia",
+            },
+            {
+                id: "pk",
+                label: "Pakistan"
+            }
+        ];
     }
 }

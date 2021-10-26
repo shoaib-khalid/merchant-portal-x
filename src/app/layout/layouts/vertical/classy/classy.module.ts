@@ -19,6 +19,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { FuseNavigationModule } from '@fuse/components/navigation';
 import { FuseFullscreenModule } from '@fuse/components/fullscreen/fullscreen.module';
 import { LanguagesModule } from 'app/layout/common/languages/languages.module';
+import { CountriesModule } from 'app/layout/common/countries/countries.module';
 import { MessagesModule } from 'app/layout/common/messages/messages.module';
 import { NotificationsModule } from 'app/layout/common/notifications/notifications.module';
 import { QuickChatModule } from 'app/layout/common/quick-chat/quick-chat.module';
@@ -42,6 +43,7 @@ import { ClassyLayoutComponent } from 'app/layout/layouts/vertical/classy/classy
         FuseFullscreenModule,
         FuseNavigationModule,
         LanguagesModule,
+        CountriesModule,
         MessagesModule,
         NotificationsModule,
         QuickChatModule,

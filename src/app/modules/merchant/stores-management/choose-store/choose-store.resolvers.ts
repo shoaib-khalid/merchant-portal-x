@@ -3,7 +3,7 @@ import { ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot } from '@a
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { StoreCategory, Store } from 'app/core/store/store.types';
-import { ChooseStoreService } from 'app/modules/merchant/stores-management/choose-store.service';
+import { ChooseStoreService } from 'app/modules/merchant/stores-management/choose-store/choose-store.service';
 
 @Injectable({
     providedIn: 'root'

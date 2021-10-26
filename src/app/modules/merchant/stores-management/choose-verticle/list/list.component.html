@@ -1,0 +1,93 @@
+<div
+    class="absolute inset-0 flex flex-col min-w-0 overflow-y-auto"
+    cdkScrollable>
+
+    <!-- Header -->
+    <div class="relative flex-0 py-8 px-4 sm:p-8 overflow-hidden bg-gray-800 dark">
+        <!-- Background - @formatter:off -->
+        <!-- Rings -->
+        <svg class="absolute inset-0 pointer-events-none"
+             viewBox="0 0 960 540" width="100%" height="100%" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+            <g class="text-gray-700 opacity-25" fill="none" stroke="currentColor" stroke-width="100">
+                <circle r="234" cx="196" cy="23"></circle>
+                <circle r="234" cx="790" cy="491"></circle>
+            </g>
+        </svg>
+        <!-- @formatter:on -->
+        <div class="z-10 relative flex flex-col items-center">
+            <h2 class="text-xl font-semibold">CHOOSE YOUR STORE VERTICLE</h2>
+            <!-- <div class="mt-1 text-4xl sm:text-7xl font-extrabold tracking-tight leading-tight text-center">
+                What do you want to learn today?
+            </div> -->
+            <div class="max-w-2xl mt-6 sm:text-2xl text-center tracking-tight text-secondary">
+                The store verticle explaination HERE (Is it Verticle or Vertical ?)
+            </div>
+            <small>note: the store verticle can't be changed after choosen</small>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex flex-auto justify-center item-center p-6 sm:p-10">
+        <!-- Cards -->
+        <div class="flex justify-center mt-10">
+            <div class="w-full max-w-sm md:max-w-7xl">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-6 lg:gap-y-0 md:gap-x-6">
+                    <!-- Cards -->
+                    <fuse-card *ngFor="let verticle of verticles" class="flex-col max-w-sm md:max-w-none p-6 sm:py-12 sm:px-10 mt-8">
+                        <!-- Price -->
+                        <div class="flex items-baseline whitespace-nowrap">
+                            <img [src]="verticle.thumbnailUrl" alt="">
+                            <!-- <img class="max-h-30 overflow-hidden flex item-center justify-center" [src]="verticle.thumbnailUrl" alt=""> -->
+                        </div>
+                        <div class="w-8 h-1 my-10 rounded bg-accent"></div>
+                        <div class="text-4xl font-bold tracking-tight leading-tight">{{ verticle.name }}</div>
+                        <div class="mt-2 text-lg font-medium tracking-tight text-secondary">{{ verticle.description }}</div>
+                        <!-- CTA -->
+                        <button
+                            class="fuse-mat-button-large mt-10"
+                            mat-stroked-button
+                            [color]="'primary'">
+                            Get Started
+                        </button>
+                        <!-- Features -->
+                        <div class="flex flex-col mt-12">
+                            <div class="font-semibold">Core features, including:</div>
+                            <div class="mt-4 space-y-2">
+                                <div class="flex">
+                                    <mat-icon
+                                        class="icon-size-5 text-green-600"
+                                        [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                    <div class="ml-2 leading-5"><b>10</b> projects</div>
+                                </div>
+                                <div class="flex">
+                                    <mat-icon
+                                        class="icon-size-5 text-green-600"
+                                        [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                    <div class="ml-2 leading-5"><b>5GB</b> storage</div>
+                                </div>
+                                <div class="flex">
+                                    <mat-icon
+                                        class="icon-size-5 text-green-600"
+                                        [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                    <div class="ml-2 leading-5">Analytics</div>
+                                </div>
+                                <div class="flex">
+                                    <mat-icon
+                                        class="icon-size-5 text-green-600"
+                                        [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                    <div class="ml-2 leading-5">Free mobile app</div>
+                                </div>
+                                <div class="flex">
+                                    <mat-icon
+                                        class="icon-size-5 text-green-600"
+                                        [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                    <div class="ml-2 leading-5">Access to forums</div>
+                                </div>
+                            </div>
+                        </div>
+                    </fuse-card>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

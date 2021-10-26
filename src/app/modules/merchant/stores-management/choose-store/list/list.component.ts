@@ -4,7 +4,7 @@ import { MatSelectChange } from '@angular/material/select';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { ChooseStoreService } from 'app/modules/merchant/stores-management/choose-store.service';
+import { ChooseStoreService } from 'app/modules/merchant/stores-management/choose-store/choose-store.service';
 import { StoreCategory, Store } from 'app/core/store/store.types';
 import { InventoryService } from 'app/core/product/inventory.service'
 

@@ -11,10 +11,10 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FuseFindByKeyPipeModule } from '@fuse/pipes/find-by-key';
 import { SharedModule } from 'app/shared/shared.module';
-import { academyRoutes } from 'app/modules/merchant/stores-management/choose-store.routing';
-import { ChooseStoreComponent } from 'app/modules/merchant/stores-management/choose-store.component';
+import { chooseStoreRoutes } from 'app/modules/merchant/stores-management/choose-store/choose-store.routing';
+import { ChooseStoreComponent } from 'app/modules/merchant/stores-management/choose-store/choose-store.component';
 // import { ChooseStoreDetailsComponent } from 'app/modules/merchant/choose-store/details/details.component';
-import { ChooseStoreListComponent } from 'app/modules/merchant/stores-management/stores-list/list.component';
+import { ChooseStoreListComponent } from 'app/modules/merchant/stores-management/choose-store/list/list.component';
 import { MatTabsModule } from '@angular/material/tabs';
 
 @NgModule({
@@ -24,7 +24,7 @@ import { MatTabsModule } from '@angular/material/tabs';
         ChooseStoreListComponent
     ],
     imports     : [
-        RouterModule.forChild(academyRoutes),
+        RouterModule.forChild(chooseStoreRoutes),
         MatButtonModule,
         MatFormFieldModule,
         MatIconModule,

@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 // import { MerchantComponent } from 'app/modules/merchant/merchant.component';
 // import { DashboardComponent } from './dashboard/dashboard.component';
-import { ChooseVerticleComponent } from './stores-management/choose-verticle/choose-verticle.component';
+// import { ChooseVerticleComponent } from './stores-management/choose-verticle/choose-verticle.component';
 // import { StoresManagementComponent } from './stores-management/stores-management.component';
 // import { ProductsManagementComponent } from './products-management/products-management.component';
 // import { OrdersManagementComponent } from './orders-management/orders-management.component';
@@ -15,7 +15,7 @@ import { merchantRoutes } from 'app/modules/merchant/merchant.routing';
     declarations: [
         // MerchantComponent,
         // DashboardComponent,
-        ChooseVerticleComponent,
+        // ChooseVerticleComponent,
         // StoresManagementComponent,
         // ProductsManagementComponent,
         // OrdersManagementComponent,
@@ -29,7 +29,7 @@ import { merchantRoutes } from 'app/modules/merchant/merchant.routing';
     bootstrap   : [
         // MerchantComponent,
         // DashboardComponent,
-        ChooseVerticleComponent,
+        // ChooseVerticleComponent,
         // StoresManagementComponent,
         // ProductsManagementComponent,
         // OrdersManagementComponent,
