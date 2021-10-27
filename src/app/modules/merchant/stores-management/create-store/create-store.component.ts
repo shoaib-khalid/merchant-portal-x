@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 
 @Component({
-    selector       : 'choose-vertical',
-    templateUrl    : './choose-vertical.component.html',
+    selector       : 'create-store',
+    templateUrl    : './create-store.component.html',
     encapsulation  : ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ChooseVerticalComponent
+export class CreateStoreComponent
 {
     yearlyBilling: boolean = true;
 

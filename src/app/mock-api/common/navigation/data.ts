@@ -19,7 +19,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 id   : 'apps.stores-management.setup',
                 title: 'Create Store',
                 type : 'basic',
-                link : '/stores/store-setup',
+                link : '/stores/create-store',
                 exactMatch: true
             },
             {

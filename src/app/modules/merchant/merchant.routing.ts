@@ -34,7 +34,7 @@ export const merchantRoutes: Route[] = [
             path       : 'stores',
             children   : [
                 {path: '', loadChildren: () => import('app/modules/merchant/stores-management/choose-store/choose-store.module').then(m => m.ChooseStoreModule)},
-                {path: 'choose-vertical', loadChildren: () => import('app/modules/merchant/stores-management/choose-vertical/choose-vertical.module').then(m => m.ChooseVerticalModule)}
+                {path: '', loadChildren: () => import('app/modules/merchant/stores-management/create-store/create-store.module').then(m => m.CreateStoreModule)}
             ]
         },
 ]; 

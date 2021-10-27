@@ -1,18 +1,18 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewEncapsulation } from '@angular/core';
-import { ChooseVerticalService } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.service';
+import { ChooseVerticalService } from 'app/modules/merchant/stores-management/create-store/choose-vertical/choose-vertical.service';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { Vertical } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.types';
+import { Vertical } from 'app/modules/merchant/stores-management/create-store/choose-vertical/choose-vertical.types';
 import { LocaleService } from 'app/core/locale/locale.service';
 import { Locale } from 'app/core/locale/locale.types';
 
 @Component({
-    selector       : 'choose-vertical-list',
-    templateUrl    : './list.component.html',
+    selector       : 'choose-vertical-page',
+    templateUrl    : './choose-vertical.component.html',
     encapsulation  : ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ChooseVerticalListComponent
+export class ChooseVerticalComponent
 {
     yearlyBilling: boolean = true;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
