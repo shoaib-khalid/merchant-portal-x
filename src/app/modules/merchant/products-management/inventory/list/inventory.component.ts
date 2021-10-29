@@ -1527,4 +1527,12 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     changeStatus(something){
         console.log("",something);
     }
+
+    // Quil editor text limit
+    textChanged($event) {
+        const MAX_LENGTH = 500;
+        if ($event.editor.getLength() > MAX_LENGTH) {
+           $event.editor.deleteText(MAX_LENGTH, $event.editor.getLength());
+        }
+    }
 }

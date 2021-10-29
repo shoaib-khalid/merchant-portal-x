@@ -13,6 +13,11 @@ export const chooseVerticalRoutes: Route[] = [
             {
                 path     : 'create-store',
                 pathMatch: 'full',
+                redirectTo: 'choose-vertical'
+            },
+            {
+                path     : 'create-store/:vertical-code',
+                pathMatch: 'full',
                 component: RegisterStoreComponent,
                 resolve  : {
                     createStore: ChooseVerticalsResolver

@@ -32,3 +32,14 @@ export interface Store
         completed?: number;
     };
 }
+
+export interface StoreRegionCountries
+{
+    id: string;
+    name: string;
+    region: string;
+    currency: string;
+    currencyCode: string;
+    currencySymbol: string;
+    timezone: string;
+}

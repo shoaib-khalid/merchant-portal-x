@@ -52,6 +52,7 @@ export class InitialDataResolver implements Resolve<any>
             this._shortcutsService.getAll(),
             this._merchantSetupService.get(),
             this._storesService.get(),
+            this._storesService.getStoreRegions(),
             // this._userService.get(),
         ]);
     }

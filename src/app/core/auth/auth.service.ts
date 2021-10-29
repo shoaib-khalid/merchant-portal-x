@@ -229,6 +229,7 @@ export class AuthService
         // Renew token
         let userService = this._apiServer.settings.apiServer.userService;
         let productService = this._apiServer.settings.apiServer.productService;
+        // kena accessToken
         let token = "accessToken"
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${token}`)

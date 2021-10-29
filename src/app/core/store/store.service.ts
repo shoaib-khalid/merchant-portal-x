@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of, ReplaySubject, Subject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { Store } from 'app/core/store/store.types';
+import { Store, StoreRegionCountries } from 'app/core/store/store.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { takeUntil } from 'rxjs/operators';
@@ -13,6 +13,7 @@ import { takeUntil } from 'rxjs/operators';
 export class StoresService
 {
     private _stores: ReplaySubject<Store[]> = new ReplaySubject<Store[]>(1);
+    private _storeRegionCountries: ReplaySubject<StoreRegionCountries[]> = new ReplaySubject<StoreRegionCountries[]>(1);
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     private _storeSubDomain: string;
 
@@ -46,6 +47,16 @@ export class StoresService
      * Getter for store
      *
      */
+    get storeRegionCountries$(): Observable<StoreRegionCountries[]>
+    {
+        console.log("HAHAH")
+        return this._storeRegionCountries.asObservable();
+    }
+
+    /**
+     * Getter for store
+     *
+    */
     get stores$(): Observable<Store[]>
     {
         return this._stores.asObservable();
@@ -111,6 +122,22 @@ export class StoresService
         );
     }
 
+    post(store: Store): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                "clientId": clientId
+            }
+        };
+        
+        return this._httpClient.post(productService + '/stores', store , header);
+    }
+
     /**
      * Update the store
      *
@@ -131,6 +158,24 @@ export class StoresService
             .subscribe((storeList: Store[]) => {
                 this.storeId = storeList[0].id;
             });  
+    }
+
+    async getStoreRegions(): Promise<Observable<StoreRegionCountries>>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.get<any>(productService + '/region-countries', header)
+            .pipe(
+                tap((response) => {
+                    console.log("DISINI", response)
+                    return this._storeRegionCountries.next(response["data"].content);
+                })
+            );
     }
 
     async getStoreBaseUrl(storeId: string){

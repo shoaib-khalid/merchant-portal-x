@@ -395,9 +395,10 @@
                                                 <span class="font-medium leading-tight">Description</span>
                                                 <div class="mt-1.5 flex items-center -my-px w-full">
                                                     <quill-editor
-                                                    class="w-full"
+                                                        class="w-full"
                                                         [formControlName]="'description'"
                                                         [modules]="quillModules"></quill-editor>
+                                                    <!-- use (onContentChanged)="textChanged($event)" for limiting quil editor -->
                                                 </div>
                                             </div>
                                         </div>

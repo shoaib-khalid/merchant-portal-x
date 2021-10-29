@@ -50,13 +50,7 @@ export class LocaleService
      * Get the current logged in locale data
      */
     async get(): Promise<Observable<Locale>>
-    {
-        let token = "accessToken";
-
-        const header = {
-            headers: new HttpHeaders().set("Authorization", `Bearer ${token}`)
-        };
-        
+    {   
         return await this._httpClient.get<any>("https://extreme-ip-lookup.com/json")
         .pipe(
             tap((response) => {

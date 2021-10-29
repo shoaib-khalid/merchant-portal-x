@@ -44,7 +44,6 @@ export class ChooseVerticalComponent
         .subscribe((verticals: Vertical[]) => {
             this._localeService.locale$.subscribe((response: Locale)=>{
 
-                console.log("response",response)
                 let regionId = response.symplified_region;
                 this.verticals = this.getVerticalByRegionId(verticals,regionId);
     
