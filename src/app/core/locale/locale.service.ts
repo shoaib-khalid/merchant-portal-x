@@ -64,10 +64,10 @@ export class LocaleService
      *
      * @param country
      */
-    update(countryCode: string, symplified_region: string): Observable<any>
+    update(id: string, countryCode: string, symplified_region: string): Observable<any>
     {
         let change: Locale = {
-            id: '',
+            id,
             name: '',
             "symplified_region": symplified_region,
             "countryCode": countryCode,

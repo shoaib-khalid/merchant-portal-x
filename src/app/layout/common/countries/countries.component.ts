@@ -90,16 +90,19 @@ export class CountriesComponent implements OnInit, OnDestroy
         this._updateNavigation(country);
 
         let symplified_region: string;
+        let id: string;
         if (country == 'my') {
+            id = "MYS";
             symplified_region = "SEA";
         } else if (country == 'pk'){
+            id = "PAK";
             symplified_region = "SA";
         } else {
             symplified_region = null;
         }
 
         // Set the active country
-        this._localeService.update(country,symplified_region);
+        this._localeService.update(id,country,symplified_region);
     }
 
     /**

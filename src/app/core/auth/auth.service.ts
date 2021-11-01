@@ -194,6 +194,47 @@ export class AuthService
 
                 /**
                  * 
+                 *  REGION SERVICE
+                 * 
+                 */
+
+                // get extreme-ip-lookup info
+
+                let locale: any;
+                let ipLookup: any = await this._httpClient.get("https://extreme-ip-lookup.com/json").toPromise();
+                if (ipLookup.country == "Malaysia") {
+                    locale = {
+                        id: "MYS",
+                        symplified_region: "SEA",
+                        continent: ipLookup.continent,
+                        country: ipLookup.country,
+                        countryCode: ipLookup.countryCode,
+                        region: ipLookup.region
+                    };
+                } else if (ipLookup.country == "Pakistan") {
+                    locale = {
+                        id: "PAK",
+                        symplified_region: "SA",
+                        continent: ipLookup.continent,
+                        country: ipLookup.country,
+                        countryCode: ipLookup.countryCode,
+                        region: ipLookup.region
+                    };
+                } else {
+                    locale = {
+                        id: undefined,
+                        symplified_region: undefined,
+                        continent: ipLookup.continent,
+                        country: ipLookup.country,
+                        countryCode: ipLookup.countryCode,
+                        region: ipLookup.region
+                    };
+                }
+
+                this._localeService.locale = locale;
+
+                /**
+                 * 
                  *  PROCESS
                  * 
                  */
@@ -341,6 +382,7 @@ export class AuthService
                 let ipLookup: any = await this._httpClient.get("https://extreme-ip-lookup.com/json").toPromise();
                 if (ipLookup.country == "Malaysia") {
                     locale = {
+                        id: "MYS",
                         symplified_region: "SEA",
                         continent: ipLookup.continent,
                         country: ipLookup.country,
@@ -349,6 +391,7 @@ export class AuthService
                     };
                 } else if (ipLookup.country == "Pakistan") {
                     locale = {
+                        id: "PAK",
                         symplified_region: "SA",
                         continent: ipLookup.continent,
                         country: ipLookup.country,
@@ -357,6 +400,7 @@ export class AuthService
                     };
                 } else {
                     locale = {
+                        id: undefined,
                         symplified_region: undefined,
                         continent: ipLookup.continent,
                         country: ipLookup.country,

@@ -8,6 +8,7 @@ import { QuickChatService } from 'app/layout/common/quick-chat/quick-chat.servic
 import { ShortcutsService } from 'app/layout/common/shortcuts/shortcuts.service';
 import { MerchantSetupService } from './core/merchant-setup/merchant-setup.service';
 import { StoresService } from './core/store/store.service';
+import { LocaleService } from './core/locale/locale.service';
 // import { UserService } from 'app/core/user/user.service';
 
 @Injectable({
@@ -25,7 +26,8 @@ export class InitialDataResolver implements Resolve<any>
         private _quickChatService: QuickChatService,
         private _shortcutsService: ShortcutsService,
         private _merchantSetupService: MerchantSetupService,
-        private _storesService: StoresService
+        private _storesService: StoresService,
+        private _localeService: LocaleService
         // private _userService: UserService,
     )
     {
@@ -52,7 +54,8 @@ export class InitialDataResolver implements Resolve<any>
             this._shortcutsService.getAll(),
             this._merchantSetupService.get(),
             this._storesService.get(),
-            this._storesService.getStoreRegions(),
+            this._localeService.get(),
+            this._storesService.getStoreRegionCountries(),
             // this._userService.get(),
         ]);
     }

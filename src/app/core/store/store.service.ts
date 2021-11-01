@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of, ReplaySubject, Subject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { Store, StoreRegionCountries } from 'app/core/store/store.types';
+import { Store, StoreRegionCountries, StoreTiming } from 'app/core/store/store.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { takeUntil } from 'rxjs/operators';
@@ -49,7 +49,7 @@ export class StoresService
      */
     get storeRegionCountries$(): Observable<StoreRegionCountries[]>
     {
-        console.log("HAHAH")
+        console.log("DISINI trsemai cita2")
         return this._storeRegionCountries.asObservable();
     }
 
@@ -108,6 +108,7 @@ export class StoresService
             }
         };
 
+        // if ada id change url stucture
         if (id !== null) { id = "/" + id } 
         
         return await this._httpClient.get<any>(productService + '/stores' + id, header)
@@ -160,7 +161,7 @@ export class StoresService
             });  
     }
 
-    async getStoreRegions(): Promise<Observable<StoreRegionCountries>>
+    getStoreRegionCountries(): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -172,10 +173,40 @@ export class StoresService
         return this._httpClient.get<any>(productService + '/region-countries', header)
             .pipe(
                 tap((response) => {
-                    console.log("DISINI", response)
                     return this._storeRegionCountries.next(response["data"].content);
                 })
             );
+    }
+
+    getStoreRegionCountryState(regionCountryId: string): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                "regionCountryId": regionCountryId
+            }
+        };
+
+        return this._httpClient.get<any>(productService + '/region-country-state', header);
+    }
+
+    postTiming(storeId: string, storeTiming: StoreTiming): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.post<any>(productService + '/stores/' + storeId + '/timings', storeTiming , header ).pipe(
+            map((response) => {
+                this._stores.next(response);
+            })
+        );
     }
 
     async getStoreBaseUrl(storeId: string){

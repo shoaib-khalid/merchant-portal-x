@@ -133,7 +133,7 @@ export class ChooseStoreService
         let _storeList;
         this._storesService.stores$
             .pipe((takeUntil(this._unsubscribeAll)))
-            .subscribe((storeList: Store[]) => {
+            .subscribe((storeList: Store[] = []) => {
                 // this._stores.next(storeList);
                 // this.stores = storeList.sort(this.dynamicSort("name"));
                 _storeList = storeList.sort(this.dynamicSort("name"));

@@ -40,7 +40,7 @@
                 </fuse-alert>
                 <form
                     class="space-y-3 flex flex-col w-full"
-                    [formGroup]="supportForm"
+                    [formGroup]="createStoreForm"
                     #supportNgForm="ngForm">
 
                     <!-- Name, Store URL, Description, Email, Phonenumber, Message, City, State, Country, Postcode -->
@@ -57,7 +57,7 @@
                                         [required]="true">
                                     <mat-label>Store Name</mat-label>
                                     
-                                    <mat-error *ngIf="supportForm.get('name').hasError('required')">
+                                    <mat-error *ngIf="createStoreForm.get('name').hasError('required')">
                                         Required
                                     </mat-error>
                                 </mat-form-field>
@@ -73,16 +73,16 @@
                                         [required]="true"
                                         (change)="checkExistingSubdomain()">
                                     <span>.symplified.store</span>
-                                    <mat-error *ngIf="supportForm.get('domain').hasError('required')">
+                                    <mat-error *ngIf="createStoreForm.get('domain').hasError('required')">
                                         Required
                                     </mat-error>
-                                    <mat-error *ngIf="supportForm.get('domain').hasError('invalidDomain')">
+                                    <mat-error *ngIf="createStoreForm.get('domain').hasError('invalidDomain')">
                                         Invalid URL
                                     </mat-error>
-                                    <mat-error *ngIf="supportForm.get('domain').hasError('minlength')">
+                                    <mat-error *ngIf="createStoreForm.get('domain').hasError('minlength')">
                                         Minimum character length not meet (mininum 4 character)
                                     </mat-error>
-                                    <mat-error *ngIf="supportForm.get('domain').hasError('maxlength')">
+                                    <mat-error *ngIf="createStoreForm.get('domain').hasError('maxlength')">
                                         Maximum character length exceed (maximum 15 character)
                                     </mat-error>
                                 </mat-form-field>
@@ -97,7 +97,7 @@
                                         maxlength="100"
                                         matTextareaAutosize></textarea>
                                     <mat-label>Store Description</mat-label>
-                                    <mat-error *ngIf="supportForm.get('storeDescription').hasError('required')">
+                                    <mat-error *ngIf="createStoreForm.get('storeDescription').hasError('required')">
                                         Required
                                     </mat-error>
                                 </mat-form-field>
@@ -110,10 +110,10 @@
                                         [formControlName]="'email'"
                                         [required]="true">
                                     <mat-label>Store Email</mat-label>
-                                    <mat-error *ngIf="supportForm.get('email').hasError('required')">
+                                    <mat-error *ngIf="createStoreForm.get('email').hasError('required')">
                                         Required
                                     </mat-error>
-                                    <mat-error *ngIf="supportForm.get('email').hasError('email')">
+                                    <mat-error *ngIf="createStoreForm.get('email').hasError('email')">
                                         Enter a valid email address
                                     </mat-error>
                                 </mat-form-field>
@@ -125,10 +125,10 @@
                                         [formControlName]="'phoneNumber'"
                                         [required]="true">
                                     <mat-label>Store Phone Number</mat-label>
-                                    <mat-error *ngIf="supportForm.get('phoneNumber').hasError('required')">
+                                    <mat-error *ngIf="createStoreForm.get('phoneNumber').hasError('required')">
                                         Required
                                     </mat-error>
-                                    <mat-error *ngIf="supportForm.get('phoneNumber').hasError('invalidPhonenumber')">
+                                    <mat-error *ngIf="createStoreForm.get('phoneNumber').hasError('invalidPhonenumber')">
                                         Invalid Phonenumber
                                     </mat-error>
                                 </mat-form-field>
@@ -146,7 +146,7 @@
                                         [rows]="5"
                                         matTextareaAutosize></textarea>
                                     <mat-label>Address</mat-label>
-                                    <mat-error *ngIf="supportForm.get('address').hasError('required')">
+                                    <mat-error *ngIf="createStoreForm.get('address').hasError('required')">
                                         Required
                                     </mat-error>
                                 </mat-form-field>
@@ -158,7 +158,7 @@
                                         [formControlName]="'city'"
                                         [required]="true">
                                     <mat-label>City</mat-label>
-                                    <mat-error *ngIf="supportForm.get('city').hasError('required')">
+                                    <mat-error *ngIf="createStoreForm.get('city').hasError('required')">
                                         Required
                                     </mat-error>
                                 </mat-form-field>
@@ -166,11 +166,11 @@
                                 <mat-form-field class="w-full" appearance="fill" floatLabel="always">
                                     <mat-label class="font-medium">State</mat-label>
                                     <mat-select
-                                        [formControlName]="'state'"
+                                        [formControlName]="'regionCountryStateId'"
                                         [required]="true"
-                                        [value]="'state'"
+                                        [value]="'regionCountryStateId'"
                                         [placeholder]="'Select State'"
-                                        (selectionChange)="supportForm.get('state').patchValue($event.value)"
+                                        (selectionChange)="createStoreForm.get('regionCountryStateId').patchValue($event.value)"
                                         #stateSelector="matSelect"
                                         >
                                         <mat-select-trigger>
@@ -179,10 +179,10 @@
                                             </span>
                                         </mat-select-trigger>
                                         <div *ngFor="let state of statesByCountry">
-                                            <mat-option [value]="state">{{state}}</mat-option>
+                                            <mat-option [value]="state.id">{{state.name}}</mat-option>
                                         </div>
                                     </mat-select>
-                                    <mat-error *ngIf="supportForm.get('state').hasError('required')">
+                                    <mat-error *ngIf="createStoreForm.get('regionCountryStateId').hasError('required')">
                                         Required
                                     </mat-error>
                                 </mat-form-field>
@@ -195,16 +195,16 @@
                                         maxlength="10"
                                         [required]="true">
                                     <mat-label>Postcode</mat-label>
-                                    <mat-error *ngIf="supportForm.get('postcode').hasError('required')">
+                                    <mat-error *ngIf="createStoreForm.get('postcode').hasError('required')">
                                         Required
                                     </mat-error>
-                                    <mat-error *ngIf="supportForm.get('postcode').hasError('invalidPostcode')">
+                                    <mat-error *ngIf="createStoreForm.get('postcode').hasError('invalidPostcode')">
                                         Invalid postcode
                                     </mat-error>
-                                    <mat-error *ngIf="supportForm.get('postcode').hasError('minlength')">
+                                    <mat-error *ngIf="createStoreForm.get('postcode').hasError('minlength')">
                                         Minimum length of postcode not meet
                                     </mat-error>
-                                    <mat-error *ngIf="supportForm.get('postcode').hasError('maxlength')">
+                                    <mat-error *ngIf="createStoreForm.get('postcode').hasError('maxlength')">
                                         Exceed maximum length of postcode
                                     </mat-error>
                                 </mat-form-field>
@@ -216,7 +216,7 @@
                                         [required]="true"
                                         [value]="'regionCountryId'"
                                         [placeholder]="'Select Country'"
-                                        (selectionChange)="supportForm.get('regionCountryId').patchValue($event.value);updateStates(countrySelector.value)"
+                                        (selectionChange)="createStoreForm.get('regionCountryId').patchValue($event.value);updateStates(countrySelector.value)"
                                         #countrySelector="matSelect"
                                         >
                                         <mat-select-trigger>
@@ -225,10 +225,10 @@
                                             </span>
                                         </mat-select-trigger>
                                         <div *ngFor="let country of countriesList">
-                                            <mat-option [value]="country.countryCode">{{country.name}}</mat-option>
+                                            <mat-option [value]="country.id">{{country.name}}</mat-option>
                                         </div>
                                     </mat-select>
-                                    <mat-error *ngIf="supportForm.get('region').hasError('required')">
+                                    <mat-error *ngIf="createStoreForm.get('regionCountryId').hasError('required')">
                                         Required
                                     </mat-error>
                                 </mat-form-field>
@@ -239,7 +239,7 @@
                                         [formControlName]="'region'"
                                         [required]="true"
                                         [value]="'region'"
-                                        (selectionChange)="supportForm.get('region').patchValue($event.value)"
+                                        (selectionChange)="createStoreForm.get('region').patchValue($event.value)"
                                         #regionSelector="matSelect"
                                         >
                                         <mat-select-trigger>
@@ -252,7 +252,7 @@
                                             <mat-option [value]="region.regionCode">{{region.name}}</mat-option>
                                         </div>
                                     </mat-select>
-                                    <mat-error *ngIf="supportForm.get('region').hasError('required')">
+                                    <mat-error *ngIf="createStoreForm.get('region').hasError('required')">
                                         Required
                                     </mat-error>
                                 </mat-form-field> -->
@@ -364,7 +364,7 @@
                                             [required]="true"
                                             [value]="'deliveryType'"
                                             [placeholder]="'Select Delivery Type'"
-                                            (selectionChange)="supportForm.get('deliveryType').patchValue($event.value)"
+                                            (selectionChange)="createStoreForm.get('deliveryType').patchValue($event.value)"
                                             #deliverySelector="matSelect"
                                             >
                                             <mat-select-trigger>
@@ -377,7 +377,7 @@
                                                 <mat-option [value]="'DELIVERY_PARTNERS'">Delivery Partners</mat-option>
                                             </div>
                                         </mat-select>
-                                        <mat-error *ngIf="supportForm.get('deliveryType').hasError('required')">
+                                        <mat-error *ngIf="createStoreForm.get('deliveryType').hasError('required')">
                                             Required
                                         </mat-error>
                                     </mat-form-field>
@@ -410,7 +410,7 @@
                             <!-- Delivery Partner, Self Delivery -->
                             <div class="flex w-full flex-auto flex-wrap">
                                 <!-- Delivery Partner -->
-                                <div *ngIf="supportForm.get('deliveryType').value === 'DELIVERY_PARTNERS'" class="flex flex-col w-full">
+                                <div *ngIf="createStoreForm.get('deliveryType').value === 'DELIVERY_PARTNERS'" class="flex flex-col w-full">
                                     <mat-label class="font-medium">Delivery Partner *</mat-label>
                                     <div class="mb-0.5"></div>
                                     <div class="border border-gray-300 rounded min-h-26 max-h-72 overflow-auto">
@@ -419,14 +419,14 @@
                                                 <mat-checkbox class="py-0.5" [checked]="deliveryPartner.selected" (change)="onChange($event)">{{deliveryPartner.label}}</mat-checkbox>
                                             </section>
                                         </div>
-                                        <mat-error *ngIf="supportForm.get('deliveryType').hasError('required')">
+                                        <mat-error *ngIf="createStoreForm.get('deliveryType').hasError('required')">
                                             Required at least 1
                                         </mat-error>
                                         &#160;
                                     </div>
                                 </div>
                                 <!-- Self Delivery -->
-                                <div *ngIf="supportForm.get('deliveryType').value === 'SELF_DELIVERY'" class="flex flex-col w-full">
+                                <div *ngIf="createStoreForm.get('deliveryType').value === 'SELF_DELIVERY'" class="flex flex-col w-full">
                                     <mat-label class="font-medium">Self Delivery *</mat-label>
                                     <div class="mb-0.5"></div>
                                     <div class="border border-gray-300 rounded min-h-26 max-h-72 overflow-auto">
@@ -502,14 +502,14 @@
                                                 </div>
                                             </ng-container>
                                         </div>
-                                        <mat-error *ngIf="supportForm.get('deliveryType').hasError('required')">
+                                        <mat-error *ngIf="createStoreForm.get('deliveryType').hasError('required')">
                                             Required at least 1
                                         </mat-error>
                                         &#160;
                                     </div>
                                 </div>
                                 <!-- Defalut -->
-                                <div *ngIf="!supportForm.get('deliveryType').value || supportForm.get('deliveryType').value === ''" class="flex flex-col w-full">
+                                <div *ngIf="!createStoreForm.get('deliveryType').value || createStoreForm.get('deliveryType').value === ''" class="flex flex-col w-full">
                                     <mat-label class="font-medium">Please choose a delivery type</mat-label>
                                     <div class="mb-2"></div>
                                     <div class="border border-gray-300 rounded h-72 overflow-auto">
@@ -528,7 +528,7 @@
                                     [required]="true"
                                     [value]="'paymentType'"
                                     [placeholder]="'Select Payment Type'"
-                                    (selectionChange)="supportForm.get('paymentType').patchValue($event.value)"
+                                    (selectionChange)="createStoreForm.get('paymentType').patchValue($event.value)"
                                     #paymentSelector="matSelect"
                                     >
                                     <mat-select-trigger>
@@ -537,11 +537,11 @@
                                         </span>
                                     </mat-select-trigger>
                                     <div>
-                                        <mat-option [value]="'COD'">Cash On Delivery</mat-option>
-                                        <mat-option [value]="'ONLINE_PAYMENT'">Online Payment</mat-option>
+                                        <mat-option [value]="'CoD'">Cash On Delivery</mat-option>
+                                        <mat-option [value]="'OnlinePayment'">Online Payment</mat-option>
                                     </div>
                                 </mat-select>
-                                <mat-error *ngIf="supportForm.get('paymentType').hasError('required')">
+                                <mat-error *ngIf="createStoreForm.get('paymentType').hasError('required')">
                                     Required
                                 </mat-error>
                             </mat-form-field>
@@ -591,87 +591,100 @@
                                                 </div>
                                             </div>
                                         </ng-container>
-                                        <ng-container *ngFor="let dayList of storeOpenCloseTime">
-                                            <!-- Days -->
-                                            <div class="flex flex-col w-full lg:w-1/6 lg:pr-2">
-                                                <!-- <mat-label>&nbsp;</mat-label>  -->
-                                                <div class="flex justify-center py-3">
-                                                    <span>{{dayList.day}}</span>
+                                        <ng-container formArrayName="storeTiming" *ngFor="let dayList of createStoreForm.get('storeTiming')['controls']; let i = index;">
+                                            <ng-container [formGroupName]="i">
+                                                <!-- Days -->
+                                                <div class="flex flex-col w-full lg:w-1/6 lg:pr-2">
+                                                    <!-- <mat-label>&nbsp;</mat-label>  -->
+                                                    <div class="flex justify-center py-3">
+                                                        <!-- <span>{{dayList.day}}</span> -->
+                                                        <input 
+                                                            matInput
+                                                            [formControlName]="'day'"
+                                                            [value]="dayList.day"
+                                                            readonly
+                                                        />
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <!-- Open Time -->
-                                            <div class="flex flex-col w-full lg:w-1/6 lg:pr-2">
-                                                <mat-form-field class="w-full" floatLabel="always">
-                                                    <input
-                                                        matInput
-                                                        [disabled]="dayList.isStoreClose"
-                                                        type="time"
-                                                        [value]="dayList.openTime"
-                                                    >
-                                                    <!-- <mat-label>Open Time</mat-label> -->
-                                                    <mat-error *ngIf="supportForm.get('storeOpenTime').hasError('required')">
-                                                        Required
-                                                    </mat-error>
-                                                </mat-form-field>
-                                            </div>
-                                            <!-- Close Time -->
-                                            <div class="flex flex-col w-full lg:w-1/6 lg:pr-2">
-                                                <mat-form-field class="w-full" floatLabel="always">
-                                                    <input
-                                                        matInput
-                                                        [disabled]="dayList.isStoreClose"
-                                                        type="time"
-                                                        [value]="dayList.closeTime"
-                                                    >
-                                                    <!-- <mat-label>Close Time</mat-label> -->
-                                                    <mat-error *ngIf="supportForm.get('storeCloseTime').hasError('required')">
-                                                        Required
-                                                    </mat-error>
-                                                </mat-form-field>
-                                            </div>
-                                            <!-- Break Time Start -->
-                                            <div class="flex flex-col w-full lg:w-1/6 lg:pr-2">
-                                                <mat-form-field class="w-full" floatLabel="always">
-                                                    <input
-                                                        matInput
-                                                        [disabled]="dayList.isStoreClose"
-                                                        type="time"
-                                                        [value]="dayList.startBreakTime"
-                                                    >
-                                                    <!-- <mat-label>Break Time (Start)</mat-label> -->
-                                                    <mat-error *ngIf="supportForm.get('storeCloseTime').hasError('required')">
-                                                        Required
-                                                    </mat-error>
-                                                </mat-form-field>
-                                            </div>
-                                            <!-- Break Time End -->
-                                            <div class="flex flex-col w-full lg:w-1/6 lg:pr-2">
-                                                <mat-form-field class="w-full" floatLabel="always">
-                                                    <input
-                                                        matInput
-                                                        [disabled]="dayList.isStoreClose"
-                                                        type="time"
-                                                        [value]="dayList.endBreakTime"
-                                                    >
-                                                    <!-- <mat-label>Break Time (End)</mat-label> -->
-                                                    <mat-error *ngIf="supportForm.get('storeCloseTime').hasError('required')">
-                                                        Required
-                                                    </mat-error>
-                                                </mat-form-field>
-                                            </div>
-                                            <!-- Working Day -->
-                                            <div class="flex flex-col w-full lg:w-1/6 lg:pr-2">
-                                                <!-- <mat-label>&nbsp;</mat-label> -->
-                                                <div class="mt-3 flex items-center -my-px w-full">
-                                                    <mat-slide-toggle
-                                                        matInput
-                                                        [checked]="!dayList.isStoreClose"
-                                                        [color]="'primary'"
-                                                        (change)="updateStoreOpening(dayList.day)">
-                                                        {{!dayList.isStoreClose === true ? 'Open' : 'Close'}}
-                                                    </mat-slide-toggle>
+                                                <!-- Open Time -->
+                                                <div class="flex flex-col w-full lg:w-1/6 lg:pr-2">
+                                                    <mat-form-field class="w-full" floatLabel="always">
+                                                        <input
+                                                            matInput
+                                                            [formControlName]="'openTime'"
+                                                            [disabled]="dayList.isOff"
+                                                            type="time"
+                                                            [value]="dayList.openTime"
+                                                        >
+                                                        <!-- <mat-label>Open Time</mat-label> -->
+                                                        <!-- <mat-error *ngIf="createStoreForm.get('storeTiming').hasError('required')">
+                                                            Required
+                                                        </mat-error> -->
+                                                    </mat-form-field>
                                                 </div>
-                                            </div>
+                                                <!-- Close Time -->
+                                                <div class="flex flex-col w-full lg:w-1/6 lg:pr-2">
+                                                    <mat-form-field class="w-full" floatLabel="always">
+                                                        <input
+                                                            matInput
+                                                            [formControlName]="'closeTime'"
+                                                            [disabled]="dayList.isOff"
+                                                            type="time"
+                                                            [value]="dayList.closeTime"
+                                                        >
+                                                        <!-- <mat-label>Close Time</mat-label> -->
+                                                        <!-- <mat-error *ngIf="createStoreForm.get('storeCloseTime').hasError('required')">
+                                                            Required
+                                                        </mat-error> -->
+                                                    </mat-form-field>
+                                                </div>
+                                                <!-- Break Time Start -->
+                                                <div class="flex flex-col w-full lg:w-1/6 lg:pr-2">
+                                                    <mat-form-field class="w-full" floatLabel="always">
+                                                        <input
+                                                            matInput
+                                                            [formControlName]="'breakStartTime'"
+                                                            [disabled]="dayList.isOff"
+                                                            type="time"
+                                                            [value]="dayList.breakStartTime"
+                                                        >
+                                                        <!-- <mat-label>Break Time (Start)</mat-label> -->
+                                                        <!-- <mat-error *ngIf="createStoreForm.get('storeCloseTime').hasError('required')">
+                                                            Required
+                                                        </mat-error> -->
+                                                    </mat-form-field>
+                                                </div>
+                                                <!-- Break Time End -->
+                                                <div class="flex flex-col w-full lg:w-1/6 lg:pr-2">
+                                                    <mat-form-field class="w-full" floatLabel="always">
+                                                        <input
+                                                            matInput
+                                                            [formControlName]="'breakEndTime'"
+                                                            [disabled]="dayList.isOff"
+                                                            type="time"
+                                                            [value]="dayList.breakEndTime"
+                                                        >
+                                                        <!-- <mat-label>Break Time (End)</mat-label> -->
+                                                        <!-- <mat-error *ngIf="createStoreForm.get('storeCloseTime').hasError('required')">
+                                                            Required
+                                                        </mat-error> -->
+                                                    </mat-form-field>
+                                                </div>
+                                                <!-- Working Day -->
+                                                <div class="flex flex-col w-full lg:w-1/6 lg:pr-2">
+                                                    <!-- <mat-label>&nbsp;</mat-label> -->
+                                                    <div class="mt-3 flex items-center -my-px w-full">
+                                                        <mat-slide-toggle
+                                                            matInput
+                                                            [formControlName]="'isOff'"
+                                                            [checked]="!dayList.isOff"
+                                                            [color]="'primary'"
+                                                            (change)="updateStoreOpening(dayList.day)">
+                                                            {{!dayList.isOff === true ? 'Open' : 'Close'}}
+                                                        </mat-slide-toggle>
+                                                    </div>
+                                                </div>
+                                            </ng-container>
                                         </ng-container>
                                     </div>
                                 </div>
@@ -684,7 +697,7 @@
                         <button
                             mat-button
                             [color]="'accent'"
-                            [disabled]="supportForm.pristine || supportForm.untouched"
+                            [disabled]="createStoreForm.pristine || createStoreForm.untouched"
                             (click)="clearForm()">
                             Clear
                         </button>
@@ -692,7 +705,7 @@
                             class="ml-2"
                             mat-flat-button
                             [color]="'primary'"
-                            [disabled]="supportForm.pristine || supportForm.invalid"
+                            [disabled]="createStoreForm.pristine || createStoreForm.invalid"
                             (click)="sendForm()">
                             Submit
                         </button>
