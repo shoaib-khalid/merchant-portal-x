@@ -1,20 +1,21 @@
+
 <!-- Button -->
 <button
     mat-icon-button
-    [matMenuTriggerFor]="languages">
+    [matMenuTriggerFor]="countries">
     <ng-container *ngTemplateOutlet="flagImage; context: {$implicit: activeCountry}"></ng-container>
 </button>
 
 <!-- Language menu -->
 <mat-menu
     [xPosition]="'before'"
-    #languages="matMenu">
+    #countries="matMenu">
     <ng-container *ngFor="let country of availableCountries; trackBy: trackByFn">
         <button
             mat-menu-item
-            (click)="setActiveCountry(country.id)">
+            (click)="setActiveCountry(country.countryCode)">
             <span class="flex items-center">
-                <ng-container *ngTemplateOutlet="flagImage; context: {$implicit: country.id}"></ng-container>
+                <ng-container *ngTemplateOutlet="flagImage; context: {$implicit: country.countryCode}"></ng-container>
                 <span class="ml-3">{{country.label}}</span>
             </span>
         </button>
@@ -33,3 +34,4 @@
             [alt]="'Flag image for ' + country">
     </span>
 </ng-template>
+

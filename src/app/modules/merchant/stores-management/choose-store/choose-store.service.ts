@@ -87,8 +87,8 @@ export class ChooseStoreService
                         name: "Food and Beverages"
                     },
                     {
-                        id: "ecommerce",
-                        slug: "ecommerce",
+                        id: "E-Commerece",
+                        slug: "E-Commerece",
                         name: "E-commerce"   
                     }
                 ];
@@ -96,37 +96,6 @@ export class ChooseStoreService
             })
         );
     }
-
-    /**
-     * Get stores
-     */
-    // getStores(): Observable<Store[]>
-    // {
-    //     return this._httpClient.get<Store[]>('api/apps/academy/stores').pipe(
-    //         tap((response: any) => {
-    //             console.log("COURCES: ",response)
-    //             let _stores = [
-    //                 {
-    //                     id: "694e4e5f-f25f-470b-bd0e-26b1d4f64028",
-    //                     title: "Basics of Angular",
-    //                     slug: "basics-of-angular",
-    //                     description: "Introductory store for Angular and framework basics",
-    //                     duration: 30,
-    //                     totalSteps: 11,
-    //                     featured: true,
-    //                     progress: {
-    //                         completed: 2,
-    //                         currentStep: 3
-    //                     },
-    //                     category: "web",
-    //                     completed: 2,
-    //                     currentStep: 3
-    //                 }
-    //             ];
-    //             this._stores.next(_stores);
-    //         })
-    //     );
-    // }
 
     getStores(): any {
 
@@ -136,7 +105,7 @@ export class ChooseStoreService
             .subscribe((storeList: Store[] = []) => {
                 // this._stores.next(storeList);
                 // this.stores = storeList.sort(this.dynamicSort("name"));
-                _storeList = storeList.sort(this.dynamicSort("name"));
+                _storeList = storeList;
 
                 let _stores = [];
                 _storeList.forEach(element => {
@@ -145,6 +114,7 @@ export class ChooseStoreService
                             id: element.id,
                             name: element.name,
                             slug: element.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''),
+                            storeLogo: element.storeLogo,
                             storeDescription: element.name,
                             duration: 30,
                             totalSteps: 3,
@@ -164,30 +134,6 @@ export class ChooseStoreService
             });      
 
     }
-
-
-    // getStores(): any {
-    //     this._storeService.store$
-    //     let _stores = [
-    //         {
-    //             id: "694e4e5f-f25f-470b-bd0e-26b1d4f64028",
-    //             title: "Basics of Angular",
-    //             slug: "basics-of-angular",
-    //             description: "Introductory store for Angular and framework basics",
-    //             duration: 30,
-    //             totalSteps: 11,
-    //             featured: true,
-    //             progress: {
-    //                 completed: 2,
-    //                 currentStep: 3
-    //             },
-    //             category: "web",
-    //             completed: 2,
-    //             currentStep: 3
-    //         }
-    //     ];
-    //     this._stores.next(_stores);
-    // }
 
     /**
      * Get store by id

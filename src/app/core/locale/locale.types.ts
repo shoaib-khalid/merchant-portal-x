@@ -1,15 +1,11 @@
 export interface Locale
 {
-    id: string;
-    name: string;
-    symplified_region?: string;
-    continent?: string;
-    country?: string;
-    countryCode?: string;
-    region?: string;
+    symplifiedCountryId: string;
+    symplifiedRegion: string;
+    countryCode: string;
 }
 
 export declare type AvailableCountries = string[] | {
-    id: string;
+    countryCode: string;
     label: string;
 }[];

@@ -1,12 +1,16 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSelectChange } from '@angular/material/select';
-import { MatSlideToggleChange } from '@angular/material/slide-toggle';
-import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { MatPaginator } from '@angular/material/paginator';
+import { combineLatest, merge, Observable, Subject } from 'rxjs';
+import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { ChooseStoreService } from 'app/modules/merchant/stores-management/choose-store/choose-store.service';
-import { StoreCategory, Store } from 'app/core/store/store.types';
+import { StoreCategory, Store, StorePagination } from 'app/core/store/store.types';
 import { InventoryService } from 'app/core/product/inventory.service'
+import { StoresService } from 'app/core/store/store.service';
+import { MatSort } from '@angular/material/sort';
+import { FormControl } from '@angular/forms';
 
 @Component({
     selector       : 'choose-store-list',
@@ -16,30 +20,36 @@ import { InventoryService } from 'app/core/product/inventory.service'
 })
 export class ChooseStoreListComponent implements OnInit, OnDestroy
 {
+    @ViewChild(MatPaginator) private _paginator: MatPaginator;
+    @ViewChild(MatSort) private _sort: MatSort;
+
     categories: StoreCategory[];
-    stores: Store[];
-    filteredStores: Store[];
-    filters: {
-        categorySlug$: BehaviorSubject<string>;
-        query$: BehaviorSubject<string>;
-        hideCompleted$: BehaviorSubject<boolean>;
-    } = {
-        categorySlug$ : new BehaviorSubject('all'),
-        query$        : new BehaviorSubject(''),
-        hideCompleted$: new BehaviorSubject(false)
-    };
+    stores$: Observable<Store[]>;
+    filteredStores: Store[] = [];
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
+
+    pagination: StorePagination;
+    isLoading: boolean = false;
+
+    filterControl: FormControl = new FormControl();
+    sortName: 'asc' | 'desc' | '' = 'asc';
+    searchName: string = "";
+
+    categoryFilterControl: FormControl = new FormControl();
+    filteredCategory: string = "";
 
     /**
      * Constructor
      */
     constructor(
         private _activatedRoute: ActivatedRoute,
+        private _fuseConfirmationService: FuseConfirmationService,
         private _changeDetectorRef: ChangeDetectorRef,
         private _router: Router,
         private _chooseStoreService: ChooseStoreService,
-        private _inventoryService: InventoryService
+        private _inventoryService: InventoryService,
+        private _storesService: StoresService
 
     )
     {
@@ -82,44 +92,87 @@ export class ChooseStoreListComponent implements OnInit, OnDestroy
             });
 
         // Get the stores
-        this._chooseStoreService.stores$
+        this._storesService.stores$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((stores: Store[]) => {
-                this.stores = this.filteredStores = stores;
 
-                console.log("filteredStores: ",stores);
+                stores.forEach(async (item, index) => {
+                    let res = await this._storesService.getStoreAssets(item.id);
+                    stores[index] = Object.assign(stores[index],{storeLogo: (res !== null) ? res.logoUrl : "" });
+
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                })
+
+                this.filteredStores = stores;
+            });
+
+        // Get the store
+        this._storesService.store$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((store: Store) => {
+                // console.log("cini: ",store)
+            });
+
+        // Get the pagination
+        this._storesService.pagination$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((pagination: StorePagination) => {
+
+                // Update the pagination
+                this.pagination = pagination;
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
 
-        // Filter the stores
-        combineLatest([this.filters.categorySlug$, this.filters.query$, this.filters.hideCompleted$])
-            .subscribe(([categorySlug, query, hideCompleted]) => {
+        this.filterControl.valueChanges
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((query) => {
 
-                // Reset the filtered stores
-                this.filteredStores = this.stores;
+                    // since sortName and searchName share same input field 
+                    // below if statement is needed
+                    if (typeof(query) === "boolean") {
+                        query = "";
+                    } else if (query === null){
+                        query = "";
+                    }
+                    else {
+                        this.searchName = query;
+                    }
 
-                // Filter by category
-                if ( categorySlug !== 'all' )
-                {
-                    this.filteredStores = this.filteredStores.filter(store => store.category === categorySlug);
-                }
+                    this.isLoading = true;
+                    return this._storesService.getStores("",0, 10, 'name', this.sortName, this.searchName, this.filteredCategory);
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
 
-                // Filter by search query
-                if ( query !== '' )
-                {
-                    this.filteredStores = this.filteredStores.filter(store => store.name.toLowerCase().includes(query.toLowerCase())
-                        || store.storeDescription.toLowerCase().includes(query.toLowerCase())
-                        || store.category.toLowerCase().includes(query.toLowerCase()));
-                }
+        this.categoryFilterControl.valueChanges
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((query) => {
 
-                // Filter by completed
-                if ( hideCompleted )
-                {
-                    this.filteredStores = this.filteredStores.filter(store => store.progress.completed === 0);
-                }
-            });
+                    // if categor not 'all' or null
+                    if (query !== "all" || query !== null) {
+                        this.filteredCategory = query;
+                    } else {
+                        this.filteredCategory = "";
+                    }
+
+                    this.isLoading = true;
+                    return this._storesService.getStores("",0, 10, 'name', this.sortName, this.searchName, this.filteredCategory);
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
     }
 
     /**
@@ -132,38 +185,45 @@ export class ChooseStoreListComponent implements OnInit, OnDestroy
         this._unsubscribeAll.complete();
     }
 
+    /**
+     * After view init
+     */
+    ngAfterViewInit(): void
+    {
+
+        if ( this._paginator )
+        {
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+            
+            // Get products if sort or page changes
+            merge(this._paginator.page).pipe(
+                switchMap(() => {
+                    this.isLoading = true;
+                    return this._storesService.getStores("", this._paginator.pageIndex, this._paginator.pageSize,"name", this.sortName, this.searchName, this.filteredCategory);
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            ).subscribe();
+        }
+    }
+
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
 
-    /**
-     * Filter by search query
-     *
-     * @param query
-     */
-    filterByQuery(query: string): void
-    {
-        this.filters.query$.next(query);
+    toggleSortName(){
+        this.sortName = (this.sortName === 'asc') ? 'desc' : 'asc';
     }
 
-    /**
-     * Filter by category
-     *
-     * @param change
-     */
-    filterByCategory(change: MatSelectChange): void
-    {
-        this.filters.categorySlug$.next(change.value);
-    }
+    clearFilter(){
+        this.sortName = 'asc';
+        this.searchName = "";
 
-    /**
-     * Show/hide completed stores
-     *
-     * @param change
-     */
-    toggleCompleted(change: MatSlideToggleChange): void
-    {
-        this.filters.hideCompleted$.next(change.checked);
+        this.filterControl.reset();
+
     }
 
     /**
@@ -193,5 +253,40 @@ export class ChooseStoreListComponent implements OnInit, OnDestroy
                 this._router.navigateByUrl('/dashboard')
         })
     }
+
+    /**
+     * Delete the selected product using the form data
+     */
+     deleteStore(storeId: string): void
+     {
+         // Open the confirmation dialog
+         const confirmation = this._fuseConfirmationService.open({
+             title  : 'Delete product',
+             message: 'Are you sure you want to remove this store ? This action cannot be undone!',
+             actions: {
+                 confirm: {
+                     label: 'Delete'
+                 }
+             }
+         });
+ 
+         // Subscribe to the confirmation dialog closed action
+         confirmation.afterClosed().subscribe((result) => {
+ 
+            // If the confirm button pressed...
+            if ( result === 'confirmed' )
+            {
+                // Delete the product on the server
+                this._storesService.delete(storeId).subscribe(() => {
+                    
+                    // empty out storeId
+                    this.storeId = null;
+                    
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+            });
+            }
+         });
+     }
     
 }

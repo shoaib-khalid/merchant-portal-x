@@ -4,6 +4,7 @@ import { Observable, ReplaySubject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { User } from 'app/core/user/user.types';
 import { AppConfig } from 'app/config/service.config';
+import { LogService } from '../logging/log.service';
 
 @Injectable({
     providedIn: 'root'
@@ -17,7 +18,8 @@ export class UserService
      */
     constructor(
         private _httpClient: HttpClient,
-        private _apiServer: AppConfig
+        private _apiServer: AppConfig,
+        private _logging: LogService
     )
     {
     }
@@ -49,7 +51,7 @@ export class UserService
     /**
      * Get the current logged in user data
      */
-    async get(): Promise<Observable<User>>
+    get(clientId: string = ""): Observable<any>
     {
         let userService = this._apiServer.settings.apiServer.userService;
         let token = "accessToken";
@@ -57,11 +59,14 @@ export class UserService
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${token}`)
         };
+
+        if (clientId !== "") { clientId = "/" + clientId } 
         
-        return await this._httpClient.get<any>(userService + '/clients/' + '51a4bc43-53e0-4e6e-9fb0-fff57cf02ba9', header)
+        return this._httpClient.get<any>(userService + '/clients' + clientId, header)
         .pipe(
-            tap((user) => {
-                return this._user.next(user.data);
+            tap((response) => {
+                this._logging.debug("Response from UserService",response);
+                return this._user.next(response.data);
             })
         );
     }

@@ -59,17 +59,24 @@ export class LogService {
             
             // Build log string
             if (this.logWithDate) {
-                value = new Date() + " - ";
+                value = new Date() + "\n";
             }
             
             value += "Type: " + LogLevel[this.level];
-            value += " - Message: " + msg;
-            if (params.length) {
-                value += " - Extra Info: " + this.formatParams(params);
+            if (params.length === 1) {
+                value += "\nExtra Info: ";
+                console.groupCollapsed(msg);
+                console.log(value,params);
+                console.groupEnd();
+            } else {
+                value += "\nMessage: " + msg;
+                if (params.length > 1) {
+                    value += "\nExtra Info: " + this.formatParams(params);
+                }
+                console.log(value);
             }
             
             // Log the value
-            console.log(value);
         }
     }
 

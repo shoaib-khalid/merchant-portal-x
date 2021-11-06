@@ -294,7 +294,7 @@ export class InventoryService
                     page: response.data.number,
                     lastPage: response.data.totalPages,
                     startIndex: response.data.pageable.offset,
-                    endIndex: response.data.pageable.offset + response.data.pageable.numberOfElements - 1
+                    endIndex: response.data.pageable.offset + response.data.numberOfElements - 1
                 }
                 this._pagination.next(_pagination);
                 

@@ -1,0 +1,57 @@
+<div class="flex flex-col max-w-240 md:min-w-160 -m-6">
+
+    <!-- Compose form -->
+    <div
+        class="flex flex-col flex-auto p-6 sm:p-8 overflow-y-auto"
+    >
+
+        <div class="flex items-center flex-auto min-w-0">
+            <mat-icon
+                class="w-10"
+                [svgIcon]="'heroicons_solid:location-marker'"></mat-icon>
+            <span class="pl-4 text-2xl font-bold text-primary">Failed to detect location</span> <br>
+        </div>
+        <div class="flex items-center flex-auto min-w-0 mb-8">
+            <span class="pl-14 text-lg">Oops ! We're unable to detect your current location. 
+                <br>Please select your current country to continue
+            </span>
+        </div>
+        <!-- To -->
+        <mat-form-field>
+            <mat-select
+                placeholder="Select Country"
+                [value]="'country'"
+                (selectionChange)="changeCountry(countrySelector.value)"
+                #countrySelector="matSelect"
+                >
+                <mat-select-trigger>
+                    <span class="flex items-center">
+                        <span>{{ countrySelector.triggerValue }}</span>
+                    </span>
+                </mat-select-trigger>
+                <div>
+                    <mat-option [value]="'MYS'">Malaysia</mat-option>
+                    <mat-option [value]="'PAK'">Pakistan</mat-option>
+                </div>
+            </mat-select>
+            <mat-error *ngIf="false">
+                Required at least 1
+            </mat-error>
+        </mat-form-field>
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mt-4 sm:mt-6">
+            <div class="-ml-2">
+                <!-- Send -->
+                <button
+                    class="order-first sm:order-last"
+                    mat-flat-button
+                    [disabled]="isCountrySelected"
+                    [color]="'primary'"
+                    (click)="setCountry()">
+                    Ok
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

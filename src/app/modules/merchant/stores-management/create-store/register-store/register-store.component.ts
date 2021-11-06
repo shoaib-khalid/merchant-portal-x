@@ -227,19 +227,19 @@ export class RegisterStoreComponent implements OnInit
 
             console.log("this._localeService.locale$ :", response);
             
-            let countryId = response.id;
+            let symplifiedCountryId = response.symplifiedCountryId;
             
             // state (using component variable)
             // INITIALLY (refer below section updateStates(); for changes), get states from symplified backed by using the 3rd party api
             
             // Get states by country Z(using symplified backend)
-            this._storesService.getStoreRegionCountryState(countryId).subscribe((response)=>{
+            this._storesService.getStoreRegionCountryState(symplifiedCountryId).subscribe((response)=>{
                 console.log("this._storesService.getStoreRegionCountryState(countryId): ", response);
                 this.statesByCountry = response.data.content;
             });
 
             // country (using form builder variable)
-            this.createStoreForm.get('regionCountryId').patchValue(countryId.toUpperCase());
+            this.createStoreForm.get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
             
             // Mark for check
             this._changeDetectorRef.markForCheck();

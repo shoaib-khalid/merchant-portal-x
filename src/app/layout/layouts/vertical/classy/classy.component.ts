@@ -97,8 +97,8 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
         // Subscribe to the store service
         this._storesService.stores$
             .pipe((takeUntil(this._unsubscribeAll)))
-            .subscribe((storeList: Store[]) => {
-                this.stores = storeList.sort(this.dynamicSort("name"));
+            .subscribe((stores: Store[]) => {
+                this.stores = stores;
             });            
 
         // Subscribe to media changes

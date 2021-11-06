@@ -1,0 +1,9 @@
+<svg width="20" height="14.999999999999998" xmlns="http://www.w3.org/2000/svg" fill="none">
+ <mask height="15" width="20" y="0" x="0" maskUnits="userSpaceOnUse" id="a">
+  <path id="svg_1" d="m0,0l20,0l0,15l-20,0l0,-15z" fill="#fff"/>
+ </mask>
+
+ <g>
+  <title>Layer 1</title>
+ </g>
+</svg>

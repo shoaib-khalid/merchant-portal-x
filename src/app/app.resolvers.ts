@@ -27,8 +27,8 @@ export class InitialDataResolver implements Resolve<any>
         private _shortcutsService: ShortcutsService,
         private _merchantSetupService: MerchantSetupService,
         private _storesService: StoresService,
-        private _localeService: LocaleService
-        // private _userService: UserService,
+        private _localeService: LocaleService,
+        // private _userService: UserService
     )
     {
     }
@@ -53,8 +53,8 @@ export class InitialDataResolver implements Resolve<any>
             this._quickChatService.getChats(),
             this._shortcutsService.getAll(),
             this._merchantSetupService.get(),
-            this._storesService.get(),
             this._localeService.get(),
+            this._storesService.getStores(),
             this._storesService.getStoreRegionCountries(),
             // this._userService.get(),
         ]);

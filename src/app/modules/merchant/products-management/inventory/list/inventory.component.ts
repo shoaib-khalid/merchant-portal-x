@@ -115,7 +115,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         private _fuseConfirmationService: FuseConfirmationService,
         private _formBuilder: FormBuilder,
         private _inventoryService: InventoryService,
-        private _storeService: StoresService,
+        private _storesService: StoresService,
         private _overlay: Overlay,
         private _renderer2: Renderer2,
         private _viewContainerRef: ViewContainerRef
@@ -157,7 +157,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         });
 
         // Get the stores
-        this._storeService.stores$
+        this._storesService.stores$
         .pipe(takeUntil(this._unsubscribeAll))
         .subscribe((stores: Store[]) => {
 
@@ -1400,7 +1400,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
         const productRaw = this.selectedProductForm.getRawValue();
 
         // Get Current Store domain
-        const currentStoreIndex = (this.stores).findIndex(item => item.id === this._storeService.storeId$)
+        const currentStoreIndex = (this.stores).findIndex(item => item.id === this._storesService.storeId$)
 
         // Get
         // let storeFrontDomain = this._apiServer.settings.storeFrontDomain;

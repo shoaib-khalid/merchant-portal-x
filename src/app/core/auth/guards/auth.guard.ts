@@ -53,7 +53,7 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanLoad
         let currentRole = this._jwt.getJwtPayload(this._authService.accessToken).role;
         if (route.data.roles) {
             // check if route is restricted by role
-            this._logging.debug("Required role to access route",route.data.roles);
+            this._logging.debug("Required role to access route",route.data.roles.join());
             this._logging.debug("Current user role",currentRole);
             if (route.data.roles && route.data.roles.indexOf(currentRole) === -1) {
                 // role not authorised so redirect to home page

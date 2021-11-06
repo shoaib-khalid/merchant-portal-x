@@ -11,6 +11,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FuseFindByKeyPipeModule } from '@fuse/pipes/find-by-key';
 import { SharedModule } from 'app/shared/shared.module';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { chooseStoreRoutes } from 'app/modules/merchant/stores-management/choose-store/choose-store.routing';
 import { ChooseStoreComponent } from 'app/modules/merchant/stores-management/choose-store/choose-store.component';
 // import { ChooseStoreDetailsComponent } from 'app/modules/merchant/choose-store/details/details.component';
@@ -36,7 +37,8 @@ import { MatTabsModule } from '@angular/material/tabs';
         MatTooltipModule,
         FuseFindByKeyPipeModule,
         SharedModule,
-        MatTabsModule
+        MatTabsModule,
+        MatPaginatorModule
     ]
 })
 export class ChooseStoreModule

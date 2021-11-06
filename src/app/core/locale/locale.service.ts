@@ -4,6 +4,7 @@ import { Observable, of, ReplaySubject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { AvailableCountries, Locale } from 'app/core/locale/locale.types';
 import { AppConfig } from 'app/config/service.config';
+import { LogService } from 'app/core/logging/log.service';
 
 @Injectable({
     providedIn: 'root'
@@ -17,7 +18,8 @@ export class LocaleService
      */
     constructor(
         private _httpClient: HttpClient,
-        private _apiServer: AppConfig
+        private _apiServer: AppConfig,
+        private _logging: LogService
     )
     {
     }
@@ -49,11 +51,12 @@ export class LocaleService
     /**
      * Get the current logged in locale data
      */
-    async get(): Promise<Observable<Locale>>
+    get(): Observable<any>
     {   
-        return await this._httpClient.get<any>("https://extreme-ip-lookup.com/json")
+        return this._httpClient.get<any>("https://extreme-ip-lookup.com/json")
         .pipe(
             tap((response) => {
+                this._logging.debug("Response from LocaleService",response);
                 return this._locale.next(response);
             })
         );
@@ -64,12 +67,11 @@ export class LocaleService
      *
      * @param country
      */
-    update(id: string, countryCode: string, symplified_region: string): Observable<any>
+    update(symplifiedCountryId: string, symplifiedRegion: string , countryCode: string): Observable<any>
     {
         let change: Locale = {
-            id,
-            name: '',
-            "symplified_region": symplified_region,
+            "symplifiedCountryId": symplifiedCountryId,
+            "symplifiedRegion": symplifiedRegion,
             "countryCode": countryCode,
         };
         this._locale.next(change);
@@ -84,11 +86,11 @@ export class LocaleService
     getAvailableCountries(): AvailableCountries{
         return [
             {
-                id: "my",
+                countryCode: "my",
                 label: "Malaysia",
             },
             {
-                id: "pk",
+                countryCode: "pk",
                 label: "Pakistan"
             }
         ];

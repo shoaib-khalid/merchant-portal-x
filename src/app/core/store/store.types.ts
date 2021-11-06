@@ -10,6 +10,7 @@ export interface Store
     id: string;
     name: string;
     storeDescription?: string;
+    storeLogo: string;
     slug?: string;
     domain?: string;
     email?: string;
@@ -31,6 +32,10 @@ export interface Store
         currentStep?: number;
         completed?: number;
     };
+    duration?: number;
+    featured?: boolean;
+    completed?: number;
+    currentStep?: number;
 }
 
 export interface CreateStore
@@ -80,4 +85,22 @@ export interface StoreRegionCountries
     currencySymbol: string;
     timezone: string;
     countryCode?: string; // need taufik to add in backend
+}
+
+export interface StoreAssets
+{
+    bannerMobileUrl: string;
+    bannerUrl: string;
+    logoUrl: string;
+    storeId: string;
+}
+
+export interface StorePagination
+{
+    length: number;
+    size: number;
+    page: number;
+    lastPage: number;
+    startIndex: number;
+    endIndex: number;
 }

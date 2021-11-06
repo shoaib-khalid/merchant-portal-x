@@ -14,8 +14,8 @@ import { Locale } from 'app/core/locale/locale.types';
 })
 export class ChooseVerticalComponent
 {
-    yearlyBilling: boolean = true;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
+    yearlyBilling: boolean = true;
     verticals: Vertical[];
 
     /**
@@ -44,7 +44,11 @@ export class ChooseVerticalComponent
         .subscribe((verticals: Vertical[]) => {
             this._localeService.locale$.subscribe((response: Locale)=>{
 
-                let regionId = response.symplified_region;
+                let regionId = response.symplifiedRegion;
+                if (!response.symplifiedRegion) {
+                    
+                }
+                console.log("regionId: ",regionId);
                 this.verticals = this.getVerticalByRegionId(verticals,regionId);
     
                 // Mark for check
