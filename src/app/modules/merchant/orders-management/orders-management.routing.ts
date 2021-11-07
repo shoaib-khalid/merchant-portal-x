@@ -1,13 +1,14 @@
 import { Route } from '@angular/router';
-import { FinanceComponent } from 'app/modules/merchant/orders-management/orders-management.component';
-import { FinanceResolver } from 'app/modules/merchant/orders-management/orders-management.resolvers';
+import { OrdersListComponent } from 'app/modules/merchant/orders-management/orders-list/orders-list.component';
+import { OrdersListResolver } from 'app/modules/merchant/orders-management/orders-list/orders-list.resolvers';
 
 export const financeRoutes: Route[] = [
     {
         path     : '',
-        component: FinanceComponent,
+        component: OrdersListComponent,
         resolve  : {
-            data: FinanceResolver
+            data: OrdersListResolver,
+            // data2: OrdersList2Resolver
         }
     }
 ];

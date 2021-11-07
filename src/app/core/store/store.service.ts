@@ -183,27 +183,6 @@ export class StoresService
                 this._pagination.next(_pagination);
                 this._stores.next(this._currentStores);
             })
-
-
-            // .pipe(
-            //     map((store) => {
-    
-            //         // Update the store
-            //         this._store.next(store.data.content);
-    
-            //         // Return the store
-            //         return store;
-            //     }),
-            //     switchMap((store) => {
-    
-            //         if ( !store )
-            //         {
-            //             return throwError('Could not found store with id of ' + id + '!');
-            //         }
-    
-            //         return of(store);
-            //     })
-            // );
         );
     }
 

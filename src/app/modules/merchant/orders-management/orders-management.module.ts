@@ -6,15 +6,22 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSortModule } from '@angular/material/sort';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import { NgApexchartsModule } from 'ng-apexcharts';
+import { MatSelectModule } from '@angular/material/select';
 import { SharedModule } from 'app/shared/shared.module';
-import { FinanceComponent } from 'app/modules/merchant/orders-management/orders-management.component';
+import { OrdersListComponent } from 'app/modules/merchant/orders-management/orders-list/orders-list.component';
 import { financeRoutes } from 'app/modules/merchant/orders-management/orders-management.routing';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+
 
 @NgModule({
     declarations: [
-        FinanceComponent
+        OrdersListComponent
     ],
     imports     : [
         RouterModule.forChild(financeRoutes),
@@ -26,7 +33,13 @@ import { financeRoutes } from 'app/modules/merchant/orders-management/orders-man
         MatSortModule,
         MatTableModule,
         NgApexchartsModule,
-        SharedModule
+        SharedModule,
+        MatPaginatorModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatDatepickerModule,
+        MatNativeDateModule
     ]
 })
 export class FinanceModule

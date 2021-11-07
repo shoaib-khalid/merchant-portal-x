@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
-import { FinanceService } from 'app/modules/merchant/orders-management/orders-management.service';
+import { OrdersListService } from 'app/modules/merchant/orders-management/orders-list/orders-list.service';
 
 @Injectable({
     providedIn: 'root'
 })
-export class FinanceResolver implements Resolve<any>
+export class OrdersListResolver implements Resolve<any>
 {
     /**
      * Constructor
      */
-    constructor(private _financeService: FinanceService)
+    constructor(private _ordersListService: OrdersListService)
     {
     }
 
@@ -27,6 +27,6 @@ export class FinanceResolver implements Resolve<any>
      */
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
     {
-        return this._financeService.getData();
+        return this._ordersListService.getOrders();
     }
 }
