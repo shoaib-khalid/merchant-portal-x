@@ -13,6 +13,8 @@ import { NgApexchartsModule } from 'ng-apexcharts';
 import { MatSelectModule } from '@angular/material/select';
 import { SharedModule } from 'app/shared/shared.module';
 import { OrdersListComponent } from 'app/modules/merchant/orders-management/orders-list/orders-list.component';
+import { OrderDetailsComponent } from 'app/modules/merchant/orders-management/order-details/order-details.component';
+import { ChooseProviderDateTimeComponent } from 'app/modules/merchant/orders-management/choose-provider-datetime/choose-provider-datetime.component';
 import { financeRoutes } from 'app/modules/merchant/orders-management/orders-management.routing';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -21,7 +23,9 @@ import { MatNativeDateModule } from '@angular/material/core';
 
 @NgModule({
     declarations: [
-        OrdersListComponent
+        OrdersListComponent,
+        OrderDetailsComponent,
+        ChooseProviderDateTimeComponent
     ],
     imports     : [
         RouterModule.forChild(financeRoutes),
@@ -42,6 +46,6 @@ import { MatNativeDateModule } from '@angular/material/core';
         MatNativeDateModule
     ]
 })
-export class FinanceModule
+export class OrdersManagementModule
 {
 }

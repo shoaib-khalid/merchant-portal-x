@@ -18,7 +18,7 @@ export const merchantRoutes: Route[] = [
             children   : [
                 {path: 'dashboard', loadChildren: () => import('app/modules/merchant/dashboard/dashboard.module').then(m => m.DashboardModule)},
                 {path: 'products', loadChildren: () => import('app/modules/merchant/products-management/products-management.module').then(m => m.ECommerceModule)},
-                {path: 'orders', loadChildren: () => import('app/modules/merchant/orders-management/orders-management.module').then(m => m.FinanceModule)},
+                {path: 'orders', loadChildren: () => import('app/modules/merchant/orders-management/orders-management.module').then(m => m.OrdersManagementModule)},
                 {path: 'discounts', loadChildren: () => import('app/modules/merchant/discounts-management/discounts-management.module').then(m => m.DiscountsManagementModule), component  : DiscountsManagementComponent},
                 {path: 'user-channels', loadChildren: () => import('app/modules/merchant/social-media/social-media.module').then(m => m.SocialMediaModule), component  : SocialMediaComponent},
             ]

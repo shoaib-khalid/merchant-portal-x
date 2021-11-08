@@ -5,7 +5,7 @@ import { tap } from 'rxjs/operators';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service';
-import { Order, OrdersListPagination } from './orders-list.types';
+import { Order, OrderItem, OrdersListPagination } from './orders-list.types';
 
 @Injectable({
     providedIn: 'root'
@@ -14,6 +14,8 @@ export class OrdersListService
 {
     private _pagination: BehaviorSubject<OrdersListPagination | null> = new BehaviorSubject(null);
     private _orders: BehaviorSubject<Order[] | null> = new BehaviorSubject(null);
+    private _order: BehaviorSubject<Order | null> = new BehaviorSubject(null);
+    private _orderItems: BehaviorSubject<OrderItem[] | null> = new BehaviorSubject(null);
 
     _currentStores: any = [];
 
@@ -34,11 +36,27 @@ export class OrdersListService
     // -----------------------------------------------------------------------------------------------------
 
     /**
-     * Getter for data
+     * Getter for orders
      */
     get orders$(): Observable<any>
     {
         return this._orders.asObservable();
+    }
+
+    /**
+     * Getter for orders
+     */
+    get order$(): Observable<any>
+    {
+        return this._order.asObservable();
+    }
+
+    /**
+     * Getter for orders
+     */
+    get orderItems$(): Observable<any>
+    {
+        return this._orderItems.asObservable();
     }
 
     /**
@@ -136,6 +154,44 @@ export class OrdersListService
                 this._orders.next(this._currentStores);
             })
         );
+    }
+
+    getOrderById(orderId): Observable<any>
+    {
+        let orderService = this._apiServer.settings.apiServer.orderService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+        
+        return this._httpClient.get<Order>(orderService + '/orders/' + orderId, header)
+        .pipe(
+            tap((response) => {
+                this._logging.debug("Response from OrdersService (getOrderById)",response);
+                this._order.next(response.data);
+            })
+        )
+    }
+
+    getOrderItemsById(orderId): Observable<any>
+    {
+        let orderService = this._apiServer.settings.apiServer.orderService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+        
+        return this._httpClient.get<OrderItem[]>(orderService + '/orders/' + orderId + '/items', header)
+        .pipe(
+            tap((response) => {
+                this._logging.debug("Response from OrdersService (getOrderItemsById)",response);
+                this._orderItems.next(response.data);
+            })
+        )
     }
 
     updateOrder(orderId, nextCompletionStatus): Observable<any>

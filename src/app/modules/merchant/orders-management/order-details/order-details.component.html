@@ -1,0 +1,126 @@
+<div
+    class="absolute inset-0 flex flex-col min-w-0 overflow-y-auto"
+    cdkScrollable>
+    <div class="flex flex-col flex-auto w-full">
+        <div class="flex flex-wrap item-center justify-center w-full max-w-screen-xl mx-auto p-6 md:p-8">
+
+            <div class="max-w-240 p-16 rounded-2xl shadow bg-card print:w-auto print:p-0 print:rounded-none print:shadow-none print:bg-transparent">
+
+                <div class="flex items-start">
+                    <div class="grid grid-rows-2 place-items-start gap-y-12">
+                        <div class="grid auto-cols-max grid-flow-col gap-x-8">
+                            <div class="place-self-center w-24">
+                                <img
+                                    class="w-24"
+                                    [src]="invoiceForm.get('storeLogo').value">
+                            </div>
+                            <div class="pl-10 border-l text-md">
+                                <div class="font-medium">{{ invoiceForm.get('storeName').value }}</div>
+                                <div class="w-40"> {{ invoiceForm.get('storeAddress').value }} </div>
+                                <div>{{ invoiceForm.get('storePhoneNumber').value }}</div>
+                                <div>{{ invoiceForm.get('storeEmail').value }}</div>
+                                <div>{{ invoiceForm.get('storeUrl').value }}</div>
+                            </div>
+                        </div>
+                        <div class="grid auto-cols-max grid-flow-col gap-x-8">
+                            <div class="place-self-center w-24 text-center text-2xl text-secondary">
+                                Bill To
+                            </div>
+                            <div class="pl-10 border-l text-md">
+                                <div class="font-medium">{{ invoiceForm.get('customerName').value }}</div>
+                                <div class="w-40"> {{ invoiceForm.get('customerAddress').value }} </div>
+                                <div>{{ invoiceForm.get('customerPhoneNumber').value }}</div>
+                                <div>{{ invoiceForm.get('customerEmail').value }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-1 ml-auto">
+                        <div class="justify-self-end text-4xl tracking-tight text-secondary">INVOICE</div>
+                        <div class="text-4xl">{{ invoiceForm.get('invoiceId').value }}</div>
+                        <div class="justify-self-end font-medium tracking-tight text-secondary">CREATED DATE</div>
+                        <div class="font-medium">{{ invoiceForm.get('invoiceCreatedDate').value | date:'MMM dd, h:mm a' }}</div>
+                        <div class="justify-self-end font-medium tracking-tight text-secondary">UPDATED DATE</div>
+                        <div class="font-medium">{{ invoiceForm.get('invoiceUpdatedDate').value | date:'MMM dd, h:mm a' }}</div>
+                        <div class="justify-self-end font-medium tracking-tight text-secondary">TOTAL</div>
+                        <div class="font-medium">{{ invoiceForm.get('total').value | currency: '$' }}</div>
+                    </div>
+                </div>
+    
+                <div class="grid grid-cols-12 gap-x-1 mt-16">
+                    <!-- Columns -->
+                    <div class="col-span-8 font-medium text-md text-secondary">SERVICE</div>
+                    <div class="font-medium text-md text-right text-secondary">RATE</div>
+                    <div class="font-medium text-md text-right text-secondary">QTY</div>
+                    <div class="col-span-2 font-medium text-md text-right text-secondary">TOTAL</div>
+    
+                    <ng-container *ngFor="let item of invoiceForm.get('items').value">
+                        <!-- Divider -->
+                        <div class="col-span-12 my-4 border-b"></div>
+        
+                        <!-- Item -->
+                        <div class="col-span-8">
+                            <div class="text-lg font-medium">{{ item.productName }}</div>
+                            <div class="mt-2 text-md text-secondary">
+                                {{ item.productVariant }}
+                            </div>
+                        </div>
+                        <div class="self-center text-right">{{ item.productPrice | currency: '$' }}</div>
+                        <div class="self-center text-right">{{ item.quantity }}</div>
+                        <div class="col-span-2 self-center text-right">{{ (item.productPrice * item.quantity) | currency: '$' }}</div>
+                    </ng-container>
+    
+                    <!-- Spacer -->
+                    <div class="col-span-12 mt-16"></div>
+    
+                    <!-- Subtotal -->
+                    <div class="col-span-10 self-center font-medium tracking-tight text-secondary">SUBTOTAL</div>
+                    <div class="col-span-2 text-right text-lg">{{ invoiceForm.get('subtotal').value | currency:'$'}}</div>
+    
+                    <!-- Divider -->
+                    <div class="col-span-12 my-3 border-b"></div>
+    
+                    <!-- Service Charges -->
+                    <div class="col-span-10 self-center font-medium tracking-tight text-secondary">SERVICE CHARGES</div>
+                    <div class="col-span-2 text-right text-lg">{{ invoiceForm.get('storeServiceCharges').value | currency:'$'}}</div>
+    
+                    <!-- Divider -->
+                    <div class="col-span-12 my-3 border-b"></div>
+    
+                    <!-- Delivery Charges -->
+                    <div class="col-span-10 self-center font-medium tracking-tight text-secondary">DELIVERY CHARGES</div>
+                    <div class="col-span-2 text-right text-lg">{{ invoiceForm.get('deliveryCharges').value | currency:'$'}}</div>
+    
+                    <!-- Divider -->
+                    <div class="col-span-12 my-3 border-b"></div>
+
+                    <!-- Delivery Charges -->
+                    <div class="col-span-10 self-center font-medium tracking-tight text-secondary">DELIVERY DISCOUNT</div>
+                    <div class="col-span-2 text-right text-lg">{{ invoiceForm.get('deliveryDiscount').value | currency:'$'}}</div>
+    
+                    <!-- Divider -->
+                    <div class="col-span-12 my-3 border-b"></div>
+    
+                    <!-- Total -->
+                    <div class="col-span-10 self-center text-2xl font-medium tracking-tight text-secondary">TOTAL</div>
+                    <div class="col-span-2 text-right text-2xl font-medium">{{ invoiceForm.get('total').value | currency:'$'}}</div>
+                </div>
+    
+                <div class="mt-16">
+                    <div class="font-medium">This invoice is computer generated. Thank you for your business.</div>
+                    <div class="flex items-start mt-4">
+                        <img
+                            class="flex-0 w-10 mt-2"
+                            [src]="invoiceForm.get('storeLogo').value">
+                        <div class="ml-6 text-sm text-secondary">
+                            In condimentum malesuada efficitur. Mauris volutpat placerat auctor. Ut ac congue dolor. Quisque scelerisque lacus sed feugiat fermentum.
+                            Cras aliquet facilisis pellentesque. Nunc hendrerit quam at leo commodo, a suscipit tellus dapibus. Etiam at felis volutpat est mollis lacinia.
+                            Mauris placerat sem sit amet velit mollis, in porttitor ex finibus. Proin eu nibh id libero tincidunt lacinia et eget.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>

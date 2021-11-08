@@ -66,7 +66,23 @@ export interface Order
       invoiceSeqNo: number;
       nameAbreviation: string;
     }
-  }
+}
+
+export interface OrderItem
+{
+  id: string;
+  orderId: string;
+  productId: string;
+  price: number;
+  productPrice: number;
+  weight: string;
+  quantity: number;
+  itemCode: string;
+  productName: string;
+  specialInstruction: string;
+  productVariant: string;
+  SKU: string;
+}
 
 export interface OrdersListPagination
 {

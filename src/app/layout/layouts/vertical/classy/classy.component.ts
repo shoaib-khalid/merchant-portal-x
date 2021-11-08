@@ -99,7 +99,7 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
             .pipe((takeUntil(this._unsubscribeAll)))
             .subscribe((stores: Store[]) => {
                 this.stores = stores;
-            });            
+            });
 
         // Subscribe to media changes
         this._fuseMediaWatcherService.onMediaChange$

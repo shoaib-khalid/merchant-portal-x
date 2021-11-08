@@ -8,6 +8,10 @@ import { OrdersListPagination } from 'app/modules/merchant/orders-management/ord
 import { MatPaginator } from '@angular/material/paginator';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
+import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { OrderDetailsComponent } from 'app/modules/merchant/orders-management/order-details/order-details.component';
+import { ChooseProviderDateTimeComponent } from 'app/modules/merchant/orders-management/choose-provider-datetime/choose-provider-datetime.component';
+import { Router } from '@angular/router';
 
 @Component({
     selector       : 'orders-list',
@@ -36,7 +40,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     range: any;
 
     recentTransactionsDataSource: MatTableDataSource<any> = new MatTableDataSource();
-    recentTransactionsTableColumns: string[] = ['transactionId', 'date', 'name', 'amount', 'status', 'action'];
+    recentTransactionsTableColumns: string[] = ['transactionId', 'date', 'name', 'amount', 'status', 'details', 'action'];
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     /**
@@ -44,7 +48,10 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
      */
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
-        private _orderslistService: OrdersListService)
+        private _orderslistService: OrdersListService,
+        public _dialog: MatDialog,
+        private _router: Router,
+        )
     {
     }
 
@@ -305,6 +312,18 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
         } else {
             return "Undefined";
         } 
+    }
+
+    viewDetails(orderId){
+        console.log("orderId",orderId)
+        this._router.navigateByUrl('/orders/'+orderId)
+    }
+
+    chooseProviderDateTime(){
+        const dialogRef = this._dialog.open(ChooseProviderDateTimeComponent, { disableClose: true });
+        dialogRef.afterClosed().subscribe(result => {
+            console.log(result);
+        });
     }
 
 }

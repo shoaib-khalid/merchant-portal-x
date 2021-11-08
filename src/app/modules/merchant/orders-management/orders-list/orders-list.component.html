@@ -300,6 +300,38 @@
                                     </td>
                                 </ng-container>
 
+                                <!-- Details -->
+                                <ng-container matColumnDef="details">
+                                    <th
+                                        mat-header-cell
+                                        mat-sort-header
+                                        *matHeaderCellDef>
+                                        Details
+                                    </th>
+                                    <td
+                                        mat-cell
+                                        class="px-2"
+                                        *matCellDef="let transaction">
+                                        <input
+                                            [id]=" 'babun-' + transaction.id"
+                                            type="button"
+                                            (click)="viewDetails(transaction.id)"
+                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                            mat-button>
+                                        <label 
+                                            class="flex items-center justify-center py-2 px-1 rounded-full cursor-pointer border border-primary bg-primary group hover:bg-white"
+                                            [for]="'babun-' + transaction.id"
+                                            matRipple>
+                                            <mat-icon
+                                                class="text-white group-hover:text-primary pr-2"
+                                                [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                                            <span class="font-medium text-white group-hover:text-primary text-sm text-secondary whitespace-nowrap">
+                                                View
+                                            </span>
+                                        </label>
+                                    </td>
+                                </ng-container>
+
                                 <!-- Action -->
                                 <ng-container matColumnDef="action">
                                     <th
@@ -310,23 +342,23 @@
                                     </th>
                                     <td
                                         mat-cell
-                                        *matCellDef="let transaction">
+                                        class="px-2"
+                                        *matCellDef="let transaction"
+                                    >
                                         <input
-                                            [id]=" 'action-' + transaction.id"
+                                            [id]="'action-' + transaction.id"
                                             type="button"
                                             (click)="updateStatus(transaction.id, getNextCompletionStatus(transaction.completionStatus).nextId)"
                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                             mat-button>
                                         <label 
-                                            class="flex items-center justify-center py-2 px-1 rounded-full cursor-pointer bg-primary hover:bg-primary-500"
+                                            *ngIf="getNextCompletionStatus(transaction.completionStatus).nextLabelBtn !== null"    
+                                            class="flex items-center justify-center py-2 px-1 rounded-full cursor-pointer border border-primary border-solid group hover:bg-primary"
                                             [for]="'action-' + transaction.id"
                                             matRipple>
-                                            <span class="font-medium text-white text-sm text-secondary whitespace-nowrap">
+                                            <span class="font-medium group-hover:text-white text-sm text-primary whitespace-nowrap">
                                                 {{ (transaction.completionStatus) ? getNextCompletionStatus(transaction.completionStatus).nextLabelBtn : 'Undefined' }}
                                             </span>
-                                            <mat-icon
-                                                class="text-white pl-2"
-                                                [svgIcon]="'heroicons_solid:check'"></mat-icon>
                                         </label>
                                     </td>
                                 </ng-container>

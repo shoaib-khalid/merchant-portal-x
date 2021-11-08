@@ -158,15 +158,15 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
 
         // Get the stores
         this._storesService.stores$
-        .pipe(takeUntil(this._unsubscribeAll))
-        .subscribe((stores: Store[]) => {
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((stores: Store[]) => {
 
-            // Update the pagination
-            this.stores = stores;
+                // Update the pagination
+                this.stores = stores;
 
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
-        });
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
     
 
         // Get the pagination
