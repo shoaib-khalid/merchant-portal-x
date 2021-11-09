@@ -126,7 +126,7 @@ export class RedirectComponent implements OnInit, OnDestroy
      */
     goToChooseVertical(): void
     {
-        this._router.navigate(['/choose-vertical']);
+        this._router.navigate(['/stores/choose-vertical']);
     }
 
     /**
