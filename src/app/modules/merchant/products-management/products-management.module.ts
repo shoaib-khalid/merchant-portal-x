@@ -17,13 +17,11 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SharedModule } from 'app/shared/shared.module';
 import { InventoryComponent } from 'app/modules/merchant/products-management/inventory/inventory.component';
-import { InventoryListComponent } from 'app/modules/merchant/products-management/inventory/list/inventory.component';
 import { productsManagementRoutes } from 'app/modules/merchant/products-management/products-management.routing';
 
 @NgModule({
     declarations: [
         InventoryComponent,
-        InventoryListComponent
     ],
     imports     : [
         RouterModule.forChild(productsManagementRoutes),
