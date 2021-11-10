@@ -20,7 +20,7 @@ export interface Product
     productVariants?: ProductVariant[]; // Refer Product Variants Section
     productInventories?: ProductInventory[]; // Refer Product Inventories Section
     productReviews?: [];
-    productAssets?: [];
+    productAssets?: ProductAssets[];
     productDeliveryDetail?: string;
 }
 
@@ -96,11 +96,26 @@ export interface ProductPagination
  * 
  */
 
- export interface ProductCategory
- {
-    id?: string;
-    storeId: string;
-    parentCategoryId: string;
+export interface ProductCategory
+{
+id?: string;
+storeId: string;
+parentCategoryId: string;
+name: string;
+thumbnailUrl: string;
+}
+
+/**
+ * 
+ *  Product Assets
+ */
+
+export interface ProductAssets
+{
+    id: string;
+    itemCode: string;
     name: string;
-    thumbnailUrl: string;
- }
+    url: string;
+    productId: string;
+    isThumbnail: boolean;
+}

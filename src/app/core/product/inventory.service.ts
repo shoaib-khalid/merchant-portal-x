@@ -5,6 +5,7 @@ import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { Product, ProductVariant, ProductInventory, ProductCategory, ProductPagination, ProductVariantAvailable } from 'app/core/product/inventory.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
+import { LogService } from '../logging/log.service';
 
 @Injectable({
     providedIn: 'root'
@@ -31,6 +32,7 @@ export class InventoryService
     constructor(
         private _httpClient: HttpClient,
         private _apiServer: AppConfig,
+        private _logging: LogService,
         private _jwt: JwtService,
     )
     {
@@ -123,6 +125,9 @@ export class InventoryService
 
         return this._httpClient.get<any>(productService +'/stores/'+this.storeId$+'/products', header).pipe(
             tap((response) => {
+
+                this._logging.debug("Response from ProductsService",response);
+
                 let _pagination = {
                     length: response.data.totalElements,
                     size: response.data.size,
@@ -132,38 +137,7 @@ export class InventoryService
                     endIndex: response.data.pageable.offset + response.data.numberOfElements - 1
                 }
                 this._pagination.next(_pagination);
-                
-                let _newProducts: Array<any> = [];
-                let _newVariants: Array<any> = [];
-                let _newVariantTags: Array<any> = [];
-                (response.data.content).forEach(object => {
-                    _newProducts.push({
-                        id: object.id,
-                        thumbnail: object.thumbnailUrl,
-                        images: Object.keys(object.productAssets).map(function(key){return object.productAssets[key].url}),
-                        status: object.status,
-                        name: object.name,
-                        description: object.description,
-                        productInventories: object.productInventories,
-                        stock: object.productInventories[0].quantity, // need looping
-                        allowOutOfStockPurchases: object.allowOutOfStockPurchases,
-                        minQuantityForAlarm: object.minQuantityForAlarm,
-                        trackQuantity: object.trackQuantity,
-                        sku: object.productInventories[0].sku, // need looping
-                        price: object.productInventories[0].price, // need looping
-                        weight: 0,
-                        categoryId: object.categoryId,
-                        variants: object.productVariants
-                    });
-                    _newVariants.push(object.productVariants)
-                    _newVariantTags.push({
-                        id: Object.keys(object.productVariants).map(function(key){return object.productVariants[key].id}),
-                        value: Object.keys(object.productVariants).map(function(key){return object.productVariants[key].value}),
-                        productId: Object.keys(object.productVariants).map(function(key){return object.productVariants[key].productId}),
-                    });
-                });
-                this._products.next(_newProducts);
-                this._variants.next(_newVariants);
+                this._products.next(response.data.content);
             })
         );
     }

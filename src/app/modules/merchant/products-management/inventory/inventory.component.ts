@@ -57,7 +57,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     selectedProduct: Product | null = null;
     selectedProductForm: FormGroup;
     
-    pagination$: ProductPagination;
+    pagination: ProductPagination;
 
     // product variant
     productVariants$: ProductVariant[] = [];
@@ -202,7 +202,14 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 sku                     : ['']
             }]),
             productReviews        : [''], // not used
-            productAssets         : [''], // not used
+            productAssets         : this._formBuilder.array([{
+                id                  : [''],
+                itemCode            : [''],
+                name                : [''],
+                url                 : [''],
+                productId           : [''],
+                isThumbnail         : [false],
+            }]),
             productDeliveryDetail : [''], // not used
         });
 
@@ -225,7 +232,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             .subscribe((pagination: ProductPagination) => {
 
                 // Update the pagination
-                this.pagination$ = pagination;
+                this.pagination = pagination;
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -269,41 +276,43 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      */
     ngAfterViewInit(): void
     {
-        if ( this._sort && this._paginator )
-        {
-            // Set the initial sort
-            this._sort.sort({
-                id          : 'name',
-                start       : 'asc',
-                disableClear: true
-            });
-
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
-
-            // If the user changes the sort order...
-            this._sort.sortChange
-                .pipe(takeUntil(this._unsubscribeAll))
-                .subscribe(() => {
-                    // Reset back to the first page
-                    this._paginator.pageIndex = 0;
-
-                    // Close the details
-                    this.closeDetails();
+        setTimeout(() => {
+            if ( this._sort && this._paginator )
+            {
+                // Set the initial sort
+                this._sort.sort({
+                    id          : 'name',
+                    start       : 'asc',
+                    disableClear: true
                 });
 
-            // Get products if sort or page changes
-            merge(this._sort.sortChange, this._paginator.page).pipe(
-                switchMap(() => {
-                    this.closeDetails();
-                    this.isLoading = true;
-                    return this._inventoryService.getProducts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction);
-                }),
-                map(() => {
-                    this.isLoading = false;
-                })
-            ).subscribe();
-        }
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+
+                // If the user changes the sort order...
+                this._sort.sortChange
+                    .pipe(takeUntil(this._unsubscribeAll))
+                    .subscribe(() => {
+                        // Reset back to the first page
+                        this._paginator.pageIndex = 0;
+
+                        // Close the details
+                        this.closeDetails();
+                    });
+
+                // Get products if sort or page changes
+                merge(this._sort.sortChange, this._paginator.page).pipe(
+                    switchMap(() => {
+                        this.closeDetails();
+                        this.isLoading = true;
+                        return this._inventoryService.getProducts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction);
+                    }),
+                    map(() => {
+                        this.isLoading = false;
+                    })
+                ).subscribe();
+            }
+        }, 0);
     }
 
     /**
@@ -347,6 +356,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
                 // Set the selected product
                 this.selectedProduct = product;
+
+                console.log("this.selectedProduct",this.selectedProduct)
+
                 // Fill the form
                 this.selectedProductForm.patchValue(product);
                 
