@@ -1,6 +1,6 @@
 import { Route } from '@angular/router';
 import { InventoryComponent } from 'app/modules/merchant/products-management/inventory/inventory.component';
-import { InventoryCategoriesResolver, InventoryProductsResolver, InventoryTagsResolver } from 'app/modules/merchant/products-management/inventory/inventory.resolvers';
+import { InventoryCategoriesResolver, InventoryProductsResolver, InventoryTagsResolver, GetStoreByIdResolver } from 'app/modules/merchant/products-management/inventory/inventory.resolvers';
 // import { InventoryBrandsResolver
 
 
@@ -21,6 +21,7 @@ export const productsManagementRoutes: Route[] = [
                     categories: InventoryCategoriesResolver,
                     products  : InventoryProductsResolver,
                     tags      : InventoryTagsResolver,
+                    storeById : GetStoreByIdResolver
                 }
             }
         ]

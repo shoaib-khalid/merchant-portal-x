@@ -35,8 +35,8 @@ export interface ProductVariant
     id?: string;
     name: string;
     description?: string;
-    productVariantsAvailable: ProductVariantAvailable[];
-    sequenceNumber: number;
+    productVariantsAvailable?: ProductVariantAvailable[];
+    sequenceNumber?: number;
 }
 
 /**
@@ -68,9 +68,9 @@ export interface ProductVariantAvailable
 {
     id?: string;
     value: string;
-    productId: string;
-    productVariantId: string;
-    sequenceNumber: number;
+    productId?: string;
+    productVariantId?: string;
+    sequenceNumber?: number;
 }
 
 /**

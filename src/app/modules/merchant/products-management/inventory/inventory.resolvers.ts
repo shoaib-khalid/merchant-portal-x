@@ -3,7 +3,9 @@ import { ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot } from '@a
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { InventoryService } from 'app/core/product/inventory.service';
-import { Product, ProductCategory, ProductPagination, ProductInventory, ProductVariant } from 'app/core/product/inventory.types';
+import { Product, ProductCategory, ProductPagination, ProductVariant } from 'app/core/product/inventory.types';
+import { StoresService } from 'app/core/store/store.service';
+import { Store } from 'app/core/store/store.types';
 
 @Injectable({
     providedIn: 'root'
@@ -134,5 +136,46 @@ export class InventoryTagsResolver implements Resolve<any>
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<ProductVariant[]>
     {
         return this._inventoryService.getVariants();
+    }
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class GetStoreByIdResolver implements Resolve<any>
+{
+    /**
+     * Constructor
+     */
+    constructor(private _storesService: StoresService)
+    {
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Accessors
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Getter for storeId
+     */
+ 
+     get storeId$(): string
+     {
+         return localStorage.getItem('storeId') ?? '';
+     }    
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Resolver
+     *
+     * @param route
+     * @param state
+     */
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Store>
+    {
+        return this._storesService.getStoresById(this.storeId$);
     }
 }

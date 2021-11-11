@@ -64,10 +64,17 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     filteredProductVariants: ProductVariant[] = [];
     selectedProductVariants: ProductVariant;
 
-    // product variant
+    productVariantsEditMode: boolean = false;
+    productVariantsValueEditMode:any = [];
+    showVariantsSection: boolean = false;
+    
+    // product variant available
     productVariantAvailable$: ProductVariantAvailable[] = [];
     filteredProductVariantAvailable: ProductVariantAvailable[] = [];
-    selectedProductVariantAvailable: ProductVariantAvailable;
+    selectedProductVariantAvailable: ProductVariantAvailable[] = [];
+    
+    productVariantAvailableEditMode: boolean = false;
+    productVariantAvailableValueEditMode:any = [];
 
     // product inventory
     productProductInventory$: ProductInventory[] = [];
@@ -79,9 +86,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     filteredProductCategories: ProductCategory[];
     selectedProductCategory: ProductCategory;
     
-    productVariantsEditMode: boolean = false;
-    productVariantAvailableEditMode: boolean = false;
     productCategoriesEditMode: boolean = false;
+    productCategoriesValueEditMode:any = [];
 
     flashMessage: 'success' | 'error' | null = null;
     isLoading: boolean = false;
@@ -211,6 +217,16 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 isThumbnail         : [false],
             }]),
             productDeliveryDetail : [''], // not used
+
+
+            // OLD HERE -----------------------------------
+
+            currentImageIndex: [0],
+            images           : [[]],
+            sku              : [''],
+            price            : [0],
+            quantity         : [0],
+            isVariants       : [false],
         });
 
         // Get the stores
@@ -225,7 +241,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             });
     
-
+        // Get the products
+        this.products$ = this._inventoryService.products$;
+        
         // Get the pagination
         this._inventoryService.pagination$
             .pipe(takeUntil(this._unsubscribeAll))
@@ -237,7 +255,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
-
+            
+            
         // Get the categories
         this._inventoryService.categories$
             .pipe(takeUntil(this._unsubscribeAll))
@@ -251,8 +270,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             });
 
-        // Get the products
-        this.products$ = this._inventoryService.products$;
 
         // Subscribe to search input field value changes
         this.searchInputControl.valueChanges
@@ -269,6 +286,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 })
             )
             .subscribe();
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
 
     /**
@@ -352,20 +372,38 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
         // Get the product by id
         this._inventoryService.getProductById(productId)
-            .subscribe(async (product) => {
+            .subscribe((product) => {
 
                 // Set the selected product
                 this.selectedProduct = product;
 
-                console.log("this.selectedProduct",this.selectedProduct)
-
                 // Fill the form
                 this.selectedProductForm.patchValue(product);
+
+                // Fill the form for SKU , Price & Quantity productInventories[0]
+                // this because SKU , Price & Quantity migh have variants
+                // this is only for display, so we display the productInventories[0] 
+                this.selectedProductForm.get('sku').patchValue(product.productInventories[0].sku);
+                this.selectedProductForm.get('price').patchValue(product.productInventories[0].price);
+                this.selectedProductForm.get('quantity').patchValue(product.productInventories[0].quantity);
+
+                // set isVariants = true is productInventories.length > 0
+                product.productInventories.length > 1 ? this.selectedProductForm.get('isVariants').patchValue(true) : this.selectedProductForm.get('isVariants').patchValue(false);
+
+                // Get product image by product id
+                
+                let imagesObjSorted = product.productAssets.sort(this.dynamicSort("itemCode"));
+                let imageArr = imagesObjSorted.map(item => item.url);
+
+                // console.log("asal kejadian image", imageArr)
+
+                this.selectedProductForm.get('images').patchValue(imageArr);
                 
                 // Set to this productVariants 
                 this.productVariants$ = product.productVariants;
                 this.filteredProductVariants = product.productVariants;
 
+                // console.log("filteredProductVariants: ", this.filteredProductVariants)
 
                 const getCombosName = ([head, ...[headTail, ...tailTail]]) => {
                     if (!headTail) return head
@@ -395,7 +433,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                     });
                 });
 
-                console.log("variantCombos: ",this.variantCombos)
+                // console.log("variantCombos: ",this.variantCombos)
 
                 const combine = ([head, ...[headTail, ...tailTail]]) => {
                     if (!headTail) return head
@@ -412,6 +450,21 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         
                 // Update the selected product form
                 this.selectedProductForm.get('categoryId').patchValue(this.selectedProduct.categoryId);
+
+                // Sort the filtered categories, put selected category on top
+                // First get selected array index by using this.selectedProduct.categoryId
+
+                let selectedProductCategoryIndex = this.filteredProductCategories.findIndex(item => item.id === this.selectedProduct.categoryId);
+                // if selectedProductCategoryIndex < -1 // category not selected
+                // if selectedProductCategoryIndex = 0 // category selected already in first element
+                if (selectedProductCategoryIndex > 0) {
+                    // if index exists get the object of selectedProductCategory
+                    this.selectedProductCategory = this.filteredProductCategories[selectedProductCategoryIndex];
+                    // remove the object from this.filteredProductCategories
+                    this.filteredProductCategories.splice(selectedProductCategoryIndex,1);
+                    // re add this.selectedProductCategory in front
+                    this.filteredProductCategories.unshift(this.selectedProductCategory);
+                }
 
                 this.selectedProduct.minQuantityForAlarm = product.minQuantityForAlarm;
 
@@ -556,55 +609,65 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      *
      * @param title
      */
-    createVariant(productId: string, name: string, description: string, productVariantsAvailable: ProductVariantAvailable[], sequenceNumber: number): void
+    createVariant(name: string): void
     {
         const variant = {
-            name,
-            description,
-            productVariantsAvailable,
-            sequenceNumber
+            name
         };
         
         // Create variant on the server
-        this._inventoryService.createVariant(variant, productId)
+        this._inventoryService.createVariant(variant, this.selectedProduct.id)
             .subscribe((response) => {
                 // Add the variant to the product
                 this.addVariantToProduct(response);
             });
     }
 
-    /**
-     * Update the variant title
-     *
-     * @param variant
-     * @param event
-     */
-    // updateVariantTitle(variant: ProductVariant, event): void
-    // {
-    //     // Update the title on the variant
-    //     variant.name = event.target.value;
+    updateLocalVariantTitle(variants: ProductVariant, event){
+        // Update the title on the category
+        variants.name = event.target.value;
+    }
 
-    //     // Update the variant on the server
-    //     this._inventoryService.updateVariant(variant.id, variant)
-    //         .pipe(debounceTime(300))
-    //         .subscribe();
+    updateServerVariantTitle(variants: ProductVariant, event){
 
-    //     // Mark for check
-    //     this._changeDetectorRef.markForCheck();
-    // }
+        alert("Update variant, backend not ready yet")
+        // Update the category on the server
+        // this._inventoryService.updateVariant(variants.id, variants)
+        //     .pipe(debounceTime(300))
+        //     .subscribe();
+    }
 
     /**
      * Delete the variant
      *
      * @param variant
      */
-    deleteVariant(variant: ProductVariant, productId: string): void
+    deleteVariant(variant: ProductVariant): void
     {
-        // Delete the variant from the server
-        this._inventoryService.deleteVariant(variant.id, productId).subscribe();
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title  : 'Delete product',
+            message: 'Are you sure you want to delete this variant? This variant will be remove permenantly!',
+            actions: {
+                confirm: {
+                    label: 'Delete'
+                }
+            }
+        });
 
-        // Mark for check
-        this._changeDetectorRef.markForCheck();
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+
+            // If the confirm button pressed...
+            if ( result === 'confirmed' )
+            {
+                // Delete the variant from the server
+                this._inventoryService.deleteVariant(variant, this.selectedProduct.id)
+                .subscribe((response)=>{
+                    this.removeVariantFromProduct(response)
+                });
+            }
+        });
     }
 
     /**
@@ -619,7 +682,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         this.selectedProduct.productVariants.unshift(variant);
 
         // Update the selected product form
-        this.selectedProductForm.get('variants').patchValue(this.selectedProduct.productVariants);
+        this.selectedProductForm.get('productVariants').patchValue(this.selectedProduct.productVariants);
 
         this.productVariants$ = this.selectedProduct.productVariants;
         this.filteredProductVariants = this.selectedProduct.productVariants;
@@ -639,7 +702,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         this.selectedProduct.productVariants.splice(this.selectedProduct.productVariants.findIndex(item => item.id === variant.id), 1);
 
         // Update the selected product form
-        this.selectedProductForm.get('variants').patchValue(this.selectedProduct.productVariants);
+        this.selectedProductForm.get('productVariants').patchValue(this.selectedProduct.productVariants);
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -683,10 +746,13 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         
         if (this.selectedProductVariants){
 
+            console.log("disini: this.filteredProductVariantAvailable ", this.filteredProductVariantAvailable)
+
             // get index of filteredVariants that have same id with variantId
             let index = this.filteredProductVariants.findIndex(x => x.id === variant.id);
     
             // get the object of filteredVariantsTag in filteredVariants
+            this.productVariantAvailable$ = this.filteredProductVariants[index].productVariantsAvailable;
             this.filteredProductVariantAvailable = this.filteredProductVariants[index].productVariantsAvailable;
 
         } else {
@@ -761,7 +827,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     /**
      * Delete the selected variants using the form data
      */
-    deleteVariantConfirmation(): void
+    deleteAllVariantsConfirmation(): void
     {
 
         // Open the confirmation dialog
@@ -796,7 +862,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     }
 
     displayVariants(){
-        this.productVariantsEditMode = !this.productVariantsEditMode;
+        this.showVariantsSection = !this.showVariantsSection;
     }
     
     /**
@@ -850,14 +916,14 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
     /**
      * 
-     *  VARIANTS TAG
+     *  VARIANTS Available
      * 
      */
 
     /**
-     * Toggle the variants edit mode
+     * Toggle the variants Available edit mode
      */
-     toggleVariantsTagEditMode(): void
+     toggleVariantsAvailableEditMode(): void
      {
          this.productVariantAvailableEditMode = !this.productVariantAvailableEditMode;
      }
@@ -867,13 +933,18 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      *
      * @param event
      */
-     filterVariantsTag(event): void
+     filterProductVariantAvailable(event): void
      {
          // Get the value
          const value = event.target.value.toLowerCase();
+
+         console.log("this.productVariantAvailable$ :",this.productVariantAvailable$)
+         console.log("this.productVariantAvailable$ value :",value)
  
          // Filter the variants
-         this.filteredProductVariantAvailable = this.productVariantAvailable$.filter(variantTag => variantTag.value.toLowerCase().includes(value));
+         this.filteredProductVariantAvailable = this.productVariantAvailable$.filter(variantAvailable => variantAvailable.value.toLowerCase().includes(value));
+
+         console.log("this.filteredProductVariantAvailable: ", this.filteredProductVariantAvailable)
      }
  
      /**
@@ -881,7 +952,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
       *
       * @param event
       */
-     filterVariantsTagInputKeyDown(event): void
+     filterProductVariantAvailableInputKeyDown(event): void
      {
          // Return if the pressed key is not 'Enter'
          if ( event.key !== 'Enter' )
@@ -916,7 +987,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
          {
              // Otherwise add the variant to the product
              let variantId
-             this.addVariantTagToProduct(variantTag, variantId);
+             this.addVariantAvailableToProduct(variantTag, variantId);
          }
      }
 
@@ -925,55 +996,70 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      *
      * @param value
      */
-     createVariantTag(value: string, productId:string, productVariantId:string, sequenceNumber: number): void
+     createVariantAvailable(value: string): void
      {
         const variant = {
-             value,
-             productId,
-             productVariantId,
-             sequenceNumber
-         };
-         
-         // Create variant on the server
-         this._inventoryService.createProductVariantAvailable(variant, productId)
-             .subscribe((response) => { 
-                 // Add the variant to the product
-                 this.addVariantTagToProduct(response,this.selectedProductVariants.id);
-             });
+            productId: this.selectedProduct.id,
+            productVariantId: this.selectedProductVariants.id,
+            value
+        };
+        
+        // Create variant on the server
+        this._inventoryService.createVariantAvailable(variant, this.selectedProduct.id)
+            .subscribe((response) => { 
+                // Add the variant to the product
+                this.addVariantAvailableToProduct(response,this.selectedProductVariants.id);
+
+                // reset current filteredProductVariantAvailable
+                this.filteredProductVariantAvailable = this.productVariantAvailable$;
+            });
      }
  
-     /**
-      * Update the variant title
-      *
-      * @param variant
-      * @param event
-      */
-    //  updateVariantTitleList(variant: ProductVariant, event): void
-    //  {
-    //      // Update the title on the variant
-    //      variant.name = event.target.value;
+     updateLocalVariantAvailableTitle(variantsAvailable: ProductVariantAvailable, event){
+        // Update the title on the category
+        variantsAvailable.value = event.target.value;
+    }
+
+    updateServerVariantAvailableTitle(variantsAvailable: ProductVariantAvailable, event){
+
+        alert("Update variant available, backend not ready yet")
+        // Update the category on the server
+        // this._inventoryService.updateVariant(variants.id, variants)
+        //     .pipe(debounceTime(300))
+        //     .subscribe();
+    }
  
-    //      // Update the variant on the server
-    //      this._inventoryService.updateVariant(variant.id, variant)
-    //          .pipe(debounceTime(300))
-    //          .subscribe();
- 
-    //      // Mark for check
-    //      this._changeDetectorRef.markForCheck();
-    //  }
- 
-     /**
-      * Delete the variant
-      *
-      * @param variant
-      */
-     deleteVariantTag(variant: ProductVariant,productId: string): void
+    /**
+     * Delete the variant available
+     *
+     * @param variant
+     */
+     deleteVariantAvailable(variantAvailable: ProductVariantAvailable): void
      {
-         // Delete the variant from the server
-         this._inventoryService.deleteVariant(variant.id, productId).subscribe();
+         // Open the confirmation dialog
+         const confirmation = this._fuseConfirmationService.open({
+             title  : 'Delete product',
+             message: 'Are you sure you want to delete this variant value ? This variant value will be remove permenantly!',
+             actions: {
+                 confirm: {
+                     label: 'Delete'
+                 }
+             }
+         });
  
-         // Mark for check
-         this._changeDetectorRef.markForCheck();
+         // Subscribe to the confirmation dialog closed action
+         confirmation.afterClosed().subscribe((result) => {
+ 
+             // If the confirm button pressed...
+             if ( result === 'confirmed' )
+             {
+                 // Delete the variant from the server
+                 this._inventoryService.deleteVariantAvailable(variantAvailable, this.selectedProduct.id)
+                 .subscribe((response)=>{
+                     this.removeVariantAvailableFromProduct(response)
+                 });
+             }
+         });
      }
  
      /**
@@ -981,23 +1067,21 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
       *
       * @param variant
       */
-     addVariantTagToProduct(productVariantAvailable: ProductVariantAvailable, variantId: string): void
+     addVariantAvailableToProduct(productVariantAvailable: ProductVariantAvailable, variantId: string): void
      {
 
-        let index = (this.selectedProduct.productVariants).findIndex(item => item.id === variantId);
+        let selectedProductVariant = this.selectedProduct.productVariants.find(variant=> variant.id === variantId);
         
-        if (!this.selectedProduct.productVariants[index].productVariantsAvailable) {
-            this.selectedProduct.productVariants[index].productVariantsAvailable = [];
-        }
-        
-        // Add the variantTag
-        this.selectedProduct.productVariants[index].productVariantsAvailable.unshift(productVariantAvailable);
- 
-        // Update the selected product form
-        this.selectedProductForm.get('variants').patchValue(this.selectedProduct.productVariants);
+        // Add the productVariantAvailable
+        selectedProductVariant.productVariantsAvailable.unshift(productVariantAvailable);
 
-        this.productVariants$ = this.selectedProduct.productVariants;
-        this.filteredProductVariants = this.selectedProduct.productVariants;
+        // Get Current Selected Variant (since variant not changed in this case)
+        // things that change is variant available
+        let currentSelectedVariant = this.selectedProductForm.get('productVariants').value;
+        currentSelectedVariant.push(selectedProductVariant);
+
+        // Update the selected product form
+        this.selectedProductForm.get('productVariants').patchValue(currentSelectedVariant);
         
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -1008,16 +1092,21 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
       *
       * @param variantTag
       */
-     removeVariantTagFromProduct(variant: ProductVariant): void
+     removeVariantAvailableFromProduct(variantAvailable: ProductVariantAvailable): void
      {
-         // Remove the variantTag
-         this.selectedProduct.productVariants.splice(this.selectedProduct.productVariants.findIndex(item => item.id === variant.id), 1);
- 
-         // Update the selected product form
-         this.selectedProductForm.get('variants').patchValue(this.selectedProduct.productVariants);
- 
-         // Mark for check
-         this._changeDetectorRef.markForCheck();
+
+        // Find Index of variantAvailable.productVariantId
+
+        let selectedroductVariants = this.selectedProduct.productVariants.find(variant=> variant.id === variantAvailable.productVariantId);
+
+        // Remove the variant Available 
+        selectedroductVariants.productVariantsAvailable.splice(selectedroductVariants.productVariantsAvailable.findIndex(item => item.id === variantAvailable.id), 1);
+
+        // After selectedroductVariants.productVariantsAvailable.splice , no need to patch this.selectedProduct.productVariants
+        // because inventory service observable already did that in removeVariantFromProduct (i think)
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
      }
 
     /**
@@ -1043,7 +1132,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
       *
       * @param inputValue
       */
-     shouldShowCreateVariantTagButton(inputValue: string): boolean
+     shouldShowCreateVariantAvailableButton(inputValue: string): boolean
      {
          return !!!(inputValue === '' || this.productVariantAvailable$.findIndex(variantTag => variantTag.value.toLowerCase() === inputValue.toLowerCase()) > -1);
      }
@@ -1149,18 +1238,18 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
       * @param category
       * @param event
       */
-     updateCategoryTitle(category: ProductCategory, event): void
+     updateLocalCategoryTitle(category: ProductCategory, event): void
      {
          // Update the title on the category
          category.name = event.target.value;
- 
+     }
+
+     updateServerCategoryTitle(category: ProductCategory, event): void
+     {
          // Update the category on the server
          this._inventoryService.updateCategory(category.id, category)
              .pipe(debounceTime(300))
              .subscribe();
- 
-         // Mark for check
-         this._changeDetectorRef.markForCheck();
      }
  
      /**
@@ -1170,11 +1259,30 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
       */
      deleteCategory(category: ProductCategory): void
      {
-         // Delete the category from the server
-         this._inventoryService.deleteCategory(category.id).subscribe();
- 
-         // Mark for check
-         this._changeDetectorRef.markForCheck();
+
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title  : 'Delete category',
+            message: 'Are you sure you want to delete this category? This action cannot be undone!',
+            actions: {
+                confirm: {
+                    label: 'Delete'
+                }
+            }
+        });
+
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+            // If the confirm button pressed...
+            if ( result === 'confirmed' )
+            {
+                // Delete the category from the server
+                this._inventoryService.deleteCategory(category.id).subscribe();
+        
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            }
+        });
      }
 
     /**
@@ -1260,7 +1368,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      *
      * @param fileList
      */
-    uploadImages(fileList: FileList,imageIndex): Promise<void>
+    uploadImages(fileList: FileList,images): Promise<void>
     {
         // Return if canceled
         if ( !fileList.length )
@@ -1279,15 +1387,17 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         
         var reader = new FileReader();
         reader.readAsDataURL(file); 
-        reader.onload = (_event)  => {            
-            // if(!imageIndex.length === true) {
-            //     this.selectedProduct.images.push(reader.result + "");
-            // } else {
-            //     this.selectedProductForm.get('images').value[this.selectedProductForm.get('currentImageIndex').value] = reader.result + "";
-            // }
+        reader.onload = (_event)  => {               
+            if(!images.length === true) {
+                this.selectedProductForm.get('images').value.push(reader.result);
+            } else {
+                this.selectedProductForm.get('images').value[this.selectedProductForm.get('currentImageIndex').value] = reader.result + "";
+            }
 
-            // this.imagesEditMode = false; 
-            // this._changeDetectorRef.markForCheck();
+            // console.log("updated images: ",this.selectedProductForm.get('images').value)
+
+            this.imagesEditMode = false; 
+            this._changeDetectorRef.markForCheck();
         }
 
         const product = this.selectedProductForm.getRawValue();
@@ -1375,8 +1485,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     createProduct(categoryId): void
     {
 
-        console.log("this problem", categoryId)
-
         // Create the product
         this._inventoryService.createProduct(categoryId).subscribe(async (newProduct) => {
 
@@ -1389,17 +1497,15 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             // Set Category to Product 
             this.selectedProduct.categoryId = newProduct["data"].categoryId;
 
-            // // Set Price to 0 ... It's default anyway
-            // this.selectedProduct.price = 0;
+            // Update current form with new product data
+            this.selectedProductForm.patchValue(newProduct["data"]);
 
-            // // Set Stock to 1 ... It's default anyway
-            // this.selectedProduct.stock = 1;
+            // Set image & currentImageIndex to null ...
+            this.selectedProductForm.get('currentImageIndex').patchValue(0);
+            this.selectedProductForm.get('images').patchValue([]);
 
-            // // Set Stock to 1 ... It's default anyway
-            // this.selectedProduct.minQuantityForAlarm = -1;
-
-            // // Set Image to null ... It's default anyway
-            // this.selectedProduct.images = [];
+            // Set image & isVariants to false ...
+            this.selectedProductForm.get('isVariants').patchValue(false);
             
             // // Set filtered variants to empty array
             // this.filteredVariants = [];
@@ -1409,9 +1515,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
             // // Set selectedProduct variants to empty array
             // this.selectedProduct.variants = [];
-
-            // Update current form with new product data
-            this.selectedProductForm.patchValue(newProduct["data"]);
 
             // Mark for check
             this._changeDetectorRef.markForCheck();
@@ -1423,50 +1526,33 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      */
     updateSelectedProduct(): void
     {
-        
-        // Get the product object
-        const productRaw = this.selectedProductForm.getRawValue();
-
-        // Get Current Store domain
-        // const currentStoreIndex = (this.store).findIndex(item => item.id === this._storesService.storeId$)
-
         // Get
         // let storeFrontDomain = this._apiServer.settings.storeFrontDomain;
         let storeFrontDomain = 'symplified.ai';
-
         let storeFrontURL = 'https://' + this.store$.domain + '.' + storeFrontDomain;
+        
+        // Get the product object
+        const {sku, price, quantity, images, currentImageIndex, isVariants,
+                productAssets, productDeliveryDetail, productInventories, 
+                productReviews, productVariants,  ...product} = this.selectedProductForm.getRawValue();
 
-        // Generate product service (backend) body
-        const product = {
-            id: productRaw.id,
-            categoryId: productRaw.categoryId,
-            name: productRaw.name,
-            seoName: productRaw.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''),
-            seoUrl: storeFrontURL + '/product/name/' + productRaw.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''),
-            status: productRaw.status,
-            description: productRaw.description,
-            productInventories: productRaw.productInventories,
-            storeId: productRaw.storeId,
-            allowOutOfStockPurchases: productRaw.allowOutOfStockPurchases,
-            trackQuantity: productRaw.trackQuantity,
-            minQuantityForAlarm: productRaw.minQuantityForAlarm,
-            packingSize: productRaw.packingSize
-        }
+        product.seoName = product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
+        product.seoUrl = storeFrontURL + '/product/name/' + product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
 
         // Remove the currentImageIndex field
-        delete productRaw.currentImageIndex;
-
-        console.log("updateSelectedProduct(): ",product)
-        
+        // delete productRaw.currentImageIndex;
 
         // Update the product on the server
-        this._inventoryService.updateProduct(productRaw.id, product).subscribe(() => {
-
+        this._inventoryService.updateProduct(product.id, product).subscribe(() => {
             // Show a success message
             this.showFlashMessage('success');
         });
 
-
+        // Update the inventory product on the server (backend kena enable update)
+        // this._inventoryService.updateInventoryToProduct(product.id, productInventories).subscribe(() => {
+        //     // Show a success message
+        //     this.showFlashMessage('success');
+        // });
     }
 
     /**
@@ -1548,8 +1634,12 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             /* next line works with strings and numbers, 
             * and you may want to customize it to your needs
             */
-            var result = (a[property].toLowerCase() < b[property].toLowerCase()) ? -1 : (a[property].toLowerCase() > b[property].toLowerCase()) ? 1 : 0;
-            return result * sortOrder;
+
+            let aProp = a[property] ? a[property] : '';
+            let bProp = b[property] ? b[property] : '';
+
+            var result = ( aProp.toLowerCase() < bProp.toLowerCase()) ? -1 : (aProp.toLowerCase() > bProp.toLowerCase()) ? 1 : 0;
+            return (result * sortOrder);
         }
     }
 
