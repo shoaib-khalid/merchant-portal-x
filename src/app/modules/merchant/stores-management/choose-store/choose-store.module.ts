@@ -17,12 +17,17 @@ import { ChooseStoreComponent } from 'app/modules/merchant/stores-management/cho
 // import { ChooseStoreDetailsComponent } from 'app/modules/merchant/choose-store/details/details.component';
 import { ChooseStoreListComponent } from 'app/modules/merchant/stores-management/choose-store/list/list.component';
 import { MatTabsModule } from '@angular/material/tabs';
+import { EditStoreComponent } from './edit-store/edit-store.component';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatToolbarModule } from '@angular/material/toolbar';
+
 
 @NgModule({
     declarations: [
         ChooseStoreComponent,
         // ChooseStoreDetailsComponent,
-        ChooseStoreListComponent
+        ChooseStoreListComponent,
+        EditStoreComponent
     ],
     imports     : [
         RouterModule.forChild(chooseStoreRoutes),
@@ -38,7 +43,9 @@ import { MatTabsModule } from '@angular/material/tabs';
         FuseFindByKeyPipeModule,
         SharedModule,
         MatTabsModule,
-        MatPaginatorModule
+        MatPaginatorModule,
+        MatCheckboxModule,
+        MatToolbarModule
     ]
 })
 export class ChooseStoreModule
