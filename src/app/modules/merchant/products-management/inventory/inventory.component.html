@@ -1009,8 +1009,8 @@
                                                                     <div class="hidden sm:block">Details</div>
                                                                 </div>
                                                                 <!-- Rows -->
-                                                                <ng-container *ngIf="variantCombos">
-                                                                    <ng-container *ngFor="let combos of variantCombos; trackBy: trackByFn">
+                                                                <ng-container *ngIf="selectedVariantCombos">
+                                                                    <ng-container *ngFor="let combos of selectedVariantCombos; trackBy: trackByFn">
                                                                         <div class="inventory-grid grid items-center gap-4 py-3 px-6 md:px-8 border-b">                                       
                                                                             <!-- SKU -->
                                                                             <div class="hidden md:block truncate">
@@ -1019,7 +1019,7 @@
                                         
                                                                             <!-- Name -->
                                                                             <div class="truncate">
-                                                                                {{combos.name}}
+                                                                                {{combos.variant}}
                                                                             </div>
 
                                                                             <div></div>
@@ -1074,12 +1074,12 @@
                                                                                     (click)="toggleVariantDetails(combos.itemCode)">
                                                                                     <mat-icon
                                                                                         class="icon-size-5"
-                                                                                        [svgIcon]="selectedItemCode?.itemCode === combos.itemCode ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'"></mat-icon>
+                                                                                        [svgIcon]="selectedProductInventory?.itemCode === combos.itemCode ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'"></mat-icon>
                                                                                 </button>
                                                                             </div>
                                                                         </div>
                                                                         <div class="grid">
-                                                                            <ng-container *ngIf="selectedItemCode?.itemCode === combos.itemCode">
+                                                                            <ng-container *ngIf="selectedProductInventory?.itemCode === combos.itemCode">
                                                                                 <ng-container *ngTemplateOutlet="rowVariantDetailsTemplate; context: {$implicit: variantlist}"></ng-container>
                                                                             </ng-container>
                                                                         </div>
@@ -1274,7 +1274,7 @@
                                                                             </mat-form-field>
 
                                                                             <!-- Packing Size -->
-                                                                            <mat-form-field class="w-full pr-2">
+                                                                            <!-- <mat-form-field class="w-full pr-2">
                                                                                 <mat-label>Packing Size</mat-label>
                                                                                 <mat-select
                                                                                     class="w-full"
@@ -1297,7 +1297,7 @@
                                                                                         <mat-option [value]="'XL'">Xtra Large</mat-option>
                                                                                     </div>
                                                                                 </mat-select>
-                                                                            </mat-form-field>
+                                                                            </mat-form-field> -->
                                                                         </div>
                                                                     </div>
                                                                 </div>

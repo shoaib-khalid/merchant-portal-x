@@ -77,7 +77,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     productVariantAvailableValueEditMode:any = [];
 
     // product inventory
-    productProductInventory$: ProductInventory[] = [];
+    productInventory$: ProductInventory[] = [];
     filteredProductInventory: ProductInventory[] = [];
     selectedProductInventory: ProductInventory;
 
@@ -117,6 +117,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             ['blockquote','clean']
         ]
     };
+
+    selectedVariantCombos: any = [];
 
     /**
      * Constructor
@@ -403,6 +405,63 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this.productVariants$ = product.productVariants;
                 this.filteredProductVariants = product.productVariants;
 
+
+                // reset selectedVariantCombos to empty 
+                this.selectedVariantCombos = [];
+
+                // initialise empty variantItems
+                // this variantItems only for front end use to display variant combination
+                let variantItems:any = [];
+                let variantOptions:any = [];
+
+                // set a new variant object to display @ front end
+                // sort object if there is more than 1 variants
+                if (this.selectedProduct.productVariants.length > 0) {
+                    // sort this selected productVariants
+                    this.sortObjects(this.selectedProduct.productVariants)
+                    // this.variantChecked = true;
+                    // this.toggleDefaultInventory(true)
+                }
+
+                // next sort this.selectedProduct.productVariantsAvailable
+                this.selectedProduct.productVariants.forEach((element: ProductVariant, index) => {
+                    this.sortObjects(element.productVariantsAvailable)
+                    // this.options.push({ name: element.name, id: element.id })
+
+                    // push empty values array and ids array for each productVariantsAvailable
+                    variantOptions.push({ name: element.name, id: element.id })
+                    variantItems.push({ values: [], ids: [] })
+
+                    // push productVariantsAvailable.value and productVariantsAvailable.id to the 
+                    // created items above
+                    element.productVariantsAvailable.forEach(item => {
+                        variantItems[index].values.push(item.value);
+                        variantItems[index].ids.push(item.id);
+                    });
+                });
+                // this.newItems = JSON.parse(JSON.stringify(variantItems))
+
+
+                
+                // console.log("variantItems:", variantItems)
+                this.getallCombinations(variantItems)
+                
+                const productIdLength = this.selectedProduct.id.length;
+                (this.selectedProduct.productInventories).forEach((item: ProductInventory, index) => {
+                    if (item.itemCode.slice(-1) != "a") {
+                        const index = parseInt(item.itemCode.substring(productIdLength));
+                        console.log("selectedVariantCombos: ",this.selectedVariantCombos)
+                        if (this.selectedVariantCombos[index]) {
+                            console.log("item.price :",item.price)
+                            this.selectedVariantCombos[index].itemCode = item.itemCode;
+                            this.selectedVariantCombos[index].price = item.price;
+                            this.selectedVariantCombos[index].sku = item.sku;
+                            this.selectedVariantCombos[index].quantity = item.quantity;
+                            // this.variantCombos[index].status = item.status;
+                        }
+                    }
+                });
+
                 // console.log("filteredProductVariants: ", this.filteredProductVariants)
 
                 const getCombosName = ([head, ...[headTail, ...tailTail]]) => {
@@ -417,7 +476,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 }
 
                 // Get variant combo from selected productInventories
-                (this.selectedProduct.productInventories).forEach(async item => {
+                (this.selectedProduct.productInventories).forEach(item => {
                     
                     let variantCombosName: string = "";
                     let variantCombosArr = [];
@@ -433,7 +492,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                     });
                 });
 
-                // console.log("variantCombos: ",this.variantCombos)
+                console.log("variantCombos: ",this.variantCombos)
+                console.log("this.selectedVariantCombos", this.selectedVariantCombos)
 
                 const combine = ([head, ...[headTail, ...tailTail]]) => {
                     if (!headTail) return head
@@ -493,7 +553,49 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 }
             });
         });
+        
         return variantCombosName.slice(0,-1);
+    }
+
+    getallCombinations(combos, itemCode = "", nameComboOutput = "", n = 0) {
+        var nameCombo = "";
+        if (n == combos.length) {
+            if (nameComboOutput.substring(1) != "") {
+              console.log("combos: ",combos)
+            this.selectedVariantCombos.push({ itemCode: itemCode, variant: nameComboOutput.substring(1), price: 0, quantity: 0, sku: 0, status: "AVAILABLE" })
+            // this.images.push([])
+          }
+          return nameComboOutput.substring(1);
+        }
+    
+        for (var i = 0; i < combos[n].values.length; i++) {
+          if (nameComboOutput != "") {
+            nameCombo = nameComboOutput + " / " + combos[n].values[i];
+          }
+          else {
+            nameCombo = nameComboOutput + " " + combos[n].values[i];
+          }
+
+          this.getallCombinations(combos, itemCode, nameCombo, n + 1)
+        }
+    }
+
+    setVariants() {
+        
+    }
+
+    sortObjects(array) {
+        array.sort(function (a, b) {
+        return a.sequenceNumber - b.sequenceNumber;
+        });
+    }
+
+    variantsChanged(i, data, items, options, combos) {
+        if (options[i].id) {
+        //   this.apiCalls.addVariantValues(this.selectedProduct.id, { productVariantId: options[i].id, value: data.value, sequenceNumber: items.values.length - 1 })
+        }
+        combos = [];
+        this.getallCombinations(items)
     }
 
     /**
@@ -888,7 +990,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
         
         console.log("index : ",index)
-        console.log("variantId : ",itemCode);
+        console.log("itemCode : ",itemCode);
         console.log("this.variants : ",this.selectedProduct.productInventories)
         console.log("this.variants[index] : ",this.selectedProduct.productInventories[index])
         console.log("this.selectedItemCode : ",this.selectedProductInventory);
@@ -896,10 +998,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         // Get the variant details by id
         // this._inventoryService.getProductById(variantId)
         //     .subscribe(async (variant) => {
-
         //         // Set the selected variant
         //         this.selectedVariantList = variant;
-
         //     });
             
         // Mark for check
