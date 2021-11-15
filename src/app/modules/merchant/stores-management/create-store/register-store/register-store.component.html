@@ -54,11 +54,15 @@
                                         maxlength="100"
                                         placeholder="Tell us, what is your store name ?"
                                         [formControlName]="'name'"
-                                        [required]="true">
+                                        [required]="true"
+                                        (input)="checkExistingName($event.target.value)">
                                     <mat-label>Store Name</mat-label>
                                     
                                     <mat-error *ngIf="createStoreForm.get('name').hasError('required')">
                                         Required
+                                    </mat-error>
+                                    <mat-error *ngIf="createStoreForm.get('name').hasError('storeNameAlreadyTaken')">
+                                        The store name entered is already taken
                                     </mat-error>
                                 </mat-form-field>
                                 <!-- Store URL -->
@@ -85,6 +89,7 @@
                                     <mat-error *ngIf="createStoreForm.get('domain').hasError('maxlength')">
                                         Maximum character length exceed (maximum 15 character)
                                     </mat-error>
+                                    
                                 </mat-form-field>
                                 <!-- Store Description -->
                                 <mat-form-field class="fuse-mat-textarea w-full" floatLabel="always">

@@ -10,6 +10,8 @@ import { Store, StoreRegionCountries, CreateStore } from 'app/core/store/store.t
 import { ActivatedRoute, Router } from '@angular/router';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { store } from 'app/mock-api/common/store/data';
+import { debounce } from 'lodash';
+
 
 @Component({
     selector     : 'register-store-page',
@@ -68,6 +70,7 @@ export class RegisterStoreComponent implements OnInit
         private _route: ActivatedRoute
     )
     {
+        this.checkExistingName = debounce(this.checkExistingName,300)
     }
 
     /**
@@ -393,6 +396,14 @@ export class RegisterStoreComponent implements OnInit
     }
 
     checkExistingSubdomain(){
+
+    }
+    
+    async checkExistingName(name:string){
+        let status = await this._storesService.getExistingName(name);
+        if (status ===409){
+            this.createStoreForm.get('name').setErrors({storeNameAlreadyTaken: true});
+        }
 
     }
 
