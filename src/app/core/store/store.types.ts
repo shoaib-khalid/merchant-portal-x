@@ -17,6 +17,7 @@ export interface Store
     phoneNumber?: string;
     address?: string;
     postcode?: string;
+    regionCountryStateId?: string;
     paymentType?: string;
     city?: string;
     verticalCode?: string;

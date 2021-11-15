@@ -195,6 +195,8 @@ export class StoresService
                 // Find the store
                 const store = stores.find(item => item.id === id) || null;
 
+                this._logging.debug("Response from StoresService (getStoresById)",store);
+
                 // Update the store
                 this._store.next(store);
 
@@ -213,7 +215,7 @@ export class StoresService
         );
     }
 
-    post(store: Store): Observable<any>
+    post(storeBody: Store): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -226,7 +228,7 @@ export class StoresService
             }
         };
         
-        return this._httpClient.post(productService + '/stores', store , header);
+        return this._httpClient.post(productService + '/stores', storeBody , header);
     }
 
     /**
@@ -234,13 +236,20 @@ export class StoresService
      *
      * @param store
      */
-    update(store: Store): Observable<any>
+    update(storeId: string, storeBody: Store): Observable<any>
     {
-        return this._httpClient.patch<Store[]>('api/common/store', {store}).pipe(
-            map((response) => {
-                this._stores.next(response);
-            })
-        );
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                "clientId": clientId
+            }
+        };
+        
+        return this._httpClient.put(productService + '/stores/' + storeId , storeBody , header);
     }
 
     /**

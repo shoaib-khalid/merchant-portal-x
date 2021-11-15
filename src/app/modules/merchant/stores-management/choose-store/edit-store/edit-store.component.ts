@@ -22,6 +22,8 @@ export class EditStoreComponent implements OnInit
 {
     @ViewChild('supportNgForm') supportNgForm: NgForm;
 
+    storeId: string;
+
     alert: any;
     createStoreForm: FormGroup;
     otherStoreForm: FormGroup;
@@ -211,9 +213,9 @@ export class EditStoreComponent implements OnInit
             },
         ];
 
-        let storeId = this._route.snapshot.paramMap.get('storeid');
+        this.storeId = this._route.snapshot.paramMap.get('storeid');
 
-        this._storesService.getStoresById(storeId).subscribe(
+        this._storesService.getStoresById(this.storeId).subscribe(
            (response) => {
                 console.log("response",response);
                 this.createStoreForm.get('name').patchValue(response.name)
@@ -224,8 +226,11 @@ export class EditStoreComponent implements OnInit
                 this.createStoreForm.get('address').patchValue(response.address)
                 this.createStoreForm.get('city').patchValue(response.city)
                 this.createStoreForm.get('postcode').patchValue(response.postcode)
+                // this.createStoreForm.get('state').patchValue(response.regionCountryStateId)
                 this.createStoreForm.get('deliveryType').patchValue("SELF_DELIVERY")
                 this.createStoreForm.get('paymentType').patchValue(response.paymentType)
+                this.createStoreForm.get('verticleCode').patchValue(response.verticalCode);
+
            } 
         );
         
@@ -270,9 +275,6 @@ export class EditStoreComponent implements OnInit
         this.createStoreForm.get('isBranch').patchValue(false);
         this.createStoreForm.get('isSnooze').patchValue(false);
 
-        this._route.paramMap.subscribe( paramMap => {
-            this.createStoreForm.get('verticleCode').patchValue(paramMap.get('vertical-code'));
-        })
 
     }
 
@@ -312,7 +314,7 @@ export class EditStoreComponent implements OnInit
     /**
      * Send the form
      */
-    sendForm(): void
+    updateForm(): void
     {
         // Do nothing if the form is invalid
         if ( this.createStoreForm.invalid )
@@ -339,7 +341,7 @@ export class EditStoreComponent implements OnInit
         this.createStoreForm.disable();
 
 
-        this._storesService.post(createStoreBody)
+        this._storesService.update(this.storeId, createStoreBody)
             .subscribe((response) => {
 
                 console.log("this._storesService.post: ", response);
