@@ -310,7 +310,7 @@ export class StoresService
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
 
-        const header = {
+        const header = {  
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
 
