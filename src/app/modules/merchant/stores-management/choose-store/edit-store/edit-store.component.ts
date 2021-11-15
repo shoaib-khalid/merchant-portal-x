@@ -211,10 +211,24 @@ export class EditStoreComponent implements OnInit
             },
         ];
 
-        let name = this._route.snapshot.paramMap.get('storeid');
+        let storeId = this._route.snapshot.paramMap.get('storeid');
 
-        this.createStoreForm.get('name').patchValue(name);
-
+        this._storesService.getStoresById(storeId).subscribe(
+           (response) => {
+                console.log("response",response);
+                this.createStoreForm.get('name').patchValue(response.name)
+                this.createStoreForm.get('domain').patchValue(response.domain)
+                this.createStoreForm.get('storeDescription').patchValue(response.storeDescription)
+                this.createStoreForm.get('email').patchValue(response.email)
+                this.createStoreForm.get('phoneNumber').patchValue(response.phoneNumber)
+                this.createStoreForm.get('address').patchValue(response.address)
+                this.createStoreForm.get('city').patchValue(response.city)
+                this.createStoreForm.get('postcode').patchValue(response.postcode)
+                this.createStoreForm.get('deliveryType').patchValue("SELF_DELIVERY")
+                this.createStoreForm.get('paymentType').patchValue(response.paymentType)
+           } 
+        );
+        
         // Get allowed store countries 
         // this only to get list of country in symplified backend
         this._storesService.storeRegionCountries$.subscribe((response: StoreRegionCountries[])=>{
@@ -498,4 +512,5 @@ export class EditStoreComponent implements OnInit
         //     });
         // }
     }
+    
 }
