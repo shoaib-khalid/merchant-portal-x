@@ -9,7 +9,7 @@ import { StoresService } from 'app/core/store/store.service';
 import { Store, StoreRegionCountries, CreateStore } from 'app/core/store/store.types';
 import { ActivatedRoute, Router } from '@angular/router';
 import { JwtService } from 'app/core/jwt/jwt.service';
-import { store } from 'app/mock-api/common/store/data';
+import { debounce } from 'lodash';
 
 @Component({
     selector     : 'register-store-page',
@@ -68,6 +68,7 @@ export class RegisterStoreComponent implements OnInit
         private _route: ActivatedRoute
     )
     {
+        this.checkExistingURL = debounce(this.checkExistingURL, 300)
     }
 
     /**
@@ -254,7 +255,7 @@ export class RegisterStoreComponent implements OnInit
 
         this._route.paramMap.subscribe( paramMap => {
             this.createStoreForm.get('verticalCode').patchValue(paramMap.get('vertical-code'));
-        })
+        });
 
     }
 
@@ -392,8 +393,11 @@ export class RegisterStoreComponent implements OnInit
         this._changeDetectorRef.markForCheck();
     }
 
-    checkExistingSubdomain(){
-
+    async checkExistingURL(url: string){
+        let status = await this._storesService.getExistingURL(url);
+        if (status === 409){
+            this.createStoreForm.get('domain').setErrors({domainAlreadyTaken: true});
+        }
     }
 
     updateStoreOpening(day: string){

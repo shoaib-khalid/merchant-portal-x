@@ -71,7 +71,7 @@
                                         maxlength="15"
                                         [formControlName]="'domain'"
                                         [required]="true"
-                                        (change)="checkExistingSubdomain()">
+                                        (input)="checkExistingURL($event.target.value)">
                                     <span>.symplified.store</span>
                                     <mat-error *ngIf="createStoreForm.get('domain').hasError('required')">
                                         Required
@@ -84,6 +84,9 @@
                                     </mat-error>
                                     <mat-error *ngIf="createStoreForm.get('domain').hasError('maxlength')">
                                         Maximum character length exceed (maximum 15 character)
+                                    </mat-error>
+                                    <mat-error *ngIf="createStoreForm.get('domain').hasError('domainAlreadyTaken')">
+                                        The domain name entered is already taken
                                     </mat-error>
                                 </mat-form-field>
                                 <!-- Store Description -->
