@@ -54,11 +54,14 @@
                                         maxlength="100"
                                         placeholder="Tell us, what is your store name ?"
                                         [formControlName]="'name'"
-                                        [required]="true">
+                                        [required]="true"
+                                        (input)="checkExistingName($event.target.value)">
                                     <mat-label>Store Name</mat-label>
-                                    
                                     <mat-error *ngIf="createStoreForm.get('name').hasError('required')">
                                         Required
+                                    </mat-error>
+                                    <mat-error *ngIf="createStoreForm.get('name').hasError('storeNameAlreadyTaken')">
+                                        The store name entered is already taken
                                     </mat-error>
                                 </mat-form-field>
                                 <!-- Store URL -->

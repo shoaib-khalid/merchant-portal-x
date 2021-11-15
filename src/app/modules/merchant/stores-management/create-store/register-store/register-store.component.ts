@@ -69,6 +69,7 @@ export class RegisterStoreComponent implements OnInit
     )
     {
         this.checkExistingURL = debounce(this.checkExistingURL, 300)
+        this.checkExistingName = debounce(this.checkExistingName,300)
     }
 
     /**
@@ -398,6 +399,14 @@ export class RegisterStoreComponent implements OnInit
         if (status === 409){
             this.createStoreForm.get('domain').setErrors({domainAlreadyTaken: true});
         }
+    }
+    
+    async checkExistingName(name:string){
+        let status = await this._storesService.getExistingName(name);
+        if (status ===409){
+            this.createStoreForm.get('name').setErrors({storeNameAlreadyTaken: true});
+        }
+
     }
 
     updateStoreOpening(day: string){

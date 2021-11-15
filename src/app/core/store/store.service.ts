@@ -1,14 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, ReplaySubject, Subject, throwError } from 'rxjs';
-import { switchMap, take, map, tap } from 'rxjs/operators';
+import { switchMap, take, map, tap, catchError } from 'rxjs/operators';
 import { Store, StoreRegionCountries, StoreTiming, StorePagination } from 'app/core/store/store.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { takeUntil } from 'rxjs/operators';
 import { LogService } from 'app/core/logging/log.service';
-import { catchError } from 'rxjs/operators';
-
 
 @Injectable({
     providedIn: 'root'
@@ -382,6 +380,32 @@ export class StoresService
     //     console.log("storeSubDomain",this._storeSubDomain)
     //     return 'https://'  + storeFrontDomain;
     // }
+    
+    async getExistingName(name:string){
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params:{
+                storeName: name
+            }
+        };
+
+        let response = await this._httpClient.get<any>(productService + '/stores/checkname', header)
+                            .pipe<any>(catchError((error:HttpErrorResponse)=>{
+                                    return of(error);
+                                })
+                            )
+                            .toPromise();
+    
+
+        this._logging.debug("Response from StoresService (getExistingName) ",response);
+        
+        //if exist status = 409, if not exist status = 200
+        return response.status;
+
+    }
 
     async getExistingURL(url: string){
         let productService = this._apiServer.settings.apiServer.productService;
@@ -405,5 +429,4 @@ export class StoresService
         // if exists status = 409, if not exists status = 200
         return response.status;
     }
-    
 }
