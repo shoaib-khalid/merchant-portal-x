@@ -195,6 +195,8 @@ export class StoresService
                 // Find the store
                 const store = stores.find(item => item.id === id) || null;
 
+                this._logging.debug("Response from StoresService (Current Store)",store);
+
                 // Update the store
                 this._store.next(store);
 

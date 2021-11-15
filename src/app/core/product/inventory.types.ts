@@ -1,26 +1,85 @@
-export interface InventoryProduct
+export interface Product
 {
-    id: string; 
-    thumbnail?: string;
-    images?: string[];
-    active?: boolean;
-    name: string; 
-    description: string; 
-    productInventories?: InventoryProductX[];
-    stock?: number;
+    id: string;
+    name: string;
+    description: string;
+    storeId: string;
+    categoryId: string;
+    status: string;
+    thumbnailUrl?: string;
+    vendor?: string;
+    region?: string;
+    seoUrl: string;
+    seoName: string;
+    trackQuantity: boolean;
     allowOutOfStockPurchases: boolean;
     minQuantityForAlarm: number;
-    trackQuantity: boolean;
-    sku?: string | null;
-    price?: number;
-    weight?: number;
-    categoryId: string;
-    variants?: InventoryVariant[];
-    variantsTag?: InventoryVariantsAvailable[];
-    status: string;
+    packingSize: string;
+    created?: string;
+    updated?: string;
+    productVariants?: ProductVariant[]; // Refer Product Variants Section
+    productInventories?: ProductInventory[]; // Refer Product Inventories Section
+    productReviews?: [];
+    productAssets?: ProductAssets[];
+    productDeliveryDetail?: string;
 }
 
-export interface InventoryPagination
+/**
+ * 
+ * Product Variants Section
+ * 
+ */
+
+export interface ProductVariant
+{
+    id?: string;
+    name: string;
+    description?: string;
+    productVariantsAvailable?: ProductVariantAvailable[];
+    sequenceNumber?: number;
+}
+
+/**
+ * 
+ * Product Inventories Section
+ * 
+ */
+export interface ProductInventory
+{
+    itemCode: string;
+    price: number;
+    quantity: number;
+    productId: string;
+    productInventoryItems?: ProductInventoryItem[];
+    sku: string;
+}
+
+
+export interface ProductInventoryItem
+{
+    itemCode: string;
+    productVariantAvailableId: string;
+    productId: string;
+    sequenceNumber: number;
+    productVariantAvailable: ProductVariantAvailable
+}
+
+export interface ProductVariantAvailable
+{
+    id?: string;
+    value: string;
+    productId?: string;
+    productVariantId?: string;
+    sequenceNumber?: number;
+}
+
+/**
+ * 
+ * Product Pagination
+ * 
+ */
+
+export interface ProductPagination
 {
     length: number;
     size: number;
@@ -30,47 +89,33 @@ export interface InventoryPagination
     endIndex: number;
 }
 
-export interface InventoryCategory
+
+/**
+ * 
+ * Product Category
+ * 
+ */
+
+export interface ProductCategory
 {
-    id?: string;
-    parentCategoryId?: string;
-    name?: string;
-    slug?: string;
+id?: string;
+storeId: string;
+parentCategoryId: string;
+name: string;
+thumbnailUrl: string;
 }
 
-export interface InventoryVariant
-{
-    id?: string;
-    name?: string;
-    productVariantsAvailable?: InventoryVariantsAvailable[];
-}
+/**
+ * 
+ *  Product Assets
+ */
 
-export interface InventoryVariantsAvailable
+export interface ProductAssets
 {
-    id?: string;
-    value?: string;
-    productId?: string;
-}
-
-// productInventories
-export interface InventoryProductX
-{
-    name?: string;
-    productId?: string;
-    productInventoryItems?: InventoryProductItem[];
-    itemCode?: string;
-    price?: number;
-    compareAtprice?: number;
-    quantity?: number;
-    sku?: string;
-    status?: string;
-}
-
-// productInventoryItems
-export interface InventoryProductItem
-{
-    productId?: string;
-    itemCode?: string;
-    productVariantAvailableId?: string;
-    sequenceNumber?: string;
+    id: string;
+    itemCode: string;
+    name: string;
+    url: string;
+    productId: string;
+    isThumbnail: boolean;
 }

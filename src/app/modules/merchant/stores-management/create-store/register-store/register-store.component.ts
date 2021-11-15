@@ -99,7 +99,7 @@ export class RegisterStoreComponent implements OnInit
             city               : ['test', Validators.required],
             postcode           : ['12345', [Validators.required, Validators.minLength(5), Validators.maxLength(10), RegisterStoreValidationService.postcodeValidator]],
             deliveryType       : ['SELF_DELIVERY', Validators.required],
-            paymentType        : ['OnlinePayment', Validators.required],
+            paymentType        : ['ONLINEPAYMENT', Validators.required],
             
             // region       : ['', Validators.required],
             // state       : ['', Validators.required],
@@ -111,7 +111,7 @@ export class RegisterStoreComponent implements OnInit
             isBranch: [false],
             isSnooze: [false],
             serviceChargesPercentage: [0],
-            verticleCode: [''],
+            verticalCode: [''],
 
             regionCountryId: ['', Validators.required],
             regionCountryStateId: ['', Validators.required],
@@ -253,7 +253,7 @@ export class RegisterStoreComponent implements OnInit
         this.createStoreForm.get('isSnooze').patchValue(false);
 
         this._route.paramMap.subscribe( paramMap => {
-            this.createStoreForm.get('verticleCode').patchValue(paramMap.get('vertical-code'));
+            this.createStoreForm.get('verticalCode').patchValue(paramMap.get('vertical-code'));
         })
 
     }
