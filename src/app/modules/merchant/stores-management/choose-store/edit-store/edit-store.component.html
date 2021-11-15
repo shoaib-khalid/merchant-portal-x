@@ -74,7 +74,7 @@
                                         maxlength="15"
                                         [formControlName]="'domain'"
                                         [required]="true"
-                                        (input)="checkExistingName($event.target.value)">
+                                        (input)="checkExistingURL($event.target.value)">
                                     <span>.symplified.store</span>
                                     <mat-error *ngIf="createStoreForm.get('domain').hasError('required')">
                                         Required
