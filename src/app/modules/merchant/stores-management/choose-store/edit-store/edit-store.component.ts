@@ -365,7 +365,7 @@ export class EditStoreComponent implements OnInit
                 });
 
                 // Navigate to the confirmation required page
-                this._router.navigateByUrl('/stores');
+                // this._router.navigateByUrl('/stores');
             },
             (response) => {
                 // Re-enable the form
@@ -395,8 +395,8 @@ export class EditStoreComponent implements OnInit
             this.alert = null;
         }, 7000);
 
-        // Clear the form
-        this.clearForm();
+        // Enable the form
+        this.createStoreForm.enable();
     }
 
     updateStates(countryId: string){
