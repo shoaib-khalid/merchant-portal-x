@@ -93,9 +93,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     isLoading: boolean = false;
     searchInputControl: FormControl = new FormControl();
 
-    
-    variantCombos: any = [];
-
     imagesEditMode: boolean = false;
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -439,20 +436,16 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                         variantItems[index].ids.push(item.id);
                     });
                 });
-                // this.newItems = JSON.parse(JSON.stringify(variantItems))
-
-
                 
-                // console.log("variantItems:", variantItems)
                 this.getallCombinations(variantItems)
                 
                 const productIdLength = this.selectedProduct.id.length;
                 (this.selectedProduct.productInventories).forEach((item: ProductInventory, index) => {
                     if (item.itemCode.slice(-1) != "a") {
                         const index = parseInt(item.itemCode.substring(productIdLength));
-                        console.log("selectedVariantCombos: ",this.selectedVariantCombos)
+                        // console.log("selectedVariantCombos: ",this.selectedVariantCombos)
                         if (this.selectedVariantCombos[index]) {
-                            console.log("item.price :",item.price)
+                            // console.log("item.price :",item.price)
                             this.selectedVariantCombos[index].itemCode = item.itemCode;
                             this.selectedVariantCombos[index].price = item.price;
                             this.selectedVariantCombos[index].sku = item.sku;
@@ -462,48 +455,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                     }
                 });
 
-                // console.log("filteredProductVariants: ", this.filteredProductVariants)
-
-                const getCombosName = ([head, ...[headTail, ...tailTail]]) => {
-                    if (!headTail) return head
-                  
-                    const combined = headTail.reduce((acc, x) => {
-                        
-                        return acc.concat(head.map(h => `${h} / ${x}`))
-                    }, [])
-                  
-                    return combine([combined, ...tailTail])
-                }
-
-                // Get variant combo from selected productInventories
-                (this.selectedProduct.productInventories).forEach(item => {
-                    
-                    let variantCombosName: string = "";
-                    let variantCombosArr = [];
-                    (item.productInventoryItems).forEach(item => {
-                        // put to array variantCombosArr
-                        variantCombosArr.push(item.productVariantAvailableId);
-                        variantCombosName = this.getVariantCombosName(variantCombosArr);
-                    });
-
-                    this.variantCombos.push({
-                        itemCode: item.itemCode,
-                        name: variantCombosName
-                    });
-                });
-
-                console.log("variantCombos: ",this.variantCombos)
-                console.log("this.selectedVariantCombos", this.selectedVariantCombos)
-
-                const combine = ([head, ...[headTail, ...tailTail]]) => {
-                    if (!headTail) return head
-                  
-                    const combined = headTail.reduce((acc, x) => {
-                      return acc.concat(head.map(h => `${h} / ${x}`))
-                    }, [])
-                  
-                    return combine([combined, ...tailTail])
-                }
+                // console.log("this.selectedVariantCombos", this.selectedVariantCombos)
 
                 // Add the category
                 this.selectedProduct.categoryId = product.categoryId;
@@ -1608,7 +1560,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             this.selectedProductForm.get('isVariants').patchValue(false);
             
             // // Set filtered variants to empty array
-            // this.filteredVariants = [];
+            this.filteredProductVariants = [];
             
             // // Set variants to empty array
             // this.variants = [];
