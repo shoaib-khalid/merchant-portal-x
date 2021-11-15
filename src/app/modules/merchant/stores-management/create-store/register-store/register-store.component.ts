@@ -68,8 +68,8 @@ export class RegisterStoreComponent implements OnInit
         private _route: ActivatedRoute
     )
     {
-        this.checkExistingURL = debounce(this.checkExistingURL, 300)
-        this.checkExistingName = debounce(this.checkExistingName,300)
+        this.checkExistingURL = debounce(this.checkExistingURL, 300);
+        this.checkExistingName = debounce(this.checkExistingName,300);
     }
 
     /**

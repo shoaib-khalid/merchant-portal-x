@@ -9,7 +9,7 @@ import { StoresService } from 'app/core/store/store.service';
 import { Store, StoreRegionCountries, CreateStore } from 'app/core/store/store.types';
 import { ActivatedRoute, Router } from '@angular/router';
 import { JwtService } from 'app/core/jwt/jwt.service';
-import { store } from 'app/mock-api/common/store/data';
+import { debounce } from 'lodash';
 
 @Component({
     selector     : 'edit-store-page',
@@ -70,6 +70,8 @@ export class EditStoreComponent implements OnInit
         private _route: ActivatedRoute
     )
     {
+        this.checkExistingURL = debounce(this.checkExistingURL, 300);
+        this.checkExistingName = debounce(this.checkExistingName,300);
     }
 
     /**
@@ -412,7 +414,18 @@ export class EditStoreComponent implements OnInit
         this._changeDetectorRef.markForCheck();
     }
 
-    checkExistingSubdomain(){
+    async checkExistingURL(url: string){
+        let status = await this._storesService.getExistingURL(url);
+        if (status === 409){
+            this.createStoreForm.get('domain').setErrors({domainAlreadyTaken: true});
+        }
+    }
+    
+    async checkExistingName(name:string){
+        let status = await this._storesService.getExistingName(name);
+        if (status === 409){
+            this.createStoreForm.get('name').setErrors({storeNameAlreadyTaken: true});
+        }
 
     }
 

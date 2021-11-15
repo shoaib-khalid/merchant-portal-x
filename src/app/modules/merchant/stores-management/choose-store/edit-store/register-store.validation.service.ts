@@ -22,6 +22,8 @@ export class RegisterStoreValidationService {
         invalidEmailAddress: 'Invalid email address',
         invalidPassword: 'Invalid password. Password must be at least 6 characters long, and contain a number.',
         invalidDomain: 'Store URL should only contain alphanumeric and "-" character',
+        domainAlreadyTaken: 'Sorry, the selected domain name is already taken',
+        storeNameAlreadytaken:'Sorry, the selected name is already taken',
         invalidPhonenumber: 'Invalid phonenumber',
         invalidPostcode: 'Invalid postcode',
         minlength: `Minimum length ${validatorValue.requiredLength}`
