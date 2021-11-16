@@ -95,15 +95,6 @@ export class ChooseStoreListComponent implements OnInit, OnDestroy
         this._storesService.stores$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((stores: Store[]) => {
-
-                stores.forEach(async (item, index) => {
-                    let res = await this._storesService.getStoreAssets(item.id);
-                    stores[index] = Object.assign(stores[index],{storeLogo: (res !== null) ? res.logoUrl : "" });
-
-                    // Mark for check
-                    this._changeDetectorRef.markForCheck();
-                })
-
                 this.filteredStores = stores;
             });
 
@@ -243,8 +234,16 @@ export class ChooseStoreListComponent implements OnInit, OnDestroy
      * @param storeId
      */
 
-    async pageRedirect(storeId: string){
+    async pageRedirect(storeId: string) {
         this.storeId = storeId;
+        await this._storesService.getStoresById(storeId)
+            .subscribe((store: Store)=>{
+                this._storesService.store = store;
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+
         await this._inventoryService.getProducts().subscribe((response)=>{
 
             if (response["data"]["content"].length < 1)

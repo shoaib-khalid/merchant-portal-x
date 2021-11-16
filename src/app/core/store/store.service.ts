@@ -7,6 +7,7 @@ import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { takeUntil } from 'rxjs/operators';
 import { LogService } from 'app/core/logging/log.service';
+import { FormControl } from '@angular/forms';
 
 @Injectable({
     providedIn: 'root'
@@ -19,6 +20,8 @@ export class StoresService
     private _storeRegionCountries: ReplaySubject<StoreRegionCountries[]> = new ReplaySubject<StoreRegionCountries[]>(1);
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     private _currentStores: Store[] = [];
+    public storeControl: FormControl = new FormControl();
+
 
     /**
      * Constructor
@@ -43,6 +46,17 @@ export class StoresService
     get store$(): Observable<Store>
     {
         return this._store.asObservable();
+    }
+
+    /**
+     * Setter for stores
+     *
+     * @param value
+     */
+    set store(value: Store)
+    {
+        // Store the value
+        this._store.next(value);
     }
 
     /**
@@ -164,7 +178,7 @@ export class StoresService
                 
                 (this._currentStores).forEach(async (item, index) => {
                     // let assets = await this.getStoreAssets(item.id);
-                    this._currentStores[index] = Object.assign(this._currentStores[index],{storeLogo: "" });
+                    // this._currentStores[index] = Object.assign(this._currentStores[index],{storeLogo: "" });
                     this._currentStores[index] = Object.assign(this._currentStores[index],{slug: item.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '')});
                     this._currentStores[index] = Object.assign(this._currentStores[index],{duration: 30});
                     this._currentStores[index] = Object.assign(this._currentStores[index],{totalSteps: 3});
@@ -194,6 +208,9 @@ export class StoresService
 
                 // Find the store
                 const store = stores.find(item => item.id === id) || null;
+
+                // set this
+                this.storeControl.setValue(store);
 
                 this._logging.debug("Response from StoresService (getStoresById)",store);
 

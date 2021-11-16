@@ -39,6 +39,15 @@ export interface Store
     featured?: boolean;
     completed?: number;
     currentStep?: number;
+    storeAsset?: storeAssets;
+}
+
+export interface storeAssets
+{
+    storeId: string;
+    logoUrl: string;
+    bannerUrl: string;
+    bannerMobileUrl: string;
 }
 
 export interface CreateStore

@@ -24,10 +24,17 @@
         <div class="flex flex-col items-center w-full p-4">
             <div class="relative w-24 h-24">
                 <img
+                    *ngIf="storeLogo; else defaultImage"
                     class="w-full h-full rounded-full"
-                    *ngIf="user.avatar"
-                    [src]="user.avatar"
-                    alt="User avatar">
+                    [src]="storeLogo"
+                    alt="Logo">
+                <ng-template #defaultImage>
+                    <img
+                        class="w-full h-full rounded-full"
+                        *ngIf="user.avatar"
+                        [src]="user.avatar"
+                        alt="User avatar">
+                </ng-template>    
                 <mat-icon
                     class="icon-size-24"
                     *ngIf="!user.avatar"
@@ -40,8 +47,10 @@
                 <mat-form-field class="w-5/6">
                     <!-- <mat-select> -->
                     <mat-select
-                        [value]="storeId$"
+                        [(ngModel)]="currentStoreId"
                         (selectionChange)="changeStore($event.value)"
+                        placeholder="Select Store"
+                        appearance="fill"
                         #storeSelector="matSelect"
                         >
                         <mat-select-trigger>
@@ -59,7 +68,7 @@
                         id="see-store-button"
                         class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                         type="button"
-                        (click)="openStoreFront(storeId$)"
+                        (click)="openStoreFront()"
                         mat-icon-button>
                     <label 
                         class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
