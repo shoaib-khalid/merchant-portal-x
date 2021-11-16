@@ -44,13 +44,13 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 link : '/products',
                 exactMatch: true
             },
-            {
-                id   : 'apps.ecommerce.inventory',
-                title: 'Product Category',
-                type : 'basic',
-                link : '/products',
-                exactMatch: true
-            }
+            // {
+            //     id   : 'apps.ecommerce.inventory',
+            //     title: 'Product Category',
+            //     type : 'basic',
+            //     link : '/products',
+            //     exactMatch: true
+            // }
         ],
     },
     {
