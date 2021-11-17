@@ -11,7 +11,7 @@ export class DashboardResolver implements Resolve<any>
     /**
      * Constructor
      */
-    constructor(private _DashboardService: DashboardService)
+    constructor(private _dashboardService: DashboardService)
     {
     }
 
@@ -27,6 +27,129 @@ export class DashboardResolver implements Resolve<any>
      */
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
     {
-        return this._DashboardService.getData();
+        return this._dashboardService.getData();
+    }
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class DailyTopProductsResolver implements Resolve<any>
+{
+    /**
+     * Constructor
+     */
+    constructor(private _dashboardService: DashboardService)
+    {
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Accessors
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Getter for storeId
+     */
+
+    get storeId$(): string
+    {
+        return localStorage.getItem('storeId') ?? '';
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Resolver
+     *
+     * @param route
+     * @param state
+     */
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
+    {
+        return this._dashboardService.getDailyTopProducts(this.storeId$);
+    }
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class DetailedDailySalesResolver implements Resolve<any>
+{
+    /**
+     * Constructor
+     */
+    constructor(private _dashboardService: DashboardService)
+    {
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Accessors
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Getter for storeId
+     */
+
+    get storeId$(): string
+    {
+        return localStorage.getItem('storeId') ?? '';
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Resolver
+     *
+     * @param route
+     * @param state
+     */
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
+    {
+        return this._dashboardService.getDetailedDailySales(this.storeId$);
+    }
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class SummarySalesResolver implements Resolve<any>
+{
+    /**
+     * Constructor
+     */
+    constructor(private _dashboardService: DashboardService)
+    {
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Accessors
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Getter for storeId
+     */
+
+    get storeId$(): string
+    {
+        return localStorage.getItem('storeId') ?? '';
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Resolver
+     *
+     * @param route
+     * @param state
+     */
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
+    {
+        return this._dashboardService.getSummarySales(this.storeId$);
     }
 }

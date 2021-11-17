@@ -6,7 +6,7 @@
             <!-- Title and action buttons -->
             <div class="flex items-center justify-between w-full">
                 <div>
-                    <h2 class="text-3xl font-semibold tracking-tight leading-8">STORE-NAME Sales Overview</h2>
+                    <h2 class="text-3xl font-semibold tracking-tight leading-8">{{ storeName }} Sales Overview</h2>
                     <div class="font-medium tracking-tight text-secondary">SYMPly manage your financial status</div>
                 </div>
                 <div class="flex items-center ml-6">
@@ -203,176 +203,202 @@
                                     </div>
                                 </div>
                             </div>
-
                             <!-- Summary Sales details -->
-                            <div class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
-                                <div class="text-lg font-medium tracking-tight leading-6 truncate">Summary Sales Details</div>
+                            <div class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 pb-0 bg-card shadow rounded-2xl overflow-hidden">
+                                
+                                <div class="flex flex-wrap justify-between item-center w-full">
+                                    <div class="text-lg font-medium tracking-tight my-auto leading-6 truncate">Summary Sales Details</div>
+                                    <mat-form-field 
+                                        class="fuse-mat-no-subscript w-full sm:w-72"
+                                        appearance="fill"
+                                    >
+                                        <mat-date-range-input [formGroup]="summarySalesDateRange" [rangePicker]="summarySalesDateRangePicker">
+                                        <input matStartDate formControlName="start" placeholder="mm/dd/yyyy" [value]="summarySalesDateRange.start">
+                                        <input matEndDate formControlName="end" placeholder="mm/dd/yyyy" [value]="summarySalesDateRange.end">
+                                        </mat-date-range-input>
+                                        <mat-datepicker-toggle matSuffix [for]="summarySalesDateRangePicker"></mat-datepicker-toggle>
+                                        <mat-date-range-picker #summarySalesDateRangePicker></mat-date-range-picker>
+                                    
+                                        <!-- <mat-error *ngIf="range.controls.start.hasError('matStartDateInvalid')">Invalid start date</mat-error>
+                                        <mat-error *ngIf="range.controls.end.hasError('matEndDateInvalid')">Invalid end date</mat-error> -->
+                                    </mat-form-field>
+                                </div>
                                 <div class="flex flex-col flex-auto mt-2 overflow-x-auto">
                                     <table
                                         class="min-w-240 overflow-y-visible"
                                         mat-table
-                                        [dataSource]="data.budgetDetails.rows">
+                                        [dataSource]="summarySalesRow">
 
-                                        <!-- Type -->
-                                        <ng-container
-                                            matColumnDef="type"
-                                            sticky>
+                                        <!-- Date -->
+                                        <ng-container matColumnDef="date">
                                             <th
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                Type
+                                                Date
                                             </th>
                                             <td
                                                 mat-cell
-                                                *matCellDef="let budget">
-                                                <span class="flex items-center">
-                                                    <span
-                                                        class="w-2 h-2 rounded-full"
-                                                        [ngClass]="{'bg-blue-500': budget.id === 1,
-                                                                    'bg-red-500': budget.id === 2,
-                                                                    'bg-green-500': budget.id === 3,
-                                                                    'bg-amber-500': budget.id === 4,
-                                                                    'bg-indigo-500': budget.id === 5}"></span>
-                                                    <span class="ml-3 leading-4">{{budget.type}}</span>
-                                                </span>
-                                            </td>
-                                        </ng-container>
-
-                                        <!-- Total -->
-                                        <ng-container matColumnDef="total">
-                                            <th
-                                                mat-header-cell
-                                                *matHeaderCellDef>
-                                                Total Budget
-                                            </th>
-                                            <td
-                                                mat-cell
-                                                *matCellDef="let budget">
+                                                *matCellDef="let summarySale">
                                                 <span class="font-medium text-right">
-                                                    {{budget.total | currency:'USD'}}
+                                                    {{summarySale.date | date:'MMM dd, h:mm a'}}
                                                 </span>
                                             </td>
                                         </ng-container>
 
-                                        <!-- Expenses amount -->
-                                        <ng-container matColumnDef="expensesAmount">
+                                        <!-- Customer Name -->
+                                        <ng-container matColumnDef="totalOrders">
                                             <th
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                Expenses (USD)
+                                                Total Orders
                                             </th>
                                             <td
                                                 mat-cell
-                                                *matCellDef="let budget">
-                                                {{budget.expensesAmount | currency:'USD'}}
+                                                *matCellDef="let summarySale">
+                                                {{summarySale.totalOrders}}
                                             </td>
                                         </ng-container>
 
                                         <!-- Expenses percentage -->
-                                        <ng-container matColumnDef="expensesPercentage">
+                                        <ng-container matColumnDef="amountEarned">
                                             <th
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                Expenses (%)
+                                                Amount Earned
                                             </th>
                                             <td
                                                 mat-cell
-                                                *matCellDef="let budget">
-                                                {{budget.expensesPercentage}}%
-                                            </td>
-                                        </ng-container>
-
-                                        <!-- Remaining amount -->
-                                        <ng-container matColumnDef="remainingAmount">
-                                            <th
-                                                mat-header-cell
-                                                *matHeaderCellDef>
-                                                Remaining (USD)
-                                            </th>
-                                            <td
-                                                mat-cell
-                                                *matCellDef="let budget">
-                                                {{budget.remainingAmount | currency:'USD'}}
-                                            </td>
-                                        </ng-container>
-
-                                        <!-- Remaining percentage -->
-                                        <ng-container matColumnDef="remainingPercentage">
-                                            <th
-                                                mat-header-cell
-                                                *matHeaderCellDef>
-                                                Remaining (%)
-                                            </th>
-                                            <td
-                                                mat-cell
-                                                *matCellDef="let budget">
-                                                <span class="flex items-center">
-                                                    <span>
-                                                        <!-- Low -->
-                                                        <span
-                                                            class="flex items-end w-1 h-4 bg-red-200 rounded overflow-hidden"
-                                                            *ngIf="budget.remainingPercentage < 30">
-                                                            <span class="flex w-full h-1/3 bg-red-600"></span>
-                                                        </span>
-                                                        <!-- Medium -->
-                                                        <span
-                                                            class="flex items-end w-1 h-4 bg-orange-200 rounded overflow-hidden"
-                                                            *ngIf="budget.remainingPercentage >= 30 && budget.remainingPercentage < 80">
-                                                            <span class="flex w-full h-2/4 bg-orange-400"></span>
-                                                        </span>
-                                                        <!-- High -->
-                                                        <span
-                                                            class="flex items-end w-1 h-4 bg-green-100 rounded overflow-hidden"
-                                                            *ngIf="budget.remainingPercentage >= 80">
-                                                            <span class="flex w-full h-full bg-green-400"></span>
-                                                        </span>
-                                                    </span>
-                                                    <span class="ml-3 leading-4">{{budget.remainingPercentage}}%</span>
-                                                </span>
+                                                *matCellDef="let summarySale">
+                                                {{summarySale.amountEarned | currency:'$'}}
                                             </td>
                                         </ng-container>
 
                                         <tr
                                             mat-header-row
-                                            *matHeaderRowDef="data.budgetDetails.columns"></tr>
+                                            *matHeaderRowDef="summarySalesCol"></tr>
                                         <tr
                                             mat-row
-                                            *matRowDef="let row; columns: data.budgetDetails.columns;"></tr>
+                                            *matRowDef="let row; columns: summarySalesCol;"></tr>
                                     </table>
                                 </div>
+                                <mat-paginator
+                                    class=""
+                                    [ngClass]="{'pointer-events-none': isLoading}"
+                                    [length]="summarySalesPagination.length"
+                                    [pageIndex]="summarySalesPagination.page"
+                                    [pageSize]="summarySalesPagination.size"
+                                    [pageSizeOptions]="[5, 10, 25, 100]"
+                                    [showFirstLastButtons]="true"></mat-paginator>
                             </div>
 
                             <!-- Daily Detailed Sales details -->
-                            <div class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
-                                <div class="text-lg font-medium tracking-tight leading-6 truncate">Daily Detailed Sales Details</div>
+                            <div class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 pb-0 bg-card shadow rounded-2xl overflow-hidden">
+                                <div class="flex flex-wrap justify-between item-center w-full">
+                                    <div class="text-lg font-medium tracking-tight my-auto leading-6 truncate">Daily Detailed Sales Details</div>
+                                    <mat-form-field 
+                                        class="fuse-mat-no-subscript w-full sm:w-72"
+                                        appearance="fill"
+                                    >
+                                        <mat-date-range-input [formGroup]="dailyTopProductsDateRange" [rangePicker]="dailyTopProductsPicker">
+                                        <input matStartDate formControlName="start" placeholder="mm/dd/yyyy" [value]="dailyTopProductsDateRange.start">
+                                        <input matEndDate formControlName="end" placeholder="mm/dd/yyyy" [value]="dailyTopProductsDateRange.end">
+                                        </mat-date-range-input>
+                                        <mat-datepicker-toggle matSuffix [for]="dailyTopProductsPicker"></mat-datepicker-toggle>
+                                        <mat-date-range-picker #dailyTopProductsPicker></mat-date-range-picker>
+                                    
+                                        <!-- <mat-error *ngIf="range.controls.start.hasError('matStartDateInvalid')">Invalid start date</mat-error>
+                                        <mat-error *ngIf="range.controls.end.hasError('matEndDateInvalid')">Invalid end date</mat-error> -->
+                                    </mat-form-field>
+                                </div>
                                 <div class="flex flex-col flex-auto mt-2 overflow-x-auto">
                                     <table
                                         class="min-w-240 overflow-y-visible"
                                         mat-table
-                                        [dataSource]="data.budgetDetails.rows">
+                                        [dataSource]="detailedDailySalesRow">
 
-                                        <!-- Type -->
-                                        <ng-container
-                                            matColumnDef="type"
-                                            sticky>
+                                        <!-- Date -->
+                                        <ng-container matColumnDef="date">
                                             <th
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                Type
+                                                Date
                                             </th>
                                             <td
                                                 mat-cell
-                                                *matCellDef="let budget">
-                                                <span class="flex items-center">
-                                                    <span
-                                                        class="w-2 h-2 rounded-full"
-                                                        [ngClass]="{'bg-blue-500': budget.id === 1,
-                                                                    'bg-red-500': budget.id === 2,
-                                                                    'bg-green-500': budget.id === 3,
-                                                                    'bg-amber-500': budget.id === 4,
-                                                                    'bg-indigo-500': budget.id === 5}"></span>
-                                                    <span class="ml-3 leading-4">{{budget.type}}</span>
+                                                *matCellDef="let detailedDailySale">
+                                                <span class="font-medium text-right">
+                                                    {{detailedDailySale.date | date:'MMM dd, h:mm a'}}
                                                 </span>
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Customer Name -->
+                                        <ng-container matColumnDef="customerName">
+                                            <th
+                                                mat-header-cell
+                                                *matHeaderCellDef>
+                                                Customer Name
+                                            </th>
+                                            <td
+                                                mat-cell
+                                                *matCellDef="let detailedDailySale">
+                                                {{detailedDailySale.customerName}}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Subtotal -->
+                                        <ng-container matColumnDef="subTotal">
+                                            <th
+                                                mat-header-cell
+                                                *matHeaderCellDef>
+                                                Subtotal
+                                            </th>
+                                            <td
+                                                mat-cell
+                                                *matCellDef="let detailedDailySale">
+                                                {{detailedDailySale.subTotal | currency: '$'}}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Service Charge -->
+                                        <ng-container matColumnDef="serviceCharge">
+                                            <th
+                                                mat-header-cell
+                                                *matHeaderCellDef>
+                                                Service Charge
+                                            </th>
+                                            <td
+                                                mat-cell
+                                                *matCellDef="let detailedDailySale">
+                                                {{detailedDailySale.serviceCharge | currency:'$'}}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Delivery Charge -->
+                                        <ng-container matColumnDef="deliveryCharge">
+                                            <th
+                                                mat-header-cell
+                                                *matHeaderCellDef>
+                                                Delivery Charge
+                                            </th>
+                                            <td
+                                                mat-cell
+                                                *matCellDef="let detailedDailySale">
+                                                {{detailedDailySale.deliveryCharge | currency:'$'}}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Commission-->
+                                        <ng-container matColumnDef="commission">
+                                            <th
+                                                mat-header-cell
+                                                *matHeaderCellDef>
+                                                Commission
+                                            </th>
+                                            <td
+                                                mat-cell
+                                                *matCellDef="let detailedDailySale">
+                                                {{detailedDailySale.commission | currency:'$'}}
                                             </td>
                                         </ng-container>
 
@@ -381,241 +407,134 @@
                                             <th
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                Total Budget
+                                                Total
                                             </th>
                                             <td
                                                 mat-cell
-                                                *matCellDef="let budget">
-                                                <span class="font-medium text-right">
-                                                    {{budget.total | currency:'USD'}}
-                                                </span>
-                                            </td>
-                                        </ng-container>
-
-                                        <!-- Expenses amount -->
-                                        <ng-container matColumnDef="expensesAmount">
-                                            <th
-                                                mat-header-cell
-                                                *matHeaderCellDef>
-                                                Expenses (USD)
-                                            </th>
-                                            <td
-                                                mat-cell
-                                                *matCellDef="let budget">
-                                                {{budget.expensesAmount | currency:'USD'}}
-                                            </td>
-                                        </ng-container>
-
-                                        <!-- Expenses percentage -->
-                                        <ng-container matColumnDef="expensesPercentage">
-                                            <th
-                                                mat-header-cell
-                                                *matHeaderCellDef>
-                                                Expenses (%)
-                                            </th>
-                                            <td
-                                                mat-cell
-                                                *matCellDef="let budget">
-                                                {{budget.expensesPercentage}}%
-                                            </td>
-                                        </ng-container>
-
-                                        <!-- Remaining amount -->
-                                        <ng-container matColumnDef="remainingAmount">
-                                            <th
-                                                mat-header-cell
-                                                *matHeaderCellDef>
-                                                Remaining (USD)
-                                            </th>
-                                            <td
-                                                mat-cell
-                                                *matCellDef="let budget">
-                                                {{budget.remainingAmount | currency:'USD'}}
-                                            </td>
-                                        </ng-container>
-
-                                        <!-- Remaining percentage -->
-                                        <ng-container matColumnDef="remainingPercentage">
-                                            <th
-                                                mat-header-cell
-                                                *matHeaderCellDef>
-                                                Remaining (%)
-                                            </th>
-                                            <td
-                                                mat-cell
-                                                *matCellDef="let budget">
-                                                <span class="flex items-center">
-                                                    <span>
-                                                        <!-- Low -->
-                                                        <span
-                                                            class="flex items-end w-1 h-4 bg-red-200 rounded overflow-hidden"
-                                                            *ngIf="budget.remainingPercentage < 30">
-                                                            <span class="flex w-full h-1/3 bg-red-600"></span>
-                                                        </span>
-                                                        <!-- Medium -->
-                                                        <span
-                                                            class="flex items-end w-1 h-4 bg-orange-200 rounded overflow-hidden"
-                                                            *ngIf="budget.remainingPercentage >= 30 && budget.remainingPercentage < 80">
-                                                            <span class="flex w-full h-2/4 bg-orange-400"></span>
-                                                        </span>
-                                                        <!-- High -->
-                                                        <span
-                                                            class="flex items-end w-1 h-4 bg-green-100 rounded overflow-hidden"
-                                                            *ngIf="budget.remainingPercentage >= 80">
-                                                            <span class="flex w-full h-full bg-green-400"></span>
-                                                        </span>
-                                                    </span>
-                                                    <span class="ml-3 leading-4">{{budget.remainingPercentage}}%</span>
-                                                </span>
+                                                *matCellDef="let detailedDailySale">
+                                                {{detailedDailySale.total | currency:'$'}}
                                             </td>
                                         </ng-container>
 
                                         <tr
                                             mat-header-row
-                                            *matHeaderRowDef="data.budgetDetails.columns"></tr>
+                                            *matHeaderRowDef="detailedDailySalesCol"></tr>
                                         <tr
                                             mat-row
-                                            *matRowDef="let row; columns: data.budgetDetails.columns;"></tr>
+                                            *matRowDef="let row; columns: detailedDailySalesCol;"></tr>
                                     </table>
                                 </div>
+                                <mat-paginator
+                                    class=""
+                                    [ngClass]="{'pointer-events-none': isLoading}"
+                                    [length]="detailedDailySalesPagination.length"
+                                    [pageIndex]="detailedDailySalesPagination.page"
+                                    [pageSize]="detailedDailySalesPagination.size"
+                                    [pageSizeOptions]="[5, 10, 25, 100]"
+                                    [showFirstLastButtons]="true"></mat-paginator>
                             </div>
 
                             <!-- Daily Top Products details -->
-                            <div class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
-                                <div class="text-lg font-medium tracking-tight leading-6 truncate">Daily Top Products Details</div>
+                            <div class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 pb-0 bg-card shadow rounded-2xl overflow-hidden">
+                                <div class="flex flex-wrap justify-between item-center w-full">
+                                    <div class="text-lg font-medium tracking-tight my-auto leading-6 truncate">Daily Top Products Details</div>
+                                    <mat-form-field 
+                                        class="fuse-mat-no-subscript w-full sm:w-72"
+                                        appearance="fill"
+                                    >
+                                        <mat-date-range-input [formGroup]="detailedDailySalesDateRange" [rangePicker]="detailedDailySalesPicker">
+                                        <input matStartDate formControlName="start" placeholder="mm/dd/yyyy" [value]="detailedDailySalesDateRange.start">
+                                        <input matEndDate formControlName="end" placeholder="mm/dd/yyyy" [value]="detailedDailySalesDateRange.end">
+                                        </mat-date-range-input>
+                                        <mat-datepicker-toggle matSuffix [for]="detailedDailySalesPicker"></mat-datepicker-toggle>
+                                        <mat-date-range-picker #detailedDailySalesPicker></mat-date-range-picker>
+                                    
+                                        <!-- <mat-error *ngIf="range.controls.start.hasError('matStartDateInvalid')">Invalid start date</mat-error>
+                                        <mat-error *ngIf="range.controls.end.hasError('matEndDateInvalid')">Invalid end date</mat-error> -->
+                                    </mat-form-field>
+                                </div>
                                 <div class="flex flex-col flex-auto mt-2 overflow-x-auto">
                                     <table
                                         class="min-w-240 overflow-y-visible"
                                         mat-table
-                                        [dataSource]="data.budgetDetails.rows">
+                                        [dataSource]="dailyTopProductsRow">
 
-                                        <!-- Type -->
-                                        <ng-container
-                                            matColumnDef="type"
-                                            sticky>
+                                        <!-- Date -->
+                                        <ng-container matColumnDef="date">
                                             <th
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                Type
+                                                Date
                                             </th>
                                             <td
                                                 mat-cell
-                                                *matCellDef="let budget">
-                                                <span class="flex items-center">
-                                                    <span
-                                                        class="w-2 h-2 rounded-full"
-                                                        [ngClass]="{'bg-blue-500': budget.id === 1,
-                                                                    'bg-red-500': budget.id === 2,
-                                                                    'bg-green-500': budget.id === 3,
-                                                                    'bg-amber-500': budget.id === 4,
-                                                                    'bg-indigo-500': budget.id === 5}"></span>
-                                                    <span class="ml-3 leading-4">{{budget.type}}</span>
+                                                *matCellDef="let dailyTopProduct">
+                                                <span class="font-medium text-right">
+                                                    {{dailyTopProduct.date | date:'MMM dd, h:mm a'}}
                                                 </span>
                                             </td>
                                         </ng-container>
 
                                         <!-- Total -->
-                                        <ng-container matColumnDef="total">
+                                        <ng-container matColumnDef="productName">
                                             <th
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                Total Budget
+                                                Product Name
                                             </th>
                                             <td
                                                 mat-cell
-                                                *matCellDef="let budget">
+                                                *matCellDef="let dailyTopProduct">
                                                 <span class="font-medium text-right">
-                                                    {{budget.total | currency:'USD'}}
+                                                    {{dailyTopProduct.productName}}
                                                 </span>
                                             </td>
                                         </ng-container>
 
                                         <!-- Expenses amount -->
-                                        <ng-container matColumnDef="expensesAmount">
+                                        <ng-container matColumnDef="rank">
                                             <th
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                Expenses (USD)
+                                                Rank
                                             </th>
                                             <td
                                                 mat-cell
-                                                *matCellDef="let budget">
-                                                {{budget.expensesAmount | currency:'USD'}}
+                                                *matCellDef="let dailyTopProduct">
+                                                {{dailyTopProduct.rank}}
                                             </td>
                                         </ng-container>
 
                                         <!-- Expenses percentage -->
-                                        <ng-container matColumnDef="expensesPercentage">
+                                        <ng-container matColumnDef="totalTransaction">
                                             <th
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                Expenses (%)
+                                                Total Transaction
                                             </th>
                                             <td
                                                 mat-cell
-                                                *matCellDef="let budget">
-                                                {{budget.expensesPercentage}}%
-                                            </td>
-                                        </ng-container>
-
-                                        <!-- Remaining amount -->
-                                        <ng-container matColumnDef="remainingAmount">
-                                            <th
-                                                mat-header-cell
-                                                *matHeaderCellDef>
-                                                Remaining (USD)
-                                            </th>
-                                            <td
-                                                mat-cell
-                                                *matCellDef="let budget">
-                                                {{budget.remainingAmount | currency:'USD'}}
-                                            </td>
-                                        </ng-container>
-
-                                        <!-- Remaining percentage -->
-                                        <ng-container matColumnDef="remainingPercentage">
-                                            <th
-                                                mat-header-cell
-                                                *matHeaderCellDef>
-                                                Remaining (%)
-                                            </th>
-                                            <td
-                                                mat-cell
-                                                *matCellDef="let budget">
-                                                <span class="flex items-center">
-                                                    <span>
-                                                        <!-- Low -->
-                                                        <span
-                                                            class="flex items-end w-1 h-4 bg-red-200 rounded overflow-hidden"
-                                                            *ngIf="budget.remainingPercentage < 30">
-                                                            <span class="flex w-full h-1/3 bg-red-600"></span>
-                                                        </span>
-                                                        <!-- Medium -->
-                                                        <span
-                                                            class="flex items-end w-1 h-4 bg-orange-200 rounded overflow-hidden"
-                                                            *ngIf="budget.remainingPercentage >= 30 && budget.remainingPercentage < 80">
-                                                            <span class="flex w-full h-2/4 bg-orange-400"></span>
-                                                        </span>
-                                                        <!-- High -->
-                                                        <span
-                                                            class="flex items-end w-1 h-4 bg-green-100 rounded overflow-hidden"
-                                                            *ngIf="budget.remainingPercentage >= 80">
-                                                            <span class="flex w-full h-full bg-green-400"></span>
-                                                        </span>
-                                                    </span>
-                                                    <span class="ml-3 leading-4">{{budget.remainingPercentage}}%</span>
-                                                </span>
+                                                *matCellDef="let dailyTopProduct">
+                                                {{dailyTopProduct.totalTransaction}}
                                             </td>
                                         </ng-container>
 
                                         <tr
                                             mat-header-row
-                                            *matHeaderRowDef="data.budgetDetails.columns"></tr>
+                                            *matHeaderRowDef="dailyTopProductsCol"></tr>
                                         <tr
                                             mat-row
-                                            *matRowDef="let row; columns: data.budgetDetails.columns;"></tr>
+                                            *matRowDef="let row; columns: dailyTopProductsCol;"></tr>
                                     </table>
                                 </div>
+                                <mat-paginator
+                                    class=""
+                                    [ngClass]="{'pointer-events-none': isLoading}"
+                                    [length]="dailyTopProductsPagination.length"
+                                    [pageIndex]="dailyTopProductsPagination.page"
+                                    [pageSize]="dailyTopProductsPagination.size"
+                                    [pageSizeOptions]="[5, 10, 25, 100]"
+                                    [showFirstLastButtons]="true"></mat-paginator>
                             </div>
                         </div>
                     </div>

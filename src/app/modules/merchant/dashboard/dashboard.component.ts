@@ -1,9 +1,13 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { debounceTime, switchMap, takeUntil } from 'rxjs/operators';
 import { ApexOptions } from 'ng-apexcharts';
 import { DashboardService } from 'app/modules/merchant/dashboard/dashboard.service';
+import { Store } from 'app/core/store/store.types';
+import { StoresService } from 'app/core/store/store.service';
+import { DailyTopProducts, DailyTopProductsPagination, DetailedDailySales, DetailedDailySalesPagination, SummarySales, SummarySalesPagination } from './dashboard.types';
+import { items } from 'app/mock-api/apps/file-manager/data';
 
 @Component({
     selector       : 'dashboard',
@@ -13,25 +17,55 @@ import { DashboardService } from 'app/modules/merchant/dashboard/dashboard.servi
 })
 export class DashboardComponent implements OnInit, OnDestroy
 {
+    store: Store;
+    stores: Store[];
+    currentStoreId: string;
+    storeName: string = "";
     chartGithubIssues: ApexOptions = {};
-    chartTaskDistribution: ApexOptions = {};
-    chartBudgetDistribution: ApexOptions = {};
-    chartWeeklyExpenses: ApexOptions = {};
-    chartMonthlyExpenses: ApexOptions = {};
-    chartYearlyExpenses: ApexOptions = {};
     data: any;
-    selectedProject: string = 'ACME Corp. Backend App';
+
+    summarySalesCol = ["date","totalOrders","amountEarned"]
+    summarySalesRow = [];
+    summarySalesPagination: SummarySalesPagination;
+    summarySalesDateRange = { start: '', end: ''};
+    
+    dailyTopProductsCol = ["date","productName","rank","totalTransaction"]
+    dailyTopProductsRow = [];
+    dailyTopProductsPagination: DailyTopProductsPagination;
+    dailyTopProductsDateRange = { start: '', end: ''};
+    
+    detailedDailySalesCol = ["date","customerName","subTotal","serviceCharge","deliveryCharge","commission","total"]
+    detailedDailySalesRow = [];
+    detailedDailySalesPagination: DetailedDailySalesPagination;
+    detailedDailySalesDateRange = { start: '', end: ''};
+
+    isLoading: boolean = false;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     /**
      * Constructor
      */
     constructor(
-        private _DashboardService: DashboardService,
+        private _dashboardService: DashboardService,
+        private _changeDetectorRef: ChangeDetectorRef,
+        private _storesService: StoresService,
         private _router: Router
     )
     {
     }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Accessors
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Getter for storeId
+     */
+
+     get storeId$(): string
+     {
+         return localStorage.getItem('storeId') ?? '';
+     }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
@@ -42,13 +76,130 @@ export class DashboardComponent implements OnInit, OnDestroy
      */
     ngOnInit(): void
     {
+        
+        this._storesService.store$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((store: Store)=>{
+                this.storeName = store.name;
+            });
+
+        this._storesService.storeControl.valueChanges
+            .pipe(
+                debounceTime(100),
+                takeUntil(this._unsubscribeAll),
+                switchMap((store: Store) => {
+                    this.store = store;
+                    this.currentStoreId = store.id;
+                    this.storeName = store.name;
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                    return [];
+                })
+            )
+            .subscribe();
+
+        // Get the Daily Top Products
+        this._dashboardService.dailyTopProducts$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((dailyTopProducts: DailyTopProducts[])=>{
+                dailyTopProducts.forEach(items=>{
+                    items.topProduct.forEach(item => {
+                        this.dailyTopProductsRow.push({
+                            date: items.date, 
+                            productName: item.productName, 
+                            rank: item.rank, 
+                            totalTransaction: item.totalTransaction
+                        });
+                    });
+                });
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+
+        // Get the Daily Top Products Pagination
+        this._dashboardService.dailyTopProductsPagination$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((pagination: DailyTopProductsPagination) => {
+
+                // Update the pagination
+                this.dailyTopProductsPagination = pagination;
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+
+        // Get the Detailed Daily Sales
+        this._dashboardService.detailedDailySales$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((dailyTopProducts: DetailedDailySales[])=>{
+                dailyTopProducts.forEach(items => {
+                    items.sales.forEach(item => {
+                        this.detailedDailySalesRow.push({ 
+                            date: items.date, 
+                            customerName: item.customerName, 
+                            subTotal: item.subTotal, 
+                            serviceCharge: item.serviceCharge, 
+                            deliveryCharge: item.deliveryCharge,
+                            commission: item.commission,
+                            total: item.total
+                        });
+                    });
+                });
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+
+        // Get the Detailed Daily Sales Pagination
+        this._dashboardService.detailedDailySalesPagination$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((pagination: DetailedDailySalesPagination) => {
+
+                // Update the pagination
+                this.detailedDailySalesPagination = pagination;
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+
+        // Get the Summary Sales
+        this._dashboardService.summarySales$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((summarySales: SummarySales[])=>{
+                summarySales.forEach(items => {
+                    this.summarySalesRow.push({ 
+                        date: items.date, 
+                        totalOrders: items.totalOrders, 
+                        amountEarned: items.amountEarned
+                    });
+                });
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });    
+        
+        // Get the Summary Sales Pagination
+        this._dashboardService.summarySalesPagination$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((pagination: SummarySalesPagination) => {
+
+                // Update the pagination
+                this.summarySalesPagination = pagination;
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+
         // Get the data
-        this._DashboardService.data$
+        this._dashboardService.data$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((data) => {
 
                 // Store the data
                 this.data = data;
+
+                console.log("data.budgetDetails.rows", data.budgetDetails.rows)
 
                 // Prepare the chart data
                 this._prepareChartData();
@@ -203,230 +354,6 @@ export class DashboardComponent implements OnInit, OnDestroy
                     style  : {
                         colors: 'var(--fuse-text-secondary)'
                     }
-                }
-            }
-        };
-
-        // Task distribution
-        this.chartTaskDistribution = {
-            chart      : {
-                fontFamily: 'inherit',
-                foreColor : 'inherit',
-                height    : '100%',
-                type      : 'polarArea',
-                toolbar   : {
-                    show: false
-                },
-                zoom      : {
-                    enabled: false
-                }
-            },
-            labels     : this.data.taskDistribution.labels,
-            legend     : {
-                position: 'bottom'
-            },
-            plotOptions: {
-                polarArea: {
-                    spokes: {
-                        connectorColors: 'var(--fuse-border)'
-                    },
-                    rings : {
-                        strokeColor: 'var(--fuse-border)'
-                    }
-                }
-            },
-            series     : this.data.taskDistribution.series,
-            states     : {
-                hover: {
-                    filter: {
-                        type : 'darken',
-                        value: 0.75
-                    }
-                }
-            },
-            stroke     : {
-                width: 2
-            },
-            theme      : {
-                monochrome: {
-                    enabled       : true,
-                    color         : '#93C5FD',
-                    shadeIntensity: 0.75,
-                    shadeTo       : 'dark'
-                }
-            },
-            tooltip    : {
-                followCursor: true,
-                theme       : 'dark'
-            },
-            yaxis      : {
-                labels: {
-                    style: {
-                        colors: 'var(--fuse-text-secondary)'
-                    }
-                }
-            }
-        };
-
-        // Budget distribution
-        this.chartBudgetDistribution = {
-            chart      : {
-                fontFamily: 'inherit',
-                foreColor : 'inherit',
-                height    : '100%',
-                type      : 'radar',
-                sparkline : {
-                    enabled: true
-                }
-            },
-            colors     : ['#818CF8'],
-            dataLabels : {
-                enabled   : true,
-                formatter : (val: number): string | number => `${val}%`,
-                textAnchor: 'start',
-                style     : {
-                    fontSize  : '13px',
-                    fontWeight: 500
-                },
-                background: {
-                    borderWidth: 0,
-                    padding    : 4
-                },
-                offsetY   : -15
-            },
-            markers    : {
-                strokeColors: '#818CF8',
-                strokeWidth : 4
-            },
-            plotOptions: {
-                radar: {
-                    polygons: {
-                        strokeColors   : 'var(--fuse-border)',
-                        connectorColors: 'var(--fuse-border)'
-                    }
-                }
-            },
-            series     : this.data.budgetDistribution.series,
-            stroke     : {
-                width: 2
-            },
-            tooltip    : {
-                theme: 'dark',
-                y    : {
-                    formatter: (val: number): string => `${val}%`
-                }
-            },
-            xaxis      : {
-                labels    : {
-                    show : true,
-                    style: {
-                        fontSize  : '12px',
-                        fontWeight: '500'
-                    }
-                },
-                categories: this.data.budgetDistribution.categories
-            },
-            yaxis      : {
-                max       : (max: number): number => parseInt((max + 10).toFixed(0), 10),
-                tickAmount: 7
-            }
-        };
-
-        // Weekly expenses
-        this.chartWeeklyExpenses = {
-            chart  : {
-                animations: {
-                    enabled: false
-                },
-                fontFamily: 'inherit',
-                foreColor : 'inherit',
-                height    : '100%',
-                type      : 'line',
-                sparkline : {
-                    enabled: true
-                }
-            },
-            colors : ['#22D3EE'],
-            series : this.data.weeklyExpenses.series,
-            stroke : {
-                curve: 'smooth'
-            },
-            tooltip: {
-                theme: 'dark'
-            },
-            xaxis  : {
-                type      : 'category',
-                categories: this.data.weeklyExpenses.labels
-            },
-            yaxis  : {
-                labels: {
-                    formatter: (val): string => `$${val}`
-                }
-            }
-        };
-
-        // Monthly expenses
-        this.chartMonthlyExpenses = {
-            chart  : {
-                animations: {
-                    enabled: false
-                },
-                fontFamily: 'inherit',
-                foreColor : 'inherit',
-                height    : '100%',
-                type      : 'line',
-                sparkline : {
-                    enabled: true
-                }
-            },
-            colors : ['#4ADE80'],
-            series : this.data.monthlyExpenses.series,
-            stroke : {
-                curve: 'smooth'
-            },
-            tooltip: {
-                theme: 'dark'
-            },
-            xaxis  : {
-                type      : 'category',
-                categories: this.data.monthlyExpenses.labels
-            },
-            yaxis  : {
-                labels: {
-                    formatter: (val): string => `$${val}`
-                }
-            }
-        };
-
-        // Yearly expenses
-        this.chartYearlyExpenses = {
-            chart  : {
-                animations: {
-                    enabled: false
-                },
-                fontFamily: 'inherit',
-                foreColor : 'inherit',
-                height    : '100%',
-                type      : 'line',
-                sparkline : {
-                    enabled: true
-                }
-            },
-            colors : ['#FB7185'],
-            series : this.data.yearlyExpenses.series,
-            stroke : {
-                curve: 'smooth'
-            },
-            tooltip: {
-                theme: 'dark'
-            },
-            xaxis  : {
-                type      : 'category',
-                categories: this.data.yearlyExpenses.labels
-            },
-            yaxis  : {
-                labels: {
-                    formatter: (val): string => `$${val}`
                 }
             }
         };

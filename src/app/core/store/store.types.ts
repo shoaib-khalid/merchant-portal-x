@@ -39,10 +39,10 @@ export interface Store
     featured?: boolean;
     completed?: number;
     currentStep?: number;
-    storeAsset?: storeAssets;
+    storeAsset?: StoreAssets;
 }
 
-export interface storeAssets
+export interface StoreAssets
 {
     storeId: string;
     logoUrl: string;

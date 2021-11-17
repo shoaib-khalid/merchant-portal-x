@@ -214,7 +214,6 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
     }
 
     changeStore(storeId){
-        console.log("changed")
         this.storeId = storeId;
         this._storesService.getStoresById(storeId)
             .subscribe((store: Store)=>{
