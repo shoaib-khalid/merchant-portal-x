@@ -1,0 +1,32 @@
+<mat-sidenav-container class="example-container">
+    <mat-sidenav #sidenav mode="side" class="sideNav" [(opened)]="opened">
+        <img id="pin" src="assets/push-pin.svg" (click)="pin()">
+
+        <div class="header text-center w-100">
+            <h4>
+                <input type="text" value="Send" (ngModelChange)="titleChange($event)" id="vertex-action-title"
+                    (focusout)="titleFocusOut($event)" value="Action" [(ngModel)]="title">
+            </h4>
+        </div>
+        <div class="body" id="side-nav-body">
+            <div class="text-center pt-5 pl-4" id="buttons-list">
+                <div class="external-requests-list" *ngFor="let req of requestsArray;let i =index;">
+                    <div >
+                        <div class="inside-external-heading" (click)="openActionDialog($event,i)">External Request</div>
+                        <div class="actual-req" (click)="openActionDialog($event,i)">{{req}}</div>
+                        <img src="assets/cross.svg" alt="" height="10px" width="10px" (click)="removeRequest(i)">
+                    </div>
+                    <hr class="line">
+                </div>
+                <button (document:click)="handleClick($event)" hidden></button>
+                <div id="addAction" (click)="addRequest()">
+                    <h5 style="color: orange;">+Action</h5>
+                </div>
+
+            </div>
+        </div>
+    </mat-sidenav>
+    <mat-sidenav-content>
+        <button mat-button (click)="toggle()" id="sideNavAction" hidden></button>
+    </mat-sidenav-content>
+</mat-sidenav-container>

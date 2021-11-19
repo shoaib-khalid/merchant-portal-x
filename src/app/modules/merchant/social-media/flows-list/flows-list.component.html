@@ -1,0 +1,230 @@
+<div
+    class="absolute mb-12 inset-0 flex flex-col min-w-0 overflow-y-auto"
+    cdkScrollable>
+    <div class="flex flex-col flex-auto w-full">
+        <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+            <!-- Title and action buttons -->
+            <div class="flex items-center justify-between w-full">
+                <div>
+                    <h2 class="text-3xl font-semibold tracking-tight leading-8">Flows Management</h2>
+                    <div class="font-medium tracking-tight text-secondary">Keep track of your financial status</div>
+                </div>
+                <div class="flex items-center ml-6">
+                    <button
+                        class="hidden sm:inline-flex"
+                        mat-stroked-button>
+                        <mat-icon
+                            class="icon-size-5"
+                            [svgIcon]="'heroicons_solid:document-report'"></mat-icon>
+                        <span class="ml-2">Reports</span>
+                    </button>
+                    <button
+                        class="hidden sm:inline-flex ml-3"
+                        mat-stroked-button>
+                        <mat-icon
+                            class="icon-size-5"
+                            [svgIcon]="'heroicons_solid:cog'"></mat-icon>
+                        <span class="ml-2">Settings</span>
+                    </button>
+                    <button
+                        class="hidden sm:inline-flex ml-3"
+                        mat-flat-button
+                        [color]="'primary'">
+                        <mat-icon
+                            class="icon-size-5"
+                            [svgIcon]="'heroicons_solid:save'"></mat-icon>
+                        <span class="ml-2">Export</span>
+                    </button>
+
+                    <!-- Actions menu (visible on xs) -->
+                    <div class="sm:hidden">
+                        <button
+                            [matMenuTriggerFor]="actionsMenu"
+                            mat-icon-button>
+                            <mat-icon [svgIcon]="'heroicons_outline:dots-vertical'"></mat-icon>
+                        </button>
+                        <mat-menu #actionsMenu="matMenu">
+                            <button mat-menu-item>Export</button>
+                            <button mat-menu-item>Reports</button>
+                            <button mat-menu-item>Settings</button>
+                        </mat-menu>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 w-full mt-8">
+                <!-- Recent transactions table -->
+                <div class="xl:col-span-2 flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex flex-col sm:flex-row p-6 sm:justify-between">
+                        <div class="flex w-full">
+                            <div class="flex-0">
+                                <div class="mr-4 text-lg font-medium tracking-tight leading-6 truncate">Recent transactions</div>
+                                <div class="text-secondary font-medium">1 pending, 4 completed</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="overflow-x-auto mx-6">
+                            <table
+                                class="w-full bg-transparent"
+                                mat-table
+                                matSort
+                                matSortDisableClear
+                                [dataSource]="flowsList"
+                                [trackBy]="trackByFn"
+                                #flowsListTable>
+    
+                                <!-- Flow Name -->
+                                <ng-container matColumnDef="title">
+                                    <th
+                                        mat-header-cell
+                                        mat-sort-header
+                                        *matHeaderCellDef>
+                                        Flow Name
+                                    </th>
+                                    <td
+                                        mat-cell
+                                        *matCellDef="let flow">
+                                        <span class="pr-6 font-medium text-sm text-secondary whitespace-nowrap">
+                                            {{flow.title}}
+                                        </span>
+                                    </td>
+                                </ng-container>
+    
+                                <!-- Description -->
+                                <ng-container matColumnDef="description">
+                                    <th
+                                        mat-header-cell
+                                        mat-sort-header
+                                        *matHeaderCellDef>
+                                        Description
+                                    </th>
+                                    <td
+                                        mat-cell
+                                        *matCellDef="let transaction">
+                                        <span class="pr-6 whitespace-nowrap">
+                                            {{transaction.description}}
+                                        </span>
+                                    </td>
+                                </ng-container>
+    
+                                <!-- Status -->
+                                <ng-container matColumnDef="status">
+                                    <th
+                                        mat-header-cell
+                                        mat-sort-header
+                                        *matHeaderCellDef>
+                                        Status
+                                    </th>
+                                    <td
+                                        mat-cell
+                                        *matCellDef="let transaction">
+                                        <span class="pr-6 font-medium whitespace-nowrap">
+                                            {{transaction.status}}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Details -->
+                                <ng-container matColumnDef="details">
+                                    <th
+                                        mat-header-cell
+                                        mat-sort-header
+                                        *matHeaderCellDef>
+                                        Details
+                                    </th>
+                                    <td
+                                        mat-cell
+                                        class="px-2"
+                                        *matCellDef="let transaction">
+                                        <input
+                                            [id]=" 'babun-' + transaction.id"
+                                            type="button"
+                                            (click)="viewDetails(transaction.id)"
+                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                            mat-button>
+                                        <label 
+                                            class="flex items-center justify-center py-2 px-1 rounded-full cursor-pointer border border-primary bg-primary group hover:bg-white"
+                                            [for]="'babun-' + transaction.id"
+                                            matRipple>
+                                            <mat-icon
+                                                class="text-white group-hover:text-primary pr-2"
+                                                [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                                            <span class="font-medium text-white group-hover:text-primary text-sm text-secondary whitespace-nowrap">
+                                                View
+                                            </span>
+                                        </label>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Action -->
+                                <ng-container matColumnDef="action">
+                                    <th
+                                        mat-header-cell
+                                        mat-sort-header
+                                        *matHeaderCellDef>
+                                        Action
+                                    </th>
+                                    <td
+                                        mat-cell
+                                        class="px-2"
+                                        *matCellDef="let transaction"
+                                    >
+                                        <input
+                                            [id]="'action-' + transaction.id"
+                                            type="button"
+                                            (click)="updateStatus(transaction.id, getNextCompletionStatus(transaction.completionStatus).nextId)"
+                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                            mat-button>
+                                        <label 
+                                            *ngIf="getNextCompletionStatus(transaction.completionStatus).nextLabelBtn !== null"    
+                                            class="flex items-center justify-center py-2 px-1 rounded-full cursor-pointer border border-primary border-solid group hover:bg-primary"
+                                            [for]="'action-' + transaction.id"
+                                            matRipple>
+                                            <span class="font-medium group-hover:text-white text-sm text-primary whitespace-nowrap">
+                                                {{ (transaction.completionStatus) ? getNextCompletionStatus(transaction.completionStatus).nextLabelBtn : 'Undefined' }}
+                                            </span>
+                                        </label>
+                                    </td>
+                                </ng-container>
+    
+                                <!-- Footer -->
+                                <ng-container matColumnDef="recentOrdersTableFooter">
+                                    <td
+                                        class="py-6 px-0 border-0"
+                                        mat-footer-cell
+                                        *matFooterCellDef
+                                        colspan="6">
+                                    </td>
+                                </ng-container>
+
+                                
+                                <tr
+                                mat-header-row
+                                *matHeaderRowDef="flowsListTableColumns"></tr>
+                                <tr
+                                class="order-row h-16"
+                                mat-row
+                                *matRowDef="let row; columns: flowsListTableColumns;"></tr>
+                                <!-- <tr
+                                class="h-16 border-0"
+                                mat-footer-row
+                                *matFooterRowDef="['recentOrdersTableFooter']"></tr> -->
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mb-6"></div>
+</div>
+
+<!-- <mat-paginator
+    class="absolute inset-x-0 bottom-0 border-b border-t border-b-0 z-10 bg-gray-50 dark:bg-transparent"
+    [ngClass]="{'pointer-events-none': isLoading}"
+    [length]="pagination.length"
+    [pageIndex]="pagination.page"
+    [pageSize]="pagination.size"
+    [pageSizeOptions]="[5, 10, 25, 100]"
+    [showFirstLastButtons]="true"></mat-paginator> -->

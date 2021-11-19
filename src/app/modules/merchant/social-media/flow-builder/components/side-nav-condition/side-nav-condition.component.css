@@ -1,0 +1,109 @@
+.example-container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    
+  }
+
+
+  .sideNav{
+    background-color: rgb(255, 255, 255);
+    justify-content: center;
+    width: 320px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  }
+
+  #sideNavTest{
+    opacity: 0;
+  }
+
+  #condition-title{
+    border:0px;
+    width: 140px;
+    height: 40px;
+    background-color:  rgb(101, 193, 247);
+    margin-top: 10px;
+
+  }
+#condition-title:focus{
+  outline: none;
+  background-color: white;
+}
+
+#side-nav-body{
+  background-color: white;
+}
+
+
+#pin{
+  height: 15px;
+  width: 15px;
+  right: 18px;
+  position: absolute;
+  cursor: pointer;
+}
+
+
+.header{
+  background-color:  rgb(78, 190, 255);
+  height: 60px;
+}
+
+#addCondition{
+  height: 50px;
+  width: 250px;
+  border: 2px dashed rgb(90, 167, 255);
+  cursor: pointer;
+  padding: 10px;
+  margin-left: 35px;
+  margin-bottom: 10px;
+}
+
+#addCondition:hover{
+  border: 2px dashed rgb(247, 153, 46);
+}
+
+.condition-inputs{
+  width: 90px;
+  margin:10px;
+}
+.condition-dropdown{
+  width: 50px;
+  height: 28px;
+}
+
+#add-group{
+  margin-bottom: 10px;
+  background: none;
+  border: 1px solid black;
+  border-radius: 10px;
+}
+
+#add-group:hover{
+  background-color: rgb(88, 233, 243);
+}
+
+.condition{
+  margin-top: 5px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+#description-text-condition{
+  border-radius: 15px 15px 0px 0px;
+  background-color: rgb(236, 235, 235);
+  border: none;
+  width: 250px;
+  height: 50px;
+  margin-bottom: 5px;
+}
+
+#description-text-condition:focus{
+outline: none;
+}
+
+.fieldNames{
+  width: 90px;
+  margin:10px;
+}

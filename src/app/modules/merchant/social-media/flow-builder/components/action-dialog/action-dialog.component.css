@@ -1,0 +1,76 @@
+#reqType{
+    width: 118px;
+}
+
+#reqUrl{
+    padding-left: 10px;
+    width: 700px;
+}
+
+.elements{
+    padding: 4px;
+    cursor: pointer;
+}
+
+.elements:hover{
+    color: blue;
+}
+.selectable{
+    height: 200px;
+}
+.headerElements{
+    margin: 7px;
+}
+
+#addheaderbtn{
+    border: 1px solid blue;
+    cursor: pointer;
+    border-radius: 8px;
+    height: 30px;
+    padding: 7px;
+    width: 168px;
+    height: 40px;
+    margin-left: 8px;
+    color: blue;
+}
+#addheaderbtn:hover{
+background-color: rgb(232, 255, 253);
+}
+
+.bodyArea{
+    border: 1px solid black;
+    width: 800px;
+    height: 180px;
+
+}
+.bodyArea:focus{
+    outline: none;
+}
+.mappingElements{
+margin-left: 10px;
+}
+
+.jsonPath{
+    width: 400px;
+}
+
+#addMapping{
+    display: block;
+    margin-left: 15px;
+    border: 1px solid blue;
+    border-radius: 8px;
+    width: 45px;
+    margin-left: 10px;
+    padding: 5px;
+
+}
+
+#addMapping:hover{
+    background-color: rgb(219, 248, 255);
+    cursor: pointer;
+
+}
+
+#headerText{
+    color: blue;
+}

@@ -1,0 +1,9 @@
+#menu{
+    opacity: 0;
+}
+#addStep{
+    margin-left: -5px;
+    height: 60px;
+    padding-top: 14px;
+    padding-left: 6px;
+}

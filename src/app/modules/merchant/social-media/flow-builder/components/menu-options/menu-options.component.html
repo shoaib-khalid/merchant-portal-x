@@ -1,0 +1,10 @@
+<div id="addStep" [matMenuTriggerFor]="menu" #clickmenu="matMenuTrigger"  ><img src="assets/plus.png" alt=""></div>
+<!-- #enddocregion mat-menu-trigger-for -->
+<mat-menu #menu="matMenu">
+  <button mat-menu-item (click)= "menuClicked()">Menu/Text</button>
+  <button mat-menu-item (click)= "actionClicked()">Action</button>
+  <button mat-menu-item (click)= "conditionClicked()">Condition</button>
+  <button mat-menu-item (click)= "quickReplyClicked()">Quick Reply</button>
+  <button mat-menu-item (click)= "handOverClicked()">Hand Over</button>
+
+</mat-menu>
