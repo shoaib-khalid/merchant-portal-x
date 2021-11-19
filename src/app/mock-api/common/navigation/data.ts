@@ -77,9 +77,17 @@ export const defaultNavigation: FuseNavigationItem[] = [
     {
         id   : 'customer-support',
         title: 'Customer Support',
-        type : 'basic',
+        type : 'collapsable',
         icon : 'heroicons_outline:support',
-        link : '/customer-support'
+        children: [
+            {
+                id   : 'customer-support.list',
+                title: 'Customer Database',
+                type : 'basic',
+                link : '/customer-support',
+                exactMatch: true
+            },
+        ]
     }
 ];
 export const compactNavigation: FuseNavigationItem[] = [

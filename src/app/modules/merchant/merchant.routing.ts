@@ -6,7 +6,7 @@ import { RedirectComponent } from './redirect/redirect.component';
 // import { OrdersManagementComponent } from './orders-management/orders-management.component';
 // import { DiscountsManagementComponent } from './discounts-management/discounts-management.component';
 import { SocialMediaComponent } from './social-media/social-media.component';
-import { CustomerSupportComponent } from './customer-support/customer-support.component';
+// import { CustomerSupportComponent } from './customer-support/customer-support.component';
 
 export const merchantRoutes: Route[] = [
         // Merchant routes
@@ -26,7 +26,7 @@ export const merchantRoutes: Route[] = [
         {
             path       : '',
             children   : [
-                {path: 'customer-support', loadChildren: () => import('app/modules/merchant/customer-support/customer-support.module').then(m => m.CustomerSupportModule), component  : CustomerSupportComponent},
+                {path: 'customer-support', loadChildren: () => import('app/modules/merchant/customer-support/customer-support.module').then(m => m.CustomerSupportModule)},
                 {path: 'redirect', loadChildren: () => import('app/modules/merchant/redirect/redirect.module').then(m => m.RedirectModule), component  : RedirectComponent},
             ]
         },

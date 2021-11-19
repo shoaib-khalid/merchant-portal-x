@@ -8,7 +8,7 @@ import { RouterModule } from '@angular/router';
 // import { OrdersManagementComponent } from './orders-management/orders-management.component';
 // import { DiscountsManagementComponent } from './discounts-management/discounts-management.component';
 import { SocialMediaComponent } from './social-media/social-media.component';
-import { CustomerSupportComponent } from './customer-support/customer-support.component';
+// import { CustomerSupportComponent } from './customer-support/customer-support.component';
 import { merchantRoutes } from 'app/modules/merchant/merchant.routing';
 
 @NgModule({
@@ -21,7 +21,7 @@ import { merchantRoutes } from 'app/modules/merchant/merchant.routing';
         // OrdersManagementComponent,
         // DiscountsManagementComponent,
         SocialMediaComponent,
-        CustomerSupportComponent
+        // CustomerSupportComponent
     ],
     imports     : [
         RouterModule.forChild(merchantRoutes),
@@ -35,7 +35,7 @@ import { merchantRoutes } from 'app/modules/merchant/merchant.routing';
         // OrdersManagementComponent,
         // DiscountsManagementComponent,
         SocialMediaComponent,
-        CustomerSupportComponent
+        // CustomerSupportComponent
     ]
 })
 export class MerchantModule

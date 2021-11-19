@@ -1,0 +1,1309 @@
+<div class="sm:absolute sm:inset-0 flex flex-col flex-auto min-w-0 sm:overflow-hidden bg-card dark:bg-transparent">
+
+    <!-- Header -->
+    <div class="relative flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between py-8 px-6 md:px-8 border-b">
+        <!-- Loader -->
+        <div
+            class="absolute inset-x-0 bottom-0"
+            *ngIf="isLoading">
+            <mat-progress-bar [mode]="'indeterminate'"></mat-progress-bar>
+        </div>
+        <!-- Title -->
+        <div class="text-4xl font-extrabold tracking-tight">Customer Database</div>
+        <!-- Actions -->
+        <div class="flex flex-shrink-0 items-center mt-6 sm:mt-0 sm:ml-4">
+            <!-- Search -->
+            <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-64">
+                <mat-icon
+                    class="icon-size-5"
+                    matPrefix
+                    [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                <input
+                    matInput
+                    [formControl]="searchInputControl"
+                    [autocomplete]="'off'"
+                    [placeholder]="'Search customers'">
+            </mat-form-field>
+            <!-- Add customer button -->
+            <button
+                class="ml-4"
+                mat-flat-button
+                [color]="'primary'">
+                <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                <span class="ml-2 mr-1">Add</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex flex-auto overflow-hidden">
+
+        <!-- Discounts list -->
+        <div class="flex flex-col flex-auto sm:mb-18 overflow-hidden sm:overflow-y-auto">
+            <ng-container *ngIf="(customers$ | async) as customers">
+                <ng-container *ngIf="customers.length > 0; else noDiscounts">
+                    <div class="grid">
+                        <!-- Header -->
+                        <div
+                            class="inventory-grid z-10 sticky top-0 grid gap-4 py-4 px-6 md:px-8 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                            matSort
+                            matSortDisableClear>
+                            <div></div>
+                            <div [mat-sort-header]="'customerType'">Username</div>
+                            <div [mat-sort-header]="'name'">Name</div>
+                            <div [mat-sort-header]="'name'">Phonenumber</div>
+                            <div class="block">Details</div>
+                        </div>
+                        <!-- Rows -->
+                        <ng-container *ngIf="(customers$ | async) as customers">
+                            <ng-container *ngFor="let customer of customers; trackBy: trackByFn">
+                                <div class="inventory-grid grid items-center gap-4 py-3 px-6 md:px-8 border-b">
+
+                                    <div></div>
+
+                                    <!-- Username -->
+                                    <div class="truncate">
+                                        {{ customer.username }}
+                                    </div>
+
+                                    <!-- Name -->
+                                    <div class="truncate">
+                                        {{ customer.name }}
+                                    </div>
+
+                                    <!-- Phonenumber -->
+                                    <div class="truncate">
+                                        {{ customer.phoneNumber }}
+                                    </div>
+
+                                    <!-- Details button -->
+                                    <div>
+                                        <button
+                                            class="min-w-10 min-h-7 h-7 px-2 leading-6"
+                                            mat-stroked-button
+                                            (click)="toggleDetails(customer.id);resetCycleImages()">
+                                            <mat-icon
+                                                class="icon-size-5"
+                                                [svgIcon]="selectedDiscount?.id === customer.id ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'"></mat-icon>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="grid">
+                                    <ng-container *ngIf="selectedDiscount?.id === customer.id">
+                                        <ng-container *ngTemplateOutlet="rowDetailsTemplate; context: {$implicit: customer}"></ng-container>
+                                    </ng-container>
+                                </div>
+                            </ng-container>
+                        </ng-container>
+                    </div>
+
+                    <mat-paginator
+                        class="sm:absolute sm:inset-x-0 sm:bottom-0 border-b sm:border-t sm:border-b-0 z-10 bg-gray-50 dark:bg-transparent"
+                        [ngClass]="{'pointer-events-none': isLoading}"
+                        [length]="pagination.length"
+                        [pageIndex]="pagination.page"
+                        [pageSize]="pagination.size"
+                        [pageSizeOptions]="[5, 10, 25, 100]"
+                        [showFirstLastButtons]="true"></mat-paginator>
+
+                </ng-container>
+            </ng-container>
+
+            <ng-template
+                #rowDetailsTemplate
+                let-customer>
+                <div class="shadow-lg overflow-hidden">
+                    <div class="flex border-b">
+                        <!-- Selected customer form -->
+                        <form
+                            class="flex flex-col w-full"
+                            [formGroup]="selectedDiscountForm">
+
+                            <div [style.visibility]="(showVariantsSection) ? 'hidden' : 'visible'" [style.max-height]="(showVariantsSection) ? '0' : ''">
+                                <div class="flex flex-col sm:flex-row px-8 pt-8 pb-4">
+                                    <!-- Discount images and status -->
+                                    <div class="flex flex-col items-center sm:items-start">
+                                        <div class="flex flex-col items-center">
+                                            <!-- Image Frame -->
+                                            <div *ngIf="!imagesEditMode" class="w-32 h-44 border rounded overflow-hidden">
+                                                <ng-container *ngIf="selectedDiscountForm.get('images').value.length; else noImage">
+                                                    <img
+                                                        class="w-full h-full object-cover"
+                                                        [src]="selectedDiscountForm.get('images').value[selectedDiscountForm.get('currentImageIndex').value]">
+                                                </ng-container>
+                                                <ng-template #noImage>
+                                                    <div
+                                                        class="flex items-center justify-center w-full h-full rounded overflow-hidden uppercase text-8xl font-bold leading-none bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                                                    >
+                                                        <span class="text-md">NO IMAGE</span> 
+                                                    </div>
+                                                </ng-template>
+                                            </div>
+                                            
+                                            <!-- Edit Image Frame -->
+                                            <div *ngIf="imagesEditMode" class="flex flex-col items-center sm:items-start mb-8 sm:mb-0">
+                                                <div class="relative flex items-center justify-center w-32 h-44 rborder rounded overflow-hidden ring-4 ring-bg-card">
+                                                    <!-- Upload / Remove Image to Overide Image -->
+                                                    <div class="absolute inset-0 bg-black bg-opacity-50 z-10"></div>
+                                                    <div class="absolute inset-0 flex items-center justify-center z-20">
+                                                        <!-- Add / Edit Image -->
+                                                        <div>
+                                                            <input
+                                                                id="image-file-input"
+                                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                type="file"
+                                                                [multiple]="false"
+                                                                [accept]="'image/jpeg, image/png'"
+                                                                (change)="uploadImages(imageFileInput.files, selectedDiscountForm.get('images').value);"
+                                                                #imageFileInput>
+                                                            <label
+                                                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                                for="image-file-input"
+                                                                matRipple>
+                                                                <mat-icon
+                                                                    class="text-white"
+                                                                    [svgIcon]="'heroicons_outline:camera'"></mat-icon>
+                                                            </label>
+                                                        </div>
+                                                        <!-- Remove Image -->
+                                                        <div *ngIf="selectedDiscountForm.get('images').value.length">
+                                                            <input
+                                                                id="image-remove-button"
+                                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                type="button"
+                                                                (click)="removeImage();resetCycleImages()"
+                                                                mat-icon-button>
+                                                            <label 
+                                                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                                for="image-remove-button"
+                                                                matRipple>
+                                                                <mat-icon
+                                                                    class="text-white"
+                                                                    [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <!-- View Image -->
+                                                    <img
+                                                        class="object-cover w-full h-full"
+                                                        *ngIf="selectedDiscountForm.get('images').value.length"
+                                                        [src]="selectedDiscountForm.get('images').value[selectedDiscountForm.get('currentImageIndex').value]">
+                                                    <!-- View No Image -->
+                                                    <div
+                                                        class="flex items-center justify-center w-full h-full rounded overflow-hidden uppercase text-8xl font-bold leading-none bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                                                        *ngIf="!selectedDiscountForm.get('images').value.length">
+                                                        <span class="text-md">NO IMAGE</span> 
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Add New Image -->
+                                            <div class="flex items-center mt-2 whitespace-nowrap">
+                                                <div>
+                                                    <input
+                                                        id="image-file-input"
+                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                        type="file"
+                                                        [multiple]="false"
+                                                        [accept]="'image/jpeg, image/png'"
+                                                        (change)="uploadImages(imageFileInput.files, []);"
+                                                        #imageFileInput>
+                                                    <label
+                                                        class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                        for="image-file-input"
+                                                        matRipple>
+                                                        <mat-icon
+                                                            class="icon-size-5"
+                                                            [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                                                    </label>
+                                                </div>
+                                                <!-- Toggle Image Edit -->
+                                                <div>
+                                                    <input
+                                                        id="image-edit-button"
+                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                        type="button"
+                                                        (click)="toggleImagesEditMode()"
+                                                        mat-icon-button
+                                                    >
+                                                    
+                                                    <label 
+                                                        class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                        for="image-edit-button"
+                                                        matRipple>
+                                                        <mat-icon
+                                                            class="icon-size-5"
+                                                            [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <!-- Image Cycle -->
+                                            <div
+                                                class="flex items-center mt-2 whitespace-nowrap"
+                                                *ngIf="selectedDiscountForm.get('images').value.length">
+                                                
+                                                <input
+                                                    id="image-cycle-left"
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="button"
+                                                    (click)="cycleImages(false)"
+                                                    mat-icon-button>
+                                            
+                                                <label 
+                                                    class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                    for="image-cycle-left"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="icon-size-5"
+                                                        [svgIcon]="'heroicons_solid:arrow-narrow-left'"></mat-icon>
+                                                </label>
+
+                                                <span class="font-sm mx-2">
+                                                    {{selectedDiscountForm.get('currentImageIndex').value + 1}} of {{selectedDiscountForm.get('images').value.length}}
+                                                </span>
+
+                                                <input
+                                                    id="image-cycle-right"
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="button"
+                                                    (click)="cycleImages(true)"
+                                                    mat-icon-button>
+                                            
+                                                <label 
+                                                    class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                    for="image-cycle-right"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="icon-size-5"
+                                                        [svgIcon]="'heroicons_solid:arrow-narrow-right'"></mat-icon>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <!-- Discount status -->
+                                        <div class="flex flex-col mt-8 w-full">
+                                            <span class="font-semibold mb-2">Discount status</span>
+                                            <mat-select
+                                                class="border border-gray-300 w-full px-2 py-2 rounded"
+                                                [formControlName]="'status'"
+                                                [value]="'status'"
+                                                (selectionChange)="selectedDiscountForm.get('status').value = $event.value"
+                                                #statusSelector="matSelect"
+                                                >
+                                                <mat-select-trigger>
+                                                    <span class="flex items-center">
+                                                        <span>{{ statusSelector.triggerValue }}</span>
+                                                    </span>
+                                                </mat-select-trigger>
+                                                <div>
+                                                    <mat-option [value]="'ACTIVE'">Active</mat-option>
+                                                    <mat-option [value]="'INACTIVE'">Inactive</mat-option>
+                                                    <mat-option [value]="'DRAF'">Draf</mat-option>
+                                                </div>
+                                            </mat-select>
+                                            <!-- <mat-slide-toggle
+                                                [formControlName]="'status'"
+                                                [color]="'primary'">
+                                                {{selectedDiscountForm.get('status').value === "ACTIVE" ? true : false}}
+                                            </mat-slide-toggle> -->
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-auto flex-wrap">
+                                        <!-- Name, Description -->
+                                        <div class="flex flex-col w-full lg:w-2/4 sm:pl-8">
+
+                                            <!-- Name -->
+                                            <mat-form-field class="w-full">
+                                                <mat-label>Name</mat-label>
+                                                <input
+                                                    matInput
+                                                    [formControlName]="'name'">
+                                            </mat-form-field>
+
+                                            <!-- Description -->
+                                            <div class="w-full mb-4">
+                                                <span class="font-medium leading-tight">Description</span>
+                                                <div class="mt-1.5 flex items-center -my-px w-full">
+                                                    <quill-editor
+                                                        class="w-full"
+                                                        [formControlName]="'description'"
+                                                        [modules]="quillModules"></quill-editor>
+                                                    <!-- use (onContentChanged)="textChanged($event)" for limiting quil editor -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- SKU, Price, Packing Size, Category-->
+                                        <div class="flex flex-col w-full lg:w-1/4 sm:pl-8">
+                                            <!-- SKU -->
+                                            <mat-form-field class="w-full pr-2">
+                                                <mat-label>SKU</mat-label>
+                                                <input
+                                                    matInput
+                                                    [formControlName]="'sku'">
+                                            </mat-form-field>
+
+                                            <!-- Price -->
+                                            <mat-form-field class="w-full pr-2">
+                                                <mat-label>Price</mat-label>
+                                                <span matSuffix>$</span>
+                                                <input
+                                                    matInput
+                                                    [formControlName]="'price'">
+                                            </mat-form-field>
+
+                                            <!-- Discount status -->
+                                            <mat-form-field class="w-full pr-2">
+                                                <mat-label>Packing Size</mat-label>
+                                                <mat-select
+                                                    class="w-full"
+                                                    [formControlName]="'packingSize'"
+                                                    appearance="fill"
+                                                    [value]="packingSize"
+                                                    placeholder="Select a packing size"
+                                                    (selectionChange)="selectedDiscountForm.get('packingSize').value = statusSelector.value"
+                                                    #packingSizeSelector="matSelect"
+                                                    >
+                                                    <mat-select-trigger>
+                                                        <span class="flex items-center">
+                                                            <span>{{ packingSizeSelector.triggerValue }}</span>
+                                                        </span>
+                                                    </mat-select-trigger>
+                                                    <div>
+                                                        <mat-option [value]="'S'">Small</mat-option>
+                                                        <mat-option [value]="'M'">Medium</mat-option>
+                                                        <mat-option [value]="'L'">Large</mat-option>
+                                                        <mat-option [value]="'XL'">Xtra Large</mat-option>
+                                                    </div>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Category -->
+                                        <div class="flex flex-col w-full lg:w-1/4 sm:pl-8">
+                                            <!-- Category -->
+                                            <div class="w-full">
+                                                <span class="mb-px font-medium leading-tight">Category</span>
+                                                <div class="mt-0.5 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden">
+                                                    <!-- Header -->
+                                                    <div class="flex items-center -my-px py-2 px-3">
+                                                        <div class="flex items-center flex-auto min-w-0">
+                                                            <mat-icon
+                                                                class="icon-size-5"
+                                                                [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                                            <input
+                                                                class="min-w-0 ml-2 py-1 border-0"
+                                                                type="text"
+                                                                placeholder="Enter Category name"
+                                                                (input)="filterCategories($event)"
+                                                                (keydown)="filterCategoriesInputKeyDown($event)"
+                                                                [maxLength]="20"
+                                                                #newCategoryInput>
+                                                        </div>
+                                                        <input
+                                                            id="category-edit-button"
+                                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                            type="button"
+                                                            (click)="toggleCategoriesEditMode()"
+                                                            mat-icon-button>
+                                                        
+                                                        <label 
+                                                            class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                            for="category-edit-button"
+                                                            matRipple>
+                                                            <mat-icon
+                                                                *ngIf="!customerCategoriesEditMode"
+                                                                class="icon-size-5"
+                                                                [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                                                            <mat-icon
+                                                                *ngIf="customerCategoriesEditMode"
+                                                                class="icon-size-5"
+                                                                [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                                        </label>
+                                                    </div>
+                                                    <!-- Available categories -->
+                                                    <div class="h-30 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
+                                                        <!-- Categories -->
+                                                        <ng-container *ngIf="!customerCategoriesEditMode">
+                                                            <ng-container *ngFor="let category of filteredDiscountCategories; trackBy: trackByFn;">
+                                                                <mat-checkbox
+                                                                    class="flex items-center h-10 min-h-10 px-4"
+                                                                    [color]="'primary'"
+                                                                    [checked]="selectedDiscount.categoryId.includes(category.id)"
+                                                                    (change)="toggleDiscountCategory(category, $event)">
+                                                                    {{category.name}}
+                                                                </mat-checkbox>
+                                                            </ng-container>
+                                                        </ng-container>
+                                                        <!-- Categories editing -->
+                                                        <ng-container *ngIf="customerCategoriesEditMode">
+                                                            <div class="p-4 space-y-2">
+                                                                <ng-container *ngFor="let category of filteredDiscountCategories; let i = index; trackBy: trackByFn">
+                                                                    <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full">
+                                                                        <input
+                                                                            matInput
+                                                                            [id]="'category-input-' + category.id"
+                                                                            [value]="category.name"
+                                                                            [readonly]="!customerCategoriesValueEditMode[i]"
+                                                                            (input)="updateLocalCategoryTitle(category, $event)"
+                                                                        >
+                                                                        <input
+                                                                            [id]="'category-edit-' + category.id"
+                                                                            type="button"
+                                                                            (click)="customerCategoriesValueEditMode[i] = !customerCategoriesValueEditMode[i]"
+                                                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                            mat-button>
+                                                                        <label 
+                                                                            *ngIf="!customerCategoriesValueEditMode[i]"
+                                                                            class="flex items-center justify-center p-2 rounded-full cursor-pointer hover:bg-hover"
+                                                                            [for]="'category-edit-' + category.id"
+                                                                            matRipple>
+                                                                            <mat-icon
+                                                                                class="icon-size-5"
+                                                                                [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                                                                        </label>
+                                                                        <input
+                                                                            [id]="'category-add-' + category.id"
+                                                                            type="button"
+                                                                            (click)="customerCategoriesValueEditMode[i] = !customerCategoriesValueEditMode[i]; updateServerCategoryTitle(category, $event)"
+                                                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                            mat-button>
+                                                                        <label 
+                                                                            *ngIf="customerCategoriesValueEditMode[i]"
+                                                                            class="flex items-center justify-center p-2 rounded-full cursor-pointer hover:bg-hover"
+                                                                            [for]="'category-add-' + category.id"
+                                                                            matRipple>
+                                                                            <mat-icon
+                                                                                class="icon-size-5"
+                                                                                [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                                                        </label>
+                                                                        <input
+                                                                            [id]="'category-remove-' + category.id"
+                                                                            type="button"
+                                                                            (click)="deleteCategory(category)"
+                                                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                            mat-button>
+                                                                        <label 
+                                                                            class="flex items-center justify-center p-2 rounded-full cursor-pointer hover:bg-hover"
+                                                                            [for]="'category-remove-' + category.id"
+                                                                            matRipple>
+                                                                            <mat-icon
+                                                                                class="icon-size-5"
+                                                                                [svgIcon]="'heroicons_solid:trash'"></mat-icon>
+                                                                        </label>
+                                                                    </mat-form-field>
+                                                                </ng-container>
+                                                            </div>
+                                                        </ng-container>
+                                                        <div
+                                                            class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer border-t hover:bg-gray-50 dark:hover:bg-hover"
+                                                            *ngIf="shouldShowCreateCategoryButton(newCategoryInput.value)"
+                                                            (click)="createCategory(newCategoryInput.value); newCategoryInput.value = ''"
+                                                            matRipple>
+                                                            <mat-icon
+                                                                class="mr-2 icon-size-5"
+                                                                [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                                                            <div class="break-all">Create "<b>{{newCategoryInput.value}}</b>"</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-col sm:flex-row pb-4 border-t pt-4 px-8">
+                                    <div class="flex flex-auto flex-wrap">
+                                        <div class="flex flex-col w-full sm:w-1/5 sm:pr-2 sm:border-r py-2 sm:py-0">
+                                            <span class="mb-2 font-medium leading-tight">Available Stock
+                                                <mat-icon
+                                                    matTooltip="Current available stock"
+                                                    class="transform scale-75"
+                                                    [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                                </mat-icon>
+                                            </span>
+                                            <mat-form-field class="mt-0 sm:mt-1 flex items-center -my-px w-full">
+                                                <input
+                                                    type="number"
+                                                    matInput
+                                                    [formControlName]="'quantity'">
+                                            </mat-form-field>
+                                        </div>
+                                        <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
+                                            <span class="mb-2 font-medium leading-tight">Out of Stock Selling
+                                                <mat-icon
+                                                    matTooltip="Continue selling even when out of stock"
+                                                    class="transform scale-75"
+                                                    [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                                </mat-icon>
+                                            </span>
+                                            <div class="mt-0 sm:mt-3 flex items-center -my-px w-full">
+                                                <mat-slide-toggle
+                                                    [formControlName]="'allowOutOfStockPurchases'"
+                                                    [color]="'primary'">
+                                                    {{selectedDiscountForm.get('allowOutOfStockPurchases').value === true ? 'Yes' : 'No'}}
+                                                </mat-slide-toggle>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
+                                            <span class="mb-2 font-medium leading-tight">Low Stock Alarm
+                                                <mat-icon
+                                                    matTooltip="Minimum 0 value to activate the alarm. Input negative value to disable the alarm"
+                                                    class="transform scale-75"
+                                                    [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                                </mat-icon>
+                                            </span>
+                                            <div *ngIf="selectedDiscountForm.get('minQuantityForAlarm').value < 0" class="mt-0 sm:mt-3 flex items-center -my-px w-full">
+                                                <mat-slide-toggle
+                                                    [color]="'primary'"
+                                                    (click)="selectedDiscountForm.get('minQuantityForAlarm').value = 0"
+                                                    >
+                                                    {{selectedDiscountForm.get('minQuantityForAlarm').value >= 0 ? 'Active' : 'Disabled'}}
+                                                </mat-slide-toggle>
+                                            </div>
+                                            <mat-form-field *ngIf="selectedDiscountForm.get('minQuantityForAlarm').value >= 0" class="mt-0 sm:mt-1 flex items-center -my-px w-full">
+                                                <input
+                                                    type="number"
+                                                    [value]="selectedDiscountForm.get('minQuantityForAlarm').value"
+                                                    matInput
+                                                    [formControlName]="'minQuantityForAlarm'">
+                                            </mat-form-field>
+                                        </div>
+                                        <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
+                                            <span class="mb-2 sm:mb-4 font-medium leading-tight">Track Stock 
+                                                <mat-icon
+                                                    matTooltip="Keep track the quantity of the stock"
+                                                    class="transform scale-75"
+                                                    [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                                </mat-icon>
+                                            </span>
+                                            <div class="mt-0 flex items-center -my-px w-full">
+                                                <mat-slide-toggle
+                                                    [formControlName]="'trackQuantity'"
+                                                    [color]="'primary'">
+                                                    {{selectedDiscountForm.get('trackQuantity').value === true ? 'Active' : 'Disabled'}}
+                                                </mat-slide-toggle>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-col w-full sm:w-1/5 sm:pl-2 py-2 sm:py-0">
+                                            <span class="mb-2 sm:mb-4 font-medium leading-tight">Variants 
+                                                <mat-icon
+                                                    matTooltip="This customer have variants ?"
+                                                    class="transform scale-75"
+                                                    [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                                </mat-icon>
+                                            </span>
+                                            <div class="mt-0 flex items-center justify-between -my-px w-full">
+                                                <mat-slide-toggle
+                                                    [formControlName]="'isVariants'"
+                                                    [color]="'primary'"
+                                                    (change)="(selectedDiscountForm.get('isVariants').value === false) ? deleteAllVariantsConfirmation() : return"
+                                                    >
+                                                    {{selectedDiscountForm.get('isVariants').value === true ? 'Yes' : 'No'}}
+                                                </mat-slide-toggle>
+                                                <div *ngIf="selectedDiscountForm.get('isVariants').value === true">
+                                                    <input
+                                                        id="goto-variant-button"
+                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                        type="button"
+                                                        (click)="displayVariants()"
+                                                        mat-icon-button>
+                                                    <label 
+                                                        class="flex items-center justify-center h-10 w-10 rounded-full cursor-pointer bg-gray-200 hover:bg-gray-300 text-white"
+                                                        for="goto-variant-button"
+                                                        matRipple>
+                                                        <mat-icon
+                                                            class="p-0.5"
+                                                            [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between w-full border-t px-8 py-4">
+                                    <input
+                                        id="customer-remove-button"
+                                        type="button"
+                                        (click)="deleteSelectedDiscount()"
+                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                        mat-button>
+                                    <label 
+                                        class="flex items-center justify-center h-10 px-4 border rounded border-red-300 dark:border-red-500 cursor-pointer hover:bg-hover"
+                                        for="customer-remove-button"
+                                        matRipple>
+                                        <span>Delete</span>
+                                        <mat-icon
+                                            class="ml-1"
+                                            [color]="'warn'"
+                                            [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                    </label>
+                                    <!-- <button
+                                        class="-ml-4"
+                                        mat-button
+                                        [color]="'warn'"
+                                        (click)="deleteSelectedDiscount()">
+                                        Delete
+                                    </button> -->
+                                    <div class="flex items-center">
+                                        <div
+                                            class="flex items-center mr-4"
+                                            *ngIf="flashMessage">
+                                            <ng-container *ngIf="flashMessage === 'success'">
+                                                <mat-icon
+                                                    class="text-green-500"
+                                                    [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                                                <span class="ml-2">Discount updated</span>
+                                            </ng-container>
+                                            <ng-container *ngIf="flashMessage === 'error'">
+                                                <mat-icon
+                                                    class="text-red-500"
+                                                    [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                                                <span class="ml-2">An error occurred, try again!</span>
+                                            </ng-container>
+                                        </div>
+                                        <button
+                                            mat-flat-button
+                                            [color]="'primary'"
+                                            (click)="updateSelectedDiscount()">
+                                            Update
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row px-8 py-4" [style.visibility]="(!showVariantsSection) ? 'hidden' : 'visible'" [style.max-height]="(!showVariantsSection) ? '0' : ''">
+                                <div class="flex flex-auto flex-wrap">
+                                    <div class="flex w-full border-b mb-4">
+                                        <div class="flex w-full mb-4 items-center justify-between">
+                                            <span class="font-medium text-3xl leading-tight">Preview</span>
+                                            <div>
+                                                <input
+                                                    id="variant-back-button"
+                                                    class="absolute h-0 w-0 opacity-0 text-1x1 invisible pointer-events-none"
+                                                    type="button"
+                                                    (click)="displayVariants()"
+                                                    mat-icon-button>
+                                                <label 
+                                                    class="flex items-center justify-center text-1x1 h-10 px-2 rounded cursor-pointer text-white bg-primary hover:bg-primary-700"
+                                                    for="variant-back-button"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="text-white pr-2"
+                                                        [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
+                                                    Back
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-auto flex-wrap w-full">
+                                        <!-- Variants -->
+                                        <div class="flex flex-col w-full sm:w-1/4">
+                                            <!-- Variant View -->
+                                            <div class="w-full mb-4">
+                                                <span class="mb-px font-medium leading-tight">Variant</span>
+                                                <div class="mt-1 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden">
+                                                    <!-- Header -->
+                                                    <div class="flex items-center -my-px py-3 px-3">
+                                                        <div class="flex items-center flex-auto min-w-0">
+                                                            <mat-icon
+                                                                class="icon-size-5"
+                                                                [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                                            <input
+                                                                class="min-w-0 ml-2 py-1 border-0"
+                                                                type="text"
+                                                                placeholder="Enter variant name"
+                                                                (input)="filterVariants($event)"
+                                                                (keydown)="filterVariantsInputKeyDown($event)"
+                                                                [maxLength]="50"
+                                                                #newVariantInput>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Available variants -->
+                                                    <div class="h-44 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
+                                                        <!-- Variants -->
+                                                        <ng-container *ngIf="!variantsEditMode">
+                                                            <div class="p-4 space-y-2">
+                                                                <ng-container *ngFor="let variant of filteredDiscountVariants;let i = index; trackBy: trackByFn">
+                                                                    <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full">
+                                                                        <input
+                                                                            matInput
+                                                                            [value]="variant.name"
+                                                                            (input)="updateLocalVariantTitle(variant, $event)"
+                                                                            [readonly]="!customerVariantsValueEditMode[i]">
+                                                                        <button
+                                                                            *ngIf="!customerVariantsValueEditMode[i]"
+                                                                            mat-icon-button
+                                                                            (click)="customerVariantsValueEditMode[i] = !customerVariantsValueEditMode[i]"
+                                                                            matSuffix>
+                                                                            <mat-icon
+                                                                                class="icon-size-5"
+                                                                                [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                                                                        </button>
+                                                                        <button
+                                                                            *ngIf="customerVariantsValueEditMode[i]"
+                                                                            mat-icon-button
+                                                                            (click)="customerVariantsValueEditMode[i] = !customerVariantsValueEditMode[i];updateServerVariantTitle(variant.id);"
+                                                                            matSuffix>
+                                                                            <mat-icon
+                                                                                class="icon-size-5"
+                                                                                [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                                                        </button>
+                                                                        <button
+                                                                            mat-icon-button
+                                                                            (click)="deleteVariant(variant)"
+                                                                            matSuffix>
+                                                                            <mat-icon
+                                                                                class="icon-size-5"
+                                                                                [svgIcon]="'heroicons_solid:trash'"></mat-icon>
+                                                                        </button>
+                                                                    </mat-form-field>
+                                                                </ng-container>
+                                                            </div>
+                                                        </ng-container>
+                                                        <div
+                                                            class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer border-t hover:bg-gray-50 dark:hover:bg-hover"
+                                                            *ngIf="shouldShowCreateVariantButton(newVariantInput.value)"
+                                                            (click)="createVariant(newVariantInput.value); newVariantInput.value = ''"
+                                                            matRipple>
+                                                            <mat-icon
+                                                                class="mr-2 icon-size-5"
+                                                                [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                                                            <div class="break-all">Create "<b>{{newVariantInput.value}}</b>"</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Variant Available -->
+                                            <div class="w-full max-w-2xl">
+                                                <span class="mt-2 mb-px font-medium leading-tight">Variant Available</span>
+                                                <div class="w-full mt-2 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-auto">
+                                                    <!-- Variants Available -->
+                                                    <div class="h-44 m-2 leading-none overflow-y-auto border-gray-300 dark:border-gray-500">
+                                                        <div *ngIf="filteredDiscountVariants">
+                                                            <div *ngFor="let variant of filteredDiscountVariants; trackBy: trackByFn">
+                                                                <span class="w-full mb-px font-small leading-tight">{{variant.name}}</span>
+                                                                <div class="flex items-center rounded-full w-full">
+                                                                    <div class="ml-0 m-1.5">
+                                                                        <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                            <input
+                                                                                [id]="'variant-available-edit-button-' + variant.id"
+                                                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                                type="button"
+                                                                                (click)="openVariantsPanel(variant)"
+                                                                                mat-icon-button
+                                                                                #variantsPanelOrigin>
+                                                                            <label 
+                                                                                class="flex items-center justify-center p-3 h-9 cursor-pointer rounded-full leading-9 bg-primary"
+                                                                                [for]="'variant-available-edit-button-' + variant.id"
+                                                                                matRipple>
+                                                                                <span class="mx-1 text-white">Add</span>
+                                                                                <mat-icon
+                                                                                    [svgIcon]="'heroicons_outline:plus'"
+                                                                                    class="text-white"></mat-icon>
+                                                                            </label>
+                                                                        </span>
+                                                                    </div>
+                                                                    <div *ngFor="let variantsAvailable of variant.customerVariantsAvailable; trackBy: trackByFn" class="px-4 ml-0 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-300 dark:text-gray-300 dark:bg-gray-700">
+                                                                        <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                            <span class="ml-1.5 text-md font-medium whitespace-nowrap">{{variantsAvailable.value}}</span>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Variants panel and its button -->
+                                                    <div>
+                                                        <!-- Variants panel -->
+                                                        <ng-template #variantsPanel>
+                                                            <div class="w-60 rounded border shadow-md bg-card">
+                                                                <!-- Variants panel header -->
+                                                                <div class="flex items-center m-3 mr-2">
+                                                                    <div class="flex items-center">
+                                                                        <mat-icon
+                                                                            class="icon-size-5"
+                                                                            [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                                                        <div class="ml-2">
+                                                                            <input
+                                                                                class="w-full min-w-0 py-1 border-0"
+                                                                                type="text"
+                                                                                placeholder="Enter variant tag value"
+                                                                                (input)="filterDiscountVariantAvailable($event)"
+                                                                                (keydown)="filterDiscountVariantAvailableInputKeyDown($event)"
+                                                                                [maxLength]="30"
+                                                                                #newVariantInput>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div
+                                                                    class="flex flex-col max-h-64 py-2 border-t overflow-y-auto">
+                                                                    <!-- Variant Available -->
+                                                                    <ng-container *ngIf="!customerVariantAvailableEditMode">
+                                                                        <div class="py-2 space-y-2">
+                                                                            <ng-container *ngFor="let variantAvailable of filteredDiscountVariantAvailable; let i = index; trackBy: trackByFn">
+                                                                                <div class="flex items-center">
+                                                                                    <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full mx-4">
+                                                                                        <input
+                                                                                            matInput
+                                                                                            [value]="variantAvailable.value"
+                                                                                            (input)="updateLocalVariantAvailableTitle(variant, $event)"
+                                                                                            [readonly]="!customerVariantAvailableValueEditMode[i]"
+                                                                                        >
+                                                                                        <button
+                                                                                            mat-icon-button
+                                                                                            *ngIf="customerVariantAvailableValueEditMode[i]"
+                                                                                            (click)="customerVariantAvailableValueEditMode[i] = !customerVariantAvailableValueEditMode[i]; updateServerVariantAvailableTitle(variant, $event)"
+                                                                                            matSuffix>
+                                                                                            <mat-icon
+                                                                                                class="icon-size-5 ml-2"
+                                                                                                [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                                                                        </button>
+                                                                                        <button
+                                                                                            mat-icon-button
+                                                                                            *ngIf="!customerVariantAvailableValueEditMode[i]"
+                                                                                            (click)="customerVariantAvailableValueEditMode[i] = !customerVariantAvailableValueEditMode[i]"
+                                                                                            matSuffix>
+                                                                                            <mat-icon
+                                                                                                class="icon-size-5 ml-2"
+                                                                                                [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                                                                                        </button>
+                                                                                        <button
+                                                                                            mat-icon-button
+                                                                                            (click)="deleteVariantAvailable(variantAvailable)"
+                                                                                            matSuffix>
+                                                                                            <mat-icon
+                                                                                                class="icon-size-5 ml-2"
+                                                                                                [svgIcon]="'heroicons_solid:trash'"></mat-icon>
+                                                                                        </button>
+                                                                                    </mat-form-field>
+                                                                                </div>
+                                                                            </ng-container>
+                                                                        </div>
+                                                                    </ng-container>
+                                                                    <!-- Create variant -->
+                                                                    <div
+                                                                        class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer hover:bg-hover"
+                                                                        *ngIf="shouldShowCreateVariantAvailableButton(newVariantInput.value)"
+                                                                        (click)="createVariantAvailable(newVariantInput.value); newVariantInput.value = ''"
+                                                                        matRipple>
+                                                                        <mat-icon
+                                                                            class="mr-2 icon-size-5"
+                                                                            [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                                                                        <div class="break-all">Create "<b>{{newVariantInput.value}}</b>"</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </ng-template>
+                                                    </div>
+                                                    
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Matrix Table -->
+                                        <div class="flex flex-col w-full sm:w-3/4 sm:pl-8 py-4 sm:py-0">
+                                            <div class="font-medium tracking-tight mb-1 truncate">Variant Details</div>
+                                            <div class="flex flex-auto overflow-hidden">
+                                                <div class="flex flex-col flex-auto sm:mb-18 overflow-hidden sm:overflow-y-auto">
+                                                    <ng-container *ngIf="selectedDiscount.customerInventories">
+                                                        <ng-container *ngIf="selectedDiscount.customerInventories.length > 0; else noVariants">
+                                                            <div class="grid">
+                                                                <!-- Header -->
+                                                                <div
+                                                                    class="inventory-grid z-9 sticky top-0 grid gap-4 py-4 px-6 md:px-8 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                                                                    matSort
+                                                                    matSortDisableClear>
+                                                                    <div
+                                                                        class="hidden md:block"
+                                                                        [mat-sort-header]="'sku'">
+                                                                        SKU
+                                                                    </div>
+                                                                    <div [mat-sort-header]="'name'">Name</div>
+                                                                    <div></div>
+                                                                    <div
+                                                                        class="hidden sm:block"
+                                                                        [mat-sort-header]="'price'">
+                                                                        Price
+                                                                    </div>
+                                                                    <div
+                                                                        class="hidden lg:block"
+                                                                        [mat-sort-header]="'quantity'">
+                                                                        Stock
+                                                                    </div>
+                                                                    <div
+                                                                        class="hidden lg:block"
+                                                                        [mat-sort-header]="'active'">
+                                                                        Active
+                                                                    </div>
+                                                                    <div class="hidden sm:block">Details</div>
+                                                                </div>
+                                                                <!-- Rows -->
+                                                                <ng-container *ngIf="selectedVariantCombos">
+                                                                    <ng-container *ngFor="let combos of selectedVariantCombos; trackBy: trackByFn">
+                                                                        <div class="inventory-grid grid items-center gap-4 py-3 px-6 md:px-8 border-b">                                       
+                                                                            <!-- SKU -->
+                                                                            <div class="hidden md:block truncate">
+                                                                                {{combos.sku}}
+                                                                            </div>
+                                        
+                                                                            <!-- Name -->
+                                                                            <div class="truncate">
+                                                                                {{combos.variant}}
+                                                                            </div>
+
+                                                                            <div></div>
+                                        
+                                                                            <!-- Price -->
+                                                                            <div class="hidden sm:block">
+                                                                                {{combos.price | currency:'USD':'symbol':'1.2-2'}}
+                                                                            </div>
+                                        
+                                                                            <!-- Stock -->
+                                                                            <div class="hidden lg:flex items-center">
+                                                                                <div class="min-w-4">{{combos.quantity}}</div>
+                                                                                <!-- Low stock -->
+                                                                                <div
+                                                                                    class="flex items-end ml-2 w-1 h-4 bg-red-200 rounded overflow-hidden"
+                                                                                    *ngIf="combos.quantity < 20">
+                                                                                    <div class="flex w-full h-1/3 bg-red-600"></div>
+                                                                                </div>
+                                                                                <!-- Medium stock -->
+                                                                                <div
+                                                                                    class="flex items-end ml-2 w-1 h-4 bg-orange-200 rounded overflow-hidden"
+                                                                                    *ngIf="combos.quantity >= 20 && combos.quantity < 30">
+                                                                                    <div class="flex w-full h-2/4 bg-orange-400"></div>
+                                                                                </div>
+                                                                                <!-- High stock -->
+                                                                                <div
+                                                                                    class="flex items-end ml-2 w-1 h-4 bg-green-100 rounded overflow-hidden"
+                                                                                    *ngIf="combos.quantity >= 30">
+                                                                                    <div class="flex w-full h-full bg-green-400"></div>
+                                                                                </div>
+                                                                            </div>
+                                        
+                                                                            <!-- Active -->
+                                                                            <div class="hidden lg:block">
+                                                                                <ng-container *ngIf="combos.active">
+                                                                                    <mat-icon
+                                                                                        class="text-green-400 icon-size-5"
+                                                                                        [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                                                                </ng-container>
+                                                                                <ng-container *ngIf="!combos.active">
+                                                                                    <mat-icon
+                                                                                        class="text-gray-400 icon-size-5"
+                                                                                        [svgIcon]="'heroicons_solid:x'"></mat-icon>
+                                                                                </ng-container>
+                                                                            </div>
+                                        
+                                                                            <!-- Details button -->
+                                                                            <div>
+                                                                                <button
+                                                                                    class="min-w-10 min-h-7 h-7 px-2 leading-6"
+                                                                                    mat-stroked-button
+                                                                                    (click)="toggleVariantDetails(combos.itemCode)">
+                                                                                    <mat-icon
+                                                                                        class="icon-size-5"
+                                                                                        [svgIcon]="selectedDiscountInventory?.itemCode === combos.itemCode ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'"></mat-icon>
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="grid">
+                                                                            <ng-container *ngIf="selectedDiscountInventory?.itemCode === combos.itemCode">
+                                                                                <ng-container *ngTemplateOutlet="rowVariantDetailsTemplate; context: {$implicit: variantlist}"></ng-container>
+                                                                            </ng-container>
+                                                                        </div>
+                                                                    </ng-container>
+                                                                </ng-container>
+                                                            </div>
+                                                        </ng-container>
+                                                    </ng-container>
+
+                                                    <ng-template
+                                                        #rowVariantDetailsTemplate
+                                                        let-variantlist>
+                                                        <div class="shadow-lg overflow-hidden">
+                                                            <div class="flex border-b">
+                                                                <div class="flex flex-col sm:flex-row p-8 w-full">
+                                                                    <div class="flex flex-auto flex-wrap">
+                                                                        <!-- Image-->
+                                                                        <div class="flex flex-col w-full lg:w-1/3 sm:pl-4">
+                                                                            <span class="font-semibold mb-1">Variant image</span>
+                                                                            <div class="flex flex-col items-start">
+                                                                                <div class="flex flex-col items-center">
+                                                                                    <!-- Image Frame -->
+                                                                                    <div *ngIf="!imagesEditMode" class="w-32 h-44 border rounded overflow-hidden">
+                                                                                        <ng-container *ngIf="selectedDiscountForm.get('images').value.length; else noImage">
+                                                                                            <img
+                                                                                                class="w-full h-full object-cover"
+                                                                                                [src]="selectedDiscountForm.get('images').value[selectedDiscountForm.get('currentImageIndex').value]">
+                                                                                        </ng-container>
+                                                                                        <ng-template #noImage>
+                                                                                            <div
+                                                                                                class="flex items-center justify-center w-full h-full rounded overflow-hidden uppercase text-8xl font-bold leading-none bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                                                                                            >
+                                                                                                <span class="text-md">NO IMAGE</span> 
+                                                                                            </div>
+                                                                                        </ng-template>
+                                                                                    </div>
+                                                                                    
+                                                                                    <!-- Edit Image Frame -->
+                                                                                    <div *ngIf="imagesEditMode" class="flex flex-col sm:items-start mb-8 sm:mb-0">
+                                                                                        <div class="relative flex items-center justify-center w-32 h-44 rborder rounded overflow-hidden ring-4 ring-bg-card">
+                                                                                            <!-- Upload / Remove Image to Overide Image -->
+                                                                                            <div class="absolute inset-0 bg-black bg-opacity-50 z-10"></div>
+                                                                                            <div class="absolute inset-0 flex items-center justify-center z-20">
+                                                                                                <!-- Add / Edit Image -->
+                                                                                                <div>
+                                                                                                    <input
+                                                                                                        id="image-file-input"
+                                                                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                                                        type="file"
+                                                                                                        [multiple]="false"
+                                                                                                        [accept]="'image/jpeg, image/png'"
+                                                                                                        (change)="uploadImages(imageFileInput.files, selectedDiscountForm.get('images').value);"
+                                                                                                        #imageFileInput>
+                                                                                                    <label
+                                                                                                        class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                                                                        for="image-file-input"
+                                                                                                        matRipple>
+                                                                                                        <mat-icon
+                                                                                                            class="text-white"
+                                                                                                            [svgIcon]="'heroicons_outline:camera'"></mat-icon>
+                                                                                                    </label>
+                                                                                                </div>
+                                                                                                <!-- Remove Image -->
+                                                                                                <div *ngIf="selectedDiscountForm.get('images').value.length">
+                                                                                                    <input
+                                                                                                        id="image-remove-button"
+                                                                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                                                        type="button"
+                                                                                                        (click)="removeImage();resetCycleImages()"
+                                                                                                        mat-icon-button>
+                                                                                                    <label 
+                                                                                                        class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                                                                        for="image-remove-button"
+                                                                                                        matRipple>
+                                                                                                        <mat-icon
+                                                                                                            class="text-white"
+                                                                                                            [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                                                                                    </label>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <!-- View Image -->
+                                                                                            <img
+                                                                                                class="object-cover w-full h-full"
+                                                                                                *ngIf="selectedDiscountForm.get('images').value.length"
+                                                                                                [src]="selectedDiscountForm.get('images').value[selectedDiscountForm.get('currentImageIndex').value]">
+                                                                                            <!-- View No Image -->
+                                                                                            <div
+                                                                                                class="flex items-center justify-center w-full h-full rounded overflow-hidden uppercase text-8xl font-bold leading-none bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                                                                                                *ngIf="!selectedDiscountForm.get('images').value.length">
+                                                                                                <span class="text-md">NO IMAGE</span> 
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                        
+                                                                                    <!-- Add New Image -->
+                                                                                    <div class="flex  mt-2 whitespace-nowrap">
+                                                                                        <div>
+                                                                                            <input
+                                                                                                id="image-file-input"
+                                                                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                                                type="file"
+                                                                                                [multiple]="false"
+                                                                                                [accept]="'image/jpeg, image/png'"
+                                                                                                (change)="uploadImages(imageFileInput.files, []);"
+                                                                                                #imageFileInput>
+                                                                                            <label
+                                                                                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                                                                for="image-file-input"
+                                                                                                matRipple>
+                                                                                                <mat-icon
+                                                                                                    class="icon-size-5"
+                                                                                                    [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                                                                                            </label>
+                                                                                        </div>
+                                                                                        <!-- Toggle Image Edit -->
+                                                                                        <div>
+                                                                                            <input
+                                                                                                id="image-edit-button"
+                                                                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                                                type="button"
+                                                                                                (click)="toggleImagesEditMode()"
+                                                                                                mat-icon-button
+                                                                                            >
+                                                                                            
+                                                                                            <label 
+                                                                                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                                                                for="image-edit-button"
+                                                                                                matRipple>
+                                                                                                <mat-icon
+                                                                                                    class="icon-size-5"
+                                                                                                    [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
+                                                                                            </label>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>                                                                            
+                                                                            </div>
+                                                                            <!-- Variant status -->
+                                                                            <div class="flex flex-col mt-2">
+                                                                                <span class="font-semibold mb-2">Variant status</span>
+                                                                                <mat-select
+                                                                                    class="border border-gray-300 w-32 px-2 py-2 rounded"
+                                                                                    [formControlName]="'status'"
+                                                                                    [value]="'status'"
+                                                                                    (selectionChange)="selectedDiscountForm.get('status').value = $event.value"
+                                                                                    #statusSelector="matSelect"
+                                                                                    >
+                                                                                    <mat-select-trigger>
+                                                                                        <span class="flex items-center">
+                                                                                            <span>{{ statusSelector.triggerValue }}</span>
+                                                                                        </span>
+                                                                                    </mat-select-trigger>
+                                                                                    <div>
+                                                                                        <mat-option [value]="'ACTIVE'">Active</mat-option>
+                                                                                        <mat-option [value]="'INACTIVE'">Inactive</mat-option>
+                                                                                        <mat-option [value]="'DRAF'">Draf</mat-option>
+                                                                                    </div>
+                                                                                </mat-select>
+                                                                                <!-- <mat-slide-toggle
+                                                                                    [formControlName]="'status'"
+                                                                                    [color]="'primary'">
+                                                                                    {{selectedDiscountForm.get('status').value === "ACTIVE" ? true : false}}
+                                                                                </mat-slide-toggle> -->
+                                                                            </div>
+                                                                        </div>
+                                                                        <!-- SKU & Price -->
+                                                                        <div class="flex flex-col w-full lg:w-1/3 sm:pl-4">
+                                                                            <!-- SKU -->
+                                                                            <mat-form-field class="w-full">
+                                                                                <mat-label>SKU</mat-label>
+                                                                                <input
+                                                                                    matInput
+                                                                                    [formControlName]="'sku'">
+                                                                            </mat-form-field>
+                                                                            <!-- Price -->
+                                                                            <mat-form-field class="w-full">
+                                                                                <mat-label>Price</mat-label>
+                                                                                <span matSuffix>$</span>
+                                                                                <input
+                                                                                    matInput
+                                                                                    [formControlName]="'price'">
+                                                                            </mat-form-field>                                                                            
+                                                                        </div>
+
+                                                                        <!-- Stock & Packing Size -->
+                                                                        <div class="flex flex-col w-full lg:w-1/3 sm:pl-4">
+                                                                            <mat-form-field class="w-full">
+                                                                                <mat-label>Stock</mat-label>
+                                                                                <input
+                                                                                    type="number"
+                                                                                    matInput
+                                                                                    [formControlName]="'quantity'">
+                                                                            </mat-form-field>
+
+                                                                            <!-- Packing Size -->
+                                                                            <!-- <mat-form-field class="w-full pr-2">
+                                                                                <mat-label>Packing Size</mat-label>
+                                                                                <mat-select
+                                                                                    class="w-full"
+                                                                                    [formControlName]="'packingSize'"
+                                                                                    appearance="fill"
+                                                                                    [value]="packingSize"
+                                                                                    placeholder="Select a packing size"
+                                                                                    (selectionChange)="selectedDiscountForm.get('packingSize').value = statusSelector.value"
+                                                                                    #packingSizeSelector="matSelect"
+                                                                                    >
+                                                                                    <mat-select-trigger>
+                                                                                        <span class="flex items-center">
+                                                                                            <span>{{ packingSizeSelector.triggerValue }}</span>
+                                                                                        </span>
+                                                                                    </mat-select-trigger>
+                                                                                    <div>
+                                                                                        <mat-option [value]="'S'">Small</mat-option>
+                                                                                        <mat-option [value]="'M'">Medium</mat-option>
+                                                                                        <mat-option [value]="'L'">Large</mat-option>
+                                                                                        <mat-option [value]="'XL'">Xtra Large</mat-option>
+                                                                                    </div>
+                                                                                </mat-select>
+                                                                            </mat-form-field> -->
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </ng-template>
+
+                                                    <ng-template #noVariants>
+                                                        <div class="p-8 sm:p-16 border-t text-2xl font-semibold tracking-tight text-center">There are no Variants! Add them now.</div>
+                                                    </ng-template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between w-full px-8">
+                                        <input
+                                            id="customer-remove-button"
+                                            type="button"
+                                            (click)="deleteSelectedDiscount()"
+                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                            mat-button>
+                                        <label 
+                                            class="flex items-center justify-center h-10 px-4 border rounded border-red-300 dark:border-red-500 cursor-pointer hover:bg-hover"
+                                            for="customer-remove-button"
+                                            matRipple>
+                                            <span>Delete</span>
+                                            <mat-icon
+                                                class="ml-1"
+                                                [color]="'warn'"
+                                                [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                        </label>
+                                        <!-- <button
+                                            class="-ml-4"
+                                            mat-button
+                                            [color]="'warn'"
+                                            (click)="deleteSelectedDiscount()">
+                                            Delete
+                                        </button> -->
+                                        <div class="flex items-center">
+                                            <div
+                                                class="flex items-center mr-4"
+                                                *ngIf="flashMessage">
+                                                <ng-container *ngIf="flashMessage === 'success'">
+                                                    <mat-icon
+                                                        class="text-green-500"
+                                                        [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                                                    <span class="ml-2">Discount updated</span>
+                                                </ng-container>
+                                                <ng-container *ngIf="flashMessage === 'error'">
+                                                    <mat-icon
+                                                        class="text-red-500"
+                                                        [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                                                    <span class="ml-2">An error occurred, try again!</span>
+                                                </ng-container>
+                                            </div>
+                                            <button
+                                                mat-flat-button
+                                                [color]="'primary'"
+                                                (click)="updateSelectedDiscount()">
+                                                Update
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </ng-template>
+
+            <ng-template #noDiscounts>
+                <div class="p-8 sm:p-16 border-t text-4xl font-semibold tracking-tight text-center">There are no customers!</div>
+            </ng-template>
+
+        </div>
+
+    </div>
+
+</div>
