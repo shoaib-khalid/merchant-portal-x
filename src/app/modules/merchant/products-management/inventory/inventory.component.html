@@ -190,6 +190,7 @@
                             [formGroup]="selectedProductForm">
 
                             <div [style.visibility]="(showVariantsSection) ? 'hidden' : 'visible'" [style.max-height]="(showVariantsSection) ? '0' : ''">
+                                <!-- product imag, sku row -->
                                 <div class="flex flex-col sm:flex-row px-8 pt-8 pb-4">
                                     <!-- Product images and status -->
                                     <div class="flex flex-col items-center sm:items-start">
@@ -378,8 +379,8 @@
                                         </div>
                                     </div>
 
+                                    <!-- Name, Description, SKU -->
                                     <div class="flex flex-auto flex-wrap">
-                                        <!-- Name, Description -->
                                         <div class="flex flex-col w-full lg:w-2/4 sm:pl-8">
 
                                             <!-- Name -->
@@ -582,6 +583,7 @@
                                     </div>
                                 </div>
 
+                                <!-- Available stock row -->
                                 <div class="flex flex-col sm:flex-row pb-4 border-t pt-4 px-8">
                                     <div class="flex flex-auto flex-wrap">
                                         <div class="flex flex-col w-full sm:w-1/5 sm:pr-2 sm:border-r py-2 sm:py-0">
@@ -692,6 +694,7 @@
                                     </div>
                                 </div>
 
+                                <!-- Delete and update button -->
                                 <div class="flex items-center justify-between w-full border-t px-8 py-4">
                                     <input
                                         id="product-remove-button"

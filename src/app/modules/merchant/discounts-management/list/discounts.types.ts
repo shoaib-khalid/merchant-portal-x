@@ -1,27 +1,24 @@
 export interface Discount
 {
+    discountName: string;
+    discountType: string;
+    endDate: string;
+    endTime: string;
     id: string;
-    name: string;
-    description: string;
+    isActive: boolean;
+    startDate: string;
+    startTime: string;
+    storeDiscountTierList: StoreDiscountTierList[];
     storeId: string;
-    categoryId: string;
-    status: string;
-    thumbnailUrl?: string;
-    vendor?: string;
-    region?: string;
-    seoUrl: string;
-    seoName: string;
-    trackQuantity: boolean;
-    allowOutOfStockPurchases: boolean;
-    minQuantityForAlarm: number;
-    packingSize: string;
-    created?: string;
-    updated?: string;
-    discountVariants?: DiscountVariant[]; // Refer Discount Variants Section
-    discountInventories?: DiscountInventory[]; // Refer Discount Inventories Section
-    discountReviews?: [];
-    discountAssets?: DiscountAssets[];
-    discountDeliveryDetail?: string;
+}
+
+export interface StoreDiscountTierList {
+    calculationType: string;
+    discountAmount: number;
+    endTotalSalesAmount: number;
+    id: string;
+    startTotalSalesAmount: number;
+    storeDiscountId: string;
 }
 
 /**
