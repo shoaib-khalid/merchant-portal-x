@@ -70,9 +70,24 @@ export const defaultNavigation: FuseNavigationItem[] = [
     {
         id   : 'social-media',
         title: 'Social Media',
-        type : 'basic',
+        type : 'collapsable',
         icon : 'heroicons_outline:chat-alt-2',
-        link : '/user-channels'
+        children: [
+            {
+                id   : 'apps.ecommerce.inventory',
+                title: 'Flows Management',
+                type : 'basic',
+                link : '/social-media',
+                exactMatch: true
+            },
+            {
+                id   : 'apps.ecommerce.inventory',
+                title: 'Flow Builder',
+                type : 'basic',
+                link : '/social-media/flow-builder',
+                exactMatch: true
+            }
+        ]
     },
     {
         id   : 'customer-support',

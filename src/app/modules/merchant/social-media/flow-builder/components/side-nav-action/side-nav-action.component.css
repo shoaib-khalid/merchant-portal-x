@@ -1,0 +1,76 @@
+.example-container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    
+  }
+
+
+  .sideNav{
+    background-color: rgb(255, 255, 255);
+    justify-content: center;
+    width: 320px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  }
+
+  #sideNavTest{
+    opacity: 0;
+  }
+
+  #vertex-action-title{
+    border:0px;
+    width: 140px;
+    height: 40px;
+    background-color:  rgb(245, 242, 65);
+    margin-top: 10px;
+  }
+#vertex-action-title:focus{
+  outline: none;
+  background-color: white;
+}
+
+#side-nav-body{
+  background-color: white;
+
+}
+
+
+#pin{
+  height: 15px;
+  width: 15px;
+  right: 18px;
+  position: absolute;
+  cursor: pointer;
+}
+
+#addAction{
+    height: 50px;
+    width: 250px;
+    border: 2px dashed rgb(238, 184, 5);
+    cursor: pointer;
+    padding: 10px;
+}#addAction:hover{
+    border: 2px dashed rgb(46, 116, 247);
+}
+.external-requests-list{
+    padding-bottom: 0px;
+    cursor: pointer;
+}
+.inside-external-heading{
+    font-weight: bold;
+}
+.line{
+    margin-right: 15px;
+}
+
+.header{
+  background-color:  rgb(245, 242, 65);
+  height: 60px;
+}
+
+.actual-req{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+}

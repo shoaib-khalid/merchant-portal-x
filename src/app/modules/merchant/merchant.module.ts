@@ -7,7 +7,7 @@ import { RouterModule } from '@angular/router';
 // import { ProductsManagementComponent } from './products-management/products-management.component';
 // import { OrdersManagementComponent } from './orders-management/orders-management.component';
 // import { DiscountsManagementComponent } from './discounts-management/discounts-management.component';
-import { SocialMediaComponent } from './social-media/social-media.component';
+// import { SocialMediaComponent } from './social-media/social-media.component';
 import { CustomerSupportComponent } from './customer-support/customer-support.component';
 import { merchantRoutes } from 'app/modules/merchant/merchant.routing';
 
@@ -20,7 +20,7 @@ import { merchantRoutes } from 'app/modules/merchant/merchant.routing';
         // ProductsManagementComponent,
         // OrdersManagementComponent,
         // DiscountsManagementComponent,
-        SocialMediaComponent,
+        // SocialMediaComponent,
         CustomerSupportComponent
     ],
     imports     : [
@@ -34,7 +34,7 @@ import { merchantRoutes } from 'app/modules/merchant/merchant.routing';
         // ProductsManagementComponent,
         // OrdersManagementComponent,
         // DiscountsManagementComponent,
-        SocialMediaComponent,
+        // SocialMediaComponent,
         CustomerSupportComponent
     ]
 })

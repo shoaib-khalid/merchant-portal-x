@@ -1,0 +1,91 @@
+<h1 mat-dialog-title>External Request</h1>
+<mat-dialog-content>
+
+  <span>
+    <mat-form-field appearance="fill" id="reqType">
+      <mat-label>Request Type</mat-label>
+      <select matNativeControl required [(ngModel)]="reqType" (change)="requestMethodChange()">
+        <option value="POST">POST</option>
+        <option value="GET">GET</option>
+        <option value="PUT">PUT</option>
+        <option value="DELETE">DELETE</option>
+      </select>
+    </mat-form-field>
+  </span>
+  <span>
+
+    <mat-form-field id="reqUrl">
+      <mat-label>Request URL</mat-label>
+      <input matInput [(ngModel)]="url">
+    </mat-form-field>
+  </span>
+
+  <div>
+    <span id="headText" class="elements" (click)="headers()">Headers</span>
+    <span id="bodyText" class="elements" (click)="body()">Body</span>
+    <span id="responseMappingText" class="elements" (click)="respMapping()">Response Mapping</span>
+  </div>
+  <hr>
+
+  <div *ngIf="vheader" class="selectable">
+    <div *ngFor="let reqHeader of reqheaders;let i=index;">
+      <input type="text" placeholder="key" value="{{reqHeader.key}}" (keyup)="keyChange($event, i)"
+        class="headerElements">
+      <input type="text" placeholder="value" value="{{reqHeader.value}}" (keyup)="valueChange($event,i)"
+        class="headerElements">
+    </div>
+    <div id="addheaderbtn" (click)="addReqHeader()">Add Request Header</div>
+
+  </div>
+
+  <div *ngIf="vbody" class="selectable">
+    <mat-form-field>
+      <mat-label>Format</mat-label>
+      <select matNativeControl [(ngModel)]="bodyFormat" required>
+        <option value="JSON"> JSON</option>
+        <option value="XML"> XML</option>
+      </select>
+    </mat-form-field>
+    <br>
+    <textarea name="" class="bodyArea" [(ngModel)]="bodyText" placeholder="Enter Request Body" cols="30"
+      rows="10"></textarea>
+  </div>
+
+  <div *ngIf="vrespMapping" class="selectable">
+
+    <mat-form-field>
+      <mat-label>Format</mat-label>
+      <select matNativeControl required [(ngModel)]="responseMappingFormat">
+        <option value="JSON">JSON</option>
+        <option value="XML">XML</option>
+      </select>
+    </mat-form-field>
+
+    <div *ngFor="let reqMap of reqMapping;let i=index">
+
+      <input type="text" name="" value="{{reqMap.path}}" (keyup)="jsonPathChange($event,i)"
+        placeholder="Enter path" class="mappingElements ">
+      <input type="text" name="" value="{{reqMap.dataVariable}}" (keyup)="customFieldChange($event,i)"
+        placeholder="Enter data variable field name"  class="mappingElements">
+      <span>
+        <mat-form-field appearance="fill"  class="mappingElements reqType">
+          <mat-label>Optional</mat-label>
+          <select matNativeControl required (change)="updatedOptional($event,i)">
+            <option value="true">True</option>
+            <option value="false">False</option>
+          </select>
+        </mat-form-field>
+      </span>
+    </div>
+
+
+    <div id="addMapping" (click)="addRequestMapping()">Add</div>
+
+  </div>
+
+
+</mat-dialog-content>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">No Thanks</button>
+  <button mat-button [mat-dialog-close]="[reqType,url,reqheaders,bodyFormat,bodyText,reqMapping,responseMappingFormat]" (click)="openExternalRequestForm()" cdkFocusInitial>Ok</button>
+</div>

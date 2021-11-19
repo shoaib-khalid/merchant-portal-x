@@ -1,0 +1,22 @@
+<h1 mat-dialog-title>{{title}}</h1>
+<div mat-dialog-content class="bot-buttons">
+    <div id="buttons-div">
+        <div *ngIf="loading">
+            <mat-spinner [diameter]="30" id="loading-spinner"></mat-spinner>
+        </div>
+        <mat-checkbox [hidden]="showPublished" id="{{bot.refId}}" style="width: 300px;text-align: initial;" (change)="setAll($event,i)"
+            *ngFor="let bot of bots;index as i;">{{bot.channelName}} <span class="text-muted">{{bot.refId}}
+                <span class="text-muted" *ngIf="bot.published">(Published already)</span></span>
+        </mat-checkbox>
+        <div [hidden]="!showPublished">
+            <ul>
+                <li *ngFor="let bot of bots;index as i;">{{bot.channelName}}</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div [hidden]="showPublished">
+    <div mat-dialog-actions>
+        <button mat-button (click)="publish()">Publish</button>
+    </div>
+</div>

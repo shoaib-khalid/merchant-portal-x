@@ -1,0 +1,22 @@
+<mat-sidenav-container class="example-container">
+	<mat-sidenav #sidenav mode="side" class="sideNav" [(opened)]="opened">
+		<img id="pin" src="assets/push-pin.svg" (click)="pin()">
+
+		<div class="header text-center w-100">
+			<h4>
+				<input type="text" value="Send" (ngModelChange)="titleChange($event)" id="quick-reply-title"
+					(focusout)="titleFocusOut($event)" [(ngModel)]="title">
+			</h4>
+		</div>
+		<div class="body" id="side-nav-body">
+			<div class="text-center pt-5" id="buttons-list">
+				<input id="quick-description-text" type="text" [(ngModel)]="description" (focusout)="descriptionFocusOut($event)"
+					placeholder="Enter your text..." (keyup)="descriptionChange($event)">
+				<button (document:click)="handleClick($event)" hidden></button>
+			</div>
+		</div>
+	</mat-sidenav>
+	<mat-sidenav-content>
+		<button mat-button (click)="toggle()" id="sideNavTest" hidden></button>
+	</mat-sidenav-content>
+</mat-sidenav-container>

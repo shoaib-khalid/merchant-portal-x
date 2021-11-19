@@ -1,0 +1,60 @@
+<mat-sidenav-container class="example-container">
+	<mat-sidenav #sidenav mode="side" class="sideNav" [(opened)]="opened">
+		<img id="pin" src="assets/push-pin.svg" (click)="pin()">
+
+		<div class="header text-center w-100">
+			<h4>
+				<input type="text" value="Send" (ngModelChange)="titleChange($event)" id="condition-title"
+					(focusout)="titleFocusOut($event)" [(ngModel)]="title">
+			</h4>
+		</div>
+		<div class="body" id="side-nav-body">
+			<div class="text-center pt-5" id="conditions-list">
+				<input id="description-text-condition" type="text" [(ngModel)]="description"
+					(focusout)="descriptionFocusOut($event)" placeholder="Enter your text..."
+					(keyup)="descriptionChange($event)">
+				<div class="condition shadow-sm" *ngFor="let condition of conditions.conditions; let j= index;">
+
+					<select [(ngModel)]="condition.operator" name="operator" style="margin-bottom:10px;" (change)="operatorChange($event,j)">
+						<option value="AND">AND</option>
+						<option value="OR">OR</option>
+					</select>
+					<br>
+
+					<div class="groups" *ngFor="let group of condition.groups;let i= index">
+
+						<select [(ngModel)]="group.field" class="fieldNames" (change)="fieldNameChange($event,j,i)">
+							<option value="not selected">Field Name</option>
+							<option value="{{field}}" *ngFor="let field of fieldNames;">{{field}}</option>
+						</select>
+
+						<select [(ngModel)]="group.match" name="condition" class="condition-dropdown" (change)="conditionChanged($event,j,i)">
+							<option value="is">is</option>
+							<option value="is not">is not</option>
+							<option value="starts with">starts with</option>
+							<option value="ends with">ends with</option>
+							<option value="greater than">greater than</option>
+							<option value="smaller than">smaller than</option>
+						</select>
+						<input class="condition-inputs" type="text" placeholder="Value" value="{{group.value}}"
+						(focusout)="valueFocusOut($event)" (keyup)="valueChange($event,j,i)">
+						<br>
+
+						<span *ngIf="i<(conditions.conditions[j].groups.length-1)"class="text-muted">{{conditions.conditions[j].operator}}</span>
+
+					</div>
+					<button id="add-group" (click)="addGroup(j)">+ Add Group</button>
+				</div>
+
+				<button (document:click)="handleClick($event)" hidden></button>
+				<div id="addCondition" (click)="addCondition()">
+					<h5 style="color: blue;">+Condition</h5>
+				</div>
+			</div>
+
+		</div>
+	</mat-sidenav>
+	<mat-sidenav-content>
+		<button mat-button (click)="toggle()" id="sideNavTest" hidden></button>
+	</mat-sidenav-content>
+</mat-sidenav-container>
