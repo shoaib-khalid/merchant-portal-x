@@ -103,7 +103,13 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
         // Create the selected discount form
         this.selectedDiscountForm = this._formBuilder.group({
             id               : [''],
-            name             : ['', [Validators.required]],
+            discountName     : ['', [Validators.required]],
+            startDate        : [''],
+            endDate          : [''],
+            startTime        : [''],
+            endTime          : [''],
+            discountType     : [''],
+            isActive         : [''],
             description      : [''],
             storeId          : [''], // not used
             categoryId       : [''],
@@ -240,13 +246,6 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
 
                 // Fill the form
                 this.selectedDiscountForm.patchValue(discount);
-
-                // Fill the form for SKU , Price & Quantity discountInventories[0]
-                // this because SKU , Price & Quantity migh have variants
-                // this is only for display, so we display the discountInventories[0] 
-                this.selectedDiscountForm.get('sku').patchValue(discount.discountInventories[0].sku);
-                this.selectedDiscountForm.get('price').patchValue(discount.discountInventories[0].price);
-                this.selectedDiscountForm.get('quantity').patchValue(discount.discountInventories[0].quantity);
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
