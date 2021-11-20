@@ -13,6 +13,10 @@ import { LayoutModule } from 'app/layout/layout.module';
 import { AppComponent } from 'app/app.component';
 import { appRoutes } from 'app/app.routing';
 import { AppConfig } from 'app/config/service.config';
+
+import { GraphHelper } from 'app/modules/merchant/social-media/flow-builder/components/helpers/graph-helper';
+
+
 const routerConfig: ExtraOptions = {
     preloadingStrategy       : PreloadAllModules,
     scrollPositionRestoration: 'enabled',
@@ -43,6 +47,7 @@ const routerConfig: ExtraOptions = {
         MarkdownModule.forRoot({})
     ],
     providers: [
+        GraphHelper,
         AppConfig,
         { 
           provide: APP_INITIALIZER,

@@ -16,6 +16,8 @@ export class FlowBuilderService
     private _orders: BehaviorSubject<FlowBuilder[] | null> = new BehaviorSubject(null);
     private _order: BehaviorSubject<FlowBuilder | null> = new BehaviorSubject(null);
 
+    public data$: any;
+
     _currentStores: any = [];
 
     /**
@@ -187,14 +189,51 @@ export class FlowBuilderService
         return this._httpClient.put(orderService + '/orders/' + orderId + '/completion-status-updates', body , header);
     }
 
-    updateCompletion(orderId, nextCompletionStatus)
-    {
-        this.orders$.subscribe((response)=>{
-            response.forEach(item => {
-                if (item.id === orderId) {
-                    item.completionStatus = nextCompletionStatus;
-                } 
-            })
-        });
+    // -----------------------------------------------------------------------------------------------------
+    // @ Private methods
+    // -----------------------------------------------------------------------------------------------------
+
+    async getAllflows() {
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let flowBuilderService: string = this._apiServer.settings.apiServer.flowBuilderService;
+
+        let response = await this._httpClient.get(flowBuilderService + "/flow/getall/" + clientId).toPromise();
+        this._logging.debug("Response from FlowBuildersService (retrieveGraph)",response);
+        return response;
+    }
+
+    async retrieveGraph(flowId) {
+        let flowBuilderService: string = this._apiServer.settings.apiServer.flowBuilderService;
+        let response = await this._httpClient.get(flowBuilderService + "/mxgraph/" + flowId).toPromise();
+
+        this._logging.debug("Response from FlowBuildersService (retrieveGraph)",response);
+        return response;
+    }
+
+    async retrieveFlowDetails(flowId) {
+        let flowBuilderService: string = this._apiServer.settings.apiServer.flowBuilderService;
+        let response = await this._httpClient.get(flowBuilderService + "/flow/" + flowId).toPromise();
+
+        this._logging.debug("Response from FlowBuildersService (retrieveFlowDetails)",response);
+        return response;
+    }
+    
+    updateFlowDetails(body, flowId) {
+        let flowBuilderService: string = this._apiServer.settings.apiServer.flowBuilderService;
+        
+        this._httpClient.patch<any>(flowBuilderService + "/flow/" + flowId, body).toPromise
+          ().then((data) => {
+            this._logging.debug("Response from FlowBuildersService (updateFlowDetails)",data);
+          });
+      }
+
+    postNewFlowDefaultJson(json,flowId) {
+        let flowBuilderService: string = this._apiServer.settings.apiServer.flowBuilderService;
+        const body: any = json;
+
+        let response = this._httpClient.post<any>(flowBuilderService + "/mxgraph/" + flowId, body).toPromise();
+
+        this._logging.debug("Response from FlowBuildersService (postNewFlowDefaultJson)",response);
+        return response;
     }
 }

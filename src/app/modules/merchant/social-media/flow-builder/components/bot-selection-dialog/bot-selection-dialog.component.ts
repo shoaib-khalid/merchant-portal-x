@@ -1,7 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { ApiCallsService } from 'src/app/services/api-calls.service';
-import { environment } from 'src/environments/environment';
+import { UserService } from 'app/core/user/user.service';
+// import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-bot-selection-dialog',
@@ -19,12 +19,15 @@ export class BotSelectionDialogComponent implements OnInit {
   flowId: any;
   channelsPublish: any;
 
-  constructor(public dialogRef: MatDialogRef<BotSelectionDialogComponent>, private apiCalls: ApiCallsService, @Inject(MAT_DIALOG_DATA) public data: {
-    channels: any;
-    flowId: any;
-    channelsPublish: any;
-
-  }) {
+  constructor(
+    public dialogRef: MatDialogRef<BotSelectionDialogComponent>, 
+    private _userService: UserService, 
+    @Inject(MAT_DIALOG_DATA) public data: {
+      channels: any;
+      flowId: any;
+      channelsPublish: any;
+    }
+  ) {
     if (data.channels) {
       this.showPublished = true;
       this.title = "Published Channels"
@@ -48,7 +51,7 @@ export class BotSelectionDialogComponent implements OnInit {
   async loadPublishButtons(channels) {
     this.loading = true;
     this.bots = [];
-    var data: any = await this.apiCalls.getUserChannels();
+    var data: any = await this._userService.getUserChannels();
     const content = data.data.content;
     console.log(content)
 
@@ -74,7 +77,7 @@ export class BotSelectionDialogComponent implements OnInit {
   }
 
   publish() {
-    this.apiCalls.publishmxGraph(this.botIds, this.flowId)
+    // this.apiCalls.publishmxGraph(this.botIds, this.flowId)
     this.dialogRef.close();
 
   }
@@ -95,30 +98,30 @@ export class BotSelectionDialogComponent implements OnInit {
  */
   async loadPages() {
     if (localStorage.getItem("fb-user-accessToken")) {
-      this.apiCalls.loadingAnimation("Loading..")
-      this.apiCalls.loadFbPages().subscribe(data1 => {
-        const pageList = data1.data;
-        for (var i = 0; i < pageList.length; i++) {
-          this.checkForConnectedPages(pageList[i])
-        }
-      });
+      // this.apiCalls.loadingAnimation("Loading..")
+      // this.apiCalls.loadFbPages().subscribe(data1 => {
+      //   const pageList = data1.data;
+      //   for (var i = 0; i < pageList.length; i++) {
+      //     this.checkForConnectedPages(pageList[i])
+      //   }
+      // });
     }
   }
 
   checkForConnectedPages(page) {
-    this.apiCalls.checkFbPageConnection(page.id, page.access_token).subscribe(data => {
-      var flag = true;
-      for (var i = 0; i < data.data.length; i++) {
-        if (data.data[i].id == environment.client_id) {
-          flag = false;
-        }
-      }
-      if (flag == false) {
-        this.bots.push({ channelName: page.name, refId: page.id })
-        console.log(page)
-      }
-      this.apiCalls.loadingdialogRef.close();
-    })
+    // this.apiCalls.checkFbPageConnection(page.id, page.access_token).subscribe(data => {
+    //   var flag = true;
+    //   for (var i = 0; i < data.data.length; i++) {
+    //     if (data.data[i].id == environment.client_id) {
+    //       flag = false;
+    //     }
+    //   }
+    //   if (flag == false) {
+    //     this.bots.push({ channelName: page.name, refId: page.id })
+    //     console.log(page)
+    //   }
+    //   this.apiCalls.loadingdialogRef.close();
+    // })
   }
 
 }

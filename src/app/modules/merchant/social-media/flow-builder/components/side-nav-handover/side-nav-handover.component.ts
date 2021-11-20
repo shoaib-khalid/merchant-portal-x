@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
-import { JsonCodec } from 'src/app/helpers/json-codec';
-import { Helper } from '../../../../helpers/graph-helper';
-import { ApiCallsService } from '../../../../services/api-calls.service'
-import { HelperService } from '../../../../services/helper.service';
+import { JsonCodec } from 'app/modules/merchant/social-media/flow-builder/components/helpers/json-codec';
+import { GraphHelper } from 'app/modules/merchant/social-media/flow-builder/components/helpers/graph-helper';
+import { FlowBuilderService } from 'app/modules/merchant/social-media/flow-builder/flow-builder.service';
+import { HelperService } from 'app/modules/merchant/social-media/flow-builder/components/helpers/helper.service';
 
 @Component({
     selector: 'side-nav-handover',
@@ -16,17 +16,20 @@ export class SideNavHandOverComponent {
     dataVariable: any = "";
     description: any = "";
 
-    constructor(private apiCalls: ApiCallsService,private helper:Helper, 
-        private helperService: HelperService) {
-     }
+    constructor(
+        private _flowBuilderService: FlowBuilderService,
+        private _graphHelper: GraphHelper, 
+        private helperService: HelperService
+    ) {
+    }
 
 
     toggle() {
 
         this.description = this.getDescriptionOfVertex();
         this.dataVariable = "";
-        this.apiCalls.data.forEach((element, index) => {
-            if (element.vertexId == this.helper.v1.id) {
+        this._flowBuilderService.data$.forEach((element, index) => {
+            if (element.vertexId == this._graphHelper.v1.id) {
                 this.dataVariable = element.dataVariables[0].dataVariable;
             }
         });
@@ -51,7 +54,7 @@ export class SideNavHandOverComponent {
     titleChange(text) {
 
         var strDigit = this.getStrDigit();
-        const digit = this.helper.digitFromString(strDigit);
+        const digit = this._graphHelper.digitFromString(strDigit);
         document.getElementById("header" + digit).textContent = text;
 
     }
@@ -82,43 +85,43 @@ export class SideNavHandOverComponent {
 
     descriptionChange(event) {
         var strDigit = this.getStrDigit();
-        const digit = this.helper.digitFromString(strDigit);
+        const digit = this._graphHelper.digitFromString(strDigit);
         document.getElementById("initial-message" + digit).textContent = event.target.value;
     }
 
     getStrDigit() {
-        if (this.helper.v1.div.firstChild.id) {
-            return this.helper.v1.div.firstChild.id;
+        if (this._graphHelper.v1.div.firstChild.id) {
+            return this._graphHelper.v1.div.firstChild.id;
         } else {
-            return this.helper.v1.div.firstChild.nextElementSibling.id;
+            return this._graphHelper.v1.div.firstChild.nextElementSibling.id;
         }
     }
     getDescriptionOfVertex() {
         var strDigit = this.getStrDigit();
-        const digit = this.helper.digitFromString(strDigit);
+        const digit = this._graphHelper.digitFromString(strDigit);
         return document.getElementById("initial-message" + digit).textContent;
     }
 
 
     dataVariableFocusOut(event) {
-        const vertexId = this.helper.v1.id;
+        const vertexId = this._graphHelper.v1.id;
         const dataValue = event.target.value
-        const length = this.apiCalls.data.length;
+        const length = this._flowBuilderService.data$.length;
         var lastId;
         if (length > 0) {
-            lastId = parseInt(this.apiCalls.data[length - 1].dataVariables[0].id);
+            lastId = parseInt(this._flowBuilderService.data$[length - 1].dataVariables[0].id);
         } else {
             lastId = -1;
         }
         var flag = false;
         for (var i = 0; i < length; i++) {
-            if (this.apiCalls.data[i].vertexId === vertexId) {
-                this.apiCalls.data[i].dataVariables[0].dataVariable = dataValue;
+            if (this._flowBuilderService.data$[i].vertexId === vertexId) {
+                this._flowBuilderService.data$[i].dataVariables[0].dataVariable = dataValue;
                 flag = true;
             }
         }
         if (!flag) {
-            this.apiCalls.data.push({
+            this._flowBuilderService.data$.push({
                 "vertexId": vertexId,
                 "dataVariables": [
                     {

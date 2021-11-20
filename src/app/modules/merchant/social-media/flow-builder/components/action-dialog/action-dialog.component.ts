@@ -1,6 +1,5 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { ApiCallsService } from "../../../../services/api-calls.service";
 export interface DialogData {
     title: string;
     description: string;
@@ -27,7 +26,7 @@ export class ActionDialog {
     bodyFormat: any = "json";
     responseMappingFormat: any = "json";
 
-    constructor(private configService: ApiCallsService,
+    constructor(
         public dialogRef: MatDialogRef<ActionDialog>,
         @Inject(MAT_DIALOG_DATA) public data: {
             reqType: any,

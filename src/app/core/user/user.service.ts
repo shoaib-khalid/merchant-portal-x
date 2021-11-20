@@ -5,6 +5,7 @@ import { map, tap } from 'rxjs/operators';
 import { User } from 'app/core/user/user.types';
 import { AppConfig } from 'app/config/service.config';
 import { LogService } from '../logging/log.service';
+import { JwtService } from '../jwt/jwt.service';
 
 @Injectable({
     providedIn: 'root'
@@ -19,6 +20,7 @@ export class UserService
     constructor(
         private _httpClient: HttpClient,
         private _apiServer: AppConfig,
+        private _jwt: JwtService,
         private _logging: LogService
     )
     {
@@ -43,6 +45,15 @@ export class UserService
     {
         return this._user.asObservable();
     }
+
+    /**
+     * Getter for access token
+     */
+ 
+    get accessToken(): string
+    {
+        return localStorage.getItem('accessToken') ?? '';
+    } 
 
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
@@ -83,5 +94,19 @@ export class UserService
                 this._user.next(response);
             })
         );
+    }
+
+
+    async getUserChannels() {
+
+        let userService = this._apiServer.settings.apiServer.userService;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const httpOptions = {
+            params: {
+            userId: clientId
+            }
+        }
+        return await this._httpClient.get(userService + "/userChannels", httpOptions).toPromise();
     }
 }

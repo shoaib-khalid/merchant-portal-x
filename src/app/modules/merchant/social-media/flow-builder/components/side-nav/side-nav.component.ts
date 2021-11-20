@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
-import { JsonCodec } from 'src/app/helpers/json-codec';
-import { Helper } from 'src/app/helpers/graph-helper';
-import { ApiCallsService } from 'src/app/services/api-calls.service'
-import { HelperService } from 'src/app/services/helper.service';
+import { JsonCodec } from 'app/modules/merchant/social-media/flow-builder/components/helpers/json-codec';
+import { GraphHelper } from 'app/modules/merchant/social-media/flow-builder/components/helpers/graph-helper';
+import { HelperService } from 'app/modules/merchant/social-media/flow-builder/components/helpers/helper.service';
+import { FlowBuilderService } from 'app/modules/merchant/social-media/flow-builder/flow-builder.service';
 
 @Component({
   selector: 'side-nav',
@@ -24,13 +24,18 @@ export class SideNav {
   placeholderValue = "New Button";
 
 
-  constructor(private apiCalls: ApiCallsService, private helper: Helper, private helperService: HelperService) {
+  constructor(
+    private _flowBuilderService: FlowBuilderService, 
+    private _helperService: HelperService,
+
+    private helper: GraphHelper, 
+  ) {
   }
 
   toggle() {
     this.description = this.getDescriptionOfVertex();
     this.dataVariable = "";
-    this.apiCalls.data.forEach((element, index) => {
+    this._flowBuilderService.data$.forEach((element, index) => {
       if (element.vertexId == this.helper.v1.id) {
         this.dataVariable = element.dataVariables[0].dataVariable;
       }
@@ -83,7 +88,7 @@ export class SideNav {
     return String(digit);
   }
   handleClick(event) {
-    if (this.helperService.vertexClicked() === "TEXT_MESSAGE" || this.helperService.vertexClicked() === "MENU_MESSAGE") {
+    if (this._helperService.vertexClicked() === "TEXT_MESSAGE" || this._helperService.vertexClicked() === "MENU_MESSAGE") {
       if (event.target.id.includes("header") || event.target.id.includes("card")) {
         var id = event.target.id;
         // console.log(id)
@@ -166,22 +171,22 @@ export class SideNav {
   dataVariableFocusOut(event) {
     const vertexId = this.helper.v1.id;
     const dataValue = event.target.value
-    const length = this.apiCalls.data.length;
+    const length = this._flowBuilderService.data$.length;
     var lastId;
     if (length > 0) {
-      lastId = parseInt(this.apiCalls.data[length - 1].dataVariables[0].id);
+      lastId = parseInt(this._flowBuilderService.data$[length - 1].dataVariables[0].id);
     } else {
       lastId = -1;
     }
     var flag = false;
     for (var i = 0; i < length; i++) {
-      if (this.apiCalls.data[i].vertexId === vertexId) {
-        this.apiCalls.data[i].dataVariables[0].dataVariable = dataValue;
+      if (this._flowBuilderService.data$[i].vertexId === vertexId) {
+        this._flowBuilderService.data$[i].dataVariables[0].dataVariable = dataValue;
         flag = true;
       }
     }
     if (!flag) {
-      this.apiCalls.data.push({
+      this._flowBuilderService.data$.push({
         "vertexId": vertexId,
         "dataVariables": [
           {
@@ -217,7 +222,7 @@ export class SideNav {
   }
 
   updateDataVariableArray() {
-    this.apiCalls.data.forEach((element, index) => {
+    this._flowBuilderService.data$.forEach((element, index) => {
       if (element.vertexId == this.helper.v1.id) {
         element.type = "MENU_MESSAGE";
       }
@@ -241,16 +246,16 @@ export class SideNav {
 
   btnValueMouseOut() {
     // Send updated buttons array
-    var vertexIndex = this.helperService.getVertexIndex();
-    this.apiCalls.data[vertexIndex].buttons = this.btnValues;
+    var vertexIndex = this._helperService.getVertexIndex();
+    this._flowBuilderService.data$[vertexIndex].buttons = this.btnValues;
     // this.apiCalls.autoSaveUpdate(JsonCodec.getIndividualJson(this.helper.v1))
 
   }
 
 
   updateButtonValues() {
-    var vertexIndex = this.helperService.getVertexIndex();
-    this.btnValues = this.apiCalls.data[vertexIndex].buttons;
+    var vertexIndex = this._helperService.getVertexIndex();
+    this.btnValues = this._flowBuilderService.data$[vertexIndex].buttons;
   }
 
   deleteTriggers(i) {
