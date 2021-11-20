@@ -314,7 +314,7 @@ export class FlowsListComponent implements OnInit, AfterViewInit, OnDestroy
 
     viewDetails(flowId){
         console.log("flowId",flowId)
-        this._router.navigateByUrl('/flows/'+flowId)
+        this._router.navigateByUrl('social-media/flow-builder/'+flowId)
     }
 
 }
