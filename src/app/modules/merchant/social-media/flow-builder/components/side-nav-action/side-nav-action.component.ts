@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
-import { JsonCodec } from 'src/app/helpers/json-codec';
+import { JsonCodec } from 'app/modules/merchant/social-media/flow-builder/components/helpers/json-codec';
 import { MatDialog } from '@angular/material/dialog';
-import { Helper } from '../../../../helpers/graph-helper';
-import { ApiCallsService } from '../../../../services/api-calls.service'
-import { HelperService } from '../../../../services/helper.service'
+import { GraphHelper } from 'app/modules/merchant/social-media/flow-builder/components/helpers/graph-helper';
+import { HelperService } from 'app/modules/merchant/social-media/flow-builder/components/helpers/helper.service';
 import { ActionDialog } from '../action-dialog/action-dialog.component';
 
 @Component({
@@ -21,17 +20,21 @@ export class SideNavAction {
     dataVariable: any = "";
 
 
-    constructor(private apiCalls: ApiCallsService, private helper: Helper, private helperService: HelperService, public dialog: MatDialog) {
+    constructor(
+        private _graphHelper: GraphHelper, 
+        private _helperService: HelperService, 
+        public dialog: MatDialog
+    ) {
     }
 
     titleChange(text) {
         var strDigit = this.getStrDigit();
-        const digit = this.helper.digitFromString(strDigit);
+        const digit = this._graphHelper.digitFromString(strDigit);
         document.getElementById("header" + digit).textContent = text;
     }
 
     removeRequest(i) {
-        this.helperService.fetchExternalRequests().splice(i, 1);
+        this._helperService.fetchExternalRequests().splice(i, 1);
         this.requestsArray.splice(i, 1);
         // this.apiCalls.autoSaveUpdate(JsonCodec.getIndividualJson(this.helper.v1))
 
@@ -39,7 +42,7 @@ export class SideNavAction {
 
     handleClick(event) {
 
-        if (this.helperService.vertexClicked() === "ACTION") {
+        if (this._helperService.vertexClicked() === "ACTION") {
             if (event.target.id.includes("header") || event.target.id.includes("card")) {
                 var id = event.target.id;
                 try{
@@ -87,10 +90,10 @@ export class SideNavAction {
 
     }
     getStrDigit() {
-        if (this.helper.v1.div.firstChild.id) {
-            return this.helper.v1.div.firstChild.id;
+        if (this._graphHelper.v1.div.firstChild.id) {
+            return this._graphHelper.v1.div.firstChild.id;
         } else {
-            return this.helper.v1.div.firstChild.nextElementSibling.id;
+            return this._graphHelper.v1.div.firstChild.nextElementSibling.id;
         }
     }
 
@@ -106,7 +109,7 @@ export class SideNavAction {
             if (result != null) {
                 const headers = this.convertHeadersToJson(result[2])
                 this.requestsArray[i] = result[1];
-                this.helperService.setExternalRequest({
+                this._helperService.setExternalRequest({
                     type: "EXTERNAL_REQUEST",
                     externalRequest: {
                         url: result[1],
@@ -140,7 +143,7 @@ export class SideNavAction {
 
     requestParameters(i) {
         var data;
-        const externalRequests = this.helperService.fetchExternalRequests();
+        const externalRequests = this._helperService.fetchExternalRequests();
         const oldHeaders = this.convertJsontoHeadersArray(externalRequests[i].externalRequest.headers);
         data = {
             reqType: externalRequests[i].externalRequest.httpMethod,
@@ -157,7 +160,7 @@ export class SideNavAction {
 
     insertIntoExternalRequests() {
 
-        this.helperService.insertExternalRequest({
+        this._helperService.insertExternalRequest({
             type: "EXTERNAL_REQUEST",
             externalRequest: {
                 url: "",
@@ -184,7 +187,7 @@ export class SideNavAction {
     }
 
     updateSidePanelWithButtons() {
-        const externalRequests = this.helperService.fetchExternalRequests();
+        const externalRequests = this._helperService.fetchExternalRequests();
         this.requestsArray = [];
 
         for (var i = 0; i < externalRequests.length; i++) {

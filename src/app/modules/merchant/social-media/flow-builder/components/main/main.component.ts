@@ -1,14 +1,13 @@
 import { AfterViewInit, Component, ElementRef, ViewChild, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { BotSelectionDialogComponent } from 'src/app/modules/flow-builder/components/bot-selection-dialog/bot-selection-dialog.component';
-import { Helper } from 'src/app/helpers/graph-helper';
-import { JsonCodec } from 'src/app/helpers/json-codec';
+import { GraphHelper } from 'app/modules/merchant/social-media/flow-builder/components/helpers/graph-helper';
+import { JsonCodec } from 'app/modules/merchant/social-media/flow-builder/components/helpers/json-codec';
 import { saveAs } from 'file-saver';
-import { ApiCallsService } from "src/app/services/api-calls.service";
 import { MatDialog } from '@angular/material/dialog';
-import { HelperService } from 'src/app/services/helper.service';
-import { FlowDialog } from 'src/app/modules/flow-builder/components/flow-dialog/flow-dialog.component';
-import { HelperTextService } from 'src/app/helpers/helper-text.service';
+import { HelperService } from 'app/modules/merchant/social-media/flow-builder/components/helpers/helper.service';
+import { BotSelectionDialogComponent } from 'app/modules/merchant/social-media/flow-builder/components/bot-selection-dialog/bot-selection-dialog.component';
+import { FlowDialogComponent } from 'app/modules/merchant/social-media/flow-builder/components/flow-dialog/flow-dialog.component';
+import { FlowBuilderService } from '../../flow-builder.service';
 
 declare var mxUtils: any;
 declare var mxGraphHandler: any;
@@ -31,21 +30,23 @@ export class MainComponent implements OnInit, AfterViewInit {
    triggers: any;
    redoPointer: any;
    opened: boolean;
+
+   flowId: string;
    flowTitle: any = "";
    flowDescription: any;
    constructor(
       private helperService: HelperService,
-      private helper: Helper,
+      private _graphHelper: GraphHelper,
       private route: ActivatedRoute,
-      private configService: ApiCallsService,
+      private _flowBuilderService: FlowBuilderService,
       public dialog: MatDialog,
-      private helperTextService: HelperTextService) {
+   ) {
    }
 
    ngOnInit() {
       this.route.params.subscribe(params => {
          if (params.id) {
-            this.configService.flowId = params.id;
+            this.flowId = params.id;
             this.retrieveJsonEndpoint();
 
          }
@@ -76,7 +77,7 @@ export class MainComponent implements OnInit, AfterViewInit {
 
          this.graph.refresh();
 
-         this.helper.v1 = vertext;
+         this._graphHelper.v1 = vertext;
          return vertext;
       }
       //End callback function
@@ -84,13 +85,13 @@ export class MainComponent implements OnInit, AfterViewInit {
       //Graph configurations
       this.graph = new mxGraph(this.graphContainer.nativeElement);
       this.graph.keepEdgesInBackground = true;
-      this.helper.addAssets(this.graph);
+      this._graphHelper.addAssets(this.graph);
 
       new mxOutline(this.graph, this.outlineContainer.nativeElement);
       mxGraphHandler.prototype.guidesEnabled = true;
 
       var undoManager = new mxUndoManager();
-      this.helper.actionOnEvents(this.graph);
+      this._graphHelper.actionOnEvents(this.graph);
       var listener = async (sender, evt) => {
 
          this.redoPointer++;
@@ -213,18 +214,18 @@ export class MainComponent implements OnInit, AfterViewInit {
       this.graph.getModel().addListener(mxEvent.UNDO, listener);
       this.graph.getView().addListener(mxEvent.UNDO, listener);
       this.graph.connectionHandler.targetConnectImage = true;
-      this.helper.graphConfigurations(this.graph);
-      this.helper.setVertexStyle(this.graph);
+      this._graphHelper.graphConfigurations(this.graph);
+      this._graphHelper.setVertexStyle(this.graph);
 
       //For edge connections
-      this.graph = this.helper.connectPreview(this.graph);
+      this.graph = this._graphHelper.connectPreview(this.graph);
 
       var doc = mxUtils.createXmlDocument();
       var obj = doc.createElement('UserObject');
       this.triggers = doc.createElement('triggers');
-      this.helper.customVertex(this.graph);
+      this._graphHelper.customVertex(this.graph);
 
-      this.helper.setEdgeStyle(this.graph);
+      this._graphHelper.setEdgeStyle(this.graph);
       new mxRubberband(this.graph);
       this.graph.getModel().beginUpdate();
       this.graph.foldingEnabled = false;
@@ -268,51 +269,50 @@ export class MainComponent implements OnInit, AfterViewInit {
       }
    }
 
-   deleteMultipleVertices() { this.helper.deleteMultipleVertices(this.graph); }
+   deleteMultipleVertices() { this._graphHelper.deleteMultipleVertices(this.graph); }
 
    copyMultipleVertices() {
-      this.helper.copyMultipleVertices(this.graph);
+      this._graphHelper.copyMultipleVertices(this.graph);
    }
 
    async retrieveJsonEndpoint() {
 
       try {
-         var data: any = await this.configService.retrieveGraph();
+         var data: any = await this._flowBuilderService.retrieveGraph(this.flowId);
 
       } catch (ex) {
          console.log(ex)
       }
 
-      this.configService.data = data.data.data;
+      this._flowBuilderService.data$ = data.data.data;
       data = JSON.stringify({ mxGraphModel: data.data.mxGraphModel });
-      console.log(this.configService.data)
       JsonCodec.loadJson(this.graph, data)
       this.setFlowDetails();
 
    }
 
    async publish() {
-      const data = await this.helperService.getPublishFlowData(this.configService.flowId)
+      const data = await this.helperService.getPublishFlowData(this.flowId)
       const dialogRef = this.dialog.open(BotSelectionDialogComponent, {
          width: '550px',
          data: data
       });
    }
    addStepWithType(type, x: any = 50, y: any = 0) {
-      this.helper.vertexType = type;
+      this._graphHelper.vertexType = type;
       const v1 = this.addStep(x, y);
-      const length = this.configService.data.length;
+      const length = this._flowBuilderService.data$.length;
       var lastId
       if (length > 0) {
-         lastId = parseInt(this.configService.data[length - 1].dataVariables[0].id);
+         lastId = parseInt(this._flowBuilderService.data$[length - 1].dataVariables[0].id);
       } else {
          lastId = -1;
       }
 
       if (type === "ACTION") {
-         this.configService.data.push({
+         this._flowBuilderService.data$.push({
             "type": type,
-            "vertexId": this.helper.v1.id,
+            "vertexId": this._graphHelper.v1.id,
             "actions": [],
             "dataVariables": [
                {
@@ -324,9 +324,9 @@ export class MainComponent implements OnInit, AfterViewInit {
             ]
          });
       } else if (type === "CONDITION") {
-         this.configService.data.push({
+         this._flowBuilderService.data$.push({
             "type": type,
-            "vertexId": this.helper.v1.id,
+            "vertexId": this._graphHelper.v1.id,
             "conditions": [],
             "dataVariables": [
                {
@@ -339,9 +339,9 @@ export class MainComponent implements OnInit, AfterViewInit {
          });
       }
       else {
-         this.configService.data.push({
+         this._flowBuilderService.data$.push({
             "type": type,
-            "vertexId": this.helper.v1.id,
+            "vertexId": this._graphHelper.v1.id,
             "buttons": [],
             "dataVariables": [
                {
@@ -354,13 +354,13 @@ export class MainComponent implements OnInit, AfterViewInit {
          });
       }
       console.log('-----------------------------------------')
-      console.log(this.configService.data)
+      console.log(this._flowBuilderService.data$)
       // this.configService.autoSaveAdd(JsonCodec.getIndividualJson(this.helper.v1), type)
       return v1;
    }
 
    editDetails() {
-      const dialogRef = this.dialog.open(FlowDialog, {
+      const dialogRef = this.dialog.open(FlowDialogComponent, {
          width: '368px',
          data: { title: this.flowTitle, description: this.flowDescription, dialogTitle: "Edit flow details" }
       });
@@ -370,18 +370,18 @@ export class MainComponent implements OnInit, AfterViewInit {
             if (result[0] && result[1]) {
                this.flowTitle = result[1];
                this.flowDescription = result[0];
-               this.configService.updateFlowDetails({
+               this._flowBuilderService.updateFlowDetails({
                   title: result[1],
                   description: result[0],
                   ownerId: localStorage.getItem("ownerId")
-               });
+               }, this.flowId);
             }
          }
       });
    }
 
    async setFlowDetails() {
-      var flowDetails: any = await this.configService.retrieveFlowDetails(this.configService.flowId);
+      var flowDetails: any = await this._flowBuilderService.retrieveFlowDetails(this.flowId);
       this.flowTitle = flowDetails.data.title;
       this.flowDescription = flowDetails.data.description;
    }
@@ -389,11 +389,11 @@ export class MainComponent implements OnInit, AfterViewInit {
    async save() {
       const newStartJson:any = this.getStartJson();
       const json = {
-         "data": this.configService.data,
+         "data": this._flowBuilderService.data$,
          "mxGraphModel": JSON.parse(newStartJson).mxGraphModel
       };
-      this.configService.loadingAnimation("Updating...")
-      const data = await this.configService.postNewFlowDefaultJson(json)
-      this.configService.loadingdialogRef.close();
+      // this.configService.loadingAnimation("Updating...")
+      const data = await this._flowBuilderService.postNewFlowDefaultJson(json,this.flowId)
+      // this.configService.loadingdialogRef.close();
    }
 }

@@ -1,6 +1,6 @@
 <mat-sidenav-container class="example-container">
 	<mat-sidenav #sidenav mode="side" class="sideNav" [(opened)]="opened">
-		<img id="pin" src="assets/push-pin.svg" (click)="pin()">
+		<img id="pin" src="assets/graph/push-pin.svg" (click)="pin()">
 
 		<div class="header text-center w-100">
 			<h4>
@@ -16,7 +16,7 @@
 					<input class="button-text" type="text" value="{{name}}" (keyup)="triggerTextChange($event,i)"
 						(focusout)="triggerFocusOut($event,i)" (focus)="btnTitleFocus($event,i)" />
 
-					<img class="delete-trigger-icon" src="assets/red-cross.svg" (click)="deleteTriggers(i)" alt="" height="10px" width='10px'>
+					<img class="delete-trigger-icon" src="assets/graph/red-cross.svg" (click)="deleteTriggers(i)" alt="" height="10px" width='10px'>
 
 				</div>
 				<div id="add-button" (click)="insertButton()">Add Button</div>

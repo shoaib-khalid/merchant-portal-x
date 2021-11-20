@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiCallsService } from '../../../../services/api-calls.service'
-import { HelperService } from '../../../../services/helper.service';
-import { JsonCodec } from 'src/app/helpers/json-codec';
-import { Helper } from '../../../../helpers/graph-helper';
+import { HelperService } from 'app/modules/merchant/social-media/flow-builder/components/helpers/helper.service';
+import { JsonCodec } from 'app/modules/merchant/social-media/flow-builder/components/helpers/json-codec';
+import { GraphHelper } from 'app/modules/merchant/social-media/flow-builder/components/helpers/graph-helper';
 
 @Component({
   selector: 'app-side-nav-quick-reply',
@@ -15,8 +14,10 @@ export class SideNavQuickReplyComponent implements OnInit {
   title: any;
   description: any = "";
 
-  constructor(private apiCalls: ApiCallsService,private helper:Helper, 
-    private helperService: HelperService) { }
+  constructor(
+    private _graphHelper: GraphHelper, 
+    private helperService: HelperService
+  ) { }
 
   ngOnInit(): void {
   }
@@ -45,7 +46,7 @@ pin() {
 titleChange(text) {
 
     var strDigit = this.getStrDigit();
-    const digit = this.helper.digitFromString(strDigit);
+    const digit = this._graphHelper.digitFromString(strDigit);
     document.getElementById("header" + digit).textContent = text;
 
 }
@@ -76,20 +77,20 @@ descriptionFocusOut(event) {
 
 descriptionChange(event) {
     var strDigit = this.getStrDigit();
-    const digit = this.helper.digitFromString(strDigit);
+    const digit = this._graphHelper.digitFromString(strDigit);
     document.getElementById("initial-message" + digit).textContent = event.target.value;
 }
 
 getStrDigit() {
-    if (this.helper.v1.div.firstChild.id) {
-        return this.helper.v1.div.firstChild.id;
+    if (this._graphHelper.v1.div.firstChild.id) {
+        return this._graphHelper.v1.div.firstChild.id;
     } else {
-        return this.helper.v1.div.firstChild.nextElementSibling.id;
+        return this._graphHelper.v1.div.firstChild.nextElementSibling.id;
     }
 }
 getDescriptionOfVertex() {
     var strDigit = this.getStrDigit();
-    const digit = this.helper.digitFromString(strDigit);
+    const digit = this._graphHelper.digitFromString(strDigit);
     return document.getElementById("initial-message" + digit).textContent;
 }
 
