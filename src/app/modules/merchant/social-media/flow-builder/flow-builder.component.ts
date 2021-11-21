@@ -54,7 +54,7 @@ export class FlowBuilderComponent implements OnInit, AfterViewInit, OnDestroy
     opened: boolean;
 
     flowId: string;
-    flowTitle: any = "";
+    flowTitle: any = "Flow Title";
     flowDescription: any;
     loadingdialogRef: any;
 

@@ -1,4 +1,11 @@
-<div id="addStep" [matMenuTriggerFor]="menu" #clickmenu="matMenuTrigger"  ><img src="assets/graph/plus.png" alt=""></div>
+<div 
+  id="addStep" 
+  class="cursor-pointer bg-gray-300 w-10 h-10 rounded rounded-full p-2"
+  [matMenuTriggerFor]="menu" 
+  #clickmenu="matMenuTrigger">
+  <mat-icon
+    [svgIcon]="'heroicons_solid:menu'"></mat-icon>
+</div>
 <!-- #enddocregion mat-menu-trigger-for -->
 <mat-menu #menu="matMenu">
   <button mat-menu-item (click)= "menuClicked()">Menu/Text</button>

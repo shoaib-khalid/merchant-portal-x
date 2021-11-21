@@ -11,7 +11,7 @@ import { Output, EventEmitter } from '@angular/core';
     selector: 'menu-options',
     templateUrl: 'menu-options.component.html',
 })
-export class MenuOptions {
+export class MenuOptionsComponent {
     @ViewChild('clickmenu') menu: MatMenuTrigger;
     @Output() open: EventEmitter<any> = new EventEmitter();
 

@@ -36,6 +36,7 @@ import { ActionDialog } from 'app/modules/merchant/social-media/flow-builder/com
 import { BotSelectionDialogComponent } from 'app/modules/merchant/social-media/flow-builder/components/bot-selection-dialog/bot-selection-dialog.component';
 import { FlowDialogComponent } from 'app/modules/merchant/social-media/flow-builder/components/flow-dialog/flow-dialog.component';
 import { LoadingComponent } from 'app/modules/merchant/social-media/flow-builder/components/loading/loading.component';
+import { MenuOptionsComponent } from 'app/modules/merchant/social-media/flow-builder/components/menu-options/menu-options.component';
 
 import { socialMediaRoutes } from 'app/modules/merchant/social-media/social-media.routing';
 
@@ -49,6 +50,7 @@ import { socialMediaRoutes } from 'app/modules/merchant/social-media/social-medi
         FlowDialogComponent,
         BotSelectionDialogComponent,
         LoadingComponent,
+        MenuOptionsComponent,
 
         SideNav,
         SideNavAction,

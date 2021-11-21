@@ -1,6 +1,6 @@
 <mat-sidenav-container class="example-container">
     <mat-sidenav #sidenav mode="side" class="sideNav" [(opened)]="opened">
-        <img id="pin" src="assets/graph/push-pin.svg" (click)="pin()">
+        <img id="pin" src="assets/mxgraph/push-pin.svg" (click)="pin()">
 
         <div class="header text-center w-100">
             <h4>
@@ -14,7 +14,7 @@
                     <div >
                         <div class="inside-external-heading" (click)="openActionDialog($event,i)">External Request</div>
                         <div class="actual-req" (click)="openActionDialog($event,i)">{{req}}</div>
-                        <img src="assets/graph/cross.svg" alt="" height="10px" width="10px" (click)="removeRequest(i)">
+                        <img src="assets/mxgraph/cross.svg" alt="" height="10px" width="10px" (click)="removeRequest(i)">
                     </div>
                     <hr class="line">
                 </div>
