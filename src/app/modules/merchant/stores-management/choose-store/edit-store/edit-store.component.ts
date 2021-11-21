@@ -6,10 +6,11 @@ import { Observable } from 'rxjs';
 import { LocaleService } from 'app/core/locale/locale.service';
 import { Locale } from 'app/core/locale/locale.types';
 import { StoresService } from 'app/core/store/store.service';
-import { Store, StoreRegionCountries, CreateStore } from 'app/core/store/store.types';
+import { Store, StoreRegionCountries, CreateStore, StoreAssets } from 'app/core/store/store.types';
 import { ActivatedRoute, Router } from '@angular/router';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { debounce } from 'lodash';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
 
 @Component({
     selector     : 'edit-store-page',
@@ -23,9 +24,11 @@ export class EditStoreComponent implements OnInit
     @ViewChild('supportNgForm') supportNgForm: NgForm;
 
     storeId: string;
+    
+    domainName:string;
 
     alert: any;
-    createStoreForm: FormGroup;
+    editStoreForm: FormGroup;
     otherStoreForm: FormGroup;
 
     statesList: any;
@@ -46,11 +49,7 @@ export class EditStoreComponent implements OnInit
     storeOpenCloseTime: any;
     storeTiming: FormArray;
 
-    // Image part
-    
-    progressInfos: any[] = [];
-    message: string[] = [];
-    
+    // Image part    
     files: any;
     imageInfos?: Observable<any>;
     
@@ -93,7 +92,7 @@ export class EditStoreComponent implements OnInit
     ngOnInit(): void
     {
         // Create the support form
-        this.createStoreForm = this._formBuilder.group({
+        this.editStoreForm = this._formBuilder.group({
             name               : ['', Validators.required],
             domain             : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
             storeDescription   : ['', [Validators.required, Validators.maxLength(100)]],
@@ -161,7 +160,7 @@ export class EditStoreComponent implements OnInit
         // })
 
         this.storeOpenCloseTime.forEach(item => {
-            this.storeTiming = this.createStoreForm.get('storeTiming') as FormArray;
+            this.storeTiming = this.editStoreForm.get('storeTiming') as FormArray;
             this.storeTiming.push(this._formBuilder.group(item));
         });
 
@@ -187,31 +186,37 @@ export class EditStoreComponent implements OnInit
         // Logo & Banner
         this.files = [
             { 
-                type: "logo-image", 
+                type: "logo", 
+                fileSource: null,
                 selectedFileName: "", 
                 selectedFiles: null, 
                 recommendedImageWidth: "500", 
                 recommendedImageHeight: "500", 
                 selectedImageWidth: "", 
-                selectedImageHeight: ""
+                selectedImageHeight: "",
+                toDelete: false
             },
             { 
-                type: "banner-desktop-image", 
+                type: "banner", 
+                fileSource: null,
                 selectedFileName: "", 
                 selectedFiles: null, 
                 recommendedImageWidth: "1110", 
                 recommendedImageHeight: "250", 
                 selectedImageWidth: "", 
-                selectedImageHeight: ""
+                selectedImageHeight: "",
+                toDelete: false
             },
             { 
-                type: "banner-mobile-image", 
+                type: "bannerMobile", 
+                fileSource: null,
                 selectedFileName: "", 
                 selectedFiles: null, 
                 recommendedImageWidth: "950", 
                 recommendedImageHeight: "260", 
                 selectedImageWidth: "", 
-                selectedImageHeight: ""
+                selectedImageHeight: "",
+                toDelete: false
             },
         ];
 
@@ -219,20 +224,29 @@ export class EditStoreComponent implements OnInit
 
         this._storesService.getStoresById(this.storeId).subscribe(
            (response) => {
-                console.log("response",response);
-                this.createStoreForm.get('name').patchValue(response.name)
-                this.createStoreForm.get('domain').patchValue(response.domain)
-                this.createStoreForm.get('storeDescription').patchValue(response.storeDescription)
-                this.createStoreForm.get('email').patchValue(response.email)
-                this.createStoreForm.get('phoneNumber').patchValue(response.phoneNumber)
-                this.createStoreForm.get('address').patchValue(response.address)
-                this.createStoreForm.get('city').patchValue(response.city)
-                this.createStoreForm.get('postcode').patchValue(response.postcode)
-                // this.createStoreForm.get('state').patchValue(response.regionCountryStateId)
-                this.createStoreForm.get('deliveryType').patchValue("SELF_DELIVERY")
-                this.createStoreForm.get('paymentType').patchValue(response.paymentType)
-                this.createStoreForm.get('verticleCode').patchValue(response.verticalCode);
 
+                // get subdomain from store domain
+                let subdomain = response.domain.split(".")[0];
+                // domain in form here is actually subdomain
+                this.editStoreForm.get('domain').patchValue(subdomain);
+                // set domain name 
+                this.domainName = "." + response.domain.split(".")[1] + "." + response.domain.split(".")[2];
+
+                this.editStoreForm.get('name').patchValue(response.name)
+                this.editStoreForm.get('storeDescription').patchValue(response.storeDescription)
+                this.editStoreForm.get('email').patchValue(response.email)
+                this.editStoreForm.get('phoneNumber').patchValue(response.phoneNumber)
+                this.editStoreForm.get('address').patchValue(response.address)
+                this.editStoreForm.get('city').patchValue(response.city)
+                this.editStoreForm.get('postcode').patchValue(response.postcode)
+                // this.editStoreForm.get('state').patchValue(response.regionCountryStateId)
+                this.editStoreForm.get('deliveryType').patchValue("SELF_DELIVERY")
+                this.editStoreForm.get('paymentType').patchValue(response.paymentType)
+                this.editStoreForm.get('verticleCode').patchValue(response.verticalCode);
+
+                this.files[0].fileSource = response.storeAsset.logoUrl;
+                this.files[1].fileSource = response.storeAsset.bannerUrl;
+                this.files[2].fileSource = response.storeAsset.bannerMobileUrl;
            } 
         );
         
@@ -264,7 +278,7 @@ export class EditStoreComponent implements OnInit
             });
 
             // country (using form builder variable)
-            this.createStoreForm.get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
+            this.editStoreForm.get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
             
             // Mark for check
             this._changeDetectorRef.markForCheck();
@@ -272,10 +286,10 @@ export class EditStoreComponent implements OnInit
 
         // set required value that does not appear in register-store.component.html
         let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
-        this.createStoreForm.get('clientId').patchValue(clientId);
+        this.editStoreForm.get('clientId').patchValue(clientId);
 
-        this.createStoreForm.get('isBranch').patchValue(false);
-        this.createStoreForm.get('isSnooze').patchValue(false);
+        this.editStoreForm.get('isBranch').patchValue(false);
+        this.editStoreForm.get('isSnooze').patchValue(false);
 
 
     }
@@ -309,7 +323,7 @@ export class EditStoreComponent implements OnInit
     // }
 
     // addStoreTiming(): void{
-    //     this.storeTiming = this.createStoreForm.get('storeTiming') as FormArray;
+    //     this.storeTiming = this.editStoreForm.get('storeTiming') as FormArray;
     //     this.storeTiming.push(this.createStoreTiming());
     // }
 
@@ -319,7 +333,7 @@ export class EditStoreComponent implements OnInit
     updateForm(): void
     {
         // Do nothing if the form is invalid
-        if ( this.createStoreForm.invalid )
+        if ( this.editStoreForm.invalid )
         {
             return;
         }
@@ -335,19 +349,13 @@ export class EditStoreComponent implements OnInit
 
         // this will remove the item from the object
         const { allowScheduledDelivery, allowStorePickup, storeTiming
-                ,...createStoreBody}  = this.createStoreForm.value;
-
-        console.log("createStoreBody: ",createStoreBody)
+                ,...createStoreBody}  = this.editStoreForm.value;
 
         // Disable the form
-        this.createStoreForm.disable();
-
+        this.editStoreForm.disable();
 
         this._storesService.update(this.storeId, createStoreBody)
             .subscribe((response) => {
-
-                console.log("this._storesService.post: ", response);
-
                 /**
                  * 
                  * Register Store Timing Section
@@ -355,8 +363,6 @@ export class EditStoreComponent implements OnInit
                  */
 
                 // this will remove the item from the object
-                console.log("storeTiming: ", storeTiming);
-
                 let storeId = response.data.id;
 
                 storeTiming.forEach(item => {
@@ -364,12 +370,40 @@ export class EditStoreComponent implements OnInit
                         .subscribe((response)=>{});
                 });
 
+                let _assets = {};
+                const formData = new FormData();
+                this.files.forEach(item =>{
+                    console.log(item);
+                    if (item.selectedFiles !== null){
+                        formData.append(item.type,item.selectedFiles[0])
+                    }
+
+                    if (item.toDelete === true && item.type === 'logo'){
+                        this._storesService.deleteAssetsLogo(this.storeId).subscribe();
+                    }
+                    if (item.toDelete === true && item.type === 'banner'){
+                        this._storesService.deleteAssetsBanner(this.storeId).subscribe();
+                    }
+                });
+                
+                if (_assets) {
+                    this._storesService.postAssets(this.storeId, formData).subscribe(
+                      (event: any) => {
+                        if (event instanceof HttpResponse) {
+                          console.log('Uploaded the file successfully');
+                        }
+                      },
+                      (err: any) => {
+                          console.log('Could not upload the file');
+                      });
+                }
+
                 // Navigate to the confirmation required page
                 // this._router.navigateByUrl('/stores');
             },
             (response) => {
                 // Re-enable the form
-                this.createStoreForm.enable();
+                this.editStoreForm.enable();
 
                 // Reset the form
                 this.clearForm();
@@ -396,17 +430,16 @@ export class EditStoreComponent implements OnInit
         }, 7000);
 
         // Enable the form
-        this.createStoreForm.enable();
+        this.editStoreForm.enable();
     }
 
     updateStates(countryId: string){
 
         // reset current regionCountryStateId
-        this.createStoreForm.get('regionCountryStateId').patchValue("");
+        this.editStoreForm.get('regionCountryStateId').patchValue("");
 
         // Get states by country (using symplified backend)
         this._storesService.getStoreRegionCountryState(countryId).subscribe((response)=>{
-            console.log("this._storesService.getStoreRegionCountryState(countryId): ", response);
             this.statesByCountry = response.data.content;
         });
 
@@ -417,14 +450,14 @@ export class EditStoreComponent implements OnInit
     async checkExistingURL(url: string){
         let status = await this._storesService.getExistingURL(url);
         if (status === 409){
-            this.createStoreForm.get('domain').setErrors({domainAlreadyTaken: true});
+            this.editStoreForm.get('domain').setErrors({domainAlreadyTaken: true});
         }
     }
     
     async checkExistingName(name:string){
         let status = await this._storesService.getExistingName(name);
         if (status === 409){
-            this.createStoreForm.get('name').setErrors({storeNameAlreadyTaken: true});
+            this.editStoreForm.get('name').setErrors({storeNameAlreadyTaken: true});
         }
 
     }
@@ -451,18 +484,16 @@ export class EditStoreComponent implements OnInit
     }
 
     /**
-     * tahu la
+     * 
      * @param event 
      */
     selectFiles(fileType,event: any): void {
-        this.message = [];
-        this.progressInfos = [];
       
         // find index of object this.files
         let index = this.files.findIndex(preview => preview.type === fileType);
 
         // set each of the attributes
-        this.files[index].fileName = "";
+        this.files[index].fileSource = null;
         this.files[index].selectedFileNames = "";
         this.files[index].selectedFiles = event.target.files;
 
@@ -470,9 +501,13 @@ export class EditStoreComponent implements OnInit
             const numberOfFiles = this.files[index].selectedFiles.length;
             for (let i = 0; i < numberOfFiles; i++) {
             const reader = new FileReader();
-        
+            
             reader.onload = (e: any) => {
-                this.files[index].fileName = e.target.result;
+                
+                // set this.files[index].delete to false 
+                this.files[index].toDelete = false;
+
+                this.files[index].fileSource = e.target.result;
 
                 var image = new Image();
                 image.src = e.target.result;
@@ -486,7 +521,7 @@ export class EditStoreComponent implements OnInit
 
                 this._changeDetectorRef.markForCheck();                
             };
-            console.log("this.files[index].selectedFiles[i]",this.files[index].selectedFiles[i])
+            console.log("this.files["+index+"].selectedFiles["+i+"]",this.files[index].selectedFiles[i])
             reader.readAsDataURL(this.files[index].selectedFiles[i]);
             console.log("sini")
             this.files[index].selectedFileNames = this.files[index].selectedFiles[i].name;
@@ -496,36 +531,11 @@ export class EditStoreComponent implements OnInit
         this._changeDetectorRef.markForCheck();
     }
 
-    uploadFiles(): void {
-        this.message = [];
-      
-        if (this.selectedFiles) {
-          for (let i = 0; i < this.selectedFiles.length; i++) {
-            // this.upload(i, this.selectedFiles[i]);
-          }
-        }
-    }
+    deletefiles(index: number) { 
+        this.files[index].toDelete = true;
+        this.files[index].fileSource = '';
 
-    upload(idx: number, file: File): void {
-        this.progressInfos[idx] = { value: 0, fileName: file.name };
-      
-        // if (file) {
-        //   this.uploadService.upload(file).subscribe(
-        //     (event: any) => {
-        //       if (event.type === HttpEventType.UploadProgress) {
-        //         this.progressInfos[idx].value = Math.round(100 * event.loaded / event.total);
-        //       } else if (event instanceof HttpResponse) {
-        //         const msg = 'Uploaded the file successfully: ' + file.name;
-        //         this.message.push(msg);
-        //         this.imageInfos = this.uploadService.getFiles();
-        //       }
-        //     },
-        //     (err: any) => {
-        //       this.progressInfos[idx].value = 0;
-        //       const msg = 'Could not upload the file: ' + file.name;
-        //       this.message.push(msg);
-        //     });
-        // }
+        this._changeDetectorRef.markForCheck();
     }
     
 }
