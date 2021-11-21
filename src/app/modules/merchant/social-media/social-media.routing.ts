@@ -5,6 +5,9 @@ import { FlowsListResolver } from 'app/modules/merchant/social-media/flows-list/
 import { FlowBuilderComponent } from 'app/modules/merchant/social-media/flow-builder/flow-builder.component';
 import { FlowBuilderResolver } from 'app/modules/merchant/social-media/flow-builder/flow-builder.resolvers';
 
+import { ChannelsListComponent } from './channels-list/channels-list.component';
+import { ChannelsListResolver } from './channels-list/channels-list.resolvers';
+
 export const socialMediaRoutes: Route[] = [
     {
         path     : '',
@@ -25,6 +28,13 @@ export const socialMediaRoutes: Route[] = [
         component: FlowBuilderComponent,
         resolve  : {
             data: FlowBuilderResolver,
+        }
+    },
+    {
+        path     : 'channels',
+        component: ChannelsListComponent,
+        resolve  : {
+            data: ChannelsListResolver,
         }
     }
 ];

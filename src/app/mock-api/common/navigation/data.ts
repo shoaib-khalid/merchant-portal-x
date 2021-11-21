@@ -74,10 +74,17 @@ export const defaultNavigation: FuseNavigationItem[] = [
         icon : 'heroicons_outline:chat-alt-2',
         children: [
             {
-                id   : 'apps.ecommerce.inventory',
+                id   : 'apps.flow.management',
                 title: 'Flows Management',
                 type : 'basic',
                 link : '/social-media',
+                exactMatch: true
+            },
+            {
+                id   : 'apps.channel.management',
+                title: 'Channels Management',
+                type : 'basic',
+                link : '/social-media/channels',
                 exactMatch: true
             }
         ]
