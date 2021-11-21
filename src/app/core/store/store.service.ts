@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, ReplaySubject, Subject, throwError } from 'rxjs';
 import { switchMap, take, map, tap, catchError } from 'rxjs/operators';
-import { Store, StoreRegionCountries, StoreTiming, StorePagination } from 'app/core/store/store.types';
+import { Store, StoreRegionCountries, StoreTiming, StorePagination, StoreAssets } from 'app/core/store/store.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { takeUntil } from 'rxjs/operators';
@@ -245,7 +245,19 @@ export class StoresService
             }
         };
         
-        return this._httpClient.post(productService + '/stores', storeBody , header);
+        return this.store$.pipe(
+            take(1),
+            // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
+            switchMap(stores => this._httpClient.post<Store>(productService + '/stores', storeBody , header).pipe(
+                map((response) => {
+
+                    this._logging.debug("Response from StoresService (Create Store)",response);
+
+                    // Return the new product
+                    return response;
+                })
+            ))
+        );
     }
 
     /**
@@ -266,7 +278,19 @@ export class StoresService
             }
         };
         
-        return this._httpClient.put(productService + '/stores/' + storeId , storeBody , header);
+        return this.store$.pipe(
+            take(1),
+            // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
+            switchMap(stores => this._httpClient.put<Store>(productService + '/stores/' + storeId , storeBody , header).pipe(
+                map((response) => {
+
+                    this._logging.debug("Response from StoresService (Edit Store)",response);
+
+                    // Return the new product
+                    return response;
+                })
+            ))
+        );
     }
 
     /**
@@ -291,7 +315,9 @@ export class StoresService
         return this.stores$.pipe(
             take(1),
             switchMap(stores => this._httpClient.delete(productService +'/stores/' + storeId, header).pipe(
-                map((status: number) => {
+                map((response) => {
+
+                    this._logging.debug("Response from StoresService (Delete Store)",response);
 
                     // Find the index of the deleted product
                     const index = stores.findIndex(item => item.id === storeId);
@@ -303,7 +329,7 @@ export class StoresService
                     this._stores.next(stores);
 
                     let isDeleted:boolean = false;
-                    if (status === 200) {
+                    if (response["status"] === 200) {
                         isDeleted = true
                     }
 
@@ -390,13 +416,53 @@ export class StoresService
         return response.data;
     }
 
-    // async getStoreBaseUrl(storeId: string){
-    //     let storeFrontDomain = this._apiServer.settings.storeFrontDomain;
-    //     console.log("storeId",storeId)
-    //     // await console.log(this.get(storeId));
-    //     console.log("storeSubDomain",this._storeSubDomain)
-    //     return 'https://'  + storeFrontDomain;
-    // }
+    postAssets(storeId: string, storeAssets): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.post<any>(productService + '/stores/' + storeId + '/assets', storeAssets , header ).pipe(
+            map((response) => {
+                this._stores.next(response);
+            })
+        );
+    }
+
+    deleteAssetsBanner(storeId: string): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.delete<any>(productService + '/stores/' + storeId + '/assets/banner' , header ).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (deleteAssetsBanner)",response);
+            })
+        );
+    }
+
+    deleteAssetsLogo(storeId: string): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.delete<any>(productService + '/stores/' + storeId + '/assets/logo' , header ).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (deleteAssetsLogo)",response);
+            })
+        );
+    }
     
     async getExistingName(name:string){
         let productService = this._apiServer.settings.apiServer.productService;

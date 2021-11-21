@@ -42,14 +42,6 @@ export interface Store
     storeAsset?: StoreAssets;
 }
 
-export interface StoreAssets
-{
-    storeId: string;
-    logoUrl: string;
-    bannerUrl: string;
-    bannerMobileUrl: string;
-}
-
 export interface CreateStore
 {
     address: string;
@@ -101,10 +93,10 @@ export interface StoreRegionCountries
 
 export interface StoreAssets
 {
-    bannerMobileUrl: string;
-    bannerUrl: string;
-    logoUrl: string;
-    storeId: string;
+    bannerMobileUrl?: string;
+    bannerUrl?: string;
+    logoUrl?: string;
+    storeId?: string;
 }
 
 export interface StorePagination
