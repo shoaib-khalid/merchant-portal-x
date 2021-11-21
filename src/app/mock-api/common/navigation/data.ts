@@ -79,13 +79,6 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 type : 'basic',
                 link : '/social-media',
                 exactMatch: true
-            },
-            {
-                id   : 'apps.ecommerce.inventory',
-                title: 'Flow Builder',
-                type : 'basic',
-                link : '/social-media/flow-builder',
-                exactMatch: true
             }
         ]
     },

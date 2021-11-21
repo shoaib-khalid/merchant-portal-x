@@ -1,1 +1,1 @@
-mxBasePath = 'assets/graph';
+mxBasePath = 'assets/mxgraph';

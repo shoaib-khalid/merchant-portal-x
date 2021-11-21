@@ -5,13 +5,13 @@ export class Card {
     </div>
     <span class="tooltip-text">
         <div class="d-inline img-icon mr-2">
-        <img class="delete" src="assets/graph/delete.png" />
+        <img class="delete" src="assets/mxgraph/delete.png" />
         </div>  
-        <img  class="img-icon copy"src="assets/graph/copy.png"/>
+        <img  class="img-icon copy"src="assets/mxgraph/copy.png"/>
       </span>      
           <div class="card" style='border-radius:35px;border:0px;width:300px; min-height:200px;'>
             <div id="card-header`+ id + `"class="card-header" style='background-color:white;border-radius:35px;border:0px;' >
-              <img src="assets/graph/`+ icon + `" class="start-icon float-left" alt="..." style="width:35px;height=35px">
+              <img src="assets/mxgraph/`+ icon + `" class="start-icon float-left" alt="..." style="width:35px;height=35px">
               <div style='margin-left:60px;margin-top:5px;'>
                 <h4 id="header`+ id + `"class="header">` + title + `</h4>
               </div>
@@ -31,14 +31,14 @@ export class Card {
     </div>
     <span class="tooltip-text">
         <div class="d-inline img-icon mr-2">
-        <img class="delete" src="assets/graph/delete.png" />
+        <img class="delete" src="assets/mxgraph/delete.png" />
         </div>  
-        <img  class="img-icon copy"src="assets/graph/copy.png"/>
+        <img  class="img-icon copy"src="assets/mxgraph/copy.png"/>
       </span>
       
           <div class="card" style='border-radius:35px;border:0px;width:300px; min-height:200px;'>
             <div id="card-header`+ id + `"class="card-header actionHeader" style="background-color:white;border-radius:35px;border:0px;'">
-              <img src="assets/graph/`+ icon + `" class="start-icon float-left" alt="..." style="width:35px;height=35px">
+              <img src="assets/mxgraph/`+ icon + `" class="start-icon float-left" alt="..." style="width:35px;height=35px">
               <div style='margin-left:60px;margin-top:5px;'>
                 <h4 id="header`+ id + `"class="header">` + title + `</h4>
               </div>
@@ -58,14 +58,14 @@ export class Card {
     </div>
     <span class="tooltip-text">
         <div class="d-inline img-icon mr-2">
-        <img class="delete" src="assets/graph/delete.png" />
+        <img class="delete" src="assets/mxgraph/delete.png" />
         </div>  
-        <img  class="img-icon copy"src="assets/graph/copy.png"/>
+        <img  class="img-icon copy"src="assets/mxgraph/copy.png"/>
       </span>
       
           <div class="card" style='border-radius:35px;border:0px;width:300px; min-height:200px;'>
             <div id="card-header`+ id + `"class="card-header actionHeader" style="background-color: white;border-radius:35px;border:0px;">
-              <img src="assets/graph/`+ icon + `" class="start-icon float-left" alt="..." style="width:35px;height=35px">
+              <img src="assets/mxgraph/`+ icon + `" class="start-icon float-left" alt="..." style="width:35px;height=35px">
               <div style='margin-left:60px;margin-top:5px;'>
                 <h4 id="header`+ id + `"class="header">` + title + `</h4>
               </div>
@@ -88,13 +88,13 @@ export class Card {
     </div>
     <span class="tooltip-text">
         <div class="d-inline img-icon mr-2">
-        <img class="delete" src="assets/graph/delete.png" />
+        <img class="delete" src="assets/mxgraph/delete.png" />
         </div>  
-        <img  class="img-icon copy"src="assets/graph/copy.png"/>
+        <img  class="img-icon copy"src="assets/mxgraph/copy.png"/>
       </span>
           <div class="card" style='border-radius:35px;border:0px;width:300px; min-height:200px;'>
             <div id="card-header`+ id + `"class="card-header" style='background-color:white;border-radius:35px;border:0px;' >
-              <img src="assets/graph/`+ icon + `" class="start-icon float-left" alt="..." style="width:35px;height=35px">
+              <img src="assets/mxgraph/`+ icon + `" class="start-icon float-left" alt="..." style="width:35px;height=35px">
               <div style='margin-left:60px;margin-top:5px;'>
                 <h4 id="header`+ id + `"class="header">` + title + `</h4>
               </div>
@@ -114,13 +114,13 @@ export class Card {
     </div>
     <span class="tooltip-text">
         <div class="d-inline img-icon mr-2">
-        <img class="delete" src="assets/graph/delete.png" />
+        <img class="delete" src="assets/mxgraph/delete.png" />
         </div>  
-        <img  class="img-icon copy"src="assets/graph/copy.png"/>
+        <img  class="img-icon copy"src="assets/mxgraph/copy.png"/>
       </span>
           <div class="card" style='border-radius:35px;border:0px;width:300px; min-height:200px;'>
             <div id="card-header`+ id + `"class="card-header" style='background-color:white;border-radius:35px;border:0px;' >
-              <img src="assets/graph/`+ icon + `" class="start-icon float-left" alt="..." style="width:35px;height=35px">
+              <img src="assets/mxgraph/`+ icon + `" class="start-icon float-left" alt="..." style="width:35px;height=35px">
               <div style='margin-left:60px;margin-top:5px;'>
                 <h4 id="header`+ id + `"class="header">` + title + `</h4>
               </div>
@@ -140,7 +140,7 @@ export class Card {
 
   private static _triggerButton: string = `<div class="row">
     <div class="col-md-12">
-      <button type="button" class="btn btn-outline-primary btn-block mb-2"> <img src="assets/graph/icons/door-open.svg" alt="" width="32" height="32"> Trigger 1 </button>
+      <button type="button" class="btn btn-outline-primary btn-block mb-2"> <img src="assets/mxgraph/icons/door-open.svg" alt="" width="32" height="32"> Trigger 1 </button>
     </div>
   </div>`;
 

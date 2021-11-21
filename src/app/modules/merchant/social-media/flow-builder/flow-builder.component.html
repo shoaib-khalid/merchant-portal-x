@@ -55,26 +55,69 @@
                 <!-- Recent transactions table -->
                 <div class="xl:col-span-2 flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden">
                     
-                    <div class="flex flex-col sm:flex-row p-6 sm:justify-between">
-                        <div class="flex w-full">
-                            <div class="flex-0">
-                                <div class="mr-4 text-lg font-medium tracking-tight leading-6 truncate">Recent transactions</div>
-                                <div class="text-secondary font-medium">1 pending, 4 completed</div>
+                    <div class="flex flex-row p-6">
+                        <div class="flex flex-col w-full mr-3">
+                            <div class="flex w-full justify-between">
+                                <div class="flex-0">
+                                    <div class="mr-4 text-lg font-medium tracking-tight leading-6 truncate">{{flowTitle}}</div>
+                                    <div class="text-secondary font-medium">1 pending, 4 completed</div>
+                                </div>
                             </div>
+                            <div class="flex w-full justify-between mt-4">
+                                <div class="flex flex-wrap">
+                                    <menu-options (open)="addStepWithType($event)"></menu-options>
+                                    <div 
+                                        class="cursor-pointer bg-gray-300 w-10 h-10 rounded rounded-full p-2 ml-2"
+                                        (click)="zoomIn()">
+                                        <mat-icon
+                                            [svgIcon]="'heroicons_solid:plus'"></mat-icon>
+                                    </div>
+                                    <div 
+                                        class="cursor-pointer bg-gray-300 w-10 h-10 rounded rounded-full p-2 ml-2"
+                                        (click)="zoomOut()">
+                                        <mat-icon
+                                            [svgIcon]="'heroicons_solid:minus'"></mat-icon>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button
+                                        class="hidden sm:inline-flex"
+                                        mat-flat-button
+                                        (click)="save()"
+                                        [color]="'primary'">
+                                        <mat-icon
+                                            class="icon-size-5"
+                                            [svgIcon]="'heroicons_solid:archive'"></mat-icon>
+                                        <span class="ml-2">Update</span>
+                                    </button>
+                                    <button
+                                        class="hidden sm:inline-flex ml-3"
+                                        mat-flat-button
+                                        (click)="publish()"
+                                        [color]="'primary'">
+                                        <mat-icon
+                                            class="icon-size-5"
+                                            [svgIcon]="'heroicons_solid:cloud-upload'"></mat-icon>
+                                        <span class="ml-2">Publish Flow</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex border border-gray-500 rounded">
+                            <div #outlineContainer
+                            style="overflow:hidden;width:160px;height:100px;background:transparent;">
+                        </div>
                         </div>
                     </div>
                     <div>
-                        <div class="overflow-x-auto mx-6">
-                            <div #outlineContainer
-                                style="z-index:1;position:absolute;overflow:hidden;top:55px;right:0px;width:160px;height:120px;background:transparent;border-style:solid;border-color:lightgray;">
-                            </div>
-                            <div #graphContainer id="graphContainer">
+                        <div class="overflow-hidden mx-6">
+                            <div style="background-size: 30px 30px; background-image: linear-gradient(to right, grey 1px, transparent 1px), linear-gradient(to bottom, grey 1px, transparent 1px);" #graphContainer id="graphContainer">
                                 <side-nav></side-nav>
                                 <side-nav-action></side-nav-action>
                                 <side-nav-handover></side-nav-handover>
                                 <side-nav-condition></side-nav-condition>
                                 <app-side-nav-quick-reply></app-side-nav-quick-reply>
-                            </div>
+                            </div> 
                         </div>
                     </div>
                 </div>
