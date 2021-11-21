@@ -39,12 +39,14 @@ import { LoadingComponent } from 'app/modules/merchant/social-media/flow-builder
 import { MenuOptionsComponent } from 'app/modules/merchant/social-media/flow-builder/components/menu-options/menu-options.component';
 
 import { socialMediaRoutes } from 'app/modules/merchant/social-media/social-media.routing';
+import { ChannelsListComponent } from './channels-list/channels-list.component';
 
 
 @NgModule({
     declarations: [
         FlowBuilderComponent,
         FlowsListComponent,
+        ChannelsListComponent,
 
         ActionDialog,
         FlowDialogComponent,
