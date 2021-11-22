@@ -273,25 +273,25 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
         const dialogRef = this._dialog.open(CreateDiscountComponent, { disableClose: true });
         dialogRef.afterClosed().subscribe(result => {
             console.log(result);
-            if (result.status !== false) {
-                // this will remove the item from the object
-                const createDiscountBody  = this.selectedDiscountForm.getRawValue();
+            // if (result.status !== false) {
+            //     // this will remove the item from the object
+            //     const createDiscountBody  = this.selectedDiscountForm.getRawValue();
     
-                console.log("createDiscountBody", createDiscountBody)
+            //     console.log("createDiscountBody", createDiscountBody)
     
-                // Create the discount
-                this._discountService.createDiscount(createDiscountBody).subscribe(async (newDiscount) => {
+            //     // Create the discount
+            //     this._discountService.createDiscount(createDiscountBody).subscribe(async (newDiscount) => {
                     
-                    // Go to new discount
-                    this.selectedDiscount = newDiscount["data"];
+            //         // Go to new discount
+            //         this.selectedDiscount = newDiscount["data"];
     
-                    // Update current form with new discount data
-                    this.selectedDiscountForm.patchValue(newDiscount["data"]);
+            //         // Update current form with new discount data
+            //         this.selectedDiscountForm.patchValue(newDiscount["data"]);
     
-                    // Mark for check
-                    this._changeDetectorRef.markForCheck();
-                });
-            }
+            //         // Mark for check
+            //         this._changeDetectorRef.markForCheck();
+            //     });
+            // }
         });
     }
 
