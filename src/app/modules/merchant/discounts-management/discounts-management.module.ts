@@ -18,10 +18,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { SharedModule } from 'app/shared/shared.module';
 import { DiscountsComponent } from 'app/modules/merchant/discounts-management/list/discounts.component';
 import { discountsManagementRoutes } from 'app/modules/merchant/discounts-management/discounts-management.routing';
+import { CreateDiscountComponent } from './create-discount/create-discount.component';
 
 @NgModule({
     declarations: [
         DiscountsComponent,
+        CreateDiscountComponent
     ],
     imports     : [
         RouterModule.forChild(discountsManagementRoutes),

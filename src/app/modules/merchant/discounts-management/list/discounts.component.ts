@@ -1,18 +1,15 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { Overlay, OverlayRef } from '@angular/cdk/overlay';
-import { TemplatePortal } from '@angular/cdk/portal';
 import { merge, Observable, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { Discount, DiscountVariant, DiscountVariantAvailable, DiscountInventory, DiscountCategory, DiscountPagination, StoreDiscountTierList } from 'app/modules/merchant/discounts-management/list/discounts.types';
+import { Discount, DiscountPagination, StoreDiscountTierList } from 'app/modules/merchant/discounts-management/list/discounts.types';
 import { DiscountsService } from 'app/modules/merchant/discounts-management/list/discounts.service';
-import { Store } from 'app/core/store/store.types';
-import { StoresService } from 'app/core/store/store.service';
+import { CreateDiscountComponent } from '../create-discount/create-discount.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
     selector       : 'discounts',
@@ -43,24 +40,13 @@ import { StoresService } from 'app/core/store/store.service';
 })
 export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
 {
-    @ViewChild('avatarFileInput') private _avatarFileInput: ElementRef;
     @ViewChild(MatPaginator) private _paginator: MatPaginator;
     @ViewChild(MatSort) private _sort: MatSort;
-    @ViewChild('variantsPanel') private _variantsPanel: TemplateRef<any>;
-    @ViewChild('variantsPanelOrigin') private _variantsPanelOrigin: ElementRef;
-
-    // get current store
-    store$: Store;
 
     // discount
     discounts$: Observable<Discount[]>;
     selectedDiscount: Discount | null = null;
     selectedDiscountForm: FormGroup;
-
-    // discountsTierList$: Observable<StoreDiscountTierList[]>;
-    // selectedDiscountTierList: StoreDiscountTierList | null = null;
-    // selectedDiscountTierListForm: FormGroup;
-
     storeDiscountTierList: FormArray;
     
     pagination: DiscountPagination;
@@ -79,7 +65,7 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
         private _fuseConfirmationService: FuseConfirmationService,
         private _formBuilder: FormBuilder,
         private _discountService: DiscountsService,
-        private _storesService: StoresService
+        public _dialog: MatDialog,
     )
     {
     }
@@ -126,18 +112,6 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
             storeDiscountTierList : this._formBuilder.array([]),
         });
 
-        // Get the stores
-        this._storesService.store$
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((store: Store) => {
-
-                // Update the pagination
-                this.store$ = store;
-
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            });
-    
         // Get the discounts
         this.discounts$ = this._discountService.discounts$;
         
@@ -260,7 +234,7 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
                 (this.selectedDiscountForm.get('storeDiscountTierList') as FormArray).clear();
 
                 // load discount tier form array with data frombackend
-                discount.storeDiscountTierList.forEach(item => {
+                discount.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
                     this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
                     this.storeDiscountTierList.push(this._formBuilder.group(item));
                 });
@@ -294,20 +268,30 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
     /**
      * Create discount
      */
-    createDiscount(categoryId): void
+    createDiscount(): void
     {
-
-        // Create the discount
-        this._discountService.createDiscount(categoryId).subscribe(async (newDiscount) => {
-            
-            // Go to new discount
-            this.selectedDiscount = newDiscount["data"];
-
-            // Update current form with new discount data
-            this.selectedDiscountForm.patchValue(newDiscount["data"]);
-
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
+        const dialogRef = this._dialog.open(CreateDiscountComponent, { disableClose: true });
+        dialogRef.afterClosed().subscribe(result => {
+            console.log(result);
+            if (result.status !== false) {
+                // this will remove the item from the object
+                const createDiscountBody  = this.selectedDiscountForm.getRawValue();
+    
+                console.log("createDiscountBody", createDiscountBody)
+    
+                // Create the discount
+                this._discountService.createDiscount(createDiscountBody).subscribe(async (newDiscount) => {
+                    
+                    // Go to new discount
+                    this.selectedDiscount = newDiscount["data"];
+    
+                    // Update current form with new discount data
+                    this.selectedDiscountForm.patchValue(newDiscount["data"]);
+    
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                });
+            }
         });
     }
 
@@ -318,25 +302,25 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
     {
         // Get
         // let storeFrontDomain = this._apiServer.settings.storeFrontDomain;
-        let storeFrontDomain = 'symplified.ai';
-        let storeFrontURL = 'https://' + this.store$.domain + '.' + storeFrontDomain;
+        // let storeFrontDomain = 'symplified.ai';
+        // let storeFrontURL = 'https://' + this.store$.domain + '.' + storeFrontDomain;
         
-        // Get the discount object
-        const {sku, price, quantity, images, currentImageIndex, isVariants,
-                discountAssets, discountDeliveryDetail, discountInventories, 
-                discountReviews, discountVariants,  ...discount} = this.selectedDiscountForm.getRawValue();
+        // // Get the discount object
+        // const {sku, price, quantity, images, currentImageIndex, isVariants,
+        //         discountAssets, discountDeliveryDetail, discountInventories, 
+        //         discountReviews, discountVariants,  ...discount} = this.selectedDiscountForm.getRawValue();
 
-        discount.seoName = discount.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
-        discount.seoUrl = storeFrontURL + '/discount/name/' + discount.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
+        // discount.seoName = discount.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
+        // discount.seoUrl = storeFrontURL + '/discount/name/' + discount.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
 
-        // Remove the currentImageIndex field
-        // delete discountRaw.currentImageIndex;
+        // // Remove the currentImageIndex field
+        // // delete discountRaw.currentImageIndex;
 
-        // Update the discount on the server
-        this._discountService.updateDiscount(discount.id, discount).subscribe(() => {
-            // Show a success message
-            this.showFlashMessage('success');
-        });
+        // // Update the discount on the server
+        // this._discountService.updateDiscount(discount.id, discount).subscribe(() => {
+        //     // Show a success message
+        //     this.showFlashMessage('success');
+        // });
 
         // Update the inventory discount on the server (backend kena enable update)
         // this._discountService.updateInventoryToDiscount(discount.id, discountInventories).subscribe(() => {

@@ -180,7 +180,7 @@ export class DiscountsService
     /**
      * Create discount
      */
-    createDiscount(categoryId): Observable<Discount>
+    createDiscount(body: StoreDiscountTierList): Observable<Discount>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -192,17 +192,6 @@ export class DiscountsService
 
         const now = new Date();
         const date = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate() + " " + now.getHours() + ":" + now.getMinutes()  + ":" + now.getSeconds();
-
-        const body = {
-            "categoryId": categoryId,
-            "name": "A New Discount " + date,
-            "status": "INACTIVE",
-            "description": "Tell us more about your discount",
-            "storeId": this.storeId$,
-            "allowOutOfStockPurchases": false,
-            "trackQuantity": false,
-            "minQuantityForAlarm": -1
-        };
 
         return this.discounts$.pipe(
             take(1),
