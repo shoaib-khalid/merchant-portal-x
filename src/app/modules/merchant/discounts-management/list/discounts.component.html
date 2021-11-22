@@ -143,78 +143,78 @@
                         class="flex flex-col w-full"
                         [formGroup]="selectedDiscountForm">
 
-                        <div [style.visibility]="(showVariantsSection) ? 'hidden' : 'visible'" [style.max-height]="(showVariantsSection) ? '0' : ''">
-                            
-                            
+                        <div [style.visibility]="(showVariantsSection) ? 'hidden' : 'visible'" [style.max-height]="(showVariantsSection) ? '0' : ''" >
                             <!-- min sub total, max sub total, discount amount, calculation type -->
-                            <div *ngFor="let e of [].constructor(3); let i = index" class="flex flex-col sm:flex-row px-8 pt-8 pb-4">
-                               
-                                
-                                <div class="flex flex-auto flex-wrap w-full">
-
-                                        <!-- Min Sub Total -->
-                                        <mat-form-field class="w-full lg:w-1/5 pr-4">
-                                            <mat-label>Min Sub Total</mat-label>
-                                            <input
-                                                type="number"
-                                                matInput
-                                                [formControlName]="'discountName'">
-                                        </mat-form-field>
-
-                                        <!-- Max Sub Total -->
-                                        <div class="flex flex-wrap w-full lg:w-1/5">
-                                            <mat-form-field class="w-full pr-4">
-                                                <mat-label>Max Sub Total</mat-label>
+                            <div class="my-8">
+                                <div formArrayName="storeDiscountTierList" *ngFor="let discountTier of selectedDiscountForm.get('storeDiscountTierList')['controls']; let i = index;" class="flex flex-col sm:flex-row px-8">
+                                    <div class="flex flex-auto flex-wrap w-full" [formGroupName]="i">
+    
+                                            <!-- Min Sub Total -->
+                                            <mat-form-field class="w-full lg:w-1/5 pr-4">
+                                                <mat-label>Min Sub Total</mat-label>
                                                 <input
                                                     type="number"
                                                     matInput
-                                                    [formControlName]="'discountName'">
+                                                    [formControlName]="'startTotalSalesAmount'"
+                                                    [value]="discountTier.startTotalSalesAmount"
+                                                    >
                                             </mat-form-field>
-                                        </div>                               
-                                    
-                                    <!-- Discount Amount-->
-                                    <div class="flex flex-wrap w-full lg:w-1/5 ">
+    
+                                            <!-- Max Sub Total -->
+                                            <div class="flex flex-wrap w-full lg:w-1/5">
+                                                <mat-form-field class="w-full pr-4">
+                                                    <mat-label>Max Sub Total</mat-label>
+                                                    <input
+                                                        type="number"
+                                                        matInput
+                                                        [formControlName]="'endTotalSalesAmount'">
+                                                </mat-form-field>
+                                            </div>                               
                                         
-                                        <mat-form-field class="w-full pr-4">
-                                            <mat-label>Discount Amount</mat-label>
-                                            <input
-                                                type="number"
-                                                matInput
-                                                [formControlName]="'discountName'">
-                                        </mat-form-field>
-
-                                    </div>
-
-                                    <!-- calculation type) -->
-                                    <div class="flex flex-wrap w-full lg:w-1/5">
-                                        <mat-form-field class="w-full pr-4">
-                                            <mat-label>Calculation Type</mat-label>
-                                            <mat-select
-                                                class="w-full"
-                                                [formControlName]="'discountType'"
-                                                >
-                                                
-                                                <div>
-                                                    <mat-option [value]="'PERCENTAGE'">Percentage</mat-option>
-                                                    <mat-option [value]="'FIX'">Fix</mat-option>
-                                                </div>
-                                            </mat-select>
-                                        </mat-form-field>
-                                    </div>
-                                    
-
-                                    <!-- Insert Discount Tier-->
-                                    <div class="flex flex-wrap w-1/1/2 lg:w-1/5 items-center justify-center ">
+                                        <!-- Discount Amount-->
+                                        <div class="flex flex-wrap w-full lg:w-1/5 ">
+                                            
+                                            <mat-form-field class="w-full pr-4">
+                                                <mat-label>Discount Amount</mat-label>
+                                                <input
+                                                    type="number"
+                                                    matInput
+                                                    [formControlName]="'discountAmount'">
+                                            </mat-form-field>
+    
+                                        </div>
+    
+                                        <!-- calculation type) -->
+                                        <div class="flex flex-wrap w-full lg:w-1/5">
+                                            <mat-form-field class="w-full pr-4">
+                                                <mat-label>Calculation Type</mat-label>
+                                                <mat-select
+                                                    class="w-full"
+                                                    [formControlName]="'calculationType'"
+                                                    >
+                                                    
+                                                    <div>
+                                                        <mat-option [value]="'PERCENT'">Percentage</mat-option>
+                                                        <mat-option [value]="'FIX'">Fix</mat-option>
+                                                    </div>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
                                         
-                                        <!-- Dbuttons -->
-                                        
-                                    <button
-                                        mat-flat-button
-                                        [color]="'primary'"
-                                        (click)="updateSelectedProduct()">
-                                        Insert Discount Tier
-                                    </button>
-
+    
+                                        <!-- Insert Discount Tier-->
+                                        <div class="flex flex-wrap w-1/1/2 lg:w-1/5 items-center justify-center ">
+                                            
+                                            <!-- Dbuttons -->
+                                            
+                                        <button
+                                            mat-flat-button
+                                            [color]="'primary'"
+                                            (click)="updateSelectedProduct()">
+                                            Insert Discount Tier
+                                        </button>
+    
+                                        </div>
                                     </div>
                                 </div>
                             </div>

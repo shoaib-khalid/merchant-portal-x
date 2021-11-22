@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
-import { Discount, DiscountPagination } from 'app/modules/merchant/discounts-management/list/discounts.types';
+import { Discount, DiscountPagination, StoreDiscountTierList } from 'app/modules/merchant/discounts-management/list/discounts.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service';
@@ -16,6 +16,9 @@ export class DiscountsService
     private _discount: BehaviorSubject<Discount | null> = new BehaviorSubject(null);
     private _discounts: BehaviorSubject<Discount[] | null> = new BehaviorSubject(null);
     private _pagination: BehaviorSubject<DiscountPagination | null> = new BehaviorSubject(null);
+
+    private _discountTier: BehaviorSubject<StoreDiscountTierList | null> = new BehaviorSubject(null);
+    private _discountTierList: BehaviorSubject<StoreDiscountTierList[] | null> = new BehaviorSubject(null);
 
     /**
      * Constructor
@@ -56,6 +59,22 @@ export class DiscountsService
     {
         return this._pagination.asObservable();
     }
+
+    /**
+     * Getter for discount
+     */
+     get discountTierList$(): Observable<StoreDiscountTierList[]>
+     {
+         return this._discountTierList.asObservable();
+     }
+ 
+     /**
+      * Getter for discounts
+      */
+     get discountTier$(): Observable<StoreDiscountTierList>
+     {
+         return this._discountTier.asObservable();
+     }
 
     /**
      * Getter for access token
@@ -296,5 +315,58 @@ export class DiscountsService
             ))
         );
     }
+
+    /**
+     * 
+     * DISCOUNT TIER
+     * 
+     */
+
+    /**
+     * Get discounts tier
+     *
+     * @param page
+     * @param size
+     * @param sort
+     * @param order
+     * @param search
+     */
+    getDiscountsTier(discountId: string, page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', status: string = 'ACTIVE,INACTIVE'):
+         Observable<{ pagination: DiscountPagination; discountTierList: StoreDiscountTierList[] }>
+     {
+         let productService = this._apiServer.settings.apiServer.productService;
+         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+ 
+         const header = {
+             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            //  params: {
+            //      page: '' + page,
+            //      pageSize: '' + size,
+            //      sortByCol: '' + sort,
+            //      sortingOrder: '' + order.toUpperCase(),
+            //      name: '' + search,
+            //      status: '' + status
+            //  }
+         };
+ 
+         return this._httpClient.get<any>(productService +'/stores/'+this.storeId$+'/discount/'+discountId+'/tier', header).pipe(
+             tap((response) => {
+ 
+                 this._logging.debug("Response from DiscountsService (getDiscountsTier)",response);
+ 
+                 // let _pagination = {
+                 //     length: response.data.totalElements,
+                 //     size: response.data.size,
+                 //     page: response.data.number,
+                 //     lastPage: response.data.totalPages,
+                 //     startIndex: response.data.pageable.offset,
+                 //     endIndex: response.data.pageable.offset + response.data.numberOfElements - 1
+                 // }
+                //  let _pagination = { length: 0, size: 0, page: 0, lastPage: 0, startIndex: 0, endIndex: 0 };
+                //  this._pagination.next(_pagination);
+                 this._discountTierList.next(response.data);
+             })
+         );
+     }
 
 }
