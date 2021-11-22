@@ -1,0 +1,140 @@
+<div class="flex flex-col max-w-240 md:min-w-160 -m-6">
+
+    <!-- Compose form -->
+    <div
+        class="flex flex-col flex-auto p-6 sm:p-8 overflow-y-auto"
+    >
+        <!-- <div class="flex items-center flex-auto min-w-0">
+            <mat-icon
+                class="w-10"
+                [svgIcon]="'heroicons_solid:location-marker'"></mat-icon>
+            <span class="pl-4 text-2xl font-bold text-primary">Failed to detect location</span> <br>
+        </div> -->
+        <!-- <div class="flex items-center flex-auto min-w-0 mb-8">
+            <span class="pl-14 text-lg">Lets start creating discount  
+                <br>Fill in below 
+            </span>
+        </div> -->
+
+        <div class="mb-4"></div>
+
+        <mat-form-field 
+            appearance="fill"
+            class="w-full">
+            <mat-label>Discount name</mat-label>
+            <input 
+                matInput
+                placeholder="Enter discount name"
+                [(ngModel)]="date"
+            >
+        </mat-form-field>
+
+        <div class="w-full">
+            <mat-form-field 
+                appearance="fill"
+                class="w-1/2 pr-2">
+                <mat-label>Status</mat-label>
+                <mat-select
+                    class="w-full"
+                    placeholder="Select status"
+                    [formControlName]="'isActive'"
+                    >
+                    <div>
+                        <mat-option [value]="true">Active</mat-option>
+                        <mat-option [value]="false">Inactive</mat-option>
+                        
+                    </div>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field 
+                appearance="fill"
+                class="w-1/2 pl-2">
+                <mat-label>Discount on</mat-label>
+                <mat-select
+                    class="w-full"
+                    [formControlName]="'discountType'"
+                    placeholder="Select discount to be applied"
+                    >
+                    
+                    <div>
+                        <mat-option [value]="'SHIPPING'">Shipping</mat-option>
+                        <mat-option [value]="'TOTALSALES'">Total Sales</mat-option>
+                    </div>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+
+        <div class="w-full">
+            <div class="font-semibold mb-2 w-full">Start date/time</div>
+            <mat-form-field 
+                class="w-1/2 pr-2"
+                appearance="fill">
+                <input 
+                    
+                    matInput 
+                    type="date" 
+                    [(ngModel)]="date"
+                    (change)="checkDate()"
+                    [min]="mindate"
+                >
+            </mat-form-field>
+            <mat-form-field 
+                class="w-1/2 pl-2" 
+                appearance="fill">
+                <input 
+                    matInput type="time" 
+                    [(ngModel)]="time"
+                    (change)="checkTime()"
+                >
+            </mat-form-field>
+        </div>
+
+        <div class="w-full">
+            <div class="font-semibold mb-2 w-full">End date/time</div>
+            <mat-form-field 
+                class="w-1/2 pr-2"
+                appearance="fill">
+                <input 
+                    
+                    matInput 
+                    type="date" 
+                    [(ngModel)]="date"
+                    (change)="checkDate()"
+                    [min]="mindate"
+                >
+            </mat-form-field>
+            <mat-form-field 
+                class="w-1/2 pl-2" 
+                appearance="fill">
+                <input 
+                    matInput type="time" 
+                    [(ngModel)]="time"
+                    (change)="checkTime()"
+                >
+            </mat-form-field>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-end mt-4 sm:mt-6">
+            <div class="order-last">
+                <!-- Send -->
+                <button
+                    class="hover:bg-gray-500 border border-gray-500"
+                    mat-flat-button
+                    (click)="cancelPickupDateTime()"
+                    [color]="'gray'">
+                    Cancel
+                </button>
+                <span>&nbsp;&nbsp;</span>
+                <button
+                    mat-flat-button
+                    *ngIf="showButton" (click)="setPickupDateTime()"
+                    [color]="'primary'">
+                    Ok
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
