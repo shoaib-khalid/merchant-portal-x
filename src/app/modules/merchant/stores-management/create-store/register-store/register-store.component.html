@@ -280,17 +280,22 @@
                                     id="logoImage"
                                     name="logoImage"
                                     accept="image/*" multiple 
-                                    (change)="selectFiles('logo-image',$event)"
+                                    (change)="selectFiles('logo',$event)"
                                 />
                             </mat-form-field>
                             <div class="w-full">
                                 <mat-label class="font-medium">Preview</mat-label>
                                 <div class="my-2"></div>
-                                <div class="p-8 border border-gray-300 rounded h-96">
-                                    <div *ngIf="this.files[0].fileName">
-                                        <span class="block"><b>Image Size</b> : {{ this.files[0].selectedImageWidth }} x {{ this.files[0].selectedImageHeight }} pixel</span>
-                                        <span class="block"><b>Recommended Size</b> : {{ this.files[0].recommendedImageWidth }} x {{ this.files[0].recommendedImageHeight }} pixel</span> 
-                                        <img [src]="this.files[0].fileName" class="object-scale-down h-52" />
+                                <div *ngIf="this.files[0].fileSource">
+                                    <span class="block"><b>Image Size</b> : {{ this.files[0].selectedImageWidth }} x {{ this.files[0].selectedImageHeight }} pixel</span>
+                                    <span class="block"><b>Recommended Size</b> : {{ this.files[0].recommendedImageWidth }} x {{ this.files[0].recommendedImageHeight }} pixel</span>
+                                    <div class="flex w-full flex-auto">
+                                        <img [src]="this.files[0].fileSource" class="object-scale-down h-52" />
+                                        <mat-icon
+                                            class="top-0 right-0 cursor-pointer"
+                                            (click)="deletefiles(0);"
+                                            [svgIcon]="'heroicons_solid:x'">
+                                        </mat-icon>
                                     </div>
                                 </div> 
                             </div>

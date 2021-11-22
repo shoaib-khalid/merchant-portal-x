@@ -6,10 +6,11 @@ import { Observable } from 'rxjs';
 import { LocaleService } from 'app/core/locale/locale.service';
 import { Locale } from 'app/core/locale/locale.types';
 import { StoresService } from 'app/core/store/store.service';
-import { Store, StoreRegionCountries, CreateStore } from 'app/core/store/store.types';
+import { Store, StoreRegionCountries, CreateStore, StoreAssets } from 'app/core/store/store.types';
 import { ActivatedRoute, Router } from '@angular/router';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { debounce } from 'lodash';
+import { HttpResponse } from '@angular/common/http';
 
 @Component({
     selector     : 'register-store-page',
@@ -21,6 +22,10 @@ import { debounce } from 'lodash';
 export class RegisterStoreComponent implements OnInit
 {
     @ViewChild('supportNgForm') supportNgForm: NgForm;
+
+    storeId: string;
+
+    domainName:string;
 
     alert: any;
     createStoreForm: FormGroup;
@@ -185,31 +190,37 @@ export class RegisterStoreComponent implements OnInit
         // Logo & Banner
         this.files = [
             { 
-                type: "logo-image", 
+                type: "logo",
+                fileSource: null,
                 selectedFileName: "", 
                 selectedFiles: null, 
                 recommendedImageWidth: "500", 
                 recommendedImageHeight: "500", 
                 selectedImageWidth: "", 
-                selectedImageHeight: ""
+                selectedImageHeight: "",
+                toDelete: false
             },
             { 
-                type: "banner-desktop-image", 
+                type: "banner", 
+                fileSource: null,
                 selectedFileName: "", 
                 selectedFiles: null, 
                 recommendedImageWidth: "1110", 
                 recommendedImageHeight: "250", 
                 selectedImageWidth: "", 
-                selectedImageHeight: ""
+                selectedImageHeight: "",
+                toDelete: false
             },
             { 
-                type: "banner-mobile-image", 
+                type: "banner-mobile",
+                fileSource: null, 
                 selectedFileName: "", 
                 selectedFiles: null, 
                 recommendedImageWidth: "950", 
                 recommendedImageHeight: "260", 
                 selectedImageWidth: "", 
-                selectedImageHeight: ""
+                selectedImageHeight: "",
+                toDelete: false
             },
         ];
 
@@ -337,12 +348,42 @@ export class RegisterStoreComponent implements OnInit
                 // this will remove the item from the object
                 console.log("storeTiming: ", storeTiming);
 
-                let storeId = response.data.id;
+                this.storeId = response.data.id;
 
+                // create store timing
                 storeTiming.forEach(item => {
-                    this._storesService.postTiming(storeId, item)
+                    this._storesService.postTiming(this.storeId, item)
                         .subscribe((response)=>{});
                 });
+
+                // create store assets
+                let _assets = {};
+                const formData = new FormData();
+                this.files.forEach(item =>{
+                    console.log(item);
+                    if (item.selectedFiles !== null){
+                        formData.append(item.type,item.selectedFiles[0])
+                    }
+        
+                    if (item.toDelete === true && item.type === 'logo'){
+                        this._storesService.deleteAssetsLogo(this.storeId).subscribe();
+                    }
+                    if (item.toDelete === true && item.type === 'banner'){
+                        this._storesService.deleteAssetsBanner(this.storeId).subscribe();
+                    }
+                });
+                
+                if (_assets) {
+                    this._storesService.postAssets(this.storeId, formData).subscribe(
+                      (event: any) => {
+                        if (event instanceof HttpResponse) {
+                          console.log('Uploaded the file successfully');
+                        }
+                      },
+                      (err: any) => {
+                          console.log('Could not upload the file');
+                      });
+                }
 
                 // Navigate to the confirmation required page
                 this._router.navigateByUrl('/stores');
@@ -452,7 +493,10 @@ export class RegisterStoreComponent implements OnInit
             const reader = new FileReader();
         
             reader.onload = (e: any) => {
-                this.files[index].fileName = e.target.result;
+               // set this.files[index].delete to false 
+               this.files[index].toDelete = false;
+
+               this.files[index].fileSource = e.target.result;
 
                 var image = new Image();
                 image.src = e.target.result;
@@ -466,7 +510,7 @@ export class RegisterStoreComponent implements OnInit
 
                 this._changeDetectorRef.markForCheck();                
             };
-            console.log("this.files[index].selectedFiles[i]",this.files[index].selectedFiles[i])
+            console.log("this.files["+index+"].selectedFiles["+i+"]",this.files[index].selectedFiles[i])
             reader.readAsDataURL(this.files[index].selectedFiles[i]);
             console.log("sini")
             this.files[index].selectedFileNames = this.files[index].selectedFiles[i].name;
@@ -486,25 +530,10 @@ export class RegisterStoreComponent implements OnInit
         }
     }
 
-    upload(idx: number, file: File): void {
-        this.progressInfos[idx] = { value: 0, fileName: file.name };
-      
-        // if (file) {
-        //   this.uploadService.upload(file).subscribe(
-        //     (event: any) => {
-        //       if (event.type === HttpEventType.UploadProgress) {
-        //         this.progressInfos[idx].value = Math.round(100 * event.loaded / event.total);
-        //       } else if (event instanceof HttpResponse) {
-        //         const msg = 'Uploaded the file successfully: ' + file.name;
-        //         this.message.push(msg);
-        //         this.imageInfos = this.uploadService.getFiles();
-        //       }
-        //     },
-        //     (err: any) => {
-        //       this.progressInfos[idx].value = 0;
-        //       const msg = 'Could not upload the file: ' + file.name;
-        //       this.message.push(msg);
-        //     });
-        // }
+    deletefiles(index: number) { 
+        this.files[index].toDelete = true;
+        this.files[index].fileSource = '';
+
+        this._changeDetectorRef.markForCheck();
     }
 }
