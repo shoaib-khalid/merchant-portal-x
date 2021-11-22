@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -9,7 +9,7 @@ import { merge, Observable, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { Discount, DiscountVariant, DiscountVariantAvailable, DiscountInventory, DiscountCategory, DiscountPagination } from 'app/modules/merchant/discounts-management/list/discounts.types';
+import { Discount, DiscountVariant, DiscountVariantAvailable, DiscountInventory, DiscountCategory, DiscountPagination, StoreDiscountTierList } from 'app/modules/merchant/discounts-management/list/discounts.types';
 import { DiscountsService } from 'app/modules/merchant/discounts-management/list/discounts.service';
 import { Store } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
@@ -56,6 +56,12 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
     discounts$: Observable<Discount[]>;
     selectedDiscount: Discount | null = null;
     selectedDiscountForm: FormGroup;
+
+    // discountsTierList$: Observable<StoreDiscountTierList[]>;
+    // selectedDiscountTierList: StoreDiscountTierList | null = null;
+    // selectedDiscountTierListForm: FormGroup;
+
+    storeDiscountTierList: FormArray;
     
     pagination: DiscountPagination;
 
@@ -110,11 +116,14 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
             endTime          : [''],
             discountType     : [''],
             isActive         : [''],
+            calculationType  : [''],
+            discountAmount   : [''],
             description      : [''],
             storeId          : [''], // not used
             categoryId       : [''],
             status           : ['INACTIVE'],
-            thumbnailUrl     : ['']
+            thumbnailUrl     : [''],
+            storeDiscountTierList : this._formBuilder.array([]),
         });
 
         // Get the stores
@@ -246,6 +255,21 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
 
                 // Fill the form
                 this.selectedDiscountForm.patchValue(discount);
+
+                // clear discount tier form array
+                (this.selectedDiscountForm.get('storeDiscountTierList') as FormArray).clear();
+
+                // load discount tier form array with data frombackend
+                discount.storeDiscountTierList.forEach(item => {
+                    this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
+                    this.storeDiscountTierList.push(this._formBuilder.group(item));
+                });
+
+                // this._discountService.getDiscountsTier(discountId)
+                //     .subscribe((response) => {
+                //         console.log("response", response["data"])
+                //         this.
+                //     });
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
