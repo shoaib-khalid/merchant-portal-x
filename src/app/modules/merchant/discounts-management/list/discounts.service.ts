@@ -180,7 +180,7 @@ export class DiscountsService
     /**
      * Create discount
      */
-    createDiscount(body: StoreDiscountTierList): Observable<Discount>
+    createDiscount(body: Discount): Observable<Discount>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;

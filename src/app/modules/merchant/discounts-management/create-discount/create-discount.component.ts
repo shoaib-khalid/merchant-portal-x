@@ -10,6 +10,11 @@ export class CreateDiscountComponent implements OnInit {
   disabledProceed: boolean = true;
   discountName: string;
 
+  checkdate = false;
+  checkname = false;
+  checkstatus = false;
+  checktype = false;
+
   startDate: string;
   startTime: string;
   isDisabledStartDateTime: boolean = true;
@@ -24,6 +29,8 @@ export class CreateDiscountComponent implements OnInit {
   minEndTime: string;
   maxEndDate: string;
   maxEndTime: string;
+
+  message: string = "";
 
   status: boolean;
   discountType: string;
@@ -48,7 +55,7 @@ export class CreateDiscountComponent implements OnInit {
     this.minStartTime = hh + ':' + ms;
   }
 
-  setPickupDateTime() {
+  addNewDiscount() {
     this.dialogRef.close({ 
         status: true ,
         discountName: this.discountName,
@@ -56,7 +63,8 @@ export class CreateDiscountComponent implements OnInit {
         startDate: this.startDate,
         startTime: this.startTime,
         endDate: this.endDate,
-        endTime: this.endTime
+        endTime: this.endTime,
+        isActive :this.isActive
     });
   }
 
@@ -64,26 +72,69 @@ export class CreateDiscountComponent implements OnInit {
     this.dialogRef.close({ status: false });
   }
   
-  checkDateTime(){
-      
-    // check min end date not less than min start date
-    if (this.startDate && this.startTime) {
-        // set minimum end date to current selected date
-        this.isDisabledStartDateTime = false;
-        this.minEndDate = this.startDate;
-       
-    }
-
-    console.log("this.startTime", this.startTime);
-    console.log("this.endTime", this.endTime);
-
-    if ((this.startTime && this.endTime) && (this.endTime > this.startTime)){
-        this.disabledProceed = false;
-    }
-
+  checkName(){           
+        // check discount name
+        if (this.discountName) {
+            this.checkname = true;
+            this.message = "";
+        }else{
+            this.checkname = false;
+            this.message = "Please insert discount name";
+        }
+        
   }
 
-  checkTime(){
+  checkDateTime(){
+         // check min end date not less than min start date
+         if (this.startDate && this.startTime) {
+            // set minimum end date to current selected date
+            this.isDisabledStartDateTime = false;
+            this.minEndDate = this.startDate;
+            this.checkdate = true;
+        }
+        // check date
+        if (this.startTime && this.endTime && this.endDate && this.startDate) {        
+            if (this.startDate < this.endDate){
+                this.checkdate = true;
+            } else if (this.startDate == this.endDate) {
+                if (this.startTime <= this.endTime) {
+                    this.checkdate = true;
+                } else {
+                    this.checkdate = false;
+                    this.message = "Date/time range incorrect";
+                }
+            }
+        }
+  }
 
+  checkStatus(){
+    //check status
+     if (!this.isActive){
+        this.checkstatus = true;
+        this.message = ""
+        }else{
+            this.checkstatus = false;
+            this.message = "Please select status option"
+        }
+  }
+
+  checkDiscountType(){
+        //check discount type
+        if (!this.discountType){
+            this.checktype = true;
+            this.message = ""
+        }else{
+            this.checktype = false;
+            this.message = "Please select discount type option"
+        }
+  }
+
+  checkForm(){
+    if (this.checkname === true && this.checkdate === true && this.checkstatus === true && this.checktype === true) {
+        this.disabledProceed = false;
+    } else {
+        this.disabledProceed = true;
+    }
+    
   }
 }

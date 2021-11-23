@@ -26,6 +26,8 @@
                 matInput
                 placeholder="Enter discount name"
                 [(ngModel)]="discountName"
+                (change)="checkName();checkForm()"
+
             >
         </mat-form-field>
 
@@ -38,6 +40,8 @@
                     class="w-full"
                     placeholder="Select status"
                     [(ngModel)]="isActive"
+                    (change)="checkStatus();checkForm()"
+
                     >
                     <div>
                         <mat-option [value]="true">Active</mat-option>
@@ -54,6 +58,7 @@
                 <mat-select
                     class="w-full"
                     [(ngModel)]="discountType"
+                    (change)="checkDiscountType();checkForm()"
                     placeholder="Select discount to be applied"
                     >
                     
@@ -75,7 +80,7 @@
                     matInput 
                     type="date" 
                     [(ngModel)]="startDate"
-                    (change)="checkDateTime()"
+                    (change)="checkDateTime();checkForm()"
                     [min]="minStartDate"
                 >
             </mat-form-field>
@@ -85,7 +90,7 @@
                 <input 
                     matInput type="time" 
                     [(ngModel)]="startTime"
-                    (change)="checkDateTime()"
+                    (change)="checkDateTime();checkForm()"
                     [min]="minStartTime"
                 >
             </mat-form-field>
@@ -101,7 +106,7 @@
                     type="date" 
                     [disabled]="isDisabledStartDateTime"
                     [(ngModel)]="endDate"
-                    (change)="checkDateTime()"
+                    (change)="checkDateTime();checkForm()"
                     [min]="minEndDate"
                 >
             </mat-form-field>
@@ -112,13 +117,16 @@
                     matInput type="time" 
                     [disabled]="isDisabledStartDateTime"
                     [(ngModel)]="endTime"
-                    (change)="checkDateTime()"
+                    (change)="checkDateTime();checkForm()"
                 >
             </mat-form-field>
         </div>
 
         <!-- Actions -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-end mt-4 sm:mt-6">
+            <div *ngIf="message !== ''" class="mr-3 text-warn">
+                {{message}}
+            </div>
             <div class="order-last">
                 <!-- Send -->
                 <button
@@ -133,7 +141,7 @@
                     class="bg-primary-300 hover:bg-primary-500 border border-primary-500 ml-2"
                     mat-flat-button
                     [disabled]="disabledProceed"
-                    (click)="setPickupDateTime()"
+                    (click)="addNewDiscount()"
                     [color]="'gray'">
                     Ok
                 </button>

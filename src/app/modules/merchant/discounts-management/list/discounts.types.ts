@@ -4,11 +4,11 @@ export interface Discount
     discountType: string;
     endDate: string;
     endTime: string;
-    id: string;
+    id?: string;
     isActive: boolean;
     startDate: string;
     startTime: string;
-    storeDiscountTierList: StoreDiscountTierList[];
+    storeDiscountTierList?: StoreDiscountTierList[];
     storeId: string;
 }
 
