@@ -16,9 +16,9 @@ export interface StoreDiscountTierList {
     calculationType: string;
     discountAmount: number;
     endTotalSalesAmount: number;
-    id: string;
+    id?: string;
     startTotalSalesAmount: number;
-    storeDiscountId: string;
+    storeDiscountId?: string;
 }
 
 /**

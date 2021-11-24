@@ -267,9 +267,9 @@ export class DiscountsService
     /**
      * Delete the discount
      *
-     * @param id
+     * @param discountId
      */
-    deleteDiscount(id: string): Observable<boolean>
+    deleteDiscount(discountId: string): Observable<boolean>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -281,11 +281,11 @@ export class DiscountsService
       
         return this.discounts$.pipe(
             take(1),
-            switchMap(discounts => this._httpClient.delete(productService +'/stores/'+this.storeId$+'/discount/'+id, header).pipe(
+            switchMap(discounts => this._httpClient.delete(productService +'/stores/'+this.storeId$+'/discount/'+discountId, header).pipe(
                 map((status: number) => {
 
                     // Find the index of the deleted discount
-                    const index = discounts.findIndex(item => item.id === id);
+                    const index = discounts.findIndex(item => item.id === discountId);
 
                     // Delete the discount
                     discounts.splice(index, 1);
@@ -357,5 +357,74 @@ export class DiscountsService
              })
          );
      }
+
+    createDiscountTier(discountId: string, discountTier: StoreDiscountTierList): Observable<StoreDiscountTierList>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        const now = new Date();
+        const date = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate() + " " + now.getHours() + ":" + now.getMinutes()  + ":" + now.getSeconds();
+
+        return this.discountTierList$.pipe(
+            take(1),
+            // switchMap(discounts => this._httpClient.post<InventoryDiscount>('api/apps/ecommerce/inventory/discount', {}).pipe(
+            switchMap(discountTierList => this._httpClient.post<any>(productService + '/stores/' + this.storeId$ + '/discount/' + discountId + '/tier' , discountTier , header).pipe(
+                map((newDiscountTier) => {
+
+                    // Return the new discount
+                    return newDiscountTier;
+                })
+            ))
+        );
+    }
+
+    /**
+     * Delete the discount tier
+     *
+     * @param id
+     */
+         deleteDiscountTier(discountId: string, discountTierId: string): Observable<boolean>
+         {
+             console.log("deletediscount",discountTierId)
+             let productService = this._apiServer.settings.apiServer.productService;
+             let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+             let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+     
+             const header = {
+                 headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+             };
+           
+             return this.discountTierList$.pipe(
+                 take(1),
+                 switchMap(discountTier => this._httpClient.delete(productService +'/stores/'+this.storeId$+'/discount/'+ discountId +'/tier/'+discountTierId, header).pipe(
+                     map((response) => {
+     
+                         // Find the index of the deleted discount
+                         const index = discountTier.findIndex(item => item.id === discountTierId);
+     
+                         // Delete the discount
+                         discountTier.splice(index, 1);
+     
+                         // Update the discounts
+                         this._discountTierList.next(discountTier);
+     
+                         let isDeleted:boolean = false;
+                         if (response["status"] === 200) {
+                             isDeleted = true
+                         }
+     
+                         // Return the deleted status
+                         return isDeleted;
+                     })
+                 ))
+             );
+         }
+     
 
 }
