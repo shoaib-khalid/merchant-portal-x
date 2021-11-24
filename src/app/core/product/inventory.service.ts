@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
-import { Product, ProductVariant, ProductInventory, ProductCategory, ProductPagination, ProductVariantAvailable } from 'app/core/product/inventory.types';
+import { Product, ProductVariant, ProductInventory, ProductCategory, ProductPagination, ProductVariantAvailable, ProductPackageOption } from 'app/core/product/inventory.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from '../logging/log.service';
@@ -25,6 +25,9 @@ export class InventoryService
 
     private _inventory: BehaviorSubject<ProductInventory | null> = new BehaviorSubject(null);
     private _inventories: BehaviorSubject<ProductInventory[] | null> = new BehaviorSubject(null);
+
+    private _package: BehaviorSubject<ProductPackageOption | null> = new BehaviorSubject(null);
+    private _packages: BehaviorSubject<ProductPackageOption[] | null> = new BehaviorSubject(null);
 
     /**
      * Constructor
@@ -73,6 +76,14 @@ export class InventoryService
     {
         return this._categories.asObservable();
     }
+
+    /**
+     * Getter for categories
+     */
+     get packages$(): Observable<ProductPackageOption[]>
+     {
+         return this._packages.asObservable();
+     }
 
     /**
      * Getter for access token
@@ -177,7 +188,7 @@ export class InventoryService
     /**
      * Create product
      */
-    createProduct(categoryId): Observable<Product>
+    createProduct(categoryId: string, productType: string): Observable<Product>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -189,16 +200,22 @@ export class InventoryService
 
         const now = new Date();
         const date = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate() + " " + now.getHours() + ":" + now.getMinutes()  + ":" + now.getSeconds();
+        const productName = "A New Product " + date;
+        const seoName = productName.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
 
         const body = {
             "categoryId": categoryId,
-            "name": "A New Product " + date,
+            "name": productName,
             "status": "INACTIVE",
             "description": "Tell us more about your product",
             "storeId": this.storeId$,
             "allowOutOfStockPurchases": false,
             "trackQuantity": false,
-            "minQuantityForAlarm": -1
+            "seoName":seoName,
+            "seoUrl": "https://cinema-online.symplified.ai/product/name/"+ seoName,
+            "minQuantityForAlarm": -1,
+            "packingSize": "S",
+            "isPackage": (productType === "combo") ? true : false
         };
 
         return this.products$.pipe(
@@ -763,6 +780,147 @@ export class InventoryService
                 ))
             ))
         );
+    }
+
+    /**
+     * Get Product Package Options
+     * 
+     * @param name
+     */
+    getProductPackageOptions(packageId: string): Observable<ProductPackageOption[]>
+    {
+
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`)
+        };
+
+        return this._httpClient.get<any>(productService + '/stores/' + this.storeId$ + '/package/' + packageId + '/options',header).pipe(
+            tap((packages) => {
+                this._logging.debug("Response from ProductsService (getProductPackageOptions)",packages);
+                this._packages.next(packages.data);
+            })
+        );
+    }
+
+    /**
+     * Add Inventory to the product
+     *
+     * @param product
+     */
+    addOptionsToProductPackage(packageId, body: ProductPackageOption): Observable<ProductInventory>{
+
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        const now = new Date();
+        const date = now.getFullYear() + "" + (now.getMonth()+1) + "" + now.getDate() + "" + now.getHours() + "" + now.getMinutes()  + "" + now.getSeconds();
+
+        // return of();
+
+        return this._inventories.pipe(
+            take(1),
+            // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
+            switchMap(products => this._httpClient.post<Product>(productService +'/stores/'+this.storeId$+'/products/' + packageId + "/inventory", body , header).pipe(
+                map((newProduct) => {
+
+                    console.log("newProduct InventoryItem",newProduct);
+                    // Update the products with the new product
+                    // this._products.next([newProduct["data"], ...products]);
+
+                    // Return the new product
+                    return newProduct["data"];
+                })
+            ))
+        );
+    }
+
+    createProductsOptionById(packageId, productPackage) {
+
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        // product-service/v1/swagger-ui.html#/store-category-controller/postStoreCategoryByStoreIdUsingPOST
+        return this.packages$.pipe(
+            take(1),
+            switchMap(packages => this._httpClient.post<any>(productService + '/stores/' + this.storeId$ + '/package/' + packageId + '/options', productPackage , header).pipe(
+                map((newpackage) => {
+                    // Update the categories with the new category
+                    this._packages.next([...packages, newpackage.data]);
+
+                    // Return new category from observable
+                    return newpackage.data;
+                })
+            ))
+        );
+    }
+
+    getProductsOptionById(optionId: string): Observable<ProductPackageOption>
+    {
+        return this._packages.pipe(
+            take(1),
+            map((packages) => {
+
+                // Find the product
+                const _package = packages.find(item => item.id === optionId) || null;
+
+                this._logging.debug("Response from ProductsService (getProductsOptionById)",_package);
+
+                // Update the product
+                this._package.next(_package);
+
+                // Return the product
+                return _package;
+            }),
+            switchMap((_package) => {
+
+                if ( !_package )
+                {
+                    return throwError('Could not found optionId with id of ' + optionId + '!');
+                }
+
+                return of(_package);
+            })
+        );
+    }
+
+    updateProductsOptionById(packageId: string, productPackage, optionId: string) {
+
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        // product-service/v1/swagger-ui.html#/store-category-controller/postStoreCategoryByStoreIdUsingPOST
+        return this._httpClient.put<any>(productService + '/stores/' + this.storeId$ + '/package/' + packageId + '/options', productPackage , header);
+    }
+
+    deleteProductsOptionById(optionId: string, packageId: string) {
+
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        // product-service/v1/swagger-ui.html#/store-category-controller/postStoreCategoryByStoreIdUsingPOST
+        let response = this._httpClient.delete<any>(productService + '/stores/' + this.storeId$ + '/package/' + packageId + '/options/' + optionId, header);
+        this._logging.debug("Response from ProductsService (deleteProductsOptionById)",response);
+        return response;
     }
 
 }

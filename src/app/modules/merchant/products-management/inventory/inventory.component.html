@@ -26,13 +26,18 @@
             </mat-form-field>
             <!-- Add product button -->
             <button
+                [matMenuTriggerFor]="addProductMenu"
                 class="ml-4"
                 mat-flat-button
                 [color]="'primary'"
-                (click)="initCreateProduct()">
+            >
                 <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
                 <span class="ml-2 mr-1">Add</span>
             </button>
+            <mat-menu #addProductMenu="matMenu">
+                <button mat-menu-item (click)="initCreateProduct('normal')">Product</button>
+                <button mat-menu-item (click)="initCreateProduct('combo')">Combo</button>
+            </mat-menu>
         </div>
     </div>
 
@@ -189,8 +194,8 @@
                             class="flex flex-col w-full"
                             [formGroup]="selectedProductForm">
 
-                            <div [style.visibility]="(showVariantsSection) ? 'hidden' : 'visible'" [style.max-height]="(showVariantsSection) ? '0' : ''">
-                                <!-- product imag, sku row -->
+                            <!-- Normal Section -->
+                            <div [style.visibility]="(showVariantsSection || showCombosSection) ? 'hidden' : 'visible'" [style.max-height]="(showVariantsSection || showCombosSection) ? '0' : ''">
                                 <div class="flex flex-col sm:flex-row px-8 pt-8 pb-4">
                                     <!-- Product images and status -->
                                     <div class="flex flex-col items-center sm:items-start">
@@ -424,7 +429,9 @@
                                             </mat-form-field>
 
                                             <!-- Product status -->
-                                            <mat-form-field class="w-full pr-2">
+                                            <mat-form-field 
+                                                class="w-full pr-2"
+                                                *ngIf="store$.verticalCode === 'E-Commerece' || store$.verticalCode === 'ECommerce_PK'">
                                                 <mat-label>Packing Size</mat-label>
                                                 <mat-select
                                                     class="w-full"
@@ -657,7 +664,7 @@
                                                 </mat-slide-toggle>
                                             </div>
                                         </div>
-                                        <div class="flex flex-col w-full sm:w-1/5 sm:pl-2 py-2 sm:py-0">
+                                        <div *ngIf="store$.verticalCode === 'E-Commerece' || store$.verticalCode === 'ECommerce_PK'" class="flex flex-col w-full sm:w-1/5 sm:pl-2 py-2 sm:py-0">
                                             <span class="mb-2 sm:mb-4 font-medium leading-tight">Variants 
                                                 <mat-icon
                                                     matTooltip="This product have variants ?"
@@ -689,6 +696,23 @@
                                                             [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
                                                     </label>
                                                 </div>
+                                            </div>
+                                        </div>
+                                        <div *ngIf="(store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK') && this.selectedProductForm.get('isPackage').value === true" class="flex flex-col w-full sm:w-1/5 sm:pl-2 py-2 sm:py-0">
+                                            <span class="mb-2 sm:mb-4 font-medium leading-tight">Combo 
+                                                <mat-icon
+                                                    matTooltip="This product have variants ?"
+                                                    class="transform scale-75"
+                                                    [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                                </mat-icon>
+                                            </span>
+                                            <div class="mt-0 flex items-center justify-between -my-px w-full">
+                                                <button
+                                                    mat-flat-button
+                                                    [color]="'primary'"
+                                                    (click)="displayCombos()">
+                                                    Go to combo section
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -746,11 +770,12 @@
                                 </div>
                             </div>
 
+                            <!-- Variant Section -->
                             <div class="flex flex-col sm:flex-row px-8 py-4" [style.visibility]="(!showVariantsSection) ? 'hidden' : 'visible'" [style.max-height]="(!showVariantsSection) ? '0' : ''">
                                 <div class="flex flex-auto flex-wrap">
                                     <div class="flex w-full border-b mb-4">
                                         <div class="flex w-full mb-4 items-center justify-between">
-                                            <span class="font-medium text-3xl leading-tight">Preview</span>
+                                            <span class="font-medium text-3xl leading-tight">Variant Preview</span>
                                             <div>
                                                 <input
                                                     id="variant-back-button"
@@ -1315,7 +1340,252 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="flex items-center justify-between w-full px-8">
+                                    <div class="flex items-center justify-between w-full border-t px-8 py-4 mt-4">
+                                        <input
+                                            id="product-remove-button"
+                                            type="button"
+                                            (click)="deleteSelectedProduct()"
+                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                            mat-button>
+                                        <label 
+                                            class="flex items-center justify-center h-10 px-4 border rounded border-red-300 dark:border-red-500 cursor-pointer hover:bg-hover"
+                                            for="product-remove-button"
+                                            matRipple>
+                                            <span>Delete</span>
+                                            <mat-icon
+                                                class="ml-1"
+                                                [color]="'warn'"
+                                                [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                        </label>
+                                        <!-- <button
+                                            class="-ml-4"
+                                            mat-button
+                                            [color]="'warn'"
+                                            (click)="deleteSelectedProduct()">
+                                            Delete
+                                        </button> -->
+                                        <div class="flex items-center">
+                                            <div
+                                                class="flex items-center mr-4"
+                                                *ngIf="flashMessage">
+                                                <ng-container *ngIf="flashMessage === 'success'">
+                                                    <mat-icon
+                                                        class="text-green-500"
+                                                        [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                                                    <span class="ml-2">Product updated</span>
+                                                </ng-container>
+                                                <ng-container *ngIf="flashMessage === 'error'">
+                                                    <mat-icon
+                                                        class="text-red-500"
+                                                        [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                                                    <span class="ml-2">An error occurred, try again!</span>
+                                                </ng-container>
+                                            </div>
+                                            <button
+                                                mat-flat-button
+                                                [color]="'primary'"
+                                                (click)="updateSelectedProduct()">
+                                                Update
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Combo Section -->
+                            <div class="flex flex-col sm:flex-row px-8 py-4" [style.visibility]="(!showCombosSection) ? 'hidden' : 'visible'" [style.max-height]="(!showCombosSection) ? '0' : ''">
+                                <div class="flex flex-auto flex-wrap">
+                                    <div class="flex w-full border-b mb-4">
+                                        <div class="flex w-full mb-4 items-center justify-between">
+                                            <span class="font-medium text-3xl leading-tight">Combo Preview</span>
+                                            <div>
+                                                <input
+                                                    id="combo-back-button"
+                                                    class="absolute h-0 w-0 opacity-0 text-1x1 invisible pointer-events-none"
+                                                    type="button"
+                                                    (click)="displayCombos()"
+                                                    mat-icon-button>
+                                                <label 
+                                                    class="flex items-center justify-center text-1x1 h-10 px-2 rounded cursor-pointer text-white bg-primary hover:bg-primary-700"
+                                                    for="combo-back-button"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="text-white pr-2"
+                                                        [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
+                                                    Back
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-auto flex-wrap w-full">
+                                        <!-- Variants -->
+                                        <div class="flex flex-col w-full sm:w-1/4">
+                                            <!-- Option Name -->
+                                            <mat-form-field class="w-full">
+                                                <mat-label>Option Name</mat-label>
+                                                <input
+                                                    matInput
+                                                    [value]="(selectedProductsOption) ? selectedProductsOption.title : ''"
+                                                    (change)="validateProductsOptionName($event.target.value)"
+                                                >
+                                            </mat-form-field>
+                                            <!-- Add product to combo -->
+                                            <div class="w-full mb-4">
+                                                <span class="mb-px font-medium leading-tight">Add product</span>
+                                                <div class="mt-1 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden">
+                                                    <!-- Header -->
+                                                    <div class="flex items-center -my-px py-3 px-3">
+                                                        <div class="flex items-center flex-auto min-w-0">
+                                                            <mat-icon
+                                                                class="icon-size-5"
+                                                                [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                                            <input
+                                                                class="min-w-0 ml-2 py-1 border-0"
+                                                                type="text"
+                                                                placeholder="Enter product name"
+                                                                (input)="filterProducts($event)"
+                                                                (keydown)="filterProductsInputKeyDown($event)"
+                                                                [maxLength]="50"
+                                                                #newProductInput>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Add product to option -->
+                                                    <div class="h-56 pt-2 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
+                                                        <!-- Products -->
+                                                        <ng-container *ngFor="let product of filteredProductsOptions; trackBy: trackByFn;">
+                                                            <mat-checkbox
+                                                                class="flex items-center h-10 min-h-10 px-4"
+                                                                [color]="'primary'"
+                                                                [checked]="validateProductsInOption(product.id)"
+                                                                (change)="insertProductsInOption(product.id, $event.checked)"
+                                                            >
+                                                                {{product.name}}
+                                                            </mat-checkbox>
+                                                        </ng-container>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Item allowed of the option-->
+                                            <mat-form-field class="w-full">
+                                                <mat-label>Total allowed</mat-label>
+                                                <input
+                                                    matInput
+                                                    type="number"
+                                                    (change)="validateProductsOptionTotalAllowed($event.target.value)"
+                                                    [value]="(selectedProductsOption) ? selectedProductsOption.totalAllow : ''">
+                                            </mat-form-field>
+
+                                            <div class="w-full flex flex-auto">
+                                                <div class="w-full flex justify-end">
+                                                    <button
+                                                        mat-flat-button
+                                                        class="mr-3 bg-gray-300 hover:bg-gray-400"
+                                                        *ngIf="selectedProductsOption"
+                                                        (click)="resetSelectedProductsOption()">
+                                                        Cancel
+                                                    </button>
+                                                    <button
+                                                        mat-flat-button
+                                                        [color]="'primary'"
+                                                        (click)="updateSelectedProductsOption((selectedProductsOption) ? selectedProductsOption.id : '')">
+                                                        {{(selectedProductsOption) ? 'Update' : 'Create'}}
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <!-- Matrix Table -->
+                                        <div class="flex flex-col w-full sm:w-3/4 sm:pl-8 py-4 sm:py-0">
+                                            <div class="font-medium tracking-tight mb-1 truncate">Option Details</div>
+                                            <div class="flex flex-auto overflow-hidden">
+                                                <div class="flex flex-col flex-auto sm:mb-18 overflow-hidden sm:overflow-y-auto">
+                                                    <ng-container *ngIf="selectedProduct.productInventories">
+                                                        <ng-container *ngIf="selectedProduct.productInventories.length > 0; else noVariants">
+                                                            <div class="grid">
+                                                                <!-- Header -->
+                                                                <div
+                                                                    class="option-grid z-9 sticky top-0 grid gap-4 py-4 px-6 md:px-8 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                                                                    matSort
+                                                                    matSortDisableClear>
+                                                                    <div [mat-sort-header]="'optionName'">Option Name</div>
+                                                                    <div [mat-sort-header]="'optionTotalAllowed'">Total allowed</div>
+                                                                    <div [mat-sort-header]="'optionProducts'">Product in option</div>
+                                                                    <div [mat-sort-header]="'optionAction'">Action</div>
+                                                                </div>
+                                                                <!-- Rows -->
+                                                                <ng-container *ngIf="selectedVariantCombos">
+                                                                    <ng-container *ngFor="let combos of productsCombos$; trackBy: trackByFn">
+                                                                        <div class="option-grid grid items-center gap-4 py-3 px-6 md:px-8 border-b">                                       
+                                                                            <!-- Option Name -->
+                                                                            <div class="hidden sm:block truncate">
+                                                                                {{combos.title}}
+                                                                            </div>
+                                        
+                                                                            <!-- Total Allowed -->
+                                                                            <div class="truncate text-center">
+                                                                                {{combos.totalAllow}}
+                                                                            </div>
+
+                                                                            <!-- Product in option -->
+                                                                            <div class="hidden sm:block truncate">
+                                                                                <ng-container *ngIf="combos.productPackageOptionDetail.length">
+                                                                                    <ng-container *ngFor="let product of combos.productPackageOptionDetail; trackBy: trackByFn">
+                                                                                        <div class="flex items-center justify-center px-4 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                                                            <span class="text-md font-medium whitespace-nowrap">{{product.productId}}</span>
+                                                                                        </div>
+                                                                                    </ng-container>
+                                                                                </ng-container>
+                                                                            </div>
+
+                                                                             <!-- Action -->
+                                                                             <div class="flex flex-wrap">
+                                                                                 <input
+                                                                                     [id]="'select-option-btn' + combos.id"
+                                                                                     class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                                     type="button"
+                                                                                 >
+                                                                                 <label
+                                                                                     class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400 mr-3"
+                                                                                     [for]="'select-option-btn' + combos.id"
+                                                                                     (click)="selectProductOption(combos.id)"
+                                                                                     matRipple>
+                                                                                     <mat-icon
+                                                                                         class="text-white icon-size-5"
+                                                                                         [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
+                                                                                 </label>
+                                                                                <input
+                                                                                    [id]="'delete-option-btn' + combos.id"
+                                                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                                    type="button"
+                                                                                    (click)="deleteProductOption(combos.id)"
+                                                                                    >
+                                                                                <label
+                                                                                    class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-warn hover:bg-warn-700"
+                                                                                    [for]="'delete-option-btn' + combos.id"
+                                                                                    matRipple>
+                                                                                    <mat-icon
+                                                                                        class="text-white icon-size-5"
+                                                                                        [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                                                                </label>
+                                                                            </div>
+                                        
+                                                                        </div>
+                                                                    </ng-container>
+                                                                </ng-container>
+                                                            </div>
+                                                        </ng-container>
+                                                    </ng-container>
+
+                                                    <ng-template #noVariants>
+                                                        <div class="p-8 sm:p-16 border-t text-2xl font-semibold tracking-tight text-center">There are no Variants! Add them now.</div>
+                                                    </ng-template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center justify-between w-full border-t px-8 py-4 mt-4">
                                         <input
                                             id="product-remove-button"
                                             type="button"

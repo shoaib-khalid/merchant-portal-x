@@ -9,7 +9,7 @@ import { merge, Observable, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, ProductCategory, ProductPagination } from 'app/core/product/inventory.types';
+import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, ProductCategory, ProductPagination, ProductPackageOption } from 'app/core/product/inventory.types';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { Store } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
@@ -35,6 +35,10 @@ import { StoresService } from 'app/core/store/store.service';
                     grid-template-columns: 48px 112px auto 112px 96px 96px 72px;
                 }
             }
+
+            .option-grid {
+                grid-template-columns: 120px 112px auto 112px;
+            }
         `
     ],
     encapsulation  : ViewEncapsulation.None,
@@ -56,8 +60,21 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     products$: Observable<Product[]>;
     selectedProduct: Product | null = null;
     selectedProductForm: FormGroup;
-    
+
     pagination: ProductPagination;
+    
+    
+    // product combo
+    productsCombos$: ProductPackageOption[] = [];
+    showCombosValueEditMode:any = [];
+    showCombosSection: boolean = false;
+    
+    // product combo package
+    _products: Product[];
+    filteredProductsOptions: Product[] = [];
+    selectedProductsOptions: Product[] = [];
+    selectedProductsOption: ProductPackageOption = null;
+    _selectedProductsOption = {};
 
     // product variant
     productVariants$: ProductVariant[] = [];
@@ -67,6 +84,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     productVariantsEditMode: boolean = false;
     productVariantsValueEditMode:any = [];
     showVariantsSection: boolean = false;
+
     
     // product variant available
     productVariantAvailable$: ProductVariantAvailable[] = [];
@@ -226,6 +244,18 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             price            : [0],
             quantity         : [0],
             isVariants       : [false],
+            isPackage        : [false],
+            productPackage   : {
+                id          : [''],
+                packageId   : [''],
+                title       : [''],
+                totalAllow  : [0],
+                productPackageOptionDetail  : this._formBuilder.array([{
+                    id                      : [''],
+                    productPackageOptionId  : [''],
+                    productId               : [''],
+                }])
+            }
         });
 
         // Get the stores
@@ -242,6 +272,16 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     
         // Get the products
         this.products$ = this._inventoryService.products$;
+
+        // Assign to local products
+        this.products$.subscribe((response)=>{
+            this._products = response;
+
+            // remove object for array of object where item.isPackage !== true
+            let _filteredProductsOptions = response.filter(item => item.isPackage !== true );
+
+            this.filteredProductsOptions = _filteredProductsOptions;
+        });
         
         // Get the pagination
         this._inventoryService.pagination$
@@ -486,9 +526,267 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 // Update the selected product form
                 this.selectedProductForm.get('minQuantityForAlarm').patchValue(this.selectedProduct.minQuantityForAlarm);
 
+                // get product combo list
+                if (this.selectedProduct.isPackage === true) {
+                    this._inventoryService.getProductPackageOptions(productId)
+                        .subscribe((response)=>{
+                            console.log("response", response);
+                            this.productsCombos$ = response["data"];
+                        });
+                }
+
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
+    }
+
+    /**
+     * Filter product
+     *
+     * @param event
+     */
+
+    filterProducts(event): void
+    {
+        // Get the value
+        const value = event.target.value.toLowerCase();
+
+        // Filter the categories
+        this.filteredProductsOptions = this._products.filter(product => product.name.toLowerCase().includes(value));
+    }
+
+    filterProductsInputKeyDown(event): void
+    {
+        // Return if the pressed key is not 'Enter'
+        if ( event.key !== 'Enter' )
+        {
+            return;
+        }
+
+        // If there is no category available...
+        if ( this.filteredProductsOptions.length === 0 )
+        {
+        //  // Create the category
+        //  this.createCategory(event.target.value);
+
+        //  // Clear the input
+        //  event.target.value = '';
+
+        //  // Return
+        //  return;
+        }
+
+        // If there is a category...
+        const product = this.filteredProductsOptions[0];
+        const isProductApplied = this.selectedProduct.id;
+
+        // If the found category is already applied to the product...
+        if ( isProductApplied )
+        {
+            // Remove the category from the product
+            this.removeProductFromOption(product);
+        }
+        else
+        {
+            // Otherwise add the category to the product
+            this.addProductToOption(product);
+        }
+    }
+
+    /**
+     * Add  product
+     *
+     * @param category
+     */
+    addProductToOption(product: Product): void
+    {
+        // Update the selected product form
+        this.selectedProductsOptions.push(product)
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+    }
+
+    /**
+     * Remove category from the product
+     *
+     * @param category
+     */
+    removeProductFromOption(product: Product): void
+    {
+        // Update the selected product form
+        this.selectedProductsOptions.push(product)
+
+        // Update the selected product form
+        this.selectedProductForm.get('categoryId').patchValue(this.selectedProduct.categoryId);
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+    }
+
+
+    selectProductOption(optionId){
+        // If the product is already selected...
+        if ( this.selectedProductsOption && this.selectedProductsOption.id === optionId )
+        {
+            // Clear the form
+            this.selectedProductsOption = null;
+        }
+
+        // Get the product by id
+        this._inventoryService.getProductsOptionById(optionId)
+            .subscribe((packages) => {
+                this.selectedProductsOption = packages;
+            });
+    }
+
+    deleteProductOption(optionId){
+        // If the product is already selected...
+        if ( this.selectedProductsOption && this.selectedProductsOption.id === optionId )
+        {
+            // Clear the form
+            this.selectedProductsOption = null;
+        }
+
+
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title  : 'Delete option',
+            message: 'Are you sure you want to delete this option? This option will be remove permenantly!',
+            actions: {
+                confirm: {
+                    label: 'Delete'
+                }
+            }
+        });
+
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+
+            // If the confirm button pressed...
+            if ( result === 'confirmed' )
+            {
+                // Delete the variant from the server
+                this._inventoryService.deleteProductsOptionById(optionId, this.selectedProduct.id)
+                .subscribe((response)=>{
+                    console.log("response", response)
+                });
+            }
+        });
+    }
+
+    updateSelectedProductsOption(optionId = "") {
+
+        // add / update _selectedProductsOption["packageId"] value 
+        this._selectedProductsOption["packageId"] = this.selectedProduct.id;
+
+        if (optionId !== ""){
+            // update
+            this._inventoryService.updateProductsOptionById(this.selectedProduct.id, this._selectedProductsOption, this.selectedProductsOption.id )
+                .subscribe((response) => {
+
+                });
+        } else {
+            // add new
+            this._inventoryService.createProductsOptionById(this.selectedProduct.id, this._selectedProductsOption)
+                .subscribe((response) => {
+
+                    // push to this.productsCombos$
+                    // this.productsCombos$.push(response);
+
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                });
+        }
+
+        // Clear the form
+        this.selectedProductsOption = null;
+        // Clear the invisible form
+        this._selectedProductsOption = null;
+    }
+
+    resetSelectedProductsOption(){
+        this.selectedProductsOption = null;
+    }
+
+    validateProductsOptionName(value){
+        
+        // if this.selectedProductsOption have value // for update
+        if (this.selectedProductsOption) {
+            this._selectedProductsOption = this.selectedProductsOption;
+        }
+
+        this._selectedProductsOption["title"] = value;
+    }
+
+    insertProductsInOption(productId, isChecked: boolean) {
+
+        // if this.selectedProductsOption have value // for update
+        if (this.selectedProductsOption) {
+            this._selectedProductsOption = this.selectedProductsOption;
+        }
+
+        if (isChecked) {
+            // this is mostly triggered by (change)="insertProductsInOption"
+            // this is triggered when creating new option, selectedProductsOption is null since it's new
+            if (this._selectedProductsOption["productPackageOptionDetail"]) {
+                // if there already a value in this._selectedProductsOption["productPackageOptionDetail"] ,
+                // push a new one
+                this._selectedProductsOption["productPackageOptionDetail"].push({
+                    productId: productId
+                });
+            } else {
+                // if this._selectedProductsOption["productPackageOptionDetail"] have no value, initiate the array first
+                // then push the product id
+                this._selectedProductsOption["productPackageOptionDetail"] = [];
+                this._selectedProductsOption["productPackageOptionDetail"].push({
+                    productId: productId
+                });
+            }
+        } else {
+            // this is mostly triggered by (change)="insertProductsInOption"
+            // this is triggered when creating new option, selectedProductsOption is null since it's new
+            if (this._selectedProductsOption["productPackageOptionDetail"]) {
+                // if there already a value in this._selectedProductsOption["productPackageOptionDetail"] ,
+                // push a new one
+                let index = this._selectedProductsOption["productPackageOptionDetail"].findIndex(item => item.productId === productId);
+                if (index > -1) {
+                    // Delete the product from option
+                    this._selectedProductsOption["productPackageOptionDetail"].splice(index, 1);
+                }
+
+                // this mean this._selectedProductsOption["productPackageOptionDetail"] is empty
+                if (this._selectedProductsOption["productPackageOptionDetail"].length < 1) {
+                    console.log("you need to add at least 1 product")
+                }
+            } else {
+                // if this._selectedProductsOption["productPackageOptionDetail"] have no value, 
+                // dis should not happen                
+                console.log("this should not happen")
+            }
+        }
+
+    }
+
+    validateProductsOptionTotalAllowed(value){
+        // if this.selectedProductsOption have value // for update
+        if (this.selectedProductsOption) {
+            this._selectedProductsOption = this.selectedProductsOption;
+        }
+        
+        this._selectedProductsOption["totalAllow"] = value;
+    }
+
+    validateProductsInOption(productId) {
+        let index;
+        
+        // this is mostly triggered by [checked]="validateProductsInOption(product.id)"
+        // this is trigger when updating, since selectedProductsOption have values
+        if (this.selectedProductsOption){
+            index = this.selectedProductsOption.productPackageOptionDetail.findIndex(item => item.productId === productId);
+        }
+
+        return (index > -1) ? true : false;
     }
 
     getVariantCombosName(variantCombosArr){
@@ -919,6 +1217,10 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         this.showVariantsSection = !this.showVariantsSection;
     }
     
+    displayCombos(){
+        this.showCombosSection = !this.showCombosSection;
+    }
+
     /**
      * Toggle variant details
      *
@@ -975,73 +1277,73 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     /**
      * Toggle the variants Available edit mode
      */
-     toggleVariantsAvailableEditMode(): void
-     {
-         this.productVariantAvailableEditMode = !this.productVariantAvailableEditMode;
-     }
+    toggleVariantsAvailableEditMode(): void
+    {
+        this.productVariantAvailableEditMode = !this.productVariantAvailableEditMode;
+    }
 
     /**
      * Filter variants
      *
      * @param event
      */
-     filterProductVariantAvailable(event): void
-     {
-         // Get the value
-         const value = event.target.value.toLowerCase();
+    filterProductVariantAvailable(event): void
+    {
+        // Get the value
+        const value = event.target.value.toLowerCase();
 
-         console.log("this.productVariantAvailable$ :",this.productVariantAvailable$)
-         console.log("this.productVariantAvailable$ value :",value)
- 
-         // Filter the variants
-         this.filteredProductVariantAvailable = this.productVariantAvailable$.filter(variantAvailable => variantAvailable.value.toLowerCase().includes(value));
+        console.log("this.productVariantAvailable$ :",this.productVariantAvailable$)
+        console.log("this.productVariantAvailable$ value :",value)
 
-         console.log("this.filteredProductVariantAvailable: ", this.filteredProductVariantAvailable)
-     }
+        // Filter the variants
+        this.filteredProductVariantAvailable = this.productVariantAvailable$.filter(variantAvailable => variantAvailable.value.toLowerCase().includes(value));
+
+        console.log("this.filteredProductVariantAvailable: ", this.filteredProductVariantAvailable)
+    }
  
      /**
       * Filter variants input key down event
       *
       * @param event
       */
-     filterProductVariantAvailableInputKeyDown(event): void
-     {
-         // Return if the pressed key is not 'Enter'
-         if ( event.key !== 'Enter' )
-         {
-             return;
-         }
- 
-         // If there is no variant available...
-         if ( this.filteredProductVariantAvailable.length === 0 )
-         {
-             // Create the variant
-            //  this.createVariantTag(event.target.value);
- 
-             // Clear the input
-             event.target.value = '';
- 
-             // Return
-             return;
-         }
- 
-         // If there is a variant...
-         const variantTag = this.filteredProductVariantAvailable[0];
-         const isVariantTagApplied = this.selectedProduct.productVariants.find(item => item.id === variantTag.id);
- 
-         // If the found variant is already applied to the product...
-         if ( isVariantTagApplied )
-         {
-             // Remove the variant from the product
-            //  this.removeVariantTagFromProduct(variantTag);
-         }
-         else
-         {
-             // Otherwise add the variant to the product
-             let variantId
-             this.addVariantAvailableToProduct(variantTag, variantId);
-         }
-     }
+    filterProductVariantAvailableInputKeyDown(event): void
+    {
+        // Return if the pressed key is not 'Enter'
+        if ( event.key !== 'Enter' )
+        {
+            return;
+        }
+
+        // If there is no variant available...
+        if ( this.filteredProductVariantAvailable.length === 0 )
+        {
+            // Create the variant
+        //  this.createVariantTag(event.target.value);
+
+            // Clear the input
+            event.target.value = '';
+
+            // Return
+            return;
+        }
+
+        // If there is a variant...
+        const variantTag = this.filteredProductVariantAvailable[0];
+        const isVariantTagApplied = this.selectedProduct.productVariants.find(item => item.id === variantTag.id);
+
+        // If the found variant is already applied to the product...
+        if ( isVariantTagApplied )
+        {
+            // Remove the variant from the product
+        //  this.removeVariantTagFromProduct(variantTag);
+        }
+        else
+        {
+            // Otherwise add the variant to the product
+            let variantId
+            this.addVariantAvailableToProduct(variantTag, variantId);
+        }
+    }
 
     /**
      * Create a new variant
@@ -1086,42 +1388,41 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      *
      * @param variant
      */
-     deleteVariantAvailable(variantAvailable: ProductVariantAvailable): void
-     {
-         // Open the confirmation dialog
-         const confirmation = this._fuseConfirmationService.open({
-             title  : 'Delete product',
-             message: 'Are you sure you want to delete this variant value ? This variant value will be remove permenantly!',
-             actions: {
-                 confirm: {
-                     label: 'Delete'
-                 }
-             }
-         });
- 
-         // Subscribe to the confirmation dialog closed action
-         confirmation.afterClosed().subscribe((result) => {
- 
-             // If the confirm button pressed...
-             if ( result === 'confirmed' )
-             {
-                 // Delete the variant from the server
-                 this._inventoryService.deleteVariantAvailable(variantAvailable, this.selectedProduct.id)
-                 .subscribe((response)=>{
-                     this.removeVariantAvailableFromProduct(response)
-                 });
-             }
-         });
-     }
+    deleteVariantAvailable(variantAvailable: ProductVariantAvailable): void
+    {
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title  : 'Delete product',
+            message: 'Are you sure you want to delete this variant value ? This variant value will be remove permenantly!',
+            actions: {
+                confirm: {
+                    label: 'Delete'
+                }
+            }
+        });
+
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+
+            // If the confirm button pressed...
+            if ( result === 'confirmed' )
+            {
+                // Delete the variant from the server
+                this._inventoryService.deleteVariantAvailable(variantAvailable, this.selectedProduct.id)
+                .subscribe((response)=>{
+                    this.removeVariantAvailableFromProduct(response)
+                });
+            }
+        });
+    }
  
      /**
       * Add variant to the product
       *
       * @param variant
       */
-     addVariantAvailableToProduct(productVariantAvailable: ProductVariantAvailable, variantId: string): void
-     {
-
+    addVariantAvailableToProduct(productVariantAvailable: ProductVariantAvailable, variantId: string): void
+    {
         let selectedProductVariant = this.selectedProduct.productVariants.find(variant=> variant.id === variantId);
         
         // Add the productVariantAvailable
@@ -1137,29 +1438,29 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         
         // Mark for check
         this._changeDetectorRef.markForCheck();
-     }
+    }
  
-     /**
-      * Remove variantTag from the product
-      *
-      * @param variantTag
-      */
-     removeVariantAvailableFromProduct(variantAvailable: ProductVariantAvailable): void
-     {
+    /**
+     * Remove variantTag from the product
+     *
+     * @param variantTag
+     */
+    removeVariantAvailableFromProduct(variantAvailable: ProductVariantAvailable): void
+    {
 
-        // Find Index of variantAvailable.productVariantId
+    // Find Index of variantAvailable.productVariantId
 
-        let selectedroductVariants = this.selectedProduct.productVariants.find(variant=> variant.id === variantAvailable.productVariantId);
+    let selectedroductVariants = this.selectedProduct.productVariants.find(variant=> variant.id === variantAvailable.productVariantId);
 
-        // Remove the variant Available 
-        selectedroductVariants.productVariantsAvailable.splice(selectedroductVariants.productVariantsAvailable.findIndex(item => item.id === variantAvailable.id), 1);
+    // Remove the variant Available 
+    selectedroductVariants.productVariantsAvailable.splice(selectedroductVariants.productVariantsAvailable.findIndex(item => item.id === variantAvailable.id), 1);
 
-        // After selectedroductVariants.productVariantsAvailable.splice , no need to patch this.selectedProduct.productVariants
-        // because inventory service observable already did that in removeVariantFromProduct (i think)
+    // After selectedroductVariants.productVariantsAvailable.splice , no need to patch this.selectedProduct.productVariants
+    // because inventory service observable already did that in removeVariantFromProduct (i think)
 
-        // Mark for check
-        this._changeDetectorRef.markForCheck();
-     }
+    // Mark for check
+    this._changeDetectorRef.markForCheck();
+    }
 
     /**
      * Toggle product variantTag
@@ -1167,27 +1468,27 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      * @param variantTag
      * @param change
      */
-     toggleProductVariantTag(variant: ProductVariant, change: MatCheckboxChange): void
-     {
-         if ( change.checked )
-         {
-             this.addVariantToProduct(variant);
-         }
-         else
-         {
-             this.removeVariantFromProduct(variant);
-         }
-     }
+    toggleProductVariantTag(variant: ProductVariant, change: MatCheckboxChange): void
+    {
+        if ( change.checked )
+        {
+            this.addVariantToProduct(variant);
+        }
+        else
+        {
+            this.removeVariantFromProduct(variant);
+        }
+    }
  
      /**
       * Should the create variantTag button be visible
       *
       * @param inputValue
       */
-     shouldShowCreateVariantAvailableButton(inputValue: string): boolean
-     {
-         return !!!(inputValue === '' || this.productVariantAvailable$.findIndex(variantTag => variantTag.value.toLowerCase() === inputValue.toLowerCase()) > -1);
-     }
+    shouldShowCreateVariantAvailableButton(inputValue: string): boolean
+    {
+        return !!!(inputValue === '' || this.productVariantAvailable$.findIndex(variantTag => variantTag.value.toLowerCase() === inputValue.toLowerCase()) > -1);
+    }
 
 
     /**
@@ -1199,90 +1500,90 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     /**
      * Toggle the categories edit mode
      */
-     toggleCategoriesEditMode(): void
-     {
-         this.productCategoriesEditMode = !this.productCategoriesEditMode;
-     }
+    toggleCategoriesEditMode(): void
+    {
+        this.productCategoriesEditMode = !this.productCategoriesEditMode;
+    }
 
     /**
      * Filter category
      *
      * @param event
      */
-     filterCategories(event): void
-     {
-         // Get the value
-         const value = event.target.value.toLowerCase();
+    filterCategories(event): void
+    {
+        // Get the value
+        const value = event.target.value.toLowerCase();
+
+        // Filter the categories
+        this.filteredProductCategories = this.productCategories$.filter(category => category.name.toLowerCase().includes(value));
+    }
  
-         // Filter the categories
-         this.filteredProductCategories = this.productCategories$.filter(category => category.name.toLowerCase().includes(value));
-     }
- 
-     /**
-      * Filter category input key down event
-      *
-      * @param event
-      */
-      filterCategoriesInputKeyDown(event): void
-     {
-         // Return if the pressed key is not 'Enter'
-         if ( event.key !== 'Enter' )
-         {
-             return;
-         }
- 
-         // If there is no category available...
-         if ( this.filteredProductCategories.length === 0 )
-         {
-            //  // Create the category
-            //  this.createCategory(event.target.value);
- 
-            //  // Clear the input
-            //  event.target.value = '';
- 
-            //  // Return
-            //  return;
-         }
- 
-         // If there is a category...
-         const category = this.filteredProductCategories[0];
-         const isCategoryApplied = this.selectedProduct.categoryId;
- 
-         // If the found category is already applied to the product...
-         if ( isCategoryApplied )
-         {
-             // Remove the category from the product
-             this.removeCategoryFromProduct(category);
-         }
-         else
-         {
-             // Otherwise add the category to the product
-             this.addCategoryToProduct(category);
-         }
-     }
+    /**
+     * Filter category input key down event
+     *
+     * @param event
+     */
+    filterCategoriesInputKeyDown(event): void
+    {
+        // Return if the pressed key is not 'Enter'
+        if ( event.key !== 'Enter' )
+        {
+            return;
+        }
+
+        // If there is no category available...
+        if ( this.filteredProductCategories.length === 0 )
+        {
+        //  // Create the category
+        //  this.createCategory(event.target.value);
+
+        //  // Clear the input
+        //  event.target.value = '';
+
+        //  // Return
+        //  return;
+        }
+
+        // If there is a category...
+        const category = this.filteredProductCategories[0];
+        const isCategoryApplied = this.selectedProduct.categoryId;
+
+        // If the found category is already applied to the product...
+        if ( isCategoryApplied )
+        {
+            // Remove the category from the product
+            this.removeCategoryFromProduct(category);
+        }
+        else
+        {
+            // Otherwise add the category to the product
+            this.addCategoryToProduct(category);
+        }
+    }
 
     /**
      * Create a new category
      *
      * @param title
      */
-     createCategory(name: string, parentCategoryId: string, thumbnailUrl: string): void
-     {
-         const category = {
-             name,
-             storeId: this.storeId$,
-             parentCategoryId,
-             thumbnailUrl
-         };
- 
-         // Create category on the server
-         this._inventoryService.createCategory(category)
-             .subscribe((response) => {
- 
-                 // Add the category to the product
-                 this.addCategoryToProduct(response["data"]);
-             });
-     }
+    createCategory(name: string, parentCategoryId: string, thumbnailUrl: string): void
+    {
+        const category = {
+            name,
+            storeId: this.storeId$,
+            parentCategoryId,
+            thumbnailUrl
+        };
+
+        // Create category on the server
+        this._inventoryService.createCategory(category)
+            .subscribe((response) => {
+
+                // Add the category to the product
+                this.addCategoryToProduct(response["data"]);
+            });
+    }
  
      /**
       * Update the category title
@@ -1290,27 +1591,27 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
       * @param category
       * @param event
       */
-     updateLocalCategoryTitle(category: ProductCategory, event): void
-     {
-         // Update the title on the category
-         category.name = event.target.value;
-     }
+    updateLocalCategoryTitle(category: ProductCategory, event): void
+    {
+        // Update the title on the category
+        category.name = event.target.value;
+    }
 
-     updateServerCategoryTitle(category: ProductCategory, event): void
-     {
-         // Update the category on the server
-         this._inventoryService.updateCategory(category.id, category)
-             .pipe(debounceTime(300))
-             .subscribe();
-     }
+    updateServerCategoryTitle(category: ProductCategory, event): void
+    {
+        // Update the category on the server
+        this._inventoryService.updateCategory(category.id, category)
+            .pipe(debounceTime(300))
+            .subscribe();
+    }
  
      /**
       * Delete the category
       *
       * @param category
       */
-     deleteCategory(category: ProductCategory): void
-     {
+    deleteCategory(category: ProductCategory): void
+    {
 
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
@@ -1335,42 +1636,41 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             }
         });
-     }
+    }
 
     /**
      * Add category to the product
      *
      * @param category
      */
-     addCategoryToProduct(category: ProductCategory): void
-     {
+    addCategoryToProduct(category: ProductCategory): void
+    {
+        // Add the category
+        this.selectedProduct.categoryId = category.id;
 
-         // Add the category
-         this.selectedProduct.categoryId = category.id;
- 
-         // Update the selected product form
-         this.selectedProductForm.get('categoryId').patchValue(this.selectedProduct.categoryId);
- 
-         // Mark for check
-         this._changeDetectorRef.markForCheck();
-     }
+        // Update the selected product form
+        this.selectedProductForm.get('categoryId').patchValue(this.selectedProduct.categoryId);
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+    }
  
      /**
       * Remove category from the product
       *
       * @param category
       */
-     removeCategoryFromProduct(category: ProductCategory): void
-     {
-         // Remove the category
-         this.selectedProduct.categoryId = null;
- 
-         // Update the selected product form
-         this.selectedProductForm.get('categoryId').patchValue(this.selectedProduct.categoryId);
- 
-         // Mark for check
-         this._changeDetectorRef.markForCheck();
-     }
+    removeCategoryFromProduct(category: ProductCategory): void
+    {
+        // Remove the category
+        this.selectedProduct.categoryId = null;
+
+        // Update the selected product form
+        this.selectedProductForm.get('categoryId').patchValue(this.selectedProduct.categoryId);
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+    }
  
     /**
      * Toggle product category
@@ -1378,27 +1678,24 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      * @param category
      * @param change
      */
-     toggleProductCategory(category: ProductCategory, change: MatCheckboxChange): void
-     {
-         if ( change.checked )
-         {
-             this.addCategoryToProduct(category);
-         }
-         else
-         {
-             this.removeCategoryFromProduct(category);
-         }
-     }
+    toggleProductCategory(category: ProductCategory, change: MatCheckboxChange): void
+    {
+        if (change.checked) {
+            this.addCategoryToProduct(category);
+        } else {
+            this.removeCategoryFromProduct(category);
+        }
+    }
 
     /**
      * Should the create category button be visible
      *
      * @param inputValue
      */
-     shouldShowCreateCategoryButton(inputValue: string): boolean
-     {
-         return !!!(inputValue === '' || this.productCategories$.findIndex(category => category.name.toLowerCase() === inputValue.toLowerCase()) > -1);
-     }
+    shouldShowCreateCategoryButton(inputValue: string): boolean
+    {
+        return !!!(inputValue === '' || this.productCategories$.findIndex(category => category.name.toLowerCase() === inputValue.toLowerCase()) > -1);
+    }
 
 
     /**
@@ -1410,10 +1707,10 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     /**
      * Toggle the categories edit mode
      */
-     toggleImagesEditMode(): void
-     {
-         this.imagesEditMode = !this.imagesEditMode;
-     }
+    toggleImagesEditMode(): void
+    {
+        this.imagesEditMode = !this.imagesEditMode;
+    }
      
     /**
      * Upload avatar
@@ -1502,47 +1799,76 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      */ 
 
     // this create product check category first before creating them
-    initCreateProduct(){
-        // get category by name = no-category
-        this._inventoryService.getCategories("no-category").subscribe(async (res)=>{
+    initCreateProduct(productType: string){
 
-            let _noCategory = res["data"].find(obj => obj.name === "no-category");
-
-            // if there is no category with "no-category" name, create one
-            console.log("logs this !!!",_noCategory)
-
-            if (!_noCategory || _noCategory["name"] !== "no-category"){
-                await this._inventoryService.createCategory({
-                    name: "no-category",
-                    parentCategoryId: "",
-                    storeId: this.storeId$,
-                    thumbnailUrl: ""
-                }).subscribe((res)=>{
-                    if (res["status"] !== 201){
-                        console.log("an error has occur",res)
-                    } else {
-                        this.createProduct(res["data"].id);
-                    }
-                });
-            } else {
-                this.createProduct(_noCategory.id);
-            }
-        });
+        if (productType === "normal") {
+            // get category by name = no-category
+            this._inventoryService.getCategories("no-category").subscribe(async (res)=>{
+    
+                let _noCategory = res["data"].find(obj => obj.name === "no-category");
+    
+                // if there is no category with "no-category" name, create one
+                console.log("logs this !!!",_noCategory)
+    
+                if (!_noCategory || _noCategory["name"] !== "no-category"){
+                    await this._inventoryService.createCategory({
+                        name: "no-category",
+                        parentCategoryId: "",
+                        storeId: this.storeId$,
+                        thumbnailUrl: ""
+                    }).subscribe((res)=>{
+                        if (res["status"] !== 201){
+                            console.log("an error has occur",res)
+                        } else {
+                            this.createProduct(res["data"].id, productType);
+                        }
+                    });
+                } else {
+                    this.createProduct(_noCategory.id, productType);
+                }
+            });
+        } else if (productType === "combo") {
+            // get category by name =Combos
+            this._inventoryService.getCategories("Combos").subscribe(async (res)=>{
+    
+                let _noCategory = res["data"].find(obj => obj.name === "Combos");
+    
+                // if there is no category with "Combos" name, create one
+                console.log("logs this !!!",_noCategory)
+    
+                if (!_noCategory || _noCategory["name"] !== "Combos"){
+                    await this._inventoryService.createCategory({
+                        name: "Combos",
+                        parentCategoryId: "",
+                        storeId: this.storeId$,
+                        thumbnailUrl: ""
+                    }).subscribe((res)=>{
+                        if (res["status"] !== 201){
+                            console.log("an error has occur",res)
+                        } else {
+                            this.createProduct(res["data"].id, productType);
+                        }
+                    });
+                } else {
+                    this.createProduct(_noCategory.id, productType);
+                }
+            });
+        }
     }
 
 
     /**
      * Create product
      */
-    createProduct(categoryId): void
+    createProduct(categoryId: string, productType: string): void
     {
 
         // Create the product
-        this._inventoryService.createProduct(categoryId).subscribe(async (newProduct) => {
+        this._inventoryService.createProduct(categoryId, productType).subscribe(async (newProduct) => {
 
             // Add Inventory to product
-            await this._inventoryService.addInventoryToProduct(newProduct["data"]).subscribe();
-            
+            await this._inventoryService.addInventoryToProduct(newProduct["data"].id).subscribe();
+
             // Go to new product
             this.selectedProduct = newProduct["data"];
                                     
