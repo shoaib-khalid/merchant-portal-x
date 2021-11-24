@@ -26,6 +26,7 @@
             </mat-form-field>
             <!-- Add discount button -->
             <button
+                id="create-discount-btn"
                 class="ml-4"
                 mat-flat-button
                 (click)="createDiscount()"
@@ -148,50 +149,57 @@
                             <!-- min sub total, max sub total, discount amount, calculation type -->
                             <div class="my-8">
                                 <div formArrayName="storeDiscountTierList" *ngFor="let discountTier of selectedDiscountForm.get('storeDiscountTierList')['controls']; let i = index;" class="flex flex-col sm:flex-row px-8">
+                                    
+                            <!-- display, edit  delete -->
                                     <div class="flex flex-auto flex-wrap w-full" [formGroupName]="i">
     
                                             <!-- Min Sub Total -->
-                                            <mat-form-field class="w-full lg:w-1/5 pr-4">
+                                            <mat-form-field class="w-full lg:w-3/12 pr-4">
                                                 <mat-label>Min Sub Total</mat-label>
                                                 <input
                                                     type="number"
                                                     matInput
                                                     [formControlName]="'startTotalSalesAmount'"
-                                                    [value]="discountTier.startTotalSalesAmount"
-                                                    >
+                                                    [readonly]="!storeDiscountTierListValueEditMode[i]"
+                                                >
                                             </mat-form-field>
     
                                             <!-- Max Sub Total -->
-                                            <div class="flex flex-wrap w-full lg:w-1/5">
+                                            <div class="flex flex-wrap w-full lg:w-3/12">
                                                 <mat-form-field class="w-full pr-4">
                                                     <mat-label>Max Sub Total</mat-label>
                                                     <input
                                                         type="number"
                                                         matInput
-                                                        [formControlName]="'endTotalSalesAmount'">
+                                                        [formControlName]="'endTotalSalesAmount'"
+                                                        [readonly]="!storeDiscountTierListValueEditMode[i]"
+                                                    >
                                                 </mat-form-field>
                                             </div>                               
                                         
                                         <!-- Discount Amount-->
-                                        <div class="flex flex-wrap w-full lg:w-1/5 ">
+                                        <div class="flex flex-wrap w-full lg:w-3/12 ">
                                             
                                             <mat-form-field class="w-full pr-4">
                                                 <mat-label>Discount Amount</mat-label>
                                                 <input
                                                     type="number"
                                                     matInput
-                                                    [formControlName]="'discountAmount'">
+                                                    [formControlName]="'discountAmount'"
+                                                    [readonly]="!storeDiscountTierListValueEditMode[i]"
+                                                >
                                             </mat-form-field>
     
                                         </div>
     
                                         <!-- calculation type) -->
-                                        <div class="flex flex-wrap w-full lg:w-1/5">
+                                        <div class="flex flex-wrap w-full lg:w-2/12">
                                             <mat-form-field class="w-full pr-4">
                                                 <mat-label>Calculation Type</mat-label>
                                                 <mat-select
                                                     class="w-full"
                                                     [formControlName]="'calculationType'"
+                                                    [disabled]="!storeDiscountTierListValueEditMode[i]"
                                                     >
                                                     
                                                     <div>
@@ -203,23 +211,147 @@
                                         </div>
                                         
     
-                                        <!-- Insert Discount Tier-->
-                                        <div class="flex flex-wrap w-1/1/2 lg:w-1/5 items-center justify-center ">
-                                            
-                                            <!-- Dbuttons -->
-                                            
-                                        <button
-                                            mat-flat-button
-                                            [color]="'primary'"
-                                            (click)="updateSelectedProduct()">
-                                            Insert Discount Tier
-                                        </button>
-    
+                                        <!-- Edit&Delete Button-->
+                                        <div class="flex flex-wrap w-1/1/2 lg:w-1/12 items-center justify-center ">
+                                            <div class="flex flex-row w-full"> 
+                                                <input
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="button"
+                                                    [id]="'edit-discount-tier-btn' + discountTier.value.id"
+                                                    (click)="storeDiscountTierListValueEditMode[i] = !storeDiscountTierListValueEditMode[i]"
+                                                >
+                                                <label
+                                                    *ngIf="!storeDiscountTierListValueEditMode[i]"
+                                                    class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3"
+                                                    [for]="'edit-discount-tier-btn' + discountTier.value.id"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="text-white icon-size-5"
+                                                        [svgIcon]="'heroicons_outline:pencil-alt'">
+                                                    </mat-icon>
+                                                </label>
+
+                                                <input
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="button"
+                                                    [id]="'update-discount-tier-btn' + discountTier.value.id"
+                                                    (click)="storeDiscountTierListValueEditMode[i] = !storeDiscountTierListValueEditMode[i]"
+                                                >
+                                                <label
+                                                    *ngIf="storeDiscountTierListValueEditMode[i]"
+                                                    class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3"
+                                                    [for]="'update-discount-tier-btn' + discountTier.value.id"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="text-white icon-size-5"
+                                                        [svgIcon]="'heroicons_outline:check'">
+                                                    </mat-icon>
+                                                </label>
+
+                                                <input
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="button"
+                                                    [id]="'delete-discount-tier-btn' + discountTier.value.id"
+                                                    (click)="deleteSelectedDiscountTier(discountTier.value.id)"
+                                                >
+                                                <label
+                                                    class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-warn hover:bg-warn-700"
+                                                    [for]="'delete-discount-tier-btn' + discountTier.value.id"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="text-white icon-size-5"
+                                                        [svgIcon]="'heroicons_outline:trash'">
+                                                    </mat-icon>
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             
+                            <!-- Insert discount tier -->
+                                <div class="flex flex-col sm:flex-row px-8 pt-4 pb-2 border-t">
+        
+                                    <!-- Min Sub Total -->
+                                    <mat-form-field appearance="fill" class="w-full lg:w-3/12 pr-4">
+                                        <mat-label>Min Sub Total</mat-label>
+                                        <input
+                                            type="number"
+                                            placeholder="Insert Mininum Subtotal"
+                                            matInput
+                                            (value)="startTotalSalesAmount"
+                                            (change)="validateDiscountTier('startTotalSalesAmount',$event.target.value)"
+                                            >
+                                    </mat-form-field>
+
+                                    <!-- Max Sub Total -->
+                                    <div class="flex flex-wrap w-full lg:w-3/12">
+                                        <mat-form-field appearance="fill" class="w-full pr-4">
+                                            <mat-label>Max Sub Total</mat-label>
+                                            <input
+                                                type="number"
+                                                placeholder="Insert Maximum Subtotal"
+                                                matInput
+                                                (value)="endTotalSalesAmount"
+                                                (change)="validateDiscountTier('endTotalSalesAmount',$event.target.value)"
+                                                >
+                                            </mat-form-field>
+                                    </div>                               
+                                
+                                <!-- Discount Amount-->
+                                <div class="flex flex-wrap w-full lg:w-3/12 ">
+                                    
+                                    <mat-form-field appearance="fill" class="w-full pr-4">
+                                        <mat-label>Discount Amount</mat-label>
+                                        <input
+                                            type="number"
+                                            placeholder="Insert Discount Amount"
+                                            matInput
+                                            (value)="discountAmount"
+                                            (change)="validateDiscountTier('discountAmount',$event.target.value)">
+                                        </mat-form-field>
+
+                                </div>
+
+                                <!-- calculation type -->
+                                <div class="flex flex-wrap w-full lg:w-2/12">
+                                    <mat-form-field appearance="fill" class="w-full pr-4">
+                                        <mat-label>Calculation Type</mat-label>
+                                        <mat-select
+                                            class="w-full"
+                                            placeholder="Choose Calculation Type"
+                                            (value)="calculationType"
+                                            (selectionChange)="validateDiscountTier('calculationType' ,$event.value)">
+                                            <div>
+                                                <mat-option [value]="'PERCENT'">Percentage</mat-option>
+                                                <mat-option [value]="'FIX'">Fix</mat-option>
+                                            </div>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                                
+
+                                <!-- Dbuttons Insert Discount Tier-->
+                                <div class="flex flex-wrap w-1/1/2 lg:w-1/12 items-center justify-center">
+                                    <div class="flex flex-row w-full"> 
+                                        <input
+                                            id="create-discount-tier-btn"
+                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                            type="button"
+                                            (click)="insertTierToDiscount()"
+                                        >
+                                        <label
+                                            for="create-discount-tier-btn"
+                                            class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-primary hover:bg-on-primary-50 mr-3"
+                                            matRipple>
+                                            <mat-icon
+                                            class="text-white icon-size-5"
+                                            [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Discount name, start/end time&date,status,Discount on -->
                             <div class="flex flex-col sm:flex-row px-8 pt-8 pb-4 border-t">
                                
@@ -227,7 +359,7 @@
                                 <div class="flex flex-auto flex-wrap w-full">
 
                                         <!-- Name -->
-                                        <mat-form-field class="w-full lg:w-2/12 pr-2">
+                                        <mat-form-field class="w-full lg:w-1/6 pr-2">
                                             <mat-label>Discount Name</mat-label>
                                             <input
                                                 matInput
@@ -235,7 +367,7 @@
                                         </mat-form-field>
 
                                         <!-- Date range -->
-                                        <div class="flex flex-wrap w-full lg:w-5/12">
+                                        <div class="flex flex-wrap w-full lg:w-3/6">
                                             <!-- Start d&t -->
                                             <div class="w-1/2 mb-4 pr-2">
                                                 <mat-form-field 
@@ -295,7 +427,7 @@
                                         </div>                               
                                     
                                     <!-- Discount Status (isActive)-->
-                                    <div class="flex flex-wrap w-full lg:w-2/12 ">
+                                    <div class="flex flex-wrap w-full lg:w-1/6 ">
                                         
                                         <mat-form-field class="w-full pr-2">
                                             <mat-label>Status</mat-label>
@@ -315,7 +447,7 @@
                                     </div>
 
                                     <!-- Discount On (type) -->
-                                    <div class="flex flex-wrap w-full lg:w-2/12">
+                                    <div class="flex flex-wrap w-full lg:w-1/6">
                                         <mat-form-field class="w-full pr-2">
                                             <mat-label>Discount On</mat-label>
                                             <mat-select
@@ -330,21 +462,6 @@
                                             </mat-select>
                                         </mat-form-field>
                                     </div>
-                                    
-
-                                    <!-- Update-->
-                                    <div class="flex flex-wrap w-1/1/2 lg:w-1/12 items-center justify-center ">
-                                        
-                                        <!-- Dbuttons -->
-                                        
-                                    <button
-                                        mat-flat-button
-                                        [color]="'primary'"
-                                        (click)="updateSelectedProduct()">
-                                        Insert
-                                    </button>
-
-                                    </div>
                                 </div>
                             </div>
 
@@ -353,7 +470,7 @@
                                 <input
                                     id="product-remove-button"
                                     type="button"
-                                    (click)="deleteSelectedProduct()"
+                                    (click)="deleteSelectedDiscount()"
                                     class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                     mat-button>
                                 <label 

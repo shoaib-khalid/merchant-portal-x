@@ -7,15 +7,35 @@ import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog
 })
 export class CreateDiscountComponent implements OnInit {
 
-  country:any="";
+  disabledProceed: boolean = true;
   discountName: string;
-  image:any;
-  showButton: boolean = false;
-  date: string;
-  mindate: string;
-  time: string;
-  mintime: string;
+
+  checkdate = false;
+  checkname = false;
+  checkstatus = false;
+  checktype = false;
+
+  startDate: string;
+  startTime: string;
+  isDisabledStartDateTime: boolean = true;
+  minStartDate: string;
+  minStartTime: string;
+  maxStartDate:string;
+  maxStartTime:string;
+
+  endDate: string;
+  endTime: string;
+  minEndDate: string;
+  minEndTime: string;
+  maxEndDate: string;
+  maxEndTime: string;
+
+  message: string = "";
+
   status: boolean;
+  discountType: string;
+  isActive: boolean;
+  
 
   constructor(
     public dialogRef: MatDialogRef<CreateDiscountComponent>,
@@ -26,36 +46,95 @@ export class CreateDiscountComponent implements OnInit {
     let yy = today.getFullYear();
     let mm = String(today.getMonth() + 1).padStart(2, '0');
     let dd = String(today.getDate()).padStart(2, '0');
-    this.mindate = yy + '-' + mm + '-' + dd;
+    this.minStartDate = yy + '-' + mm + '-' + dd;
 
-    this.image = {
-      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/1665px-No-Image-Placeholder.svg.png",
-      atl: "No Image"
-    };
+    let now = new Date();
+    let hh = now.getHours();
+    let ms = now.getMinutes();
+    let ss = now.getSeconds();
+    this.minStartTime = hh + ':' + ms;
   }
 
-  setPickupDateTime() {
-    this.dialogRef.close({ date: this.date, time: this.time , status: true});
+  addNewDiscount() {
+    this.dialogRef.close({ 
+        status: true ,
+        discountName: this.discountName,
+        discountOn: this.discountType,
+        startDate: this.startDate,
+        startTime: this.startTime,
+        endDate: this.endDate,
+        endTime: this.endTime,
+        isActive :this.isActive
+    });
   }
 
   cancelPickupDateTime(){
     this.dialogRef.close({ status: false });
   }
   
-  checkDate(){
-    
-    if (!this.date) {
-
-    } else {
-      this.showButton = true;
-    }
+  checkName(){           
+        // check discount name
+        if (this.discountName) {
+            this.checkname = true;
+            this.message = "";
+        }else{
+            this.checkname = false;
+            this.message = "Please insert discount name";
+        }
+        
   }
 
-  checkTime(){
-    if (!this.date || !this.time) {
-      
+  checkDateTime(){
+         // check min end date not less than min start date
+         if (this.startDate && this.startTime) {
+            // set minimum end date to current selected date
+            this.isDisabledStartDateTime = false;
+            this.minEndDate = this.startDate;
+            this.checkdate = true;
+        }
+        // check date
+        if (this.startTime && this.endTime && this.endDate && this.startDate) {        
+            if (this.startDate < this.endDate){
+                this.checkdate = true;
+            } else if (this.startDate == this.endDate) {
+                if (this.startTime <= this.endTime) {
+                    this.checkdate = true;
+                } else {
+                    this.checkdate = false;
+                    this.message = "Date/time range incorrect";
+                }
+            }
+        }
+  }
+
+  checkStatus(){
+    //check status
+     if (!this.isActive){
+        this.checkstatus = true;
+        this.message = ""
+        }else{
+            this.checkstatus = false;
+            this.message = "Please select status option"
+        }
+  }
+
+  checkDiscountType(){
+        //check discount type
+        if (!this.discountType){
+            this.checktype = true;
+            this.message = ""
+        }else{
+            this.checktype = false;
+            this.message = "Please select discount type option"
+        }
+  }
+
+  checkForm(){
+    if (this.checkname === true && this.checkdate === true && this.checkstatus === true && this.checktype === true) {
+        this.disabledProceed = false;
     } else {
-      this.showButton = true;
+        this.disabledProceed = true;
     }
+    
   }
 }

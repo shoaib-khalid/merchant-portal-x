@@ -48,8 +48,16 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
     selectedDiscount: Discount | null = null;
     selectedDiscountForm: FormGroup;
     storeDiscountTierList: FormArray;
-    
+    storeDiscountTierListValueEditMode:any = [];
+
     pagination: DiscountPagination;
+
+    // discount tier
+    calculationType: string;
+    discountAmount: number;
+    endTotalSalesAmount: number;
+    startTotalSalesAmount: number;
+ 
 
     flashMessage: 'success' | 'error' | null = null;
     isLoading: boolean = false;
@@ -238,12 +246,13 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
                     this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
                     this.storeDiscountTierList.push(this._formBuilder.group(item));
                 });
+                
+                console.log("selectedDiscountForm.get('storeDiscountTierList')", this.selectedDiscountForm.get('storeDiscountTierList'))
 
-                // this._discountService.getDiscountsTier(discountId)
-                //     .subscribe((response) => {
-                //         console.log("response", response["data"])
-                //         this.
-                //     });
+                this._discountService.getDiscountsTier(discountId)
+                    .subscribe((response) => {
+
+                    });
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -272,10 +281,19 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
     {
         const dialogRef = this._dialog.open(CreateDiscountComponent, { disableClose: true });
         dialogRef.afterClosed().subscribe(result => {
-            console.log(result);
-            if (result.status !== false) {
+            console.log("saya disini : ",result);
+            if (result.status === true) {
                 // this will remove the item from the object
-                const createDiscountBody  = this.selectedDiscountForm.getRawValue();
+                const createDiscountBody  = {
+                    discountName: result.discountName,
+                    discountType: result.discountOn,
+                    startDate: result.startDate,
+                    startTime: result.startTime,
+                    endDate: result.endDate,
+                    endTime: result.endTime,
+                    isActive: result.isActive,
+                    storeId: this.storeId$
+                };
     
                 console.log("createDiscountBody", createDiscountBody)
     
@@ -363,6 +381,90 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
                 });
             }
         });
+    }
+
+    insertTierToDiscount(){
+
+        let discountTier: StoreDiscountTierList = {
+            calculationType: this.calculationType,
+            discountAmount: this.discountAmount,
+            endTotalSalesAmount: this.endTotalSalesAmount,
+            startTotalSalesAmount: this.startTotalSalesAmount,
+        }
+
+         // Create the discount
+         this._discountService.createDiscountTier(this.selectedDiscount.id,discountTier).subscribe((response) => {
+            
+            this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
+
+            // since backend give full discount tier list .. (not the only one that have been created only)
+            this.storeDiscountTierList.clear();
+
+            response["data"].forEach(item => {
+                this.storeDiscountTierList.push(this._formBuilder.group(item));
+            });
+
+
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
+    }
+
+    deleteSelectedDiscountTier(discountTierId: string): void
+    {
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title  : 'Delete discount tier',
+            message: 'Are you sure you want to remove this discount tier? This action cannot be undone!',
+            actions: {
+                confirm: {
+                    label: 'Delete'
+                }
+            }
+        });
+
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+
+            // If the confirm button pressed...
+            if ( result === 'confirmed' )
+            {
+
+                // Delete the discount on the server
+                this._discountService.deleteDiscountTier(this.selectedDiscount.id, discountTierId).subscribe(() => {
+                    this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
+
+                    let index = (this.storeDiscountTierList.value.findIndex(x => x.id === discountTierId));
+
+                    // remove from discount tier list
+                    if (index > -1) {
+                        this.storeDiscountTierList.removeAt(index);
+                    }
+
+                    // console.log("this.storeDiscountTierList.value", this.storeDiscountTierList.value);
+                    // this.storeDiscountTierList. patchValue(this.storeDiscountTierList.value);
+
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                });
+            }
+        });
+    }
+    
+    validateDiscountTier(type, value){
+        if (type === 'startTotalSalesAmount') {
+            this.startTotalSalesAmount = value;
+        }
+        if (type === 'endTotalSalesAmount') {
+            this.endTotalSalesAmount = value;
+        }
+        if (type === 'discountAmount') {
+            this.discountAmount = value;
+        }
+        if (type === 'calculationType') {
+            this.calculationType = value;
+        }
     }
 
     /**

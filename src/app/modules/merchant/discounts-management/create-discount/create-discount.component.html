@@ -25,7 +25,9 @@
             <input 
                 matInput
                 placeholder="Enter discount name"
-                [(ngModel)]="date"
+                [(ngModel)]="discountName"
+                (input)="checkName();checkForm()"
+
             >
         </mat-form-field>
 
@@ -37,7 +39,9 @@
                 <mat-select
                     class="w-full"
                     placeholder="Select status"
-                    [formControlName]="'isActive'"
+                    [(ngModel)]="isActive"
+                    (change)="checkStatus();checkForm()"
+
                     >
                     <div>
                         <mat-option [value]="true">Active</mat-option>
@@ -53,7 +57,8 @@
                 <mat-label>Discount on</mat-label>
                 <mat-select
                     class="w-full"
-                    [formControlName]="'discountType'"
+                    [(ngModel)]="discountType"
+                    (change)="checkDiscountType();checkForm()"
                     placeholder="Select discount to be applied"
                     >
                     
@@ -72,12 +77,11 @@
                 class="w-1/2 pr-2"
                 appearance="fill">
                 <input 
-                    
                     matInput 
                     type="date" 
-                    [(ngModel)]="date"
-                    (change)="checkDate()"
-                    [min]="mindate"
+                    [(ngModel)]="startDate"
+                    (change)="checkDateTime();checkForm()"
+                    [min]="minStartDate"
                 >
             </mat-form-field>
             <mat-form-field 
@@ -85,8 +89,9 @@
                 appearance="fill">
                 <input 
                     matInput type="time" 
-                    [(ngModel)]="time"
-                    (change)="checkTime()"
+                    [(ngModel)]="startTime"
+                    (change)="checkDateTime();checkForm()"
+                    [min]="minStartTime"
                 >
             </mat-form-field>
         </div>
@@ -97,12 +102,12 @@
                 class="w-1/2 pr-2"
                 appearance="fill">
                 <input 
-                    
                     matInput 
                     type="date" 
-                    [(ngModel)]="date"
-                    (change)="checkDate()"
-                    [min]="mindate"
+                    [disabled]="isDisabledStartDateTime"
+                    [(ngModel)]="endDate"
+                    (change)="checkDateTime();checkForm()"
+                    [min]="minEndDate"
                 >
             </mat-form-field>
             <mat-form-field 
@@ -110,30 +115,37 @@
                 appearance="fill">
                 <input 
                     matInput type="time" 
-                    [(ngModel)]="time"
-                    (change)="checkTime()"
+                    [disabled]="isDisabledStartDateTime"
+                    [(ngModel)]="endTime"
+                    (change)="checkDateTime();checkForm()"
                 >
             </mat-form-field>
         </div>
 
         <!-- Actions -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-end mt-4 sm:mt-6">
+            <div *ngIf="message !== ''" class="mr-3 text-warn">
+                {{message}}
+            </div>
             <div class="order-last">
                 <!-- Send -->
                 <button
-                    class="hover:bg-gray-500 border border-gray-500"
+                    class="bg-gray-300 hover:bg-gray-500 border border-gray-500"
                     mat-flat-button
                     (click)="cancelPickupDateTime()"
                     [color]="'gray'">
                     Cancel
                 </button>
-                <span>&nbsp;&nbsp;</span>
+                
                 <button
+                    class="bg-primary-300 hover:bg-primary-500 border border-primary-500 ml-2"
                     mat-flat-button
-                    *ngIf="showButton" (click)="setPickupDateTime()"
-                    [color]="'primary'">
+                    [disabled]="disabledProceed"
+                    (click)="addNewDiscount()"
+                    [color]="'gray'">
                     Ok
                 </button>
+           
             </div>
         </div>
     </div>
