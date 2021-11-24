@@ -15,6 +15,7 @@ export interface Product
     allowOutOfStockPurchases: boolean;
     minQuantityForAlarm: number;
     packingSize: string;
+    isPackage?: boolean;
     created?: string;
     updated?: string;
     productVariants?: ProductVariant[]; // Refer Product Variants Section
@@ -119,3 +120,27 @@ export interface ProductAssets
     productId: string;
     isThumbnail: boolean;
 }
+
+
+/**
+ * 
+ * Product Package Option Section
+ * 
+ */
+
+ export interface ProductPackageOption
+ {
+     id?: string;
+     packageId: string;
+     title: string;
+     totalAllow: number;
+     productPackageOptionDetail: ProductPackageOptionDetail[];
+ }
+ 
+ export interface ProductPackageOptionDetail 
+ {
+     id?: string;
+     productPackageOptionId: string;
+     productId: string;
+ }
+ 
