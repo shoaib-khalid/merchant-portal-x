@@ -905,11 +905,11 @@ export class InventoryService
         };
 
         // product-service/v1/swagger-ui.html#/store-category-controller/postStoreCategoryByStoreIdUsingPOST
-        return this._httpClient.put<any>(productService + '/stores/' + this.storeId$ + '/package/' + packageId + '/options', productPackage , header);
+        return this._httpClient.put<any>(productService + '/stores/' + this.storeId$ + '/package/' + packageId + '/options/' + optionId, productPackage , header);
     }
 
-    deleteProductsOptionById(optionId: string, packageId: string) {
-
+    deleteProductsOptionById(optionId: string, packageId: string): Observable<boolean>
+    {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
 
@@ -917,10 +917,22 @@ export class InventoryService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
 
-        // product-service/v1/swagger-ui.html#/store-category-controller/postStoreCategoryByStoreIdUsingPOST
-        let response = this._httpClient.delete<any>(productService + '/stores/' + this.storeId$ + '/package/' + packageId + '/options/' + optionId, header);
-        this._logging.debug("Response from ProductsService (deleteProductsOptionById)",response);
-        return response;
+        return this.packages$.pipe(
+            take(1),
+            switchMap(packages => this._httpClient.delete<any>(productService + '/stores/' + this.storeId$ + '/package/' + packageId + '/options/' + optionId, header).pipe(
+                map((response) => {
+                    
+                    // Find the index of the deleted product
+                    const index = packages.findIndex(item => item.id === optionId);
+
+                    // Delete the product
+                    packages.splice(index, 1);
+
+                    // Return the deleted status
+                    return response.status;
+                })
+            ))
+        );
     }
 
 }

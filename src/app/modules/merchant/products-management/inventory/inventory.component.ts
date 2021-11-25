@@ -670,6 +670,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this._inventoryService.deleteProductsOptionById(optionId, this.selectedProduct.id)
                 .subscribe((response)=>{
                     console.log("response", response)
+
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
                 });
             }
         });
