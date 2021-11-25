@@ -97,16 +97,16 @@ export class RegisterStoreComponent implements OnInit
     {
         // Create the support form
         this.createStoreForm = this._formBuilder.group({
-            name               : ['Test', Validators.required],
-            domain             : ['testing',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
-            storeDescription   : ['This is a test', [Validators.required, Validators.maxLength(100)]],
-            email              : ['test@test.com', [Validators.required, Validators.email]],
-            phoneNumber        : ['0123456789', RegisterStoreValidationService.phonenumberValidator],
-            address            : ['Test test test', Validators.required],
-            city               : ['test', Validators.required],
-            postcode           : ['12345', [Validators.required, Validators.minLength(5), Validators.maxLength(10), RegisterStoreValidationService.postcodeValidator]],
-            deliveryType       : ['SELF_DELIVERY', Validators.required],
-            paymentType        : ['ONLINEPAYMENT', Validators.required],
+            name               : ['', Validators.required],
+            domain             : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
+            storeDescription   : ['', [Validators.required, Validators.maxLength(100)]],
+            email              : ['', [Validators.required, Validators.email]],
+            phoneNumber        : ['', RegisterStoreValidationService.phonenumberValidator],
+            address            : ['', Validators.required],
+            city               : ['', Validators.required],
+            postcode           : ['', [Validators.required, Validators.minLength(5), Validators.maxLength(10), RegisterStoreValidationService.postcodeValidator]],
+            deliveryType       : ['', Validators.required],
+            paymentType        : ['', Validators.required],
             
             // region       : ['', Validators.required],
             // state       : ['', Validators.required],
