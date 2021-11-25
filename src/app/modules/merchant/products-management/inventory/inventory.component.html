@@ -1528,9 +1528,9 @@
                                                                             <!-- Product in option -->
                                                                             <div class="hidden sm:block truncate">
                                                                                 <ng-container *ngIf="combos.productPackageOptionDetail.length">
-                                                                                    <ng-container *ngFor="let product of combos.productPackageOptionDetail; trackBy: trackByFn">
+                                                                                    <ng-container *ngFor="let package of combos.productPackageOptionDetail; trackBy: trackByFn">
                                                                                         <div class="flex items-center justify-center px-4 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                                                            <span class="text-md font-medium whitespace-nowrap">{{product.productId}}</span>
+                                                                                            <span class="text-md font-medium whitespace-nowrap">{{package.product.name}}</span>
                                                                                         </div>
                                                                                     </ng-container>
                                                                                 </ng-container>
