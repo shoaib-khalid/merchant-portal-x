@@ -110,13 +110,7 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
             endTime          : [''],
             discountType     : [''],
             isActive         : [''],
-            calculationType  : [''],
-            discountAmount   : [''],
-            description      : [''],
             storeId          : [''], // not used
-            categoryId       : [''],
-            status           : ['INACTIVE'],
-            thumbnailUrl     : [''],
             storeDiscountTierList : this._formBuilder.array([]),
         });
 
@@ -247,8 +241,6 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
                     this.storeDiscountTierList.push(this._formBuilder.group(item));
                 });
                 
-                console.log("selectedDiscountForm.get('storeDiscountTierList')", this.selectedDiscountForm.get('storeDiscountTierList'))
-
                 this._discountService.getDiscountsTier(discountId)
                     .subscribe((response) => {
 
@@ -281,7 +273,6 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
     {
         const dialogRef = this._dialog.open(CreateDiscountComponent, { disableClose: true });
         dialogRef.afterClosed().subscribe(result => {
-            console.log("saya disini : ",result);
             if (result.status === true) {
                 // this will remove the item from the object
                 const createDiscountBody  = {
@@ -294,9 +285,7 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
                     isActive: result.isActive,
                     storeId: this.storeId$
                 };
-    
-                console.log("createDiscountBody", createDiscountBody)
-    
+        
                 // Create the discount
                 this._discountService.createDiscount(createDiscountBody).subscribe(async (newDiscount) => {
                     
@@ -318,33 +307,12 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
      */
     updateSelectedDiscount(): void
     {
-        // Get
-        // let storeFrontDomain = this._apiServer.settings.storeFrontDomain;
-        // let storeFrontDomain = 'symplified.ai';
-        // let storeFrontURL = 'https://' + this.store$.domain + '.' + storeFrontDomain;
-        
-        // // Get the discount object
-        // const {sku, price, quantity, images, currentImageIndex, isVariants,
-        //         discountAssets, discountDeliveryDetail, discountInventories, 
-        //         discountReviews, discountVariants,  ...discount} = this.selectedDiscountForm.getRawValue();
 
-        // discount.seoName = discount.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
-        // discount.seoUrl = storeFrontURL + '/discount/name/' + discount.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
-
-        // // Remove the currentImageIndex field
-        // // delete discountRaw.currentImageIndex;
-
-        // // Update the discount on the server
-        // this._discountService.updateDiscount(discount.id, discount).subscribe(() => {
-        //     // Show a success message
-        //     this.showFlashMessage('success');
-        // });
-
-        // Update the inventory discount on the server (backend kena enable update)
-        // this._discountService.updateInventoryToDiscount(discount.id, discountInventories).subscribe(() => {
-        //     // Show a success message
-        //     this.showFlashMessage('success');
-        // });
+        // Update the discount on the server
+        this._discountService.updateDiscount(this.selectedDiscountForm.value.id, this.selectedDiscountForm.value).subscribe(() => {
+            // Show a success message
+            this.showFlashMessage('success');
+        });
     }
 
     /**
@@ -450,6 +418,18 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
                 });
             }
         });
+    }
+
+
+    updateSelectedDiscountTier(discountTier){
+
+        // Update the discount on the server
+        this._discountService.updateDiscountTier(discountTier.value.storeDiscountId, discountTier.value).subscribe(() => {
+            // Show a success message
+            this.showFlashMessage('success');
+        });
+
+    
     }
     
     validateDiscountTier(type, value){

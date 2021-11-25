@@ -215,7 +215,7 @@ export class DiscountsService
      * @param id
      * @param discount
      */
-    updateDiscount(id: string, discount: Discount): Observable<Discount>
+    updateDiscount(id: string, body: Discount): Observable<Discount>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -228,19 +228,14 @@ export class DiscountsService
         return this.discounts$.pipe(
             take(1),
             // switchMap(discounts => this._httpClient.post<InventoryDiscount>('api/apps/ecommerce/inventory/discount', {}).pipe(
-            switchMap(discounts => this._httpClient.put<Discount>(productService + '/stores/' + this.storeId$ + '/discount/' + id, discount , header).pipe(
+            switchMap(discounts => this._httpClient.put<Discount>(productService + '/stores/' + this.storeId$ + '/discount/' , body , header).pipe(
                 map((updatedDiscount) => {
-
-                    console.log("discounts: ",discounts);
-                    console.log("updatedDiscount: ",updatedDiscount);
 
                     // Find the index of the updated discount
                     const index = discounts.findIndex(item => item.id === id);
 
                     // Update the discount
                     discounts[index] = { ...discounts[index], ...updatedDiscount["data"]};
-
-                    console.log("discounts[index]", discounts[index])
 
                     // Update the discounts
                     this._discounts.next(discounts);
@@ -391,7 +386,6 @@ export class DiscountsService
      */
          deleteDiscountTier(discountId: string, discountTierId: string): Observable<boolean>
          {
-             console.log("deletediscount",discountTierId)
              let productService = this._apiServer.settings.apiServer.productService;
              let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
              let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
@@ -426,5 +420,16 @@ export class DiscountsService
              );
          }
      
+         updateDiscountTier(StorediscountId: string, body: StoreDiscountTierList): Observable<any>
+         {
+             let productService = this._apiServer.settings.apiServer.productService;
+             let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+             let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+     
+             const header = {
+                 headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+             };
+               return this._httpClient.put(productService + '/stores/' + this.storeId$ + '/discount/' + StorediscountId + '/tier', body, header);
+         }
 
 }
