@@ -1,0 +1,119 @@
+<div class="flex flex-col max-w-240 md:min-w-160 -m-6">
+
+    <!-- Compose form -->
+    <div
+        class="flex flex-col flex-auto p-6 sm:p-8 overflow-y-auto"
+    >
+        <div class="flex items-center flex-auto min-w-0 justify-center">
+            <span class="pl-4 text-2xl font-bold text-primary">Create New Channel</span> <br>
+        </div>
+        <!-- <div class="flex items-center flex-auto min-w-0 mb-8">
+            <span class="pl-14 text-lg">Lets start creating discount  
+                <br>Fill in below 
+            </span>
+        </div> -->
+
+        <div class="mb-4"></div>
+
+        <mat-form-field 
+                appearance="fill"
+                class="w-full">
+                <mat-label>Channel name</mat-label>
+                <mat-select
+                    class="w-full"
+                    placeholder="Select channel"
+                    (selectionChange)="checkName()"
+                    [(ngModel)]="channelName"
+                    >
+                    <div>
+                        <mat-option [value]="'FACEBOOK'">Facebook</mat-option>
+                        <mat-option [value]="'WHATSAPP'">Whatsapp</mat-option>
+                        <mat-option [value]="'TELEGRAM'">Telegram</mat-option>
+                    </div>
+                </mat-select>
+            </mat-form-field>
+
+        <div
+            *ngIf="channelName && channelName === 'WHATSAPP'"
+            id="referenceId" class="w-full">
+            <mat-form-field 
+                appearance="fill"
+                class="w-1/2 pr-2">
+                <mat-label>Reference Id</mat-label>
+                <input 
+                    matInput
+                    placeholder="Insert Reference Id"
+                    [(ngModel)]="refId"
+                >
+            </mat-form-field>
+
+            <mat-form-field 
+                appearance="fill"
+                class="w-1/2 pl-2">
+                <mat-label>Token</mat-label>
+                <input 
+                    matInput
+                    placeholder="Insert Token"
+                    [(ngModel)]="token"
+                >
+            </mat-form-field>
+        </div>
+
+        <div class="flex items-center justify-center w-full pt-4">
+            <button 
+                *ngIf="channelName && channelName === 'TELEGRAM'"
+                class="w-1/2"
+                mat-flat-button
+                (click)="teleLogin()"
+                [color]="'primary'">
+                <mat-icon [svgIcon]="'feather:send'"></mat-icon>
+                <span class="ml-2 mr-1">Log In with Telegram</span>
+            </button>
+        </div>
+
+        <div class="flex items-center justify-center w-full">
+            <button 
+                *ngIf="channelName && channelName === 'FACEBOOK'"
+                class="lg:w-1/2"
+                mat-flat-button
+                (click)="fbLogin()"
+                [color]="'primary'">
+                <mat-icon [svgIcon]="'mat_outline:facebook'"></mat-icon>
+                <span class="ml-2 mr-1">Log In with Facebook</span>
+            </button>
+        </div>
+        <!-- <div
+            *ngIf="channelName && channelName === 'FACEBOOK'"
+            >
+            SAYA NAQI
+        </div> -->
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-end mt-4 sm:mt-6">
+            <div *ngIf="message !== ''" class="mr-3 text-warn">
+                {{message}}
+            </div>
+            <div class="order-last">
+                <!-- Send -->
+                <button
+                    class="bg-gray-300 hover:bg-gray-500 border border-gray-500"
+                    mat-flat-button
+                    [color]="'gray'"
+                    (click)="cancelCreateChannel()"
+                    >
+                    Cancel
+                </button>
+                
+                <button
+                    class="bg-primary-300 hover:bg-primary-500 border border-primary-500 ml-2"
+                    mat-flat-button
+                    [color]="'gray'"
+                    (click)="addNewChannel()"
+                    >
+                    Ok
+                </button>
+           
+            </div>
+        </div>
+    </div>
+</div>

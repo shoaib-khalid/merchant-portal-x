@@ -40,6 +40,7 @@ import { MenuOptionsComponent } from 'app/modules/merchant/social-media/flow-bui
 
 import { socialMediaRoutes } from 'app/modules/merchant/social-media/social-media.routing';
 import { ChannelsListComponent } from './channels-list/channels-list.component';
+import { CreateChannelComponent } from './create-channel/create-channel.component';
 
 
 @NgModule({
@@ -58,7 +59,8 @@ import { ChannelsListComponent } from './channels-list/channels-list.component';
         SideNavAction,
         SideNavHandOverComponent,
         SideNavQuickReplyComponent,
-        SideNavConditionComponent
+        SideNavConditionComponent,
+        CreateChannelComponent
     ],
     imports     : [
         RouterModule.forChild(socialMediaRoutes),
