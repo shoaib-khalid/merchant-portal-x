@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { AuthUtils } from 'app/core/auth/auth.utils';
 import { UserService } from 'app/core/user/user.service';
 import { StoresService } from 'app/core/store/store.service';
@@ -324,7 +324,17 @@ export class AuthService
             "roleId": "STORE_OWNER"
           };
         
-        return this._httpClient.post(userService + '/clients/register', body, header);
+        return this._httpClient.post(userService + '/clients/register', body, header).pipe(
+            map((response, error) => {
+                this._logging.debug("Response from AuthService (signUp)",response);
+
+                return response;
+            },
+            catchError((error:HttpErrorResponse)=>{
+                return of(error);
+            })
+            )
+        );
     }
 
     /**

@@ -116,6 +116,9 @@
                         </a>
                     </mat-checkbox>
                 </div>
+                <mat-error *ngIf="signUpForm.get('agreements').hasError('required') && isError">
+                    Warning, please accept Term of Service and Privacy Policy
+                </mat-error>
 
                 <!-- Submit button -->
                 <button
