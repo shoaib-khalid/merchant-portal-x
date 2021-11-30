@@ -25,19 +25,32 @@
                     [placeholder]="'Search products'">
             </mat-form-field>
             <!-- Add product button -->
-            <button
-                [matMenuTriggerFor]="addProductMenu"
-                class="ml-4"
-                mat-flat-button
-                [color]="'primary'"
-            >
-                <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
-                <span class="ml-2 mr-1">Add</span>
-            </button>
-            <mat-menu #addProductMenu="matMenu">
-                <button mat-menu-item (click)="initCreateProduct('normal')">Product</button>
-                <button mat-menu-item (click)="initCreateProduct('combo')">Combo</button>
-            </mat-menu>
+            <ng-container *ngIf="store$.verticalCode === 'E-Commerece' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'">
+                <button
+                    class="ml-4"
+                    (click)="initCreateProduct('normal')"
+                    mat-flat-button
+                    [color]="'primary'"
+                >
+                    <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                    <span class="ml-2 mr-1">Add</span>
+                </button>
+            </ng-container>
+            <ng-container *ngIf="store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK'">
+                <button
+                    [matMenuTriggerFor]="addProductMenu"
+                    class="ml-4"
+                    mat-flat-button
+                    [color]="'primary'"
+                >
+                    <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                    <span class="ml-2 mr-1">Add</span>
+                </button>
+                <mat-menu #addProductMenu="matMenu">
+                    <button mat-menu-item (click)="initCreateProduct('normal')">Product</button>
+                    <button mat-menu-item (click)="initCreateProduct('combo')">Combo</button>
+                </mat-menu>
+            </ng-container>
         </div>
     </div>
 
@@ -202,10 +215,10 @@
                                         <div class="flex flex-col items-center">
                                             <!-- Image Frame -->
                                             <div *ngIf="!imagesEditMode" class="w-32 h-44 border rounded overflow-hidden">
-                                                <ng-container *ngIf="selectedProductForm.get('images').value.length; else noImage">
+                                                <ng-container *ngIf="images.length; else noImage">
                                                     <img
                                                         class="w-full h-full object-cover"
-                                                        [src]="selectedProductForm.get('images').value[selectedProductForm.get('currentImageIndex').value]">
+                                                        [src]="images[currentImageIndex]">
                                                 </ng-container>
                                                 <ng-template #noImage>
                                                     <div
@@ -230,7 +243,7 @@
                                                                 type="file"
                                                                 [multiple]="false"
                                                                 [accept]="'image/jpeg, image/png'"
-                                                                (change)="uploadImages(imageFileInput.files, selectedProductForm.get('images').value);"
+                                                                (change)="uploadImages(imageFileInput.files, images, $event);"
                                                                 #imageFileInput>
                                                             <label
                                                                 class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
@@ -242,7 +255,7 @@
                                                             </label>
                                                         </div>
                                                         <!-- Remove Image -->
-                                                        <div *ngIf="selectedProductForm.get('images').value.length">
+                                                        <div *ngIf="images.length">
                                                             <input
                                                                 id="image-remove-button"
                                                                 class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -262,12 +275,12 @@
                                                     <!-- View Image -->
                                                     <img
                                                         class="object-cover w-full h-full"
-                                                        *ngIf="selectedProductForm.get('images').value.length"
-                                                        [src]="selectedProductForm.get('images').value[selectedProductForm.get('currentImageIndex').value]">
+                                                        *ngIf="images.length"
+                                                        [src]="images[currentImageIndex]">
                                                     <!-- View No Image -->
                                                     <div
                                                         class="flex items-center justify-center w-full h-full rounded overflow-hidden uppercase text-8xl font-bold leading-none bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200"
-                                                        *ngIf="!selectedProductForm.get('images').value.length">
+                                                        *ngIf="!images.length">
                                                         <span class="text-md">NO IMAGE</span> 
                                                     </div>
                                                 </div>
@@ -316,7 +329,7 @@
                                             <!-- Image Cycle -->
                                             <div
                                                 class="flex items-center mt-2 whitespace-nowrap"
-                                                *ngIf="selectedProductForm.get('images').value.length">
+                                                *ngIf="images.length">
                                                 
                                                 <input
                                                     id="image-cycle-left"
@@ -335,7 +348,7 @@
                                                 </label>
 
                                                 <span class="font-sm mx-2">
-                                                    {{selectedProductForm.get('currentImageIndex').value + 1}} of {{selectedProductForm.get('images').value.length}}
+                                                    {{currentImageIndex + 1}} of {{images.length}}
                                                 </span>
 
                                                 <input
@@ -384,8 +397,8 @@
                                         </div>
                                     </div>
 
+                                    <!-- Name, Description, SKU -->
                                     <div class="flex flex-auto flex-wrap">
-                                        <!-- Name, Description -->
                                         <div class="flex flex-col w-full lg:w-2/4 sm:pl-8">
 
                                             <!-- Name -->
@@ -393,7 +406,9 @@
                                                 <mat-label>Name</mat-label>
                                                 <input
                                                     matInput
-                                                    [formControlName]="'name'">
+                                                    [formControlName]="'name'"
+                                                    (input)="generateSku($event.target.value)"    
+                                                >
                                             </mat-form-field>
 
                                             <!-- Description -->
@@ -416,7 +431,8 @@
                                                 <mat-label>SKU</mat-label>
                                                 <input
                                                     matInput
-                                                    [formControlName]="'sku'">
+                                                    [disabled]="product.productVariants.length > 0"
+                                                    [value]="displaySku">
                                             </mat-form-field>
 
                                             <!-- Price -->
@@ -425,13 +441,15 @@
                                                 <span matSuffix>$</span>
                                                 <input
                                                     matInput
-                                                    [formControlName]="'price'">
+                                                    type="number"
+                                                    [disabled]="product.productVariants.length > 0"
+                                                    [value]="displayPrice">
                                             </mat-form-field>
 
                                             <!-- Product status -->
                                             <mat-form-field 
                                                 class="w-full pr-2"
-                                                *ngIf="store$.verticalCode === 'E-Commerece' || store$.verticalCode === 'ECommerce_PK'">
+                                                *ngIf="store$.verticalCode === 'E-Commerece' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'">
                                                 <mat-label>Packing Size</mat-label>
                                                 <mat-select
                                                     class="w-full"
@@ -590,6 +608,7 @@
                                     </div>
                                 </div>
 
+                                <!-- Available stock row -->
                                 <div class="flex flex-col sm:flex-row pb-4 border-t pt-4 px-8">
                                     <div class="flex flex-auto flex-wrap">
                                         <div class="flex flex-col w-full sm:w-1/5 sm:pr-2 sm:border-r py-2 sm:py-0">
@@ -604,7 +623,8 @@
                                                 <input
                                                     type="number"
                                                     matInput
-                                                    [formControlName]="'quantity'">
+                                                    [disabled]="product.productVariants.length > 0"
+                                                    [value]="displayQuantity">
                                             </mat-form-field>
                                         </div>
                                         <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
@@ -663,7 +683,7 @@
                                                 </mat-slide-toggle>
                                             </div>
                                         </div>
-                                        <div *ngIf="store$.verticalCode === 'E-Commerece' || store$.verticalCode === 'ECommerce_PK'" class="flex flex-col w-full sm:w-1/5 sm:pl-2 py-2 sm:py-0">
+                                        <div *ngIf="store$.verticalCode === 'E-Commerece' || store$.verticalCode === 'e-commerce-b2b2c' || store$.verticalCode === 'ECommerce_PK'" class="flex flex-col w-full sm:w-1/5 sm:pl-2 py-2 sm:py-0">
                                             <span class="mb-2 sm:mb-4 font-medium leading-tight">Variants 
                                                 <mat-icon
                                                     matTooltip="This product have variants ?"
@@ -717,6 +737,7 @@
                                     </div>
                                 </div>
 
+                                <!-- Delete and update button -->
                                 <div class="flex items-center justify-between w-full border-t px-8 py-4">
                                     <input
                                         id="product-remove-button"
@@ -1129,10 +1150,10 @@
                                                                                 <div class="flex flex-col items-center">
                                                                                     <!-- Image Frame -->
                                                                                     <div *ngIf="!imagesEditMode" class="w-32 h-44 border rounded overflow-hidden">
-                                                                                        <ng-container *ngIf="selectedProductForm.get('images').value.length; else noImage">
+                                                                                        <ng-container *ngIf="images.length; else noImage">
                                                                                             <img
                                                                                                 class="w-full h-full object-cover"
-                                                                                                [src]="selectedProductForm.get('images').value[selectedProductForm.get('currentImageIndex').value]">
+                                                                                                [src]="images[currentImageIndex]">
                                                                                         </ng-container>
                                                                                         <ng-template #noImage>
                                                                                             <div
@@ -1157,7 +1178,7 @@
                                                                                                         type="file"
                                                                                                         [multiple]="false"
                                                                                                         [accept]="'image/jpeg, image/png'"
-                                                                                                        (change)="uploadImages(imageFileInput.files, selectedProductForm.get('images').value);"
+                                                                                                        (change)="uploadImages(imageFileInput.files, images);"
                                                                                                         #imageFileInput>
                                                                                                     <label
                                                                                                         class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
@@ -1169,7 +1190,7 @@
                                                                                                     </label>
                                                                                                 </div>
                                                                                                 <!-- Remove Image -->
-                                                                                                <div *ngIf="selectedProductForm.get('images').value.length">
+                                                                                                <div *ngIf="images.length">
                                                                                                     <input
                                                                                                         id="image-remove-button"
                                                                                                         class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -1189,12 +1210,12 @@
                                                                                             <!-- View Image -->
                                                                                             <img
                                                                                                 class="object-cover w-full h-full"
-                                                                                                *ngIf="selectedProductForm.get('images').value.length"
-                                                                                                [src]="selectedProductForm.get('images').value[selectedProductForm.get('currentImageIndex').value]">
+                                                                                                *ngIf="images.length"
+                                                                                                [src]="images[currentImageIndex]">
                                                                                             <!-- View No Image -->
                                                                                             <div
                                                                                                 class="flex items-center justify-center w-full h-full rounded overflow-hidden uppercase text-8xl font-bold leading-none bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200"
-                                                                                                *ngIf="!selectedProductForm.get('images').value.length">
+                                                                                                *ngIf="!images.length">
                                                                                                 <span class="text-md">NO IMAGE</span> 
                                                                                             </div>
                                                                                         </div>
@@ -1425,6 +1446,7 @@
                                                     matInput
                                                     [value]="(selectedProductsOption) ? selectedProductsOption.title : ''"
                                                     (change)="validateProductsOptionName($event.target.value)"
+                                                    #optionName
                                                 >
                                             </mat-form-field>
                                             <!-- Add product to combo -->
@@ -1450,12 +1472,14 @@
                                                     <!-- Add product to option -->
                                                     <div class="h-56 pt-2 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
                                                         <!-- Products -->
-                                                        <ng-container *ngFor="let product of filteredProductsOptions; trackBy: trackByFn;">
+                                                        <ng-container *ngFor="let product of filteredProductsOptions; let i = index; trackBy: trackByFn;">
                                                             <mat-checkbox
                                                                 class="flex items-center h-10 min-h-10 px-4"
                                                                 [color]="'primary'"
                                                                 [checked]="validateProductsInOption(product.id)"
                                                                 (change)="insertProductsInOption(product.id, $event.checked)"
+                                                                [ngModelOptions]="{standalone: true}"
+                                                                [(ngModel)]="optionChecked[i]"
                                                             >
                                                                 {{product.name}}
                                                             </mat-checkbox>
@@ -1471,7 +1495,9 @@
                                                     matInput
                                                     type="number"
                                                     (change)="validateProductsOptionTotalAllowed($event.target.value)"
-                                                    [value]="(selectedProductsOption) ? selectedProductsOption.totalAllow : ''">
+                                                    [value]="(selectedProductsOption) ? selectedProductsOption.totalAllow : ''"
+                                                    #optionTotalAllow
+                                                    >
                                             </mat-form-field>
 
                                             <div class="w-full flex flex-auto">
@@ -1486,7 +1512,8 @@
                                                     <button
                                                         mat-flat-button
                                                         [color]="'primary'"
-                                                        (click)="updateSelectedProductsOption((selectedProductsOption) ? selectedProductsOption.id : '')">
+                                                        (click)="updateSelectedProductsOption((selectedProductsOption) ? selectedProductsOption.id : '')"
+                                                        (click)="optionName.value='';optionTotalAllow.value=0">
                                                         {{(selectedProductsOption) ? 'Update' : 'Create'}}
                                                     </button>
                                                 </div>
@@ -1529,7 +1556,7 @@
                                                                             <div class="hidden sm:block truncate">
                                                                                 <ng-container *ngIf="combos.productPackageOptionDetail.length">
                                                                                     <ng-container *ngFor="let package of combos.productPackageOptionDetail; trackBy: trackByFn">
-                                                                                        <div class="flex items-center justify-center px-4 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                                                        <div *ngIf="package.product" class="flex items-center justify-center px-4 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
                                                                                             <span class="text-md font-medium whitespace-nowrap">{{package.product.name}}</span>
                                                                                         </div>
                                                                                     </ng-container>

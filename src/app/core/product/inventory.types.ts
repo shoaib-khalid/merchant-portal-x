@@ -113,12 +113,12 @@ thumbnailUrl: string;
 
 export interface ProductAssets
 {
-    id: string;
-    itemCode: string;
-    name: string;
-    url: string;
-    productId: string;
-    isThumbnail: boolean;
+    id?: string;
+    itemCode?: string;
+    name?: string;
+    url?: string;
+    productId?: string;
+    isThumbnail?: boolean;
 }
 
 
@@ -140,7 +140,9 @@ export interface ProductAssets
  export interface ProductPackageOptionDetail 
  {
      id?: string;
-     productPackageOptionId: string;
-     productId: string;
+     productId?: string;
+     product?: Product;
+     productPackageOptionId?: string;
+     
  }
  

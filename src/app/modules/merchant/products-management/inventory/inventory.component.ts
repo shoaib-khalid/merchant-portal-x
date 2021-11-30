@@ -63,7 +63,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
     pagination: ProductPagination;
     
-    
     // product combo
     productsCombos$: ProductPackageOption[] = [];
     showCombosValueEditMode:any = [];
@@ -75,6 +74,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     selectedProductsOptions: Product[] = [];
     selectedProductsOption: ProductPackageOption = null;
     _selectedProductsOption = {};
+    optionChecked = [];
 
     // product variant
     productVariants$: ProductVariant[] = [];
@@ -85,7 +85,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     productVariantsValueEditMode:any = [];
     showVariantsSection: boolean = false;
 
-    
     // product variant available
     productVariantAvailable$: ProductVariantAvailable[] = [];
     filteredProductVariantAvailable: ProductVariantAvailable[] = [];
@@ -106,6 +105,18 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     
     productCategoriesEditMode: boolean = false;
     productCategoriesValueEditMode:any = [];
+
+    // product assets
+    images: any = [];
+    imagesFile: any = [];
+    currentImageIndex: number = 0;
+
+    // sku, price & quantity 
+    // reason these 3 not in formbuilder is because it's not part of product but 
+    // it's part of product inventory (it's here for display only)
+    displaySku: string = "";
+    displayPrice: number = 0;
+    displayQuantity: number = 0;
 
     flashMessage: 'success' | 'error' | null = null;
     isLoading: boolean = false;
@@ -175,87 +186,87 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     {
         // Create the selected product form
         this.selectedProductForm = this._formBuilder.group({
-            id               : [''],
+            // id               : [''],
             name             : ['', [Validators.required]],
             description      : [''],
-            storeId          : [''], // not used
+            // storeId          : [''], // not used
             categoryId       : [''],
             status           : ['INACTIVE'],
-            thumbnailUrl     : [''],
-            vendor           : [''], // not used
-            region           : [''], // not used
-            seoUrl           : [''], // not used
-            seoName          : [''], // not used
+            // thumbnailUrl     : [''],
+            // vendor           : [''], // not used
+            // region           : [''], // not used
+            // seoUrl           : [''], // not used
+            // seoName          : [''], // not used
             trackQuantity    : [false],
             allowOutOfStockPurchases: [false],
-            minQuantityForAlarm: [''],
+            minQuantityForAlarm: [-1],
             packingSize      : [''],
-            created          : [''],
-            updated          : [''],
-            productVariants  : this._formBuilder.array([{
-                id                      : [''],
-                name                    : [''],
-                productVariantsAvailable: this._formBuilder.array([{
-                    id                      : [''],
-                    value                   : [''],
-                    productId               : [''],
-                    productVariantId        : [''],
-                    sequenceNumber          : [0],
-                }]),
-                sequenceNumber          : [0],
-            }]),
-            productInventories : this._formBuilder.array([{
-                itemCode                : [''],
-                price                   : [0],
-                quantity                : [''],
-                productId               : [''],
-                productInventoryItems   : this._formBuilder.array([{
-                    itemCode                    : [''],
-                    productVariantAvailableId   : [''],
-                    productId                   : [''],
-                    sequenceNumber              : [''],
-                    productVariantAvailable     : [{
-                        id              : [''],
-                        value           : [''],
-                        productId       : [''],
-                        productVariantId: [''],
-                        sequenceNumber  : [0],
-                    }],
-                }]),
-                sku                     : ['']
-            }]),
-            productReviews        : [''], // not used
-            productAssets         : this._formBuilder.array([{
-                id                  : [''],
-                itemCode            : [''],
-                name                : [''],
-                url                 : [''],
-                productId           : [''],
-                isThumbnail         : [false],
-            }]),
-            productDeliveryDetail : [''], // not used
+            // created          : [''],
+            // updated          : [''],
+            // productVariants  : this._formBuilder.array([{
+            //     id                      : [''],
+            //     name                    : [''],
+            //     productVariantsAvailable: this._formBuilder.array([{
+            //         id                      : [''],
+            //         value                   : [''],
+            //         productId               : [''],
+            //         productVariantId        : [''],
+            //         sequenceNumber          : [0],
+            //     }]),
+            //     sequenceNumber          : [0],
+            // }]),
+            // productInventories : this._formBuilder.array([{
+            //     itemCode                : [''],
+            //     price                   : [0],
+            //     quantity                : [''],
+            //     productId               : [''],
+            //     productInventoryItems   : this._formBuilder.array([{
+            //         itemCode                    : [''],
+            //         productVariantAvailableId   : [''],
+            //         productId                   : [''],
+            //         sequenceNumber              : [''],
+            //         productVariantAvailable     : [{
+            //             id              : [''],
+            //             value           : [''],
+            //             productId       : [''],
+            //             productVariantId: [''],
+            //             sequenceNumber  : [0],
+            //         }],
+            //     }]),
+            //     sku                     : ['']
+            // }]),
+            // productReviews        : [''], // not used
+            // productAssets         : this._formBuilder.array([{
+            //     id                  : [''],
+            //     itemCode            : [''],
+            //     name                : [''],
+            //     url                 : [''],
+            //     productId           : [''],
+            //     isThumbnail         : [false],
+            // }]),
+            // productDeliveryDetail : [''], // not used
 
 
             // OLD HERE -----------------------------------
 
-            currentImageIndex: [0],
-            images           : [[]],
-            sku              : [''],
-            price            : [0],
-            quantity         : [0],
+            // currentImageIndex: [0],
+            // images           : [[]],
+            // sku              : [''],
+            // price            : [0],
+            // quantity         : [0],
             isVariants       : [false],
             isPackage        : [false],
-            productPackage   : {
-                id          : [''],
-                packageId   : [''],
-                title       : [''],
-                totalAllow  : [0],
-                productPackageOptionDetail  : this._formBuilder.array([{
-                    id                      : [''],
-                    productPackageOptionId  : [''],
-                    productId               : [''],
-                }])
-            }
+            // productPackage   : {
+            //     id          : [''],
+            //     packageId   : [''],
+            //     title       : [''],
+            //     totalAllow  : [0],
+            //     productPackageOptionDetail  : this._formBuilder.array([{
+            //         id                      : [''],
+            //         productPackageOptionId  : [''],
+            //         productId               : [''],
+            //     }])
+            // }
         });
 
         // Get the stores
@@ -274,14 +285,16 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         this.products$ = this._inventoryService.products$;
 
         // Assign to local products
-        this.products$.subscribe((response)=>{
-            this._products = response;
+        this.products$
+            .pipe(takeUntil(this._unsubscribeAll))    
+            .subscribe((response)=>{
+                this._products = response;
 
-            // remove object for array of object where item.isPackage !== true
-            let _filteredProductsOptions = response.filter(item => item.isPackage !== true );
+                // remove object for array of object where item.isPackage !== true
+                let _filteredProductsOptions = response.filter(item => item.isPackage !== true );
 
-            this.filteredProductsOptions = _filteredProductsOptions;
-        });
+                this.filteredProductsOptions = _filteredProductsOptions;
+            });
         
         // Get the pagination
         this._inventoryService.pagination$
@@ -394,6 +407,10 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
 
+    // --------------------------------------
+    // Product Section
+    // --------------------------------------
+
     /**
      * Toggle product details
      *
@@ -409,8 +426,13 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             return;
         }
 
+        // set showVariantsSection , showCombosSection to false
+        this.showVariantsSection = false;
+        this.showCombosSection = false;
+
         // Get the product by id
         this._inventoryService.getProductById(productId)
+            .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((product) => {
 
                 // Set the selected product
@@ -422,12 +444,12 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 // Fill the form for SKU , Price & Quantity productInventories[0]
                 // this because SKU , Price & Quantity migh have variants
                 // this is only for display, so we display the productInventories[0] 
-                this.selectedProductForm.get('sku').patchValue(product.productInventories[0].sku);
-                this.selectedProductForm.get('price').patchValue(product.productInventories[0].price);
-                this.selectedProductForm.get('quantity').patchValue(product.productInventories[0].quantity);
+                this.displaySku = product.productInventories[0].sku;
+                this.displayPrice = product.productInventories[0].price;
+                this.displayQuantity = product.productInventories[0].quantity;
 
                 // set isVariants = true is productInventories.length > 0
-                product.productInventories.length > 1 ? this.selectedProductForm.get('isVariants').patchValue(true) : this.selectedProductForm.get('isVariants').patchValue(false);
+                product.productInventories.length > 0 ? this.selectedProductForm.get('isVariants').patchValue(true) : this.selectedProductForm.get('isVariants').patchValue(false);
 
                 // Get product image by product id
                 
@@ -436,7 +458,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
                 // console.log("asal kejadian image", imageArr)
 
-                this.selectedProductForm.get('images').patchValue(imageArr);
+                this.images = imageArr;
                 
                 // Set to this productVariants 
                 this.productVariants$ = product.productVariants;
@@ -529,8 +551,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 // get product combo list
                 if (this.selectedProduct.isPackage === true) {
                     this._inventoryService.getProductPackageOptions(productId)
+                        .pipe(takeUntil(this._unsubscribeAll))
                         .subscribe((response)=>{
-                            console.log("response", response);
                             this.productsCombos$ = response["data"];
                         });
                 }
@@ -538,6 +560,231 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
+    }
+
+    /**
+     * this create product check category first before creating them
+     */
+    initCreateProduct(productType: string){
+
+        if (productType === "normal") {
+            // get category by name = no-category
+            this._inventoryService.getCategories("no-category").subscribe(async (res)=>{
+    
+                let _noCategory = res["data"].find(obj => obj.name === "no-category");
+    
+                // if there is no category with "no-category" name, create one
+                console.log("logs this !!!",_noCategory)
+    
+                if (!_noCategory || _noCategory["name"] !== "no-category"){
+                    await this._inventoryService.createCategory({
+                        name: "no-category",
+                        parentCategoryId: "",
+                        storeId: this.storeId$,
+                        thumbnailUrl: ""
+                    }).subscribe((res)=>{
+                        if (res["status"] !== 201){
+                            console.log("an error has occur",res)
+                        } else {
+                            this.createProduct(res["data"].id, productType);
+                        }
+                    });
+                } else {
+                    this.createProduct(_noCategory.id, productType);
+                }
+            });
+        } else if (productType === "combo") {
+            // get category by name =Combos
+            this._inventoryService.getCategories("Combos").subscribe(async (res)=>{
+    
+                let _noCategory = res["data"].find(obj => obj.name === "Combos");
+    
+                // if there is no category with "Combos" name, create one
+                console.log("logs this !!!",_noCategory)
+    
+                if (!_noCategory || _noCategory["name"] !== "Combos"){
+                    await this._inventoryService.createCategory({
+                        name: "Combos",
+                        parentCategoryId: "",
+                        storeId: this.storeId$,
+                        thumbnailUrl: ""
+                    }).subscribe((res)=>{
+                        if (res["status"] !== 201){
+                            console.log("an error has occur",res)
+                        } else {
+                            this.createProduct(res["data"].id, productType);
+                        }
+                    });
+                } else {
+                    this.createProduct(_noCategory.id, productType);
+                }
+            });
+        }
+    }
+
+    /**
+     * Create product
+     */
+    createProduct(categoryId: string, productType: string): void
+    {
+
+        // Create the product
+        this._inventoryService.createProduct(categoryId, productType)
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(async (newProduct) => {
+
+                // Add Inventory to product
+                this._inventoryService.addInventoryToProduct(newProduct["data"])
+                    .subscribe((response)=>{
+                        // update sku, price, quantity display since it's not part of product but product inventory
+                        this.displayPrice = response.price;
+                        this.displayQuantity = response.quantity;
+                        this.displaySku = response.sku;
+                    });
+
+                // Go to new product
+                this.selectedProduct = newProduct["data"];
+                                        
+                // Update current form with new product data
+                this.selectedProductForm.patchValue(newProduct["data"]);
+
+                // Set image & currentImageIndex to null ...
+                this.currentImageIndex = 0;
+                this.imagesFile = [];
+                this.images = [];
+
+                // Set image & isVariants to false ...
+                this.selectedProductForm.get('isVariants').patchValue(false);
+                
+                // // Set filtered variants to empty array
+                this.filteredProductVariants = [];
+                
+                // // Set variants to empty array
+                // this.variants = [];
+
+                // // Set selectedProduct variants to empty array
+                // this.selectedProduct.variants = [];
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+    }
+ 
+    /**
+     * Update the selected product using the form data
+     */
+    updateSelectedProduct(): void
+    {
+        // Get
+        // let storeFrontDomain = this._apiServer.settings.storeFrontDomain;
+        let storeFrontDomain = 'symplified.ai';
+        let storeFrontURL = 'https://' + this.store$.domain + '.' + storeFrontDomain;
+        
+        // Get the product object
+        const { sku, price, quantity, ...product} = this.selectedProductForm.getRawValue();
+
+        product.seoName = product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
+        product.seoUrl = storeFrontURL + '/product/name/' + product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
+
+        // Update the product on the server
+        this._inventoryService.updateProduct(this.selectedProduct.id, product)
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(() => {
+                // Show a success message
+                this.showFlashMessage('success');
+            });
+
+        // Update the inventory product on the server (backend kena enable update)
+        // this._inventoryService.updateInventoryToProduct(product.id, productInventories).subscribe(() => {
+        //     // Show a success message
+        //     this.showFlashMessage('success');
+        // });
+
+        // Update the assets product on the server (backend kena enable update)
+        if (product.productAssets) {
+
+        } else {
+
+                const formData = new FormData();
+                for (var i = 0; i < this.imagesFile.length; i++) {
+                    // create a new one
+                    formData.append('file',this.imagesFile[i]);
+                    this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === 0) ? { isThumbnail: true } : { isThumbnail: false })
+                        .pipe(takeUntil(this._unsubscribeAll))
+                        .subscribe((response)=>{
+                            console.log("response: ", response)
+                            if (response.isThumbnail){
+                                this.selectedProduct.thumbnailUrl = response.url;
+                            }
+
+                            // Mark for check
+                            this._changeDetectorRef.markForCheck();
+                        });
+                };
+
+        }
+        
+        // this._inventoryService.updateInventoryToProduct(product.id, productInventories).subscribe(() => {
+        //     // Show a success message
+        //     this.showFlashMessage('success');
+        // });
+    }
+ 
+    /**
+     * Delete the selected product using the form data
+     */
+    deleteSelectedProduct(): void
+    {
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title  : 'Delete product',
+            message: 'Are you sure you want to remove this product? This action cannot be undone!',
+            actions: {
+                confirm: {
+                    label: 'Delete'
+                }
+            }
+        });
+
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+
+            // If the confirm button pressed...
+            if ( result === 'confirmed' )
+            {
+
+                // Get the product object
+                const product = this.selectedProductForm.getRawValue();
+
+                // Delete the product on the server
+                this._inventoryService.deleteProduct(this.selectedProduct.id).subscribe(() => {
+
+                    // Close the details
+                    this.closeDetails();
+                });
+            }
+        });
+    }
+
+    /**
+     * Show flash message
+     */
+    showFlashMessage(type: 'success' | 'error'): void
+    {
+        // Show the message
+        this.flashMessage = type;
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+
+        // Hide it after 3 seconds
+        setTimeout(() => {
+
+            this.flashMessage = null;
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        }, 3000);
     }
 
     /**
@@ -593,6 +840,24 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         }
     }
 
+    generateSku(){
+        if (this.selectedProduct.productVariants){
+
+        }
+    }
+
+    /**
+     * Close the details
+     */
+    closeDetails(): void
+    {
+        this.selectedProduct = null;
+    }
+
+    // --------------------------------------
+    // Product Option/Combo/Package Section
+    // --------------------------------------
+
     /**
      * Add  product
      *
@@ -635,6 +900,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
         // Get the product by id
         this._inventoryService.getProductsOptionById(optionId)
+            .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((packages) => {
                 this.selectedProductsOption = packages;
             });
@@ -668,12 +934,20 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             {
                 // Delete the variant from the server
                 this._inventoryService.deleteProductsOptionById(optionId, this.selectedProduct.id)
-                .subscribe((response)=>{
-                    console.log("response", response)
+                    .pipe(takeUntil(this._unsubscribeAll))
+                    .subscribe((response)=>{
 
-                    // Mark for check
-                    this._changeDetectorRef.markForCheck();
-                });
+                        // Find the index of the deleted product
+                        const index = this.productsCombos$.findIndex(item => item.id === optionId);
+
+                        // Delete the product
+                        if(index > -1) {
+                            this.productsCombos$.splice(index, 1);
+                        }
+
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    });
             }
         });
     }
@@ -685,17 +959,34 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
         if (optionId !== ""){
             // update
-            this._inventoryService.updateProductsOptionById(this.selectedProduct.id, this._selectedProductsOption, this.selectedProductsOption.id )
+
+            // this is to remove all other element except productId when updating
+            let updateProductPackageOptionDetail = [];
+            this._selectedProductsOption["productPackageOptionDetail"].forEach(item => {
+                updateProductPackageOptionDetail.push({
+                    productId: item.productId
+                });
+            });
+            this._selectedProductsOption["productPackageOptionDetail"] = updateProductPackageOptionDetail;
+            
+            this._inventoryService.updateProductsOption(this.selectedProduct.id, this._selectedProductsOption, optionId )
+                .pipe(takeUntil(this._unsubscribeAll))
                 .subscribe((response) => {
 
+                    const index = this.productsCombos$.findIndex(item => item.id === optionId);
+                    this.productsCombos$[index] = response;
+
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
                 });
         } else {
             // add new
             this._inventoryService.createProductsOptionById(this.selectedProduct.id, this._selectedProductsOption)
+                .pipe(takeUntil(this._unsubscribeAll))
                 .subscribe((response) => {
 
                     // push to this.productsCombos$
-                    // this.productsCombos$.push(response);
+                    this.productsCombos$.push(response);
 
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
@@ -705,7 +996,12 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         // Clear the form
         this.selectedProductsOption = null;
         // Clear the invisible form
-        this._selectedProductsOption = null;
+        this._selectedProductsOption = {};
+
+        for(let i=0;i < this.filteredProductsOptions.length;i++){
+            this.optionChecked[i] = false;
+        }
+        
     }
 
     resetSelectedProductsOption(){
@@ -730,20 +1026,26 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         }
 
         if (isChecked) {
+
+            // get product object in filteredProductsOptions
+            let currentSelectedProductInOption = this.filteredProductsOptions.find(item => item.id === productId);
+
             // this is mostly triggered by (change)="insertProductsInOption"
             // this is triggered when creating new option, selectedProductsOption is null since it's new
             if (this._selectedProductsOption["productPackageOptionDetail"]) {
                 // if there already a value in this._selectedProductsOption["productPackageOptionDetail"] ,
                 // push a new one
                 this._selectedProductsOption["productPackageOptionDetail"].push({
-                    productId: productId
+                    productId: currentSelectedProductInOption.id,
+                    product: currentSelectedProductInOption
                 });
             } else {
                 // if this._selectedProductsOption["productPackageOptionDetail"] have no value, initiate the array first
                 // then push the product id
                 this._selectedProductsOption["productPackageOptionDetail"] = [];
                 this._selectedProductsOption["productPackageOptionDetail"].push({
-                    productId: productId
+                    productId: currentSelectedProductInOption.id,
+                    product: currentSelectedProductInOption
                 });
             }
         } else {
@@ -786,11 +1088,19 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         // this is mostly triggered by [checked]="validateProductsInOption(product.id)"
         // this is trigger when updating, since selectedProductsOption have values
         if (this.selectedProductsOption){
-            index = this.selectedProductsOption.productPackageOptionDetail.findIndex(item => item.productId === productId);
+            index = this.selectedProductsOption.productPackageOptionDetail.findIndex(item => item.product.id === productId);
         }
 
         return (index > -1) ? true : false;
     }
+
+    displayCombos(){
+        this.showCombosSection = !this.showCombosSection;
+    }
+
+    // --------------------------------------
+    // Product Variant Section
+    // --------------------------------------
 
     getVariantCombosName(variantCombosArr){
         let variantCombosName: string = "";
@@ -814,7 +1124,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         var nameCombo = "";
         if (n == combos.length) {
             if (nameComboOutput.substring(1) != "") {
-              console.log("combos: ",combos)
             this.selectedVariantCombos.push({ itemCode: itemCode, variant: nameComboOutput.substring(1), price: 0, quantity: 0, sku: 0, status: "AVAILABLE" })
             // this.images.push([])
           }
@@ -851,49 +1160,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         this.getallCombinations(items)
     }
 
-    /**
-     * Close the details
-     */
-    closeDetails(): void
-    {
-        this.selectedProduct = null;
-    }
-
-    /**
-     * Cycle through images of selected product
-     */
-    cycleImages(forward: boolean = true): void
-    {
-        // Get the image count and current image index
-        const count = this.selectedProductForm.get('images').value.length;
-        const currentIndex = this.selectedProductForm.get('currentImageIndex').value;
-
-        // Calculate the next and previous index
-        const nextIndex = currentIndex + 1 === count ? 0 : currentIndex + 1;
-        const prevIndex = currentIndex - 1 < 0 ? count - 1 : currentIndex - 1;
-
-        // If cycling forward...
-        if ( forward )
-        {
-            this.selectedProductForm.get('currentImageIndex').setValue(nextIndex);
-        }
-        // If cycling backwards...
-        else
-        {
-            this.selectedProductForm.get('currentImageIndex').setValue(prevIndex);
-        }
-    }
-
-    resetCycleImages(){
-        this.selectedProductForm.get('currentImageIndex').setValue(0);
-    }
-
-    /**
-     * 
-     *  VARIANTS
-     * 
-     */
-    
     /**
      * Toggle the variants edit mode
      */
@@ -972,6 +1238,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         
         // Create variant on the server
         this._inventoryService.createVariant(variant, this.selectedProduct.id)
+            .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((response) => {
                 // Add the variant to the product
                 this.addVariantToProduct(response);
@@ -1018,9 +1285,10 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             {
                 // Delete the variant from the server
                 this._inventoryService.deleteVariant(variant, this.selectedProduct.id)
-                .subscribe((response)=>{
-                    this.removeVariantFromProduct(response)
-                });
+                    .pipe(takeUntil(this._unsubscribeAll))
+                    .subscribe((response)=>{
+                        this.removeVariantFromProduct(response)
+                    });
             }
         });
     }
@@ -1220,10 +1488,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         this.showVariantsSection = !this.showVariantsSection;
     }
     
-    displayCombos(){
-        this.showCombosSection = !this.showCombosSection;
-    }
-
     /**
      * Toggle variant details
      *
@@ -1271,11 +1535,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         this.selectedProductInventory = null;
     }
 
-    /**
-     * 
-     *  VARIANTS Available
-     * 
-     */
+    // --------------------------------------
+    // Product Variant Available Section
+    // --------------------------------------
 
     /**
      * Toggle the variants Available edit mode
@@ -1353,8 +1615,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      *
      * @param value
      */
-     createVariantAvailable(value: string): void
-     {
+    createVariantAvailable(value: string): void
+    {
         const variant = {
             productId: this.selectedProduct.id,
             productVariantId: this.selectedProductVariants.id,
@@ -1363,6 +1625,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         
         // Create variant on the server
         this._inventoryService.createVariantAvailable(variant, this.selectedProduct.id)
+            .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((response) => { 
                 // Add the variant to the product
                 this.addVariantAvailableToProduct(response,this.selectedProductVariants.id);
@@ -1370,9 +1633,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 // reset current filteredProductVariantAvailable
                 this.filteredProductVariantAvailable = this.productVariantAvailable$;
             });
-     }
+    }
  
-     updateLocalVariantAvailableTitle(variantsAvailable: ProductVariantAvailable, event){
+    updateLocalVariantAvailableTitle(variantsAvailable: ProductVariantAvailable, event){
         // Update the title on the category
         variantsAvailable.value = event.target.value;
     }
@@ -1412,9 +1675,10 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             {
                 // Delete the variant from the server
                 this._inventoryService.deleteVariantAvailable(variantAvailable, this.selectedProduct.id)
-                .subscribe((response)=>{
-                    this.removeVariantAvailableFromProduct(response)
-                });
+                    .pipe(takeUntil(this._unsubscribeAll))
+                    .subscribe((response)=>{
+                        this.removeVariantAvailableFromProduct(response)
+                    });
             }
         });
     }
@@ -1493,12 +1757,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         return !!!(inputValue === '' || this.productVariantAvailable$.findIndex(variantTag => variantTag.value.toLowerCase() === inputValue.toLowerCase()) > -1);
     }
 
-
-    /**
-     * 
-     * CATEGORY
-     * 
-     */
+    // --------------------------------------
+    // Product Category Section
+    // --------------------------------------
 
     /**
      * Toggle the categories edit mode
@@ -1581,6 +1842,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
         // Create category on the server
         this._inventoryService.createCategory(category)
+            .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((response) => {
 
                 // Add the category to the product
@@ -1700,12 +1962,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         return !!!(inputValue === '' || this.productCategories$.findIndex(category => category.name.toLowerCase() === inputValue.toLowerCase()) > -1);
     }
 
-
-    /**
-     * 
-     * IMAGES
-     * 
-     */
+    // --------------------------------------
+    // Product Assets/Images Section
+    // --------------------------------------
 
     /**
      * Toggle the categories edit mode
@@ -1720,7 +1979,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      *
      * @param fileList
      */
-    uploadImages(fileList: FileList,images): Promise<void>
+    uploadImages(fileList: FileList, images): Promise<void>
     {
         // Return if canceled
         if ( !fileList.length )
@@ -1739,14 +1998,13 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         
         var reader = new FileReader();
         reader.readAsDataURL(file); 
-        reader.onload = (_event)  => {               
+        reader.onload = (_event)  => {
             if(!images.length === true) {
-                this.selectedProductForm.get('images').value.push(reader.result);
+                this.images.push(reader.result);
+                this.imagesFile.push(file);
             } else {
-                this.selectedProductForm.get('images').value[this.selectedProductForm.get('currentImageIndex').value] = reader.result + "";
+                this.images[this.currentImageIndex] = reader.result + "";
             }
-
-            // console.log("updated images: ",this.selectedProductForm.get('images').value)
 
             this.imagesEditMode = false; 
             this._changeDetectorRef.markForCheck();
@@ -1773,11 +2031,54 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     }
 
     /**
+     * Upload avatar
+     *
+     * @param fileList
+     */
+    // uploadImages(fileList: FileList, images): Promise<void>
+    // {
+    //     // Return if canceled
+    //     if ( !fileList.length )
+    //     {
+    //         return;
+    //     }
+
+    //     const allowedTypes = ['image/jpeg', 'image/png'];
+        
+    //     let file = [];
+    //     for( let i = 0; i < fileList.length; i ++){
+            
+    //         file[i] = fileList;
+    //         // Return if the file is not allowed
+    //         if ( !allowedTypes.includes(file[i].type) )
+    //         {
+    //             return;
+    //         }
+            
+    //         var reader = new FileReader();
+    //         reader.readAsDataURL(file[i]); 
+    //         reader.onload = (_event)  => {
+    //             if(!images.length === true) {
+    //                 this.images.push(reader.result);
+    //                 this.imagesFile.push(file[i]);
+    //             } else {
+    //                 this.images[this.currentImageIndex] = reader.result + "";
+    //             }
+    
+    //             this.imagesEditMode = false; 
+    //             this._changeDetectorRef.markForCheck();
+    //         }
+    
+    //         const product = this.selectedProductForm.getRawValue();
+    //     }
+    // }
+
+    /**
      * Remove the image
      */
     removeImage(): void
     {
-        const index = this.selectedProductForm.get('currentImageIndex').value;
+        const index = this.currentImageIndex;
         if (index > -1) {
             this.selectedProductForm.get('images').value.splice(index, 1);
         }
@@ -1796,202 +2097,37 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     }
 
     /**
-     * 
-     *  PRODUCTS
-     * 
-     */ 
+     * Cycle through images of selected product
+     */
+    cycleImages(forward: boolean = true): void
+    {
+        // Get the image count and current image index
+        const count = this.images.length;
+        const currentIndex = this.currentImageIndex;
 
-    // this create product check category first before creating them
-    initCreateProduct(productType: string){
+        // Calculate the next and previous index
+        const nextIndex = currentIndex + 1 === count ? 0 : currentIndex + 1;
+        const prevIndex = currentIndex - 1 < 0 ? count - 1 : currentIndex - 1;
 
-        if (productType === "normal") {
-            // get category by name = no-category
-            this._inventoryService.getCategories("no-category").subscribe(async (res)=>{
-    
-                let _noCategory = res["data"].find(obj => obj.name === "no-category");
-    
-                // if there is no category with "no-category" name, create one
-                console.log("logs this !!!",_noCategory)
-    
-                if (!_noCategory || _noCategory["name"] !== "no-category"){
-                    await this._inventoryService.createCategory({
-                        name: "no-category",
-                        parentCategoryId: "",
-                        storeId: this.storeId$,
-                        thumbnailUrl: ""
-                    }).subscribe((res)=>{
-                        if (res["status"] !== 201){
-                            console.log("an error has occur",res)
-                        } else {
-                            this.createProduct(res["data"].id, productType);
-                        }
-                    });
-                } else {
-                    this.createProduct(_noCategory.id, productType);
-                }
-            });
-        } else if (productType === "combo") {
-            // get category by name =Combos
-            this._inventoryService.getCategories("Combos").subscribe(async (res)=>{
-    
-                let _noCategory = res["data"].find(obj => obj.name === "Combos");
-    
-                // if there is no category with "Combos" name, create one
-                console.log("logs this !!!",_noCategory)
-    
-                if (!_noCategory || _noCategory["name"] !== "Combos"){
-                    await this._inventoryService.createCategory({
-                        name: "Combos",
-                        parentCategoryId: "",
-                        storeId: this.storeId$,
-                        thumbnailUrl: ""
-                    }).subscribe((res)=>{
-                        if (res["status"] !== 201){
-                            console.log("an error has occur",res)
-                        } else {
-                            this.createProduct(res["data"].id, productType);
-                        }
-                    });
-                } else {
-                    this.createProduct(_noCategory.id, productType);
-                }
-            });
+        // If cycling forward...
+        if ( forward )
+        {
+            this.currentImageIndex = nextIndex;
+        }
+        // If cycling backwards...
+        else
+        {
+            this.currentImageIndex = prevIndex;
         }
     }
 
-
-    /**
-     * Create product
-     */
-    createProduct(categoryId: string, productType: string): void
-    {
-
-        // Create the product
-        this._inventoryService.createProduct(categoryId, productType).subscribe(async (newProduct) => {
-
-            // Add Inventory to product
-            await this._inventoryService.addInventoryToProduct(newProduct["data"].id).subscribe();
-
-            // Go to new product
-            this.selectedProduct = newProduct["data"];
-                                    
-            // Set Category to Product 
-            this.selectedProduct.categoryId = newProduct["data"].categoryId;
-
-            // Update current form with new product data
-            this.selectedProductForm.patchValue(newProduct["data"]);
-
-            // Set image & currentImageIndex to null ...
-            this.selectedProductForm.get('currentImageIndex').patchValue(0);
-            this.selectedProductForm.get('images').patchValue([]);
-
-            // Set image & isVariants to false ...
-            this.selectedProductForm.get('isVariants').patchValue(false);
-            
-            // // Set filtered variants to empty array
-            this.filteredProductVariants = [];
-            
-            // // Set variants to empty array
-            // this.variants = [];
-
-            // // Set selectedProduct variants to empty array
-            // this.selectedProduct.variants = [];
-
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
-        });
+    resetCycleImages(){
+        this.currentImageIndex = 0;
     }
 
-    /**
-     * Update the selected product using the form data
-     */
-    updateSelectedProduct(): void
-    {
-        // Get
-        // let storeFrontDomain = this._apiServer.settings.storeFrontDomain;
-        let storeFrontDomain = 'symplified.ai';
-        let storeFrontURL = 'https://' + this.store$.domain + '.' + storeFrontDomain;
-        
-        // Get the product object
-        const {sku, price, quantity, images, currentImageIndex, isVariants,
-                productAssets, productDeliveryDetail, productInventories, 
-                productReviews, productVariants,  ...product} = this.selectedProductForm.getRawValue();
-
-        product.seoName = product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
-        product.seoUrl = storeFrontURL + '/product/name/' + product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
-
-        // Remove the currentImageIndex field
-        // delete productRaw.currentImageIndex;
-
-        // Update the product on the server
-        this._inventoryService.updateProduct(product.id, product).subscribe(() => {
-            // Show a success message
-            this.showFlashMessage('success');
-        });
-
-        // Update the inventory product on the server (backend kena enable update)
-        // this._inventoryService.updateInventoryToProduct(product.id, productInventories).subscribe(() => {
-        //     // Show a success message
-        //     this.showFlashMessage('success');
-        // });
-    }
-
-    /**
-     * Delete the selected product using the form data
-     */
-    deleteSelectedProduct(): void
-    {
-        // Open the confirmation dialog
-        const confirmation = this._fuseConfirmationService.open({
-            title  : 'Delete product',
-            message: 'Are you sure you want to remove this product? This action cannot be undone!',
-            actions: {
-                confirm: {
-                    label: 'Delete'
-                }
-            }
-        });
-
-        // Subscribe to the confirmation dialog closed action
-        confirmation.afterClosed().subscribe((result) => {
-
-            // If the confirm button pressed...
-            if ( result === 'confirmed' )
-            {
-
-                // Get the product object
-                const product = this.selectedProductForm.getRawValue();
-
-                // Delete the product on the server
-                this._inventoryService.deleteProduct(product.id).subscribe(() => {
-
-                    // Close the details
-                    this.closeDetails();
-                });
-            }
-        });
-    }
-
-    /**
-     * Show flash message
-     */
-    showFlashMessage(type: 'success' | 'error'): void
-    {
-        // Show the message
-        this.flashMessage = type;
-
-        // Mark for check
-        this._changeDetectorRef.markForCheck();
-
-        // Hide it after 3 seconds
-        setTimeout(() => {
-
-            this.flashMessage = null;
-
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
-        }, 3000);
-    }
+    // --------------------------------------
+    // Everything else
+    // --------------------------------------
 
     /**
      * Track by function for ngFor loops
