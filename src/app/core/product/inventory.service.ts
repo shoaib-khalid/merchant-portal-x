@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
-import { Product, ProductVariant, ProductInventory, ProductCategory, ProductPagination, ProductVariantAvailable, ProductPackageOption } from 'app/core/product/inventory.types';
+import { Product, ProductVariant, ProductInventory, ProductCategory, ProductPagination, ProductVariantAvailable, ProductPackageOption, ProductAssets } from 'app/core/product/inventory.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from '../logging/log.service';
@@ -78,12 +78,21 @@ export class InventoryService
     }
 
     /**
-     * Getter for categories
+     * Getter for package
      */
-     get packages$(): Observable<ProductPackageOption[]>
-     {
-         return this._packages.asObservable();
-     }
+    get package$(): Observable<ProductPackageOption>
+    {
+        return this._package.asObservable();
+    }
+     
+
+    /**
+     * Getter for packages
+     */
+    get packages$(): Observable<ProductPackageOption[]>
+    {
+        return this._packages.asObservable();
+    }
 
     /**
      * Getter for access token
@@ -125,12 +134,12 @@ export class InventoryService
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
             params: {
-                page: '' + page,
-                pageSize: '' + size,
-                sortByCol: '' + sort,
+                page        : '' + page,
+                pageSize    : '' + size,
+                sortByCol   : '' + sort,
                 sortingOrder: '' + order.toUpperCase(),
-                name: '' + search,
-                status: '' + status
+                name        : '' + search,
+                status      : '' + status
             }
         };
 
@@ -224,8 +233,22 @@ export class InventoryService
             switchMap(products => this._httpClient.post<Product>(productService + '/stores/' + this.storeId$ + '/products', body , header).pipe(
                 map((newProduct) => {
 
+                    this._logging.debug("Response from ProductsService (createProduct) - Before",newProduct);
+                    
+                    // initialise variants and inventory to empty 
+                    let _newProduct = newProduct["data"];
+                    _newProduct["productVariants"] = [];
+                    _newProduct["productAssets"] = [];
+                    _newProduct["productInventories"] = [{
+                        sku: null,
+                        price: null,
+                        quantity: null
+                    }];
+
+                    this._logging.debug("Response from ProductsService (createProduct) - After",_newProduct);
+
                     // Update the products with the new product
-                    this._products.next([newProduct["data"], ...products]);
+                    this._products.next([_newProduct, ...products]);
 
                     // Return the new product
                     return newProduct;
@@ -256,16 +279,13 @@ export class InventoryService
             switchMap(products => this._httpClient.put<Product>(productService + '/stores/' + this.storeId$ + '/products/' + id, product , header).pipe(
                 map((updatedProduct) => {
 
-                    console.log("products: ",products);
-                    console.log("updatedProduct: ",updatedProduct);
+                    this._logging.debug("Response from ProductsService (updateProduct)",updatedProduct);
 
                     // Find the index of the updated product
                     const index = products.findIndex(item => item.id === id);
-
+                    
                     // Update the product
                     products[index] = { ...products[index], ...updatedProduct["data"]};
-
-                    console.log("products[index]", products[index])
 
                     // Update the products
                     this._products.next(products);
@@ -355,6 +375,54 @@ export class InventoryService
      *
      * @param product
      */
+     addProductAssets(productId: string, formData, productAssets: ProductAssets): Observable<ProductAssets>{
+
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                itemCode: productAssets.itemCode,
+                isThumbnail: productAssets.isThumbnail
+            }
+        };
+
+        if (!productAssets.itemCode || productAssets.itemCode == "") {
+            delete header.params['itemCode'];
+        }
+
+        return this.products$.pipe(
+            take(1),
+            switchMap(products => this._httpClient.post<Product>(productService +'/stores/'+this.storeId$+'/products/' + productId + "/assets", formData , header).pipe(
+                map((newInventory) => {
+
+                    // Find the index of the updated product
+                    const index = products.findIndex(item => item.id === productId);
+                    let updatedProduct = products[index];
+                    updatedProduct.productAssets.push(newInventory["data"]);
+                    
+                    // Update the product
+                    products[index] = { ...products[index], ...updatedProduct};
+
+                    // Update the products
+                    this._products.next(products);
+
+                    this._logging.debug("Response from ProductsService (addProductAssets)",newInventory);
+
+                    // Return the new product
+                    return newInventory["data"];
+                })
+            ))
+        );
+    } 
+
+    /**
+     * Add Inventory to the product
+     *
+     * @param product
+     */
     addInventoryToProduct(product: Product): Observable<ProductInventory>{
 
         let productService = this._apiServer.settings.apiServer.productService;
@@ -371,27 +439,36 @@ export class InventoryService
         const body = {
             "productId": product.id,
             "itemCode": product.id + date,
-            "price": 0,
+            "price": 1,
             "compareAtprice": 0,
             "quantity": 1,
-            "sku": null,
+            "sku": product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''),
             "status": "AVAILABLE"
         };
 
         // return of();
 
-        return this._inventories.pipe(
+        return this.products$.pipe(
             take(1),
-            // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
             switchMap(products => this._httpClient.post<Product>(productService +'/stores/'+this.storeId$+'/products/' + product.id + "/inventory", body , header).pipe(
-                map((newProduct) => {
+                map((newInventory) => {
 
-                    console.log("newProduct InventoryItem",newProduct);
-                    // Update the products with the new product
-                    // this._products.next([newProduct["data"], ...products]);
+
+                    // Find the index of the updated product
+                    const index = products.findIndex(item => item.id === product.id);
+                    let updatedProduct = products[index];
+                    updatedProduct.productInventories = [newInventory["data"]];
+                    
+                    // Update the product
+                    products[index] = { ...products[index], ...updatedProduct};
+
+                    // Update the products
+                    this._products.next(products);
+
+                    this._logging.debug("Response from ProductsService (addInventoryToProduct)",newInventory);
 
                     // Return the new product
-                    return newProduct["data"];
+                    return newInventory["data"];
                 })
             ))
         );
@@ -402,7 +479,7 @@ export class InventoryService
      *
      * @param product
      */
-    updateInventoryToProduct(productInventoriesId,productInventories: ProductInventory): Observable<ProductInventory>{
+    updateInventoryToProduct(productInventoriesId: string, productInventories: ProductInventory): Observable<ProductInventory>{
 
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -831,7 +908,7 @@ export class InventoryService
             switchMap(products => this._httpClient.post<Product>(productService +'/stores/'+this.storeId$+'/products/' + packageId + "/inventory", body , header).pipe(
                 map((newProduct) => {
 
-                    console.log("newProduct InventoryItem",newProduct);
+                    this._logging.debug("Response from ProductsService (addOptionsToProductPackage)",newProduct);
                     // Update the products with the new product
                     // this._products.next([newProduct["data"], ...products]);
 
@@ -842,7 +919,8 @@ export class InventoryService
         );
     }
 
-    createProductsOptionById(packageId, productPackage) {
+    createProductsOptionById(packageId, productPackage) : Observable<ProductPackageOption>
+    {
 
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -854,13 +932,15 @@ export class InventoryService
         // product-service/v1/swagger-ui.html#/store-category-controller/postStoreCategoryByStoreIdUsingPOST
         return this.packages$.pipe(
             take(1),
-            switchMap(packages => this._httpClient.post<any>(productService + '/stores/' + this.storeId$ + '/package/' + packageId + '/options', productPackage , header).pipe(
+            switchMap(packages => this._httpClient.post<ProductPackageOption>(productService + '/stores/' + this.storeId$ + '/package/' + packageId + '/options', productPackage , header).pipe(
                 map((newpackage) => {
                     // Update the categories with the new category
-                    this._packages.next([...packages, newpackage.data]);
+                    this._packages.next([...packages, newpackage["data"]]);
+
+                    this._logging.debug("Response from ProductsService (createProductsOptionById)",newpackage);
 
                     // Return new category from observable
-                    return newpackage.data;
+                    return newpackage["data"];
                 })
             ))
         );
@@ -895,7 +975,8 @@ export class InventoryService
         );
     }
 
-    updateProductsOptionById(packageId: string, productPackage, optionId: string) {
+    updateProductsOption(packageId: string, productPackage, optionId: string) : Observable<ProductPackageOption>
+    {
 
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -904,8 +985,29 @@ export class InventoryService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
 
-        // product-service/v1/swagger-ui.html#/store-category-controller/postStoreCategoryByStoreIdUsingPOST
-        return this._httpClient.put<any>(productService + '/stores/' + this.storeId$ + '/package/' + packageId + '/options/' + optionId, productPackage , header);
+        return this.packages$.pipe(
+            take(1),
+            // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
+            switchMap(packages => this._httpClient.put<ProductPackageOption>(productService + '/stores/' + this.storeId$ + '/package/' + packageId + '/options/' + optionId, productPackage , header).pipe(
+                map((updatedPackage) => {
+
+                    this._logging.debug("Response from ProductsService (updateProductsOptionById)",updatedPackage);
+
+                    // Find the index of the updated product
+                    const index = packages.findIndex(item => item.id === optionId);
+                    
+                    // Update the product
+                    // packages[index] = { ...packages[index], ...updatedPackage["data"]};
+                    packages[index] = updatedPackage["data"];
+
+                    // Update the products
+                    this._packages.next(packages);
+
+                    // Return the updated product
+                    return updatedPackage["data"];
+                })
+            ))
+        );
     }
 
     deleteProductsOptionById(optionId: string, packageId: string): Observable<boolean>
@@ -927,6 +1029,8 @@ export class InventoryService
 
                     // Delete the product
                     packages.splice(index, 1);
+
+                    this._logging.debug("Response from ProductsService (deleteProductsOptionById)",response);
 
                     // Return the deleted status
                     return response.status;
