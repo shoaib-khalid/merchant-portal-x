@@ -4,10 +4,21 @@
     <div class="flex flex-col flex-auto w-full">
         <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
             <!-- Title and action buttons -->
-            <div class="flex items-center justify-between w-full">
+            <div class="relative flex flex-col sm:flex-row flex-0 sm:items-center w-full sm:justify-between py-8 px-6 md:px-8 border-b">
                 <div>
                     <h2 class="text-3xl font-semibold tracking-tight leading-8">Channels Management</h2>
                     <div class="font-medium tracking-tight text-secondary">Keep track of your financial status</div>
+                </div>
+                <div class="flex flex-shrink-0 items-center mt-6 sm:mt-0 sm:ml-4">
+                    <!-- Add customer button -->
+                    <button
+                        class="ml-4"
+                        mat-flat-button
+                        (click)="createChannel()"
+                        [color]="'primary'">
+                        <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                        <span class="ml-2 mr-1">Add</span>
+                    </button>
                 </div>
             </div>
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 w-full mt-8">
@@ -90,29 +101,44 @@
                                         mat-header-cell
                                         mat-sort-header
                                         *matHeaderCellDef>
-                                        Details
+                                        Action
                                     </th>
                                     <td
                                         mat-cell
                                         class="px-2"
                                         *matCellDef="let channel">
-                                        <input
-                                            [id]=" 'view-' + channel.id"
-                                            type="button"
-                                            (click)="viewDetails(channel.id)"
-                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                            mat-button>
-                                        <label 
-                                            class="flex items-center justify-center py-2 px-1 rounded-full cursor-pointer border border-primary bg-primary group hover:bg-white"
-                                            [for]="'view-' + channel.id"
-                                            matRipple>
-                                            <mat-icon
-                                                class="text-white group-hover:text-primary pr-2"
-                                                [svgIcon]="'heroicons_solid:eye'"></mat-icon>
-                                            <span class="font-medium text-white group-hover:text-primary text-sm text-secondary whitespace-nowrap">
-                                                View
-                                            </span>
-                                        </label>
+                                        <div class="flex flex-wrap">
+                                            <!-- edit button -->
+                                                <input
+                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                type="button"
+                                                >
+                                                <label
+                                                    class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="text-white icon-size-5"
+                                                        [svgIcon]="'heroicons_outline:pencil-alt'">
+                                                    </mat-icon>
+                                                </label>
+                                                <!-- delete button -->
+                                                <input
+                                                    id="delete-channel-button"
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="button"
+                                                    (click)="deleteSelectedChannel(channel.id)"
+                                                >
+                                                <label
+                                                    class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-warn hover:bg-warn-700"
+                                                    for="delete-channel-button"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="text-white icon-size-5"
+                                                        [svgIcon]="'heroicons_outline:trash'">
+                                                    </mat-icon>
+                                                </label>                                               
+                                        </div>
+                                            
                                     </td>
                                 </ng-container>
 

@@ -6,6 +6,7 @@ import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service';
 import { ChannelsList, ChannelsListPagination } from './channels-list.types';
+import { filter, map, switchMap, take } from 'rxjs/operators';
 
 @Injectable({
     providedIn: 'root'
@@ -47,6 +48,7 @@ export class ChannelsListService
     {
         return this._channel.asObservable();
     }
+    
 
     /**
      * Getter for access token
@@ -81,7 +83,7 @@ export class ChannelsListService
      * Get data
      */
     getChannels(page: number = 0, size: number = 10, sort: string = 'name', channel: 'asc' | 'desc' | '' = 'asc', receiverName: string = '', phoneNumber: string = '', from: string = '', to: string = '', completionStatus: string = ''): 
-    Observable<{ pagination: ChannelsListPagination; stores: ChannelsList[] }>
+    Observable<{ pagination: ChannelsListPagination; channels: ChannelsList[] }>
     {
         
 
@@ -104,7 +106,7 @@ export class ChannelsListService
             }
         };
         
-        return this._httpClient.get<{ pagination: ChannelsListPagination; stores: ChannelsList[] }>(userService + '/userChannels/', header)
+        return this._httpClient.get<{ pagination: ChannelsListPagination; channels: ChannelsList[] }>(userService + '/userChannels/', header)
         .pipe(
             tap((response) => {
                 
@@ -144,6 +146,79 @@ export class ChannelsListService
         )
     }
 
+    /**
+ * Create channels
+ */
+    createChannel(body: ChannelsList): Observable<ChannelsList>
+    {
+        
+        let userService = this._apiServer.settings.apiServer.userService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        const now = new Date();
+
+        return this.channel$.pipe(
+            take(1),
+            // switchMap(channels => this._httpClient.post<ChannelsList>('api/apps/ecommerce/inventory/discount', {}).pipe(
+            switchMap(channels => this._httpClient.post<ChannelsList>(userService + '/userChannels',body, header).pipe(
+                map((newChannel) => {
+
+                    // Update the channels with the new channel
+                    this._channels.next([newChannel["data"], ...channels]);
+
+                    // Return the new channel
+                    return newChannel;
+                })
+            ))
+        );
+    }
+
+    /**
+     * Delete the discount tier
+     *
+     * @param id
+     */
+     deleteChannel(channelId: string,): Observable<boolean>
+     {
+         let userService = this._apiServer.settings.apiServer.userService;
+         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+         let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+ 
+         const header = {
+             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+         };
+       
+         return this.channels$.pipe(
+             take(1),
+             switchMap(channels => this._httpClient.delete(userService + '/userChannels/' + channelId, header).pipe(
+                 map((response) => {
+ 
+                     // Find the index of the deleted discount
+                     const index = channels.findIndex(item => item.id === channelId);
+ 
+                     // Delete the discount
+                     channels.splice(index, 1);
+ 
+                     // Update the discounts
+                     this._channels.next(channels);
+ 
+                     let isDeleted:boolean = false;
+                     if (response["status"] === 200) {
+                         isDeleted = true
+                     }
+ 
+                     // Return the deleted status
+                     return isDeleted;
+                 })
+             ))
+         );
+     }
+
     updateChannel(channelId, nextCompletionStatus): Observable<any>
     {
         
@@ -175,4 +250,5 @@ export class ChannelsListService
             })
         });
     }
+    
 }

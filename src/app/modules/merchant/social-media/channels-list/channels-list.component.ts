@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { merge, Subject } from 'rxjs';
+import { merge,Observable ,Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { ChannelsListService } from 'app/modules/merchant/social-media/channels-list/channels-list.service';
 import { ChannelsListPagination } from 'app/modules/merchant/social-media/channels-list/channels-list.types'
@@ -10,6 +10,10 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
 import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { CreateChannelComponent } from '../create-channel/create-channel.component'; 
+import { ChannelsList } from 'app/modules/merchant/social-media/channels-list/channels-list.types';
+
 
 @Component({
     selector       : 'channels-list',
@@ -35,6 +39,11 @@ export class ChannelsListComponent implements OnInit, AfterViewInit, OnDestroy
     tabControl: FormControl = new FormControl();
     filterList: string = "name";
 
+    channels$: Observable<ChannelsList[]>;
+    selectedChannel: ChannelsList | null = null;
+    selectedChannelForm: FormGroup;
+
+
     range: any;
 
     channelsList: MatTableDataSource<any> = new MatTableDataSource();
@@ -49,6 +58,7 @@ export class ChannelsListComponent implements OnInit, AfterViewInit, OnDestroy
         private _channelslistService: ChannelsListService,
         public _dialog: MatDialog,
         private _router: Router,
+        private _fuseConfirmationService: FuseConfirmationService
         )
     {
     }
@@ -271,6 +281,14 @@ export class ChannelsListComponent implements OnInit, AfterViewInit, OnDestroy
 
     }
 
+     /**
+     * Close the details
+     */
+      closeDetails(): void
+      {
+          this.selectedChannel = null;
+      }
+
     clearFilter(){
         this.filterControl.reset();
     }
@@ -317,4 +335,70 @@ export class ChannelsListComponent implements OnInit, AfterViewInit, OnDestroy
         this._router.navigateByUrl('social-media/channel-builder/'+channelId)
     }
 
+    /**
+     * Create channel
+     */
+     createChannel(): void
+     {
+         const dialogRef = this._dialog.open(CreateChannelComponent, { disableClose: true });
+         dialogRef.afterClosed().subscribe(result => {
+             console.log("result",result)
+             if (result.status === true) {
+                 // this will remove the item from the object
+                 let createChannelBody  = {
+                    id: result.id,
+                    refId: result.refId,
+                    userId: result.userId,
+                    channelName: result.channelName,
+                    token: result.token
+                 };
+         
+                 // Create the discount
+                 this._channelslistService.createChannel(createChannelBody).subscribe(async (newChannel) => {
+                     
+                     // Go to new discount
+                     this.selectedChannel = newChannel["data"];
+     
+                     // Update current form with new discount data
+                     this.selectedChannelForm.patchValue(newChannel["data"]);
+     
+                     // Mark for check
+                     this._changeDetectorRef.markForCheck();
+                 });
+             }
+         });
+     }
+
+    /**
+     * Delete the selected channel
+     */
+     deleteSelectedChannel(channelId : string): void
+     {
+         console.log("deleteSelectedChannel",this.deleteSelectedChannel)
+         // Open the confirmation dialog
+         const confirmation = this._fuseConfirmationService.open({
+             title  : 'Delete ',
+             message: 'Are you sure you want to remove this channel? This action cannot be undone!',
+             actions: {
+                 confirm: {
+                     label: 'Delete'
+                 }
+             }
+         });
+
+                // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+
+            // If the confirm button pressed...
+            if ( result === 'confirmed' )
+            {
+                // Delete the discount on the server
+                this._channelslistService.deleteChannel(channelId).subscribe(() => {
+
+                    // Close the details
+                    this.closeDetails();
+                });
+            }
+        });
+    }
 }
