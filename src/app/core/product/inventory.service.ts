@@ -465,8 +465,6 @@ export class InventoryService
                     // Update the products
                     this._products.next(products);
 
-                    console.log("pe citer: ",this._products)
-
                     this._logging.debug("Response from ProductsService (addInventoryToProduct)",newInventory);
 
                     // Return the new product
