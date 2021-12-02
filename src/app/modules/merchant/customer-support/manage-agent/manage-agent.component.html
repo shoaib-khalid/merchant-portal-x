@@ -1,0 +1,218 @@
+<div
+    class="absolute mb-12 inset-0 flex flex-col min-w-0 overchannel-y-auto"
+    cdkScrollable>
+    <div class="flex flex-col flex-auto w-full">
+        <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+            <!-- Header -->
+            <div class="relative flex flex-col w-full sm:flex-row flex-0 sm:items-center sm:justify-between py-8 px-6 md:px-8 ">
+                <!-- Loader -->
+                <div
+                    class="absolute inset-x-0 bottom-0"
+                    *ngIf="isLoading">
+                    <mat-progress-bar [mode]="'indeterminate'"></mat-progress-bar>
+                </div>
+                <!-- Title -->
+                <div class="text-4xl font-extrabold tracking-tight">Agent Managment</div>
+                <!-- Actions -->
+                <div class="flex flex-shrink-0 items-center mt-6 sm:mt-0 sm:ml-4">
+                    <!-- Search -->
+                    <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-64">
+                        <mat-icon
+                            class="icon-size-5"
+                            matPrefix
+                            [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                        <input
+                            matInput
+                            [autocomplete]="'off'"
+                            [placeholder]="'Filter agents'">
+                    </mat-form-field>
+                    <!-- Add customer button -->
+                    <button
+                        class="ml-4"
+                        mat-flat-button
+                        (click)="createAgent()"
+                        [color]="'primary'">
+                        <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                        <span class="ml-2 mr-1">Add</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 w-full mt-8">
+                <!-- Recent channels table -->
+                <div class="xl:col-span-2 flex flex-col flex-auto bg-card shadow rounded-2xl overchannel-hidden">
+                    <div class="flex flex-col sm:flex-row p-6 sm:justify-between">
+                        <div class="flex w-full">
+                            <div class="flex-0">
+                                <div class="mr-4 text-lg font-medium tracking-tight leading-6 truncate">Recent channels</div>
+                                <div class="text-secondary font-medium">1 pending, 4 completed</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="overchannel-x-auto mx-6 w-full">
+                            <table
+                                class="w-full bg-transparent"
+                                mat-table
+                                matSort
+                                matSortDisableClear
+                                [dataSource]="agentList"
+                                [trackBy]="trackByFn"
+                                #agentListTable>
+    
+                                <!-- Username -->
+                                <ng-container matColumnDef="username">
+                                    <th
+                                        mat-header-cell
+                                        mat-sort-header
+                                        *matHeaderCellDef>
+                                        Username
+                                    </th>
+                                    <td
+                                        mat-cell
+                                        *matCellDef="let agent">
+                                        <span class="pr-6 font-medium text-sm text-secondary whitespace-nowrap">
+                                            {{agent.username}}
+                                        </span>
+                                    </td>
+                                </ng-container>
+    
+                                <!-- Type -->
+                                <ng-container matColumnDef="type">
+                                    <th
+                                        mat-header-cell
+                                        mat-sort-header
+                                        *matHeaderCellDef>
+                                        Type
+                                    </th>
+                                    <td
+                                        mat-cell
+                                        *matCellDef="let agent">
+                                        <span class="pr-6 whitespace-nowrap">
+                                            {{agent.roleId}}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Details -->
+                                <ng-container matColumnDef="details">
+                                    <th
+                                        mat-header-cell
+                                        mat-sort-header
+                                        *matHeaderCellDef>
+                                        Details
+                                    </th>
+                                    <td
+                                        mat-cell
+                                        class="px-2"
+                                        *matCellDef="let agent">
+                                        <div class="flex flex-wrap">
+                                            <!-- edit button -->
+                                                <input
+                                                [id]="'edit-agent-btn' + agent.id"
+                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                type="button"
+                                                (click)="editAgent(agent)"
+                                                >
+                                                <label
+                                                    class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3"
+                                                    matRipple
+                                                    [for]="'edit-agent-btn' + agent.id"
+                                                    >
+                                                    <mat-icon
+                                                        class="text-white icon-size-5"
+                                                        [svgIcon]="'heroicons_outline:pencil-alt'">
+                                                    </mat-icon>
+                                                </label>
+                                                <!-- delete button -->
+                                                <input
+                                                    [id]="'delete-agent-button' + agent.id"
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="button"
+                                                    (click)="deleteSelectedAgent(agent.id)"
+                                                >
+                                                <label
+                                                    class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-warn hover:bg-warn-700"
+                                                    [for]="'delete-agent-button' + agent.id"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="text-white icon-size-5"
+                                                        [svgIcon]="'heroicons_outline:trash'">
+                                                    </mat-icon>
+                                                </label>                                               
+                                        </div>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Action -->
+                                <ng-container matColumnDef="action">
+                                    <th
+                                        mat-header-cell
+                                        mat-sort-header
+                                        *matHeaderCellDef>
+                                        Action
+                                    </th>
+                                    <td
+                                        mat-cell
+                                        class="px-2"
+                                        *matCellDef="let channel"
+                                    >
+                                        <input
+                                            [id]="'action-' + channel.id"
+                                            type="button"
+                                            (click)="updateStatus(channel.id, getNextCompletionStatus(channel.completionStatus).nextId)"
+                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                            mat-button>
+                                        <label 
+                                            *ngIf="getNextCompletionStatus(channel.completionStatus).nextLabelBtn !== null"    
+                                            class="flex items-center justify-center py-2 px-1 rounded-full cursor-pointer border border-primary border-solid group hover:bg-primary"
+                                            [for]="'action-' + channel.id"
+                                            matRipple>
+                                            <span class="font-medium group-hover:text-white text-sm text-primary whitespace-nowrap">
+                                                {{ (channel.completionStatus) ? getNextCompletionStatus(channel.completionStatus).nextLabelBtn : 'Undefined' }}
+                                            </span>
+                                        </label>
+                                    </td>
+                                </ng-container>
+    
+                                <!-- Footer -->
+                                <ng-container matColumnDef="recentOrdersTableFooter">
+                                    <td
+                                        class="py-6 px-0 border-0"
+                                        mat-footer-cell
+                                        *matFooterCellDef
+                                        colspan="6">
+                                    </td>
+                                </ng-container>
+
+                                
+                                <tr
+                                mat-header-row
+                                *matHeaderRowDef="agentListTableColumns"></tr>
+                                <tr
+                                class="order-row h-16"
+                                mat-row
+                                *matRowDef="let row; columns: agentListTableColumns;"></tr>
+                                <!-- <tr
+                                class="h-16 border-0"
+                                mat-footer-row
+                                *matFooterRowDef="['recentOrdersTableFooter']"></tr> -->
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mb-6"></div>
+</div>
+
+<mat-paginator
+    class="absolute inset-x-0 bottom-0 border-b border-t z-10 bg-gray-50 dark:bg-transparent"
+    [ngClass]="{'pointer-events-none': isLoading}"
+    [length]="pagination.length"
+    [pageIndex]="pagination.page"
+    [pageSize]="pagination.size"
+    [pageSizeOptions]="[5, 10, 25, 100]"
+    [showFirstLastButtons]="true"></mat-paginator>

@@ -1,0 +1,131 @@
+<div class="flex flex-col max-w-240 md:min-w-160 -m-6">
+
+    <!-- Compose form -->
+    <div
+        class="flex flex-col flex-auto p-6 sm:p-8 overflow-y-auto"
+    >
+        <!-- <div class="flex items-center flex-auto min-w-0">
+            <mat-icon
+                class="w-10"
+                [svgIcon]="'heroicons_solid:location-marker'"></mat-icon>
+            <span class="pl-4 text-2xl font-bold text-primary">Failed to detect location</span> <br>
+        </div> -->
+        <!-- <div class="flex items-center flex-auto min-w-0 mb-8">
+            <span class="pl-14 text-lg">Lets start creating discount  
+                <br>Fill in below 
+            </span>
+        </div> -->
+
+        <div class="mb-4"></div>
+
+        <mat-form-field 
+            appearance="fill"
+            class="w-full "
+            >
+            <mat-label>Name</mat-label>
+            <input 
+            matInput
+                [(ngModel)]="name"
+                placeholder="Enter agent name"
+                (input)="checkName();checkForm()"
+            >
+        </mat-form-field>
+
+        <div class="w-full">
+            <mat-form-field 
+                appearance="fill"
+                class="w-1/2 pr-2">
+                <mat-label>Username</mat-label>
+                <input 
+                    matInput
+                    [(ngModel)]="username"
+                >
+            </mat-form-field>
+            
+            <mat-form-field 
+                appearance="fill"
+                class="w-1/2 pl-2">
+                <input 
+                    matInput
+                >
+            </mat-form-field>
+        </div>
+
+        <mat-form-field 
+            appearance="fill"
+            class="w-full ">
+            <mat-label>Email address</mat-label>
+            <input 
+                matInput
+                placeholder="Enter email address"
+                [(ngModel)]="email"
+            >
+        </mat-form-field>
+
+        <mat-form-field 
+            appearance="fill"
+            class="w-full">
+            <mat-label>Role</mat-label>
+                <mat-select
+                    class="w-full"
+                    placeholder="Select role"
+                    [(ngModel)]="roleId"
+                    >
+                    <div>
+                        <mat-option [value]="'STORE_CSR_COMPLAINT'">Customer service</mat-option>
+                        <mat-option [value]="'STORE_CSR_ORDER'">Order manager</mat-option>
+                        <mat-option [value]="'STORE_CSR_ADMIN'">Customer service + Order manager</mat-option>
+                    </div>
+                </mat-select>
+        </mat-form-field>
+
+        <mat-form-field 
+            appearance="fill"
+            class="w-full ">
+            <mat-label>Password</mat-label>
+            <input 
+                matInput
+                placeholder="Enter password"
+            >
+        </mat-form-field>
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-end mt-4 sm:mt-6">
+            <div class="mr-3 text-warn">
+            </div>
+            <div class="order-last">
+                <!-- Send -->
+                <button
+                    class="bg-gray-300 hover:bg-gray-500 border border-gray-500"
+                    mat-flat-button
+                    [color]="'gray'"
+                    (click)="cancelCreateAgent()"
+                    >
+                    Cancel
+                </button>
+                
+                <button
+                    *ngIf="!data"
+                    class="bg-primary-300 hover:bg-primary-500 border border-primary-500 ml-2"
+                    mat-flat-button
+                    [color]="'gray'"
+                    (click)="addNewAgent()"
+                    [disabled]="disabledProceed"
+                    >
+                    Ok
+                </button>
+
+                <button
+                    *ngIf="data"
+                    class="bg-primary-300 hover:bg-primary-500 border border-primary-500 ml-2"
+                    mat-flat-button
+                    [color]="'gray'"
+                    (click)="addNewAgent()"
+                >
+                Update
+            </button>
+           
+            </div>
+        </div>
+    </div>
+</div>

@@ -18,10 +18,14 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { SharedModule } from 'app/shared/shared.module';
 import { CustomersComponent } from 'app/modules/merchant/customer-support/list/customers.component';
 import { customerSupportRoutes } from 'app/modules/merchant/customer-support/customer-support.routing';
+import { ManageAgentComponent } from './manage-agent/manage-agent.component';
+import { CreateAgentComponent } from './create-agent/create-agent.component';
 
 @NgModule({
     declarations: [
         CustomersComponent,
+        ManageAgentComponent,
+        CreateAgentComponent,
     ],
     imports     : [
         RouterModule.forChild(customerSupportRoutes),
