@@ -16,7 +16,6 @@ import { AppConfig } from 'app/config/service.config';
 
 import { GraphHelper } from 'app/modules/merchant/social-media/flow-builder/components/helpers/graph-helper';
 
-
 const routerConfig: ExtraOptions = {
     preloadingStrategy       : PreloadAllModules,
     scrollPositionRestoration: 'enabled',
@@ -25,7 +24,7 @@ const routerConfig: ExtraOptions = {
 
 @NgModule({
     declarations: [
-        AppComponent
+        AppComponent,
     ],
     imports     : [
         BrowserModule,

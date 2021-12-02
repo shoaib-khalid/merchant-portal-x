@@ -99,7 +99,14 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 id   : 'customer-support.list',
                 title: 'Customer Database',
                 type : 'basic',
-                link : '/customer-support',
+                link : '/customer-support/list',
+                exactMatch: true
+            },
+            {
+                id   : 'manage-agent.list',
+                title: 'Agent Management',
+                type : 'basic',
+                link : '/customer-support/manage-agent',
                 exactMatch: true
             },
         ]
