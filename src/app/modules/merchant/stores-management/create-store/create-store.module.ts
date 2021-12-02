@@ -6,7 +6,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSelectModule } from '@angular/material/select';
-import {MatListModule} from '@angular/material/list';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatListModule } from '@angular/material/list';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -33,6 +34,7 @@ import { chooseVerticalRoutes } from 'app/modules/merchant/stores-management/cre
         MatInputModule,
         MatToolbarModule,
         MatSelectModule,
+        MatRadioModule,
         MatCheckboxModule,
         MatTooltipModule,
         MatListModule,

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, ReplaySubject, Subject, throwError } from 'rxjs';
 import { switchMap, take, map, tap, catchError } from 'rxjs/operators';
-import { Store, StoreRegionCountries, StoreTiming, StorePagination, StoreAssets } from 'app/core/store/store.types';
+import { Store, StoreRegionCountries, StoreTiming, StorePagination, StoreAssets, CreateStore, StoreDeliveryDetails, StoreSelfDeliveryStateCharges, StoreDeliveryProvider } from 'app/core/store/store.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { takeUntil } from 'rxjs/operators';
@@ -127,6 +127,11 @@ export class StoresService
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
 
+
+    // ---------------------------
+    // Store Section
+    // ---------------------------
+
     /**
      * Get the current logged in store data
      */
@@ -232,7 +237,7 @@ export class StoresService
         );
     }
 
-    post(storeBody: Store): Observable<any>
+    post(storeBody: CreateStore): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -348,6 +353,10 @@ export class StoresService
             });  
     }
 
+    // ---------------------------
+    // Store Region Countries Section
+    // ---------------------------
+
     getStoreRegionCountries(): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
@@ -378,8 +387,18 @@ export class StoresService
             }
         };
 
-        return this._httpClient.get<any>(productService + '/region-country-state', header);
+        return this._httpClient.get<any>(productService + '/region-country-state', header)
+            .pipe(
+                tap((response) => {
+                    this._logging.debug("Response from StoresService (getStoreRegionCountryState)",response);
+                    return response;
+                })
+            );
     }
+
+    // ---------------------------
+    // Store Timing Section
+    // ---------------------------
 
     postTiming(storeId: string, storeTiming: StoreTiming): Observable<any>
     {
@@ -392,10 +411,30 @@ export class StoresService
 
         return this._httpClient.post<any>(productService + '/stores/' + storeId + '/timings', storeTiming , header ).pipe(
             map((response) => {
-                this._stores.next(response);
+                this._logging.debug("Response from StoresService (postTiming)",response);
             })
         );
     }
+
+    putTiming(storeId: string, day: string ,storeTiming: StoreTiming): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.put<any>(productService + '/stores/' + storeId + '/timings/' + day, storeTiming , header ).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (putTiming)",response);
+            })
+        );
+    }
+
+    // ---------------------------
+    // Store Assets Section
+    // ---------------------------
 
     async getStoreAssets(storeId: string)
     {
@@ -463,7 +502,214 @@ export class StoresService
             })
         );
     }
+
+    // ---------------------------
+    // Store Delivery Provider Section
+    // ---------------------------
+
+    getStoreDeliveryProvider(query: StoreDeliveryProvider): Observable<StoreDeliveryProvider[]>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {  
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                deliveryType: query ? query.deliveryType : null,
+                regionCountryId: query.regionCountryId
+            }
+        };
+
+        // if query exist
+        if (!query.deliveryType)
+            delete header.params.deliveryType;
+
+        return this._httpClient.get<any>(productService + '/deliveryProvider', header)
+            .pipe(
+                map((response) => {
+                    this._logging.debug("Response from StoresService (getStoreDeliveryProvider)",response);
+                    return response.data;
+                })
+            );
+    }
+
+    // ------------------------------------------------------
+    // Store Region Country Delivery Service Provider Section
+    // ------------------------------------------------------
+
+    getStoreRegionCountryDeliveryProvider(storeId: string, deliveryServiceProviderId: string = ""): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                deliverySpId: deliveryServiceProviderId,
+                storeId: storeId
+            }
+        };
+
+        if (deliveryServiceProviderId === "") {
+            delete header.params.deliverySpId;
+        }
+
+        return this._httpClient.get<any>(productService + '/stores/' + storeId + '/deliveryServiceProvider', header).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (getStoreRegionCountryDeliveryProvider)",response);
+
+                return response.data.content;
+            })
+        );
+    }
+
+    postStoreRegionCountryDeliveryProvider(storeId: string, deliveryServiceProviderId: string): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.post<any>(productService + '/stores/' + storeId + '/deliveryServiceProvider/' + deliveryServiceProviderId , header).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (postStoreRegionCountryDeliveryProvider)",response);
+            })
+        );
+    }
+
+    // ---------------------------
+    // Store Delivery Details Section
+    // ---------------------------
+
+    getStoreDeliveryDetails(storeId: string): Observable<StoreDeliveryDetails>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {  
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`)
+        };
+
+        return this._httpClient.get<any>(productService + '/stores/' + storeId + '/deliverydetails', header)
+            .pipe(
+                map((response) => {
+                    this._logging.debug("Response from StoresService (getStoreDeliveryDetails)",response);
+                    return response.data;
+                })
+            );
+    }
+
+    postStoreDeliveryDetails(storeId: string, storeDelivery: StoreDeliveryDetails): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.post<any>(productService + '/stores/' + storeId + '/deliverydetails', storeDelivery , header ).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (postStoreDeliveryDetails)",response);
+            })
+        );
+    }
+
+    putStoreDeliveryDetails(storeId: string, storeDelivery: StoreDeliveryDetails): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.put<any>(productService + '/stores/' + storeId + '/deliverydetails', storeDelivery , header ).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (putStoreDeliveryDetails)",response);
+            })
+        );
+    }
     
+    // ---------------------------
+    // Store Delivery Charges by States Section
+    // ---------------------------
+
+    getSelfDeliveryStateCharges(storeId: string): Observable<StoreSelfDeliveryStateCharges[]>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {  
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.get<any>(productService + '/stores/' + storeId + '/stateDeliveryCharge', header)
+            .pipe(
+                map((response) => {
+                    this._logging.debug("Response from StoresService (getSelfDeliveryStateCharges)",response);
+                    return response.data;
+                })
+            );
+    }
+
+    postSelfDeliveryStateCharges(storeId: string, stateDeliveryCharge: StoreSelfDeliveryStateCharges): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.post<any>(productService + '/stores/' + storeId + '/stateDeliveryCharge', stateDeliveryCharge , header ).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (postSelfDeliveryStateCharges)",response);
+                return response.data;
+            })
+        );
+    }
+
+    putSelfDeliveryStateCharges(storeId: string, stateDeliveryId: string, stateDeliveryCharge: StoreSelfDeliveryStateCharges): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.put<any>(productService + '/stores/' + storeId + '/stateDeliveryCharge/' + stateDeliveryId, stateDeliveryCharge , header ).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (putSelfDeliveryStateCharges)",response);
+                return response.data;
+            })
+        );
+    }
+
+    deleteSelfDeliveryStateCharges(storeId: string, stateDeliveryId: string): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.delete<any>(productService + '/stores/' + storeId + '/stateDeliveryCharge/' + stateDeliveryId, header ).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (deleteSelfDeliveryStateCharges)",response);
+                return response.data;
+            })
+        );
+    }
+
+    // ---------------------------
+    // Others Section
+    // ---------------------------
+
     async getExistingName(name:string){
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
