@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
+import { MatRadioModule } from '@angular/material/radio';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -37,6 +38,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
         MatInputModule,
         MatProgressBarModule,
         MatSelectModule,
+        MatRadioModule,
         MatSidenavModule,
         MatSlideToggleModule,
         MatTooltipModule,

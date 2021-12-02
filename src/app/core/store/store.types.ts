@@ -91,6 +91,47 @@ export interface StoreRegionCountries
     countryCode?: string; // need taufik to add in backend
 }
 
+
+export interface StoreDeliveryProvider
+{
+    id?: string;
+    name?: string;
+    address?: string;
+    contactNo?: string;
+    contactPerson?: string;
+    getPriceClassname?: string;
+    submitOrderClassName?: string;
+    cancelOrderClassName?: string;
+    queryOrderClassName?: string;
+    spCallbackClassname?: string;
+    pickupDateClassname?: string;
+    pickupTimeClassname?: string;
+    locationIdClassname?: string;
+    providerImage?: string;
+    regionCountryId: string;
+
+    // sesat
+    deliveryType?: string;
+    deliverySpId?: string;
+}
+
+export interface StoreDeliveryDetails
+{
+    allowsStorePickup: boolean;
+    itemType: string;
+    maxOrderQuantityForBike: number;
+    storeId: string;
+    type: string;
+}
+
+export interface StoreSelfDeliveryStateCharges
+{
+    id?: string;
+    delivery_charges: number;
+    region_country_state_id: string;
+    storeId?: string;
+}
+
 export interface StoreAssets
 {
     bannerMobileUrl?: string;

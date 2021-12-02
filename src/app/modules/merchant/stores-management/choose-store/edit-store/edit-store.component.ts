@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 import { LocaleService } from 'app/core/locale/locale.service';
 import { Locale } from 'app/core/locale/locale.types';
 import { StoresService } from 'app/core/store/store.service';
-import { Store, StoreRegionCountries, CreateStore, StoreAssets } from 'app/core/store/store.types';
+import { Store, StoreRegionCountries, CreateStore, StoreAssets, StoreSelfDeliveryStateCharges, StoreDeliveryDetails, StoreDeliveryProvider } from 'app/core/store/store.types';
 import { ActivatedRoute, Router } from '@angular/router';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { debounce } from 'lodash';
@@ -26,7 +26,8 @@ export class EditStoreComponent implements OnInit
     storeId: string;
     
     domainName:string;
-
+    subDomainName: string;
+    
     alert: any;
     editStoreForm: FormGroup;
     otherStoreForm: FormGroup;
@@ -42,19 +43,17 @@ export class EditStoreComponent implements OnInit
     /** for selected country refer form builder */ 
 
     deliveryFullfilment: any;
-    deliveryPartners: any;
+    deliveryPartners: any = [];
 
-    allowedSelfDeliveryStates: any;
+    _originalAllowedSelfDeliveryStates: any = [];
+    _allowedSelfDeliveryStates: any = [];
+    allowedSelfDeliveryStates: FormArray;
 
-    storeOpenCloseTime: any;
+    _storeTiming: any;
     storeTiming: FormArray;
 
     // Image part    
     files: any;
-    imageInfos?: Observable<any>;
-    
-    selectedFiles?: FileList;
-    selectedFileNames: any = [];
 
     /**
      * Constructor
@@ -93,95 +92,40 @@ export class EditStoreComponent implements OnInit
     {
         // Create the support form
         this.editStoreForm = this._formBuilder.group({
+            // Main Store Section
             name               : ['', Validators.required],
-            domain             : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
+            city               : ['', Validators.required],
+            address            : ['', Validators.required],
+            postcode           : ['', [Validators.required, Validators.minLength(5), Validators.maxLength(10), RegisterStoreValidationService.postcodeValidator]],
             storeDescription   : ['', [Validators.required, Validators.maxLength(100)]],
             email              : ['', [Validators.required, Validators.email]],
+            clientId           : [''],
+            subdomain          : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
+            regionCountryId    : ['', Validators.required],
+            regionCountryStateId: ['', Validators.required],
             phoneNumber        : ['', RegisterStoreValidationService.phonenumberValidator],
-            address            : ['', Validators.required],
-            city               : ['', Validators.required],
-            postcode           : ['', [Validators.required, Validators.minLength(5), Validators.maxLength(10), RegisterStoreValidationService.postcodeValidator]],
-            deliveryType       : ['', Validators.required],
+            serviceChargesPercentage: [0],
+            verticalCode       : [''],
             paymentType        : ['', Validators.required],
             
-            // region       : ['', Validators.required],
-            // state       : ['', Validators.required],
-            // country       : ['', Validators.required],
-
+            // Store Timing
             storeTiming: this._formBuilder.array([]),
 
-            clientId: [''],
+            // Allowed Self Delivery States
+            allowedSelfDeliveryStates: this._formBuilder.array([]),
+
+            // Delivery Provider
+            deliveryType       : ['', Validators.required],
+
+            // Delivery Partner
+            deliveryPartner      : ['', Validators.required],
+            
+            // Else
+            allowScheduledDelivery : [false],
+            allowStorePickup : [false],
             isBranch: [false],
             isSnooze: [false],
-            serviceChargesPercentage: [0],
-            verticleCode: [''],
-
-            regionCountryId: ['', Validators.required],
-            regionCountryStateId: ['', Validators.required],
-
-            allowScheduledDelivery : [false],
-            allowStorePickup : [false]
         });
-
-        // this.otherStoreForm = this._formBuilder.group({
-        // });
-        
-        // get states service
-        this.statesList = [
-            { countryId: "MYS", states: ["Johor","Kedah","Kelantan","Kuala Lumpur","Malacca","Negeri Sembilan", "Pahang", "Pulau Pinang", "Perak", "Perlis", "Sabah", "Serawak", "Selangor"] },
-            { countryId: "PAK", states: ["Balochistan","Federal","Khyber Pakhtunkhwa", "Punjab", "Sindh"] }
-        ];
-
-        // get countries service
-        // this.countriesList = [
-        //     { countryCode: "MY", name: "Malaysia" },
-        //     { countryCode: "PK", name: "Pakistan" }
-        // ];
-
-        // get regions service
-        this.regionsList = [
-            { regionCode: "SEA", name: "South East Asia", countries: ["MY"] },
-            { regionCode: "SE", name: "South East", countries: ["PK"] }
-        ];
-
-        this.storeOpenCloseTime = [
-            { day: "Monday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false },
-            { day: "Tuesday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false },
-            { day: "Wednesday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false },
-            { day: "Thursday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false },
-            { day: "Friday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false },
-            { day: "Saturday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: true },
-            { day: "Sunday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: true },
-        ];
-
-        // form = new FormGroup({
-        //     first: new FormControl({value: 'Nancy', disabled: true}, Validators.required),
-        //     last: new FormControl('Drew', Validators.required)
-        // })
-
-        this.storeOpenCloseTime.forEach(item => {
-            this.storeTiming = this.editStoreForm.get('storeTiming') as FormArray;
-            this.storeTiming.push(this._formBuilder.group(item));
-        });
-
-        this.deliveryFullfilment = [
-            { selected: false, option: "INSTANT_DELIVERY", label: "Instant Delivery", tooltip: "This store support instant delivery. (Provided by store own logistic or delivery partners)" }, 
-            { selected: false, option: "REGULAR_DELIVERY", label: "Regular Delivery", tooltip: "This store support regular delivery. (Provided by store own logistic or delivery partners)" },
-            { selected: false, option: "SCHEDULED_DELIVERY", label: "Scheduled Delivery", tooltip: "This store allow scheduled delivery request from customer" },
-            { selected: false, option: "STORE_PICKUP", label: "Allow Store Pickup", tooltip: "This store allow customer to pick up item from store" }
-        ];
-
-        this.deliveryPartners = [
-            { selected: false, option: "LALA_MOVE", label: "Lala Move (Support Instant & Scheduled Delivery)" },
-            { selected: false, option: "MRSPEEDY", label: "MrSpeedy (Support Instant & Scheduled Delivery)" },
-            { selected: false, option: "JNT", label: "JnT (Support Scheduled Delivery)" },
-            { selected: false, option: "GDEX", label: "GDex (Support Scheduled Delivery)" },
-        ];
-
-        // set default which is empty
-        this.allowedSelfDeliveryStates = [
-            { state: "", deliveryCharges:"" }
-        ];
 
         // Logo & Banner
         this.files = [
@@ -222,38 +166,158 @@ export class EditStoreComponent implements OnInit
 
         this.storeId = this._route.snapshot.paramMap.get('storeid');
 
+        // ----------------------
+        // Get Store Details by Id
+        // ----------------------
+
         this._storesService.getStoresById(this.storeId).subscribe(
            (response) => {
 
-                // get subdomain from store domain
-                let subdomain = response.domain.split(".")[0];
-                // domain in form here is actually subdomain
-                this.editStoreForm.get('domain').patchValue(subdomain);
-                // set domain name 
-                this.domainName = "." + response.domain.split(".")[1] + "." + response.domain.split(".")[2];
+                // Fill the form
+                this.editStoreForm.patchValue(response);
 
-                this.editStoreForm.get('name').patchValue(response.name)
-                this.editStoreForm.get('storeDescription').patchValue(response.storeDescription)
-                this.editStoreForm.get('email').patchValue(response.email)
-                this.editStoreForm.get('phoneNumber').patchValue(response.phoneNumber)
-                this.editStoreForm.get('address').patchValue(response.address)
-                this.editStoreForm.get('city').patchValue(response.city)
-                this.editStoreForm.get('postcode').patchValue(response.postcode)
-                // this.editStoreForm.get('state').patchValue(response.regionCountryStateId)
-                this.editStoreForm.get('deliveryType').patchValue("SELF_DELIVERY")
-                this.editStoreForm.get('paymentType').patchValue(response.paymentType)
-                this.editStoreForm.get('verticleCode').patchValue(response.verticalCode);
+                // get subdomain from store domain
+                let _domain = response.domain;
+
+                if (_domain.split(".").length === 3) {
+                    // set domain name 
+                    this.domainName = "." + _domain.split(".")[1] + "." + _domain.split(".")[2];
+                    this.subDomainName = _domain.split(".")[0]
+                } else if (_domain.split(".").length === 1) {
+                    this.domainName = ".symplified.ai";
+                    this.subDomainName = _domain;
+                } else {
+                    console.error("Invalid domain name from backend : ",_domain);
+                    this.alert("Invalid domain name from backend : " + _domain)
+                }
+
+                this.editStoreForm.get('subdomain').patchValue(this.subDomainName);
+
+                // set timing
+                this._storeTiming = response.storeTiming;
 
                 this.files[0].fileSource = response.storeAsset.logoUrl;
                 this.files[1].fileSource = response.storeAsset.bannerUrl;
                 this.files[2].fileSource = response.storeAsset.bannerMobileUrl;
+
+
+                // Reason why we put de under get vertical code by paramMap is because
+                // we need the verticalCode before we need to query getStoreDeliveryProvider which require verticalCode
+    
+                let _verticalCode = this.editStoreForm.get('verticalCode').value;
+                let _regionCountryId = this.editStoreForm.get('regionCountryId').value;
+                let _deliveryType;
+
+                if (_verticalCode === "FnB" || _verticalCode === "FnB_PK") {
+                    _deliveryType = "ADHOC";
+                } else if (_verticalCode === 'E-Commerece' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'ECommerce_PK') {
+                    _deliveryType = "SCHEDULED";
+                } else {
+                    console.error("Invalid vertical code: ", _verticalCode)
+                    alert("Invalid vertical code : " + _verticalCode);
+                }
+
+                // ----------------------
+                // Get Store Delivery Providers
+                // ----------------------
+
+                this._storesService.getStoreDeliveryProvider({deliveryType: _deliveryType, regionCountryId: _regionCountryId}).subscribe(
+                    (response: StoreDeliveryProvider[]) => {
+                        response.forEach(item => {
+                            this.deliveryPartners.push({
+                                id: item.id,
+                                name: item.name,
+                                label: item.name,
+                                selected: false
+                            });
+                        })
+                    }
+                );
+
+                // ----------------------
+                // Get Current Store Delivery Provider
+                // ----------------------
+
+                this._storesService.getStoreRegionCountryDeliveryProvider(this.storeId).subscribe(
+                    (response: StoreDeliveryProvider[]) => {
+                        let _deliverySpId = response.length > 0 ? response[0].deliverySpId : "";
+                        this.editStoreForm.get('deliveryPartner').patchValue(_deliverySpId);
+                    }
+                );
            } 
+        );
+
+
+
+
+        // get states service
+        this.statesList = [
+            { countryId: "MYS", states: ["Johor","Kedah","Kelantan","Kuala Lumpur","Malacca","Negeri Sembilan", "Pahang", "Pulau Pinang", "Perak", "Perlis", "Sabah", "Serawak", "Selangor"] },
+            { countryId: "PAK", states: ["Balochistan","Federal","Khyber Pakhtunkhwa", "Punjab", "Sindh"] }
+        ];
+
+        // get countries service
+        // this.countriesList = [
+        //     { countryCode: "MY", name: "Malaysia" },
+        //     { countryCode: "PK", name: "Pakistan" }
+        // ];
+
+        // get regions service
+        this.regionsList = [
+            { regionCode: "SEA", name: "South East Asia", countries: ["MY"] },
+            { regionCode: "SE", name: "South East", countries: ["PK"] }
+        ];
+
+        this._storeTiming.forEach(item => {
+            this.storeTiming = this.editStoreForm.get('storeTiming') as FormArray;
+            this.storeTiming.push(this._formBuilder.group(item));
+        });
+
+        this.deliveryFullfilment = [
+            { selected: false, option: "INSTANT_DELIVERY", label: "Instant Delivery", tooltip: "This store support instant delivery. (Provided by store own logistic or delivery partners)" }, 
+            { selected: false, option: "REGULAR_DELIVERY", label: "Regular Delivery", tooltip: "This store support regular delivery. (Provided by store own logistic or delivery partners)" },
+            { selected: false, option: "SCHEDULED_DELIVERY", label: "Scheduled Delivery", tooltip: "This store allow scheduled delivery request from customer" },
+            { selected: false, option: "STORE_PICKUP", label: "Allow Store Pickup", tooltip: "This store allow customer to pick up item from store" }
+        ];
+
+        // -------------------------------------
+        // store delivery details
+        // -------------------------------------
+
+        this._storesService.getStoreDeliveryDetails(this.storeId).subscribe(
+            (response: StoreDeliveryDetails) => {
+
+                let _deliveryType = response ? response.type : "";
+                let _allowsStorePickup = response ? response.allowsStorePickup : "";
+
+                this.editStoreForm.get('deliveryType').patchValue(_deliveryType);
+                this.editStoreForm.get('allowStorePickup').patchValue(_allowsStorePickup);
+            }
+        );
+
+        // -------------------------------------
+        // store allowed self delivery states
+        // -------------------------------------
+        this._storesService.getSelfDeliveryStateCharges(this.storeId).subscribe(
+            (response: StoreSelfDeliveryStateCharges[]) => {
+                response.forEach(item => {
+                    this._allowedSelfDeliveryStates.push({
+                        id: item.id,
+                        deliveryStates: item.region_country_state_id,
+                        deliveryCharges: item.delivery_charges
+                    });
+                });
+
+                this._allowedSelfDeliveryStates.forEach(item => {
+                    this.allowedSelfDeliveryStates = this.editStoreForm.get('allowedSelfDeliveryStates') as FormArray;
+                    this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
+                });
+            }
         );
         
         // Get allowed store countries 
         // this only to get list of country in symplified backend
         this._storesService.storeRegionCountries$.subscribe((response: StoreRegionCountries[])=>{
-            console.log("this._storesService.storeRegionCountries$ :", response);
             response.forEach((country: StoreRegionCountries) => {
                 this.countriesList.push(country);
             });
@@ -263,8 +327,6 @@ export class EditStoreComponent implements OnInit
         // get locale info from (locale service)
         // this is to get the current location by using 3rd party api service
         this._localeService.locale$.subscribe((response: Locale)=>{
-
-            console.log("this._localeService.locale$ :", response);
             
             let symplifiedCountryId = response.symplifiedCountryId;
             
@@ -273,12 +335,11 @@ export class EditStoreComponent implements OnInit
             
             // Get states by country Z(using symplified backend)
             this._storesService.getStoreRegionCountryState(symplifiedCountryId).subscribe((response)=>{
-                console.log("this._storesService.getStoreRegionCountryState(countryId): ", response);
                 this.statesByCountry = response.data.content;
             });
 
             // country (using form builder variable)
-            this.editStoreForm.get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
+            // this.editStoreForm.get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
             
             // Mark for check
             this._changeDetectorRef.markForCheck();
@@ -291,16 +352,19 @@ export class EditStoreComponent implements OnInit
         this.editStoreForm.get('isBranch').patchValue(false);
         this.editStoreForm.get('isSnooze').patchValue(false);
 
+    }
 
+    ngAfterViewInit(): void
+    {
+        setTimeout(() => {
+            // this way , we keep _originalAllowedSelfDeliveryStates integrity
+            this._originalAllowedSelfDeliveryStates = this._allowedSelfDeliveryStates;
+        }, 0);
     }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
-
-    logThis(e){
-        console.log(e);
-    }
 
     /**
      * Clear the form
@@ -310,22 +374,6 @@ export class EditStoreComponent implements OnInit
         // Reset the form
         this.supportNgForm.resetForm();
     }
-
-    // createStoreTiming(): FormGroup {
-    //     return this._formBuilder.group({
-    //         day: '',
-    //         closeTime: '',
-    //         openTime: '',
-    //         breakStartTime: '',
-    //         breakEndTime: '',
-    //         isOff: ''
-    //     });
-    // }
-
-    // addStoreTiming(): void{
-    //     this.storeTiming = this.editStoreForm.get('storeTiming') as FormArray;
-    //     this.storeTiming.push(this.createStoreTiming());
-    // }
 
     /**
      * Send the form
@@ -348,32 +396,34 @@ export class EditStoreComponent implements OnInit
          */
 
         // this will remove the item from the object
-        const { allowScheduledDelivery, allowStorePickup, storeTiming
-                ,...createStoreBody}  = this.editStoreForm.value;
+        const { allowedSelfDeliveryStates, allowScheduledDelivery, allowStorePickup, 
+            deliveryType, deliveryPartner, storeTiming
+            ,...createStoreBody } = this.editStoreForm.value;
 
         // Disable the form
         this.editStoreForm.disable();
 
         this._storesService.update(this.storeId, createStoreBody)
             .subscribe((response) => {
-                /**
-                 * 
-                 * Register Store Timing Section
-                 * 
-                 */
 
-                // this will remove the item from the object
                 let storeId = response.data.id;
 
+                // ---------------------------
+                // Update Store Timing
+                // ---------------------------
+
                 storeTiming.forEach(item => {
-                    this._storesService.postTiming(storeId, item)
+                    this._storesService.putTiming(storeId, item.day, item)
                         .subscribe((response)=>{});
                 });
+
+                // ---------------------------
+                // Update Store Assets
+                // ---------------------------
 
                 let _assets = {};
                 const formData = new FormData();
                 this.files.forEach(item =>{
-                    console.log(item);
                     if (item.selectedFiles !== null){
                         formData.append(item.type,item.selectedFiles[0])
                     }
@@ -396,6 +446,131 @@ export class EditStoreComponent implements OnInit
                       (err: any) => {
                           console.log('Could not upload the file');
                       });
+                }
+
+                // ---------------------------
+                // Update Store Provider
+                // ---------------------------
+
+                let _itemType;
+                let _deliveryType;
+                if (this.editStoreForm.get('verticalCode').value === "E-Commerece" || this.editStoreForm.get('verticalCode').value === "e-commerce-b2b2c" || this.editStoreForm.get('verticalCode').value === "ECommerce_PK") {
+                    // this is actually handled by front end (but incase of hacking)
+                    if (deliveryType === "SELF") { 
+                        _itemType = null;
+                        _deliveryType = deliveryType;
+                    } else {
+                        _itemType="PARCEL";
+                        _deliveryType = "SCHEDULED";
+                        console.warn("E-Commerce deliveryType should be SCHEDULED. Current selected deliveryType " + deliveryType) 
+                    } 
+                } else if (this.editStoreForm.get('verticalCode').value === "FnB" || this.editStoreForm.get('verticalCode').value === "FnB_PK") {
+                    // this is actually handled by front end (but incase of hacking)
+                    if (deliveryType === "SELF") { 
+                        _itemType = null;
+                        _deliveryType = deliveryType;
+                    } else {
+                        _itemType="FOOD";
+                        _deliveryType = "ADHOC";
+                        console.warn("E-Commerce deliveryType should be ADHOC. Current selected deliveryType " + deliveryType) 
+                    } 
+                } else {
+                    _itemType = "ADHOC";
+                    _deliveryType = "SELF";
+
+                    console.error("Unrecogined vertical code at front-end. Need to hardcode new vertical code OR fetched available vertcal-code from backend");
+                    alert("Unrecogined vertical code at front-end. Need to hardcode new vertical code OR fetched available vertcal-code from backend");
+                }
+
+                const deliveryDetailBody = {
+                    allowsStorePickup: allowStorePickup,
+                    itemType: _itemType,
+                    maxOrderQuantityForBike: 7,
+                    storeId: this.storeId,
+                    type: _deliveryType // ADHOC or SCHEDULED or SELF
+                };
+
+                if (this.editStoreForm.get('deliveryType').value !== "") {
+                    this._storesService.putStoreDeliveryDetails(this.storeId, deliveryDetailBody).subscribe(
+                        (response) => {
+    
+                        }
+                    );
+                } else {
+                    this._storesService.postStoreDeliveryDetails(this.storeId, deliveryDetailBody).subscribe(
+                        (response) => {
+    
+                        }
+                    );
+                }
+
+                if (this.editStoreForm.get('deliveryType').value === "SELF") {
+
+                    // ---------------------------
+                    // Create State Delivery Charges
+                    // ---------------------------
+    
+                    for(let i = 0; i < allowedSelfDeliveryStates.length; i++) {
+    
+                        let selfDeliveryStateBody = {
+                            region_country_state_id: allowedSelfDeliveryStates[i].deliveryStates,
+                            delivery_charges: allowedSelfDeliveryStates[i].deliveryCharges
+                        };
+    
+                        if (this._originalAllowedSelfDeliveryStates.findIndex(item => item.deliveryStates === allowedSelfDeliveryStates[i].deliveryStates) > -1 && allowedSelfDeliveryStates[i].id) {
+                            this._storesService.putSelfDeliveryStateCharges(this.storeId, allowedSelfDeliveryStates[i].id, selfDeliveryStateBody).subscribe(
+                                (response) => {
+            
+                                }
+                            );
+                        } else {
+                            this._storesService.postSelfDeliveryStateCharges(this.storeId, selfDeliveryStateBody).subscribe(
+                                (response) => {
+                                    this._originalAllowedSelfDeliveryStates.push({
+                                        id: response.id,
+                                        deliveryStates: response.region_country_state_id,
+                                        deliveryCharges: response.delivery_charges
+                                    });
+                                }
+                            );
+                        }
+                    }
+
+                    // ---------------------------
+                    // Delete State Delivery Charges
+                    // ---------------------------
+
+                    for(let i = 0; i < this._originalAllowedSelfDeliveryStates.length; i++) {
+                        if (allowedSelfDeliveryStates.findIndex(item => item.deliveryStates === this._originalAllowedSelfDeliveryStates[i].deliveryStates) > -1 && this._originalAllowedSelfDeliveryStates[i].id) {
+                            // no nothing
+                            console.log("Do nothing", this._originalAllowedSelfDeliveryStates[i].deliveryStates)
+                        } else {
+                            console.log("masuk")
+                            this._storesService.deleteSelfDeliveryStateCharges(this.storeId, this._originalAllowedSelfDeliveryStates[i].id).subscribe(
+                                (response) => {
+                                    this._originalAllowedSelfDeliveryStates.push({
+                                        id: response.id,
+                                        deliveryStates: response.region_country_state_id,
+                                        deliveryCharges: response.delivery_charges
+                                    });
+                                }
+                            );
+                        }
+                    }
+
+                } 
+
+                if (this.editStoreForm.get('deliveryType').value === "ADHOC") {
+
+                    // ---------------------------
+                    // Provision ADHOC Delivery Provider
+                    // ---------------------------
+
+                    this._storesService.postStoreRegionCountryDeliveryProvider(this.storeId, this.editStoreForm.get('deliveryPartner').value)
+                        .subscribe((response) => {
+                            
+                        });
+
                 }
 
                 // Navigate to the confirmation required page
@@ -447,7 +622,9 @@ export class EditStoreComponent implements OnInit
         this._changeDetectorRef.markForCheck();
     }
 
-    async checkExistingURL(url: string){
+    async checkExistingURL(subdomain: string){
+        let url = subdomain + "." + this.domainName;
+        console.log("the url: ", url)
         let status = await this._storesService.getExistingURL(url);
         if (status === 409){
             this.editStoreForm.get('domain').setErrors({domainAlreadyTaken: true});
@@ -463,24 +640,64 @@ export class EditStoreComponent implements OnInit
     }
 
     updateStoreOpening(day: string){
-        let index = this.storeOpenCloseTime.findIndex(dayList => dayList.day === day);
-        this.storeOpenCloseTime[index].isOff = !this.storeOpenCloseTime[index].isOff;
-    }
-
-    checkCurrData(){
-        console.log("this.allowedSelfDeliveryStates",this.allowedSelfDeliveryStates)
+        let index = this._storeTiming.findIndex(dayList => dayList.day === day);
+        this._storeTiming[index].isOff = !this._storeTiming[index].isOff;
     }
 
     addSelfDeliveryState(){
-        this.allowedSelfDeliveryStates.push({
-            state: "",
+
+        let selfDeliveryStateItem = {
+            deliveryStates: "",
             deliveryCharges: ""
+        };
+
+        // push to _allowedSelfDeliveryStates (normal)
+        this._allowedSelfDeliveryStates.push(selfDeliveryStateItem);
+
+        // push to allowedSelfDeliveryStates (form)
+        this.allowedSelfDeliveryStates = this.editStoreForm.get('allowedSelfDeliveryStates') as FormArray;
+        this.allowedSelfDeliveryStates.push(this._formBuilder.group(selfDeliveryStateItem));
+    }
+
+    removeSelfDeliveryState(index: number) {
+        this._allowedSelfDeliveryStates.splice(index,1);
+
+        // push to allowedSelfDeliveryStates (form)
+        this.allowedSelfDeliveryStates = this.editStoreForm.get('allowedSelfDeliveryStates') as FormArray;
+        // since backend give full discount tier list .. (not the only one that have been created only)
+        this.allowedSelfDeliveryStates.clear();
+
+        // re populate items
+        this._allowedSelfDeliveryStates.forEach(item => {
+            this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
+        });
+    }
+    
+    editSelfDeliveryState(attribute: string, index: number, value){
+        // push to _allowedSelfDeliveryStates (normal)
+        if (attribute === "deliveryStates") {
+            this._allowedSelfDeliveryStates[index].deliveryStates = value;
+        } else if (attribute === "deliveryCharges") {
+            this._allowedSelfDeliveryStates[index].deliveryCharges = value;
+        } else {
+            console.log("this should not happen")
+        }
+
+        // push to allowedSelfDeliveryStates (form)
+        this.allowedSelfDeliveryStates = this.editStoreForm.get('allowedSelfDeliveryStates') as FormArray;
+        // since backend give full discount tier list .. (not the only one that have been created only)
+        this.allowedSelfDeliveryStates.clear();
+
+        // re populate items
+        this._allowedSelfDeliveryStates.forEach(item => {
+            this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
         });
     }
 
-    removeSelfDeliveryState(index: number){
-        console.log("index", index)
-        this.allowedSelfDeliveryStates.splice(index,1);
+    checkCurrDeliveryStates(value){
+        let index = this._allowedSelfDeliveryStates.findIndex(item => item.deliveryStates === value);
+
+        return (index > -1) ? true : false; 
     }
 
     /**
@@ -494,7 +711,7 @@ export class EditStoreComponent implements OnInit
 
         // set each of the attributes
         this.files[index].fileSource = null;
-        this.files[index].selectedFileNames = "";
+        this.files[index].selectedFileName = "";
         this.files[index].selectedFiles = event.target.files;
 
         if (this.files[index].selectedFiles && this.files[index].selectedFiles[0]) {
@@ -521,11 +738,9 @@ export class EditStoreComponent implements OnInit
 
                 this._changeDetectorRef.markForCheck();                
             };
-            console.log("this.files["+index+"].selectedFiles["+i+"]",this.files[index].selectedFiles[i])
+            // console.log("this.files["+index+"].selectedFiles["+i+"]",this.files[index].selectedFiles[i])
             reader.readAsDataURL(this.files[index].selectedFiles[i]);
-            console.log("sini")
-            this.files[index].selectedFileNames = this.files[index].selectedFiles[i].name;
-            console.log("sini 2")
+            this.files[index].selectedFileName = this.files[index].selectedFiles[i].name;
             }
         }
         this._changeDetectorRef.markForCheck();
