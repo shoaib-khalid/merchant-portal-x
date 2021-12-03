@@ -659,7 +659,7 @@
                                                         <input
                                                             matInput
                                                             [formControlName]="'openTime'"
-                                                            [readonly]="dayList.value.isOff"
+                                                            [readonly]="dayList.value.isOpen"
                                                             type="time"
                                                             [value]="dayList.value.openTime"
                                                         >
@@ -675,7 +675,7 @@
                                                         <input
                                                             matInput
                                                             [formControlName]="'closeTime'"
-                                                            [readonly]="dayList.value.isOff"
+                                                            [readonly]="dayList.value.isOpen"
                                                             type="time"
                                                             [value]="dayList.value.closeTime"
                                                         >
@@ -691,7 +691,7 @@
                                                         <input
                                                             matInput
                                                             [formControlName]="'breakStartTime'"
-                                                            [readonly]="dayList.value.isOff"
+                                                            [readonly]="dayList.value.isOpen"
                                                             type="time"
                                                             [value]="dayList.value.breakStartTime"
                                                         >
@@ -707,7 +707,7 @@
                                                         <input
                                                             matInput
                                                             [formControlName]="'breakEndTime'"
-                                                            [readonly]="dayList.value.isOff"
+                                                            [readonly]="dayList.value.isOpen"
                                                             type="time"
                                                             [value]="dayList.value.breakEndTime"
                                                         >
@@ -723,10 +723,10 @@
                                                     <div class="mt-3 flex items-center -my-px w-full">
                                                         <mat-slide-toggle
                                                             matInput
-                                                            [formControlName]="'isOff'"
+                                                            [formControlName]="'isOpen'"
                                                             [color]="'primary'"
                                                             (change)="updateStoreOpening(dayList.value.day)">
-                                                            {{ dayList.value.isOff === true ? 'Open' : 'Close'}}
+                                                            {{ dayList.value.isOpen === true ? 'Open' : 'Close'}}
                                                         </mat-slide-toggle>
                                                     </div>
                                                 </div>

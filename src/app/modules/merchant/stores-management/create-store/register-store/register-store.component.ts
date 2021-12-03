@@ -228,13 +228,13 @@ export class RegisterStoreComponent implements OnInit
         // -------------------------
 
         this._storeTiming = [
-            { day: "Monday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false },
-            { day: "Tuesday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false },
-            { day: "Wednesday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false },
-            { day: "Thursday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false },
-            { day: "Friday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false },
-            { day: "Saturday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: true },
-            { day: "Sunday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: true },
+            { day: "Monday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false, isOpen: true },
+            { day: "Tuesday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false, isOpen: true },
+            { day: "Wednesday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false, isOpen: true },
+            { day: "Thursday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false, isOpen: true },
+            { day: "Friday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false, isOpen: true },
+            { day: "Saturday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: true, isOpen: false },
+            { day: "Sunday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: true, isOpen: false },
         ];
 
         this._storeTiming.forEach(item => {
@@ -369,7 +369,8 @@ export class RegisterStoreComponent implements OnInit
                 // ---------------------------
 
                 storeTiming.forEach(item => {
-                    this._storesService.postTiming(this.storeId, item)
+                    let { isOpen, ...filteredItem } = item;
+                    this._storesService.postTiming(this.storeId, filteredItem)
                         .subscribe((response)=>{});
                 });
 
@@ -550,6 +551,7 @@ export class RegisterStoreComponent implements OnInit
 
     updateStoreOpening(day: string){
         let index = this._storeTiming.findIndex(dayList => dayList.day === day);
+        this._storeTiming[index].isOpen = !this._storeTiming[index].isOpen;
         this._storeTiming[index].isOff = !this._storeTiming[index].isOff;
     }
 
