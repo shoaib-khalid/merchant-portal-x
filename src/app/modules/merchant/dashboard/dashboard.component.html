@@ -208,20 +208,20 @@
                                 
                                 <div class="flex flex-wrap justify-between item-center w-full">
                                     <div class="text-lg font-medium tracking-tight my-auto leading-6 truncate">Summary Sales Details</div>
-                                    <mat-form-field 
+                                    <!-- <mat-form-field 
                                         class="fuse-mat-no-subscript w-full sm:w-72"
                                         appearance="fill"
                                     >
                                         <mat-date-range-input [formGroup]="summarySalesDateRange" [rangePicker]="summarySalesDateRangePicker">
-                                        <input matStartDate formControlName="start" placeholder="mm/dd/yyyy" [value]="summarySalesDateRange.start">
-                                        <input matEndDate formControlName="end" placeholder="mm/dd/yyyy" [value]="summarySalesDateRange.end">
+                                            <input matStartDate formControlName="start" placeholder="mm/dd/yyyy" [value]="summarySalesDateRange.start">
+                                            <input matEndDate formControlName="end" placeholder="mm/dd/yyyy" [value]="summarySalesDateRange.end">
                                         </mat-date-range-input>
                                         <mat-datepicker-toggle matSuffix [for]="summarySalesDateRangePicker"></mat-datepicker-toggle>
                                         <mat-date-range-picker #summarySalesDateRangePicker></mat-date-range-picker>
                                     
-                                        <!-- <mat-error *ngIf="range.controls.start.hasError('matStartDateInvalid')">Invalid start date</mat-error>
-                                        <mat-error *ngIf="range.controls.end.hasError('matEndDateInvalid')">Invalid end date</mat-error> -->
-                                    </mat-form-field>
+                                        <mat-error *ngIf="range.controls.start.hasError('matStartDateInvalid')">Invalid start date</mat-error>
+                                        <mat-error *ngIf="range.controls.end.hasError('matEndDateInvalid')">Invalid end date</mat-error>
+                                    </mat-form-field> -->
                                 </div>
                                 <div class="flex flex-col flex-auto mt-2 overflow-x-auto">
                                     <table
@@ -295,20 +295,20 @@
                             <div class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 pb-0 bg-card shadow rounded-2xl overflow-hidden">
                                 <div class="flex flex-wrap justify-between item-center w-full">
                                     <div class="text-lg font-medium tracking-tight my-auto leading-6 truncate">Daily Detailed Sales Details</div>
-                                    <mat-form-field 
+                                    <!-- <mat-form-field 
                                         class="fuse-mat-no-subscript w-full sm:w-72"
                                         appearance="fill"
                                     >
                                         <mat-date-range-input [formGroup]="dailyTopProductsDateRange" [rangePicker]="dailyTopProductsPicker">
-                                        <input matStartDate formControlName="start" placeholder="mm/dd/yyyy" [value]="dailyTopProductsDateRange.start">
-                                        <input matEndDate formControlName="end" placeholder="mm/dd/yyyy" [value]="dailyTopProductsDateRange.end">
+                                            <input matStartDate formControlName="start" placeholder="mm/dd/yyyy" [value]="dailyTopProductsDateRange.start">
+                                            <input matEndDate formControlName="end" placeholder="mm/dd/yyyy" [value]="dailyTopProductsDateRange.end">
                                         </mat-date-range-input>
                                         <mat-datepicker-toggle matSuffix [for]="dailyTopProductsPicker"></mat-datepicker-toggle>
                                         <mat-date-range-picker #dailyTopProductsPicker></mat-date-range-picker>
                                     
-                                        <!-- <mat-error *ngIf="range.controls.start.hasError('matStartDateInvalid')">Invalid start date</mat-error>
-                                        <mat-error *ngIf="range.controls.end.hasError('matEndDateInvalid')">Invalid end date</mat-error> -->
-                                    </mat-form-field>
+                                        <mat-error *ngIf="range.controls.start.hasError('matStartDateInvalid')">Invalid start date</mat-error>
+                                        <mat-error *ngIf="range.controls.end.hasError('matEndDateInvalid')">Invalid end date</mat-error>
+                                    </mat-form-field> -->
                                 </div>
                                 <div class="flex flex-col flex-auto mt-2 overflow-x-auto">
                                     <table
@@ -431,27 +431,28 @@
                                     [pageIndex]="detailedDailySalesPagination.page"
                                     [pageSize]="detailedDailySalesPagination.size"
                                     [pageSizeOptions]="[5, 10, 25, 100]"
-                                    [showFirstLastButtons]="true"></mat-paginator>
+                                    [showFirstLastButtons]="true"
+                                    #detailedDailySalesPaginator></mat-paginator>
                             </div>
 
                             <!-- Daily Top Products details -->
                             <div class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 pb-0 bg-card shadow rounded-2xl overflow-hidden">
                                 <div class="flex flex-wrap justify-between item-center w-full">
                                     <div class="text-lg font-medium tracking-tight my-auto leading-6 truncate">Daily Top Products Details</div>
-                                    <mat-form-field 
+                                    <!-- <mat-form-field 
                                         class="fuse-mat-no-subscript w-full sm:w-72"
                                         appearance="fill"
                                     >
                                         <mat-date-range-input [formGroup]="detailedDailySalesDateRange" [rangePicker]="detailedDailySalesPicker">
-                                        <input matStartDate formControlName="start" placeholder="mm/dd/yyyy" [value]="detailedDailySalesDateRange.start">
-                                        <input matEndDate formControlName="end" placeholder="mm/dd/yyyy" [value]="detailedDailySalesDateRange.end">
+                                            <input matStartDate formControlName="start" placeholder="mm/dd/yyyy" [value]="detailedDailySalesDateRange.start">
+                                            <input matEndDate formControlName="end" placeholder="mm/dd/yyyy" [value]="detailedDailySalesDateRange.end">
                                         </mat-date-range-input>
                                         <mat-datepicker-toggle matSuffix [for]="detailedDailySalesPicker"></mat-datepicker-toggle>
                                         <mat-date-range-picker #detailedDailySalesPicker></mat-date-range-picker>
                                     
-                                        <!-- <mat-error *ngIf="range.controls.start.hasError('matStartDateInvalid')">Invalid start date</mat-error>
-                                        <mat-error *ngIf="range.controls.end.hasError('matEndDateInvalid')">Invalid end date</mat-error> -->
-                                    </mat-form-field>
+                                        <mat-error *ngIf="range.controls.start.hasError('matStartDateInvalid')">Invalid start date</mat-error>
+                                        <mat-error *ngIf="range.controls.end.hasError('matEndDateInvalid')">Invalid end date</mat-error>
+                                    </mat-form-field> -->
                                 </div>
                                 <div class="flex flex-col flex-auto mt-2 overflow-x-auto">
                                     <table
@@ -534,7 +535,8 @@
                                     [pageIndex]="dailyTopProductsPagination.page"
                                     [pageSize]="dailyTopProductsPagination.size"
                                     [pageSizeOptions]="[5, 10, 25, 100]"
-                                    [showFirstLastButtons]="true"></mat-paginator>
+                                    [showFirstLastButtons]="true"
+                                    #dailyTopProductsPaginator></mat-paginator>
                             </div>
                         </div>
                     </div>
@@ -543,4 +545,3 @@
         </div>
     </div>
 </div>
-

@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { debounceTime, switchMap, takeUntil } from 'rxjs/operators';
+import { merge, Subject } from 'rxjs';
+import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
+import { MatPaginator } from '@angular/material/paginator';
 import { ApexOptions } from 'ng-apexcharts';
 import { DashboardService } from 'app/modules/merchant/dashboard/dashboard.service';
 import { Store } from 'app/core/store/store.types';
@@ -17,6 +18,9 @@ import { items } from 'app/mock-api/apps/file-manager/data';
 })
 export class DashboardComponent implements OnInit, OnDestroy
 {
+    @ViewChild("dailyTopProductsPaginator", {read: MatPaginator}) private _dailyTopProductsPaginator: MatPaginator;
+    @ViewChild("detailedDailySalesPaginator", {read: MatPaginator}) private _detailedDailySalesPaginator: MatPaginator;
+
     store: Store;
     stores: Store[];
     currentStoreId: string;
@@ -102,16 +106,35 @@ export class DashboardComponent implements OnInit, OnDestroy
         this._dashboardService.dailyTopProducts$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((dailyTopProducts: DailyTopProducts[])=>{
-                dailyTopProducts.forEach(items=>{
-                    items.topProduct.forEach(item => {
-                        this.dailyTopProductsRow.push({
-                            date: items.date, 
-                            productName: item.productName, 
-                            rank: item.rank, 
-                            totalTransaction: item.totalTransaction
-                        });
+                this.dailyTopProductsRow = [];
+                dailyTopProducts.forEach(item=>{
+                    this.dailyTopProductsRow.push({
+                        date: item.date, 
+                        productName: item.name, 
+                        rank: 1, 
+                        totalTransaction: item.totalOrders
                     });
                 });
+
+                // let rank = 1;
+                // let quantity = 1;
+                // dailyTopProducts.forEach(item=>{
+
+                //     let index = this.dailyTopProductsRow.findIndex(element => element.productId === item.productId);
+
+                //     if (index > -1) {
+
+                //     } else {
+                //         this.dailyTopProductsRow.push({
+                //             date: item.date, 
+                //             productId: item.productId,
+                //             productName: item.name, 
+                //             rank: 1,
+                //             qu
+                //             totalTransaction: item.totalOrders
+                //         });
+                //     }
+                // });
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -132,18 +155,17 @@ export class DashboardComponent implements OnInit, OnDestroy
         // Get the Detailed Daily Sales
         this._dashboardService.detailedDailySales$
             .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((dailyTopProducts: DetailedDailySales[])=>{
-                dailyTopProducts.forEach(items => {
-                    items.sales.forEach(item => {
-                        this.detailedDailySalesRow.push({ 
-                            date: items.date, 
-                            customerName: item.customerName, 
-                            subTotal: item.subTotal, 
-                            serviceCharge: item.serviceCharge, 
-                            deliveryCharge: item.deliveryCharge,
-                            commission: item.commission,
-                            total: item.total
-                        });
+            .subscribe((detailedDailySales: DetailedDailySales[])=>{
+                this.detailedDailySalesRow = [];
+                detailedDailySales.forEach(item => {
+                    this.detailedDailySalesRow.push({ 
+                        date: item.created, 
+                        customerName: item.customer.name, 
+                        subTotal: item.subTotal, 
+                        serviceCharge: 3, 
+                        deliveryCharge: 2,
+                        commission: 1,
+                        total: item.total
                     });
                 });
 
@@ -167,6 +189,7 @@ export class DashboardComponent implements OnInit, OnDestroy
         this._dashboardService.summarySales$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((summarySales: SummarySales[])=>{
+                console.log("disini response:",summarySales)
                 summarySales.forEach(items => {
                     this.summarySalesRow.push({ 
                         date: items.date, 
@@ -218,6 +241,51 @@ export class DashboardComponent implements OnInit, OnDestroy
                 }
             }
         };
+    }
+
+    /**
+     * After view init
+     */
+    ngAfterViewInit(): void
+    {
+        setTimeout(() => {
+            if ( this._dailyTopProductsPaginator )
+            {
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+
+
+                // Get customers if sort or page changes
+                merge(this._dailyTopProductsPaginator.page).pipe(
+                    switchMap(() => {
+                        this.isLoading = true;
+                        return this._dashboardService.getDailyTopProducts(this.storeId$, this._dailyTopProductsPaginator.pageIndex, this._dailyTopProductsPaginator.pageSize, "date", "asc");
+                    }),
+                    map(() => {
+                        this.isLoading = false;
+                    })
+                ).subscribe();
+            }
+            if ( this._detailedDailySalesPaginator )
+            {
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+
+
+                // Get customers if sort or page changes
+                merge(this._detailedDailySalesPaginator.page).pipe(
+                    switchMap(() => {
+                        this.isLoading = true;
+                        return this._dashboardService.getDetailedDailySales(this.storeId$, this._detailedDailySalesPaginator.pageIndex, this._detailedDailySalesPaginator.pageSize, "date", "asc");
+                    }),
+                    map(() => {
+                        this.isLoading = false;
+                    })
+                ).subscribe();
+            }
+        }, 0);
     }
 
     /**
@@ -282,6 +350,7 @@ export class DashboardComponent implements OnInit, OnDestroy
      */
     private _prepareChartData(): void
     {
+        console.log("disini", this.data.githubIssues.series)
         // Github issues
         this.chartGithubIssues = {
             chart      : {
