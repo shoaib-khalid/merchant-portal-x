@@ -1,14 +1,12 @@
+import { getSupportedInputTypes } from "@angular/cdk/platform"
+
 export interface DailyTopProducts
 {
     date: string;
-    topProduct: TopProducts[];
-}
-
-export interface TopProducts
-{
-    productName: string;
-    totalTransaction: number;
-    rank: number;
+    name: string;
+    productId: string;
+    storeId: string;
+    totalOrders: number;
 }
 
 export interface DailyTopProductsPagination
@@ -27,23 +25,27 @@ export interface DailyTopProductsPagination
 
 export interface DetailedDailySales
 {
-    date: string;
-    sales: DetailedSale[];
-}
-
-export interface DetailedSale
-{
-    storeId: string;
-    merchantName: string;
-    storeName: string;
+    cartId: string;
+    completionStatus: string;
+    created: string;
+    customer: {
+        id: string;
+        name: string;
+    }
+    customerNotes: {
+        id: string;
+        paymentStatus: string;
+        privateAdminNotes: string;
+    }
+    store: {
+        id: string; 
+        name: string; 
+        clientId: string; 
+        nameAbreviation: string;
+    }
     subTotal: number;
     total: number;
-    serviceCharge: number;
-    deliveryCharge: number;
-    customerName: string;
-    orderStatus: string;
-    deliveryStatus: string;
-    commission: number;
+  
 }
 
 export interface DetailedDailySalesPagination
@@ -61,31 +63,23 @@ export interface DetailedDailySalesPagination
 
 export interface SummarySales
 {
-    date: string;
-    storeId: string;
-    totalOrders: number;
-    successFullOrders: string;
-    canceledOrders: string;
     amountEarned: number;
+    canceledOrders: string;
     commision: number;
-    totalServiceCharge: number;
+    date: string;
+    settlementReferenceId: string;
+    store: {
+        id: string;
+        name: string;
+        clientId: string;
+        nameAbreviation: string;
+    }
+    storeId: string;
+    successFullOrders: string;
     totalAmount: number;
     totalDeliveryFee: number;
-    store: {
-      id: string;
-      name: string;
-      address: string;
-      city: string;
-      postcode: string;
-      state: string;
-      email: string;
-      phone: string;
-      verticalCode: string;
-      regionCountryId: string;
-      clientId: string;
-      nameAbreviation: string;
-    },
-    settlementReferenceId: string;
+    totalOrders: number;
+    totalServiceCharge: number;
 }
 
 export interface SummarySalesPagination

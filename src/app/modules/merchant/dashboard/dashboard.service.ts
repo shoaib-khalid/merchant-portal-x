@@ -72,18 +72,7 @@ export class DashboardService
     }
 
     /**
-     * Setter for dailyTopProducts
-     *
-     * @param value
-     */
-    set dailyTopProducts(value: DailyTopProducts[])
-    {
-        // Store the value
-        this._dailyTopProducts.next(value);
-    }
-
-    /**
-      * Getter for pagination
+      * Getter for pagination dailyTopProducts
       */
     get dailyTopProductsPagination$(): Observable<DailyTopProductsPagination>
     {
@@ -98,9 +87,17 @@ export class DashboardService
     {
         return this._detailedDailySales.asObservable();
     }
+    
+    /**
+     * Getter for pagination
+     */
+    get detailedDailySalesPagination$(): Observable<DetailedDailySalesPagination>
+    {
+        return this._detailedDailySalesPagination.asObservable();
+    }
 
     /**
-     * Setter for detailedDailySales
+     * GHtter for detailedDailySales
      *
      * @param value
      */
@@ -109,14 +106,6 @@ export class DashboardService
         // Store the value
         this._detailedDailySales.next(value);
     }
-
-    /**
-      * Getter for pagination
-      */
-     get detailedDailySalesPagination$(): Observable<DetailedDailySalesPagination>
-     {
-         return this._detailedDailySalesPagination.asObservable();
-     }
 
     /**
      * Getter for detailedDailySales
@@ -202,34 +191,33 @@ export class DashboardService
         };
         
         return this._httpClient.get<{ pagination: DailyTopProductsPagination; dailyTopProducts: DailyTopProducts[] }>
-            (reportService + '/store/' + id + '/report/dailyTopProducts', header)
+            (reportService + '/store/' + id + '/report/merchantDailyTopProducts', header)
             .pipe(
                 tap((response) => {
                     
                     this._logging.debug("Response from ReportService (getDailyTopProducts)",response);
 
                     // Pagination
-                    // let _pagination = {
-                    //     length: response["data"].totalElements,
-                    //     size: response["data"].size,
-                    //     page: response["data"].number,
-                    //     lastPage: response["data"].totalPages,
-                    //     startIndex: response["data"].pageable.offset,
-                    //     endIndex: response["data"].pageable.offset + response["data"].numberOfElements - 1
-                    // };
-                    let _pagination = { length: 138, size: 1, page: 0, lastPage: 138, startIndex: 0, endIndex: 0 };
+                    let _pagination = {
+                        length: response["data"].totalElements,
+                        size: response["data"].size,
+                        page: response["data"].number,
+                        lastPage: response["data"].totalPages,
+                        startIndex: response["data"].pageable.offset,
+                        endIndex: response["data"].pageable.offset + response["data"].numberOfElements - 1
+                    };
                     this._logging.debug("Response from StoresService (getDailyTopProducts pagination)",_pagination);
                     
 
                     this._dailyTopProductsPagination.next(_pagination);
-                    this._dailyTopProducts.next(response["data"]);
+                    this._dailyTopProducts.next(response["data"].content);
                 })
             );
     }
 
     getDetailedDailySales(id: string, page: number = 0, size: number = 10, sort: string = 'created', order: 'asc' | 'desc' | '' = 'asc', 
                         search: string = '', from: string = this.fromDate, to: string = this.todayDate):
-    Observable<{ pagination: DailyTopProductsPagination; dailyTopProducts: DailyTopProducts[] }>
+    Observable<{ pagination: DetailedDailySalesPagination; detailedDailySales: DetailedDailySales[] }>
     {
         let reportService = this._apiServer.settings.apiServer.reportService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -247,34 +235,33 @@ export class DashboardService
             }
         };
         
-        return this._httpClient.get<{ pagination: DailyTopProductsPagination; dailyTopProducts: DailyTopProducts[] }>
-            (reportService + '/store/' + id + '/report/detailedDailySales', header)
+        return this._httpClient.get<{ pagination: DetailedDailySalesPagination; detailedDailySales: DetailedDailySales[] }>
+            (reportService + '/store/' + id + '/report/merchantDetailedDailySales', header)
             .pipe(
                 tap((response) => {
                     
                     this._logging.debug("Response from ReportService (getDetailedDailySales)",response);
 
                     // Pagination
-                    // let _pagination = {
-                    //     length: response["data"].totalElements,
-                    //     size: response["data"].size,
-                    //     page: response["data"].number,
-                    //     lastPage: response["data"].totalPages,
-                    //     startIndex: response["data"].pageable.offset,
-                    //     endIndex: response["data"].pageable.offset + response["data"].numberOfElements - 1
-                    // };
-                    let _pagination = { length: 138, size: 1, page: 0, lastPage: 138, startIndex: 0, endIndex: 0 };
+                    let _pagination = {
+                        length: response["data"].totalElements,
+                        size: response["data"].size,
+                        page: response["data"].number,
+                        lastPage: response["data"].totalPages,
+                        startIndex: response["data"].pageable.offset,
+                        endIndex: response["data"].pageable.offset + response["data"].numberOfElements - 1
+                    };
                     this._logging.debug("Response from StoresService (getDailyTopProducts pagination)",_pagination);
 
                     this._detailedDailySalesPagination.next(_pagination);
-                    this._detailedDailySales.next(response["data"]);
+                    this._detailedDailySales.next(response["data"].content);
                 })
             );
     }
 
     getSummarySales(id: string, page: number = 0, size: number = 10, sort: string = 'date', order: 'asc' | 'desc' | '' = 'asc', 
                     search: string = '', from: string = this.fromDate, to: string = this.todayDate):
-    Observable<{ pagination: SummarySalesPagination; dailyTopProducts: SummarySales[] }>
+    Observable<{ pagination: SummarySalesPagination; summarySales: SummarySales[] }>
     {
         let reportService = this._apiServer.settings.apiServer.reportService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -292,23 +279,23 @@ export class DashboardService
             }
         };
         
-        return this._httpClient.get<{ pagination: SummarySalesPagination; dailyTopProducts: SummarySales[] }>
-            (reportService + '/store/' + id + '/daily_sales', header)
+        return this._httpClient.get<{ pagination: SummarySalesPagination; summarySales: SummarySales[] }>
+            (reportService + '/store/' + id + '/merchant_daily_sales', header)
             .pipe(
                 tap((response) => {
                     
                     this._logging.debug("Response from ReportService (getSummarySales)",response);
 
                     // Pagination
-                    // let _pagination = {
-                    //     length: response["data"].totalElements,
-                    //     size: response["data"].size,
-                    //     page: response["data"].number,
-                    //     lastPage: response["data"].totalPages,
-                    //     startIndex: response["data"].pageable.offset,
-                    //     endIndex: response["data"].pageable.offset + response["data"].numberOfElements - 1
-                    // };
-                    let _pagination = { length: 138, size: 1, page: 0, lastPage: 138, startIndex: 0, endIndex: 0 };
+                    let _pagination = {
+                        length: response["data"].totalElements,
+                        size: response["data"].size,
+                        page: response["data"].number,
+                        lastPage: response["data"].totalPages,
+                        startIndex: response["data"].pageable.offset,
+                        endIndex: response["data"].pageable.offset + response["data"].numberOfElements - 1
+                    };
+
                     this._logging.debug("Response from StoresService (getDailyTopProducts pagination)",_pagination);
 
                     this._summarySalesPagination.next(_pagination);
