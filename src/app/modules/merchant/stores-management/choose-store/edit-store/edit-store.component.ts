@@ -195,6 +195,7 @@ export class EditStoreComponent implements OnInit
 
                 // set timing
                 this._storeTiming = response.storeTiming;
+                this._storeTiming.map(item => item["isOpen"] = !item.isOff);
 
                 this.files[0].fileSource = response.storeAsset.logoUrl;
                 this.files[1].fileSource = response.storeAsset.bannerUrl;
@@ -413,7 +414,8 @@ export class EditStoreComponent implements OnInit
                 // ---------------------------
 
                 storeTiming.forEach(item => {
-                    this._storesService.putTiming(storeId, item.day, item)
+                    let { isOpen, ...filteredItem } = item;
+                    this._storesService.putTiming(storeId, item.day, filteredItem)
                         .subscribe((response)=>{});
                 });
 
@@ -641,6 +643,7 @@ export class EditStoreComponent implements OnInit
 
     updateStoreOpening(day: string){
         let index = this._storeTiming.findIndex(dayList => dayList.day === day);
+        this._storeTiming[index].isOpen = !this._storeTiming[index].isOpen;
         this._storeTiming[index].isOff = !this._storeTiming[index].isOff;
     }
 
