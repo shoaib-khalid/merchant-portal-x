@@ -189,7 +189,6 @@ export class DashboardComponent implements OnInit, OnDestroy
         this._dashboardService.summarySales$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((summarySales: SummarySales[])=>{
-                console.log("disini response:",summarySales)
                 summarySales.forEach(items => {
                     this.summarySalesRow.push({ 
                         date: items.date, 
@@ -221,8 +220,6 @@ export class DashboardComponent implements OnInit, OnDestroy
 
                 // Store the data
                 this.data = data;
-
-                console.log("data.budgetDetails.rows", data.budgetDetails.rows)
 
                 // Prepare the chart data
                 this._prepareChartData();
@@ -350,7 +347,6 @@ export class DashboardComponent implements OnInit, OnDestroy
      */
     private _prepareChartData(): void
     {
-        console.log("disini", this.data.githubIssues.series)
         // Github issues
         this.chartGithubIssues = {
             chart      : {
