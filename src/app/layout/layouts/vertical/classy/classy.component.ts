@@ -210,7 +210,7 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
 
     openStoreFront(){
         let currentStore = this.store.domain;
-        window.open("https://"+currentStore+".symplified.ai",'_blank');
+        window.open("https://"+currentStore,'_blank');
     }
 
     changeStore(storeId){

@@ -26,6 +26,7 @@ export class RegisterStoreComponent implements OnInit
     storeId: string;
 
     domainName:string;
+    subDomainName: string;
 
     alert: any;
     createStoreForm: FormGroup;
@@ -104,7 +105,8 @@ export class RegisterStoreComponent implements OnInit
             storeDescription   : ['', [Validators.required, Validators.maxLength(100)]],
             email              : ['', [Validators.required, Validators.email]],
             clientId           : [''],
-            domain             : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
+            domain             : [''],
+            subdomain          : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
             regionCountryId: ['', Validators.required],
             regionCountryStateId: ['', Validators.required],
             phoneNumber        : ['', RegisterStoreValidationService.phonenumberValidator],
@@ -122,7 +124,7 @@ export class RegisterStoreComponent implements OnInit
             deliveryType       : ['', Validators.required],
 
             // Delivery Partner
-            deliveryPartner      : ['', Validators.required],
+            deliveryPartner      : [''],
             
             // Else
             allowScheduledDelivery : [false],
@@ -139,9 +141,20 @@ export class RegisterStoreComponent implements OnInit
         // -------------------------
 
         this._route.paramMap.subscribe( paramMap => {
+            
 
             let _verticalCode = paramMap.get('vertical-code');
             this.createStoreForm.get('verticalCode').patchValue(_verticalCode);
+
+            if (_verticalCode === "ECommerce_PK" || _verticalCode === "FnB_PK") {
+                // set domain name 
+                this.domainName = ".easydukan.co";
+            } else if (_verticalCode === "e-commerce-b2b2c" || _verticalCode === "E-Commerece" || _verticalCode === "FnB") {
+                this.domainName = ".symplified.ai";
+            } else {
+                console.error("Invalid domain name from backend : ",this.domainName);
+                alert("Invalid domain name from backend : " + this.domainName)
+            }
 
 
             // -------------------------
@@ -349,11 +362,13 @@ export class RegisterStoreComponent implements OnInit
 
         // this will remove the item from the object
         const { allowedSelfDeliveryStates, allowScheduledDelivery, allowStorePickup, 
-                deliveryType, deliveryPartner, storeTiming
+            subdomain, deliveryType, deliveryPartner, storeTiming
                 ,...createStoreBody}  = this.createStoreForm.value;
             
         // Disable the form
         this.createStoreForm.disable();
+
+        console.log("createStoreBody: ", createStoreBody)
 
         // ---------------------------
         // Register Store Section
@@ -534,10 +549,13 @@ export class RegisterStoreComponent implements OnInit
         this._changeDetectorRef.markForCheck();
     }
 
-    async checkExistingURL(url: string){
+    async checkExistingURL(subdomain: string){
+        let url = subdomain + this.domainName;
         let status = await this._storesService.getExistingURL(url);
         if (status === 409){
-            this.createStoreForm.get('domain').setErrors({domainAlreadyTaken: true});
+            this.createStoreForm.get('subdomain').setErrors({domainAlreadyTaken: true});
+        } else {
+            this.createStoreForm.get('domain').patchValue(url);
         }
     }
     
