@@ -1369,8 +1369,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         
         if (this.selectedProductVariants){
 
-            console.log("disini: this.filteredProductVariantAvailable ", this.filteredProductVariantAvailable)
-
             // get index of filteredVariants that have same id with variantId
             let index = this.filteredProductVariants.findIndex(x => x.id === variant.id);
     
