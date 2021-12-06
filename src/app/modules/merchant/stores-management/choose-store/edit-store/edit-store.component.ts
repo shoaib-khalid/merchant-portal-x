@@ -411,7 +411,8 @@ export class EditStoreComponent implements OnInit
         this._storesService.update(this.storeId, updateStoreBody)
             .subscribe((response) => {
 
-                let storeId = response.data.id;
+                console.log("response",response)
+                let storeId = response.id;
 
                 // ---------------------------
                 // Update Store Timing
@@ -579,6 +580,26 @@ export class EditStoreComponent implements OnInit
 
                 }
 
+                // Show a success message (it can also be an error message)
+                const confirmation = this._fuseConfirmationService.open({
+                    title  : 'Success',
+                    message: 'Your store has been updated successfully!',
+                    icon: {
+                        show: true,
+                        name: "heroicons_outline:check",
+                        color: "success"
+                    },
+                    actions: {
+                        confirm: {
+                            label: 'Ok',
+                            color: "primary",
+                        },
+                        cancel: {
+                            show: false,
+                        },
+                    }
+                });
+
                 // Navigate to the confirmation required page
                 // this._router.navigateByUrl('/stores');
             },
@@ -598,27 +619,6 @@ export class EditStoreComponent implements OnInit
                 // Show the alert
                 this.alert = true;
             });
-
-        // Show a success message (it can also be an error message)
-        // and remove it after 5 seconds
-        const confirmation = this._fuseConfirmationService.open({
-            title  : 'Success',
-            message: 'Your store has been updated successfully!',
-            icon: {
-                show: true,
-                name: "heroicons_outline:check",
-                color: "success"
-              },
-            actions: {
-                confirm: {
-                    label: 'Ok',
-                    color: "primary"
-                },
-                cancel: {
-                    show: false,
-                },
-            }
-        });
 
         setTimeout(() => {
             this.alert = null;

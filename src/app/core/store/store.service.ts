@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, ReplaySubject, Subject, throwError } from 'rxjs';
-import { switchMap, take, map, tap, catchError } from 'rxjs/operators';
+import { switchMap, take, map, tap, catchError, filter } from 'rxjs/operators';
 import { Store, StoreRegionCountries, StoreTiming, StorePagination, StoreAssets, CreateStore, StoreDeliveryDetails, StoreSelfDeliveryStateCharges, StoreDeliveryProvider } from 'app/core/store/store.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
@@ -270,7 +270,7 @@ export class StoresService
      *
      * @param store
      */
-    update(storeId: string, storeBody: Store): Observable<any>
+    update(storeId: string, storeBody: Store): Observable<Store>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -283,7 +283,7 @@ export class StoresService
             }
         };
         
-        return this.store$.pipe(
+        return this.stores$.pipe(
             take(1),
             // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
             switchMap(stores => this._httpClient.put<Store>(productService + '/stores/' + storeId , storeBody , header).pipe(
@@ -291,10 +291,32 @@ export class StoresService
 
                     this._logging.debug("Response from StoresService (Edit Store)",response);
 
+                    // Find the index of the updated product
+                    const index = stores.findIndex(item => item.id === storeId);
+
+                    // Update the product
+                    stores[index] = { ...stores[index], ...response["data"]};
+
+                    // Update the products
+                    this._stores.next(stores);
+
                     // Return the new product
-                    return response;
-                })
+                    return response["data"];
+                }),
+                switchMap(response => this.store$.pipe(
+                    take(1),
+                    filter(item => item && item.id === storeId),
+                    tap(() => {
+
+                        // Update the product if it's selected
+                        this._store.next(response);
+
+                        // Return the updated product
+                        return response;
+                    })
+                ))
             ))
+            
         );
     }
 
@@ -466,7 +488,7 @@ export class StoresService
 
         return this._httpClient.post<any>(productService + '/stores/' + storeId + '/assets', storeAssets , header ).pipe(
             map((response) => {
-                this._stores.next(response);
+                this._logging.debug("Response from StoresService (postAssets)",response);
             })
         );
     }
