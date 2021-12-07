@@ -17,8 +17,6 @@ export class OrdersListService
     private _order: BehaviorSubject<Order | null> = new BehaviorSubject(null);
     private _orderItems: BehaviorSubject<OrderItem[] | null> = new BehaviorSubject(null);
 
-    _currentStores: any = [];
-
     /**
      * Constructor
      */
@@ -122,7 +120,7 @@ export class OrdersListService
             header.params["phoneNumber"] = phoneNumber;
         }
         
-        return this._httpClient.get<{ pagination: OrdersListPagination; stores: Order[] }>(orderService + '/orders', header)
+        return this._httpClient.get<{ pagination: OrdersListPagination; stores: Order[] }>(orderService + '/orders/search', header)
         .pipe(
             tap((response) => {
                 
@@ -140,18 +138,18 @@ export class OrdersListService
                 this._logging.debug("Response from OrdersService (pagination)",_pagination);
                 
                 // this is local
-                this._currentStores = response["data"].content;
+                let _orders = response["data"].content;
                 
                 // (this._currentStores).forEach(async (item, index) => {
                     
                 // });
 
-                this._logging.debug("Response from OrdersService (After Reconstruct)",this._currentStores);
+                this._logging.debug("Response from OrdersService (After Reconstruct)",_orders);
 
                 // this is observable service
 
                 this._pagination.next(_pagination);
-                this._orders.next(this._currentStores);
+                this._orders.next(_orders);
             })
         );
     }

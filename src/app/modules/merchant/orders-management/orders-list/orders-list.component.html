@@ -221,7 +221,7 @@
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span class="pr-6 font-medium text-sm text-secondary whitespace-nowrap">
-                                            {{transaction.invoiceId}}
+                                            {{transaction.order.invoiceId}}
                                         </span>
                                     </td>
                                 </ng-container>
@@ -238,7 +238,7 @@
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span class="pr-6 whitespace-nowrap">
-                                            {{transaction.created | date:'MMM dd, y'}}
+                                            {{transaction.order.created | date:'MMM dd, y'}}
                                         </span>
                                     </td>
                                 </ng-container>
@@ -255,7 +255,7 @@
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span class="pr-6 whitespace-nowrap">
-                                            {{transaction.orderPaymentDetail.accountName | titlecase }}
+                                            {{transaction.order.orderPaymentDetail.accountName | titlecase }}
                                         </span>
                                     </td>
                                 </ng-container>
@@ -272,7 +272,7 @@
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span class="pr-6 font-medium whitespace-nowrap">
-                                            {{transaction.total | currency:'$'}}
+                                            {{transaction.order.total | currency:'$'}}
                                         </span>
                                     </td>
                                 </ng-container>
@@ -313,14 +313,14 @@
                                         class="px-2"
                                         *matCellDef="let transaction">
                                         <input
-                                            [id]=" 'babun-' + transaction.id"
+                                            [id]=" 'babun-' + transaction.order.id"
                                             type="button"
-                                            (click)="viewDetails(transaction.id)"
+                                            (click)="viewDetails(transaction.order.id)"
                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                             mat-button>
                                         <label 
                                             class="flex items-center justify-center py-2 px-1 rounded-full cursor-pointer border border-primary bg-primary group hover:bg-white"
-                                            [for]="'babun-' + transaction.id"
+                                            [for]="'babun-' + transaction.order.id"
                                             matRipple>
                                             <mat-icon
                                                 class="text-white group-hover:text-primary pr-2"
@@ -346,18 +346,18 @@
                                         *matCellDef="let transaction"
                                     >
                                         <input
-                                            [id]="'action-' + transaction.id"
+                                            [id]="'action-' + transaction.order.id"
                                             type="button"
-                                            (click)="updateStatus(transaction.id, getNextCompletionStatus(transaction.completionStatus).nextId)"
+                                            (click)="updateStatus(transaction.order.id, transaction.nextCompletionStatus)"
                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                             mat-button>
                                         <label 
-                                            *ngIf="getNextCompletionStatus(transaction.completionStatus).nextLabelBtn !== null"    
+                                            *ngIf="transaction.nextActionText"    
                                             class="flex items-center justify-center py-2 px-1 rounded-full cursor-pointer border border-primary border-solid group hover:bg-primary"
-                                            [for]="'action-' + transaction.id"
+                                            [for]="'action-' + transaction.order.id"
                                             matRipple>
                                             <span class="font-medium group-hover:text-white text-sm text-primary whitespace-nowrap">
-                                                {{ (transaction.completionStatus) ? getNextCompletionStatus(transaction.completionStatus).nextLabelBtn : 'Undefined' }}
+                                                {{ transaction.nextActionText }}
                                             </span>
                                         </label>
                                     </td>
