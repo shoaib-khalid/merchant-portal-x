@@ -72,23 +72,23 @@
                                         matInput
                                         minlength="4"
                                         maxlength="15"
-                                        [formControlName]="'domain'"
+                                        [formControlName]="'subdomain'"
                                         [required]="true"
                                         (input)="checkExistingURL($event.target.value)">
-                                    <span>.symplified.store</span>
-                                    <mat-error *ngIf="createStoreForm.get('domain').hasError('required')">
+                                    <span>{{domainName}}</span>
+                                    <mat-error *ngIf="createStoreForm.get('subdomain').hasError('required')">
                                         Required
                                     </mat-error>
-                                    <mat-error *ngIf="createStoreForm.get('domain').hasError('invalidDomain')">
+                                    <mat-error *ngIf="createStoreForm.get('subdomain').hasError('invalidDomain')">
                                         Invalid URL
                                     </mat-error>
-                                    <mat-error *ngIf="createStoreForm.get('domain').hasError('minlength')">
+                                    <mat-error *ngIf="createStoreForm.get('subdomain').hasError('minlength')">
                                         Minimum character length not meet (mininum 4 character)
                                     </mat-error>
-                                    <mat-error *ngIf="createStoreForm.get('domain').hasError('maxlength')">
+                                    <mat-error *ngIf="createStoreForm.get('subdomain').hasError('maxlength')">
                                         Maximum character length exceed (maximum 15 character)
                                     </mat-error>
-                                    <mat-error *ngIf="createStoreForm.get('domain').hasError('domainAlreadyTaken')">
+                                    <mat-error *ngIf="createStoreForm.get('subdomain').hasError('domainAlreadyTaken')">
                                         The domain name entered is already taken
                                     </mat-error>
                                 </mat-form-field>

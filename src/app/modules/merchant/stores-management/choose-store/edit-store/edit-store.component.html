@@ -103,6 +103,9 @@
                                         maxlength="100"
                                         matTextareaAutosize></textarea>
                                     <mat-label>Store Description</mat-label>
+                                    <mat-error *ngIf="editStoreForm.get('storeDescription').hasError('maxLength')">
+                                        Max length exceeded
+                                    </mat-error>
                                     <mat-error *ngIf="editStoreForm.get('storeDescription').hasError('required')">
                                         Required
                                     </mat-error>
