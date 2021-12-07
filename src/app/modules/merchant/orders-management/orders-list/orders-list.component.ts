@@ -77,6 +77,8 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((data) => {
 
+                console.log("here", data)
+
                 // Store the table data
                 this.recentTransactionsDataSource.data = data;
 
