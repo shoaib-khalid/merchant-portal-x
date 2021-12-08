@@ -1,0 +1,471 @@
+<div
+    class="absolute inset-0 flex flex-col min-w-0 overflow-y-auto"
+    cdkScrollable>
+
+    <!-- Header -->
+    <div class="relative flex-0 py-8 px-4 sm:p-8 overflow-hidden bg-gray-800 dark">
+        <!-- Background - @formatter:off -->
+        <!-- Rings -->
+        <svg class="absolute inset-0 pointer-events-none"
+             viewBox="0 0 960 540" width="100%" height="100%" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+            <g class="text-gray-700 opacity-25" fill="none" stroke="currentColor" stroke-width="100">
+                <circle r="234" cx="196" cy="23"></circle>
+                <circle r="234" cx="790" cy="491"></circle>
+            </g>
+        </svg>
+        <!-- @formatter:on -->
+        <div class="z-10 relative flex flex-col items-center">
+            <h2 class="text-xl font-semibold">CREATE YOUR STORE NOW</h2>
+            <!-- <div class="mt-1 text-4xl sm:text-7xl font-extrabold tracking-tight leading-tight text-center">
+                What do you want to learn today?
+            </div> -->
+            <div class="max-w-2xl mt-6 sm:text-2xl text-center tracking-tight text-secondary">
+                The create store explaination HERE
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex flex-col flex-auto items-center p-6 sm:p-10">
+        <div class="flex flex-col w-full">
+            <!-- Form -->
+            <div class="mt-8 sm:mt-12 p-6 pb-7 sm:p-10 sm:pb-7 shadow rounded-2xl bg-card">
+                <!-- Alert -->
+                <fuse-alert
+                    class="mb-8"
+                    *ngIf="alert"
+                    [type]="alert.type"
+                    [showIcon]="false">
+                    {{alert.message}}
+                </fuse-alert>
+                <form
+                    class="space-y-3 flex flex-col w-full"
+                    [formGroup]="editStoreForm"
+                    #supportNgForm="ngForm">
+
+                    <!-- Name, Store URL, Description, Email, Phonenumber, Message, City, State, Country, Postcode -->
+                    <div class="flex flex-col sm:flex-row">
+                        <div class="flex flex-auto flex-wrap">
+                            <div class="flex flex-col w-full lg:w-2/4 sm:px-4">
+                                <!-- Store Name -->
+                                <mat-form-field class="w-full" floatLabel="always">
+                                    <input
+                                        matInput
+                                        maxlength="100"
+                                        placeholder="Tell us, what is your store name ?"
+                                        [formControlName]="'name'"
+                                        [required]="true"
+                                        (input)="checkExistingName($event.target.value)">
+                                    <mat-label>Store Name</mat-label>
+                                    <mat-error *ngIf="editStoreForm.get('name').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                    <mat-error *ngIf="editStoreForm.get('name').hasError('storeNameAlreadyTaken')">
+                                        The store name entered is already taken
+                                    </mat-error>
+                                </mat-form-field>
+                                <!-- Store URL -->
+                                <mat-form-field class="w-full">
+                                    <mat-label>Store URL</mat-label>
+                                    <span>https://</span> 
+                                    <input
+                                        matInput
+                                        minlength="4"
+                                        maxlength="15"
+                                        [formControlName]="'subdomain'"
+                                        [required]="true"
+                                        (input)="checkExistingURL($event.target.value)">
+                                    <span>{{domainName}}</span>
+                                    <mat-error *ngIf="editStoreForm.get('subdomain').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                    <mat-error *ngIf="editStoreForm.get('subdomain').hasError('invalidDomain')">
+                                        Invalid URL
+                                    </mat-error>
+                                    <mat-error *ngIf="editStoreForm.get('subdomain').hasError('minlength')">
+                                        Minimum character length not meet (mininum 4 character)
+                                    </mat-error>
+                                    <mat-error *ngIf="editStoreForm.get('subdomain').hasError('maxlength')">
+                                        Maximum character length exceed (maximum 15 character)
+                                    </mat-error>
+                                    <mat-error *ngIf="editStoreForm.get('subdomain').hasError('domainAlreadyTaken')">
+                                        The subdomain name entered is already taken
+                                    </mat-error>
+                                </mat-form-field>
+                                <!-- Store Description -->
+                                <mat-form-field class="fuse-mat-textarea w-full" floatLabel="always">
+                                    <textarea
+                                        matInput
+                                        placeholder="Describe to us about your store"
+                                        [formControlName]="'storeDescription'"
+                                        [required]="true"
+                                        [rows]="5"
+                                        maxlength="100"
+                                        matTextareaAutosize></textarea>
+                                    <mat-label>Store Description</mat-label>
+                                    <mat-error *ngIf="editStoreForm.get('storeDescription').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                </mat-form-field>
+                                <!-- Email -->
+                                <mat-form-field class="w-full" floatLabel="always">
+                                    <input
+                                        type="email"
+                                        placeholder="example@yourstore.com"
+                                        matInput
+                                        [formControlName]="'email'"
+                                        [required]="true">
+                                    <mat-label>Store Email</mat-label>
+                                    <mat-error *ngIf="editStoreForm.get('email').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                    <mat-error *ngIf="editStoreForm.get('email').hasError('email')">
+                                        Enter a valid email address
+                                    </mat-error>
+                                </mat-form-field>
+                                <!-- Phonenumber -->
+                                <mat-form-field class="w-full" floatLabel="always">
+                                    <input
+                                        matInput
+                                        placeholder="+60123456789"
+                                        [formControlName]="'phoneNumber'"
+                                        [required]="true">
+                                    <mat-label>Store Phone Number</mat-label>
+                                    <mat-error *ngIf="editStoreForm.get('phoneNumber').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                    <mat-error *ngIf="editStoreForm.get('phoneNumber').hasError('invalidPhonenumber')">
+                                        Invalid Phonenumber
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="flex flex-col w-full lg:w-2/4 sm:px-4">
+                                <!-- Address -->
+                                <mat-form-field class="fuse-mat-textarea w-full" floatLabel="always">
+                                    <textarea
+                                        matInput
+                                        placeholder="Your customer will be looking for your store, add your store address now !"
+                                        maxlength="500"
+                                        [formControlName]="'address'"
+                                        [required]="true"
+                                        [rows]="5"
+                                        matTextareaAutosize></textarea>
+                                    <mat-label>Address</mat-label>
+                                    <mat-error *ngIf="editStoreForm.get('address').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                </mat-form-field>
+                                <!-- City -->
+                                <mat-form-field class="w-full" floatLabel="always">
+                                    <input
+                                        matInput
+                                        maxlength="100"
+                                        [formControlName]="'city'"
+                                        [required]="true">
+                                    <mat-label>City</mat-label>
+                                    <mat-error *ngIf="editStoreForm.get('city').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                </mat-form-field>
+                                <!-- State -->
+                                <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+                                    <mat-label class="font-medium">State</mat-label>
+                                    <mat-select
+                                        [formControlName]="'regionCountryStateId'"
+                                        [required]="true"
+                                        [value]="'regionCountryStateId'"
+                                        [placeholder]="'Select State'"
+                                        (selectionChange)="editStoreForm.get('regionCountryStateId').patchValue($event.value)"
+                                        #stateSelector="matSelect"
+                                        >
+                                        <mat-select-trigger>
+                                            <span class="flex items-center">
+                                                <span>{{ stateSelector.triggerValue }}</span>
+                                            </span>
+                                        </mat-select-trigger>
+                                        <div *ngFor="let state of statesByCountry">
+                                            <mat-option [value]="state.id">{{state.name}}</mat-option>
+                                        </div>
+                                    </mat-select>
+                                    <mat-error *ngIf="editStoreForm.get('regionCountryStateId').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                </mat-form-field>
+                                <!-- Postcode -->
+                                <mat-form-field class="w-full">
+                                    <input
+                                        matInput
+                                        [formControlName]="'postcode'"
+                                        minlength="5"
+                                        maxlength="10"
+                                        [required]="true">
+                                    <mat-label>Postcode</mat-label>
+                                    <mat-error *ngIf="editStoreForm.get('postcode').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                    <mat-error *ngIf="editStoreForm.get('postcode').hasError('invalidPostcode')">
+                                        Invalid postcode
+                                    </mat-error>
+                                    <mat-error *ngIf="editStoreForm.get('postcode').hasError('minlength')">
+                                        Minimum length of postcode not meet
+                                    </mat-error>
+                                    <mat-error *ngIf="editStoreForm.get('postcode').hasError('maxlength')">
+                                        Exceed maximum length of postcode
+                                    </mat-error>
+                                </mat-form-field>
+                                <!-- Country -->
+                                <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+                                    <mat-label class="font-medium">Country</mat-label>
+                                    <mat-select
+                                        [formControlName]="'regionCountryId'"
+                                        [required]="true"
+                                        [value]="'regionCountryId'"
+                                        [placeholder]="'Select Country'"
+                                        (selectionChange)="editStoreForm.get('regionCountryId').patchValue($event.value);updateStates(countrySelector.value)"
+                                        #countrySelector="matSelect"
+                                        >
+                                        <mat-select-trigger>
+                                            <span class="flex items-center">
+                                                <span>{{ countrySelector.triggerValue }}</span>
+                                            </span>
+                                        </mat-select-trigger>
+                                        <div *ngFor="let country of countriesList">
+                                            <mat-option [value]="country.id">{{country.name}}</mat-option>
+                                        </div>
+                                    </mat-select>
+                                    <mat-error *ngIf="editStoreForm.get('regionCountryId').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                </mat-form-field>
+                                <!-- Region -->
+                                <!-- <mat-form-field class="w-full" appearance="fill">
+                                    <mat-label class="font-medium">Region</mat-label>
+                                    <mat-select
+                                        [formControlName]="'region'"
+                                        [required]="true"
+                                        [value]="'region'"
+                                        (selectionChange)="editStoreForm.get('region').patchValue($event.value)"
+                                        #regionSelector="matSelect"
+                                        >
+                                        <mat-select-trigger>
+                                            <span class="flex items-center">
+                                                <span>{{ regionSelector.triggerValue }}</span>
+                                            </span>
+                                        </mat-select-trigger>
+                                        <mat-option [disabled]="'disabled'" [value]="''">Select Region</mat-option>
+                                        <div *ngFor="let region of regionsList">
+                                            <mat-option [value]="region.regionCode">{{region.name}}</mat-option>
+                                        </div>
+                                    </mat-select>
+                                    <mat-error *ngIf="editStoreForm.get('region').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                </mat-form-field> -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logo and Banner -->
+                    <div class="flex flex-col sm:flex-row">
+                        <!-- Logo -->
+                        <div class="flex flex-col w-full lg:w-2/4 sm:px-4">
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-medium">Store Logo</mat-label>
+                                <mat-toolbar>
+                                    <input class="text-sm" matInput type="text" readonly [value]="files[0].selectedFileNames ? files[0].selectedFileNames : 'Select Images'" />
+                                </mat-toolbar>
+                                <input
+                                    type="file"
+                                    id="logo"
+                                    name="logo"
+                                    accept="image/*" multiple 
+                                    (change)="selectFiles('logo',$event)"
+                                />
+                            </mat-form-field>
+                            <div class="w-full">
+                                <mat-label class="font-medium">Preview</mat-label>
+                                <div class="my-2"></div>
+                                <div class="p-8 border border-gray-300 rounded h-96">
+                                    <div *ngIf="this.files[0].fileSource">
+                                        <span class="block"><b>Image Size</b> : {{ this.files[0].selectedImageWidth }} x {{ this.files[0].selectedImageHeight }} pixel</span>
+                                        <span class="block"><b>Recommended Size</b> : {{ this.files[0].recommendedImageWidth }} x {{ this.files[0].recommendedImageHeight }} pixel</span>
+                                        <div class="flex w-full flex-auto">
+                                            <img [src]="this.files[0].fileSource" class="object-scale-down h-52" />
+                                            <mat-icon
+                                                class="top-0 right-0 cursor-pointer"
+                                                (click)="deletefiles(0);"
+                                                [svgIcon]="'heroicons_solid:x'">
+                                            </mat-icon>
+                                        </div>
+                                    </div>
+                                </div> 
+                            </div>
+                        </div>
+                        <!-- Banner -->
+                        <div class="flex flex-col w-full lg:w-2/4 sm:px-4">
+                            <!-- Store Banner(Desktop) & Store Banner(Mobile) -->
+                            <div class="flex flex-col sm:flex-row">
+                                <!-- Store Banner (Desktop) -->
+                                <div class="flex flex-col w-full lg:w-2/4 sm:pr-2">
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-medium">Store Banner (Desktop)</mat-label>
+                                        <mat-toolbar>
+                                            <input class="text-sm" matInput type="text" readonly [value]="this.files[1].selectedFileNames ? this.files[1].selectedFileNames : 'Select Images'" />
+                                        </mat-toolbar>
+                                        <input
+                                            type="file"
+                                            id="banner"
+                                            name="banner"
+                                            accept="image/*" multiple 
+                                            (change)="selectFiles('banner',$event)"
+                                        />
+                                    </mat-form-field>
+                                </div>
+                                <!-- Store Banner (Mobile) -->
+                                <div class="flex flex-col w-full lg:w-2/4 sm:pl-2">
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-medium">Store Banner (Mobile)</mat-label>
+                                        <mat-toolbar>
+                                            <input class="text-sm" matInput type="text" readonly [value]="this.files[2].selectedFileNames ? this.files[2].selectedFileNames : 'Select Images'" />
+                                        </mat-toolbar>
+                                        <input
+                                            type="file"
+                                            id="bannerMobile"
+                                            name="bannerMobile"
+                                            accept="image/*" multiple 
+                                            (change)="selectFiles('bannerMobile',$event)"
+                                        />
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                            <div class="w-full">
+                                <mat-label class="font-medium">Preview</mat-label>
+                                <div class="my-2"></div>
+                                <div class="flex flex-wrap content-center border border-gray-300 rounded h-96">
+                                    <div class="py-2 px-8" *ngIf="this.files[1].fileSource">
+                                        <span class="block">Banner for <b>Desktop</b> View </span> 
+                                        <span class="block"><b>Image Size</b> : {{ this.files[1].selectedImageWidth }} x {{ this.files[1].selectedImageHeight }} pixel</span>
+                                        <span class="block"><b>Recommended Size</b> : {{ this.files[1].recommendedImageWidth }} x {{ this.files[1].recommendedImageHeight }} pixel</span> 
+                                        <div class="flex w-full flex-auto">
+                                            <img [src]="this.files[1].fileSource" class="object-scale-down h-24" />
+                                            <mat-icon
+                                                class="top-0 right-0 cursor-pointer"
+                                                (click)="deletefiles(1);"
+                                                [svgIcon]="'heroicons_solid:x'">
+                                            </mat-icon>
+                                        </div>
+                                    </div>
+                                    <div class="py-2 px-8" *ngIf="this.files[2].fileSource">
+                                        <span>Banner for <b>Mobile</b> View </span> 
+                                        <span class="block"><b>Image Size</b> : {{ this.files[2].selectedImageWidth }} x {{ this.files[2].selectedImageHeight }} pixel</span>
+                                        <span class="block"><b>Recommended Size</b> : {{ this.files[2].recommendedImageWidth }} x {{ this.files[2].recommendedImageHeight }} pixel</span>  
+                                        <div class="flex w-full flex-auto">
+                                            <img [src]="this.files[2].fileSource" class="object-scale-down h-24" />
+                                            <mat-icon
+                                                class="top-0 right-0 cursor-pointer"
+                                                (click)="deletefiles(2);"
+                                                [svgIcon]="'heroicons_solid:x'">
+                                            </mat-icon>
+                                        </div>
+                                    </div>
+                                    &nbsp;
+                                </div> 
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--  -->
+                    <div class="mb-2"></div>
+                    <div class="flex flex-col sm:flex-row">
+                        <!-- Delivery Type & Delivery Fullfilment -->
+                        <div class="flex flex-col w-full lg:w-2/4 sm:px-4">
+                            <!-- Delivery Type & Delivery Fullfillment -->
+                            <div class="flex flex-col sm:flex-row">
+                                <!-- Delivery Type -->
+                                <div class="flex flex-col w-full">
+                                    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+                                        <mat-label class="font-medium">Delivery Type</mat-label>
+                                        <mat-select
+                                            [formControlName]="'deliveryType'"
+                                            [required]="true"
+                                            [value]="'deliveryType'"
+                                            [placeholder]="'Select Delivery Type'"
+                                            (selectionChange)="editStoreForm.get('deliveryType').patchValue($event.value)"
+                                            #deliverySelector="matSelect"
+                                            >
+                                            <mat-select-trigger>
+                                                <span class="flex items-center">
+                                                    <span>{{ deliverySelector.triggerValue }}</span>
+                                                </span>
+                                            </mat-select-trigger>
+                                            <div>
+                                                <mat-option [value]="'SELF'">Self Delivery</mat-option>
+                                                <mat-option 
+                                                    *ngIf="this.editStoreForm.get('verticalCode').value === 'E-Commerece' || this.editStoreForm.get('verticalCode').value === 'e-commerce-b2b2c' || this.editStoreForm.get('verticalCode').value === 'ECommerce_PK'" 
+                                                    [value]="'SCHEDULED'">Regular Delivery</mat-option>
+                                                <mat-option 
+                                                *ngIf="this.editStoreForm.get('verticalCode').value === 'FnB' || this.editStoreForm.get('verticalCode').value === 'FnB_PK'"
+                                                    [value]="'ADHOC'">Instant Delivery</mat-option>
+                                            </div>
+                                        </mat-select>
+                                        <mat-error *ngIf="editStoreForm.get('deliveryType').hasError('required')">
+                                            Required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Payment & Store Opening Hour -->
+                        <div class="flex flex-col w-full lg:w-2/4 sm:px-4">
+                            <!-- Payment Type -->
+                            <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+                                <mat-label class="font-medium">Payment Type</mat-label>
+                                <mat-select
+                                    [formControlName]="'paymentType'"
+                                    [required]="true"
+                                    [value]="'paymentType'"
+                                    [placeholder]="'Select Payment Type'"
+                                    (selectionChange)="editStoreForm.get('paymentType').patchValue($event.value)"
+                                    #paymentSelector="matSelect"
+                                    >
+                                    <mat-select-trigger>
+                                        <span class="flex items-center">
+                                            <span>{{ paymentSelector.triggerValue }}</span>
+                                        </span>
+                                    </mat-select-trigger>
+                                    <div>
+                                        <mat-option [value]="'COD'">Cash On Delivery</mat-option>
+                                        <mat-option [value]="'ONLINEPAYMENT'">Online Payment</mat-option>
+                                    </div>
+                                </mat-select>
+                                <mat-error *ngIf="editStoreForm.get('paymentType').hasError('required')">
+                                    Required
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center justify-end">
+                        <button
+                            mat-button
+                            [color]="'accent'"
+                            [disabled]="editStoreForm.pristine || editStoreForm.untouched"
+                            (click)="clearForm()">
+                            Clear
+                        </button>
+                        <button
+                            class="ml-2"
+                            mat-flat-button
+                            [color]="'primary'"
+                            [disabled]="editStoreForm.pristine || editStoreForm.invalid"
+                            (click)="updateForm()">
+                            Update
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
