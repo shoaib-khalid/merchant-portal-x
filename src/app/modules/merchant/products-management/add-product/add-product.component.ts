@@ -13,41 +13,14 @@ import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, Pro
 import { InventoryService } from 'app/core/product/inventory.service';
 import { Store } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
-import { MatDialog } from '@angular/material/dialog';
-import { AddProductComponent } from '../add-product/add-product.component';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-    selector       : 'inventory',
-    templateUrl    : './inventory.component.html',
-    styles         : [
-        /* language=SCSS */
-        `
-            .inventory-grid {
-                grid-template-columns: 48px auto 40px;
-
-                @screen sm {
-                    grid-template-columns: 48px auto 112px 72px;
-                }
-
-                @screen md {
-                    grid-template-columns: 48px 112px auto 112px 72px;
-                }
-
-                @screen lg {
-                    grid-template-columns: 48px 112px auto 112px 96px 96px 72px;
-                }
-            }
-
-            .option-grid {
-                grid-template-columns: 120px 112px auto 112px;
-            }
-        `
-    ],
-    encapsulation  : ViewEncapsulation.None,
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    animations     : fuseAnimations
-})
-export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
+    selector: 'dialog-add-product',
+    templateUrl: './add-product.component.html'
+  })
+  
+export class AddProductComponent implements OnInit, AfterViewInit, OnDestroy
 {
     @ViewChild('avatarFileInput') private _avatarFileInput: ElementRef;
     @ViewChild(MatPaginator) private _paginator: MatPaginator;
@@ -58,10 +31,27 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     // get current store
     store$: Store;
 
+    disabledProceed: boolean = true;
+
+    productStatus: boolean;
+    productPacking: boolean;
+
+    checkname = false;
+    checkdescription = false;
+    checkstatus = false;
+    checksku = false;
+    checkprice = false;
+    checkpackingsize = false;
+    checkcategory = false;
+    checkavailablestock = false;
+
+    message: string = "";
+
+
     // product
     products$: Observable<Product[]>;
     selectedProduct: Product | null = null;
-    selectedProductForm: FormGroup;
+    addProductForm: FormGroup;
 
     pagination: ProductPagination;
     
@@ -161,6 +151,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         private _renderer2: Renderer2,
         private _viewContainerRef: ViewContainerRef,
         public _dialog: MatDialog,
+        public dialogRef: MatDialogRef<AddProductComponent>,
+
     )
     {
     }
@@ -188,13 +180,13 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     ngOnInit(): void
     {
         // Create the selected product form
-        this.selectedProductForm = this._formBuilder.group({
+        this.addProductForm = this._formBuilder.group({
             // id               : [''],
             name             : ['', [Validators.required]],
             description      : [''],
             // storeId          : [''], // not used
             categoryId       : [''],
-            status           : ['INACTIVE'],
+            status           : [''],
             // thumbnailUrl     : [''],
             // vendor           : [''], // not used
             // region           : [''], // not used
@@ -204,6 +196,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             allowOutOfStockPurchases: [false],
             minQuantityForAlarm: [-1],
             packingSize      : [''],
+            availableStock   : [''],
             // created          : [''],
             // updated          : [''],
             // productVariants  : this._formBuilder.array([{
@@ -254,8 +247,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
             // currentImageIndex: [0],
             // images           : [[]],
-            // sku              : [''],
-            // price            : [0],
+            sku              : [''],
+            price            : [0],
             // quantity         : [0],
             isVariants       : [false],
             isPackage        : [false],
@@ -442,7 +435,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this.selectedProduct = product;
 
                 // Fill the form
-                this.selectedProductForm.patchValue(product);
+                this.addProductForm.patchValue(product);
 
                 // Fill the form for SKU , Price & Quantity productInventories[0]
                 // this because SKU , Price & Quantity migh have variants
@@ -452,7 +445,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this.displayQuantity = product.productInventories[0].quantity;
 
                 // set isVariants = true is productInventories.length > 0
-                product.productInventories.length > 0 ? this.selectedProductForm.get('isVariants').patchValue(true) : this.selectedProductForm.get('isVariants').patchValue(false);
+                product.productInventories.length > 0 ? this.addProductForm.get('isVariants').patchValue(true) : this.addProductForm.get('isVariants').patchValue(false);
 
                 // Get product image by product id
                 
@@ -526,7 +519,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this.selectedProduct.categoryId = product.categoryId;
         
                 // Update the selected product form
-                this.selectedProductForm.get('categoryId').patchValue(this.selectedProduct.categoryId);
+                this.addProductForm.get('categoryId').patchValue(this.selectedProduct.categoryId);
 
                 // Sort the filtered categories, put selected category on top
                 // First get selected array index by using this.selectedProduct.categoryId
@@ -546,10 +539,10 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this.selectedProduct.minQuantityForAlarm = product.minQuantityForAlarm;
 
                 // Update minQuantityForAlarm
-                this.selectedProductForm.get('minQuantityForAlarm').patchValue(this.selectedProduct.minQuantityForAlarm);
+                this.addProductForm.get('minQuantityForAlarm').patchValue(this.selectedProduct.minQuantityForAlarm);
 
                 // Update the selected product form
-                this.selectedProductForm.get('minQuantityForAlarm').patchValue(this.selectedProduct.minQuantityForAlarm);
+                this.addProductForm.get('minQuantityForAlarm').patchValue(this.selectedProduct.minQuantityForAlarm);
 
                 // get product combo list
                 if (this.selectedProduct.isPackage === true) {
@@ -565,77 +558,13 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             });
     }
 
-    
-    /**
-     * Create product
-     */
-     addProduct(productType: string): void
-     {
-         const dialogRef = this._dialog.open(AddProductComponent, { disableClose: true });
-         dialogRef.afterClosed().subscribe(result => {
-             if (result.status === true) {
-            }
-        });
-    }
-
     /**
      * this create product check category first before creating them
      */
-    initCreateProduct(productType: string){
-
-        if (productType === "normal") {
-            // get category by name = no-category
-            this._inventoryService.getCategories("no-category").subscribe(async (res)=>{
-    
-                let _noCategory = res["data"].find(obj => obj.name === "no-category");
-    
-                // if there is no category with "no-category" name, create one
-                console.log("logs this !!!",_noCategory)
-    
-                if (!_noCategory || _noCategory["name"] !== "no-category"){
-                    await this._inventoryService.createCategory({
-                        name: "no-category",
-                        parentCategoryId: "",
-                        storeId: this.storeId$,
-                        thumbnailUrl: ""
-                    }).subscribe((res)=>{
-                        if (res["status"] !== 201){
-                            console.log("an error has occur",res)
-                        } else {
-                            this.createProduct(res["data"].id, productType);
-                        }
-                    });
-                } else {
-                    this.createProduct(_noCategory.id, productType);
-                }
-            });
-        } else if (productType === "combo") {
-            // get category by name =Combos
-            this._inventoryService.getCategories("Combos").subscribe(async (res)=>{
-    
-                let _noCategory = res["data"].find(obj => obj.name === "Combos");
-    
-                // if there is no category with "Combos" name, create one
-                console.log("logs this !!!",_noCategory)
-    
-                if (!_noCategory || _noCategory["name"] !== "Combos"){
-                    await this._inventoryService.createCategory({
-                        name: "Combos",
-                        parentCategoryId: "",
-                        storeId: this.storeId$,
-                        thumbnailUrl: ""
-                    }).subscribe((res)=>{
-                        if (res["status"] !== 201){
-                            console.log("an error has occur",res)
-                        } else {
-                            this.createProduct(res["data"].id, productType);
-                        }
-                    });
-                } else {
-                    this.createProduct(_noCategory.id, productType);
-                }
-            });
-        }
+    initCreateProduct(){
+        this.dialogRef.close({ 
+            status: true 
+        });
     }
 
     /**
@@ -662,7 +591,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this.selectedProduct = newProduct["data"];
                                         
                 // Update current form with new product data
-                this.selectedProductForm.patchValue(newProduct["data"]);
+                this.addProductForm.patchValue(newProduct["data"]);
 
                 // Set image & currentImageIndex to null ...
                 this.currentImageIndex = 0;
@@ -670,7 +599,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this.images = [];
 
                 // Set image & isVariants to false ...
-                this.selectedProductForm.get('isVariants').patchValue(false);
+                this.addProductForm.get('isVariants').patchValue(false);
                 
                 // // Set filtered variants to empty array
                 this.filteredProductVariants = [];
@@ -697,7 +626,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         let storeFrontURL = 'https://' + this.store$.domain + '.' + storeFrontDomain;
         
         // Get the product object
-        const { sku, price, quantity, ...product} = this.selectedProductForm.getRawValue();
+        const { sku, price, quantity, ...product} = this.addProductForm.getRawValue();
 
         product.seoName = product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
         product.seoUrl = storeFrontURL + '/product/name/' + product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
@@ -770,7 +699,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             {
 
                 // Get the product object
-                const product = this.selectedProductForm.getRawValue();
+                const product = this.addProductForm.getRawValue();
 
                 // Delete the product on the server
                 this._inventoryService.deleteProduct(this.selectedProduct.id).subscribe(() => {
@@ -899,7 +828,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         this.selectedProductsOptions.push(product)
 
         // Update the selected product form
-        this.selectedProductForm.get('categoryId').patchValue(this.selectedProduct.categoryId);
+        this.addProductForm.get('categoryId').patchValue(this.selectedProduct.categoryId);
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -1321,7 +1250,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         this.selectedProduct.productVariants.unshift(variant);
 
         // Update the selected product form
-        this.selectedProductForm.get('productVariants').patchValue(this.selectedProduct.productVariants);
+        this.addProductForm.get('productVariants').patchValue(this.selectedProduct.productVariants);
 
         this.productVariants$ = this.selectedProduct.productVariants;
         this.filteredProductVariants = this.selectedProduct.productVariants;
@@ -1341,7 +1270,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         this.selectedProduct.productVariants.splice(this.selectedProduct.productVariants.findIndex(item => item.id === variant.id), 1);
 
         // Update the selected product form
-        this.selectedProductForm.get('productVariants').patchValue(this.selectedProduct.productVariants);
+        this.addProductForm.get('productVariants').patchValue(this.selectedProduct.productVariants);
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -1492,7 +1421,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 // this.closeDetails();
             } else {
                 // Update the selected product form
-                this.selectedProductForm.get('isVariants').patchValue(true);
+                this.addProductForm.get('isVariants').patchValue(true);
                 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -1713,11 +1642,11 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
         // Get Current Selected Variant (since variant not changed in this case)
         // things that change is variant available
-        let currentSelectedVariant = this.selectedProductForm.get('productVariants').value;
+        let currentSelectedVariant = this.addProductForm.get('productVariants').value;
         currentSelectedVariant.push(selectedProductVariant);
 
         // Update the selected product form
-        this.selectedProductForm.get('productVariants').patchValue(currentSelectedVariant);
+        this.addProductForm.get('productVariants').patchValue(currentSelectedVariant);
         
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -1930,7 +1859,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         this.selectedProduct.categoryId = category.id;
 
         // Update the selected product form
-        this.selectedProductForm.get('categoryId').patchValue(this.selectedProduct.categoryId);
+        this.addProductForm.get('categoryId').patchValue(this.selectedProduct.categoryId);
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -1947,7 +1876,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         this.selectedProduct.categoryId = null;
 
         // Update the selected product form
-        this.selectedProductForm.get('categoryId').patchValue(this.selectedProduct.categoryId);
+        this.addProductForm.get('categoryId').patchValue(this.selectedProduct.categoryId);
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -2026,10 +1955,10 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             this._changeDetectorRef.markForCheck();
         }
 
-        const product = this.selectedProductForm.getRawValue();
+        const product = this.addProductForm.getRawValue();
         
         // // Get the product object
-        // const product = this.selectedProductForm.getRawValue();
+        // const product = this.addProductForm.getRawValue();
 
         // // Remove the currentImageIndex field
         // delete product.currentImageIndex;
@@ -2085,7 +2014,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     //             this._changeDetectorRef.markForCheck();
     //         }
     
-    //         const product = this.selectedProductForm.getRawValue();
+    //         const product = this.addProductForm.getRawValue();
     //     }
     // }
 
@@ -2096,7 +2025,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     {
         const index = this.currentImageIndex;
         if (index > -1) {
-            this.selectedProductForm.get('images').value.splice(index, 1);
+            this.addProductForm.get('images').value.splice(index, 1);
         }
 
         // // Get the form control for 'avatar'
@@ -2186,5 +2115,121 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         if ($event.editor.getLength() > MAX_LENGTH) {
            $event.editor.deleteText(MAX_LENGTH, $event.editor.getLength());
         }
+    }
+
+    addNewProduct() {
+        this.dialogRef.close({ 
+            status: true 
+        });
+      }
+    
+      cancelAddProduct(){
+        this.dialogRef.close({ status: false });
+    }
+    
+    checkName(){           
+        // check product name
+        if (this.addProductForm.get('name').value) {
+            this.checkname = true;
+            this.message = "";
+        }else{
+            this.checkname = false;
+            this.message = "Please insert product name";
+        }
+    }
+
+    checkDescription(){
+         // check product description
+         if (this.addProductForm.get('description').value) {
+            this.checkdescription = true;
+            this.message = "";
+        }else{
+            this.checkdescription = false;
+            this.message = "Please insert product description";
+        }
+    }
+
+    checkStatus(){
+            //check status
+     if (!this.productStatus){
+        this.checkstatus = true;
+        this.message = ""
+        }else{
+            this.checkstatus = false;
+            this.message = "Please select status option"
+        }
+    }
+
+    checkSku(){           
+        // check product sku
+        if (this.addProductForm.get('sku').value) {
+            this.checksku = true;
+            this.message = "";
+        }else{
+            this.checksku = false;
+            this.message = "Please insert product SKU";
+        }
+    }
+
+    checkPrice(){           
+        // check product price
+        if (this.addProductForm.get('price').value) {
+            this.checkprice = true;
+            this.message = "";
+        }else{
+            this.checkprice = false;
+            this.message = "Please insert product price";
+        }
+    }
+
+
+    checkPackingSize(){
+        //check status
+        if (!this.productPacking){
+        this.checkpackingsize = true;
+        this.message = ""
+        }else{
+            this.checkpackingsize = false;
+            this.message = "Please select packing size option"
+        }
+    }    
+
+    checkCategory(event){
+        // check product category
+        if (event.target.checked) {
+            this.checkcategory = true;
+            this.message = "";
+        }else{
+            this.checkcategory = false;
+            this.message = "Please select product categories";
+        }
+    }
+
+    checkAvailableStock(){
+        // check product category
+        if (this.addProductForm.get('availableStock').value) {
+            this.checkavailablestock = true;
+            this.message = "";
+        }else{
+            this.checkavailablestock = false;
+            this.message = "Please insert available stock";
+        }
+    }
+         
+    checkForm(){
+
+        if (this.checkname === true &&
+            this.checkdescription === true &&
+            this.checkstatus === true && 
+            this.checksku === true && 
+            this.checkprice === true && 
+            this.checkpackingsize === true && 
+            this.checkcategory === true && 
+            this.checkavailablestock === true
+            ) {
+            this.disabledProceed = false;
+        } else {
+            this.disabledProceed = true;
+        }   
     }
 }
