@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
-import { Vertical } from 'app/modules/merchant/stores-management/create-store/choose-vertical/choose-vertical.types';
+import { Vertical } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { takeUntil } from 'rxjs/operators';

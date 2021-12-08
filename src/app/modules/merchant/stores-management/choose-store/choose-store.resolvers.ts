@@ -34,34 +34,6 @@ export class ChooseStoreCategoriesResolver implements Resolve<any>
     }
 }
 
-// @Injectable({
-//     providedIn: 'root'
-// })
-// export class ChooseStoresResolver implements Resolve<any>
-// {
-//     /**
-//      * Constructor
-//      */
-//     constructor(private _storesService: StoresService)
-//     {
-//     }
-
-//     // -----------------------------------------------------------------------------------------------------
-//     // @ Public methods
-//     // -----------------------------------------------------------------------------------------------------
-
-//     /**
-//      * Resolver
-//      *
-//      * @param route
-//      * @param state
-//      */
-//     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):  Observable<{ pagination: StorePagination; stores: Store[] }>
-//     {
-//         return this._storesService.get();
-//     }
-// }
-
 @Injectable({
     providedIn: 'root'
 })

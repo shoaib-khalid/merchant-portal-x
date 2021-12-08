@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
+
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,25 +14,29 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { FuseFindByKeyPipeModule } from '@fuse/pipes/find-by-key';
 import { SharedModule } from 'app/shared/shared.module';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import { chooseStoreRoutes } from 'app/modules/merchant/stores-management/choose-store/choose-store.routing';
-import { ChooseStoreComponent } from 'app/modules/merchant/stores-management/choose-store/choose-store.component';
-// import { ChooseStoreDetailsComponent } from 'app/modules/merchant/choose-store/details/details.component';
-import { ChooseStoreListComponent } from 'app/modules/merchant/stores-management/choose-store/list/list.component';
 import { MatTabsModule } from '@angular/material/tabs';
-import { EditStoreComponent } from './edit-store/edit-store.component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatListModule } from '@angular/material/list';
+import { FuseCardModule } from '@fuse/components/card';
+
+import { ChooseVerticalComponent } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.component';
+import { RegisterStoreComponent } from 'app/modules/merchant/stores-management/register-store/register-store.component';
+import { ChooseStoreComponent } from 'app/modules/merchant/stores-management/choose-store/choose-store.component';
+import { EditStoreComponent } from 'app/modules/merchant/stores-management/edit-store/edit-store.component';
+
+import { storesManagementRoutes } from 'app/modules/merchant/stores-management/stores-management.routing';
 
 
 @NgModule({
     declarations: [
         ChooseStoreComponent,
-        // ChooseStoreDetailsComponent,
-        ChooseStoreListComponent,
-        EditStoreComponent
+        ChooseVerticalComponent,
+        EditStoreComponent,
+        RegisterStoreComponent
     ],
     imports     : [
-        RouterModule.forChild(chooseStoreRoutes),
+        RouterModule.forChild(storesManagementRoutes),
         MatButtonModule,
         MatFormFieldModule,
         MatIconModule,
@@ -47,9 +52,14 @@ import { MatToolbarModule } from '@angular/material/toolbar';
         MatTabsModule,
         MatPaginatorModule,
         MatCheckboxModule,
-        MatToolbarModule
-    ]
+        MatToolbarModule,
+        MatListModule,
+        FuseCardModule
+    ],
+    providers: [
+        // GraphHelper
+    ],
 })
-export class ChooseStoreModule
+export class StoreManagementModule
 {
 }

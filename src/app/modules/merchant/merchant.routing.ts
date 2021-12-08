@@ -28,13 +28,7 @@ export const merchantRoutes: Route[] = [
             children   : [
                 {path: 'customer-support', loadChildren: () => import('app/modules/merchant/customer-support/customer-support.module').then(m => m.CustomerSupportModule)},
                 {path: 'redirect', loadChildren: () => import('app/modules/merchant/redirect/redirect.module').then(m => m.RedirectModule), component  : RedirectComponent},
+                {path: 'stores', loadChildren: () => import('app/modules/merchant/stores-management/stores-management.module').then(m => m.StoreManagementModule)},
             ]
-        },
-        {
-            path       : 'stores',
-            children   : [
-                {path: '', loadChildren: () => import('app/modules/merchant/stores-management/choose-store/choose-store.module').then(m => m.ChooseStoreModule)},
-                {path: '', loadChildren: () => import('app/modules/merchant/stores-management/create-store/create-store.module').then(m => m.CreateStoreModule)}
-            ]
-        },
+        }
 ]; 

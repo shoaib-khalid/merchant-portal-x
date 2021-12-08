@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { fuseAnimations } from '@fuse/animations';
-import { RegisterStoreValidationService } from 'app/modules/merchant/stores-management/create-store/register-store/register-store.validation.service';
+import { RegisterStoreValidationService } from 'app/modules/merchant/stores-management/register-store/register-store.validation.service';
 import { Observable } from 'rxjs';
 import { LocaleService } from 'app/core/locale/locale.service';
 import { Locale } from 'app/core/locale/locale.types';
@@ -26,7 +26,6 @@ export class RegisterStoreComponent implements OnInit
     storeId: string;
 
     domainName:string;
-    subDomainName: string;
 
     alert: any;
     createStoreForm: FormGroup;
@@ -105,8 +104,7 @@ export class RegisterStoreComponent implements OnInit
             storeDescription   : ['', [Validators.required, Validators.maxLength(100)]],
             email              : ['', [Validators.required, Validators.email]],
             clientId           : [''],
-            domain             : [''],
-            subdomain          : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
+            domain             : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
             regionCountryId: ['', Validators.required],
             regionCountryStateId: ['', Validators.required],
             phoneNumber        : ['', RegisterStoreValidationService.phonenumberValidator],
@@ -124,7 +122,7 @@ export class RegisterStoreComponent implements OnInit
             deliveryType       : ['', Validators.required],
 
             // Delivery Partner
-            deliveryPartner      : [''],
+            deliveryPartner      : ['', Validators.required],
             
             // Else
             allowScheduledDelivery : [false],
@@ -141,20 +139,9 @@ export class RegisterStoreComponent implements OnInit
         // -------------------------
 
         this._route.paramMap.subscribe( paramMap => {
-            
 
             let _verticalCode = paramMap.get('vertical-code');
             this.createStoreForm.get('verticalCode').patchValue(_verticalCode);
-
-            if (_verticalCode === "ECommerce_PK" || _verticalCode === "FnB_PK") {
-                // set domain name 
-                this.domainName = ".easydukan.co";
-            } else if (_verticalCode === "e-commerce-b2b2c" || _verticalCode === "E-Commerece" || _verticalCode === "FnB") {
-                this.domainName = ".symplified.ai";
-            } else {
-                console.error("Invalid domain name from backend : ",this.domainName);
-                alert("Invalid domain name from backend : " + this.domainName)
-            }
 
 
             // -------------------------
@@ -362,13 +349,11 @@ export class RegisterStoreComponent implements OnInit
 
         // this will remove the item from the object
         const { allowedSelfDeliveryStates, allowScheduledDelivery, allowStorePickup, 
-            subdomain, deliveryType, deliveryPartner, storeTiming
+                deliveryType, deliveryPartner, storeTiming
                 ,...createStoreBody}  = this.createStoreForm.value;
             
         // Disable the form
         this.createStoreForm.disable();
-
-        console.log("createStoreBody: ", createStoreBody)
 
         // ---------------------------
         // Register Store Section
@@ -549,13 +534,10 @@ export class RegisterStoreComponent implements OnInit
         this._changeDetectorRef.markForCheck();
     }
 
-    async checkExistingURL(subdomain: string){
-        let url = subdomain + this.domainName;
+    async checkExistingURL(url: string){
         let status = await this._storesService.getExistingURL(url);
         if (status === 409){
-            this.createStoreForm.get('subdomain').setErrors({domainAlreadyTaken: true});
-        } else {
-            this.createStoreForm.get('domain').patchValue(url);
+            this.createStoreForm.get('domain').setErrors({domainAlreadyTaken: true});
         }
     }
     

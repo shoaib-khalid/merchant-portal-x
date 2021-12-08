@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewEncapsulation } from '@angular/core';
-import { ChooseVerticalService } from 'app/modules/merchant/stores-management/create-store/choose-vertical/choose-vertical.service';
+import { ChooseVerticalService } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.service';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { Vertical } from 'app/modules/merchant/stores-management/create-store/choose-vertical/choose-vertical.types';
+import { Vertical } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.types';
 import { LocaleService } from 'app/core/locale/locale.service';
 import { Locale } from 'app/core/locale/locale.types';
 

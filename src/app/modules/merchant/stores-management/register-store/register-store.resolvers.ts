@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { Vertical } from 'app/modules/merchant/stores-management/create-store/choose-vertical/choose-vertical.types'
-import { ChooseVerticalService } from 'app/modules/merchant/stores-management/create-store/choose-vertical/choose-vertical.service';
+import { Vertical } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.types'
+import { ChooseVerticalService } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.service';
 import { StoresService } from 'app/core/store/store.service';
 
 @Injectable({

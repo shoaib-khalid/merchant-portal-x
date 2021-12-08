@@ -1,1 +1,262 @@
-<router-outlet></router-outlet>
+<div
+    class="absolute mb-12 inset-0 flex flex-col min-w-0 overflow-y-auto"
+    cdkScrollable>
+
+    <!-- Header -->
+    <div class="relative flex-0 py-8 px-4 sm:p-8 overflow-hidden bg-gray-800 dark">
+        <!-- Background - @formatter:off -->
+        <!-- Rings -->
+        <svg class="absolute inset-0 pointer-events-none"
+             viewBox="0 0 960 540" width="100%" height="100%" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+            <g class="text-gray-700 opacity-25" fill="none" stroke="currentColor" stroke-width="100">
+                <circle r="234" cx="196" cy="23"></circle>
+                <circle r="234" cx="790" cy="491"></circle>
+            </g>
+        </svg>
+        <!-- @formatter:on -->
+        <div class="z-10 relative flex flex-col items-center">
+            <h2 class="text-xl font-semibold">SELECT YOUR STORE</h2>
+            <!-- <div class="mt-1 text-4xl sm:text-7xl font-extrabold tracking-tight leading-tight text-center">
+                What do you want to learn today?
+            </div> -->
+            <div class="max-w-2xl mt-6 sm:text-2xl text-center tracking-tight text-secondary">
+                Simply manage your store with SYMPlified
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex flex-auto p-6 sm:p-10">
+
+        <div class="flex flex-col flex-auto w-full max-w-xs sm:max-w-5xl mx-auto">
+            <!-- Filters -->
+            <div class="flex flex-col sm:flex-row items-center justify-between w-full max-w-xs sm:max-w-none">
+                <mat-form-field class="fuse-mat-no-subscript w-full sm:w-48">
+                    <!-- <mat-select
+                        [value]="'all'"
+                        (selectionChange)=""> -->
+                    <mat-select
+                        [formControl]="categoryFilterControl"
+                        [value]="filteredCategory"
+                        placeholder="Store vertical"
+                        #categorySelector="matSelect"
+                    >
+                        <mat-select-trigger>
+                            <span class="flex items-center">
+                                <span>{{ categorySelector.triggerValue }}</span>
+                            </span>
+                        </mat-select-trigger>
+                        <mat-option [value]="''">All</mat-option>
+                        <ng-container *ngFor="let category of categories; trackBy: trackByFn">
+                            <mat-option [value]="category.slug">{{category.name}}</mat-option>
+                        </ng-container>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field
+                    class="fuse-mat-no-subscript w-full sm:w-72 mt-4 sm:mt-0 sm:ml-4"
+                    [floatLabel]="'always'">
+                    <mat-icon
+                        matPrefix
+                        class="icon-size-5"
+                        [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                    <!-- <input
+                        (input)=""
+                        placeholder="Search by title or description"
+                        matInput
+                        #query> -->
+                    <input
+                        [formControl]="filterControl"
+                        placeholder="Search by store name"
+                        matInput
+                        #query>
+                    <div>
+                        <input
+                            id="name-sort-button"
+                            [formControl]="filterControl"
+                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                            checked
+                            (click)="toggleSortName();"
+                            type="checkbox"
+                            mat-icon-button>
+                        <label 
+                            class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
+                            for="name-sort-button"
+                            matRipple>
+                            <mat-icon
+                                *ngIf="sortName === 'asc'"
+                                class="text-gray-400 icon-size-5"
+                                [svgIcon]="'heroicons_outline:sort-ascending'"></mat-icon>
+                            <mat-icon
+                                *ngIf="sortName === 'desc'"
+                                class="text-gray-400 icon-size-5"
+                                [svgIcon]="'heroicons_outline:sort-descending'"></mat-icon>
+                        </label>
+                    </div>
+                    <div>
+                        <input
+                            id="clear-sort-button"
+                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                            type="button"
+                            (click)="clearFilter()"
+                            mat-icon-button>
+                        <label 
+                            class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
+                            for="clear-sort-button"
+                            matRipple>
+                            <mat-icon
+                                class="text-gray-400 icon-size-5"
+                                [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                        </label>
+                    </div>
+                </mat-form-field>
+            </div>
+            <!-- Stores -->
+            <ng-container *ngIf="this.filteredStores.length; else noCourses">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8 sm:mt-10">
+                    <ng-container *ngFor="let store of filteredStores; trackBy: trackByFn">
+                        <!-- Store -->
+                        <div class="flex flex-col h-96 shadow rounded-2xl overflow-hidden bg-card">
+                            <div class="flex flex-col p-6">
+                                <div class="flex items-center justify-between">
+                                    <!-- Store category -->
+                                    <ng-container *ngIf="(store.category | fuseFindByKey:'slug':categories) as category">
+                                        <div
+                                            class="py-0.5 px-3 rounded-full text-sm font-semibold"
+                                            [ngClass]="{'text-blue-800 bg-blue-100 dark:text-blue-50 dark:bg-blue-500': category.slug === 'web',
+                                                        'text-green-800 bg-green-100 dark:text-green-50 dark:bg-green-500': category.slug === 'android',
+                                                        'text-pink-800 bg-pink-100 dark:text-pink-50 dark:bg-pink-500': category.slug === 'cloud',
+                                                        'text-amber-800 bg-amber-100 dark:text-amber-50 dark:bg-amber-500': category.slug === 'firebase'}">
+                                            {{category.title}}
+                                        </div>
+                                    </ng-container>
+                                    <!-- Completed at least once -->
+                                    <div class="flex items-center">
+                                        <ng-container *ngIf="store.progress.completed > 0">
+                                            <mat-icon
+                                                class="icon-size-5 text-green-600"
+                                                [svgIcon]="'heroicons_solid:badge-check'"
+                                                [matTooltip]="'You completed this store at least once'"></mat-icon>
+                                        </ng-container>
+                                    </div>
+                                </div>
+
+                                <!-- Store Image -->
+                                <div class="flex w-full items-center leading-5 text-md text-secondary">
+                                    <div class="flex w-full justify-center">
+                                        <img *ngIf="store.storeAsset && store.storeAsset.logoUrl !== ''; else defaultLogo" class="max-h-20 my-4 w-auto" [src]="store.storeAsset.logoUrl" alt="">
+                                    </div>
+                                    <ng-template #defaultLogo>
+                                        <img class="max-h-20 my-4 w-auto" [src]="'assets/images/logo/logo_symplified_bg-removebg.png'" alt="">
+                                    </ng-template>
+                                </div>
+                                <!-- Store title & description -->
+                                <div class="mt-4 text-lg font-medium">{{store.name}}</div>
+                                <!-- <div class="mt-0.5 line-clamp-2 text-secondary">{{store.storeDescription}}</div> -->
+                                <div class="w-full h-1 my-4 border-t-2"></div>
+
+                                <!-- Store completion -->
+                                <div class="flex items-center mt-2 leading-5 text-md text-secondary">
+                                    <mat-icon
+                                        class="icon-size-5 text-hint"
+                                        [svgIcon]="'heroicons_solid:academic-cap'"></mat-icon>
+                                    <ng-container *ngIf="store.progress.completed === 0">
+                                        <div class="ml-1.5">Never completed</div>
+                                    </ng-container>
+                                    <ng-container *ngIf="store.progress.completed > 0">
+                                        <div class="ml-1.5">
+                                            <span>Store Setup Completed</span>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                            <!-- Footer -->
+                            <div class="flex flex-col w-full mt-auto">
+                                <!-- Store progress -->
+                                <div class="relative h-0.5">
+                                    <div
+                                        class="z-10 absolute inset-x-0 h-6 -mt-3"
+                                        [matTooltip]="store.progress.currentStep / store.totalSteps | percent"
+                                        [matTooltipPosition]="'above'"
+                                        [matTooltipClass]="'-mb-0.5'"></div>
+                                    <mat-progress-bar
+                                        class="h-0.5"
+                                        [value]="(100 * store.progress.currentStep) / store.totalSteps"></mat-progress-bar>
+                                </div>
+
+                                <!-- Store launch button -->
+                                <div class="px-6 py-4 text-right bg-gray-50 dark:bg-transparent justify-between w-full flex">
+                                    <div class="flex flex-wrap">
+                                        <input
+                                            [id]="'delete-store-btn' + store.id"
+                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                            type="button"
+                                            (click)="deleteStore(store.id)"
+                                            >
+                                        <label
+                                            class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-warn hover:bg-warn-700 mr-3"
+                                            [for]="'delete-store-btn' + store.id"
+                                            matRipple>
+                                            <mat-icon
+                                                class="text-white icon-size-5"
+                                                [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                        </label>
+                                        <input
+                                            [id]="'edit-store-btn' + store.id"
+                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                            type="button"
+                                            [routerLink]="'/stores/edit/'+ store.id"
+                                        >
+                                        <label
+                                            class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400"
+                                            [for]="'edit-store-btn' + store.id"
+                                            matRipple>
+                                            <mat-icon
+                                                class="text-white icon-size-5"
+                                                [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
+                                        </label>
+
+                                    </div>
+                                    <!-- <button>update</button> -->
+                                    <button
+                                        mat-stroked-button
+                                        (click)="pageRedirect(store.id)">
+                                        <span class="inline-flex items-center">
+
+                                            <!-- Choose Store -->
+                                            <ng-container *ngIf="store.progress.currentStep > 0">
+                                                <span>Select</span>
+                                            </ng-container>
+
+                                            <mat-icon
+                                                class="ml-1.5 icon-size-5"
+                                                [svgIcon]="'heroicons_solid:arrow-sm-right'"></mat-icon>
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </ng-container>
+                </div>
+            </ng-container>
+
+            <!-- No stores -->
+            <ng-template #noCourses>
+                <div class="flex flex-auto flex-col items-center justify-center bg-gray-100 dark:bg-transparent">
+                    <mat-icon
+                        class="icon-size-20"
+                        [svgIcon]="'iconsmind:file_search'"></mat-icon>
+                    <div class="mt-6 text-2xl font-semibold tracking-tight text-secondary">No stores found!</div>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+</div>
+
+<mat-paginator
+    class="absolute inset-x-0 bottom-0 border-b border-t border-b-0 z-10 bg-gray-50 dark:bg-transparent"
+    [ngClass]="{'pointer-events-none': isLoading}"
+    [length]="pagination.length"
+    [pageIndex]="pagination.page"
+    [pageSize]="pagination.size"
+    [pageSizeOptions]="[5, 10, 25, 100]"
+    [showFirstLastButtons]="true"></mat-paginator>

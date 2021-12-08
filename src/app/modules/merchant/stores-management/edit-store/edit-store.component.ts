@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { fuseAnimations } from '@fuse/animations';
-import { RegisterStoreValidationService } from 'app/modules/merchant/stores-management/create-store/register-store/register-store.validation.service';
+import { RegisterStoreValidationService } from 'app/modules/merchant/stores-management/register-store/register-store.validation.service';
 import { Observable } from 'rxjs';
 import { LocaleService } from 'app/core/locale/locale.service';
 import { Locale } from 'app/core/locale/locale.types';
@@ -9,9 +9,8 @@ import { StoresService } from 'app/core/store/store.service';
 import { Store, StoreRegionCountries, CreateStore, StoreAssets, StoreSelfDeliveryStateCharges, StoreDeliveryDetails, StoreDeliveryProvider } from 'app/core/store/store.types';
 import { ActivatedRoute, Router } from '@angular/router';
 import { JwtService } from 'app/core/jwt/jwt.service';
-import { debounce, StringNullableChain } from 'lodash';
+import { debounce } from 'lodash';
 import { HttpEventType, HttpResponse } from '@angular/common/http';
-import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 @Component({
     selector     : 'edit-store-page',
@@ -28,7 +27,6 @@ export class EditStoreComponent implements OnInit
     
     domainName:string;
     subDomainName: string;
-    currentDomain: string;
     
     alert: any;
     editStoreForm: FormGroup;
@@ -67,8 +65,7 @@ export class EditStoreComponent implements OnInit
         private _changeDetectorRef: ChangeDetectorRef,
         private _localeService: LocaleService,
         private _router: Router,
-        private _route: ActivatedRoute,
-        private _fuseConfirmationService: FuseConfirmationService,
+        private _route: ActivatedRoute
     )
     {
         this.checkExistingURL = debounce(this.checkExistingURL, 300);
@@ -103,7 +100,6 @@ export class EditStoreComponent implements OnInit
             storeDescription   : ['', [Validators.required, Validators.maxLength(100)]],
             email              : ['', [Validators.required, Validators.email]],
             clientId           : [''],
-            domain             : [''],
             subdomain          : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
             regionCountryId    : ['', Validators.required],
             regionCountryStateId: ['', Validators.required],
@@ -122,7 +118,7 @@ export class EditStoreComponent implements OnInit
             deliveryType       : ['', Validators.required],
 
             // Delivery Partner
-            deliveryPartner      : [''],
+            deliveryPartner      : ['', Validators.required],
             
             // Else
             allowScheduledDelivery : [false],
@@ -182,9 +178,6 @@ export class EditStoreComponent implements OnInit
 
                 // get subdomain from store domain
                 let _domain = response.domain;
-                this.currentDomain = response.domain;
-
-                
 
                 if (_domain.split(".").length === 3) {
                     // set domain name 
@@ -195,7 +188,7 @@ export class EditStoreComponent implements OnInit
                     this.subDomainName = _domain;
                 } else {
                     console.error("Invalid domain name from backend : ",_domain);
-                    alert("Invalid domain name from backend : " + _domain)
+                    this.alert("Invalid domain name from backend : " + _domain)
                 }
 
                 this.editStoreForm.get('subdomain').patchValue(this.subDomainName);
@@ -254,6 +247,9 @@ export class EditStoreComponent implements OnInit
                 );
            } 
         );
+
+
+
 
         // get states service
         this.statesList = [
@@ -402,17 +398,16 @@ export class EditStoreComponent implements OnInit
 
         // this will remove the item from the object
         const { allowedSelfDeliveryStates, allowScheduledDelivery, allowStorePickup, 
-            subdomain, deliveryType, deliveryPartner, storeTiming
-            ,...updateStoreBody } = this.editStoreForm.value;
+            deliveryType, deliveryPartner, storeTiming
+            ,...createStoreBody } = this.editStoreForm.value;
 
         // Disable the form
         this.editStoreForm.disable();
 
-        this._storesService.update(this.storeId, updateStoreBody)
+        this._storesService.update(this.storeId, createStoreBody)
             .subscribe((response) => {
 
-                console.log("response",response)
-                let storeId = response.id;
+                let storeId = response["data"].id;
 
                 // ---------------------------
                 // Update Store Timing
@@ -580,26 +575,6 @@ export class EditStoreComponent implements OnInit
 
                 }
 
-                // Show a success message (it can also be an error message)
-                const confirmation = this._fuseConfirmationService.open({
-                    title  : 'Success',
-                    message: 'Your store has been updated successfully!',
-                    icon: {
-                        show: true,
-                        name: "heroicons_outline:check",
-                        color: "success"
-                    },
-                    actions: {
-                        confirm: {
-                            label: 'Ok',
-                            color: "primary",
-                        },
-                        cancel: {
-                            show: false,
-                        },
-                    }
-                });
-
                 // Navigate to the confirmation required page
                 // this._router.navigateByUrl('/stores');
             },
@@ -619,6 +594,13 @@ export class EditStoreComponent implements OnInit
                 // Show the alert
                 this.alert = true;
             });
+
+        // Show a success message (it can also be an error message)
+        // and remove it after 5 seconds
+        this.alert = {
+            type   : 'success',
+            message: 'Your request has been delivered! A member of our support staff will respond as soon as possible.'
+        };
 
         setTimeout(() => {
             this.alert = null;
@@ -643,12 +625,11 @@ export class EditStoreComponent implements OnInit
     }
 
     async checkExistingURL(subdomain: string){
-        let url = subdomain + this.domainName;
+        let url = subdomain + "." + this.domainName;
+        console.log("the url: ", url)
         let status = await this._storesService.getExistingURL(url);
-        if (status === 409 && this.currentDomain !== url){
-            this.editStoreForm.get('subdomain').setErrors({domainAlreadyTaken: true});
-        } else {
-            this.editStoreForm.get('domain').patchValue(url);
+        if (status === 409){
+            this.editStoreForm.get('domain').setErrors({domainAlreadyTaken: true});
         }
     }
     
