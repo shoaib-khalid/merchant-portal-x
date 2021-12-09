@@ -572,16 +572,18 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         
         const dialogRef = this._dialog.open(AddProductComponent, { disableClose: true });
         dialogRef.afterClosed().subscribe(result => {
-            console.log("result: ", result)
+
+            if (result.valid === false) {
+                return;
+            }
+
             if (productType === "normal") {
                 // get category by name = no-category
                 this._inventoryService.getCategories("no-category").subscribe(async (res)=>{
     
                     let _noCategory = res["data"].find(obj => obj.name === "no-category");
     
-                    // if there is no category with "no-category" name, create one
-                    console.log("logs this !!!",_noCategory)
-    
+                    // if there is no category with "no-category" name, create one    
                     if (!_noCategory || _noCategory["name"] !== "no-category"){
                         await this._inventoryService.createCategory({
                             name: "no-category",
@@ -605,9 +607,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     
                     let _noCategory = res["data"].find(obj => obj.name === "Combos");
     
-                    // if there is no category with "Combos" name, create one
-                    console.log("logs this !!!",_noCategory)
-    
+                    // if there is no category with "Combos" name, create one   
                     if (!_noCategory || _noCategory["name"] !== "Combos"){
                         await this._inventoryService.createCategory({
                             name: "Combos",
@@ -635,7 +635,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     createProduct(categoryId: string, productType: string, productBody): void
     {
 
-        const { sku, availableStock,price, ...newProductBody } = productBody;
+        const { sku, availableStock, price, images, imagefiles, ...newProductBody } = productBody;
 
         // Create the product
         this._inventoryService.createProduct(categoryId, productType, newProductBody)
@@ -651,16 +651,35 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                         this.displaySku = response.sku;
                     });
 
+                // Update the assets product on the server (backend kena enable update)
+                if (imagefiles) {
+                    for (var i = 0; i < imagefiles.length; i++) {
+                        // create a new one
+                        let formData = new FormData();
+                        formData.append('file',imagefiles[i]);
+                        this._inventoryService.addProductAssets(newProduct["data"].id, formData, (i === 0) ? { isThumbnail: true } : { isThumbnail: false })
+                            .pipe(takeUntil(this._unsubscribeAll))
+                            .subscribe((response)=>{
+                                if (response.isThumbnail){
+                                    this.selectedProduct.thumbnailUrl = response.url;
+                                }
+
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
+                            });
+                    }
+
+                    // load images
+                    this.currentImageIndex = 0;
+                    this.imagesFile = imagefiles;
+                    this.images = images;
+                }
+
                 // Go to new product
                 this.selectedProduct = newProduct["data"];
                                         
                 // Update current form with new product data
                 this.selectedProductForm.patchValue(newProduct["data"]);
-
-                // Set image & currentImageIndex to null ...
-                this.currentImageIndex = 0;
-                this.imagesFile = [];
-                this.images = [];
 
                 // Set image & isVariants to false ...
                 this.selectedProductForm.get('isVariants').patchValue(false);
@@ -714,22 +733,21 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
         } else {
 
-                const formData = new FormData();
-                for (var i = 0; i < this.imagesFile.length; i++) {
-                    // create a new one
-                    formData.append('file',this.imagesFile[i]);
-                    this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === 0) ? { isThumbnail: true } : { isThumbnail: false })
-                        .pipe(takeUntil(this._unsubscribeAll))
-                        .subscribe((response)=>{
-                            console.log("response: ", response)
-                            if (response.isThumbnail){
-                                this.selectedProduct.thumbnailUrl = response.url;
-                            }
+            for (var i = 0; i < this.imagesFile.length; i++) {
+                // create a new one
+                let formData = new FormData();
+                formData.append('file',this.imagesFile[i]);
+                this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === 0) ? { isThumbnail: true } : { isThumbnail: false })
+                    .pipe(takeUntil(this._unsubscribeAll))
+                    .subscribe((response)=>{
+                        if (response.isThumbnail){
+                            this.selectedProduct.thumbnailUrl = response.url;
+                        }
 
-                            // Mark for check
-                            this._changeDetectorRef.markForCheck();
-                        });
-                };
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    });
+            }
 
         }
         
@@ -2165,10 +2183,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             var result = ( aProp.toLowerCase() < bProp.toLowerCase()) ? -1 : (aProp.toLowerCase() > bProp.toLowerCase()) ? 1 : 0;
             return (result * sortOrder);
         }
-    }
-
-    changeStatus(something){
-        console.log("",something);
     }
 
     // Quil editor text limit
