@@ -41,7 +41,7 @@
                                                 <!-- Add / Edit Image -->
                                                 <div>
                                                     <input
-                                                        id="image-file-input"
+                                                        id="new-image-file-input"
                                                         class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                         type="file"
                                                         [multiple]="false"
@@ -50,7 +50,7 @@
                                                         #imageFileInput>
                                                     <label
                                                         class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
-                                                        for="image-file-input"
+                                                        for="new-image-file-input"
                                                         matRipple>
                                                         <mat-icon
                                                             class="text-white"
@@ -60,14 +60,14 @@
                                                 <!-- Remove Image -->
                                                 <div *ngIf="images.length">
                                                     <input
-                                                        id="image-remove-button"
+                                                        id="new-image-remove-button"
                                                         class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                         type="button"
                                                         (click)="removeImage();resetCycleImages()"
                                                         mat-icon-button>
                                                     <label 
                                                         class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
-                                                        for="image-remove-button"
+                                                        for="new-image-remove-button"
                                                         matRipple>
                                                         <mat-icon
                                                             class="text-white"
@@ -93,7 +93,7 @@
                                     <div class="flex items-center mt-2 whitespace-nowrap">
                                         <div>
                                             <input
-                                                id="image-file-input"
+                                                id="new-image-file-input"
                                                 class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                 type="file"
                                                 [multiple]="false"
@@ -102,7 +102,7 @@
                                                 #imageFileInput>
                                             <label
                                                 class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
-                                                for="image-file-input"
+                                                for="new-image-file-input"
                                                 matRipple>
                                                 <mat-icon
                                                     class="icon-size-5"
@@ -112,7 +112,7 @@
                                         <!-- Toggle Image Edit -->
                                         <div>
                                             <input
-                                                id="image-edit-button"
+                                                id="new-image-edit-button"
                                                 class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                 type="button"
                                                 (click)="toggleImagesEditMode()"
@@ -121,7 +121,7 @@
                                             
                                             <label 
                                                 class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
-                                                for="image-edit-button"
+                                                for="new-image-edit-button"
                                                 matRipple>
                                                 <mat-icon
                                                     class="icon-size-5"
@@ -178,7 +178,6 @@
                                         appearance="fill" floatLabel="always"
                                         placeholder="Select one option"
                                         class="border border-gray-300 w-full px-2 py-2 rounded"
-                                        [value]="'status'"
                                         (selectionChange)="addProductForm.get('status').patchValue(statusSelector.value)"
                                         (selectionChange)="checkInput('status');checkForm()"
                                         #statusSelector="matSelect"
@@ -243,7 +242,7 @@
                                             [formControlName]="'sku'"
                                             placeholder="Insert SKU"
                                             (input)="checkInput('sku');checkForm()"
-                                            [value]="displaySku">
+                                        >
                                     </mat-form-field>
 
                                     <!-- Price -->
@@ -259,7 +258,7 @@
                                             placeholder="Insert price"
                                             (input)="checkInput('price');checkForm()"
                                             type="number"
-                                            [value]="displayPrice">
+                                        >
                                     </mat-form-field>
 
                                     <!-- Packing Size -->
@@ -273,7 +272,7 @@
                                             appearance="fill"
                                             [value]="packingSize"
                                             placeholder="Select one option"
-                                            (selectionChange)="addProductForm.get('packingSize').patchValue(statusSelector.value)"
+                                            (selectionChange)="addProductForm.get('packingSize').patchValue(packingSizeSelector.value)"
                                             (selectionChange)="checkInput('packingSize');checkForm()"
                                             #packingSizeSelector="matSelect"
                                             >
@@ -448,7 +447,7 @@
                                             [formControlName]="'availableStock'"
                                             type="number"
                                             matInput
-                                            [value]="displayQuantity">
+                                        >
                                     </mat-form-field>
                                 </div>
                                 <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
@@ -486,7 +485,6 @@
                                     <mat-form-field *ngIf="addProductForm.get('minQuantityForAlarm').value >= 0" class="mt-0 sm:mt-1 flex items-center -my-px w-full">
                                         <input
                                             type="number"
-                                            [value]="addProductForm.get('minQuantityForAlarm').value"
                                             matInput
                                             [formControlName]="'minQuantityForAlarm'">
                                     </mat-form-field>

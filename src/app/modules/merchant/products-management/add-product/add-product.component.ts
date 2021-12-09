@@ -19,8 +19,6 @@ import { StoresService } from 'app/core/store/store.service';
   
 export class AddProductComponent implements OnInit, OnDestroy
 {
-    @ViewChild('avatarFileInput') private _avatarFileInput: ElementRef;
-
     // get current store
     store$: Store;
 
@@ -40,7 +38,6 @@ export class AddProductComponent implements OnInit, OnDestroy
     message: string = "";
 
     // product
-    products$: Observable<Product[]>;
     selectedProduct: Product | null = null;
     addProductForm: FormGroup;
 
@@ -56,18 +53,6 @@ export class AddProductComponent implements OnInit, OnDestroy
     images: any = [];
     imagesFile: any = [];
     currentImageIndex: number = 0;
-
-    // sku, price & quantity 
-    // reason these 3 not in formbuilder is because it's not part of product but 
-    // it's part of product inventory (it's here for display only)
-    displaySku: string = "";
-    displayPrice: number = 0;
-    displayQuantity: number = 0;
-
-    flashMessage: 'success' | 'error' | null = null;
-    isLoading: boolean = false;
-    searchInputControl: FormControl = new FormControl();
-
     imagesEditMode: boolean = false;
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -89,8 +74,6 @@ export class AddProductComponent implements OnInit, OnDestroy
             ['blockquote','clean']
         ]
     };
-
-    selectedVariantCombos: any = [];
 
     /**
      * Constructor
@@ -144,6 +127,7 @@ export class AddProductComponent implements OnInit, OnDestroy
             sku              : [''],
             price            : [''],
             images           : [[]],
+            imagefiles       : [[]],
 
 
             // form completion
@@ -528,6 +512,8 @@ export class AddProductComponent implements OnInit, OnDestroy
     }
 
     addNewProduct() {
+        this.addProductForm.get('images').patchValue(this.images);
+        this.addProductForm.get('imagefiles').patchValue(this.imagesFile);
         this.dialogRef.close(this.addProductForm.value);
     }
     
@@ -548,53 +534,7 @@ export class AddProductComponent implements OnInit, OnDestroy
             this.message = "Please insert product " + input;
         }
 
-        console.log(this.checkinput)
-
     }
-
-    // checkPrice(){           
-    //     // check product price
-    //     if (this.addProductForm.get('price').value) {
-    //         this.checkprice = true;
-    //         this.message = "";
-    //     }else{
-    //         this.checkprice = false;
-    //         this.message = "Please insert product price";
-    //     }
-    // }
-
-    // checkPackingSize(){
-    //     //check status
-    //     if (!this.productPacking){
-    //     this.checkpackingsize = true;
-    //     this.message = ""
-    //     }else{
-    //         this.checkpackingsize = false;
-    //         this.message = "Please select packing size option"
-    //     }
-    // }    
-
-    // checkCategory(event){
-    //     // check product category
-    //     if (event.target.checked) {
-    //         this.checkcategory = true;
-    //         this.message = "";
-    //     }else{
-    //         this.checkcategory = false;
-    //         this.message = "Please select product categories";
-    //     }
-    // }
-
-    // checkAvailableStock(){
-    //     // check product category
-    //     if (this.addProductForm.get('availableStock').value) {
-    //         this.checkavailablestock = true;
-    //         this.message = "";
-    //     }else{
-    //         this.checkavailablestock = false;
-    //         this.message = "Please insert available stock";
-    //     }
-    // }
          
     checkForm(){
 
