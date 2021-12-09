@@ -143,6 +143,8 @@ export class AddProductComponent implements OnInit, OnDestroy
             availableStock   : [''],
             sku              : [''],
             price            : [''],
+            images           : [[]],
+
 
             // form completion
             valid            : [false]

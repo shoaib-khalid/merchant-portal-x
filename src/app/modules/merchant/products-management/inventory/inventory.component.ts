@@ -573,78 +573,77 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         const dialogRef = this._dialog.open(AddProductComponent, { disableClose: true });
         dialogRef.afterClosed().subscribe(result => {
             console.log("result: ", result)
+            if (productType === "normal") {
+                // get category by name = no-category
+                this._inventoryService.getCategories("no-category").subscribe(async (res)=>{
+    
+                    let _noCategory = res["data"].find(obj => obj.name === "no-category");
+    
+                    // if there is no category with "no-category" name, create one
+                    console.log("logs this !!!",_noCategory)
+    
+                    if (!_noCategory || _noCategory["name"] !== "no-category"){
+                        await this._inventoryService.createCategory({
+                            name: "no-category",
+                            parentCategoryId: "",
+                            storeId: this.storeId$,
+                            thumbnailUrl: ""
+                        }).subscribe((res)=>{
+                            if (res["status"] !== 201){
+                                console.log("an error has occur",res)
+                            } else {
+                                this.createProduct(res["data"].id, productType, result);
+                            }
+                        });
+                    } else {
+                        this.createProduct(_noCategory.id, productType, result);
+                    }
+                });
+            } else if (productType === "combo") {
+                // get category by name =Combos
+                this._inventoryService.getCategories("Combos").subscribe(async (res)=>{
+    
+                    let _noCategory = res["data"].find(obj => obj.name === "Combos");
+    
+                    // if there is no category with "Combos" name, create one
+                    console.log("logs this !!!",_noCategory)
+    
+                    if (!_noCategory || _noCategory["name"] !== "Combos"){
+                        await this._inventoryService.createCategory({
+                            name: "Combos",
+                            parentCategoryId: "",
+                            storeId: this.storeId$,
+                            thumbnailUrl: ""
+                        }).subscribe((res)=>{
+                            if (res["status"] !== 201){
+                                console.log("an error has occur",res)
+                            } else {
+                                this.createProduct(res["data"].id, productType, result);
+                            }
+                        });
+                    } else {
+                        this.createProduct(_noCategory.id, productType, result);
+                    }
+                });
+            }
         });
-
-        return;
-
-        if (productType === "normal") {
-            // get category by name = no-category
-            this._inventoryService.getCategories("no-category").subscribe(async (res)=>{
-
-                let _noCategory = res["data"].find(obj => obj.name === "no-category");
-
-                // if there is no category with "no-category" name, create one
-                console.log("logs this !!!",_noCategory)
-
-                if (!_noCategory || _noCategory["name"] !== "no-category"){
-                    await this._inventoryService.createCategory({
-                        name: "no-category",
-                        parentCategoryId: "",
-                        storeId: this.storeId$,
-                        thumbnailUrl: ""
-                    }).subscribe((res)=>{
-                        if (res["status"] !== 201){
-                            console.log("an error has occur",res)
-                        } else {
-                            this.createProduct(res["data"].id, productType);
-                        }
-                    });
-                } else {
-                    this.createProduct(_noCategory.id, productType);
-                }
-            });
-        } else if (productType === "combo") {
-            // get category by name =Combos
-            this._inventoryService.getCategories("Combos").subscribe(async (res)=>{
-
-                let _noCategory = res["data"].find(obj => obj.name === "Combos");
-
-                // if there is no category with "Combos" name, create one
-                console.log("logs this !!!",_noCategory)
-
-                if (!_noCategory || _noCategory["name"] !== "Combos"){
-                    await this._inventoryService.createCategory({
-                        name: "Combos",
-                        parentCategoryId: "",
-                        storeId: this.storeId$,
-                        thumbnailUrl: ""
-                    }).subscribe((res)=>{
-                        if (res["status"] !== 201){
-                            console.log("an error has occur",res)
-                        } else {
-                            this.createProduct(res["data"].id, productType);
-                        }
-                    });
-                } else {
-                    this.createProduct(_noCategory.id, productType);
-                }
-            });
-        }
     }
 
     /**
      * Create product
      */
-    createProduct(categoryId: string, productType: string): void
+    createProduct(categoryId: string, productType: string, productBody): void
     {
 
+        const { sku, availableStock,price, ...newProductBody } = productBody;
+
         // Create the product
-        this._inventoryService.createProduct(categoryId, productType)
+        this._inventoryService.createProduct(categoryId, productType, newProductBody)
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(async (newProduct) => {
 
                 // Add Inventory to product
-                this._inventoryService.addInventoryToProduct(newProduct["data"])
+                this._inventoryService.addInventoryToProduct(newProduct["data"], { sku: sku, availableStock: availableStock, price:price } )
                     .subscribe((response)=>{
                         // update sku, price, quantity display since it's not part of product but product inventory
                         this.displayPrice = response.price;

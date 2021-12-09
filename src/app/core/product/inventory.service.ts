@@ -197,7 +197,7 @@ export class InventoryService
     /**
      * Create product
      */
-    createProduct(categoryId: string, productType: string): Observable<Product>
+    createProduct(categoryId: string, productType: string, productBody): Observable<Product>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -209,21 +209,20 @@ export class InventoryService
 
         const now = new Date();
         const date = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate() + " " + now.getHours() + ":" + now.getMinutes()  + ":" + now.getSeconds();
-        const productName = "A New Product " + date;
-        const seoName = productName.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
+        const seoName = productBody.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
 
         const body = {
             "categoryId": categoryId,
-            "name": productName,
-            "status": "INACTIVE",
-            "description": "Tell us more about your product",
+            "name": productBody.name,
+            "status": productBody.status,
+            "description": productBody.description,
             "storeId": this.storeId$,
-            "allowOutOfStockPurchases": false,
-            "trackQuantity": false,
+            "allowOutOfStockPurchases": productBody.allowOutOfStockPurchases,
+            "trackQuantity": productBody.trackQuantity,
             "seoName":seoName,
             "seoUrl": "https://cinema-online.symplified.ai/product/name/"+ seoName,
-            "minQuantityForAlarm": -1,
-            "packingSize": "S",
+            "minQuantityForAlarm": productBody.minQuantityForAlarm === false ? -1 : productBody.minQuantityForAlarm,
+            "packingSize": productBody.packagingSize ? productBody.packagingSize : "S",
             "isPackage": (productType === "combo") ? true : false
         };
 
@@ -423,7 +422,7 @@ export class InventoryService
      *
      * @param product
      */
-    addInventoryToProduct(product: Product): Observable<ProductInventory>{
+    addInventoryToProduct(product: Product, productInventory): Observable<ProductInventory>{
 
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -439,10 +438,10 @@ export class InventoryService
         const body = {
             "productId": product.id,
             "itemCode": product.id + date,
-            "price": 1,
+            "price": productInventory.price,
             "compareAtprice": 0,
-            "quantity": 1,
-            "sku": product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''),
+            "quantity": productInventory.availableStock,
+            "sku": productInventory.sku,
             "status": "AVAILABLE"
         };
 
