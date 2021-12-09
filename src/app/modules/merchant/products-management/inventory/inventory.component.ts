@@ -13,6 +13,8 @@ import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, Pro
 import { InventoryService } from 'app/core/product/inventory.service';
 import { Store } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
+import { MatDialog } from '@angular/material/dialog';
+import { AddProductComponent } from '../add-product/add-product.component';
 
 @Component({
     selector       : 'inventory',
@@ -157,7 +159,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         private _storesService: StoresService,
         private _overlay: Overlay,
         private _renderer2: Renderer2,
-        private _viewContainerRef: ViewContainerRef
+        private _viewContainerRef: ViewContainerRef,
+        public _dialog: MatDialog,
     )
     {
     }
@@ -561,80 +564,86 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             });
     }
-
+    
     /**
      * this create product check category first before creating them
      */
     initCreateProduct(productType: string){
-
-        if (productType === "normal") {
-            // get category by name = no-category
-            this._inventoryService.getCategories("no-category").subscribe(async (res)=>{
+        
+        const dialogRef = this._dialog.open(AddProductComponent, { disableClose: true });
+        dialogRef.afterClosed().subscribe(result => {
+            console.log("result: ", result)
+            if (productType === "normal") {
+                // get category by name = no-category
+                this._inventoryService.getCategories("no-category").subscribe(async (res)=>{
     
-                let _noCategory = res["data"].find(obj => obj.name === "no-category");
+                    let _noCategory = res["data"].find(obj => obj.name === "no-category");
     
-                // if there is no category with "no-category" name, create one
-                console.log("logs this !!!",_noCategory)
+                    // if there is no category with "no-category" name, create one
+                    console.log("logs this !!!",_noCategory)
     
-                if (!_noCategory || _noCategory["name"] !== "no-category"){
-                    await this._inventoryService.createCategory({
-                        name: "no-category",
-                        parentCategoryId: "",
-                        storeId: this.storeId$,
-                        thumbnailUrl: ""
-                    }).subscribe((res)=>{
-                        if (res["status"] !== 201){
-                            console.log("an error has occur",res)
-                        } else {
-                            this.createProduct(res["data"].id, productType);
-                        }
-                    });
-                } else {
-                    this.createProduct(_noCategory.id, productType);
-                }
-            });
-        } else if (productType === "combo") {
-            // get category by name =Combos
-            this._inventoryService.getCategories("Combos").subscribe(async (res)=>{
+                    if (!_noCategory || _noCategory["name"] !== "no-category"){
+                        await this._inventoryService.createCategory({
+                            name: "no-category",
+                            parentCategoryId: "",
+                            storeId: this.storeId$,
+                            thumbnailUrl: ""
+                        }).subscribe((res)=>{
+                            if (res["status"] !== 201){
+                                console.log("an error has occur",res)
+                            } else {
+                                this.createProduct(res["data"].id, productType, result);
+                            }
+                        });
+                    } else {
+                        this.createProduct(_noCategory.id, productType, result);
+                    }
+                });
+            } else if (productType === "combo") {
+                // get category by name =Combos
+                this._inventoryService.getCategories("Combos").subscribe(async (res)=>{
     
-                let _noCategory = res["data"].find(obj => obj.name === "Combos");
+                    let _noCategory = res["data"].find(obj => obj.name === "Combos");
     
-                // if there is no category with "Combos" name, create one
-                console.log("logs this !!!",_noCategory)
+                    // if there is no category with "Combos" name, create one
+                    console.log("logs this !!!",_noCategory)
     
-                if (!_noCategory || _noCategory["name"] !== "Combos"){
-                    await this._inventoryService.createCategory({
-                        name: "Combos",
-                        parentCategoryId: "",
-                        storeId: this.storeId$,
-                        thumbnailUrl: ""
-                    }).subscribe((res)=>{
-                        if (res["status"] !== 201){
-                            console.log("an error has occur",res)
-                        } else {
-                            this.createProduct(res["data"].id, productType);
-                        }
-                    });
-                } else {
-                    this.createProduct(_noCategory.id, productType);
-                }
-            });
-        }
+                    if (!_noCategory || _noCategory["name"] !== "Combos"){
+                        await this._inventoryService.createCategory({
+                            name: "Combos",
+                            parentCategoryId: "",
+                            storeId: this.storeId$,
+                            thumbnailUrl: ""
+                        }).subscribe((res)=>{
+                            if (res["status"] !== 201){
+                                console.log("an error has occur",res)
+                            } else {
+                                this.createProduct(res["data"].id, productType, result);
+                            }
+                        });
+                    } else {
+                        this.createProduct(_noCategory.id, productType, result);
+                    }
+                });
+            }
+        });
     }
 
     /**
      * Create product
      */
-    createProduct(categoryId: string, productType: string): void
+    createProduct(categoryId: string, productType: string, productBody): void
     {
 
+        const { sku, availableStock,price, ...newProductBody } = productBody;
+
         // Create the product
-        this._inventoryService.createProduct(categoryId, productType)
+        this._inventoryService.createProduct(categoryId, productType, newProductBody)
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(async (newProduct) => {
 
                 // Add Inventory to product
-                this._inventoryService.addInventoryToProduct(newProduct["data"])
+                this._inventoryService.addInventoryToProduct(newProduct["data"], { sku: sku, availableStock: availableStock, price:price } )
                     .subscribe((response)=>{
                         // update sku, price, quantity display since it's not part of product but product inventory
                         this.displayPrice = response.price;
@@ -1268,7 +1277,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     {
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title  : 'Delete product',
+            title  : 'Delete variant',
             message: 'Are you sure you want to delete this variant? This variant will be remove permenantly!',
             actions: {
                 confirm: {
@@ -1453,7 +1462,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title  : 'Delete product',
+            title  : 'Delete variants',
             message: 'Are you sure you want to disable this variants? Current variants of this product will be remove permenantly!',
             actions: {
                 confirm: {
@@ -1656,7 +1665,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     {
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title  : 'Delete product',
+            title  : 'Delete variant',
             message: 'Are you sure you want to delete this variant value ? This variant value will be remove permenantly!',
             actions: {
                 confirm: {
