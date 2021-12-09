@@ -42,7 +42,17 @@ export class JwtService {
     }
 
     getJwtPayload(accessToken) {
-        return JSON.parse(atob(accessToken.split('.')[1]))
+        if (accessToken.split('.')[1])
+            return JSON.parse(atob(accessToken.split('.')[1]));
+        else 
+            return {
+                "iat": null,
+                "iss": "Fuse",
+                "exp": null,
+                "role": null,
+                "act": null,
+                "uid": null
+            };
     }
     
 }
