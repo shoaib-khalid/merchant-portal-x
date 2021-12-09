@@ -564,34 +564,28 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             });
     }
-
     
-    /**
-     * Create product
-     */
-     addProduct(productType: string): void
-     {
-         const dialogRef = this._dialog.open(AddProductComponent, { disableClose: true });
-         dialogRef.afterClosed().subscribe(result => {
-             if (result.status === true) {
-            }
-        });
-    }
-
     /**
      * this create product check category first before creating them
      */
     initCreateProduct(productType: string){
+        
+        const dialogRef = this._dialog.open(AddProductComponent, { disableClose: true });
+        dialogRef.afterClosed().subscribe(result => {
+            console.log("result: ", result)
+        });
+
+        return;
 
         if (productType === "normal") {
             // get category by name = no-category
             this._inventoryService.getCategories("no-category").subscribe(async (res)=>{
-    
+
                 let _noCategory = res["data"].find(obj => obj.name === "no-category");
-    
+
                 // if there is no category with "no-category" name, create one
                 console.log("logs this !!!",_noCategory)
-    
+
                 if (!_noCategory || _noCategory["name"] !== "no-category"){
                     await this._inventoryService.createCategory({
                         name: "no-category",
@@ -612,12 +606,12 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         } else if (productType === "combo") {
             // get category by name =Combos
             this._inventoryService.getCategories("Combos").subscribe(async (res)=>{
-    
+
                 let _noCategory = res["data"].find(obj => obj.name === "Combos");
-    
+
                 // if there is no category with "Combos" name, create one
                 console.log("logs this !!!",_noCategory)
-    
+
                 if (!_noCategory || _noCategory["name"] !== "Combos"){
                     await this._inventoryService.createCategory({
                         name: "Combos",

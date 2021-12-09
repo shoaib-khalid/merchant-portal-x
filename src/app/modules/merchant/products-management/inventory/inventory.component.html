@@ -28,7 +28,7 @@
             <ng-container *ngIf="store$.verticalCode === 'E-Commerece' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'">
                 <button
                     class="ml-4"
-                    (click)="addProduct()"
+                    (click)="initCreateProduct('normal')"
                     mat-flat-button
                     [color]="'primary'"
                 >

@@ -211,7 +211,11 @@ const config = {
             }),
             maxHeight               : theme => ({
                 ...theme('extendedSpacing'),
-                none: 'none'
+                none: 'none',
+                "80vh": '80vh',
+                "85vh": '85vh',
+                "90vh": '90vh',
+                "95vh": '95vh',
             }),
             width                   : theme => ({
                 ...theme('extendedSpacing')
