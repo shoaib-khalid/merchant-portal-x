@@ -112,6 +112,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     images: any = [];
     imagesFile: any = [];
     currentImageIndex: number = 0;
+    imagesEditMode: boolean = false;
 
     // sku, price & quantity 
     // reason these 3 not in formbuilder is because it's not part of product but 
@@ -124,7 +125,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     isLoading: boolean = false;
     searchInputControl: FormControl = new FormControl();
 
-    imagesEditMode: boolean = false;
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     private _variantsPanelOverlayRef: OverlayRef;
@@ -570,7 +570,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      */
     initCreateProduct(productType: string){
         
-        const dialogRef = this._dialog.open(AddProductComponent, { disableClose: true });
+        const dialogRef = this._dialog.open(AddProductComponent, { disableClose: true, data: { productType: productType } });
         dialogRef.afterClosed().subscribe(result => {
 
             if (result.valid === false) {
@@ -722,11 +722,22 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this.showFlashMessage('success');
             });
 
-        // Update the inventory product on the server (backend kena enable update)
-        // this._inventoryService.updateInventoryToProduct(product.id, productInventories).subscribe(() => {
-        //     // Show a success message
-        //     this.showFlashMessage('success');
-        // });
+        if (this.selectedProduct.productInventories.length === 1) {
+            // Update the inventory product on the server (backend kena enable update)
+            let _productInventories = {
+                productId: this.selectedProduct.id,
+                itemCode: this.selectedProduct.productInventories[0].itemCode,
+                price: this.displayPrice,
+                compareAtprice: 0,
+                quantity: this.displayQuantity,
+                sku: this.displaySku,
+                status: "AVAILABLE"
+            } 
+            this._inventoryService.updateInventoryToProduct(this.selectedProduct.id, this.selectedProduct.productInventories[0].itemCode, _productInventories).subscribe(() => {
+                // Show a success message
+                this.showFlashMessage('success');
+            });
+        }
 
         // Update the assets product on the server (backend kena enable update)
         if (product.productAssets) {

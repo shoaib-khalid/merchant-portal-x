@@ -210,7 +210,7 @@
                                         <mat-label>Name</mat-label>
                                         <input
                                             matInput
-                                            [placeholder]="'Insert product name'"
+                                            [placeholder]="'Insert product ' + ((data['productType'] === 'combo') ? 'combo ' : '') + 'name'"
                                             [formControlName]="'name'"
                                             (input)="checkInput('name');checkForm()"
                                             (change)="generateSku();checkInput('name');checkForm()"

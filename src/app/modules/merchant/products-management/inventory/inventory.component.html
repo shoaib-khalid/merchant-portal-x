@@ -432,6 +432,7 @@
                                                 <input
                                                     matInput
                                                     [disabled]="product.productVariants.length > 0"
+                                                    (change)="displaySku = $event.target.value"
                                                     [value]="displaySku">
                                             </mat-form-field>
 
@@ -442,6 +443,7 @@
                                                 <input
                                                     matInput
                                                     type="number"
+                                                    (change)="displayPrice = $event.target.value"
                                                     [disabled]="product.productVariants.length > 0"
                                                     [value]="displayPrice">
                                             </mat-form-field>
@@ -624,6 +626,7 @@
                                                     type="number"
                                                     matInput
                                                     [disabled]="product.productVariants.length > 0"
+                                                    (change)="displayQuantity = $event.target.value"
                                                     [value]="displayQuantity">
                                             </mat-form-field>
                                         </div>
