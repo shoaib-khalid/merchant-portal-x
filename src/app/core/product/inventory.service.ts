@@ -478,7 +478,7 @@ export class InventoryService
      *
      * @param product
      */
-    updateInventoryToProduct(productInventoriesId: string, productInventories: ProductInventory): Observable<ProductInventory>{
+    updateInventoryToProduct(productId: string, productInventoriesId: string, productInventories: ProductInventory): Observable<ProductInventory>{
 
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -488,33 +488,29 @@ export class InventoryService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
 
-        const now = new Date();
-        const date = now.getFullYear() + "" + (now.getMonth()+1) + "" + now.getDate() + "" + now.getHours() + "" + now.getMinutes()  + "" + now.getSeconds();
-
-        const body = {
-            "productId": 'productInventories.id',
-            "itemCode": 'productInventories.id + date',
-            "price": 0,
-            "compareAtprice": 0,
-            "quantity": 1,
-            "sku": null,
-            "status": "AVAILABLE"
-        };
-
-        // return of();
-
-        return this._inventories.pipe(
+        return this._products.pipe(
             take(1),
             // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
-            switchMap(products => this._httpClient.post<Product>(productService +'/stores/'+this.storeId$+'/products/' + 'product.id' + "/inventory", body , header).pipe(
-                map((newProduct) => {
+            switchMap(products => this._httpClient.put<Product>(productService +'/stores/'+this.storeId$+'/products/' + productId + "/inventory/" + productInventoriesId, productInventories , header).pipe(
+                map((response) => {
 
-                    console.log("newProduct InventoryItem",newProduct)
-                    // Update the products with the new product
-                    // this._products.next([newProduct["data"], ...products]);
+                    this._logging.debug("Response from ProductsService (updateInventoryToProduct)",response);
+
+                    // Find the index of the updated product
+                    const productIndex = products.findIndex(item => item.id === productId);
+
+                    // Find the index of the updated product inventory
+                    const productInventoryIndex = products[productIndex].productInventories.findIndex(element => element.itemCode === response["data"].itemCode);
+
+                    // Update the product
+                    products[productIndex].productInventories[productInventoryIndex] = { ...products[productIndex].productInventories[productInventoryIndex], ...response["data"] };
+                    
+                    // Update the products
+                    this._products.next(products);
+
 
                     // Return the new product
-                    return newProduct["data"];
+                    return response["data"];
                 })
             ))
         );
@@ -631,7 +627,7 @@ export class InventoryService
     /**
      * Update Product Variant
      */
-    deleteVariant(variant: ProductVariant, productId:string){
+    deleteVariant(productId:string, variantId:string, variant: ProductVariant){
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
         let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
@@ -640,10 +636,25 @@ export class InventoryService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
       
-        return this.products$.pipe(
+        return this._products.pipe(
             take(1),
             switchMap(products => this._httpClient.delete(productService + '/stores/' + this.storeId$ + '/products/' + productId + '/variants/' + variant.id, header).pipe(
-                map(() => {
+                map((response) => {
+
+                    this._logging.debug("Response from ProductsService (deleteVariant)",response);
+
+                    // Find the index of the updated product
+                    const productIndex = products.findIndex(item => item.id === productId);
+
+                    // Find the index of the updated product inventory
+                    const productVariantIndex = products[productIndex].productVariants.findIndex(element => element.id === variantId);
+
+                    // Update the product
+                    products[productIndex].productVariants[productVariantIndex] = { ...products[productIndex].productVariants[productVariantIndex], ...response["data"] };
+                    
+                    // Update the products
+                    this._products.next(products);
+
                     // Return the deleted variant
                     return variant;
                 })

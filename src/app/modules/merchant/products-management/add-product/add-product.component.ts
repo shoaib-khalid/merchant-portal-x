@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef, Inject } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
@@ -9,7 +9,7 @@ import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, ProductCategory, ProductPagination, ProductPackageOption } from 'app/core/product/inventory.types';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { Store } from 'app/core/store/store.types';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { StoresService } from 'app/core/store/store.service';
 
 @Component({
@@ -86,7 +86,7 @@ export class AddProductComponent implements OnInit, OnDestroy
         private _storesService: StoresService,
         public _dialog: MatDialog,
         public dialogRef: MatDialogRef<AddProductComponent>,
-
+        @Inject(MAT_DIALOG_DATA) public data: MatDialog
     )
     {
     }
@@ -141,6 +141,12 @@ export class AddProductComponent implements OnInit, OnDestroy
 
                 // Update the pagination
                 this.store$ = store;
+
+                // set packingSize to S if verticalCode FnB
+                if (this.store$.verticalCode === "FnB" || this.store$.verticalCode === "FnB_PK"){
+                    this.addProductForm.get('packingSize').patchValue('S');
+                    this.checkinput.packingSize = true;
+                }
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();

@@ -112,6 +112,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     images: any = [];
     imagesFile: any = [];
     currentImageIndex: number = 0;
+    imagesEditMode: boolean = false;
 
     // sku, price & quantity 
     // reason these 3 not in formbuilder is because it's not part of product but 
@@ -124,7 +125,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     isLoading: boolean = false;
     searchInputControl: FormControl = new FormControl();
 
-    imagesEditMode: boolean = false;
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     private _variantsPanelOverlayRef: OverlayRef;
@@ -206,18 +206,18 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             packingSize      : [''],
             // created          : [''],
             // updated          : [''],
-            // productVariants  : this._formBuilder.array([{
-            //     id                      : [''],
-            //     name                    : [''],
-            //     productVariantsAvailable: this._formBuilder.array([{
-            //         id                      : [''],
-            //         value                   : [''],
-            //         productId               : [''],
-            //         productVariantId        : [''],
-            //         sequenceNumber          : [0],
-            //     }]),
-            //     sequenceNumber          : [0],
-            // }]),
+            productVariants  : this._formBuilder.array([{
+                id                      : [''],
+                name                    : [''],
+                productVariantsAvailable: this._formBuilder.array([{
+                    id                      : [''],
+                    value                   : [''],
+                    productId               : [''],
+                    productVariantId        : [''],
+                    sequenceNumber          : [0],
+                }]),
+                sequenceNumber          : [0],
+            }]),
             // productInventories : this._formBuilder.array([{
             //     itemCode                : [''],
             //     price                   : [0],
@@ -452,7 +452,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this.displayQuantity = product.productInventories[0].quantity;
 
                 // set isVariants = true is productInventories.length > 0
-                product.productInventories.length > 0 ? this.selectedProductForm.get('isVariants').patchValue(true) : this.selectedProductForm.get('isVariants').patchValue(false);
+                product.productVariants.length > 0 ? this.selectedProductForm.get('isVariants').patchValue(true) : this.selectedProductForm.get('isVariants').patchValue(false);
 
                 // Get product image by product id
                 
@@ -570,7 +570,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      */
     initCreateProduct(productType: string){
         
-        const dialogRef = this._dialog.open(AddProductComponent, { disableClose: true });
+        const dialogRef = this._dialog.open(AddProductComponent, { disableClose: true, data: { productType: productType } });
         dialogRef.afterClosed().subscribe(result => {
 
             if (result.valid === false) {
@@ -722,11 +722,22 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this.showFlashMessage('success');
             });
 
-        // Update the inventory product on the server (backend kena enable update)
-        // this._inventoryService.updateInventoryToProduct(product.id, productInventories).subscribe(() => {
-        //     // Show a success message
-        //     this.showFlashMessage('success');
-        // });
+        if (this.selectedProduct.productInventories.length === 1) {
+            // Update the inventory product on the server (backend kena enable update)
+            let _productInventories = {
+                productId: this.selectedProduct.id,
+                itemCode: this.selectedProduct.productInventories[0].itemCode,
+                price: this.displayPrice,
+                compareAtprice: 0,
+                quantity: this.displayQuantity,
+                sku: this.displaySku,
+                status: "AVAILABLE"
+            } 
+            this._inventoryService.updateInventoryToProduct(this.selectedProduct.id, this.selectedProduct.productInventories[0].itemCode, _productInventories).subscribe(() => {
+                // Show a success message
+                this.showFlashMessage('success');
+            });
+        }
 
         // Update the assets product on the server (backend kena enable update)
         if (product.productAssets) {
@@ -1311,7 +1322,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             if ( result === 'confirmed' )
             {
                 // Delete the variant from the server
-                this._inventoryService.deleteVariant(variant, this.selectedProduct.id)
+                this._inventoryService.deleteVariant(this.selectedProduct.id, variant.id , variant)
                     .pipe(takeUntil(this._unsubscribeAll))
                     .subscribe((response)=>{
                         this.removeVariantFromProduct(response)
@@ -1495,10 +1506,12 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             // If the confirm button pressed...
             if ( result === 'confirmed' )
             {
+                // go through all the variants, and delete it
+                this.selectedProduct.productVariants.forEach(item => {
+                    this._inventoryService.deleteVariant(this.selectedProduct.id, item.id, item).subscribe(response => {
 
-                console.log("VARIANT DELETED")
-                // Close the details
-                // this.closeDetails();
+                    });
+                });
             } else {
                 // Update the selected product form
                 this.selectedProductForm.get('isVariants').patchValue(true);
