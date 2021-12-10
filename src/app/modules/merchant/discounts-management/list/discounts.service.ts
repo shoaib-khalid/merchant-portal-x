@@ -6,6 +6,7 @@ import { Discount, DiscountPagination, StoreDiscountTierList } from 'app/modules
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 @Injectable({
     providedIn: 'root'
@@ -28,6 +29,7 @@ export class DiscountsService
         private _apiServer: AppConfig,
         private _logging: LogService,
         private _jwt: JwtService,
+        private _fuseConfirmationService: FuseConfirmationService,
     )
     {
     }
@@ -198,6 +200,8 @@ export class DiscountsService
             // switchMap(discounts => this._httpClient.post<InventoryDiscount>('api/apps/ecommerce/inventory/discount', {}).pipe(
             switchMap(discounts => this._httpClient.post<Discount>(productService + '/stores/' + this.storeId$ + '/discount', body , header).pipe(
                 map((newDiscount) => {
+
+                    this._logging.debug("Response from DiscountsService (createDiscount)",newDiscount);
 
                     // Update the discounts with the new discount
                     this._discounts.next([newDiscount["data"], ...discounts]);

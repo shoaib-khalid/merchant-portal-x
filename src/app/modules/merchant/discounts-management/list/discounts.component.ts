@@ -25,11 +25,11 @@ import { MatDialog } from '@angular/material/dialog';
                 }
 
                 @screen md {
-                    grid-template-columns: 48px 112px auto 150px 150px 96px;
+                    grid-template-columns: 48px 112px auto 150px 96px;
                 }
 
                 @screen lg {
-                    grid-template-columns: 48px 112px auto 180px 180px 96px 72px;
+                    grid-template-columns: 48px 112px auto 180px 180px 180px 96px 72px;
                 }
             }
         `
@@ -55,7 +55,7 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
     // discount tier
     calculationType: string;
     discountAmount: number;
-    endTotalSalesAmount: number;
+    // endTotalSalesAmount: number;
     startTotalSalesAmount: number;
  
 
@@ -110,6 +110,8 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
             endTime          : [''],
             discountType     : [''],
             isActive         : [''],
+            maxDiscountAmount: [''],
+            normalPriceItemOnly: [''],
             storeId          : [''], // not used
             storeDiscountTierList : this._formBuilder.array([]),
         });
@@ -274,6 +276,7 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
         const dialogRef = this._dialog.open(CreateDiscountComponent, { disableClose: true });
         dialogRef.afterClosed().subscribe(result => {
             if (result.status === true) {
+                console.log("result", result)
                 // this will remove the item from the object
                 const createDiscountBody  = {
                     discountName: result.discountName,
@@ -283,6 +286,8 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
                     endDate: result.endDate,
                     endTime: result.endTime,
                     isActive: result.isActive,
+                    maxDiscountAmount: result.maxDiscountAmount,
+                    normalPriceItemOnly: result.normalPriceItemOnly,
                     storeId: this.storeId$
                 };
         
@@ -297,6 +302,25 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
     
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
+                }, error => {
+                    console.log(error);
+
+                        if (error.status === 417) {
+                            // Open the confirmation dialog
+                            const confirmation = this._fuseConfirmationService.open({
+                                title  : 'Discount date overlap',
+                                message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
+                                actions: {
+                                    confirm: {
+                                        label: 'Ok'
+                                    },
+                                    cancel : {
+                                        show : false,
+                                    }
+                                }
+                            });
+                        }
+
                 });
             }
         });
@@ -312,7 +336,26 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
         this._discountService.updateDiscount(this.selectedDiscountForm.value.id, this.selectedDiscountForm.value).subscribe(() => {
             // Show a success message
             this.showFlashMessage('success');
-        });
+        }, error => {
+            console.log(error);
+
+                if (error.status === 417) {
+                    // Open the confirmation dialog
+                    const confirmation = this._fuseConfirmationService.open({
+                        title  : 'Discount date overlap',
+                        message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
+                        actions: {
+                            confirm: {
+                                label: 'Ok'
+                            },
+                            cancel : {
+                                show : false,
+                            }
+                        }
+                    });
+                }
+            }
+        );
     }
 
     /**
@@ -356,7 +399,6 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
         let discountTier: StoreDiscountTierList = {
             calculationType: this.calculationType,
             discountAmount: this.discountAmount,
-            endTotalSalesAmount: this.endTotalSalesAmount,
             startTotalSalesAmount: this.startTotalSalesAmount,
         }
 
@@ -376,7 +418,26 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
 
             // Mark for check
             this._changeDetectorRef.markForCheck();
-        });
+        }, error => {
+            console.log(error);
+
+                if (error.status === 417) {
+                    // Open the confirmation dialog
+                    const confirmation = this._fuseConfirmationService.open({
+                        title  : 'Minimum subtotal overlap',
+                        message: 'Your minimum subtotal entered overlapping with existing amount! Please change your minimum subtotal',
+                        actions: {
+                            confirm: {
+                                label: 'Ok'
+                            },
+                            cancel : {
+                                show : false,
+                            }
+                        }
+                    });
+                }
+            }
+        );
     }
 
     deleteSelectedDiscountTier(discountTierId: string): void
@@ -427,7 +488,26 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
         this._discountService.updateDiscountTier(discountTier.value.storeDiscountId, discountTier.value).subscribe(() => {
             // Show a success message
             this.showFlashMessage('success');
-        });
+        }, error => {
+            console.log(error);
+
+                if (error.status === 417) {
+                    // Open the confirmation dialog
+                    const confirmation = this._fuseConfirmationService.open({
+                        title  : 'Minimum subtotal overlap',
+                        message: 'Your minimum subtotal entered overlapping with existing amount! Please change your minimum subtotal',
+                        actions: {
+                            confirm: {
+                                label: 'Ok'
+                            },
+                            cancel : {
+                                show : false,
+                            }
+                        }
+                    });
+                }
+            }
+        );
 
     
     }
@@ -436,9 +516,9 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
         if (type === 'startTotalSalesAmount') {
             this.startTotalSalesAmount = value;
         }
-        if (type === 'endTotalSalesAmount') {
-            this.endTotalSalesAmount = value;
-        }
+        // if (type === 'endTotalSalesAmount') {
+        //     this.endTotalSalesAmount = value;
+        // }
         if (type === 'discountAmount') {
             this.discountAmount = value;
         }

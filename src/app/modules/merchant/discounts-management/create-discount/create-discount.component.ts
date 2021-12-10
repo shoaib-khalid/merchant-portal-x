@@ -8,12 +8,19 @@ import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog
 export class CreateDiscountComponent implements OnInit {
 
   disabledProceed: boolean = true;
+
   discountName: string;
+  status: boolean;
+  discountType: string;
+  isActive: boolean;
+  maxDiscountAmount: string;
+  normalPriceItemOnly: boolean;
 
   checkdate = false;
   checkname = false;
   checkstatus = false;
   checktype = false;
+  checkdiscountamount = false;
 
   startDate: string;
   startTime: string;
@@ -31,11 +38,6 @@ export class CreateDiscountComponent implements OnInit {
   maxEndTime: string;
 
   message: string = "";
-
-  status: boolean;
-  discountType: string;
-  isActive: boolean;
-  
 
   constructor(
     public dialogRef: MatDialogRef<CreateDiscountComponent>,
@@ -64,7 +66,9 @@ export class CreateDiscountComponent implements OnInit {
         startTime: this.startTime,
         endDate: this.endDate,
         endTime: this.endTime,
-        isActive :this.isActive
+        isActive :this.isActive,
+        maxDiscountAmount :this.maxDiscountAmount,
+        normalPriceItemOnly : this.normalPriceItemOnly
     });
   }
 
@@ -90,7 +94,6 @@ export class CreateDiscountComponent implements OnInit {
             // set minimum end date to current selected date
             this.isDisabledStartDateTime = false;
             this.minEndDate = this.startDate;
-            this.checkdate = true;
         }
         // check date
         if (this.startTime && this.endTime && this.endDate && this.startDate) {        
@@ -109,7 +112,7 @@ export class CreateDiscountComponent implements OnInit {
 
   checkStatus(){
     //check status
-     if (!this.isActive){
+     if (this.isActive){
         this.checkstatus = true;
         this.message = ""
         }else{
@@ -120,7 +123,7 @@ export class CreateDiscountComponent implements OnInit {
 
   checkDiscountType(){
         //check discount type
-        if (!this.discountType){
+        if (this.discountType){
             this.checktype = true;
             this.message = ""
         }else{
@@ -129,8 +132,21 @@ export class CreateDiscountComponent implements OnInit {
         }
   }
 
+  checkDiscountAmount(){           
+    // check discount name
+    if (this.maxDiscountAmount) {
+        this.checkdiscountamount = true;
+        this.message = "";
+    }else{
+        this.checkdiscountamount = false;
+        this.message = "Please insert maximum discount amount";
+    }
+    
+}
+
   checkForm(){
-    if (this.checkname === true && this.checkdate === true && this.checkstatus === true && this.checktype === true) {
+    
+    if (this.checkname === true && this.checkdate === true && this.checkstatus === true && this.checktype === true && this.checkdiscountamount == true) {
         this.disabledProceed = false;
     } else {
         this.disabledProceed = true;

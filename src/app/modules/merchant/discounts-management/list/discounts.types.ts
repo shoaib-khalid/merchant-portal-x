@@ -6,6 +6,8 @@ export interface Discount
     endTime: string;
     id?: string;
     isActive: boolean;
+    maxDiscountAmount: string;
+    normalPriceItemOnly: boolean;
     startDate: string;
     startTime: string;
     storeDiscountTierList?: StoreDiscountTierList[];
@@ -15,7 +17,6 @@ export interface Discount
 export interface StoreDiscountTierList {
     calculationType: string;
     discountAmount: number;
-    endTotalSalesAmount: number;
     id?: string;
     startTotalSalesAmount: number;
     storeDiscountId?: string;
