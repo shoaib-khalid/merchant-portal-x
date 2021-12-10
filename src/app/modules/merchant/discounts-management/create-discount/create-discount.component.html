@@ -32,16 +32,29 @@
         </mat-form-field>
 
         <div class="w-full">
+            <!-- Max Discount Amount -->
             <mat-form-field 
                 appearance="fill"
-                class="w-1/2 pr-2">
+                class="w-1/3 pr-2">
+                <mat-label>Max discount amount</mat-label>
+                <input 
+                    matInput
+                    placeholder="Enter Maximum discount amount"
+                    type="number"
+                    [(ngModel)]="maxDiscountAmount"
+                    (input)="checkDiscountAmount();checkForm()"
+                >
+            </mat-form-field>
+            <!-- status -->
+            <mat-form-field 
+                appearance="fill"
+                class="w-1/3 pr-2">
                 <mat-label>Status</mat-label>
                 <mat-select
                     class="w-full"
                     placeholder="Select status"
                     [(ngModel)]="isActive"
-                    (change)="checkStatus();checkForm()"
-
+                    (selectionChange)="checkStatus();checkForm()"
                     >
                     <div>
                         <mat-option [value]="true">Active</mat-option>
@@ -50,15 +63,15 @@
                     </div>
                 </mat-select>
             </mat-form-field>
-
+            <!-- discount on -->
             <mat-form-field 
                 appearance="fill"
-                class="w-1/2 pl-2">
+                class="w-1/3">
                 <mat-label>Discount on</mat-label>
                 <mat-select
                     class="w-full"
                     [(ngModel)]="discountType"
-                    (change)="checkDiscountType();checkForm()"
+                    (selectionChange)="checkDiscountType();checkForm()"
                     placeholder="Select discount to be applied"
                     >
                     
@@ -120,6 +133,13 @@
                     (change)="checkDateTime();checkForm()"
                 >
             </mat-form-field>
+
+            <mat-slide-toggle
+                [color]="'primary'"
+                [(ngModel)]="normalPriceItemOnly"
+                [matTooltip]="'To enable normal price if there is already discount applied'">
+                Normal Price
+            </mat-slide-toggle>
         </div>
 
         <!-- Actions -->
@@ -138,11 +158,11 @@
                 </button>
                 
                 <button
-                    class="bg-primary-300 hover:bg-primary-500 border border-primary-500 ml-2"
+                    class="hover:bg-primary-500 border border-primary-500 ml-2"
                     mat-flat-button
                     [disabled]="disabledProceed"
                     (click)="addNewDiscount()"
-                    [color]="'gray'">
+                    [color]="'primary'">
                     Ok
                 </button>
            
