@@ -627,7 +627,7 @@ export class InventoryService
     /**
      * Update Product Variant
      */
-    deleteVariant(variant: ProductVariant, productId:string){
+    deleteVariant(productId:string, variantId:string, variant: ProductVariant){
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
         let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
@@ -636,10 +636,25 @@ export class InventoryService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
       
-        return this.products$.pipe(
+        return this._products.pipe(
             take(1),
             switchMap(products => this._httpClient.delete(productService + '/stores/' + this.storeId$ + '/products/' + productId + '/variants/' + variant.id, header).pipe(
-                map(() => {
+                map((response) => {
+
+                    this._logging.debug("Response from ProductsService (deleteVariant)",response);
+
+                    // Find the index of the updated product
+                    const productIndex = products.findIndex(item => item.id === productId);
+
+                    // Find the index of the updated product inventory
+                    const productVariantIndex = products[productIndex].productVariants.findIndex(element => element.id === variantId);
+
+                    // Update the product
+                    products[productIndex].productVariants[productVariantIndex] = { ...products[productIndex].productVariants[productVariantIndex], ...response["data"] };
+                    
+                    // Update the products
+                    this._products.next(products);
+
                     // Return the deleted variant
                     return variant;
                 })

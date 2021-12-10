@@ -206,18 +206,18 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             packingSize      : [''],
             // created          : [''],
             // updated          : [''],
-            // productVariants  : this._formBuilder.array([{
-            //     id                      : [''],
-            //     name                    : [''],
-            //     productVariantsAvailable: this._formBuilder.array([{
-            //         id                      : [''],
-            //         value                   : [''],
-            //         productId               : [''],
-            //         productVariantId        : [''],
-            //         sequenceNumber          : [0],
-            //     }]),
-            //     sequenceNumber          : [0],
-            // }]),
+            productVariants  : this._formBuilder.array([{
+                id                      : [''],
+                name                    : [''],
+                productVariantsAvailable: this._formBuilder.array([{
+                    id                      : [''],
+                    value                   : [''],
+                    productId               : [''],
+                    productVariantId        : [''],
+                    sequenceNumber          : [0],
+                }]),
+                sequenceNumber          : [0],
+            }]),
             // productInventories : this._formBuilder.array([{
             //     itemCode                : [''],
             //     price                   : [0],
@@ -452,7 +452,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this.displayQuantity = product.productInventories[0].quantity;
 
                 // set isVariants = true is productInventories.length > 0
-                product.productInventories.length > 0 ? this.selectedProductForm.get('isVariants').patchValue(true) : this.selectedProductForm.get('isVariants').patchValue(false);
+                product.productVariants.length > 0 ? this.selectedProductForm.get('isVariants').patchValue(true) : this.selectedProductForm.get('isVariants').patchValue(false);
 
                 // Get product image by product id
                 
@@ -1322,7 +1322,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             if ( result === 'confirmed' )
             {
                 // Delete the variant from the server
-                this._inventoryService.deleteVariant(variant, this.selectedProduct.id)
+                this._inventoryService.deleteVariant(this.selectedProduct.id, variant.id , variant)
                     .pipe(takeUntil(this._unsubscribeAll))
                     .subscribe((response)=>{
                         this.removeVariantFromProduct(response)
@@ -1406,8 +1406,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         this.selectedProductVariants = variant;
         
         if (this.selectedProductVariants){
-
-            console.log("disini: this.filteredProductVariantAvailable ", this.filteredProductVariantAvailable)
 
             // get index of filteredVariants that have same id with variantId
             let index = this.filteredProductVariants.findIndex(x => x.id === variant.id);
@@ -1508,10 +1506,12 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             // If the confirm button pressed...
             if ( result === 'confirmed' )
             {
+                // go through all the variants, and delete it
+                this.selectedProduct.productVariants.forEach(item => {
+                    this._inventoryService.deleteVariant(this.selectedProduct.id, item.id, item).subscribe(response => {
 
-                console.log("VARIANT DELETED")
-                // Close the details
-                // this.closeDetails();
+                    });
+                });
             } else {
                 // Update the selected product form
                 this.selectedProductForm.get('isVariants').patchValue(true);
