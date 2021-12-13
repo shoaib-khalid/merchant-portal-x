@@ -5,6 +5,7 @@ import { fuseAnimations } from '@fuse/animations';
 import { FuseValidators } from '@fuse/validators';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
     selector     : 'auth-reset-password',
@@ -15,6 +16,9 @@ import { AuthService } from 'app/core/auth/auth.service';
 export class AuthResetPasswordComponent implements OnInit
 {
     @ViewChild('resetPasswordNgForm') resetPasswordNgForm: NgForm;
+
+    clientId: string;
+    code: string;
 
     alert: { type: FuseAlertType; message: string } = {
         type   : 'success',
@@ -28,7 +32,8 @@ export class AuthResetPasswordComponent implements OnInit
      */
     constructor(
         private _authService: AuthService,
-        private _formBuilder: FormBuilder
+        private _formBuilder: FormBuilder,
+        private _route: ActivatedRoute
     )
     {
     }
@@ -51,6 +56,15 @@ export class AuthResetPasswordComponent implements OnInit
                 validators: FuseValidators.mustMatch('password', 'passwordConfirm')
             }
         );
+
+        this._route.queryParams.subscribe(params => {
+            this.clientId = params['id'];
+            this.code = params['code'];
+        });
+
+        console.log("clientId: ", this.clientId)
+
+        console.log("code: ", this.code)
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -60,7 +74,7 @@ export class AuthResetPasswordComponent implements OnInit
     /**
      * Reset password
      */
-    resetPassword(): void
+    resetPassword( ): void
     {
         // Return if the form is invalid
         if ( this.resetPasswordForm.invalid )
@@ -74,8 +88,11 @@ export class AuthResetPasswordComponent implements OnInit
         // Hide the alert
         this.showAlert = false;
 
+        // this will remove the item from the object
+        const { passwordConfirm, ...createClientBody } = this.resetPasswordForm.value;
+
         // Send the request to the server
-        this._authService.resetPassword(this.resetPasswordForm.get('password').value)
+        this._authService.resetPassword(this.clientId, this.code, createClientBody)
             .pipe(
                 finalize(() => {
 
