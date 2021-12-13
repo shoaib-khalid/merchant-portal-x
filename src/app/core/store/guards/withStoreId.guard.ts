@@ -3,6 +3,7 @@ import { ActivatedRouteSnapshot, CanActivate, CanActivateChild, CanLoad, Route, 
 import { Observable, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { StoresService } from '../store.service';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 @Injectable({
     providedIn: 'root'
@@ -16,6 +17,7 @@ export class WithStoreIdGuard implements CanActivate, CanActivateChild, CanLoad
     constructor(
         private _storesService: StoresService,
         private _router: Router,
+        private _fuseConfirmationService: FuseConfirmationService
     )
     {
     }
@@ -79,10 +81,33 @@ export class WithStoreIdGuard implements CanActivate, CanActivateChild, CanLoad
             this._router.navigate(['stores']);
 
             // Alert the user
-            alert("Please choose a store first");
+            // alert("Please choose a store first");
 
+            this._fuseConfirmationService.open({
+                "title": "No store selected",
+                "message": "Please choose a store first",
+                "icon": {
+                  "show": true,
+                  "name": "heroicons_outline:exclamation",
+                  "color": "warn"
+                },
+                "actions": {
+                  "confirm": {
+                    "show": false,
+                    "label": "Remove",
+                    "color": "warn"
+                  },
+                  "cancel": {
+                    "show": true,
+                    "label": "OK"
+                  }
+                },
+                "dismissible": false
+              });
             // Prevent the access
             return of(false);
+
+            
         }
 
         // Allow the access
