@@ -116,12 +116,18 @@ export class AuthResetPasswordComponent implements OnInit
                     };
                 },
                 (response) => {
-
                     // Set the alert
-                    this.alert = {
-                        type   : 'error',
-                        message: 'Something went wrong, please try again.'
-                    };
+                    if (response.error.error) {
+                        this.alert = {
+                            type   : 'error',
+                            message: response.error.error + ', please try again.'
+                        };
+                    } else {
+                        this.alert = {
+                            type   : 'error',
+                            message: 'Something went wrong, please try again.'
+                        };
+                    }
                 }
             );
     }
