@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient,HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject ,Observable ,throwError ,of , ReplaySubject } from 'rxjs';
-import {  take, map, tap, switchMap } from 'rxjs/operators';
+import { take, map, tap, switchMap } from 'rxjs/operators';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service';
-import { Client, ClientPagination } from './edit-profile.types';
+import { Client, ClientPagination, ClientPaymentDetails } from './edit-profile.types';
 import { FormControl } from '@angular/forms';
 
 // import { FaqCategory, Guide, GuideCategory } from 'app/modules/merchant/clients-management/create-client/register-client/register-client.types';
@@ -16,6 +16,7 @@ import { FormControl } from '@angular/forms';
 export class EditProfileService
 {
     private _client: BehaviorSubject<Client | null> = new BehaviorSubject(null);
+    private _clientPaymentdetails: BehaviorSubject<ClientPaymentDetails | null> = new BehaviorSubject(null);
     private _pagination: BehaviorSubject<ClientPagination | null> = new BehaviorSubject(null);
     public storeControl: FormControl = new FormControl();
 
@@ -42,7 +43,7 @@ export class EditProfileService
     /**
      * Getter for clients
      *
-    */
+     */
      get client$(): Observable<Client>
      {
          return this._client.asObservable();
@@ -93,6 +94,15 @@ export class EditProfileService
          return this._pagination.asObservable();
      }
 
+    /**
+     * Getter for client payment detail
+     *
+     */
+    get clientPaymentDetails$(): Observable<ClientPaymentDetails>
+    {
+        return this._clientPaymentdetails.asObservable();
+    }
+
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
@@ -133,11 +143,40 @@ export class EditProfileService
     }
 
     /**
-     * Update the client
+     * Get the current logged in client data
+     */
+     getClientPaymentDetails(page: number = 0, size: number = 10, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', category: string = ''): 
+        Observable<ClientPaymentDetails>
+    {
+
+        let id = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        let userService = this._apiServer.settings.apiServer.userService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`)
+        };
+
+        
+        return this._httpClient.get<ClientPaymentDetails>(userService + '/clients/' + clientId + '/payment_details/', header)
+        .pipe(
+            tap((response) => {
+                
+                this._logging.debug("Response from EditProfileService (getClientPaymentDetails)",response);
+
+                this._clientPaymentdetails.next(response["data"].content[0]);
+            })
+        );
+    }    
+
+    /**
+     * Update the client profile
      *
      * @param client
      */
-     updateProfile(clientBody: Client): Observable<Client>
+     updateClientProfile(clientBody: Client): Observable<Client>
      {
          let userService = this._apiServer.settings.apiServer.userService;
          let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -156,7 +195,7 @@ export class EditProfileService
              switchMap(client => this._httpClient.put<Client>(userService + '/clients/' + clientId , clientBody , header).pipe(
                  map((response) => {
  
-                     this._logging.debug("Response from StoresService (Edit Client)",response);
+                     this._logging.debug("Response from StoresService (EditClientProfile)",response);
  
                      // Update the products
                      this._client.next(response["data"]);
@@ -167,4 +206,40 @@ export class EditProfileService
              )) 
             );
     }
+
+        /**
+     * Update the client
+     *
+     * @param client
+     */
+    updatePaymentProfile(paymentClientId: string , clientPaymentBody: ClientPaymentDetails): Observable<Client>
+    {
+        let userService = this._apiServer.settings.apiServer.userService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                "clientId": clientId
+            }
+        };
+        
+        return this.client$.pipe(
+            take(1),
+            // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
+            switchMap(client => this._httpClient.put<ClientPaymentDetails>(userService + '/clients/' + clientId + '/payment_details/' + paymentClientId  , clientPaymentBody , header).pipe(
+                map((response) => {
+
+                    this._logging.debug("Response from StoresService (EditClientPayment)",response);
+
+                    // Update the products
+                    this._clientPaymentdetails.next(response["data"]);
+
+                    // Return the new product
+                    return response["data"];
+                })  
+            )) 
+        );
+}
 }

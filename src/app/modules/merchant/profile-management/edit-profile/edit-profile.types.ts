@@ -8,7 +8,22 @@ export interface Client
     deactivated: string;
     created: string;
     updated: string;
-    roleId: string
+    roleId: string;
+}
+
+export interface ClientPaymentDetails
+{
+    id?: string;
+    bankName: string;
+    bankAccountNumber: string;
+    clientId?: string;
+    created?: string;
+    updated?: string;
+    docImage?: string,
+    gstRate?: string,
+    stRate?: string,
+    taxNumber?: string
+    whtRate?: string
 }
 
 export interface ClientPagination
