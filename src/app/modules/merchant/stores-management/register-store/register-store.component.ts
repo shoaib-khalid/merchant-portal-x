@@ -191,6 +191,7 @@ export class RegisterStoreComponent implements OnInit
                             this.deliveryPartners.push({
                                 id: item.id,
                                 name: item.name,
+                                providerImage: item.providerImage,
                                 label: item.name,
                                 selected: false
                             });

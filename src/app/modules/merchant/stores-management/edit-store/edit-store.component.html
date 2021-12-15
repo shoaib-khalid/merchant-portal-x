@@ -15,12 +15,12 @@
         </svg>
         <!-- @formatter:on -->
         <div class="z-10 relative flex flex-col items-center">
-            <h2 class="text-xl font-semibold">CREATE YOUR STORE NOW</h2>
+            <h2 class="text-xl font-semibold">EDIT YOUR STORE HERE</h2>
             <!-- <div class="mt-1 text-4xl sm:text-7xl font-extrabold tracking-tight leading-tight text-center">
                 What do you want to learn today?
             </div> -->
             <div class="max-w-2xl mt-6 sm:text-2xl text-center tracking-tight text-secondary">
-                The create store explaination HERE
+                Simply edit your store
             </div>
         </div>
     </div>
@@ -48,7 +48,7 @@
                         <div class="flex flex-auto flex-wrap">
                             <div class="flex flex-col w-full lg:w-2/4 sm:px-4">
                                 <!-- Store Name -->
-                                <mat-form-field class="w-full" floatLabel="always">
+                                <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
                                     <input
                                         matInput
                                         maxlength="100"
@@ -56,6 +56,10 @@
                                         [formControlName]="'name'"
                                         [required]="true"
                                         (input)="checkExistingName($event.target.value)">
+                                    <mat-icon
+                                        matPrefix
+                                        [svgIcon]="'mat_solid:store'">
+                                  </mat-icon>
                                     <mat-label>Store Name</mat-label>
                                     <mat-error *ngIf="editStoreForm.get('name').hasError('required')">
                                         Required
@@ -65,7 +69,7 @@
                                     </mat-error>
                                 </mat-form-field>
                                 <!-- Store URL -->
-                                <mat-form-field class="w-full">
+                                <mat-form-field class="w-full fuse-mat-emphasized-affix">
                                     <mat-label>Store URL</mat-label>
                                     <span>https://</span> 
                                     <input
@@ -75,7 +79,11 @@
                                         [formControlName]="'subdomain'"
                                         [required]="true"
                                         (input)="checkExistingURL($event.target.value)">
-                                    <span>{{domainName}}</span>
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'heroicons_outline:globe-alt'">
+                                        </mat-icon>
+                                    <span matSuffix>{{domainName}}</span>
                                     <mat-error *ngIf="editStoreForm.get('subdomain').hasError('required')">
                                         Required
                                     </mat-error>
@@ -108,13 +116,17 @@
                                     </mat-error>
                                 </mat-form-field>
                                 <!-- Email -->
-                                <mat-form-field class="w-full" floatLabel="always">
+                                <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
                                     <input
                                         type="email"
                                         placeholder="example@yourstore.com"
                                         matInput
                                         [formControlName]="'email'"
                                         [required]="true">
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'mat_solid:email'">
+                                        </mat-icon>
                                     <mat-label>Store Email</mat-label>
                                     <mat-error *ngIf="editStoreForm.get('email').hasError('required')">
                                         Required
@@ -124,12 +136,16 @@
                                     </mat-error>
                                 </mat-form-field>
                                 <!-- Phonenumber -->
-                                <mat-form-field class="w-full" floatLabel="always">
+                                <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
                                     <input
                                         matInput
                                         placeholder="+60123456789"
                                         [formControlName]="'phoneNumber'"
                                         [required]="true">
+                                    <mat-icon
+                                        matPrefix
+                                        [svgIcon]="'mat_solid:phone_iphone'">
+                                    </mat-icon>
                                     <mat-label>Store Phone Number</mat-label>
                                     <mat-error *ngIf="editStoreForm.get('phoneNumber').hasError('required')">
                                         Required
@@ -155,9 +171,13 @@
                                     <mat-error *ngIf="editStoreForm.get('address').hasError('required')">
                                         Required
                                     </mat-error>
+                                    <mat-icon
+                                        matPrefix
+                                        [svgIcon]="'heroicons_solid:location-marker'">
+                                    </mat-icon>
                                 </mat-form-field>
                                 <!-- City -->
-                                <mat-form-field class="w-full" floatLabel="always">
+                                <mat-form-field class="w-full " floatLabel="always">
                                     <input
                                         matInput
                                         maxlength="100"
@@ -270,7 +290,7 @@
                     <div class="flex flex-col sm:flex-row">
                         <!-- Logo -->
                         <div class="flex flex-col w-full lg:w-2/4 sm:px-4">
-                            <mat-form-field class="w-full">
+                            <mat-form-field class="w-full fuse-mat-emphasized-affix">
                                 <mat-label class="font-medium">Store Logo</mat-label>
                                 <mat-toolbar>
                                     <input class="text-sm" matInput type="text" readonly [value]="files[0].selectedFileNames ? files[0].selectedFileNames : 'Select Images'" />
@@ -282,6 +302,10 @@
                                     accept="image/*" multiple 
                                     (change)="selectFiles('logo',$event)"
                                 />
+                                <mat-icon
+                                    matPrefix
+                                    [svgIcon]="'mat_solid:image'">
+                                </mat-icon>
                             </mat-form-field>
                             <div class="w-full">
                                 <mat-label class="font-medium">Preview</mat-label>
@@ -308,7 +332,7 @@
                             <div class="flex flex-col sm:flex-row">
                                 <!-- Store Banner (Desktop) -->
                                 <div class="flex flex-col w-full lg:w-2/4 sm:pr-2">
-                                    <mat-form-field class="w-full">
+                                    <mat-form-field class="w-full fuse-mat-emphasized-affix">
                                         <mat-label class="font-medium">Store Banner (Desktop)</mat-label>
                                         <mat-toolbar>
                                             <input class="text-sm" matInput type="text" readonly [value]="this.files[1].selectedFileNames ? this.files[1].selectedFileNames : 'Select Images'" />
@@ -320,11 +344,15 @@
                                             accept="image/*" multiple 
                                             (change)="selectFiles('banner',$event)"
                                         />
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'mat_solid:image'">
+                                        </mat-icon>
                                     </mat-form-field>
                                 </div>
                                 <!-- Store Banner (Mobile) -->
                                 <div class="flex flex-col w-full lg:w-2/4 sm:pl-2">
-                                    <mat-form-field class="w-full">
+                                    <mat-form-field class="w-full fuse-mat-emphasized-affix">
                                         <mat-label class="font-medium">Store Banner (Mobile)</mat-label>
                                         <mat-toolbar>
                                             <input class="text-sm" matInput type="text" readonly [value]="this.files[2].selectedFileNames ? this.files[2].selectedFileNames : 'Select Images'" />
@@ -336,6 +364,10 @@
                                             accept="image/*" multiple 
                                             (change)="selectFiles('bannerMobile',$event)"
                                         />
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'mat_solid:image'">
+                                        </mat-icon>
                                     </mat-form-field>
                                 </div>
                             </div>
@@ -384,7 +416,7 @@
                             <div class="flex flex-col sm:flex-row">
                                 <!-- Delivery Type -->
                                 <div class="flex flex-col w-full">
-                                    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+                                    <mat-form-field class="w-full fuse-mat-emphasized-affix" appearance="fill" floatLabel="always">
                                         <mat-label class="font-medium">Delivery Type</mat-label>
                                         <mat-select
                                             [formControlName]="'deliveryType'"
@@ -412,6 +444,10 @@
                                         <mat-error *ngIf="editStoreForm.get('deliveryType').hasError('required')">
                                             Required
                                         </mat-error>
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'mat_solid:delivery_dining'">
+                                        </mat-icon>
                                     </mat-form-field>
                                 </div>
                             </div>
@@ -420,19 +456,19 @@
                                 <div class="flex flex-col w-full">
                                     <mat-label class="font-medium">Delivery Fulfillment *</mat-label>
                                     <div class="flex flex-col sm:flex-row">
-                                        <div class="w-full lg:w-2/4">
+                                        <div class="flex w-full lg:w-2/4">
                                             <mat-checkbox class="" [formControlName]="'allowScheduledDelivery'" [checked]="deliveryFullfilment[2].selected">{{deliveryFullfilment[2].label}}</mat-checkbox>
                                             <mat-icon
                                                 [matTooltip]="deliveryFullfilment[2].tooltip"
-                                                class="transform scale-75"
+                                                class="flex flex-wrap transform scale-75"
                                                 [svgIcon]="'heroicons_solid:question-mark-circle'">
                                             </mat-icon>
                                         </div>
-                                        <div class="w-full lg:w-2/4">
+                                        <div class="flex w-full lg:w-2/4">
                                             <mat-checkbox class="" [formControlName]="'allowStorePickup'" [checked]="deliveryFullfilment[3].selected">{{deliveryFullfilment[3].label}}</mat-checkbox>
                                             <mat-icon
                                                 [matTooltip]="deliveryFullfilment[3].tooltip"
-                                                class="transform scale-75"
+                                                class="flex flex-wrap transform scale-75"
                                                 [svgIcon]="'heroicons_solid:question-mark-circle'">
                                             </mat-icon>
                                         </div>
@@ -447,11 +483,30 @@
                                     <div class="mb-0.5"></div>
                                     <div class="border border-gray-300 rounded min-h-26 max-h-72 overflow-auto">
                                         <div class="pt-4 pl-2 w-full">
-                                            <ng-container *ngIf="editStoreForm.get('deliveryType').value === 'SCHEDULED'">
+                                            <section class="flex flex-col px-2" *ngFor="let deliveryPartner of deliveryPartners">
+                                                <mat-form-field
+                                                    appearance="fill" 
+                                                    floatLabel="always"
+                                                    *ngIf="editStoreForm.get('deliveryType').value === 'SCHEDULED'"
+                                                    class="flex flex-col w-full fuse-mat-emphasized-affix">
+                                                    <input
+                                                        matInput
+                                                        [value]="deliveryPartner.name"
+                                                        [readonly]="true"/>
+                                                    <img
+                                                        matSuffix
+                                                        class="w-30"
+                                                        *ngIf="deliveryPartner.providerImage"
+                                                        [alt]="'Product thumbnail image'"
+                                                        [src]="deliveryPartner.providerImage">
+                                                </mat-form-field>
+                                            </section >
+
+                                            <!-- <ng-container *ngIf="editStoreForm.get('deliveryType').value === 'SCHEDULED'">
                                                 <section class="p-2" *ngFor="let deliveryPartner of deliveryPartners">
                                                     <span class="py-0.5">{{deliveryPartner.name}}</span>
                                                 </section>
-                                            </ng-container>
+                                            </ng-container> -->
                                             <mat-radio-group 
                                                 *ngIf="editStoreForm.get('deliveryType').value === 'ADHOC'"
                                                 class="flex flex-col w-full"
@@ -568,7 +623,7 @@
                         <!-- Payment & Store Opening Hour -->
                         <div class="flex flex-col w-full lg:w-2/4 sm:px-4">
                             <!-- Payment Type -->
-                            <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+                            <mat-form-field class="w-full fuse-mat-emphasized-affix" appearance="fill" floatLabel="always">
                                 <mat-label class="font-medium">Payment Type</mat-label>
                                 <mat-select
                                     [formControlName]="'paymentType'"
@@ -591,6 +646,10 @@
                                 <mat-error *ngIf="editStoreForm.get('paymentType').hasError('required')">
                                     Required
                                 </mat-error>
+                                <mat-icon
+                                    matPrefix
+                                    [svgIcon]="'payment'">
+                                </mat-icon>
                             </mat-form-field>
                             <!-- Opening Hour -->
                             <div class="flex flex-col w-full">
