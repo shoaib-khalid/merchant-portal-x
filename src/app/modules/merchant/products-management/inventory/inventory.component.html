@@ -124,7 +124,7 @@
 
                                     <!-- Price -->
                                     <div class="hidden sm:block">
-                                        {{ product.productInventories ? (product.productInventories[0].price | currency:'USD':'symbol':'1.2-2') : '' }}
+                                        {{ product.productInventories ? (product.productInventories[0].price | currency:store$.regionCountry.currencySymbol:'symbol':'1.2-2') : '' }}
                                     </div>
 
                                     <!-- Stock -->
