@@ -228,6 +228,7 @@ export class EditStoreComponent implements OnInit
                             this.deliveryPartners.push({
                                 id: item.id,
                                 name: item.name,
+                                providerImage: item.providerImage,
                                 label: item.name,
                                 selected: false
                             });
@@ -407,7 +408,7 @@ export class EditStoreComponent implements OnInit
         this._storesService.update(this.storeId, createStoreBody)
             .subscribe((response) => {
 
-                let storeId = response["data"].id;
+                let storeId = response.id;
 
                 // ---------------------------
                 // Update Store Timing
