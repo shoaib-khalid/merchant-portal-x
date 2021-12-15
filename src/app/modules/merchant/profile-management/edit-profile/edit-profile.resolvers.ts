@@ -5,12 +5,41 @@ import { catchError } from 'rxjs/operators';
 import { StoreCategory, Store, StorePagination } from 'app/core/store/store.types';
 import { ChooseStoreService } from 'app/modules/merchant/stores-management/choose-store/choose-store.service';
 import { EditProfileService } from './edit-profile.service';
-import { Client } from './edit-profile.types';
+import { Client, ClientPaymentDetails } from './edit-profile.types';
 
 @Injectable({
     providedIn: 'root'
 })
-export class EditProfileResolver implements Resolve<any>
+export class GetProfilePaymentResolver implements Resolve<any>
+{
+    /**
+     * Constructor
+     */
+    constructor(private _editProfileService: EditProfileService)
+    {
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Resolver
+     *
+     * @param route
+     * @param state
+     */
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<ClientPaymentDetails>
+    {
+        return this._editProfileService.getClientPaymentDetails();
+    }
+}
+
+
+@Injectable({
+    providedIn: 'root'
+})
+export class GetClientResolver implements Resolve<any>
 {
     /**
      * Constructor

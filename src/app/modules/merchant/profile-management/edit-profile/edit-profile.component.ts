@@ -18,6 +18,8 @@ export class EditProfileComponent implements OnInit
 
     user$: User;
 
+    clientPaymentId: string;
+
     alert: any;
     editProfileForm: FormGroup;
 
@@ -63,8 +65,8 @@ export class EditProfileComponent implements OnInit
             name               : ['', Validators.required],
             email              : ['', [Validators.required, Validators.email]],
             // phoneNumber        : ['', RegisterStoreValidationService.phonenumberValidator],
-            // bankName           : ['', Validators.required],
-            // bankAccountNumber  : ['', Validators.required],
+            bankName           : ['', Validators.required],
+            bankAccountNumber  : ['', Validators.required],
             
         });
 
@@ -105,18 +107,31 @@ export class EditProfileComponent implements OnInit
             },
         ];
 
-      // ----------------------
+        // ----------------------
         // Get client Details
         // ----------------------
 
         this._editProfileService.client$.subscribe(
             (response) => {
- 
-                console.log("disini: ", response)
-                 // Fill the form
-                 this.editProfileForm.patchValue(response);
+                // Fill the form
+                this.editProfileForm.patchValue(response);
             } 
-         );        
+        );
+        
+        // ----------------------
+        // Get client payment Details
+        // ----------------------
+
+        this._editProfileService.clientPaymentDetails$.subscribe(
+            (response) => {
+                  // Fill the form
+                this.editProfileForm.get('bankAccountNumber').patchValue(response.bankAccountNumber);
+                this.editProfileForm.get('bankName').patchValue(response.bankName);
+
+                this.clientPaymentId = response.id;
+            } 
+        );   
+
     }
 
     ngAfterViewInit(): void{
@@ -157,11 +172,22 @@ export class EditProfileComponent implements OnInit
         // Disable the form
         this.editProfileForm.disable();
 
-
-        this._editProfileService.updateProfile(this.editProfileForm.value)
+        // update profile
+        this._editProfileService.updateClientProfile(this.editProfileForm.value)
             .subscribe((response) => {
 
             });
+
+        let newBody = {
+            bankAccountNumber: this.editProfileForm.get('bankAccountNumber').value,
+            bankName : this.editProfileForm.get('bankName').value
+        };
+
+        // update payment profile
+        this._editProfileService.updatePaymentProfile(this.clientPaymentId, newBody)
+        .subscribe((response) => {
+
+        });
 
         // Show a success message (it can also be an error message)
                         // Show a success message (it can also be an error message)

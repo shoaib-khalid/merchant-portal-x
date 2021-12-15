@@ -20,7 +20,7 @@
                 What do you want to learn today?
             </div> -->
             <div class="max-w-2xl mt-6 sm:text-2xl text-center tracking-tight text-secondary">
-                Simply your profile with SYMPlified
+                Simply manage your profile with SYMPlified
             </div>
         </div>
     </div>
@@ -46,7 +46,7 @@
                     <div class="flex flex-col lg:flex-row">
                         <!-- username -->
                         <div class="flex flex-col lg:w-full sm:px-4">
-                            <mat-form-field class="w-full" floatLabel="always">
+                            <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
                                 <input
                                     matInput
                                     maxlength="100"
@@ -54,6 +54,10 @@
                                     [formControlName]="'name'"
                                     [required]="true"
                                     >
+                                <mat-icon
+                                    matPrefix
+                                    [svgIcon]="'heroicons_outline:user'">
+                                </mat-icon>
                                 <mat-label>Username</mat-label>
                                 <mat-error *ngIf="editProfileForm.get('name').hasError('required')">
                                     Required
@@ -65,7 +69,7 @@
                         </div>                    
                         <!-- Store name -->
                         <div class="flex flex-col lg:w-full sm:px-4">
-                            <mat-form-field class="w-full" floatLabel="always">
+                            <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
                                 <input
                                 matInput
                                 maxlength="100"
@@ -73,6 +77,10 @@
                                 [formControlName]="'username'"
                                 [required]="true"
                                 >
+                                <mat-icon
+                                    matPrefix
+                                    [svgIcon]="'mat_outline:storefront'">
+                                 </mat-icon>
                                 <mat-label>Store Name</mat-label>
                                 <mat-error *ngIf="editProfileForm.get('name').hasError('required')">
                                     Required
@@ -87,7 +95,7 @@
                     <div class="flex flex-col lg:flex-row">
                         <!-- Email address -->
                         <div class="flex flex-col lg:w-full sm:px-4">
-                            <mat-form-field class="w-full" floatLabel="always">
+                            <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
                                 <input
                                     matInput
                                     maxlength="100"
@@ -95,6 +103,10 @@
                                     [formControlName]="'email'"
                                     [required]="true"
                                     >
+                                <mat-icon
+                                    matPrefix
+                                    [svgIcon]="'heroicons_outline:mail'">
+                                </mat-icon>                                    
                                 <mat-label>Email Address</mat-label>
                                 <mat-error *ngIf="editProfileForm.get('name').hasError('required')">
                                     Required
@@ -106,7 +118,7 @@
                         </div>
                         <!-- phone number -->
                         <div class="flex flex-col lg:w-full sm:px-4">
-                            <mat-form-field class="w-full" floatLabel="always">
+                            <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
                                 <input
                                     matInput
                                     maxlength="100"
@@ -114,6 +126,10 @@
                                     [formControlName]
                                     [required]="true"
                                    >
+                                <mat-icon
+                                   matPrefix
+                                   [svgIcon]="'heroicons_outline:phone'">
+                               </mat-icon>  
                                 <mat-label>Phone Number</mat-label>
                                 <mat-error *ngIf="editProfileForm.get('name').hasError('required')">
                                     Required
@@ -128,14 +144,18 @@
                     <div class="flex flex-col lg:flex-row">
                         <!-- bank name -->
                         <div class="flex flex-col lg:w-full sm:px-4">
-                            <mat-form-field class="w-full" floatLabel="always">
+                            <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
                                 <input
                                     matInput
                                     maxlength="100"
                                     placeholder="Enter bank name"
-                                    [formControlName]
+                                    [formControlName]="'bankName'"
                                     [required]="true"
                                    >
+                                <mat-icon
+                                   matPrefix
+                                   [svgIcon]="'heroicons_outline:library'">
+                               </mat-icon>  
                                 <mat-label>Bank Name</mat-label>
                                 <mat-error *ngIf="editProfileForm.get('name').hasError('required')">
                                     Required
@@ -147,14 +167,18 @@
                         </div>
                         <!-- Bank account number -->
                         <div class="flex flex-col lg:w-full sm:px-4">
-                            <mat-form-field class="w-full" floatLabel="always">
+                            <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
                                 <input
                                     matInput
                                     maxlength="100"
                                     placeholder="Enter bank account number"
-                                    [formControlName]
+                                    [formControlName]="'bankAccountNumber'"
                                     [required]="true"
                                    >
+                                <mat-icon
+                                   matPrefix
+                                   [svgIcon]="'heroicons_outline:currency-dollar'">
+                               </mat-icon>  
                                 <mat-label>Bank Account Number</mat-label>
                                 <mat-error *ngIf="editProfileForm.get('name').hasError('required')">
                                     Required
@@ -185,6 +209,10 @@
                                             accept="image/*" multiple 
                                             (change)="selectFiles('banner',$event)"
                                         />
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'heroicons_solid:identification'">
+                                        </mat-icon> 
                                     </mat-form-field>
                                 </div>
                                 <!-- Backside ID -->
@@ -201,6 +229,10 @@
                                             accept="image/*" multiple 
                                             (change)="selectFiles('bannerMobile',$event)"
                                         />
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'heroicons_solid:identification'">
+                                        </mat-icon>  
                                     </mat-form-field>
                                 </div>
                             </div>
@@ -252,6 +284,10 @@
                                     accept="image/*" multiple 
                                     (change)="selectFiles('logo',$event)"
                                 />
+                                <mat-icon
+                                    matPrefix
+                                    [svgIcon]="'heroicons_solid:document-text'">
+                                </mat-icon> 
                             </mat-form-field>
                             <div class="w-full">
                                 <mat-label class="font-medium">Preview</mat-label>
@@ -287,6 +323,10 @@
                                 accept="image/*" multiple 
                                 (change)="selectFiles('logo',$event)"
                             />
+                            <mat-icon
+                                matPrefix
+                                [svgIcon]="'heroicons_solid:document-text'">
+                            </mat-icon>                             
                         </mat-form-field>
                         <div class="w-full">
                             <mat-label class="font-medium">Preview</mat-label>
