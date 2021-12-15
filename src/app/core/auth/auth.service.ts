@@ -71,7 +71,21 @@ export class AuthService
      */
     forgotPassword(email: string): Observable<any>
     {
-        return this._httpClient.post('api/auth/forgot-password', email);
+        let userService = this._apiServer.settings.apiServer.userService;
+        let productService = this._apiServer.settings.apiServer.productService;
+        let token = "accessToken"
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${token}`)
+        };
+        
+
+        return this._httpClient.get(userService + '/clients/' + email + '/password_reset', header).pipe(
+            switchMap(async (response: any) => {
+
+                this._logging.debug("Response from UserService (password_reset)",response);
+                
+            })
+        );
     }
 
     /**
@@ -79,9 +93,22 @@ export class AuthService
      *
      * @param password
      */
-    resetPassword(password: string): Observable<any>
+    resetPassword(id: string, code, body): Observable<any>
     {
-        return this._httpClient.post('api/auth/reset-password', password);
+        let userService = this._apiServer.settings.apiServer.userService;
+        let productService = this._apiServer.settings.apiServer.productService;
+        let token = "accessToken"
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${token}`)
+        };
+
+        return this._httpClient.put(userService + '/clients/' + id + '/password/' + code + '/reset' , body ,  header).pipe(
+            switchMap(async (response: any) => {
+
+                this._logging.debug("Response from UserService (password_reset_id)",response);
+            })
+
+        );
     }
 
     /**

@@ -5,5 +5,19 @@ export const authResetPasswordRoutes: Route[] = [
     {
         path     : '',
         component: AuthResetPasswordComponent
-    }
+    },
+    // {
+    //     path     : 'edit/:storeid',
+    //     component: EditStoreComponent,
+    //     resolve  : {
+    //         categories: ChooseStoreCategoriesResolver
+    //     },
+    //     children : [
+    //         {
+    //             path     : '',
+    //             pathMatch: 'full',
+    //             component: ChooseStoreComponent,
+    //         },
+    //     ]
+    // }
 ];
