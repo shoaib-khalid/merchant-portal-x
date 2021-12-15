@@ -67,50 +67,50 @@ export const defaultNavigation: FuseNavigationItem[] = [
         icon : 'heroicons_outline:gift',
         link : '/discounts'
     },
-    {
-        id   : 'social-media',
-        title: 'Social Media',
-        type : 'collapsable',
-        icon : 'heroicons_outline:chat-alt-2',
-        children: [
-            {
-                id   : 'apps.flow.management',
-                title: 'Flows Management',
-                type : 'basic',
-                link : '/social-media',
-                exactMatch: true
-            },
-            {
-                id   : 'apps.channel.management',
-                title: 'Channels Management',
-                type : 'basic',
-                link : '/social-media/channels',
-                exactMatch: true
-            }
-        ]
-    },
-    {
-        id   : 'customer-support',
-        title: 'Customer Support',
-        type : 'collapsable',
-        icon : 'heroicons_outline:support',
-        children: [
-            {
-                id   : 'customer-support.list',
-                title: 'Customer Database',
-                type : 'basic',
-                link : '/customer-support/list',
-                exactMatch: true
-            },
-            {
-                id   : 'manage-agent.list',
-                title: 'Agent Management',
-                type : 'basic',
-                link : '/customer-support/manage-agent',
-                exactMatch: true
-            },
-        ]
-    }
+    // {
+    //     id   : 'social-media',
+    //     title: 'Social Media',
+    //     type : 'collapsable',
+    //     icon : 'heroicons_outline:chat-alt-2',
+    //     children: [
+    //         {
+    //             id   : 'apps.flow.management',
+    //             title: 'Flows Management',
+    //             type : 'basic',
+    //             link : '/social-media',
+    //             exactMatch: true
+    //         },
+    //         {
+    //             id   : 'apps.channel.management',
+    //             title: 'Channels Management',
+    //             type : 'basic',
+    //             link : '/social-media/channels',
+    //             exactMatch: true
+    //         }
+    //     ]
+    // },
+    // {
+    //     id   : 'customer-support',
+    //     title: 'Customer Support',
+    //     type : 'collapsable',
+    //     icon : 'heroicons_outline:support',
+    //     children: [
+    //         {
+    //             id   : 'customer-support.list',
+    //             title: 'Customer Database',
+    //             type : 'basic',
+    //             link : '/customer-support/list',
+    //             exactMatch: true
+    //         },
+    //         {
+    //             id   : 'manage-agent.list',
+    //             title: 'Agent Management',
+    //             type : 'basic',
+    //             link : '/customer-support/manage-agent',
+    //             exactMatch: true
+    //         },
+    //     ]
+    // }
 ];
 export const compactNavigation: FuseNavigationItem[] = [
     {
