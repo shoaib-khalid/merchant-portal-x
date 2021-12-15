@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { User } from 'app/core/user/user.types';
 import { UserService } from 'app/core/user/user.service';
+import { store } from 'app/mock-api/common/store/data';
 
 @Component({
     selector       : 'user',
@@ -33,6 +34,19 @@ export class UserComponent implements OnInit, OnDestroy
         private _userService: UserService
     )
     {
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Accessors
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Getter for storeId
+     */
+
+    get storeId$(): string
+    {
+        return localStorage.getItem('storeId') ?? '';
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -104,5 +118,10 @@ export class UserComponent implements OnInit, OnDestroy
     editProfile(): void
     {
         this._router.navigate(['/profile']);
+    }
+
+    storeSetting(): void
+    {
+        this._router.navigate(['/stores/edit/' + this.storeId$]);
     }
 }
