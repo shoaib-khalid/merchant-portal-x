@@ -490,11 +490,29 @@
                                     <div class="mb-0.5"></div>
                                     <div class="border border-gray-300 rounded min-h-26 max-h-72 overflow-auto">
                                         <div class="pt-4 pl-2 w-full">
-                                            <ng-container *ngIf="createStoreForm.get('deliveryType').value === 'SCHEDULED'">
+                                            <section class="flex flex-col px-2" *ngFor="let deliveryPartner of deliveryPartners">
+                                                <mat-form-field
+                                                    appearance="fill" 
+                                                    floatLabel="always"
+                                                    *ngIf="createStoreForm.get('deliveryType').value === 'SCHEDULED'"
+                                                    class="flex flex-col w-full fuse-mat-emphasized-affix">
+                                                    <input
+                                                        matInput
+                                                        [value]="deliveryPartner.name"
+                                                        [readonly]="true"/>
+                                                    <img
+                                                        matSuffix
+                                                        class="w-30"
+                                                        *ngIf="deliveryPartner.providerImage"
+                                                        [alt]="'Product thumbnail image'"
+                                                        [src]="deliveryPartner.providerImage">
+                                                </mat-form-field>
+                                            </section >
+                                            <!-- <ng-container *ngIf="createStoreForm.get('deliveryType').value === 'SCHEDULED'">
                                                 <section class="p-2" *ngFor="let deliveryPartner of deliveryPartners">
                                                     <span class="py-0.5">{{deliveryPartner.name}}</span>
                                                 </section>
-                                            </ng-container>
+                                            </ng-container> -->
                                             <mat-radio-group 
                                                 *ngIf="createStoreForm.get('deliveryType').value === 'ADHOC'"
                                                 class="flex flex-col w-full"
