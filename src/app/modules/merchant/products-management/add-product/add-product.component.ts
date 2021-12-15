@@ -165,6 +165,18 @@ export class AddProductComponent implements OnInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             });
 
+        // rest of the input checking process occur at bottom
+        // refer function checkInput().... lol
+        this.addProductForm.valueChanges.subscribe(data => {
+            if (data.description) {
+                this.checkinput['description'] = true;
+                this.message = "";
+            } else {
+                this.checkinput['description'] = false;
+                this.message = "Please insert product description";
+            }
+        })
+
         // Mark for check
         this._changeDetectorRef.markForCheck();
     }
@@ -543,6 +555,18 @@ export class AddProductComponent implements OnInit, OnDestroy
     }
          
     checkForm(){
+
+        console.log("========================================")
+        console.log("name",this.checkinput.name)
+        console.log("description",this.checkinput.description)
+        console.log("status",this.checkinput.status)
+        console.log("sku",this.checkinput.sku)
+        console.log("price",this.checkinput.price)
+        console.log("packingSize",this.checkinput.packingSize)
+        console.log("category",this.checkinput.category)
+        console.log("availableStock",this.checkinput.availableStock)
+
+
 
         if (this.checkinput.name === true &&
             this.checkinput.description === true &&

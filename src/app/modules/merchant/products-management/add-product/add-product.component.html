@@ -242,6 +242,7 @@
                                             [formControlName]="'sku'"
                                             placeholder="Insert SKU"
                                             (input)="checkInput('sku');checkForm()"
+                                            (change)="checkInput('sku');checkForm()"
                                         >
                                     </mat-form-field>
 
@@ -257,6 +258,7 @@
                                             [formControlName]="'price'"
                                             placeholder="Insert price"
                                             (input)="checkInput('price');checkForm()"
+                                            (change)="checkInput('price');checkForm()"
                                             type="number"
                                         >
                                     </mat-form-field>
@@ -343,8 +345,8 @@
                                                     <mat-checkbox
                                                         class="flex items-center h-10 min-h-10 px-4"
                                                         [color]="'primary'"
-                                                        (change)="toggleProductCategory(category, $event)"
                                                         [checked]="addProductForm.get('categoryId').value.includes(category.id)"
+                                                        (change)="toggleProductCategory(category, $event);"
                                                         (input)="checkInput('category', $event);checkForm()">
                                                         {{category.name}}
                                                     </mat-checkbox>
