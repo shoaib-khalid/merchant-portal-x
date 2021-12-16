@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators, FormArray} from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -206,6 +206,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             packingSize      : [''],
             // created          : [''],
             // updated          : [''],
+
             productVariants  : this._formBuilder.array([{
                 id                      : [''],
                 name                    : [''],
@@ -218,36 +219,43 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 }]),
                 sequenceNumber          : [0],
             }]),
-            // productInventories : this._formBuilder.array([{
-            //     itemCode                : [''],
-            //     price                   : [0],
-            //     quantity                : [''],
-            //     productId               : [''],
-            //     productInventoryItems   : this._formBuilder.array([{
-            //         itemCode                    : [''],
-            //         productVariantAvailableId   : [''],
-            //         productId                   : [''],
-            //         sequenceNumber              : [''],
-            //         productVariantAvailable     : [{
-            //             id              : [''],
-            //             value           : [''],
-            //             productId       : [''],
-            //             productVariantId: [''],
-            //             sequenceNumber  : [0],
-            //         }],
-            //     }]),
-            //     sku                     : ['']
-            // }]),
-            // productReviews        : [''], // not used
-            // productAssets         : this._formBuilder.array([{
-            //     id                  : [''],
-            //     itemCode            : [''],
-            //     name                : [''],
-            //     url                 : [''],
-            //     productId           : [''],
-            //     isThumbnail         : [false],
-            // }]),
-            // productDeliveryDetail : [''], // not used
+
+            productInventories : this._formBuilder.array([
+               {
+                    itemCode                : [''],
+                    price                   : [0],
+                    quantity                : [''],
+                    productId               : [''],
+                    sku                     : [''],
+                    status           : ['AVAILABLE'],
+                    productInventoryItems   : this._formBuilder.array([
+                        {
+                            itemCode                    : [''],
+                            productVariantAvailableId   : [''],
+                            productId                   : [''],
+                            sequenceNumber              : [''],
+                            productVariantAvailable     : [{
+                                id              : [''],
+                                value           : [''],
+                                productId       : [''],
+                                productVariantId: [''],
+                                sequenceNumber  : [0],
+                            }],
+                        }
+                    ]),
+                }
+            ]),
+
+            productReviews        : [''], // not used
+            productAssets         : this._formBuilder.array([{
+                id                  : [''],
+                itemCode            : [''],
+                name                : [''],
+                url                 : [''],
+                productId           : [''],
+                isThumbnail         : [false],
+            }]),
+            productDeliveryDetail : [''], // not used
 
 
             // OLD HERE -----------------------------------
@@ -292,6 +300,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             .pipe(takeUntil(this._unsubscribeAll))    
             .subscribe((response)=>{
                 this._products = response;
+                console.log("this._products",this._products);
+
 
                 // remove object for array of object where item.isPackage !== true
                 let _filteredProductsOptions = response.filter(item => item.isPackage !== true );
@@ -440,13 +450,18 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
                 // Set the selected product
                 this.selectedProduct = product;
+                console.log("IMAN CHECK 1",product);
+
 
                 // Fill the form
                 this.selectedProductForm.patchValue(product);
+                console.log("IMAN CHECK 2",this.selectedProductForm.value);
+            
 
                 // Fill the form for SKU , Price & Quantity productInventories[0]
                 // this because SKU , Price & Quantity migh have variants
                 // this is only for display, so we display the productInventories[0] 
+                console.log("product",product);
                 this.displaySku = product.productInventories[0].sku;
                 this.displayPrice = product.productInventories[0].price;
                 this.displayQuantity = product.productInventories[0].quantity;
@@ -506,9 +521,10 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 
                 const productIdLength = this.selectedProduct.id.length;
                 (this.selectedProduct.productInventories).forEach((item: ProductInventory, index) => {
+
                     if (item.itemCode.slice(-1) != "a") {
                         const index = parseInt(item.itemCode.substring(productIdLength));
-                        // console.log("selectedVariantCombos: ",this.selectedVariantCombos)
+                   
                         if (this.selectedVariantCombos[index]) {
                             // console.log("item.price :",item.price)
                             this.selectedVariantCombos[index].itemCode = item.itemCode;
@@ -1536,7 +1552,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
         // If the variant is already selected...
         if ( this.selectedProductInventory && this.selectedProductInventory.itemCode === itemCode )
-        {
+        { 
             console.log("X MASUK PON")
             // Close the details
             this.closeVariantDetails();
