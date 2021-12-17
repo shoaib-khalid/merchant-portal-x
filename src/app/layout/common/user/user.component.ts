@@ -1,11 +1,13 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { BooleanInput } from '@angular/cdk/coercion';
-import { Subject } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { User } from 'app/core/user/user.types';
 import { UserService } from 'app/core/user/user.service';
 import { store } from 'app/mock-api/common/store/data';
+import { StoresService } from 'app/core/store/store.service';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 @Component({
     selector       : 'user',
@@ -31,7 +33,9 @@ export class UserComponent implements OnInit, OnDestroy
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _router: Router,
-        private _userService: UserService
+        private _userService: UserService,
+        private _storesService: StoresService,
+        private _fuseConfirmationService: FuseConfirmationService
     )
     {
     }
@@ -122,6 +126,59 @@ export class UserComponent implements OnInit, OnDestroy
 
     storeSetting(): void
     {
-        this._router.navigate(['/stores/edit/' + this.storeId$]);
+        if (this.storeId$) {
+            this._router.navigate(['/stores/edit/' + this.storeId$]);
+        } else (
+            this._checkStoreSelected()
+        )
     }
+
+    /**
+     * Check the authenticated status
+     *
+     * @param redirectURL
+     * @private
+     */
+     private _checkStoreSelected(): Observable<boolean>
+     {
+         // Check the authentication status
+         let storeId = this._storesService.storeId$;
+         
+         if (!storeId) {
+             // Redirect to the choose-store page
+             this._router.navigate(['stores']);
+ 
+             // Alert the user
+             // alert("Please choose a store first");
+ 
+             this._fuseConfirmationService.open({
+                 "title": "No store selected",
+                 "message": "Please choose a store first",
+                 "icon": {
+                   "show": true,
+                   "name": "heroicons_outline:exclamation",
+                   "color": "warn"
+                 },
+                 "actions": {
+                   "confirm": {
+                     "show": false,
+                     "label": "Remove",
+                     "color": "warn"
+                   },
+                   "cancel": {
+                     "show": true,
+                     "label": "OK"
+                   }
+                 },
+                 "dismissible": false
+               });
+             // Prevent the access
+             return of(false);
+ 
+             
+         }
+ 
+         // Allow the access
+         return of(true);
+     }
 }
