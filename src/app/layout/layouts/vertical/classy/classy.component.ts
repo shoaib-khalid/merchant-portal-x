@@ -11,6 +11,7 @@ import { UserService } from 'app/core/user/user.service';
 import { Store } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
 import { InventoryService } from 'app/core/product/inventory.service';
+import {environment} from 'environments/environment';
 
 @Component({
     selector     : 'classy-layout',
@@ -25,8 +26,9 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
     store: Store;
     stores: Store[];
     storeLogo: string;
-    currentStoreId: string ="";
+    currentStoreId: string = "";
     private _unsubscribeAll: Subject<any> = new Subject<any>();
+    public version: string = environment.appVersion;
 
     /**
      * Constructor
