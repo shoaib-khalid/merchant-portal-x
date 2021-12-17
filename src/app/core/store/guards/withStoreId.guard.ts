@@ -35,7 +35,7 @@ export class WithStoreIdGuard implements CanActivate, CanActivateChild, CanLoad
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean
     {
         const redirectUrl = state.url === '/sign-out' ? '/' : state.url;
-        return this._check(redirectUrl);
+        return this._checkStoreSelected();
     }
 
     /**
@@ -47,7 +47,7 @@ export class WithStoreIdGuard implements CanActivate, CanActivateChild, CanLoad
     canActivateChild(childRoute: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree
     {
         const redirectUrl = state.url === '/sign-out' ? '/' : state.url;
-        return this._check(redirectUrl);
+        return this._checkStoreSelected();
     }
 
     /**
@@ -58,7 +58,7 @@ export class WithStoreIdGuard implements CanActivate, CanActivateChild, CanLoad
      */
     canLoad(route: Route, segments: UrlSegment[]): Observable<boolean> | Promise<boolean> | boolean
     {
-        return this._check('/');
+        return this._checkStoreSelected();
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ export class WithStoreIdGuard implements CanActivate, CanActivateChild, CanLoad
      * @param redirectURL
      * @private
      */
-    private _check(redirectURL: string): Observable<boolean>
+    private _checkStoreSelected(): Observable<boolean>
     {
         // Check the authentication status
         let storeId = this._storesService.storeId$;
