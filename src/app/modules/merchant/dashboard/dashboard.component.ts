@@ -7,7 +7,7 @@ import { ApexOptions } from 'ng-apexcharts';
 import { DashboardService } from 'app/modules/merchant/dashboard/dashboard.service';
 import { Store } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
-import { DailyTopProducts, DailyTopProductsPagination, DetailedDailySales, DetailedDailySalesPagination, SummarySales, SummarySalesPagination } from './dashboard.types';
+import { DailyTopProducts, DailyTopProductsPagination, DetailedDailySales, DetailedDailySalesPagination, SummarySales, SummarySalesPagination, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly } from './dashboard.types';
 import { items } from 'app/mock-api/apps/file-manager/data';
 
 @Component({
@@ -42,6 +42,31 @@ export class DashboardComponent implements OnInit, OnDestroy
     detailedDailySalesRow = [];
     detailedDailySalesPagination: DetailedDailySalesPagination;
     detailedDailySalesDateRange = { start: '', end: ''};
+
+    completeCompletionStatus = ["DELIVERED_TO_CUSTOMER"];
+    pendingCompletionStatus = [];
+    failedCompletionStatus = ["REQUESTING_DELIVERY_FAILED","PAYMENT_FAILED","CANCELED_BY_CUSTOMER","FAILED","REJECTED_BY_STORE"];
+
+    totalSalesTotalRow = [];
+    totalSalesDailyRow = [];
+    totalSalesWeeklyRow = [];
+    totalSalesMonthlyRow = [];
+
+    sumTotalCompleted: number = 0;
+    sumTotalPending: number = 0;
+    sumTotalFailed: number = 0;
+
+    sumDailyCompleted: number = 0;
+    sumDailyPending: number = 0;
+    sumDailyFailed: number = 0;
+
+    sumWeeklyCompleted: number = 0;
+    sumWeeklyPending: number = 0;
+    sumWeeklyFailed: number = 0;
+
+    sumMonthlyCompleted: number = 0;
+    sumMonthlyPending: number = 0;
+    sumMonthlyFailed: number = 0;
 
     isLoading: boolean = false;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -115,26 +140,6 @@ export class DashboardComponent implements OnInit, OnDestroy
                         totalTransaction: item.totalOrders
                     });
                 });
-
-                // let rank = 1;
-                // let quantity = 1;
-                // dailyTopProducts.forEach(item=>{
-
-                //     let index = this.dailyTopProductsRow.findIndex(element => element.productId === item.productId);
-
-                //     if (index > -1) {
-
-                //     } else {
-                //         this.dailyTopProductsRow.push({
-                //             date: item.date, 
-                //             productId: item.productId,
-                //             productName: item.name, 
-                //             rank: 1,
-                //             qu
-                //             totalTransaction: item.totalOrders
-                //         });
-                //     }
-                // });
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -212,6 +217,124 @@ export class DashboardComponent implements OnInit, OnDestroy
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
+
+
+        // Get the Total Sales Total
+        this._dashboardService.totalSalesTotal$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((totalSalesTotal: TotalSalesTotal[])=>{
+                totalSalesTotal.forEach(items => {
+                    this.totalSalesTotalRow.push({ 
+                        completionStatus: items.completionStatus,
+                        total: items.total,
+                    });
+
+                });
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });      
+
+        // Get the Total Sales Daily
+        this._dashboardService.totalSalesDaily$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((totalSalesDaily: TotalSalesDaily[])=>{
+                totalSalesDaily.forEach(items => {
+                    this.totalSalesDailyRow.push({ 
+                        completionStatus: items.completionStatus,
+                        total: items.total
+                    });
+                });
+                
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });  
+
+        // Get the Total Sales Weekly
+        this._dashboardService.totalSalesWeekly$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((totalSalesWeekly: TotalSalesWeekly[])=>{
+                totalSalesWeekly.forEach(items => {
+                    this.totalSalesWeeklyRow.push({ 
+                        completionStatus: items.completionStatus,
+                        total: items.total
+                    });
+                });
+                
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });  
+
+        // Get the Total Sales Monthly
+        this._dashboardService.totalSalesMonthly$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((totalSalesMonthly: TotalSalesMonthly[])=>{
+                totalSalesMonthly.forEach(items => {
+                    this.totalSalesMonthlyRow.push({ 
+                        completionStatus: items.completionStatus,
+                        total: items.total
+                    });
+                });
+                
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });      
+        
+        // Sum up Total Sales Total
+        this.totalSalesTotalRow.forEach(a => {
+            
+            if (this.completeCompletionStatus.includes(a.completionStatus))
+                this.sumTotalCompleted += a.total;
+            
+            else if (this.failedCompletionStatus.includes(a.completionStatus))
+                this.sumTotalFailed += a.total;
+            
+            else
+                this.sumTotalPending += a.total;
+
+        })
+        
+        // Sum up Total Sales Daily
+        this.totalSalesDailyRow.forEach(a => {
+            
+            if (this.completeCompletionStatus.includes(a.completionStatus))
+                this.sumDailyCompleted += a.total;
+            
+            else if (this.failedCompletionStatus.includes(a.completionStatus))
+                this.sumDailyFailed += a.total;
+            
+            else
+                this.sumDailyPending += a.total;
+
+        })
+
+        // Sum up Total Sales Weekly
+        this.totalSalesWeeklyRow.forEach(a => {
+            
+            if (this.completeCompletionStatus.includes(a.completionStatus))
+                this.sumWeeklyCompleted += a.total;
+            
+            else if (this.failedCompletionStatus.includes(a.completionStatus))
+                this.sumWeeklyFailed += a.total;
+            
+            else
+                this.sumWeeklyPending += a.total;
+
+        })
+
+        // Sum up Total Sales Monthly 
+        this.totalSalesMonthlyRow.forEach(a => {
+            
+            if (this.completeCompletionStatus.includes(a.completionStatus))
+                this.sumMonthlyCompleted += a.total;
+            
+            else if (this.failedCompletionStatus.includes(a.completionStatus))
+                this.sumMonthlyFailed += a.total;
+            
+            else
+                this.sumMonthlyPending += a.total;
+
+        })
 
         // Get the data
         this._dashboardService.data$

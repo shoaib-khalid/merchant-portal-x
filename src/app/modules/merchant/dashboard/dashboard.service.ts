@@ -7,7 +7,7 @@ import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service';
 import { DailyTopProducts, DailyTopProductsPagination, 
          DetailedDailySales, DetailedDailySalesPagination, 
-         SummarySales, SummarySalesPagination 
+         SummarySales, SummarySalesPagination, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly 
        } from './dashboard.types';
 
 @Injectable({
@@ -29,6 +29,11 @@ export class DashboardService
     private _summarySalesPagination: BehaviorSubject<SummarySalesPagination | null> = new BehaviorSubject(null);
 
     private _currentDailyTopProducts: DailyTopProducts[] = [];
+
+    private _totalSalesTotal: BehaviorSubject<TotalSalesTotal[] | null> = new BehaviorSubject(null);
+    private _totalSalesDaily: BehaviorSubject<TotalSalesDaily[] | null> = new BehaviorSubject(null);
+    private _totalSalesWeekly: BehaviorSubject<TotalSalesWeekly[] | null> = new BehaviorSubject(null);
+    private _totalSalesMonthly: BehaviorSubject<TotalSalesMonthly[] | null> = new BehaviorSubject(null);
 
     fromDate: string;
     todayDate: string;
@@ -133,6 +138,27 @@ export class DashboardService
      get summarySalesPagination$(): Observable<SummarySalesPagination>
      {
          return this._summarySalesPagination.asObservable();
+     }
+
+    /**
+     * Getter for totalSales
+     *
+    */
+     get totalSalesTotal$(): Observable<TotalSalesTotal[]>
+     {
+         return this._totalSalesTotal.asObservable();
+     }
+     get totalSalesDaily$(): Observable<TotalSalesDaily[]>
+     {
+         return this._totalSalesDaily.asObservable();
+     }
+     get totalSalesWeekly$(): Observable<TotalSalesWeekly[]>
+     {
+         return this._totalSalesWeekly.asObservable();
+     }
+     get totalSalesMonthly$(): Observable<TotalSalesMonthly[]>
+     {
+         return this._totalSalesMonthly.asObservable();
      }
 
     /**
@@ -300,6 +326,34 @@ export class DashboardService
 
                     this._summarySalesPagination.next(_pagination);
                     this._summarySales.next(response["data"].content);
+                })
+            );
+    }
+
+    getTotalSales(id: string):
+    Observable<{ totalSalesTotal: TotalSalesTotal[]; totalSalesDaily: TotalSalesDaily[]; 
+        totalSalesWeekly: TotalSalesWeekly[]; totalSalesMonthly: TotalSalesMonthly[] }>
+    {
+        let reportService = this._apiServer.settings.apiServer.reportService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+        
+        return this._httpClient.get<{ totalSalesTotal: TotalSalesTotal[]; totalSalesDaily: TotalSalesDaily[]; 
+            totalSalesWeekly: TotalSalesWeekly[]; totalSalesMonthly: TotalSalesMonthly[] }>
+            (reportService + '/store/' + id + '/totalSales', header)
+            .pipe(
+                tap((response) => {
+                    
+                    this._logging.debug("Response from ReportService (getTotalSales)", response);
+
+                    this._totalSalesTotal.next(response["totalSales"]);
+                    this._totalSalesDaily.next(response["dailySales"]);
+                    this._totalSalesWeekly.next(response["weeklySales"]);
+                    this._totalSalesMonthly.next(response["monthlySales"]);
                 })
             );
     }

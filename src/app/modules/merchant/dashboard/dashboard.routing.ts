@@ -1,6 +1,6 @@
 import { Route } from '@angular/router';
 import { DashboardComponent } from 'app/modules/merchant/dashboard/dashboard.component';
-import { DashboardResolver, DailyTopProductsResolver, DetailedDailySalesResolver, SummarySalesResolver } from 'app/modules/merchant/dashboard/dashboard.resolvers';
+import { DashboardResolver, DailyTopProductsResolver, DetailedDailySalesResolver, SummarySalesResolver, TotalSalesResolver } from 'app/modules/merchant/dashboard/dashboard.resolvers';
 
 export const dashboardRoutes: Route[] = [
     {
@@ -10,7 +10,8 @@ export const dashboardRoutes: Route[] = [
             data: DashboardResolver,
             dailyTopProducts: DailyTopProductsResolver,
             detailedDailySalesResolver: DetailedDailySalesResolver,
-            summarySalesResolver: SummarySalesResolver
+            summarySalesResolver: SummarySalesResolver,
+            totalSalesResolver: TotalSalesResolver
         }
     }
 ];

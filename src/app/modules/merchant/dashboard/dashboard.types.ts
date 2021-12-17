@@ -91,3 +91,29 @@ export interface SummarySalesPagination
     startIndex: number;
     endIndex: number;
 }
+
+////
+
+export interface TotalSalesDaily
+{
+    total: number;
+    completionStatus: string;
+}
+
+export interface TotalSalesWeekly
+{
+    total: number;
+    completionStatus: string;
+}
+
+export interface TotalSalesMonthly
+{
+    total: number;
+    completionStatus: string;
+}
+
+export interface TotalSalesTotal
+{
+    total: number;
+    completionStatus: string;
+}
