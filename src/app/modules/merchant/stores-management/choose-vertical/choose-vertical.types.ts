@@ -5,4 +5,5 @@ export interface Vertical
     description?: string;
     regionId?: string;
     thumbnailUrl?: string;
+    domain?: string;
 }

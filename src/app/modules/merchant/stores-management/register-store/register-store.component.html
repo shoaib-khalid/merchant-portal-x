@@ -83,7 +83,7 @@
                                             matPrefix
                                             [svgIcon]="'heroicons_outline:globe-alt'">
                                         </mat-icon>
-                                    <span matSuffix>.symplified.store</span>
+                                    <span matSuffix>.{{ domainName }}</span>
                                     <mat-error *ngIf="createStoreForm.get('domain').hasError('required')">
                                         Required
                                     </mat-error>
@@ -424,6 +424,7 @@
                                             [value]="'deliveryType'"
                                             [placeholder]="'Select Delivery Type'"
                                             (selectionChange)="createStoreForm.get('deliveryType').patchValue($event.value)"
+                                            (selectionChange)="checkDeliveryPartner()"
                                             #deliverySelector="matSelect"
                                             >
                                             <mat-select-trigger>
@@ -443,6 +444,9 @@
                                         </mat-select>
                                         <mat-error *ngIf="createStoreForm.get('deliveryType').hasError('required')">
                                             Required
+                                        </mat-error>
+                                        <mat-error *ngIf="createStoreForm.get('deliveryType').hasError('noDeliveryPartners')">
+                                            No available delivery partner
                                         </mat-error>
                                         <mat-icon
                                             matPrefix
@@ -518,14 +522,22 @@
                                                 class="flex flex-col w-full"
                                                 [formControlName]="'deliveryPartner'"
                                             >
-                                                <section class="p-2" *ngFor="let deliveryPartner of deliveryPartners">
-                                                    <mat-radio-button [value]="deliveryPartner.id">{{deliveryPartner.name}}</mat-radio-button>
-                                                </section>
+                                                <ng-container *ngIf="deliveryPartners.length > 0; else noDeliveryPartners">
+                                                    <section class="p-2" *ngFor="let deliveryPartner of deliveryPartners">
+                                                        <mat-radio-button [value]="deliveryPartner.id">{{deliveryPartner.name}}</mat-radio-button>
+                                                    </section>
+                                                    <mat-error *ngIf="createStoreForm.get('deliveryPartner').hasError('required')">
+                                                        Required at least 1
+                                                    </mat-error>
+                                                </ng-container>
+                                                <ng-template #noDeliveryPartners>
+                                                    <section class="p-2">
+                                                        <h1 class="text-warn">Sorry there is no delivery partner for this delivery type, please choose another delivery type</h1>
+                                                    </section>
+                                                </ng-template>
+
                                             </mat-radio-group>
                                         </div>
-                                        <mat-error *ngIf="createStoreForm.get('deliveryType').hasError('required')">
-                                            Required at least 1
-                                        </mat-error>
                                         &#160;
                                     </div>
                                 </div>

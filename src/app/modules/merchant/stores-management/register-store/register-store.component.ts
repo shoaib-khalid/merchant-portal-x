@@ -11,6 +11,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { debounce } from 'lodash';
 import { HttpResponse } from '@angular/common/http';
+import { ChooseVerticalService } from '../choose-vertical/choose-vertical.service';
 
 @Component({
     selector     : 'register-store-page',
@@ -68,6 +69,7 @@ export class RegisterStoreComponent implements OnInit
         private _jwt: JwtService,
         private _changeDetectorRef: ChangeDetectorRef,
         private _localeService: LocaleService,
+        private _chooseVerticalService: ChooseVerticalService,
         private _router: Router,
         private _route: ActivatedRoute
     )
@@ -143,6 +145,13 @@ export class RegisterStoreComponent implements OnInit
             let _verticalCode = paramMap.get('vertical-code');
             this.createStoreForm.get('verticalCode').patchValue(_verticalCode);
 
+            // -------------------------
+            // Choose Vertical service
+            // -------------------------      
+            this._chooseVerticalService.getVerticalById(_verticalCode)
+                .subscribe((response) => {
+                    this.domainName = response.domain;
+                });
 
             // -------------------------
             // Locale service
@@ -664,5 +673,35 @@ export class RegisterStoreComponent implements OnInit
         this.files[index].fileSource = '';
 
         this._changeDetectorRef.markForCheck();
+    }
+
+    checkDeliveryPartner(){
+        // on every change set error to false first (reset state)
+        this.createStoreForm.get('deliveryType').setErrors(null);
+        this.createStoreForm.get('deliveryPartner').setErrors(null);
+
+        // -----------------------------------
+        // reset allowedSelfDeliveryStates if user change delivery type
+        // -----------------------------------
+
+        // push to allowedSelfDeliveryStates (form)
+        this.allowedSelfDeliveryStates = this.createStoreForm.get('allowedSelfDeliveryStates') as FormArray;
+        // since backend give full discount tier list .. (not the only one that have been created only)
+        this.allowedSelfDeliveryStates.clear();
+        
+        if (this.createStoreForm.get('deliveryType').value === "SELF") {
+            // re populate items
+            this._allowedSelfDeliveryStates.forEach(item => {
+                this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
+            });
+        }
+
+        // then check it again and set if there's an error
+        if (this.deliveryPartners.length < 1 && this.createStoreForm.get('deliveryType').value !== "SELF"){
+            this.createStoreForm.get('deliveryType').setErrors({noDeliveryPartners: true})
+        }   
+        console.log("this.createStoreForm.get('deliveryPartner').errors",this.createStoreForm.get('deliveryPartner').errors)
+        console.log("this.createStoreForm.get('deliveryType').errors",this.createStoreForm.get('deliveryType').errors)
+        console.log("this.createStoreForm.errors",this.createStoreForm.errors)
     }
 }
