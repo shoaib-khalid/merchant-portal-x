@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { map, switchMap, take, tap } from 'rxjs/operators';
 import { Vertical } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { LogService } from 'app/core/logging/log.service';
 
 @Injectable({
     providedIn: 'root'
@@ -24,7 +25,8 @@ export class ChooseVerticalService
     constructor(
         private _httpClient: HttpClient,
         private _apiServer: AppConfig,
-        private _jwt: JwtService
+        private _jwt: JwtService,
+        private _logging: LogService
         )
     {
     }
@@ -78,13 +80,15 @@ export class ChooseVerticalService
         
         return this._httpClient.get<any>(productService + '/region-verticals', header)
             .pipe(
-                map((vertical) => {
+                map((verticals) => {
+
+                    this._logging.debug("Response from ChooseVertical (getVerticals)", verticals);
 
                     // Update the vertical
-                    this._verticals.next(vertical.data);
+                    this._verticals.next(verticals.data);
 
                     // Return the vertical
-                    return vertical.data;
+                    return verticals.data;
                 }),
                 switchMap((vertical) => {
 
@@ -102,37 +106,31 @@ export class ChooseVerticalService
     /**
      * Get vertical by id
      */
-    getVerticalById(id: string): Observable<Vertical>
+    getVerticalById(code: string): Observable<Vertical>
     {
-        let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        return this._verticals.pipe(
+            take(1),
+            map((stores) => {
 
-        const header = {
-            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
-            params: {
-                "clientId": clientId
-            }
-        };
-        
-        return this._httpClient.get<any>(productService + '/verticals', header)
-        .pipe(
-            map((vertical) => {
+                // Find the store
+                const store = stores.find(item => item.code === code) || null;
 
-                // Update the vertical
-                this._vertical.next(vertical.data.content);
+                this._logging.debug("Response from StoresService (getVerticalById)",store);
 
-                // Return the vertical
-                return vertical;
+                // Update the store
+                this._vertical.next(store);
+
+                // Return the store
+                return store;
             }),
-            switchMap((vertical) => {
+            switchMap((store) => {
 
-                if ( !vertical )
+                if ( !store )
                 {
-                    return throwError('Could not found vertical with id of ' + id + '!');
+                    return throwError('Could not found store with code of ' + code + '!');
                 }
 
-                return of(vertical);
+                return of(store);
             })
         );
     }
