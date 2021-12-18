@@ -26,6 +26,8 @@ export class RegisterStoreComponent implements OnInit
 
     storeId: string;
 
+    invalidVertical: boolean = true;
+
     domainName:string;
 
     alert: any;
@@ -162,6 +164,17 @@ export class RegisterStoreComponent implements OnInit
             this._localeService.locale$.subscribe((response: Locale)=>{
                 
                 let symplifiedCountryId = response.symplifiedCountryId;
+
+                // check if vertical selected is valid for selected country
+                if ((_verticalCode === "ECommerce_PK" || _verticalCode === "FnB_PK") && symplifiedCountryId === "PAK") {
+                    this.invalidVertical = false;
+                } else if ((_verticalCode === 'E-Commerece' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'FnB') && symplifiedCountryId === "MYS") {
+                    this.invalidVertical = false;
+                } else {
+                    this.invalidVertical = true;
+                    let message = symplifiedCountryId ? "Vertical code: " + _verticalCode + " is not available for " + symplifiedCountryId + " country" : "Missing region country id";
+                    console.error(message)
+                }
                 
                 // state (using component variable)
                 // INITIALLY (refer below section updateStates(); for changes), get states from symplified backed by using the 3rd party api
@@ -191,11 +204,13 @@ export class RegisterStoreComponent implements OnInit
                     _deliveryType = "SCHEDULED";
                 } else {
                     console.error("Invalid vertical code: ", _verticalCode)
-                    alert("Invalid vertical code : " + _verticalCode);
                 }
 
                 this._storesService.getStoreDeliveryProvider({deliveryType: _deliveryType, regionCountryId: _regionCountryId}).subscribe(
                     (response: StoreDeliveryProvider[]) => {
+                        // reset this.deliveryPartners first to initial state
+                        this.deliveryPartners = [];
+                        // push the data into array
                         response.forEach(item => {
                             this.deliveryPartners.push({
                                 id: item.id,
@@ -204,7 +219,9 @@ export class RegisterStoreComponent implements OnInit
                                 label: item.name,
                                 selected: false
                             });
-                        })
+                        });
+                        // check changes
+                        this.checkDeliveryPartner();
                     }
                 );
                 
@@ -699,9 +716,6 @@ export class RegisterStoreComponent implements OnInit
         // then check it again and set if there's an error
         if (this.deliveryPartners.length < 1 && this.createStoreForm.get('deliveryType').value !== "SELF"){
             this.createStoreForm.get('deliveryType').setErrors({noDeliveryPartners: true})
-        }   
-        console.log("this.createStoreForm.get('deliveryPartner').errors",this.createStoreForm.get('deliveryPartner').errors)
-        console.log("this.createStoreForm.get('deliveryType').errors",this.createStoreForm.get('deliveryType').errors)
-        console.log("this.createStoreForm.errors",this.createStoreForm.errors)
+        }
     }
 }
