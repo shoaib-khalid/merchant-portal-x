@@ -424,6 +424,7 @@
                                             [value]="'deliveryType'"
                                             [placeholder]="'Select Delivery Type'"
                                             (selectionChange)="editStoreForm.get('deliveryType').patchValue($event.value)"
+                                            (selectionChange)="checkDeliveryPartner()"
                                             #deliverySelector="matSelect"
                                             >
                                             <mat-select-trigger>

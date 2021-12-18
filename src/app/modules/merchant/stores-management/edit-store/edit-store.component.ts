@@ -11,6 +11,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { debounce } from 'lodash';
 import { HttpEventType, HttpResponse } from '@angular/common/http';
+import { ChooseVerticalService } from '../choose-vertical/choose-vertical.service';
 
 @Component({
     selector     : 'edit-store-page',
@@ -64,6 +65,7 @@ export class EditStoreComponent implements OnInit
         private _jwt: JwtService,
         private _changeDetectorRef: ChangeDetectorRef,
         private _localeService: LocaleService,
+        private _chooseVerticalService: ChooseVerticalService,
         private _router: Router,
         private _route: ActivatedRoute
     )
@@ -176,16 +178,25 @@ export class EditStoreComponent implements OnInit
                 // Fill the form
                 this.editStoreForm.patchValue(response);
 
-                // get subdomain from store domain
+
+                // -------------------------
+                // Choose Vertical service
+                // -------------------------
+
+                console.log(response)
+                // get domain name from (vertical service)
+                this._chooseVerticalService.getVerticalById(response.verticalCode)
+                    .subscribe((response) => {
+                        this.domainName = "." + response.domain;
+                    });
+
+                // get subdomain from store domain (store service)
                 let _domain = response.domain;
 
-                if (_domain.split(".").length === 3) {
-                    // set domain name 
-                    this.domainName = "." + _domain.split(".")[1] + "." + _domain.split(".")[2];
+                // domain retrieve from store service that have less than 3 xxx.xxx.xxx is consider invalid
+                if (_domain.split(".").length >= 3) {
+                    // set sub domain name 
                     this.subDomainName = _domain.split(".")[0]
-                } else if (_domain.split(".").length === 1) {
-                    this.domainName = ".symplified.ai";
-                    this.subDomainName = _domain;
                 } else {
                     console.error("Invalid domain name from backend : ",_domain);
                     this.alert("Invalid domain name from backend : " + _domain)
@@ -225,6 +236,9 @@ export class EditStoreComponent implements OnInit
                 this._storesService.getStoreDeliveryProvider({deliveryType: _deliveryType, regionCountryId: _regionCountryId}).subscribe(
                     (response: StoreDeliveryProvider[]) => {
                         response.forEach(item => {
+                            // reset this.deliveryPartners first to initial state
+                            this.deliveryPartners = [];
+                            // push the data into array
                             this.deliveryPartners.push({
                                 id: item.id,
                                 name: item.name,
@@ -232,6 +246,8 @@ export class EditStoreComponent implements OnInit
                                 label: item.name,
                                 selected: false
                             });
+                            // check changes
+                            this.checkDeliveryPartner();
                         })
                     }
                 );
@@ -755,6 +771,33 @@ export class EditStoreComponent implements OnInit
         this.files[index].fileSource = '';
 
         this._changeDetectorRef.markForCheck();
+    }
+
+    checkDeliveryPartner(){
+        // on every change set error to false first (reset state)
+        this.editStoreForm.get('deliveryType').setErrors(null);
+        this.editStoreForm.get('deliveryPartner').setErrors(null);
+
+        // -----------------------------------
+        // reset allowedSelfDeliveryStates if user change delivery type
+        // -----------------------------------
+
+        // push to allowedSelfDeliveryStates (form)
+        this.allowedSelfDeliveryStates = this.editStoreForm.get('allowedSelfDeliveryStates') as FormArray;
+        // since backend give full discount tier list .. (not the only one that have been created only)
+        this.allowedSelfDeliveryStates.clear();
+        
+        if (this.editStoreForm.get('deliveryType').value === "SELF") {
+            // re populate items
+            this._allowedSelfDeliveryStates.forEach(item => {
+                this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
+            });
+        }
+
+        // then check it again and set if there's an error
+        if (this.deliveryPartners.length < 1 && this.editStoreForm.get('deliveryType').value !== "SELF"){
+            this.editStoreForm.get('deliveryType').setErrors({noDeliveryPartners: true})
+        }
     }
     
 }
