@@ -26,7 +26,6 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     @ViewChild('selectFilter', {read: MatSelect})  _filter: MatSelect;
 
 
-    orders: any;
     openTab: string = "HISTORY";
     displayStatuses: any = [];
     completionStatuses: any = [];
@@ -99,58 +98,67 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             });
 
+        this._orderslistService.ordersCountSummary$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((response) => {
+
+                this.completionStatuses = response;
+
+                console.log("order count summary", response)
+            });
+
         // completion statuses from backend
-        this.completionStatuses = [
-            {
-                id: "PAYMENT_CONFIRMED",
-                label: "New",
-                nextId: "BEING_PREPARED",
-                nextLabel: "Process",
-                nextLabelBtn: "Process",
-            },
-            {
-                id: "RECEIVED_AT_STORE",
-                label: "New",
-                nextId: "BEING_PREPARED",
-                nextLabel: "Process",
-                nextLabelBtn: "Process",
-            },
-            {
-                id: "BEING_PREPARED",
-                label: "Process",
-                nextId: "AWAITING_PICKUP",
-                nextLabel: "Ready for Pickup",
-                nextLabelBtn: "Ready",
-            },
-            {
-                id: "AWAITING_PICKUP",
-                label: "Ready for Pickup",
-                nextId: "BEING_DELIVERED",
-                nextLabel: "Sent",
-                nextLabelBtn: "Sent",
-            },
-            {
-                id: "BEING_DELIVERED",
-                label: "Send",
-                nextId: "DELIVERED_TO_CUSTOMER",
-                nextLabel: "Received",
-                nextLabelBtn: "Received",
-            },
-            {
-                id: "DELIVERED_TO_CUSTOMER",
-                label: "Delivered",
-                nextId: null,
-                nextLabel: null,
-                nextLabelBtn: null,
-            },
-            {
-                id: "HISTORY",
-                label: "History",
-                nextId: null,
-                nextLabel: null,
-                nextLabelBtn: null,
-            }
-        ];
+        // this.completionStatuses = [
+        //     {
+        //         id: "PAYMENT_CONFIRMED",
+        //         label: "Payment Confirmed",
+        //         nextId: "BEING_PREPARED",
+        //         nextLabel: "Process",
+        //         nextLabelBtn: "Process",
+        //     },
+        //     {
+        //         id: "RECEIVED_AT_STORE",
+        //         label: "Receive at Store",
+        //         nextId: "BEING_PREPARED",
+        //         nextLabel: "Process",
+        //         nextLabelBtn: "Process",
+        //     },
+        //     {
+        //         id: "BEING_PREPARED",
+        //         label: "Processing",
+        //         nextId: "AWAITING_PICKUP",
+        //         nextLabel: "Ready for Pickup",
+        //         nextLabelBtn: "Ready",
+        //     },
+        //     {
+        //         id: "AWAITING_PICKUP",
+        //         label: "Ready for Pickup",
+        //         nextId: "BEING_DELIVERED",
+        //         nextLabel: "Sent",
+        //         nextLabelBtn: "Sent",
+        //     },
+        //     {
+        //         id: "BEING_DELIVERED",
+        //         label: "On Delivery",
+        //         nextId: "DELIVERED_TO_CUSTOMER",
+        //         nextLabel: "Received",
+        //         nextLabelBtn: "Received",
+        //     },
+        //     {
+        //         id: "DELIVERED_TO_CUSTOMER",
+        //         label: "Delivered",
+        //         nextId: null,
+        //         nextLabel: null,
+        //         nextLabelBtn: null,
+        //     },
+        //     {
+        //         id: "HISTORY",
+        //         label: "History",
+        //         nextId: null,
+        //         nextLabel: null,
+        //         nextLabelBtn: null,
+        //     }
+        // ];
 
         // display statuses is view at frontend
         this.displayStatuses = ["NEW","BEING_PREPARED","AWAITING_PICKUP","BEING_DELIVERED","DELIVERED_TO_CUSTOMER","HISTORY"];
@@ -288,7 +296,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
             .subscribe((response) => {
                 console.log("OK");
 
-                this._orderslistService.updateCompletion(orderId, nextCompletionStatus);
+                // this._orderslistService.updateCompletion(orderId, nextCompletionStatus);
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -304,16 +312,6 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                 // // Show the alert
                 // this.alert = true;
             });
-    }
-
-    getNextCompletionStatus(id){
-        let index = this.completionStatuses.findIndex(item => item.id === id);
-
-        if (index > -1){
-            return this.completionStatuses[index];
-        } else {
-            return "Undefined";
-        } 
     }
 
     viewDetails(orderId){

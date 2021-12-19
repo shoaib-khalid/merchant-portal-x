@@ -155,47 +155,21 @@
                     </div>
                     
                     <ul class="flex mb-0 list-none flex-wrap pb-4 px-4 flex-row">
+                        <ng-container *ngFor="let orderStatus of completionStatuses">
+                            <li class="-mb-px mr-2 pb-2 last:mr-0 flex-auto text-center">
+                                <a class="text-xs font-bold uppercase px-5 py-3 border cursor-pointer	shadow-lg rounded block leading-normal" 
+                                    (click)="toggleTabs(orderStatus.completionStatus)" 
+                                    [ngClass]="{'text-primary-600 bg-white': openTab !== orderStatus.completionStatus, 'text-white bg-primary-600': openTab === orderStatus.completionStatus}">
+                                    <i class="fas fa-space-shuttle text-base mr-1"></i> {{orderStatus.completionStatus}} ({{orderStatus.count}}) 
+                                </a>
+                            </li>
+                        </ng-container>
                         <li class="-mb-px mr-2 pb-2 last:mr-0 flex-auto text-center">
-                        <a class="text-xs font-bold uppercase px-5 py-3 border cursor-pointer	shadow-lg rounded block leading-normal" 
-                            (click)="toggleTabs('NEW')" 
-                            [ngClass]="{'text-primary-600 bg-white': openTab !== 'NEW', 'text-white bg-primary-600': openTab === 'NEW'}">
-                            <i class="fas fa-space-shuttle text-base mr-1"></i> New
-                        </a>
-                        </li>
-                        <li class="-mb-px mr-2 pb-2 last:mr-0 flex-auto text-center">
-                        <a class="text-xs font-bold uppercase px-5 py-3 border cursor-pointer	shadow-lg rounded block leading-normal" 
-                            (click)="toggleTabs('BEING_PREPARED')" 
-                            [ngClass]="{'text-primary-600 bg-white': openTab !== 'BEING_PREPARED', 'text-white bg-primary-600': openTab === 'BEING_PREPARED'}">
-                            <i class="fas fa-cog text-base mr-1"></i> Processed
-                        </a>
-                        </li>
-                        <li class="-mb-px mr-2 pb-2 last:mr-0 flex-auto text-center">
-                        <a class="text-xs font-bold uppercase px-5 py-3 border cursor-pointer	shadow-lg rounded block leading-normal" 
-                            (click)="toggleTabs('AWAITING_PICKUP')" 
-                            [ngClass]="{'text-primary-600 bg-white': openTab !== 'AWAITING_PICKUP', 'text-white bg-primary-600': openTab === 'AWAITING_PICKUP'}">
-                            <i class="fas fa-briefcase text-base mr-1"></i> Awaiting Pickup
-                        </a>
-                        </li>
-                        <li class="-mb-px mr-2 pb-2 last:mr-0 flex-auto text-center">
-                        <a class="text-xs font-bold uppercase px-5 py-3 border cursor-pointer	shadow-lg rounded block leading-normal" 
-                            (click)="toggleTabs('BEING_DELIVERED')" 
-                            [ngClass]="{'text-primary-600 bg-white': openTab !== 'BEING_DELIVERED', 'text-white bg-primary-600': openTab === 'BEING_DELIVERED'}">
-                            <i class="fas fa-briefcase text-base mr-1"></i> Sent Out
-                        </a>
-                        </li>
-                        <li class="-mb-px mr-2 pb-2 last:mr-0 flex-auto text-center">
-                        <a class="text-xs font-bold uppercase px-5 py-3 border cursor-pointer	shadow-lg rounded block leading-normal" 
-                            (click)="toggleTabs('DELIVERED_TO_CUSTOMER')" 
-                            [ngClass]="{'text-primary-600 bg-white': openTab !== 'DELIVERED_TO_CUSTOMER', 'text-white bg-primary-600': openTab === 'DELIVERED_TO_CUSTOMER'}">
-                            <i class="fas fa-briefcase text-base mr-1"></i> Delivered
-                        </a>
-                        </li>
-                        <li class="-mb-px mr-2 pb-2 last:mr-0 flex-auto text-center">
-                        <a class="text-xs font-bold uppercase px-5 py-3 border cursor-pointer	shadow-lg rounded block leading-normal" 
-                            (click)="toggleTabs('HISTORY')" 
-                            [ngClass]="{'text-primary-600 bg-white': openTab !== 'HISTORY', 'text-white bg-primary-600': openTab === 'HISTORY'}">
-                            <i class="fas fa-briefcase text-base mr-1"></i> History
-                        </a>
+                            <a class="text-xs font-bold uppercase px-5 py-3 border cursor-pointer	shadow-lg rounded block leading-normal" 
+                                (click)="toggleTabs('HISTORY')" 
+                                [ngClass]="{'text-primary-600 bg-white': openTab !== 'HISTORY', 'text-white bg-primary-600': openTab === 'HISTORY'}">
+                                <i class="fas fa-briefcase text-base mr-1"></i> History
+                            </a>
                         </li>
                     </ul>
                     <div>

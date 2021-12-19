@@ -93,3 +93,9 @@ export interface OrdersListPagination
     startIndex: number;
     endIndex: number;
 }
+
+export interface OrdersCountSummary
+{
+  completionStatus: string;
+  count: number;
+}
