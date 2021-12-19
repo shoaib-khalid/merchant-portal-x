@@ -15,7 +15,12 @@ import { HttpEventType, HttpResponse } from '@angular/common/http';
 @Component({
     selector     : 'edit-store-page',
     templateUrl  : './edit-store.component.html',
-    styles       : ['.ql-container { height: 156px; }'],
+    styles       : [
+        `
+            .ql-container { height: 156px; }
+
+        `
+    ],
     encapsulation: ViewEncapsulation.None,
     animations   : fuseAnimations
 })
