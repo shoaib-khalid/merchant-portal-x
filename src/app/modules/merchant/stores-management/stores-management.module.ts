@@ -19,6 +19,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 import { FuseCardModule } from '@fuse/components/card';
+import { FuseDateRangeComponent } from '@fuse/components/date-range/date-range.component';
 
 import { ChooseVerticalComponent } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.component';
 import { RegisterStoreComponent } from 'app/modules/merchant/stores-management/register-store/register-store.component';
@@ -33,7 +34,8 @@ import { storesManagementRoutes } from 'app/modules/merchant/stores-management/s
         ChooseStoreComponent,
         ChooseVerticalComponent,
         EditStoreComponent,
-        RegisterStoreComponent
+        RegisterStoreComponent,
+        FuseDateRangeComponent
     ],
     imports     : [
         RouterModule.forChild(storesManagementRoutes),
