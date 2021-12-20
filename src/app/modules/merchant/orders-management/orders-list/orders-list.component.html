@@ -10,7 +10,7 @@
                     <div class="font-medium tracking-tight text-secondary">Keep track of your financial status</div>
                 </div>
                 <div class="flex items-center ml-6">
-                    <button
+                    <!-- <button
                         class="hidden sm:inline-flex"
                         mat-stroked-button>
                         <mat-icon
@@ -25,7 +25,7 @@
                             class="icon-size-5"
                             [svgIcon]="'heroicons_solid:cog'"></mat-icon>
                         <span class="ml-2">Settings</span>
-                    </button>
+                    </button> -->
                     <button
                         class="hidden sm:inline-flex ml-3"
                         mat-flat-button
@@ -44,9 +44,9 @@
                             <mat-icon [svgIcon]="'heroicons_outline:dots-vertical'"></mat-icon>
                         </button>
                         <mat-menu #actionsMenu="matMenu">
+                            <!-- <button mat-menu-item>Reports</button>
+                            <button mat-menu-item>Settings</button> -->
                             <button mat-menu-item>Export</button>
-                            <button mat-menu-item>Reports</button>
-                            <button mat-menu-item>Settings</button>
                         </mat-menu>
                     </div>
                 </div>
@@ -58,7 +58,7 @@
                         <div class="flex w-full">
                             <div class="flex-0">
                                 <div class="mr-4 text-lg font-medium tracking-tight leading-6 truncate">Recent transactions</div>
-                                <div class="text-secondary font-medium">1 pending, 4 completed</div>
+                                <!-- <div class="text-secondary font-medium">1 pending, 4 completed</div> -->
                             </div>
                         </div>
                         <div class="flex w-full sm:w-auto mt-4 sm:mt-0">
@@ -155,22 +155,22 @@
                     </div>
                     
                     <ul class="flex mb-0 list-none flex-wrap pb-4 px-4 flex-row">
-                        <ng-container *ngFor="let orderStatus of completionStatuses">
+                        <ng-container *ngFor="let orderStatus of _orderCountSummary">
                             <li class="-mb-px mr-2 pb-2 last:mr-0 flex-auto text-center">
                                 <a class="text-xs font-bold uppercase px-5 py-3 border cursor-pointer	shadow-lg rounded block leading-normal" 
                                     (click)="toggleTabs(orderStatus.completionStatus)" 
                                     [ngClass]="{'text-primary-600 bg-white': openTab !== orderStatus.completionStatus, 'text-white bg-primary-600': openTab === orderStatus.completionStatus}">
-                                    <i class="fas fa-space-shuttle text-base mr-1"></i> {{orderStatus.completionStatus}} ({{orderStatus.count}}) 
+                                    <i class="fas fa-space-shuttle text-base mr-1"></i> {{orderStatus.label}} ({{orderStatus.count}}) 
                                 </a>
                             </li>
                         </ng-container>
-                        <li class="-mb-px mr-2 pb-2 last:mr-0 flex-auto text-center">
+                        <!-- <li class="-mb-px mr-2 pb-2 last:mr-0 flex-auto text-center">
                             <a class="text-xs font-bold uppercase px-5 py-3 border cursor-pointer	shadow-lg rounded block leading-normal" 
                                 (click)="toggleTabs('HISTORY')" 
                                 [ngClass]="{'text-primary-600 bg-white': openTab !== 'HISTORY', 'text-white bg-primary-600': openTab === 'HISTORY'}">
                                 <i class="fas fa-briefcase text-base mr-1"></i> History
                             </a>
-                        </li>
+                        </li> -->
                     </ul>
                     <div>
                         <div class="overflow-x-auto mx-6">
@@ -246,13 +246,13 @@
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span class="pr-6 font-medium whitespace-nowrap">
-                                            {{transaction.order.total | currency:'$'}}
+                                            {{ transaction.order.total | currency: store.regionCountry.currencySymbol }}
                                         </span>
                                     </td>
                                 </ng-container>
     
                                 <!-- Status -->
-                                <ng-container matColumnDef="status">
+                                <ng-container matColumnDef="status" *ngIf="openTab === ''">
                                     <th
                                         mat-header-cell
                                         mat-sort-header
@@ -264,45 +264,13 @@
                                         *matCellDef="let transaction">
                                         <span
                                             class="inline-flex items-center font-bold text-xs px-2.5 py-0.5 rounded-full tracking-wide uppercase"
-                                            [ngClass]="{'bg-green-200 text-green-800 dark:bg-green-600 dark:text-green-50': transaction.completionStatus === 'PAYMENT_CONFIRMED',
-                                                        'bg-yellow-200 text-yellow-800 dark:bg-yellow-600 dark:text-yellow-50': transaction.completionStatus === 'BEING_PREPARED',
-                                                        'bg-orange-200 text-orange-800 dark:bg-orange-600 dark:text-orange-50': transaction.completionStatus === 'AWAITING_PICKUP',
-                                                        'bg-purple-200 text-purple-800 dark:bg-purple-600 dark:text-purple-50': transaction.completionStatus === 'BEING_DELIVERED',
-                                                        'bg-blue-200 text-blue-800 dark:bg-blue-600 dark:text-blue-50': transaction.completionStatus === 'DELIVERED_TO_CUSTOMER'}">
-                                            <span class="leading-relaxed whitespace-nowrap">{{transaction.completionStatus}}</span>
+                                            [ngClass]="{'bg-green-200 text-green-800 dark:bg-green-600 dark:text-green-50': transaction.order.completionStatus === 'PAYMENT_CONFIRMED',
+                                                        'bg-yellow-200 text-yellow-800 dark:bg-yellow-600 dark:text-yellow-50': transaction.order.completionStatus === 'BEING_PREPARED',
+                                                        'bg-orange-200 text-orange-800 dark:bg-orange-600 dark:text-orange-50': transaction.order.completionStatus === 'AWAITING_PICKUP',
+                                                        'bg-purple-200 text-purple-800 dark:bg-purple-600 dark:text-purple-50': transaction.order.completionStatus === 'BEING_DELIVERED',
+                                                        'bg-blue-200 text-blue-800 dark:bg-blue-600 dark:text-blue-50': transaction.order.completionStatus === 'DELIVERED_TO_CUSTOMER'}">
+                                            <span class="leading-relaxed whitespace-nowrap">{{transaction.order.completionStatus}}</span>
                                         </span>
-                                    </td>
-                                </ng-container>
-
-                                <!-- Details -->
-                                <ng-container matColumnDef="details">
-                                    <th
-                                        mat-header-cell
-                                        mat-sort-header
-                                        *matHeaderCellDef>
-                                        Details
-                                    </th>
-                                    <td
-                                        mat-cell
-                                        class="px-2"
-                                        *matCellDef="let transaction">
-                                        <input
-                                            [id]=" 'babun-' + transaction.order.id"
-                                            type="button"
-                                            (click)="viewDetails(transaction.order.id)"
-                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                            mat-button>
-                                        <label 
-                                            class="flex items-center justify-center py-2 px-1 rounded-full cursor-pointer border border-primary bg-primary group hover:bg-white"
-                                            [for]="'babun-' + transaction.order.id"
-                                            matRipple>
-                                            <mat-icon
-                                                class="text-white group-hover:text-primary pr-2"
-                                                [svgIcon]="'heroicons_solid:eye'"></mat-icon>
-                                            <span class="font-medium text-white group-hover:text-primary text-sm text-secondary whitespace-nowrap">
-                                                View
-                                            </span>
-                                        </label>
                                     </td>
                                 </ng-container>
 
@@ -319,21 +287,40 @@
                                         class="px-2"
                                         *matCellDef="let transaction"
                                     >
-                                        <input
-                                            [id]="'action-' + transaction.order.id"
-                                            type="button"
-                                            (click)="updateStatus(transaction.order.id, transaction.nextCompletionStatus)"
-                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                            mat-button>
-                                        <label 
-                                            *ngIf="transaction.nextActionText"    
-                                            class="flex items-center justify-center py-2 px-1 rounded-full cursor-pointer border border-primary border-solid group hover:bg-primary"
-                                            [for]="'action-' + transaction.order.id"
-                                            matRipple>
-                                            <span class="font-medium group-hover:text-white text-sm text-primary whitespace-nowrap">
-                                                {{ transaction.nextActionText }}
-                                            </span>
-                                        </label>
+                                        <div class="flex flex-row items-center">
+                                            <!-- View Receipt -->
+                                            <input
+                                                [id]=" 'view-receipt-' + transaction.order.id"
+                                                type="button"
+                                                (click)="viewDetails(transaction.order.id)"
+                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                mat-button>
+                                            <label 
+                                                class="flex items-center justify-center h-10 w-10 py-2 px-1 mr-5 rounded-full cursor-pointer border border-primary bg-primary group hover:bg-white"
+                                                [for]="'view-receipt-' + transaction.order.id"
+                                                matRipple>
+                                                <mat-icon
+                                                    class="text-white group-hover:text-primary icon-size-5"
+                                                    [svgIcon]="'heroicons_solid:document-report'"></mat-icon>
+                                            </label>
+    
+                                            <!-- Action Button -->
+                                            <input
+                                                [id]="'action-' + transaction.order.id"
+                                                type="button"
+                                                (click)="updateStatus(transaction.order.id, transaction.nextCompletionStatus)"
+                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                mat-button>
+                                            <label 
+                                                *ngIf="transaction.nextActionText"    
+                                                class="flex items-center justify-center w-2/3 py-2 px-1 rounded-full cursor-pointer border border-primary border-solid group hover:bg-primary"
+                                                [for]="'action-' + transaction.order.id"
+                                                matRipple>
+                                                <span class="font-medium group-hover:text-white text-sm text-primary whitespace-nowrap">
+                                                    {{ transaction.nextActionText }}
+                                                </span>
+                                            </label>
+                                        </div>
                                     </td>
                                 </ng-container>
     

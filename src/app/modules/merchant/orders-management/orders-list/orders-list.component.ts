@@ -4,7 +4,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { merge, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { OrdersListService } from 'app/modules/merchant/orders-management/orders-list/orders-list.service';
-import { OrdersListPagination } from 'app/modules/merchant/orders-management/orders-list/orders-list.types'
+import { OrdersCountSummary, OrdersListPagination } from 'app/modules/merchant/orders-management/orders-list/orders-list.types'
 import { MatPaginator } from '@angular/material/paginator';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
@@ -12,6 +12,8 @@ import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { OrderDetailsComponent } from 'app/modules/merchant/orders-management/order-details/order-details.component';
 import { ChooseProviderDateTimeComponent } from 'app/modules/merchant/orders-management/choose-provider-datetime/choose-provider-datetime.component';
 import { Router } from '@angular/router';
+import { Store } from 'app/core/store/store.types';
+import { StoresService } from 'app/core/store/store.service';
 
 @Component({
     selector       : 'orders-list',
@@ -26,9 +28,12 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     @ViewChild('selectFilter', {read: MatSelect})  _filter: MatSelect;
 
 
-    openTab: string = "HISTORY";
-    displayStatuses: any = [];
-    completionStatuses: any = [];
+    openTab: string = "";
+
+    store: Store;
+
+    orderCountSummary: OrdersCountSummary[];
+    _orderCountSummary: OrdersCountSummary[];
 
     pagination: OrdersListPagination;
     isLoading: boolean = false;
@@ -39,7 +44,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     range: any;
 
     recentTransactionsDataSource: MatTableDataSource<any> = new MatTableDataSource();
-    recentTransactionsTableColumns: string[] = ['transactionId', 'date', 'name', 'amount', 'status', 'details', 'action'];
+    recentTransactionsTableColumns: string[] = ['transactionId', 'date', 'name', 'amount', 'status', 'action'];
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     /**
@@ -48,6 +53,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _orderslistService: OrdersListService,
+        private _storesService: StoresService,
         public _dialog: MatDialog,
         private _router: Router,
         )
@@ -76,8 +82,6 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((data) => {
 
-                console.log("here", data)
-
                 // Store the table data
                 this.recentTransactionsDataSource.data = data;
 
@@ -98,70 +102,37 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             });
 
+        this._orderCountSummary = [
+            { label: "New", completionStatus: "PAYMENT_CONFIRMED", count: 0 },
+            { label: "Process", completionStatus: "BEING_PREPARED", count: 0 },
+            { label: "Awaiting Pickup", completionStatus: "AWAITING_PICKUP", count: 0 },
+            { label: "Sent Out", completionStatus: "BEING_DELIVERED", count: 0 },
+            { label: "Delivered", completionStatus: "DELIVERED_TO_CUSTOMER", count: 0 },
+            { label: "Cancelled", completionStatus: "REJECTED_BY_STORE", count: 0 },
+            { label: "History", completionStatus: "", count: 0 }
+        ];
+
         this._orderslistService.ordersCountSummary$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((response) => {
 
-                this.completionStatuses = response;
+                this.orderCountSummary = response;
 
-                console.log("order count summary", response)
+                this._orderCountSummary.forEach((item,iteration) => {
+                    let index = this.orderCountSummary.findIndex((obj => obj.completionStatus === item.completionStatus));
+                    if (index > -1) {
+                        this._orderCountSummary[iteration].count = this.orderCountSummary[index].count;
+
+                        // update last item in array which is history
+                        this._orderCountSummary[this._orderCountSummary.length - 1].count = this._orderCountSummary[this._orderCountSummary.length - 1].count + this.orderCountSummary[index].count;
+                    }
+                });
             });
-
-        // completion statuses from backend
-        // this.completionStatuses = [
-        //     {
-        //         id: "PAYMENT_CONFIRMED",
-        //         label: "Payment Confirmed",
-        //         nextId: "BEING_PREPARED",
-        //         nextLabel: "Process",
-        //         nextLabelBtn: "Process",
-        //     },
-        //     {
-        //         id: "RECEIVED_AT_STORE",
-        //         label: "Receive at Store",
-        //         nextId: "BEING_PREPARED",
-        //         nextLabel: "Process",
-        //         nextLabelBtn: "Process",
-        //     },
-        //     {
-        //         id: "BEING_PREPARED",
-        //         label: "Processing",
-        //         nextId: "AWAITING_PICKUP",
-        //         nextLabel: "Ready for Pickup",
-        //         nextLabelBtn: "Ready",
-        //     },
-        //     {
-        //         id: "AWAITING_PICKUP",
-        //         label: "Ready for Pickup",
-        //         nextId: "BEING_DELIVERED",
-        //         nextLabel: "Sent",
-        //         nextLabelBtn: "Sent",
-        //     },
-        //     {
-        //         id: "BEING_DELIVERED",
-        //         label: "On Delivery",
-        //         nextId: "DELIVERED_TO_CUSTOMER",
-        //         nextLabel: "Received",
-        //         nextLabelBtn: "Received",
-        //     },
-        //     {
-        //         id: "DELIVERED_TO_CUSTOMER",
-        //         label: "Delivered",
-        //         nextId: null,
-        //         nextLabel: null,
-        //         nextLabelBtn: null,
-        //     },
-        //     {
-        //         id: "HISTORY",
-        //         label: "History",
-        //         nextId: null,
-        //         nextLabel: null,
-        //         nextLabelBtn: null,
-        //     }
-        // ];
-
-        // display statuses is view at frontend
-        this.displayStatuses = ["NEW","BEING_PREPARED","AWAITING_PICKUP","BEING_DELIVERED","DELIVERED_TO_CUSTOMER","HISTORY"];
+            
+        // get store
+        this._storesService.store$.subscribe((response) => {
+            this.store = response;
+        })
 
         this.filterControl.valueChanges
         .pipe(
@@ -183,7 +154,6 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
             takeUntil(this._unsubscribeAll),
             debounceTime(300),
             switchMap((query) => {
-                console.log("Query tab: ",query)
                 this.isLoading = true;
                 //kena ubah
                 return this._orderslistService.getOrders(0, 10, 'name', 'asc', '', '', '', '', query);
@@ -268,12 +238,10 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
         this.openTab = displayStatuses;
 
         let currentOpenTab = displayStatuses;
-        if (displayStatuses === "HISTORY") {
-            currentOpenTab = "";
-        }
-
-        if (displayStatuses === "NEW") {
-            currentOpenTab = "PAYMENT_CONFIRMED";
+        if (displayStatuses !== "") {
+            this.recentTransactionsTableColumns = ['transactionId', 'date', 'name', 'amount', 'action'];
+        } else {
+            this.recentTransactionsTableColumns = ['transactionId', 'date', 'name', 'amount', 'status', 'action'];
         }
 
         this.tabControl.setValue(currentOpenTab);
@@ -296,7 +264,9 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
             .subscribe((response) => {
                 console.log("OK");
 
-                // this._orderslistService.updateCompletion(orderId, nextCompletionStatus);
+                this._orderslistService.updateCompletion(orderId, nextCompletionStatus).subscribe(() => {
+                    console.log("OK 2");
+                });
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();

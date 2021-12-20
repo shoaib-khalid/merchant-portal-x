@@ -96,6 +96,7 @@ export interface OrdersListPagination
 
 export interface OrdersCountSummary
 {
+  label?: string;
   completionStatus: string;
   count: number;
 }

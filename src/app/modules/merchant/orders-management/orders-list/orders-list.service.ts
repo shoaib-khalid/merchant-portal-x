@@ -133,7 +133,7 @@ export class OrdersListService
         .pipe(
             tap((response) => {
                 
-                this._logging.debug("Response from OrdersService (Before Reconstruct)",response);
+                this._logging.debug("Response from OrdersService (getOrders)",response);
 
                 // Pagination
                 let _pagination = {
@@ -144,21 +144,11 @@ export class OrdersListService
                     startIndex: response["data"].pageable.offset,
                     endIndex: response["data"].pageable.offset + response["data"].numberOfElements - 1
                 }
-                this._logging.debug("Response from OrdersService (pagination)",_pagination);
-                
-                // this is local
-                let _orders = response["data"].content;
-                
-                // (this._currentStores).forEach(async (item, index) => {
-                    
-                // });
-
-                this._logging.debug("Response from OrdersService (After Reconstruct)",_orders);
+                this._logging.debug("Response from OrdersService (getOrders pagination)",_pagination);
 
                 // this is observable service
-
                 this._pagination.next(_pagination);
-                this._orders.next(_orders);
+                this._orders.next(response["data"].content);
             })
         );
     }
@@ -219,96 +209,69 @@ export class OrdersListService
 
         console.log(body);
 
+        return this._httpClient.put<Order>(orderService + '/orders/' + orderId + '/completion-status-updates', body , header).pipe(
+            map((updatedOrder) => {
+
+                this._logging.debug("Response from ProductsService (updateOrder)",updatedOrder);
+
+                // Return the updated product
+                return updatedOrder["data"];
+            })
+        );
+    }
+
+    updateCompletion(orderId, nextCompletionStatus)
+    {
+
+        let orderService = this._apiServer.settings.apiServer.orderService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
         return this.orders$.pipe(
             take(1),
-            switchMap(orders => this._httpClient.put<Order>(orderService + '/orders/' + orderId + '/completion-status-updates', body , header).pipe(
-                map((updatedOrder) => {
+            switchMap(orders => this._httpClient.get<Order>(orderService + '/orders/details/' + orderId, header).pipe(
+                map((response) => {
 
-                    this._logging.debug("Response from ProductsService (updateOrder)",updatedOrder);
+                    this._logging.debug("Response from OrdersService (updateCompletion) - Get Details By OrderId",response);
 
                     // Find the index of the updated product
                     const index = orders.findIndex(item => item.order.id === orderId);
+
+                    console.log("huhuh",response["data"])
+                    // let newResponse = orders[index];
+                    // newResponse.currentComp
                     
                     // Update the product
-                    orders[index] = { ...orders[index], ...updatedOrder["data"]};
+                    orders[index] = { ...orders[index], ...response["data"]};
 
                     // Update the products
                     this._orders.next(orders);
 
                     // Return the updated product
-                    return updatedOrder["data"];
-                }),
-                switchMap(updatedOrder => this.order$.pipe(
-                    take(1),
-                    filter(item => item && item.order.id === orderId),
-                    tap(() => {
-
-                        // Update the product if it's selected
-                        this._order.next(updatedOrder["data"]);
-
-                        // Return the updated product
-                        return updatedOrder["data"];
-                    })
-                ))
+                    return response["data"];
+                })
             ))
         );
 
-        // return this._httpClient.put(orderService + '/orders/' + orderId + '/completion-status-updates', body , header);
-    }
+        // this.orders$.subscribe((response)=>{
 
-    // updateCompletion(orderId, nextCompletionStatus)
-    // {
-
-    //     return this.orders$.pipe(
-    //         take(1),
-    //         // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
-    //         switchMap(products => this._httpClient.put<Order>(productService + '/stores/' + this.storeId$ + '/products/' + id, product , header).pipe(
-    //             map((updatedProduct) => {
-
-    //                 this._logging.debug("Response from ProductsService (updateProduct)",updatedProduct);
-
-    //                 // Find the index of the updated product
-    //                 const index = products.findIndex(item => item.id === id);
-                    
-    //                 // Update the product
-    //                 products[index] = { ...products[index], ...updatedProduct["data"]};
-
-    //                 // Update the products
-    //                 this._products.next(products);
-
-    //                 // Return the updated product
-    //                 return updatedProduct["data"];
-    //             }),
-    //             switchMap(updatedProduct => this.product$.pipe(
-    //                 take(1),
-    //                 filter(item => item && item.id === id),
-    //                 tap(() => {
-
-    //                     // Update the product if it's selected
-    //                     this._product.next(updatedProduct["data"]);
-
-    //                     // Return the updated product
-    //                     return updatedProduct["data"];
-    //                 })
-    //             ))
-    //         ))
-    //     );
-
-    //     this.orders$.subscribe((response)=>{
-
-    //         let _orders = response;
+        //     let _orders = response;
 
             
-    //         _orders.forEach(item => {
-    //             if (item.id === orderId) {
-    //                 item.completionStatus = nextCompletionStatus;
-    //             } 
-    //         })
+        //     _orders.forEach(item => {
+        //         if (item.id === orderId) {
+        //             item.completionStatus = nextCompletionStatus;
+        //         } 
+        //     })
 
 
-    //         this._orders.next(_orders);;
-    //     });
-    // }
+        //     this._orders.next(_orders);;
+        // });
+    }
 
         /**
      * Get data
