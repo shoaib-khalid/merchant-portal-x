@@ -19,7 +19,7 @@ import { GraphHelper } from 'app/modules/merchant/social-media/flow-builder/comp
 const routerConfig: ExtraOptions = {
     preloadingStrategy       : PreloadAllModules,
     scrollPositionRestoration: 'enabled',
-    useHash: true
+    // useHash: true
 };
 
 @NgModule({
