@@ -108,7 +108,7 @@ export class RegisterStoreComponent implements OnInit
             storeDescription   : ['', [Validators.required, Validators.maxLength(100)]],
             email              : ['', [Validators.required, Validators.email]],
             clientId           : [''],
-            domain             : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
+            subdomain             : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
             regionCountryId: ['', Validators.required],
             regionCountryStateId: ['', Validators.required],
             phoneNumber        : ['', RegisterStoreValidationService.phonenumberValidator],
@@ -152,7 +152,7 @@ export class RegisterStoreComponent implements OnInit
             // -------------------------      
             this._chooseVerticalService.getVerticalById(_verticalCode)
                 .subscribe((response) => {
-                    this.domainName = response.domain;
+                    this.domainName = "." + response.domain;
                 });
 
             // -------------------------
@@ -561,10 +561,11 @@ export class RegisterStoreComponent implements OnInit
         this._changeDetectorRef.markForCheck();
     }
 
-    async checkExistingURL(url: string){
+    async checkExistingURL(subdomain: string){
+        let url = subdomain + this.domainName;
         let status = await this._storesService.getExistingURL(url);
         if (status === 409){
-            this.createStoreForm.get('domain').setErrors({domainAlreadyTaken: true});
+            this.createStoreForm.get('subdomain').setErrors({domainAlreadyTaken: true});
         }
     }
     

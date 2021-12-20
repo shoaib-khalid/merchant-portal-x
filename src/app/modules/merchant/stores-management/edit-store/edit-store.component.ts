@@ -31,8 +31,11 @@ export class EditStoreComponent implements OnInit
 
     storeId: string;
     
+    fullDomain: string;
     domainName:string;
     subDomainName: string;
+
+    storeName: string;
     
     alert: any;
     editStoreForm: FormGroup;
@@ -196,18 +199,20 @@ export class EditStoreComponent implements OnInit
                     });
 
                 // get subdomain from store domain (store service)
-                let _domain = response.domain;
+                this.fullDomain = response.domain;
 
                 // domain retrieve from store service that have less than 3 xxx.xxx.xxx is consider invalid
-                if (_domain.split(".").length >= 3) {
+                if (this.fullDomain.split(".").length >= 3) {
                     // set sub domain name 
-                    this.subDomainName = _domain.split(".")[0]
+                    this.subDomainName = this.fullDomain.split(".")[0]
                 } else {
-                    console.error("Invalid domain name from backend : ",_domain);
-                    this.alert("Invalid domain name from backend : " + _domain)
+                    console.error("Invalid domain name from backend : ",this.fullDomain);
+                    this.alert("Invalid domain name from backend : " + this.fullDomain)
                 }
 
                 this.editStoreForm.get('subdomain').patchValue(this.subDomainName);
+
+                this.storeName = response.name
 
                 // set timing
                 this._storeTiming = response.storeTiming;
@@ -647,17 +652,16 @@ export class EditStoreComponent implements OnInit
     }
 
     async checkExistingURL(subdomain: string){
-        let url = subdomain + "." + this.domainName;
-        console.log("the url: ", url)
+        let url = subdomain + this.domainName;
         let status = await this._storesService.getExistingURL(url);
-        if (status === 409){
-            this.editStoreForm.get('domain').setErrors({domainAlreadyTaken: true});
+        if (status === 409 && this.fullDomain !== url){
+            this.editStoreForm.get('subdomain').setErrors({domainAlreadyTaken: true});
         }
     }
     
     async checkExistingName(name:string){
         let status = await this._storesService.getExistingName(name);
-        if (status === 409){
+        if (status === 409 && this.storeName !== name){
             this.editStoreForm.get('name').setErrors({storeNameAlreadyTaken: true});
         }
 

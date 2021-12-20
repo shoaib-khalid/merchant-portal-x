@@ -45,7 +45,7 @@ export const storesManagementRoutes: Route[] = [
         path     : 'edit/:storeid',
         component: EditStoreComponent,
         resolve  : {
-            categories: ChooseStoreCategoriesResolver
+            vertical: ChooseVerticalsResolver
         },
         children : [
             {
