@@ -1130,9 +1130,13 @@
                                                                             </div>
                                                                         </div>
                                                                         <div class="grid">
-                                                                            <ng-container *ngIf="selectedProductInventory?.itemCode === variantCombo.itemCode">
-                                                                                <ng-container *ngTemplateOutlet="rowVariantDetailsTemplate; context: {$implicit: variantlist}"></ng-container>
-                                                                            </ng-container>
+                                                                            <div formArrayName="productInventories" style.visibility='hidden'>
+                                                                                
+                                                                                    <ng-container *ngIf="selectedProductInventory?.itemCode === variantCombo.itemCode">
+                                                                                        <div class="form-group" [formGroupName]="indexOfProductInventories" *ngTemplateOutlet="rowVariantDetailsTemplate; context: {$implicit: variantCombo}"></div>                                                                                        <ng-container></ng-container>
+                                                                                    </ng-container>
+
+                                                                            </div>
                                                                         </div>
                                                                     </ng-container>
                                                                 </ng-container>
@@ -1142,7 +1146,7 @@
 
                                                     <ng-template
                                                         #rowVariantDetailsTemplate
-                                                        let-variantlist>
+                                                        let-variantCombo>
                                                         <div class="shadow-lg overflow-hidden">
                                                             <div class="flex border-b">
                                                                 <div class="flex flex-col sm:flex-row p-8 w-full">
@@ -1272,7 +1276,7 @@
                                                                                 <span class="font-semibold mb-2">Variant status</span>
                                                                                 <mat-select
                                                                                     class="border border-gray-300 w-32 px-2 py-2 rounded"
-                                                                                    [formControlName]="'status'"
+                                                                                    formControlName="status"
                                                                                     [value]="'status'"
                                                                                     (selectionChange)="selectedProductForm.get('status').value = $event.value"
                                                                                     #statusSelector="matSelect"
@@ -1290,7 +1294,6 @@
                                                                                         <mat-option [value]="'NOTAVAILABLE'">Not Available</mat-option>
                                                                                     </div>
                                                                                 </mat-select>
-                                 
                                                                                 <!-- <mat-slide-toggle
                                                                                     [formControlName]="'status'"
                                                                                     [color]="'primary'">
@@ -1298,65 +1301,65 @@
                                                                                 </mat-slide-toggle> -->
                                                                             </div>
                                                                         </div>
-                                                                        <div formArrayName="productInventories">
-                                                                            <div formGroupName="0">
-                                                                                <!-- SKU & Price -->
-                                                                                <div class="flex flex-col w-full lg:w-1/3 sm:pl-4">
-                                                                                    <!-- SKU -->
-                                                                                    <mat-form-field class="w-full">
-                                                                                        <mat-label>SKU</mat-label>
-                                                                                        <input
-                                                                                            matInput
-                                                                                            [formControlName]="'sku'">
-                                                                                    </mat-form-field>
-                                                                                    <!-- Price -->
-                                                                                    <mat-form-field class="w-full">
-                                                                                        <mat-label>Price</mat-label>
-                                                                                        <span matSuffix>$</span>
-                                                                                        <input
-                                                                                            matInput
-                                                                                            [formControlName]="'price'">
-                                                                                    </mat-form-field>                                                                            
-                                                                                </div>
-
-                                                                                <!-- Stock & Packing Size -->
-                                                                                <div class="flex flex-col w-full lg:w-1/3 sm:pl-4">
-                                                                                    <mat-form-field class="w-full">
-                                                                                        <mat-label>Stock</mat-label>
-                                                                                        <input
-                                                                                            type="number"
-                                                                                            matInput
-                                                                                            [formControlName]="'quantity'">
-                                                                                    </mat-form-field>
-
-                                                                                    <!-- Packing Size -->
-                                                                                    <!-- <mat-form-field class="w-full pr-2">
-                                                                                        <mat-label>Packing Size</mat-label>
-                                                                                        <mat-select
-                                                                                            class="w-full"
-                                                                                            [formControlName]="'packingSize'"
-                                                                                            appearance="fill"
-                                                                                            [value]="packingSize"
-                                                                                            placeholder="Select a packing size"
-                                                                                            (selectionChange)="selectedProductForm.get('packingSize').value = statusSelector.value"
-                                                                                            #packingSizeSelector="matSelect"
-                                                                                            >
-                                                                                            <mat-select-trigger>
-                                                                                                <span class="flex items-center">
-                                                                                                    <span>{{ packingSizeSelector.triggerValue }}</span>
-                                                                                                </span>
-                                                                                            </mat-select-trigger>
-                                                                                            <div>
-                                                                                                <mat-option [value]="'S'">Small</mat-option>
-                                                                                                <mat-option [value]="'M'">Medium</mat-option>
-                                                                                                <mat-option [value]="'L'">Large</mat-option>
-                                                                                                <mat-option [value]="'XL'">Xtra Large</mat-option>
-                                                                                            </div>
-                                                                                        </mat-select>
-                                                                                    </mat-form-field> -->
-                                                                                </div>
-                                                                            </div>
+                                                                        <!-- SKU & Price -->
+                                                                        <div class="flex flex-col w-full lg:w-1/3 sm:pl-4">
+                                                                            <!-- SKU -->
+                                                                            <mat-form-field class="w-full">
+                                                                                <mat-label>SKU</mat-label>
+                                                                                <input
+                                                                                    matInput
+                                                                                    formControlName="sku"
+                                                                                    [value]="variantCombo.sku">
+                                                                            </mat-form-field>
+                                                                            <!-- Price -->
+                                                                            <mat-form-field class="w-full">
+                                                                                <mat-label>Price</mat-label>
+                                                                                <span matSuffix>$</span>
+                                                                                <input
+                                                                                    matInput
+                                                                                    formControlName="price"
+                                                                                    [value]="variantCombo.price">
+                                                                            </mat-form-field>                                                                            
                                                                         </div>
+
+                                                                        <!-- Stock & Packing Size -->
+                                                                        <div class="flex flex-col w-full lg:w-1/3 sm:pl-4">
+                                                                            <mat-form-field class="w-full">
+                                                                                <mat-label>Stock</mat-label>
+                                                                                <input
+                                                                                    type="number"
+                                                                                    matInput
+                                                                                    formControlName="quantity"
+                                                                                    [value]="variantCombo.quantity">
+                                                                            </mat-form-field>
+
+                                                                            <!-- Packing Size -->
+                                                                            <!-- <mat-form-field class="w-full pr-2">
+                                                                                <mat-label>Packing Size</mat-label>
+                                                                                <mat-select
+                                                                                    class="w-full"
+                                                                                    [formControlName]="'packingSize'"
+                                                                                    appearance="fill"
+                                                                                    [value]="packingSize"
+                                                                                    placeholder="Select a packing size"
+                                                                                    (selectionChange)="selectedProductForm.get('packingSize').value = statusSelector.value"
+                                                                                    #packingSizeSelector="matSelect"
+                                                                                    >
+                                                                                    <mat-select-trigger>
+                                                                                        <span class="flex items-center">
+                                                                                            <span>{{ packingSizeSelector.triggerValue }}</span>
+                                                                                        </span>
+                                                                                    </mat-select-trigger>
+                                                                                    <div>
+                                                                                        <mat-option [value]="'S'">Small</mat-option>
+                                                                                        <mat-option [value]="'M'">Medium</mat-option>
+                                                                                        <mat-option [value]="'L'">Large</mat-option>
+                                                                                        <mat-option [value]="'XL'">Xtra Large</mat-option>
+                                                                                    </div>
+                                                                                </mat-select>
+                                                                            </mat-form-field> -->
+                                                                        </div>
+                                                                       
                                                                     </div>
                                                                 </div>
                                                             </div>

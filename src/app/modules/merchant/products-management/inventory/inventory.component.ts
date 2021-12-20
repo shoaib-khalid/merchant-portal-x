@@ -83,6 +83,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     filteredProductVariants: ProductVariant[] = [];
     selectedProductVariants: ProductVariant;
 
+    productInventories: FormArray;
+    product_inventories:any=[];
+
     productVariantsEditMode: boolean = false;
     productVariantsValueEditMode:any = [];
     showVariantsSection: boolean = false;
@@ -99,6 +102,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     productInventory$: ProductInventory[] = [];
     filteredProductInventory: ProductInventory[] = [];
     selectedProductInventory: ProductInventory;
+
+    indexOfProductInventories : number = 0;
 
     // product category
     productCategories$: ProductCategory[];
@@ -124,7 +129,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     flashMessage: 'success' | 'error' | null = null;
     isLoading: boolean = false;
     searchInputControl: FormControl = new FormControl();
-
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     private _variantsPanelOverlayRef: OverlayRef;
@@ -220,31 +224,18 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 sequenceNumber          : [0],
             }]),
 
-            productInventories : this._formBuilder.array([
-               {
-                    itemCode                : [''],
-                    price                   : [0],
-                    quantity                : [''],
-                    productId               : [''],
-                    sku                     : [''],
-                    status           : ['AVAILABLE'],
-                    productInventoryItems   : this._formBuilder.array([
-                        {
-                            itemCode                    : [''],
-                            productVariantAvailableId   : [''],
-                            productId                   : [''],
-                            sequenceNumber              : [''],
-                            productVariantAvailable     : [{
-                                id              : [''],
-                                value           : [''],
-                                productId       : [''],
-                                productVariantId: [''],
-                                sequenceNumber  : [0],
-                            }],
-                        }
-                    ]),
-                }
-            ]),
+            // productInventories : this._formBuilder.array([
+            //    this._formBuilder.group({
+            //         itemCode                : [''],
+            //         price                   : [0],
+            //         quantity                : [''],
+            //         productId               : [''],
+            //         sku                     : [''],
+            //         status           : ['AVAILABLE'],
+            //     })
+            // ]),
+
+            productInventories: this._formBuilder.array([]),
 
             productReviews        : [''], // not used
             productAssets         : this._formBuilder.array([{
@@ -300,8 +291,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             .pipe(takeUntil(this._unsubscribeAll))    
             .subscribe((response)=>{
                 this._products = response;
-                console.log("this._products",this._products);
-
 
                 // remove object for array of object where item.isPackage !== true
                 let _filteredProductsOptions = response.filter(item => item.isPackage !== true );
@@ -450,18 +439,14 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
                 // Set the selected product
                 this.selectedProduct = product;
-                console.log("IMAN CHECK 1",product);
-
 
                 // Fill the form
                 this.selectedProductForm.patchValue(product);
-                console.log("IMAN CHECK 2",this.selectedProductForm.value);
             
 
                 // Fill the form for SKU , Price & Quantity productInventories[0]
                 // this because SKU , Price & Quantity migh have variants
                 // this is only for display, so we display the productInventories[0] 
-                console.log("product",product);
                 this.displaySku = product.productInventories[0].sku;
                 this.displayPrice = product.productInventories[0].price;
                 this.displayQuantity = product.productInventories[0].quantity;
@@ -523,8 +508,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 (this.selectedProduct.productInventories).forEach((item: ProductInventory, index) => {
 
                     if (item.itemCode.slice(-1) != "a") {
-                        const index = parseInt(item.itemCode.substring(productIdLength));
-                   
+                        const index = parseInt(item.itemCode.substring(productIdLength));                
+
                         if (this.selectedVariantCombos[index]) {
                             // console.log("item.price :",item.price)
                             this.selectedVariantCombos[index].itemCode = item.itemCode;
@@ -536,7 +521,17 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                     }
                 });
 
-                // console.log("this.selectedVariantCombos", this.selectedVariantCombos)
+    
+                this.product_inventories = this.selectedProduct.productInventories;
+                console.log('this.product_inventories',this.product_inventories);
+
+                this.product_inventories.forEach(item=>{
+                    this.productInventories = this.selectedProductForm.get('productInventories') as FormArray;
+                    this.productInventories.push(this._formBuilder.group(item));
+                });
+
+                //console.log("this.product_inventories",this.product_inventories);
+                console.log("Check patch form value",this.selectedProductForm.value);
 
                 // Add the category
                 this.selectedProduct.categoryId = product.categoryId;
@@ -1540,6 +1535,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
     displayVariants(){
         this.showVariantsSection = !this.showVariantsSection;
+        console.log("dalam method",this.showVariantsSection);
+
     }
     
     /**
@@ -1569,6 +1566,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         console.log("this.variants : ",this.selectedProduct.productInventories)
         console.log("this.variants[index] : ",this.selectedProduct.productInventories[index])
         console.log("this.selectedItemCode : ",this.selectedProductInventory);
+        console.log("this.indexOfProductInventories",this.indexOfProductInventories=index);
         
         // Get the variant details by id
         // this._inventoryService.getProductById(variantId)
