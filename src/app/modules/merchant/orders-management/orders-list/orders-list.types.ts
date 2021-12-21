@@ -20,6 +20,7 @@ export interface Order
     paymentType: string;
     appliedDiscount: number;
     deliveryDiscount: number;
+    deliveryType: string;
     appliedDiscountDescription: string;
     deliveryDiscountDescription: string;
     orderShipmentDetail: {
@@ -99,4 +100,11 @@ export interface OrdersCountSummary
   label?: string;
   completionStatus: string;
   count: number;
+}
+
+export interface DeliveryProviderDetails
+{
+  id: string;
+  name: string;
+  providerImage: string;
 }

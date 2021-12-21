@@ -158,8 +158,8 @@
                         <ng-container *ngFor="let orderStatus of _orderCountSummary">
                             <li class="-mb-px mr-2 pb-2 last:mr-0 flex-auto text-center">
                                 <a class="text-xs font-bold uppercase px-5 py-3 border cursor-pointer	shadow-lg rounded block leading-normal" 
-                                    (click)="toggleTabs(orderStatus.completionStatus)" 
-                                    [ngClass]="{'text-primary-600 bg-white': openTab !== orderStatus.completionStatus, 'text-white bg-primary-600': openTab === orderStatus.completionStatus}">
+                                    (click)="toggleTabs(orderStatus.id)" 
+                                    [ngClass]="{'text-primary-600 bg-white': openTab !== orderStatus.id, 'text-white bg-primary-600': openTab === orderStatus.id}">
                                     <i class="fas fa-space-shuttle text-base mr-1"></i> {{orderStatus.label}} ({{orderStatus.count}}) 
                                 </a>
                             </li>
@@ -252,7 +252,7 @@
                                 </ng-container>
     
                                 <!-- Status -->
-                                <ng-container matColumnDef="status" *ngIf="openTab === ''">
+                                <ng-container matColumnDef="status" *ngIf="openTab === 'HISTORY'">
                                     <th
                                         mat-header-cell
                                         mat-sort-header
@@ -308,7 +308,7 @@
                                             <input
                                                 [id]="'action-' + transaction.order.id"
                                                 type="button"
-                                                (click)="updateStatus(transaction.order.id, transaction.nextCompletionStatus)"
+                                                (click)="updateStatus(transaction.order, transaction.nextCompletionStatus)"
                                                 class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                 mat-button>
                                             <label 

@@ -5,7 +5,7 @@ import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service';
-import { Order, OrderItem, OrdersCountSummary, OrdersListPagination } from './orders-list.types';
+import { DeliveryProviderDetails, Order, OrderItem, OrdersCountSummary, OrdersListPagination } from './orders-list.types';
 
 @Injectable({
     providedIn: 'root'
@@ -98,7 +98,8 @@ export class OrdersListService
     /**
      * Get data
      */
-    getOrders(page: number = 0, size: number = 10, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', receiverName: string = '', phoneNumber: string = '', from: string = '', to: string = '', completionStatus: string = ''): 
+    getOrders(page: number = 0, size: number = 10, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', receiverName: string = '', phoneNumber: string = '', from: string = '', to: string = '',
+             completionStatus: string[] = ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE", "BEING_PREPARED", "AWAITING_PICKUP", "BEING_DELIVERED", "DELIVERED_TO_CUSTOMER", "REJECTED_BY_STORE"]): 
     Observable<{ pagination: OrdersListPagination; stores: Order[] }>
     {
         
@@ -112,7 +113,7 @@ export class OrdersListService
             params: {
                 from: '' + from,
                 to: '' +  to,
-                completionStatus: '' + completionStatus,
+                completionStatus,
                 page: '' + page,
                 pageSize: '' + size,
                 sortByCol: '' + sort,
@@ -120,14 +121,6 @@ export class OrdersListService
                 storeId: this.storeId$,
             }
         };
-
-        if (receiverName !== "") {
-            header.params["receiverName"] = receiverName;
-        }
-
-        if (phoneNumber !== "") {
-            header.params["phoneNumber"] = phoneNumber;
-        }
         
         return this._httpClient.get<{ pagination: OrdersListPagination; stores: Order[] }>(orderService + '/orders/search', header)
         .pipe(
@@ -191,7 +184,7 @@ export class OrdersListService
         )
     }
 
-    updateOrder(orderId, nextCompletionStatus): Observable<any>
+    updateOrder(orderId, completionBody): Observable<any>
     {
         
         let orderService = this._apiServer.settings.apiServer.orderService;
@@ -204,10 +197,13 @@ export class OrdersListService
         
         const body = {
             orderId,
-            status: '' +  nextCompletionStatus
+            status: '' +  completionBody.nextCompletionStatus
         };
 
-        console.log(body);
+        if (completionBody.date && completionBody.time) {
+            body["date"] = completionBody.date;
+            body["time"] = completionBody.time;
+        }
 
         return this._httpClient.put<Order>(orderService + '/orders/' + orderId + '/completion-status-updates', body , header).pipe(
             map((updatedOrder) => {
@@ -273,7 +269,26 @@ export class OrdersListService
         // });
     }
 
-        /**
+    getDeliveryProviderDetails(deliveryProviderId): Observable<DeliveryProviderDetails>
+    {
+        let deliveryService = this._apiServer.settings.apiServer.deliveryService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+        
+        return this._httpClient.get<any>(deliveryService + '/orders/getDeliveryProviderDetails/' + deliveryProviderId , header)
+            .pipe(
+                map((response) => {
+                    this._logging.debug("Response from OrdersService (getDeliveryProviderDetails)",response);
+                    return response["data"];
+                })
+            );
+    }
+
+    /**
      * Get data
      */
     getOrdersCountSummary(): Observable<OrdersCountSummary[]>

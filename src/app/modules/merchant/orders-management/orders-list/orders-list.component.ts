@@ -4,7 +4,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { merge, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { OrdersListService } from 'app/modules/merchant/orders-management/orders-list/orders-list.service';
-import { OrdersCountSummary, OrdersListPagination } from 'app/modules/merchant/orders-management/orders-list/orders-list.types'
+import { Order, OrdersCountSummary, OrdersListPagination } from 'app/modules/merchant/orders-management/orders-list/orders-list.types'
 import { MatPaginator } from '@angular/material/paginator';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
@@ -28,12 +28,12 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     @ViewChild('selectFilter', {read: MatSelect})  _filter: MatSelect;
 
 
-    openTab: string = "";
+    openTab: string = "HISTORY";
 
     store: Store;
 
     orderCountSummary: OrdersCountSummary[];
-    _orderCountSummary: OrdersCountSummary[];
+    _orderCountSummary: any;
 
     pagination: OrdersListPagination;
     isLoading: boolean = false;
@@ -103,13 +103,13 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
             });
 
         this._orderCountSummary = [
-            { label: "New", completionStatus: "PAYMENT_CONFIRMED", count: 0 },
-            { label: "Process", completionStatus: "BEING_PREPARED", count: 0 },
-            { label: "Awaiting Pickup", completionStatus: "AWAITING_PICKUP", count: 0 },
-            { label: "Sent Out", completionStatus: "BEING_DELIVERED", count: 0 },
-            { label: "Delivered", completionStatus: "DELIVERED_TO_CUSTOMER", count: 0 },
-            { label: "Cancelled", completionStatus: "REJECTED_BY_STORE", count: 0 },
-            { label: "History", completionStatus: "", count: 0 }
+            { id: "NEW", label: "New", completionStatus: ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE"], count: 0 },
+            { id: "PROCESS", label: "Process", completionStatus: "BEING_PREPARED", count: 0 },
+            { id: "AWAITING_PICKUP", label: "Awaiting Pickup", completionStatus: "AWAITING_PICKUP", count: 0 },
+            { id: "SENT_OUT", label: "Sent Out", completionStatus: "BEING_DELIVERED", count: 0 },
+            { id: "DELIVERED", label: "Delivered", completionStatus: "DELIVERED_TO_CUSTOMER", count: 0 },
+            { id: "CANCELLED", label: "Cancelled", completionStatus: "REJECTED_BY_STORE", count: 0 },
+            { id: "HISTORY", label: "History", completionStatus: ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE", "BEING_PREPARED", "AWAITING_PICKUP", "BEING_DELIVERED", "DELIVERED_TO_CUSTOMER", "REJECTED_BY_STORE"], count: 0 }
         ];
 
         this._orderslistService.ordersCountSummary$
@@ -118,13 +118,21 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
 
                 this.orderCountSummary = response;
 
-                this._orderCountSummary.forEach((item,iteration) => {
-                    let index = this.orderCountSummary.findIndex((obj => obj.completionStatus === item.completionStatus));
-                    if (index > -1) {
-                        this._orderCountSummary[iteration].count = this.orderCountSummary[index].count;
+                this._orderCountSummary.forEach((item,i) => {
 
-                        // update last item in array which is history
-                        this._orderCountSummary[this._orderCountSummary.length - 1].count = this._orderCountSummary[this._orderCountSummary.length - 1].count + this.orderCountSummary[index].count;
+                    // if have multiple completionStatus
+                    if (Array.isArray(item.completionStatus) && item.completionStatus.length > 1) {
+                        item.completionStatus.forEach((element, j) => {
+                            let index = this.orderCountSummary.findIndex((obj => obj.completionStatus === item.completionStatus[j]));
+                            if (index > -1) {
+                                this._orderCountSummary[i].count = this._orderCountSummary[i].count + this.orderCountSummary[index].count;
+                            }
+                        });
+                    } else {
+                        let index = this.orderCountSummary.findIndex((obj => obj.completionStatus === item.completionStatus));
+                        if (index > -1) {
+                            this._orderCountSummary[i].count = this.orderCountSummary[index].count;
+                        }
                     }
                 });
             });
@@ -139,7 +147,6 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
             takeUntil(this._unsubscribeAll),
             debounceTime(300),
             switchMap((query) => {
-                console.log("Query filter: ",query)
                 this.isLoading = true;
                 return this._orderslistService.getOrders(0, 10, 'name', 'asc', query, '', '', '', this.tabControl.value);
             }),
@@ -238,13 +245,13 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
         this.openTab = displayStatuses;
 
         let currentOpenTab = displayStatuses;
-        if (displayStatuses !== "") {
+        if (displayStatuses !== "HISTORY") {
             this.recentTransactionsTableColumns = ['transactionId', 'date', 'name', 'amount', 'action'];
         } else {
             this.recentTransactionsTableColumns = ['transactionId', 'date', 'name', 'amount', 'status', 'action'];
         }
 
-        this.tabControl.setValue(currentOpenTab);
+        this.tabControl.setValue(this._orderCountSummary.find(item => item.id === this.openTab).completionStatus);
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -259,41 +266,50 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
         this._filter.open();
     }
 
-    updateStatus(orderId, nextCompletionStatus){
-        this._orderslistService.updateOrder(orderId,nextCompletionStatus)
-            .subscribe((response) => {
-                console.log("OK");
+    updateStatus(order: Order, nextCompletionStatus){
 
-                this._orderslistService.updateCompletion(orderId, nextCompletionStatus).subscribe(() => {
-                    console.log("OK 2");
+        let completionBody = {
+            nextCompletionStatus: nextCompletionStatus
+        };
+        
+        // First check the order delivery type => Only scheduled to allow choose time
+        if (order.deliveryType === "SCHEDULED") {
+            this._orderslistService.getDeliveryProviderDetails(order.orderShipmentDetail.deliveryProviderId)
+                .subscribe(response => {
+                    const dialogRef = this._dialog.open(ChooseProviderDateTimeComponent, { disableClose: true, data: response });
+                    dialogRef.afterClosed().subscribe(result => {
+                        if (result === "cancelled" || !result.date || !result.time){
+                            console.warn("Process cancelled")
+                        } else {
+                            completionBody["date"] = result.date;
+                            completionBody["time"] = result.time;
+
+                            this._orderslistService.updateOrder(order.id, completionBody)
+                                .subscribe((response) => {                    
+                                    this._orderslistService.updateCompletion(order.id, nextCompletionStatus).subscribe(() => {
+                                    });
+                    
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                });
+                        }
+                    });
                 });
-
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            },
-            (response) => {
-                console.log("NOT OK");
-                // // Set the alert
-                // this.alert = {
-                //     type   : 'error',
-                //     message: 'Something went wrong, please try again.'
-                // };
-
-                // // Show the alert
-                // this.alert = true;
-            });
+        } else {
+            this._orderslistService.updateOrder(order.id, completionBody)
+                .subscribe((response) => {
+    
+                    this._orderslistService.updateCompletion(order.id, nextCompletionStatus).subscribe(() => {
+                    });
+    
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                });
+        }
     }
 
     viewDetails(orderId){
-        console.log("orderId",orderId)
         this._router.navigateByUrl('/orders/'+orderId)
-    }
-
-    chooseProviderDateTime(){
-        const dialogRef = this._dialog.open(ChooseProviderDateTimeComponent, { disableClose: true });
-        dialogRef.afterClosed().subscribe(result => {
-            console.log(result);
-        });
     }
 
 }
