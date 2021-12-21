@@ -376,8 +376,11 @@ export class RegisterStoreComponent implements OnInit
 
         // this will remove the item from the object
         const { allowedSelfDeliveryStates, allowScheduledDelivery, allowStorePickup, 
-                deliveryType, deliveryPartner, storeTiming
+                deliveryType, deliveryPartner, storeTiming, subdomain
                 ,...createStoreBody}  = this.createStoreForm.value;
+
+        // add domain when sending to backend.. at frontend form call it subdomain
+        createStoreBody["domain"] = subdomain + this.domainName;
             
         // Disable the form
         this.createStoreForm.disable();
@@ -695,19 +698,21 @@ export class RegisterStoreComponent implements OnInit
 
     checkDeliveryPartner(){
         // on every change set error to false first (reset state)
-        this.createStoreForm.get('deliveryType').setErrors(null);
-        this.createStoreForm.get('deliveryPartner').setErrors(null);
+        if (this.createStoreForm.get('deliveryType').errors || this.createStoreForm.get('deliveryPartner').errors){
+            this.createStoreForm.get('deliveryPartner').setErrors(null);
+        }
 
         // -----------------------------------
         // reset allowedSelfDeliveryStates if user change delivery type
         // -----------------------------------
 
-        // push to allowedSelfDeliveryStates (form)
-        this.allowedSelfDeliveryStates = this.createStoreForm.get('allowedSelfDeliveryStates') as FormArray;
-        // since backend give full discount tier list .. (not the only one that have been created only)
-        this.allowedSelfDeliveryStates.clear();
-        
         if (this.createStoreForm.get('deliveryType').value === "SELF") {
+
+            // push to allowedSelfDeliveryStates (form)
+            this.allowedSelfDeliveryStates = this.createStoreForm.get('allowedSelfDeliveryStates') as FormArray;
+            // since backend give full discount tier list .. (not the only one that have been created only)
+            this.allowedSelfDeliveryStates.clear();
+            
             // re populate items
             this._allowedSelfDeliveryStates.forEach(item => {
                 this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));

@@ -425,13 +425,16 @@ export class EditStoreComponent implements OnInit
 
         // this will remove the item from the object
         const { allowedSelfDeliveryStates, allowScheduledDelivery, allowStorePickup, 
-            deliveryType, deliveryPartner, storeTiming
-            ,...createStoreBody } = this.editStoreForm.value;
+            deliveryType, deliveryPartner, storeTiming, subdomain
+            ,...editStoreBody } = this.editStoreForm.value;
+
+        // add domain when sending to backend.. at frontend form call it subdomain
+        editStoreBody["domain"] = subdomain + this.domainName;
 
         // Disable the form
         this.editStoreForm.disable();
 
-        this._storesService.update(this.storeId, createStoreBody)
+        this._storesService.update(this.storeId, editStoreBody)
             .subscribe((response) => {
 
                 let storeId = response.id;
@@ -784,19 +787,21 @@ export class EditStoreComponent implements OnInit
 
     checkDeliveryPartner(){
         // on every change set error to false first (reset state)
-        this.editStoreForm.get('deliveryType').setErrors(null);
-        this.editStoreForm.get('deliveryPartner').setErrors(null);
+        if (this.editStoreForm.get('deliveryType').errors || this.editStoreForm.get('deliveryPartner').errors){
+            this.editStoreForm.get('deliveryPartner').setErrors(null);
+        }
 
         // -----------------------------------
         // reset allowedSelfDeliveryStates if user change delivery type
         // -----------------------------------
 
-        // push to allowedSelfDeliveryStates (form)
-        this.allowedSelfDeliveryStates = this.editStoreForm.get('allowedSelfDeliveryStates') as FormArray;
-        // since backend give full discount tier list .. (not the only one that have been created only)
-        this.allowedSelfDeliveryStates.clear();
-        
         if (this.editStoreForm.get('deliveryType').value === "SELF") {
+
+            // push to allowedSelfDeliveryStates (form)
+            this.allowedSelfDeliveryStates = this.editStoreForm.get('allowedSelfDeliveryStates') as FormArray;
+            // since backend give full discount tier list .. (not the only one that have been edited only)
+            this.allowedSelfDeliveryStates.clear();
+            
             // re populate items
             this._allowedSelfDeliveryStates.forEach(item => {
                 this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
