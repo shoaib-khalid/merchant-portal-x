@@ -1,6 +1,8 @@
 import { Route } from '@angular/router';
 import { InventoryComponent } from 'app/modules/merchant/products-management/inventory/inventory.component';
 import { InventoryCategoriesResolver, InventoryProductsResolver, InventoryTagsResolver, GetStoreByIdResolver } from 'app/modules/merchant/products-management/inventory/inventory.resolvers';
+import { CategoriesComponent } from './categories/categories.component';
+// import { CategoriesResolver, CategoriesProductsResolver, CategoriesTagsResolver, } from './categories/categories.resolvers';
 // import { InventoryBrandsResolver
 
 
@@ -25,26 +27,27 @@ export const productsManagementRoutes: Route[] = [
                 }
             }
         ]
-        /*children : [
+    },
+    {
+        path      : '',
+        pathMatch : 'full',
+        redirectTo: 'categories'
+    },
+    {
+        path     : 'categories',
+        component: CategoriesComponent,
+        children : [
             {
                 path     : '',
-                component: ContactsListComponent,
+                component: CategoriesComponent,
                 resolve  : {
-                    tasks    : ContactsResolver,
-                    countries: ContactsCountriesResolver
-                },
-                children : [
-                    {
-                        path         : ':id',
-                        component    : ContactsDetailsComponent,
-                        resolve      : {
-                            task     : ContactsContactResolver,
-                            countries: ContactsCountriesResolver
-                        },
-                        canDeactivate: [CanDeactivateContactsDetails]
-                    }
-                ]
+                    categories: InventoryCategoriesResolver,
+                    products  : InventoryProductsResolver,
+                    tags      : InventoryTagsResolver,
+                    storeById : GetStoreByIdResolver
+                }
             }
-        ]*/
-    }
+        ]
+    
+    },
 ];

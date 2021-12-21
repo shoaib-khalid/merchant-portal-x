@@ -374,7 +374,7 @@ export class InventoryService
      *
      * @param product
      */
-     addProductAssets(productId: string, formData, productAssets: ProductAssets): Observable<ProductAssets>{
+     addProductAssets(productId: string, formData: FormData, productAssets: ProductAssets): Observable<ProductAssets>{
 
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -759,6 +759,39 @@ export class InventoryService
             })
         );
     }
+
+    /**
+     * Get ctegory by id
+     */
+    getCategoriesById(id: string): Observable<ProductCategory>
+    {
+        return this._categories.pipe(
+            take(1),
+            map((categories) => {
+
+                // Find the product
+                const category = categories.find(item => item.id === id) || null;
+
+                this._logging.debug("Response from ProductsService (Current Category)",category);
+
+                // Update the product
+                this._category.next(category);
+
+                // Return the product
+                return category;
+            }),
+            switchMap((category) => {
+
+                if ( !category )
+                {
+                    return throwError('Could not found product with id of ' + id + '!');
+                }
+
+                return of(category);
+            })
+        );
+    }
+    
  
      /**
       * Create category
@@ -799,7 +832,7 @@ export class InventoryService
       * @param id
       * @param category
       */
-    updateCategory(id: string, category: ProductCategory): Observable<ProductCategory>
+    updateCategory(id: string, category: ProductCategory, formdata:FormData = null): Observable<ProductCategory>
     {
 
         let productService = this._apiServer.settings.apiServer.productService;
@@ -812,7 +845,7 @@ export class InventoryService
         let queryParam = "?storeId=" + this.storeId$ + "&name=" + category.name;
 
         // product-service/v1/swagger-ui.html#/store-category-controller/putStoreProductAssetsByIdUsingPUT
-        return this._httpClient.put<any>(productService + '/store-categories/' + id + queryParam, header);
+        return this._httpClient.put<any>(productService + '/store-categories/' + id + queryParam, formdata , header);
     }
   
      /**
