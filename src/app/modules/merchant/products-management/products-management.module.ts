@@ -19,11 +19,15 @@ import { SharedModule } from 'app/shared/shared.module';
 import { InventoryComponent } from 'app/modules/merchant/products-management/inventory/inventory.component';
 import { productsManagementRoutes } from 'app/modules/merchant/products-management/products-management.routing';
 import { AddProductComponent } from './add-product/add-product.component';
+import { CategoriesComponent } from './categories/categories.component';
+import { AddCategoryComponent } from './add-category/add-category.component';
 
 @NgModule({
     declarations: [
         InventoryComponent,
         AddProductComponent,
+        CategoriesComponent,
+        AddCategoryComponent,
     ],
     imports     : [
         RouterModule.forChild(productsManagementRoutes),

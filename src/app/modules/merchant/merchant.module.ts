@@ -4,7 +4,8 @@ import { merchantRoutes } from 'app/modules/merchant/merchant.routing';
 
 @NgModule({
     declarations: [
-    ],
+    
+  ],
     imports     : [
         RouterModule.forChild(merchantRoutes),
     ],

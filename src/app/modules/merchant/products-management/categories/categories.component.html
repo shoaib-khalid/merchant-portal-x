@@ -1,0 +1,279 @@
+<div class="sm:absolute sm:inset-0 flex flex-col flex-auto min-w-0 sm:overflow-hidden bg-card dark:bg-transparent">
+
+    <!-- Header -->
+    <div class="relative flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between py-8 px-6 md:px-8 border-b">
+        <!-- Loader -->
+        <div
+            class="absolute inset-x-0 bottom-0"
+            *ngIf="isLoading">
+            <mat-progress-bar [mode]="'indeterminate'"></mat-progress-bar>
+        </div>
+        <!-- Title -->
+        <div class="text-4xl font-extrabold tracking-tight">Product Categories</div>
+        <!-- Actions -->
+        <div class="flex flex-shrink-0 items-center mt-6 sm:mt-0 sm:ml-4">
+            <!-- Search -->
+            <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-64">
+                <mat-icon
+                    class="icon-size-5"
+                    matPrefix
+                    [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                <input
+                    matInput
+                    [formControl]="searchInputControl"
+                    [autocomplete]="'off'"
+                    [placeholder]="'Search categories'">
+            </mat-form-field>
+            <!-- Add category button -->
+            <button
+                id="create-discount-btn"
+                class="ml-4"
+                (click)="createCategory()"
+                mat-flat-button
+                [color]="'primary'">
+                <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                <span class="ml-2 mr-1">Add</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex flex-auto overflow-hidden">
+
+        <!-- Categories list -->
+        <div class="flex flex-col flex-auto sm:mb-18 overflow-hidden sm:overflow-y-auto">
+            <ng-container *ngIf="(categories$ | async) as categories">
+                <ng-container *ngIf="categories.length > 0; else noDiscounts">
+                    <div class="grid">
+                        <!-- Header -->
+                        <div
+                            class="inventory-grid z-10 sticky top-0 grid gap-4 py-4 px-6 md:px-8 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                            matSort
+                            matSortDisableClear>
+                            <div></div>
+                            <div [mat-sort-header]="'thumbnailUrl'">Category</div>
+                            <div [mat-sort-header]="'name'">Category Name</div>
+                            <div class="block">Details</div>
+                        </div>
+                        <!-- Rows -->
+                        <ng-container *ngIf="(categories$ | async) as categories">
+                            <ng-container *ngFor="let category of categories; trackBy: trackByFn">
+                                <div class="inventory-grid grid items-center gap-4 py-3 px-6 md:px-8 border-b">
+
+                                    <div></div>
+                                        
+                                     <!-- Image -->
+                                     <div class="flex items-center">
+                                        <div class="relative flex flex-0 items-center justify-center w-20 h-20 mr-6 rounded overflow-hidden border">
+                                            <img
+                                                class="w-8"
+                                                *ngIf="category.thumbnailUrl"
+                                                [alt]="'category thumbnail image'"
+                                                [src]="category.thumbnailUrl">
+                                            <div
+                                                class="flex items-center justify-center w-full h-full text-xs font-semibold leading-none text-center uppercase"
+                                                *ngIf="!category.thumbnailUrl">
+                                                NO IMAGE
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                     <!-- Name -->
+                                     <div class="truncate">
+                                        {{ category.name }}
+                                    </div>
+
+                                    <!-- Details button -->
+                                    <div>
+                                        <button
+                                            class="min-w-10 min-h-7 h-7 px-2 leading-6"
+                                            mat-stroked-button
+                                            (click)="toggleDetails(category.id);">
+                                            <mat-icon
+                                                class="icon-size-5"
+                                                [svgIcon]="selectedCategory?.id === category.id ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'">
+                                            </mat-icon>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="grid">
+                                    <ng-container *ngIf="selectedCategory?.id === category.id">
+                                        <ng-container *ngTemplateOutlet="rowDetailsTemplate; context: {$implicit: category}"></ng-container>
+                                    </ng-container>
+                                </div>
+                            </ng-container>
+                        </ng-container>
+                    </div>
+
+                    <!-- <mat-paginator
+                        class="sm:absolute sm:inset-x-0 sm:bottom-0 border-b sm:border-t sm:border-b-0 z-10 bg-gray-50 dark:bg-transparent"
+                        [ngClass]="{'pointer-events-none': isLoading}"
+                        [length]="pagination.length"
+                        [pageIndex]="pagination.page"
+                        [pageSize]="pagination.size"
+                        [pageSizeOptions]="[5, 10, 25, 100]"
+                        [showFirstLastButtons]="true"></mat-paginator> -->
+
+                </ng-container>
+            </ng-container>
+
+            <ng-template
+                #rowDetailsTemplate
+                let-category>
+                <div class="shadow-lg overflow-hidden">
+                    <div class="flex border-b">
+                        <!-- Selected discount form -->
+                        <form
+                        class="flex flex-col w-full"
+                        [formGroup]="categoriesForm">
+
+                        <div [style.visibility]="(showVariantsSection) ? 'hidden' : 'visible'" [style.max-height]="(showVariantsSection) ? '0' : ''" >
+
+                            <!-- disp Discount name, start/end time&date,status,Discount on -->
+                            <div class="flex flex-col sm:flex-row px-8 pt-4 pb-4">
+                                <!-- Name, Description, SKU -->
+                                <div class="flex flex-auto flex-wrap w-full">
+                                    <div class="flex flex-col w-full lg:w-2/12 items-center justify-center">
+                                          <!-- Image Frame -->
+                                          <div class="w-30 h-30 border rounded overflow-hidden">
+                                            <ng-container *ngIf="this.files[0].fileSource ; else noImage">
+                                                <img
+                                                    class="w-full h-full object-cover"
+                                                    [src]="this.files[0].fileSource">
+                                            </ng-container>
+                                            <ng-template #noImage>
+                                                <div
+                                                    class="flex items-center justify-center w-full h-full rounded overflow-hidden uppercase text-8xl font-bold leading-none bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                                                >
+                                                    <span class="text-md">NO IMAGE</span> 
+                                                </div>
+                                            </ng-template>
+                                        </div>
+                                        <div class="flex items-center mt-2 whitespace-nowrap">
+                                        <!-- Add New Image -->
+                                            <div>
+                                                <input
+                                                    id="image-file-input"
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="file"
+                                                    [multiple]="false"
+                                                    [accept]="'image/jpeg, image/png'"
+                                                    (change)="selectFiles('logo',$event)"
+                                                    #imageFileInput>
+                                                <label
+                                                    class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                    for="image-file-input"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="icon-size-5"
+                                                        [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                                                </label>
+                                            </div>
+                                            <!-- remove image -->
+                                            <div>
+                                                <input
+                                                    id="image-edit-button"
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="button"
+                                                    mat-icon-button
+                                                >
+                                                
+                                                <label 
+                                                    class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                    for="image-edit-button"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="icon-size-5"
+                                                        [svgIcon]="'heroicons_solid:trash'"></mat-icon>
+                                                </label>
+                                            </div>
+                                        </div>    
+                                    </div>
+                                    <!-- Name -->
+                                    <div class="flex flex-wrap justify-center items-center lg:w-8/12 pr-2">
+                                        <mat-form-field class=" w-full ">
+                                            <mat-label>Category Name</mat-label>
+                                            <input
+                                                matInput
+                                                [formControlName]="'name'">
+                                        </mat-form-field>
+
+                                    </div>
+
+                                    <!-- normal price -->
+                                    <div class="flex flex-wrap w-full lg:w-2/12 items-center justify-center pl-6">
+                                        <mat-slide-toggle
+                                            class="flex items-center justify-center flex-wrap w-full "
+                                            [color]="'primary'"
+                                            [matTooltip]="'To enable normal price if there is already discount applied'">
+                                            Normal Price
+                                        </mat-slide-toggle>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Delete and update button -->
+                            <div class="flex items-center justify-between w-full border-t px-8 py-4">
+                                <input
+                                    id="product-remove-button"
+                                    type="button"
+                                    (click)="deleteSelectedDiscount()"
+                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                    mat-button>
+                                <label 
+                                    class="flex items-center justify-center h-10 px-4 border rounded border-red-300 dark:border-red-500 cursor-pointer hover:bg-hover"
+                                    for="product-remove-button"
+                                    matRipple>
+                                    <span>Delete</span>
+                                    <mat-icon
+                                        class="ml-1"
+                                        [color]="'warn'"
+                                        [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                </label>
+                                <!-- <button
+                                    class="-ml-4"
+                                    mat-button
+                                    [color]="'warn'"
+                                    (click)="deleteSelectedProduct()">
+                                    Delete
+                                </button> -->
+                                <div class="flex items-center">
+                                    <div
+                                        class="flex items-center mr-4"
+                                        *ngIf="flashMessage">
+                                        <ng-container *ngIf="flashMessage === 'success'">
+                                            <mat-icon
+                                                class="text-green-500"
+                                                [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                                            <span class="ml-2">Product updated</span>
+                                        </ng-container>
+                                        <ng-container *ngIf="flashMessage === 'error'">
+                                            <mat-icon
+                                                class="text-red-500"
+                                                [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                                            <span class="ml-2">An error occurred, try again!</span>
+                                        </ng-container>
+                                    </div>
+                                    <button
+                                        mat-flat-button
+                                        [color]="'primary'"
+                                        (click)="updateCategory(selectedCategory)">
+                                        Update
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </ng-template>
+
+            <ng-template #noDiscounts>
+                <div class="p-8 sm:p-16 border-t text-4xl font-semibold tracking-tight text-center">There are no categories!</div>
+            </ng-template>
+
+        </div>
+
+    </div>
+
+</div>

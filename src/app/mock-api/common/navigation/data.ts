@@ -41,7 +41,14 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 id   : 'apps.ecommerce.inventory',
                 title: 'Inventory',
                 type : 'basic',
-                link : '/products',
+                link : '/products/inventory',
+                exactMatch: true
+            },
+            {
+                id   : 'apps.ecommerce.inventory',
+                title: 'Categories',
+                type : 'basic',
+                link : '/products/categories',
                 exactMatch: true
             },
             // {
