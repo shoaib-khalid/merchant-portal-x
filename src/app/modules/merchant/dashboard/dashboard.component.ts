@@ -1,14 +1,16 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
-import { merge, Subject } from 'rxjs';
+import { merge, of, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { MatPaginator } from '@angular/material/paginator';
 import { ApexOptions } from 'ng-apexcharts';
 import { DashboardService } from 'app/modules/merchant/dashboard/dashboard.service';
-import { Store } from 'app/core/store/store.types';
+import { Store, StoreRegionCountries } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
 import { DailyTopProducts, DailyTopProductsPagination, DetailedDailySales, DetailedDailySalesPagination, SummarySales, SummarySalesPagination, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly } from './dashboard.types';
 import { items } from 'app/mock-api/apps/file-manager/data';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { formatDate } from '@angular/common';
 
 @Component({
     selector       : 'dashboard',
@@ -20,28 +22,63 @@ export class DashboardComponent implements OnInit, OnDestroy
 {
     @ViewChild("dailyTopProductsPaginator", {read: MatPaginator}) private _dailyTopProductsPaginator: MatPaginator;
     @ViewChild("detailedDailySalesPaginator", {read: MatPaginator}) private _detailedDailySalesPaginator: MatPaginator;
-
+    @ViewChild("summarySalesPaginator", {read: MatPaginator}) private _summarySalesPaginator: MatPaginator;
+    
     store: Store;
     stores: Store[];
     currentStoreId: string;
     storeName: string = "";
-    chartGithubIssues: ApexOptions = {};
+    salesChart: ApexOptions = {};
     data: any;
+    seriesChart: any;
+    overviewChart: any;
+    weeklyGraph: boolean = true;
+    
+    // ------------------------
+    // Summary Sales Properties
+    // ------------------------
 
     summarySalesCol = ["date","totalOrders","amountEarned"]
     summarySalesRow = [];
     summarySalesPagination: SummarySalesPagination;
-    summarySalesDateRange = { start: '', end: ''};
+
+    summarySalesDateRange: any = {
+        start : null,
+        end: null
+    }
+    summarySalesDateInputStartControl: FormControl = new FormControl();
+    summarySalesDateInputEndControl: FormControl = new FormControl();
     
+
+    // -----------------------------
+    // Daily Top Products Properties
+    // -----------------------------
+
     dailyTopProductsCol = ["date","productName","rank","totalTransaction"]
     dailyTopProductsRow = [];
     dailyTopProductsPagination: DailyTopProductsPagination;
-    dailyTopProductsDateRange = { start: '', end: ''};
+    dailyTopProductsDateRange: any = {
+        start : null,
+        end: null
+    }
+    dailyTopProductsDateInputStart: FormControl = new FormControl();
+    dailyTopProductsDateInputEnd: FormControl = new FormControl();
     
+    // -------------------------------
+    // Daily Detailed Sales Properties
+    // -------------------------------
+
     detailedDailySalesCol = ["date","customerName","subTotal","serviceCharge","deliveryCharge","commission","total"]
     detailedDailySalesRow = [];
     detailedDailySalesPagination: DetailedDailySalesPagination;
-    detailedDailySalesDateRange = { start: '', end: ''};
+    detailedDailySalesDateRange: any = {
+        start : null,
+        end: null
+    }
+    detailedDailySalesDateInputStart: FormControl = new FormControl();
+    detailedDailySalesDateInputEnd: FormControl = new FormControl();
+
+
 
     completeCompletionStatus = ["DELIVERED_TO_CUSTOMER"];
     pendingCompletionStatus = [];
@@ -70,6 +107,9 @@ export class DashboardComponent implements OnInit, OnDestroy
 
     isLoading: boolean = false;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
+    currencySymbol: string;
+
+
 
     /**
      * Constructor
@@ -110,8 +150,8 @@ export class DashboardComponent implements OnInit, OnDestroy
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((store: Store)=>{
                 this.storeName = store.name;
-            });
-
+                this.currencySymbol = store.regionCountry.currencySymbol;
+            });            
         this._storesService.storeControl.valueChanges
             .pipe(
                 debounceTime(100),
@@ -194,6 +234,7 @@ export class DashboardComponent implements OnInit, OnDestroy
         this._dashboardService.summarySales$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((summarySales: SummarySales[])=>{
+                this.summarySalesRow = [];
                 summarySales.forEach(items => {
                     this.summarySalesRow.push({ 
                         date: items.date, 
@@ -336,6 +377,60 @@ export class DashboardComponent implements OnInit, OnDestroy
 
         })
 
+        // Chart
+
+        this.seriesChart  = {
+            'this-week': [
+                {
+                    name: 'Completed',
+                    type: 'line',
+                    data: [42, 28, 43, 34, 20, 25, 22]
+                },
+                {
+                    name: 'Pending',
+                    type: 'line',
+                    data: [1, 5, 13, 12, 15, 4, 9]
+                },
+                {
+                    name: 'Failed',
+                    type: 'column',
+                    data: [11, 10, 8, 11, 8, 10, 17]
+                }
+            ],
+            'this-month': [
+                {
+                    name: 'Completed',
+                    type: 'line',
+                    data: [37, 32, 39, 27, 18, 24, 20]
+                },
+                {
+                    name: 'Pending',
+                    type: 'line',
+                    data: [9, 8, 10, 12, 7, 11, 15]
+                },
+                {
+                    name: 'Failed',
+                    type: 'column',
+                    data: [11, 10, 8, 11, 8, 10, 17]
+                }
+            ]
+        }
+
+        this.overviewChart = {
+            'this-week':{
+                            'completed'   : this.sumWeeklyCompleted,
+                            'pending'     : this.sumWeeklyPending,
+                            'failed'     : this.sumWeeklyFailed,
+                        },
+            'this-month':{
+                            'completed'   : this.sumMonthlyCompleted,
+                            'pending'     : this.sumMonthlyPending,
+                            'failed'     : this.sumMonthlyFailed,
+                        }
+        },
+
+        this._prepareChartData();
+
         // Get the data
         this._dashboardService.data$
             .pipe(takeUntil(this._unsubscribeAll))
@@ -345,7 +440,7 @@ export class DashboardComponent implements OnInit, OnDestroy
                 this.data = data;
 
                 // Prepare the chart data
-                this._prepareChartData();
+                // this._prepareChartData();
             });
 
         // Attach SVG fill fixer to all ApexCharts
@@ -361,6 +456,174 @@ export class DashboardComponent implements OnInit, OnDestroy
                 }
             }
         };
+        
+        // -------------------------------
+        // Summary Sales Date Range Input
+        // -------------------------------
+
+        // Subscribe to start date input field value changes 
+        this.summarySalesDateInputStartControl.valueChanges
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((query) => {
+                    this.isLoading = true;
+                    
+                    // reformat date 
+                    const format = 'yyyy-MM-dd';
+                    const myDate = query;
+                    const locale = 'en-MY';
+                    const formattedDate = formatDate(myDate, format, locale);
+                    
+                    this.summarySalesDateRange.start = formattedDate;
+                        
+                    // do nothing
+                    return of(true);
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
+
+        // Subscribe to end date input field value changes
+        this.summarySalesDateInputEndControl.valueChanges
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((query) => {
+                    this.isLoading = true;
+
+                    // reformat date 
+                    const format = 'yyyy-MM-dd';
+                    const myDate = query;
+                    const locale = 'en-MY';
+                    const formattedDate = formatDate(myDate, format, locale);
+                    
+                    this.summarySalesDateRange.end = formattedDate;
+
+                    return this._dashboardService.getSummarySales(this.storeId$, 0, 10, 'created', 'asc','', 
+                                                                    this.summarySalesDateRange.start, this.summarySalesDateRange.end);
+                }),
+                map(() => {
+
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
+
+        // -------------------------------
+        // Daily Detailed Sales Date Range Input
+        // -------------------------------
+        
+        // Subscribe to start date input field value changes 
+        this.detailedDailySalesDateInputStart.valueChanges
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((query) => {
+                    this.isLoading = true;
+                    
+                    // reformat date 
+                    const format = 'yyyy-MM-dd';
+                    const myDate = query;
+                    const locale = 'en-MY';
+                    const formattedDate = formatDate(myDate, format, locale);
+                    
+                    this.detailedDailySalesDateRange.start = formattedDate;
+                        
+                    // do nothing
+                    return of(true);
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
+
+        // Subscribe to end date input field value changes
+        this.detailedDailySalesDateInputEnd.valueChanges
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((query) => {
+                    this.isLoading = true;
+
+                    // reformat date 
+                    const format = 'yyyy-MM-dd';
+                    const myDate = query;
+                    const locale = 'en-MY';
+                    const formattedDate = formatDate(myDate, format, locale);
+                    
+                    this.detailedDailySalesDateRange.end = formattedDate;
+
+                    return this._dashboardService.getDetailedDailySales(this.storeId$, 0, 10, 'created', 'asc', 
+                                                                            this.detailedDailySalesDateRange.start, this.detailedDailySalesDateRange.end);
+                }),
+                map(() => {
+
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
+
+        // -------------------------------
+        // Daily Top Products Date Range Input
+        // -------------------------------
+
+        // Subscribe to start date input field value changes 
+        this.dailyTopProductsDateInputStart.valueChanges
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((query) => {
+                    this.isLoading = true;
+                    
+                    // reformat date 
+                    const format = 'yyyy-MM-dd';
+                    const myDate = query;
+                    const locale = 'en-MY';
+                    const formattedDate = formatDate(myDate, format, locale);
+                    
+                    this.dailyTopProductsDateRange.start = formattedDate;
+                        
+                    // do nothing
+                    return of(true);
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
+
+        // Subscribe to end date input field value changes
+        this.dailyTopProductsDateInputEnd.valueChanges
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((query) => {
+                    this.isLoading = true;
+
+                    // reformat date 
+                    const format = 'yyyy-MM-dd';
+                    const myDate = query;
+                    const locale = 'en-MY';
+                    const formattedDate = formatDate(myDate, format, locale);
+                    
+                    this.dailyTopProductsDateRange.end = formattedDate;
+
+                    return this._dashboardService.getDailyTopProducts(this.storeId$, 0, 10, 'created', 'asc', "",
+                                                                            this.dailyTopProductsDateRange.start, this.dailyTopProductsDateRange.end);
+                }),
+                map(() => {
+
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+
     }
 
     /**
@@ -380,7 +643,13 @@ export class DashboardComponent implements OnInit, OnDestroy
                 merge(this._dailyTopProductsPaginator.page).pipe(
                     switchMap(() => {
                         this.isLoading = true;
-                        return this._dashboardService.getDailyTopProducts(this.storeId$, this._dailyTopProductsPaginator.pageIndex, this._dailyTopProductsPaginator.pageSize, "date", "asc");
+
+                        if (this.dailyTopProductsDateRange.start == null && this.dailyTopProductsDateRange.end == null)
+                            return this._dashboardService.getDailyTopProducts(this.storeId$, this._dailyTopProductsPaginator.pageIndex, this._dailyTopProductsPaginator.pageSize, "date", "asc");
+                        else
+                            return this._dashboardService.getDailyTopProducts(this.storeId$, this._dailyTopProductsPaginator.pageIndex, this._dailyTopProductsPaginator.pageSize, "date", "asc", "",
+                                                                                    this.dailyTopProductsDateRange.start, this.dailyTopProductsDateRange.end);
+
                     }),
                     map(() => {
                         this.isLoading = false;
@@ -398,7 +667,36 @@ export class DashboardComponent implements OnInit, OnDestroy
                 merge(this._detailedDailySalesPaginator.page).pipe(
                     switchMap(() => {
                         this.isLoading = true;
-                        return this._dashboardService.getDetailedDailySales(this.storeId$, this._detailedDailySalesPaginator.pageIndex, this._detailedDailySalesPaginator.pageSize, "date", "asc");
+
+                        if (this.detailedDailySalesDateRange.start == null && this.detailedDailySalesDateRange.end == null)
+                            return this._dashboardService.getDetailedDailySales(this.storeId$, this._detailedDailySalesPaginator.pageIndex, this._detailedDailySalesPaginator.pageSize, "date", "asc");
+                        else
+                            return this._dashboardService.getDetailedDailySales(this.storeId$, this._detailedDailySalesPaginator.pageIndex, this._detailedDailySalesPaginator.pageSize, "date", "asc", 
+                                                                                    this.detailedDailySalesDateRange.start, this.detailedDailySalesDateRange.end);
+                    }),
+                    map(() => {
+                        this.isLoading = false;
+                    })
+                ).subscribe();
+            }
+            if ( this._summarySalesPaginator )
+            {
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+
+
+                // Get customers if sort or page changes
+                merge(this._summarySalesPaginator.page).pipe(
+                    switchMap(() => {
+                        this.isLoading = true;
+
+                        if (this.summarySalesDateRange.start == null && this.summarySalesDateRange.end == null)
+                            return this._dashboardService.getSummarySales(this.storeId$, this._summarySalesPaginator.pageIndex, this._summarySalesPaginator.pageSize, "date", "asc");
+                        else
+                            return this._dashboardService.getSummarySales(this.storeId$, this._summarySalesPaginator.pageIndex, this._summarySalesPaginator.pageSize, "date", "asc", "", 
+                                                                            this.summarySalesDateRange.start, this.summarySalesDateRange.end);
+
                     }),
                     map(() => {
                         this.isLoading = false;
@@ -468,10 +766,12 @@ export class DashboardComponent implements OnInit, OnDestroy
      *
      * @private
      */
+
+    
     private _prepareChartData(): void
     {
-        // Github issues
-        this.chartGithubIssues = {
+        // Sales summary
+        this.salesChart = {
             chart      : {
                 fontFamily: 'inherit',
                 foreColor : 'inherit',
@@ -482,12 +782,12 @@ export class DashboardComponent implements OnInit, OnDestroy
                 },
                 zoom      : {
                     enabled: false
-                }
+                },
             },
-            colors     : ['#64748B', '#94A3B8'],
+            colors     : ['#3b82f6', '#f59e0b', '#ef4444'],
             dataLabels : {
                 enabled        : true,
-                enabledOnSeries: [0],
+                enabledOnSeries: [0, 1],
                 background     : {
                     borderWidth: 0
                 }
@@ -495,7 +795,7 @@ export class DashboardComponent implements OnInit, OnDestroy
             grid       : {
                 borderColor: 'var(--fuse-border)'
             },
-            labels     : this.data.githubIssues.labels,
+            labels     : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
             legend     : {
                 show: false
             },
@@ -504,7 +804,7 @@ export class DashboardComponent implements OnInit, OnDestroy
                     columnWidth: '50%'
                 }
             },
-            series     : this.data.githubIssues.series,
+            series     : this.seriesChart,
             states     : {
                 hover: {
                     filter: {
@@ -514,12 +814,33 @@ export class DashboardComponent implements OnInit, OnDestroy
                 }
             },
             stroke     : {
-                width: [3, 0]
+                width: [2, 2, 0]
             },
             tooltip    : {
-                followCursor: true,
-                theme       : 'dark'
-            },
+                y: [
+                  {
+                    title: {
+                      formatter: function(val) {
+                        return val;
+                      }
+                    }
+                  },
+                  {
+                    title: {
+                      formatter: function(val) {
+                        return val;
+                      }
+                    }
+                  },
+                  {
+                    title: {
+                      formatter: function(val) {
+                        return val;
+                      }
+                    }
+                  }
+                ]
+              },
             xaxis      : {
                 axisBorder: {
                     show: false
@@ -543,7 +864,13 @@ export class DashboardComponent implements OnInit, OnDestroy
                         colors: 'var(--fuse-text-secondary)'
                     }
                 }
-            }
+            },
+            markers: {
+                size: 0,
+                hover: {
+                  sizeOffset: 6
+                }
+              }
         };
     }
 }

@@ -18,14 +18,14 @@
                             [svgIcon]="'heroicons_solid:document-report'"></mat-icon>
                         <span class="ml-2">Reports</span>
                     </button>
-                    <button
+                    <!-- <button
                         class="hidden sm:inline-flex ml-3"
                         mat-stroked-button>
                         <mat-icon
                             class="icon-size-5"
                             [svgIcon]="'heroicons_solid:cog'"></mat-icon>
                         <span class="ml-2">Settings</span>
-                    </button>
+                    </button> -->
                     <button
                         class="hidden sm:inline-flex ml-3"
                         mat-flat-button
@@ -119,58 +119,59 @@
                                     <div class="mt-3 sm:mt-0 sm:ml-2">
                                         <mat-button-toggle-group
                                             value="this-week"
-                                            #githubIssuesWeekSelector="matButtonToggleGroup">
-                                            <mat-button-toggle value="last-week">Last Week</mat-button-toggle>
-                                            <mat-button-toggle value="this-week">This Week</mat-button-toggle>
+                                            #timeSelector="matButtonToggleGroup">
+                                            <mat-button-toggle value="this-month" (click)="weeklyGraph = true">Last Week</mat-button-toggle>
+                                            <mat-button-toggle value="this-week" (click)="weeklyGraph = true">This Week</mat-button-toggle>
                                         </mat-button-toggle-group>
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-4 grid-flow-row gap-6 w-full mt-8 sm:mt-4">
                                     <!-- New vs. Closed -->
                                     <div class="flex flex-col flex-auto col-span-2 md:col-span-4 lg:col-span-2">
-                                        <div class="font-medium text-secondary">Weekly Graph</div>
+                                        <div *ngIf="weeklyGraph" class="font-medium text-secondary">Weekly Graph</div>
+                                        <div *ngIf="!weeklyGraph" class="font-medium text-secondary">Monthly Graph</div>
                                         <div class="flex flex-col flex-auto">
                                             <apx-chart
                                                 class="flex-auto w-full h-80"
-                                                [chart]="chartGithubIssues.chart"
-                                                [colors]="chartGithubIssues.colors"
-                                                [dataLabels]="chartGithubIssues.dataLabels"
-                                                [grid]="chartGithubIssues.grid"
-                                                [labels]="chartGithubIssues.labels"
-                                                [legend]="chartGithubIssues.legend"
-                                                [plotOptions]="chartGithubIssues.plotOptions"
-                                                [series]="chartGithubIssues.series[githubIssuesWeekSelector.value]"
-                                                [states]="chartGithubIssues.states"
-                                                [stroke]="chartGithubIssues.stroke"
-                                                [tooltip]="chartGithubIssues.tooltip"
-                                                [xaxis]="chartGithubIssues.xaxis"
-                                                [yaxis]="chartGithubIssues.yaxis"></apx-chart>
+                                                [chart]="salesChart.chart"
+                                                [colors]="salesChart.colors"
+                                                [dataLabels]="salesChart.dataLabels"
+                                                [grid]="salesChart.grid"
+                                                [labels]="salesChart.labels"
+                                                [legend]="salesChart.legend"
+                                                [plotOptions]="salesChart.plotOptions"
+                                                [series]="salesChart.series[timeSelector.value]"
+                                                [states]="salesChart.states"
+                                                [stroke]="salesChart.stroke"
+                                                [tooltip]="salesChart.tooltip"
+                                                [xaxis]="salesChart.xaxis"
+                                                [yaxis]="salesChart.yaxis"></apx-chart>
                                         </div>
                                     </div>
                                     <!-- Overview -->
                                     <div class="flex flex-col flex-auto col-span-2 lg:col-span-1">
                                         <div class="font-medium text-secondary">Overview</div>
                                         <div class="flex-auto grid grid-cols-2 gap-4 mt-6">
-                                            <!-- New issues -->
-                                            <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-indigo-50 text-indigo-800 dark:bg-white dark:bg-opacity-5 dark:text-indigo-400">
+                                            <!-- Completed -->
+                                            <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-blue-50 text-blue-500 dark:bg-white dark:bg-opacity-5 dark:text-blue-400">
                                                 <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
-                                                    {{data.githubIssues.overview[githubIssuesWeekSelector.value]['new-issues']}}
+                                                    {{overviewChart[timeSelector.value]['completed']}}
                                                 </div>
-                                                <div class="mt-1 text-sm sm:text-lg font-medium">New Issues</div>
+                                                <div class="mt-1 text-sm sm:text-lg font-medium">Completed</div>
                                             </div>
-                                            <!-- Fixed -->
-                                            <div class="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-gray-100 text-secondary dark:bg-white dark:bg-opacity-5">
+                                            <!-- Pending -->
+                                            <div class="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-amber-50 text-amber-500 dark:bg-white dark:bg-opacity-5">
                                                 <div class="text-5xl font-semibold leading-none tracking-tight">
-                                                    {{data.githubIssues.overview[githubIssuesWeekSelector.value]['fixed']}}
+                                                    {{overviewChart[timeSelector.value]['pending']}}
                                                 </div>
-                                                <div class="mt-1 text-sm font-medium text-center">Fixed</div>
+                                                <div class="mt-1 text-sm font-medium text-center">Pending</div>
                                             </div>
-                                            <!-- Won't fix -->
-                                            <div class="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-gray-100 text-secondary dark:bg-white dark:bg-opacity-5">
+                                            <!-- Failed -->
+                                            <div class="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-red-50 text-red-500 dark:bg-white dark:bg-opacity-5">
                                                 <div class="text-5xl font-semibold leading-none tracking-tight">
-                                                    {{data.githubIssues.overview[githubIssuesWeekSelector.value]['wont-fix']}}
+                                                    {{overviewChart[timeSelector.value]['failed']}}
                                                 </div>
-                                                <div class="mt-1 text-sm font-medium text-center">Won't Fix</div>
+                                                <div class="mt-1 text-sm font-medium text-center">Failed</div>
                                             </div>
                                         </div>
                                     </div>
@@ -178,26 +179,26 @@
                                     <div class="flex flex-col flex-auto col-span-2 lg:col-span-1">
                                         <div class="font-medium text-secondary">Top Product</div>
                                         <div class="flex-auto grid grid-cols-2 gap-4 mt-6">
-                                            <!-- New issues -->
-                                            <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-indigo-50 text-indigo-800 dark:bg-white dark:bg-opacity-5 dark:text-indigo-400">
+                                            <!-- Completed -->
+                                            <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-blue-50 text-blue-500 dark:bg-white dark:bg-opacity-5 dark:text-blue-400">
                                                 <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
-                                                    {{data.githubIssues.overview[githubIssuesWeekSelector.value]['new-issues']}}
+                                                    <!-- {{data.githubIssues.overview[timeSelector.value]['new-issues']}} -->
                                                 </div>
-                                                <div class="mt-1 text-sm sm:text-lg font-medium">New Issues</div>
+                                                <div class="mt-1 text-sm sm:text-lg font-medium">Completed</div>
                                             </div>
-                                            <!-- Fixed -->
-                                            <div class="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-gray-100 text-secondary dark:bg-white dark:bg-opacity-5">
+                                            <!-- Pending -->
+                                            <div class="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-amber-50 text-amber-500 dark:bg-white dark:bg-opacity-5">
                                                 <div class="text-5xl font-semibold leading-none tracking-tight">
-                                                    {{data.githubIssues.overview[githubIssuesWeekSelector.value]['fixed']}}
+                                                    <!-- {{data.githubIssues.overview[timeSelector.value]['fixed']}} -->
                                                 </div>
-                                                <div class="mt-1 text-sm font-medium text-center">Fixed</div>
+                                                <div class="mt-1 text-sm font-medium text-center">Pending</div>
                                             </div>
-                                            <!-- Won't fix -->
-                                            <div class="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-gray-100 text-secondary dark:bg-white dark:bg-opacity-5">
+                                            <!-- Failed -->
+                                            <div class="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-red-50 text-red-500 dark:bg-white dark:bg-opacity-5">
                                                 <div class="text-5xl font-semibold leading-none tracking-tight">
-                                                    {{data.githubIssues.overview[githubIssuesWeekSelector.value]['wont-fix']}}
+                                                    <!-- {{data.githubIssues.overview[timeSelector.value]['wont-fix']}} -->
                                                 </div>
-                                                <div class="mt-1 text-sm font-medium text-center">Won't Fix</div>
+                                                <div class="mt-1 text-sm font-medium text-center">Failed</div>
                                             </div>
                                         </div>
                                     </div>
@@ -208,20 +209,19 @@
                                 
                                 <div class="flex flex-wrap justify-between item-center w-full">
                                     <div class="text-lg font-medium tracking-tight my-auto leading-6 truncate">Summary Sales Details</div>
-                                    <!-- <mat-form-field 
+                                    <mat-form-field 
                                         class="fuse-mat-no-subscript w-full sm:w-72"
-                                        appearance="fill"
-                                    >
-                                        <mat-date-range-input [formGroup]="summarySalesDateRange" [rangePicker]="summarySalesDateRangePicker">
-                                            <input matStartDate formControlName="start" placeholder="mm/dd/yyyy" [value]="summarySalesDateRange.start">
-                                            <input matEndDate formControlName="end" placeholder="mm/dd/yyyy" [value]="summarySalesDateRange.end">
-                                        </mat-date-range-input>
-                                        <mat-datepicker-toggle matSuffix [for]="summarySalesDateRangePicker"></mat-datepicker-toggle>
-                                        <mat-date-range-picker #summarySalesDateRangePicker></mat-date-range-picker>
+                                        appearance="fill">
+                                            <mat-date-range-input [rangePicker]="summarySalesDateRangePicker">
+                                                <input matStartDate [formControl]="summarySalesDateInputStartControl" placeholder="mm/dd/yyyy" >
+                                                <input matEndDate [formControl]="summarySalesDateInputEndControl" placeholder="mm/dd/yyyy">
+                                            </mat-date-range-input>
+                                            <mat-datepicker-toggle matSuffix [for]="summarySalesDateRangePicker"></mat-datepicker-toggle>
+                                            <mat-date-range-picker #summarySalesDateRangePicker></mat-date-range-picker>
                                     
-                                        <mat-error *ngIf="range.controls.start.hasError('matStartDateInvalid')">Invalid start date</mat-error>
-                                        <mat-error *ngIf="range.controls.end.hasError('matEndDateInvalid')">Invalid end date</mat-error>
-                                    </mat-form-field> -->
+                                        <!-- <mat-error *ngIf="range.controls.start.hasError('matStartDateInvalid')">Invalid start date</mat-error>
+                                        <mat-error *ngIf="range.controls.end.hasError('matEndDateInvalid')">Invalid end date</mat-error> -->
+                                    </mat-form-field>
                                 </div>
                                 <div class="flex flex-col flex-auto mt-2 overflow-x-auto">
                                     <table
@@ -269,7 +269,7 @@
                                             <td
                                                 mat-cell
                                                 *matCellDef="let summarySale">
-                                                {{summarySale.amountEarned | currency:'$'}}
+                                                {{summarySale.amountEarned | currency:currencySymbol}}
                                             </td>
                                         </ng-container>
 
@@ -288,27 +288,28 @@
                                     [pageIndex]="summarySalesPagination.page"
                                     [pageSize]="summarySalesPagination.size"
                                     [pageSizeOptions]="[5, 10, 25, 100]"
-                                    [showFirstLastButtons]="true"></mat-paginator>
+                                    [showFirstLastButtons]="true"
+                                    #summarySalesPaginator></mat-paginator>
                             </div>
 
                             <!-- Daily Detailed Sales details -->
                             <div class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 pb-0 bg-card shadow rounded-2xl overflow-hidden">
                                 <div class="flex flex-wrap justify-between item-center w-full">
                                     <div class="text-lg font-medium tracking-tight my-auto leading-6 truncate">Daily Detailed Sales Details</div>
-                                    <!-- <mat-form-field 
+                                    <mat-form-field 
                                         class="fuse-mat-no-subscript w-full sm:w-72"
                                         appearance="fill"
                                     >
-                                        <mat-date-range-input [formGroup]="dailyTopProductsDateRange" [rangePicker]="dailyTopProductsPicker">
-                                            <input matStartDate formControlName="start" placeholder="mm/dd/yyyy" [value]="dailyTopProductsDateRange.start">
-                                            <input matEndDate formControlName="end" placeholder="mm/dd/yyyy" [value]="dailyTopProductsDateRange.end">
-                                        </mat-date-range-input>
-                                        <mat-datepicker-toggle matSuffix [for]="dailyTopProductsPicker"></mat-datepicker-toggle>
-                                        <mat-date-range-picker #dailyTopProductsPicker></mat-date-range-picker>
+                                    <mat-date-range-input [rangePicker]="detailedDailySalesDateRangePicker">
+                                        <input matStartDate [formControl]="detailedDailySalesDateInputStart" placeholder="mm/dd/yyyy" >
+                                        <input matEndDate [formControl]="detailedDailySalesDateInputEnd" placeholder="mm/dd/yyyy">
+                                    </mat-date-range-input>
+                                    <mat-datepicker-toggle matSuffix [for]="detailedDailySalesDateRangePicker"></mat-datepicker-toggle>
+                                    <mat-date-range-picker #detailedDailySalesDateRangePicker></mat-date-range-picker>
                                     
-                                        <mat-error *ngIf="range.controls.start.hasError('matStartDateInvalid')">Invalid start date</mat-error>
-                                        <mat-error *ngIf="range.controls.end.hasError('matEndDateInvalid')">Invalid end date</mat-error>
-                                    </mat-form-field> -->
+                                        <!-- <mat-error *ngIf="range.controls.start.hasError('matStartDateInvalid')">Invalid start date</mat-error>
+                                        <mat-error *ngIf="range.controls.end.hasError('matEndDateInvalid')">Invalid end date</mat-error> -->
+                                    </mat-form-field>
                                 </div>
                                 <div class="flex flex-col flex-auto mt-2 overflow-x-auto">
                                     <table
@@ -356,7 +357,7 @@
                                             <td
                                                 mat-cell
                                                 *matCellDef="let detailedDailySale">
-                                                {{detailedDailySale.subTotal | currency: '$'}}
+                                                {{detailedDailySale.subTotal | currency: currencySymbol}}
                                             </td>
                                         </ng-container>
 
@@ -370,7 +371,7 @@
                                             <td
                                                 mat-cell
                                                 *matCellDef="let detailedDailySale">
-                                                {{detailedDailySale.serviceCharge | currency:'$'}}
+                                                {{detailedDailySale.serviceCharge | currency:currencySymbol}}
                                             </td>
                                         </ng-container>
 
@@ -384,7 +385,7 @@
                                             <td
                                                 mat-cell
                                                 *matCellDef="let detailedDailySale">
-                                                {{detailedDailySale.deliveryCharge | currency:'$'}}
+                                                {{detailedDailySale.deliveryCharge | currency:currencySymbol}}
                                             </td>
                                         </ng-container>
 
@@ -398,7 +399,7 @@
                                             <td
                                                 mat-cell
                                                 *matCellDef="let detailedDailySale">
-                                                {{detailedDailySale.commission | currency:'$'}}
+                                                {{detailedDailySale.commission | currency:currencySymbol}}
                                             </td>
                                         </ng-container>
 
@@ -412,7 +413,7 @@
                                             <td
                                                 mat-cell
                                                 *matCellDef="let detailedDailySale">
-                                                {{detailedDailySale.total | currency:'$'}}
+                                                {{detailedDailySale.total | currency:currencySymbol}}
                                             </td>
                                         </ng-container>
 
@@ -439,20 +440,21 @@
                             <div class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 pb-0 bg-card shadow rounded-2xl overflow-hidden">
                                 <div class="flex flex-wrap justify-between item-center w-full">
                                     <div class="text-lg font-medium tracking-tight my-auto leading-6 truncate">Daily Top Products Details</div>
-                                    <!-- <mat-form-field 
+                                    <mat-form-field 
                                         class="fuse-mat-no-subscript w-full sm:w-72"
                                         appearance="fill"
                                     >
-                                        <mat-date-range-input [formGroup]="detailedDailySalesDateRange" [rangePicker]="detailedDailySalesPicker">
-                                            <input matStartDate formControlName="start" placeholder="mm/dd/yyyy" [value]="detailedDailySalesDateRange.start">
-                                            <input matEndDate formControlName="end" placeholder="mm/dd/yyyy" [value]="detailedDailySalesDateRange.end">
-                                        </mat-date-range-input>
-                                        <mat-datepicker-toggle matSuffix [for]="detailedDailySalesPicker"></mat-datepicker-toggle>
-                                        <mat-date-range-picker #detailedDailySalesPicker></mat-date-range-picker>
+                                    <mat-date-range-input [rangePicker]="dailyTopProductsDateRangePicker">
+                                        <input matStartDate [formControl]="dailyTopProductsDateInputStart" placeholder="mm/dd/yyyy" >
+                                        <input matEndDate [formControl]="dailyTopProductsDateInputEnd" placeholder="mm/dd/yyyy">
+                                    </mat-date-range-input>
+                                    <mat-datepicker-toggle matSuffix [for]="dailyTopProductsDateRangePicker"></mat-datepicker-toggle>
+                                    <mat-date-range-picker #dailyTopProductsDateRangePicker></mat-date-range-picker>
+
                                     
-                                        <mat-error *ngIf="range.controls.start.hasError('matStartDateInvalid')">Invalid start date</mat-error>
-                                        <mat-error *ngIf="range.controls.end.hasError('matEndDateInvalid')">Invalid end date</mat-error>
-                                    </mat-form-field> -->
+                                        <!-- <mat-error *ngIf="range.controls.start.hasError('matStartDateInvalid')">Invalid start date</mat-error>
+                                        <mat-error *ngIf="range.controls.end.hasError('matEndDateInvalid')">Invalid end date</mat-error> -->
+                                    </mat-form-field>
                                 </div>
                                 <div class="flex flex-col flex-auto mt-2 overflow-x-auto">
                                     <table

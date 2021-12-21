@@ -242,7 +242,7 @@ export class DashboardService
     }
 
     getDetailedDailySales(id: string, page: number = 0, size: number = 10, sort: string = 'created', order: 'asc' | 'desc' | '' = 'asc', 
-                        search: string = '', from: string = this.fromDate, to: string = this.todayDate):
+                        from: string = this.fromDate, to: string = this.todayDate):
     Observable<{ pagination: DetailedDailySalesPagination; detailedDailySales: DetailedDailySales[] }>
     {
         let reportService = this._apiServer.settings.apiServer.reportService;
@@ -277,7 +277,7 @@ export class DashboardService
                         startIndex: response["data"].pageable.offset,
                         endIndex: response["data"].pageable.offset + response["data"].numberOfElements - 1
                     };
-                    this._logging.debug("Response from StoresService (getDailyTopProducts pagination)",_pagination);
+                    this._logging.debug("Response from StoresService (getDetailedDailySales pagination)",_pagination);
 
                     this._detailedDailySalesPagination.next(_pagination);
                     this._detailedDailySales.next(response["data"].content);
@@ -322,7 +322,7 @@ export class DashboardService
                         endIndex: response["data"].pageable.offset + response["data"].numberOfElements - 1
                     };
 
-                    this._logging.debug("Response from StoresService (getDailyTopProducts pagination)",_pagination);
+                    this._logging.debug("Response from StoresService (getSummarySales pagination)",_pagination);
 
                     this._summarySalesPagination.next(_pagination);
                     this._summarySales.next(response["data"].content);

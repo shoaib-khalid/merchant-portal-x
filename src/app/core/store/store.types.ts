@@ -40,6 +40,15 @@ export interface Store
     completed?: number;
     currentStep?: number;
     storeAsset?: StoreAssets;
+    regionCountry?: {
+        currency?: string;
+        currencyCode: string;
+        currencySymbol: string;
+        id: string;
+        name: string;
+        region: string;
+        timezone: string;
+    }
 }
 
 export interface CreateStore
