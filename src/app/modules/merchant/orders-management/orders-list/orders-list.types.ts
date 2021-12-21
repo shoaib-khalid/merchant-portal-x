@@ -20,6 +20,7 @@ export interface Order
     paymentType: string;
     appliedDiscount: number;
     deliveryDiscount: number;
+    deliveryType: string;
     appliedDiscountDescription: string;
     deliveryDiscountDescription: string;
     orderShipmentDetail: {
@@ -92,4 +93,18 @@ export interface OrdersListPagination
     lastPage: number;
     startIndex: number;
     endIndex: number;
+}
+
+export interface OrdersCountSummary
+{
+  label?: string;
+  completionStatus: string;
+  count: number;
+}
+
+export interface DeliveryProviderDetails
+{
+  id: string;
+  name: string;
+  providerImage: string;
 }

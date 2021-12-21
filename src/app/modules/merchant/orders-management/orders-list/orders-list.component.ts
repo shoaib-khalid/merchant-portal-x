@@ -4,7 +4,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { merge, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { OrdersListService } from 'app/modules/merchant/orders-management/orders-list/orders-list.service';
-import { OrdersListPagination } from 'app/modules/merchant/orders-management/orders-list/orders-list.types'
+import { Order, OrdersCountSummary, OrdersListPagination } from 'app/modules/merchant/orders-management/orders-list/orders-list.types'
 import { MatPaginator } from '@angular/material/paginator';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
@@ -12,6 +12,8 @@ import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { OrderDetailsComponent } from 'app/modules/merchant/orders-management/order-details/order-details.component';
 import { ChooseProviderDateTimeComponent } from 'app/modules/merchant/orders-management/choose-provider-datetime/choose-provider-datetime.component';
 import { Router } from '@angular/router';
+import { Store } from 'app/core/store/store.types';
+import { StoresService } from 'app/core/store/store.service';
 
 @Component({
     selector       : 'orders-list',
@@ -26,10 +28,12 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     @ViewChild('selectFilter', {read: MatSelect})  _filter: MatSelect;
 
 
-    orders: any;
     openTab: string = "HISTORY";
-    displayStatuses: any = [];
-    completionStatuses: any = [];
+
+    store: Store;
+
+    orderCountSummary: OrdersCountSummary[];
+    _orderCountSummary: any;
 
     pagination: OrdersListPagination;
     isLoading: boolean = false;
@@ -40,7 +44,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     range: any;
 
     recentTransactionsDataSource: MatTableDataSource<any> = new MatTableDataSource();
-    recentTransactionsTableColumns: string[] = ['transactionId', 'date', 'name', 'amount', 'status', 'details', 'action'];
+    recentTransactionsTableColumns: string[] = ['transactionId', 'date', 'name', 'amount', 'status', 'action'];
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     /**
@@ -49,6 +53,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _orderslistService: OrdersListService,
+        private _storesService: StoresService,
         public _dialog: MatDialog,
         private _router: Router,
         )
@@ -77,8 +82,6 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((data) => {
 
-                console.log("here", data)
-
                 // Store the table data
                 this.recentTransactionsDataSource.data = data;
 
@@ -99,68 +102,51 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             });
 
-        // completion statuses from backend
-        this.completionStatuses = [
-            {
-                id: "PAYMENT_CONFIRMED",
-                label: "New",
-                nextId: "BEING_PREPARED",
-                nextLabel: "Process",
-                nextLabelBtn: "Process",
-            },
-            {
-                id: "RECEIVED_AT_STORE",
-                label: "New",
-                nextId: "BEING_PREPARED",
-                nextLabel: "Process",
-                nextLabelBtn: "Process",
-            },
-            {
-                id: "BEING_PREPARED",
-                label: "Process",
-                nextId: "AWAITING_PICKUP",
-                nextLabel: "Ready for Pickup",
-                nextLabelBtn: "Ready",
-            },
-            {
-                id: "AWAITING_PICKUP",
-                label: "Ready for Pickup",
-                nextId: "BEING_DELIVERED",
-                nextLabel: "Sent",
-                nextLabelBtn: "Sent",
-            },
-            {
-                id: "BEING_DELIVERED",
-                label: "Send",
-                nextId: "DELIVERED_TO_CUSTOMER",
-                nextLabel: "Received",
-                nextLabelBtn: "Received",
-            },
-            {
-                id: "DELIVERED_TO_CUSTOMER",
-                label: "Delivered",
-                nextId: null,
-                nextLabel: null,
-                nextLabelBtn: null,
-            },
-            {
-                id: "HISTORY",
-                label: "History",
-                nextId: null,
-                nextLabel: null,
-                nextLabelBtn: null,
-            }
+        this._orderCountSummary = [
+            { id: "NEW", label: "New", completionStatus: ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE"], count: 0 },
+            { id: "PROCESS", label: "Process", completionStatus: "BEING_PREPARED", count: 0 },
+            { id: "AWAITING_PICKUP", label: "Awaiting Pickup", completionStatus: "AWAITING_PICKUP", count: 0 },
+            { id: "SENT_OUT", label: "Sent Out", completionStatus: "BEING_DELIVERED", count: 0 },
+            { id: "DELIVERED", label: "Delivered", completionStatus: "DELIVERED_TO_CUSTOMER", count: 0 },
+            { id: "CANCELLED", label: "Cancelled", completionStatus: "REJECTED_BY_STORE", count: 0 },
+            { id: "HISTORY", label: "History", completionStatus: ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE", "BEING_PREPARED", "AWAITING_PICKUP", "BEING_DELIVERED", "DELIVERED_TO_CUSTOMER", "REJECTED_BY_STORE"], count: 0 }
         ];
 
-        // display statuses is view at frontend
-        this.displayStatuses = ["NEW","BEING_PREPARED","AWAITING_PICKUP","BEING_DELIVERED","DELIVERED_TO_CUSTOMER","HISTORY"];
+        this._orderslistService.ordersCountSummary$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((response) => {
+
+                this.orderCountSummary = response;
+
+                this._orderCountSummary.forEach((item,i) => {
+
+                    // if have multiple completionStatus
+                    if (Array.isArray(item.completionStatus) && item.completionStatus.length > 1) {
+                        item.completionStatus.forEach((element, j) => {
+                            let index = this.orderCountSummary.findIndex((obj => obj.completionStatus === item.completionStatus[j]));
+                            if (index > -1) {
+                                this._orderCountSummary[i].count = this._orderCountSummary[i].count + this.orderCountSummary[index].count;
+                            }
+                        });
+                    } else {
+                        let index = this.orderCountSummary.findIndex((obj => obj.completionStatus === item.completionStatus));
+                        if (index > -1) {
+                            this._orderCountSummary[i].count = this.orderCountSummary[index].count;
+                        }
+                    }
+                });
+            });
+            
+        // get store
+        this._storesService.store$.subscribe((response) => {
+            this.store = response;
+        })
 
         this.filterControl.valueChanges
         .pipe(
             takeUntil(this._unsubscribeAll),
             debounceTime(300),
             switchMap((query) => {
-                console.log("Query filter: ",query)
                 this.isLoading = true;
                 return this._orderslistService.getOrders(0, 10, 'name', 'asc', query, '', '', '', this.tabControl.value);
             }),
@@ -175,7 +161,6 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
             takeUntil(this._unsubscribeAll),
             debounceTime(300),
             switchMap((query) => {
-                console.log("Query tab: ",query)
                 this.isLoading = true;
                 //kena ubah
                 return this._orderslistService.getOrders(0, 10, 'name', 'asc', '', '', '', '', query);
@@ -260,15 +245,13 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
         this.openTab = displayStatuses;
 
         let currentOpenTab = displayStatuses;
-        if (displayStatuses === "HISTORY") {
-            currentOpenTab = "";
+        if (displayStatuses !== "HISTORY") {
+            this.recentTransactionsTableColumns = ['transactionId', 'date', 'name', 'amount', 'action'];
+        } else {
+            this.recentTransactionsTableColumns = ['transactionId', 'date', 'name', 'amount', 'status', 'action'];
         }
 
-        if (displayStatuses === "NEW") {
-            currentOpenTab = "PAYMENT_CONFIRMED";
-        }
-
-        this.tabControl.setValue(currentOpenTab);
+        this.tabControl.setValue(this._orderCountSummary.find(item => item.id === this.openTab).completionStatus);
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -283,49 +266,50 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
         this._filter.open();
     }
 
-    updateStatus(orderId, nextCompletionStatus){
-        this._orderslistService.updateOrder(orderId,nextCompletionStatus)
-            .subscribe((response) => {
-                console.log("OK");
+    updateStatus(order: Order, nextCompletionStatus){
 
-                this._orderslistService.updateCompletion(orderId, nextCompletionStatus);
+        let completionBody = {
+            nextCompletionStatus: nextCompletionStatus
+        };
+        
+        // First check the order delivery type => Only scheduled to allow choose time
+        if (order.deliveryType === "SCHEDULED") {
+            this._orderslistService.getDeliveryProviderDetails(order.orderShipmentDetail.deliveryProviderId)
+                .subscribe(response => {
+                    const dialogRef = this._dialog.open(ChooseProviderDateTimeComponent, { disableClose: true, data: response });
+                    dialogRef.afterClosed().subscribe(result => {
+                        if (result === "cancelled" || !result.date || !result.time){
+                            console.warn("Process cancelled")
+                        } else {
+                            completionBody["date"] = result.date;
+                            completionBody["time"] = result.time;
 
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            },
-            (response) => {
-                console.log("NOT OK");
-                // // Set the alert
-                // this.alert = {
-                //     type   : 'error',
-                //     message: 'Something went wrong, please try again.'
-                // };
-
-                // // Show the alert
-                // this.alert = true;
-            });
-    }
-
-    getNextCompletionStatus(id){
-        let index = this.completionStatuses.findIndex(item => item.id === id);
-
-        if (index > -1){
-            return this.completionStatuses[index];
+                            this._orderslistService.updateOrder(order.id, completionBody)
+                                .subscribe((response) => {                    
+                                    this._orderslistService.updateCompletion(order.id, nextCompletionStatus).subscribe(() => {
+                                    });
+                    
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                });
+                        }
+                    });
+                });
         } else {
-            return "Undefined";
-        } 
+            this._orderslistService.updateOrder(order.id, completionBody)
+                .subscribe((response) => {
+    
+                    this._orderslistService.updateCompletion(order.id, nextCompletionStatus).subscribe(() => {
+                    });
+    
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                });
+        }
     }
 
     viewDetails(orderId){
-        console.log("orderId",orderId)
         this._router.navigateByUrl('/orders/'+orderId)
-    }
-
-    chooseProviderDateTime(){
-        const dialogRef = this._dialog.open(ChooseProviderDateTimeComponent, { disableClose: true });
-        dialogRef.afterClosed().subscribe(result => {
-            console.log(result);
-        });
     }
 
 }

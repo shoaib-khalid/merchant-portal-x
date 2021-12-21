@@ -1,5 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { DialogData } from '../../social-media/flow-builder/components/action-dialog/action-dialog.component';
 
 @Component({
   selector: 'app-choose-provider-datetime',
@@ -7,7 +8,6 @@ import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog
 })
 export class ChooseProviderDateTimeComponent implements OnInit {
 
-  country:any="";
   image:any;
   showButton: boolean = false;
   date: string;
@@ -17,6 +17,7 @@ export class ChooseProviderDateTimeComponent implements OnInit {
 
   constructor(
     public dialogRef: MatDialogRef<ChooseProviderDateTimeComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: DialogData
   ) { }
 
   ngOnInit(): void {
@@ -27,8 +28,8 @@ export class ChooseProviderDateTimeComponent implements OnInit {
     this.mindate = yy + '-' + mm + '-' + dd;
 
     this.image = {
-      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/1665px-No-Image-Placeholder.svg.png",
-      atl: "No Image"
+      src: this.data["providerImage"],
+      atl: this.data["name"]
     };
   }
 
@@ -37,12 +38,11 @@ export class ChooseProviderDateTimeComponent implements OnInit {
   }
 
   cancelPickupDateTime(){
-    this.dialogRef.close();
+    this.dialogRef.close("cancelled");
   }
   
   checkDate(){
-    
-    if (!this.date) {
+    if (!this.date || !this.time) {
 
     } else {
       this.showButton = true;
