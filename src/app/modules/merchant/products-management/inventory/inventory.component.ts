@@ -9,7 +9,7 @@ import { merge, Observable, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, ProductCategory, ProductPagination, ProductPackageOption } from 'app/core/product/inventory.types';
+import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, ProductCategory, ProductPagination, ProductPackageOption, ProductAssets } from 'app/core/product/inventory.types';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { Store } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
@@ -83,6 +83,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     filteredProductVariants: ProductVariant[] = [];
     selectedProductVariants: ProductVariant;
 
+    //product inventories
     productInventories: FormArray;
     product_inventories:any=[];
 
@@ -118,6 +119,10 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     imagesFile: any = [];
     currentImageIndex: number = 0;
     imagesEditMode: boolean = false;
+
+    productAssets: FormArray;
+    _productAssets:any=[];
+    displayProductAssets:any[];
 
     // sku, price & quantity 
     // reason these 3 not in formbuilder is because it's not part of product but 
@@ -442,6 +447,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
                 // Fill the form
                 this.selectedProductForm.patchValue(product);
+                console.log("Check patch form value lepas letak prodyct",this.selectedProductForm.value);
+
             
 
                 // Fill the form for SKU , Price & Quantity productInventories[0]
@@ -470,6 +477,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
                 // reset selectedVariantCombos to empty 
                 this.selectedVariantCombos = [];
+
+                this._productAssets=[];
 
                 // initialise empty variantItems
                 // this variantItems only for front end use to display variant combination
@@ -520,18 +529,44 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                         }
                     }
                 });
-
     
                 this.product_inventories = this.selectedProduct.productInventories;
                 console.log('this.product_inventories',this.product_inventories);
+                console.log('this.selectedVariantCombos',this.selectedVariantCombos);
+
 
                 this.product_inventories.forEach(item=>{
                     this.productInventories = this.selectedProductForm.get('productInventories') as FormArray;
                     this.productInventories.push(this._formBuilder.group(item));
                 });
 
+                const arr2= (this.selectedProduct.productAssets).filter((item) => 
+                    item.itemCode !== null
+                
+                );
+
+                const arr1 = this.selectedVariantCombos;
+
+                const map = new Map();
+                arr1.forEach(item => map.set(item.itemCode, item));
+                arr2.forEach(item => map.set(item.itemCode, {...map.get(item.itemCode), ...item}));
+                const mergedArr = Array.from(map.values());
+
+                // console.log(':::::',mergedArr);   
+                this.displayProductAssets=mergedArr;          
+
+
+                (this.selectedProductForm.get('productAssets') as FormArray).clear();//reset form array
+                // this._productAssets = this.selectedProduct.productAssets;                
+                console.log('this._productAssets',this._productAssets);
+
+                this._productAssets.forEach(item=>{
+                    this.productAssets = this.selectedProductForm.get('productAssets') as FormArray;
+                    this.productAssets.push(this._formBuilder.group(item));
+                });
+
+
                 //console.log("this.product_inventories",this.product_inventories);
-                console.log("Check patch form value",this.selectedProductForm.value);
 
                 // Add the category
                 this.selectedProduct.categoryId = product.categoryId;
@@ -570,6 +605,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                             this.productsCombos$ = response["data"];
                         });
                 }
+
+                console.log("Check patch form value",this.selectedProductForm.value);
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -901,6 +938,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     closeDetails(): void
     {
         this.selectedProduct = null;
+        (this.selectedProductForm.get('productInventories') as FormArray).clear();//reset form array
+
     }
 
     // --------------------------------------
@@ -1560,13 +1599,14 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         let index = (this.selectedProduct.productInventories).findIndex(item => item.itemCode === itemCode);
         this.selectedProductInventory = this.selectedProduct.productInventories[index];
 
+        this.indexOfProductInventories=index;
         
         console.log("index : ",index)
         console.log("itemCode : ",itemCode);
         console.log("this.variants : ",this.selectedProduct.productInventories)
         console.log("this.variants[index] : ",this.selectedProduct.productInventories[index])
         console.log("this.selectedItemCode : ",this.selectedProductInventory);
-        console.log("this.indexOfProductInventories",this.indexOfProductInventories=index);
+        console.log("this.indexOfProductInventories",this.indexOfProductInventories);
         
         // Get the variant details by id
         // this._inventoryService.getProductById(variantId)

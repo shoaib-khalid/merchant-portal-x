@@ -1130,13 +1130,12 @@
                                                                             </div>
                                                                         </div>
                                                                         <div class="grid">
-                                                                            <div formArrayName="productInventories" style.visibility='hidden'>
                                                                                 
-                                                                                    <ng-container *ngIf="selectedProductInventory?.itemCode === variantCombo.itemCode">
-                                                                                        <div class="form-group" [formGroupName]="indexOfProductInventories" *ngTemplateOutlet="rowVariantDetailsTemplate; context: {$implicit: variantCombo}"></div>                                                                                        <ng-container></ng-container>
-                                                                                    </ng-container>
+                                                                            <ng-container *ngIf="selectedProductInventory?.itemCode === variantCombo.itemCode">
+                                                                                <ng-container *ngTemplateOutlet="rowVariantDetailsTemplate; context: {$implicit: variantCombo}">       
+                                                                                </ng-container>
+                                                                            </ng-container>
 
-                                                                            </div>
                                                                         </div>
                                                                     </ng-container>
                                                                 </ng-container>
@@ -1147,8 +1146,9 @@
                                                     <ng-template
                                                         #rowVariantDetailsTemplate
                                                         let-variantCombo>
-                                                        <div class="shadow-lg overflow-hidden">
-                                                            <div class="flex border-b">
+                                                        <div formArrayName="productInventories" class="shadow-lg overflow-hidden">
+                                                            <div [formGroupName]="indexOfProductInventories" 
+                                                            class="flex border-b">
                                                                 <div class="flex flex-col sm:flex-row p-8 w-full">
                                                                     <div class="flex flex-auto flex-wrap">
                                                                         <!-- Image-->
@@ -1158,10 +1158,10 @@
                                                                                 <div class="flex flex-col items-center">
                                                                                     <!-- Image Frame -->
                                                                                     <div *ngIf="!imagesEditMode" class="w-32 h-44 border rounded overflow-hidden">
-                                                                                        <ng-container *ngIf="images.length; else noImage">
+                                                                                        <ng-container *ngIf="displayProductAssets.length; else noImage">
                                                                                             <img
-                                                                                                class="w-full h-full object-cover"
-                                                                                                [src]="images[currentImageIndex]">
+                                                                                                class="w-full h-full object-cover" 
+                                                                                                [src]="displayProductAssets[indexOfProductInventories].url">
                                                                                         </ng-container>
                                                                                         <ng-template #noImage>
                                                                                             <div
@@ -1277,7 +1277,7 @@
                                                                                 <mat-select
                                                                                     class="border border-gray-300 w-32 px-2 py-2 rounded"
                                                                                     formControlName="status"
-                                                                                    [value]="'status'"
+                                                                                    [value]="variantCombo.status"
                                                                                     (selectionChange)="selectedProductForm.get('status').value = $event.value"
                                                                                     #statusSelector="matSelect"
                                                                                     >
@@ -1318,7 +1318,8 @@
                                                                                 <input
                                                                                     matInput
                                                                                     formControlName="price"
-                                                                                    [value]="variantCombo.price">
+                                                                                    [value]="variantCombo.price"
+                                                                                    type="number">
                                                                             </mat-form-field>                                                                            
                                                                         </div>
 
