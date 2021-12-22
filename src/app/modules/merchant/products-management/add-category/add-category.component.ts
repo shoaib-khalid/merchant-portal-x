@@ -1,8 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit,Inject } from '@angular/core';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { InventoryService } from 'app/core/product/inventory.service';
+import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+
 
 @Component({
   selector: 'dialog-add-category',
@@ -26,6 +30,8 @@ export class AddCategoryComponent implements OnInit {
     referenceId: any;
 
     addCategoryForm: FormGroup;
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
+
 
     // product assets
     thumbnailUrl: any = [];
@@ -36,7 +42,9 @@ export class AddCategoryComponent implements OnInit {
     public dialogRef: MatDialogRef<AddCategoryComponent>,
     private _jwt: JwtService,
     private _changeDetectorRef: ChangeDetectorRef,
+    private _inventoryService: InventoryService,
     private _formBuilder: FormBuilder,
+    @Inject(MAT_DIALOG_DATA) public data: MatDialog
   ) { }
 
 // -----------------------------------------------------------------------------------------------------
@@ -56,10 +64,9 @@ export class AddCategoryComponent implements OnInit {
 
       // Create the selected product form
       this.addCategoryForm = this._formBuilder.group({
-        id               : [''],
         name             : ['',[Validators.required]],
-        storeId          : [''],
-        thumbnailUrl     : [[]]
+        thumbnailUrl     : [[]],
+        imagefiles:[[]],
     });
 
   }
@@ -70,8 +77,24 @@ export class AddCategoryComponent implements OnInit {
 
   addNewCategory() {
     this.addCategoryForm.get('thumbnailUrl').patchValue(this.thumbnailUrl);
+    this.addCategoryForm.get('imagefiles').patchValue(this.imagesFile);
+    console.log('this.addCategoryForm.value::',this.addCategoryForm.value);
+
+    // console.log('checkform',this.addCategoryForm.value);
+    //      this._inventoryService.createCategory(this.addCategoryForm.value)
+    //             .pipe(takeUntil(this._unsubscribeAll))
+    //             .subscribe((response) => {
+    //                 response["data"];
+    //                 console.log('response["data"]',response["data"]);
+    
+                    
+    //             }); 
+    
+
+
     this.dialogRef.close(this.addCategoryForm.value);
   }
+
   cancelCreateCategory(){
     this.dialogRef.close({ status: false });
   }

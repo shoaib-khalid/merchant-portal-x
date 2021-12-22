@@ -235,20 +235,26 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
     {
         const dialogRef = this._dialog.open(AddCategoryComponent, { disableClose: true });
         dialogRef.afterClosed().subscribe(result => {
-            const category = {
-                // name,
-                // storeId: this.storeId$,
-                // parentCategoryId,
-                // thumbnailUrl
+            let category = {
+                name:result.name,
+                storeId: this.storeId$,
+                parentCategoryId: null,
+                thumbnailUrl:null,
+
             };
+            const formData = new FormData();
+            formData.append("file", result.imagefiles[0]);
+            console.log("result>>>>>>",result);
     
             // Create category on the server
-            // this._inventoryService.createCategory(category)
-            //     .pipe(takeUntil(this._unsubscribeAll))
-            //     .subscribe((response) => {
+            this._inventoryService.createCategory(category,formData)
+                .pipe(takeUntil(this._unsubscribeAll))
+                .subscribe((response) => {
+                    response["data"];
+                    console.log('response["data"]',response["data"]);
     
                     
-            //     });            
+                });            
         });
     }
 
