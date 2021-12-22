@@ -7,6 +7,8 @@ import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service';
 import { DailyTopProducts, DailyTopProductsPagination, 
          DetailedDailySales, DetailedDailySalesPagination, 
+         Settlement, 
+         SettlementPagination, 
          SummarySales, SummarySalesPagination, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly 
        } from './dashboard.types';
 
@@ -34,6 +36,9 @@ export class DashboardService
     private _totalSalesDaily: BehaviorSubject<TotalSalesDaily[] | null> = new BehaviorSubject(null);
     private _totalSalesWeekly: BehaviorSubject<TotalSalesWeekly[] | null> = new BehaviorSubject(null);
     private _totalSalesMonthly: BehaviorSubject<TotalSalesMonthly[] | null> = new BehaviorSubject(null);
+
+    private _settlement: BehaviorSubject<Settlement[] | null> = new BehaviorSubject(null);
+    private _settlementPagination: BehaviorSubject<SettlementPagination | null> = new BehaviorSubject(null);
 
     fromDate: string;
     todayDate: string;
@@ -102,7 +107,7 @@ export class DashboardService
     }
 
     /**
-     * GHtter for detailedDailySales
+     * Setter for detailedDailySales
      *
      * @param value
      */
@@ -113,7 +118,7 @@ export class DashboardService
     }
 
     /**
-     * Getter for detailedDailySales
+     * Getter for summarySales
      *
     */
     get summarySales$(): Observable<SummarySales[]>
@@ -122,7 +127,7 @@ export class DashboardService
     }
 
     /**
-     * Setter for detailedDailySales
+     * Setter for summarySales
      *
      * @param value
      */
@@ -160,6 +165,34 @@ export class DashboardService
      {
          return this._totalSalesMonthly.asObservable();
      }
+
+     /**
+     * Getter for settlement
+     *
+    */
+    get settlement$(): Observable<Settlement[]>
+    {
+        return this._settlement.asObservable();
+    }
+    
+    /**
+     * Getter for pagination
+     */
+    get settlementPagination$(): Observable<SettlementPagination>
+    {
+        return this._settlementPagination.asObservable();
+    }
+
+    /**
+     * Setter for settlement
+     *
+     * @param value
+     */
+    set settlement(value: Settlement[])
+    {
+        // Store the value
+        this._settlement.next(value);
+    }
 
     /**
      * Getter for storeId
@@ -354,6 +387,50 @@ export class DashboardService
                     this._totalSalesDaily.next(response["dailySales"]);
                     this._totalSalesWeekly.next(response["weeklySales"]);
                     this._totalSalesMonthly.next(response["monthlySales"]);
+                })
+            );
+    }
+
+    getSettlement(id: string, page: number = 0, size: number = 10, sort: string = 'created', order: 'cycleStartDate' | 'cycleEndDate' | '' = 'cycleStartDate', 
+                        from: string = this.fromDate, to: string = this.todayDate):
+    Observable<{ pagination: SettlementPagination; settlement: Settlement[] }>
+    {
+        let reportService = this._apiServer.settings.apiServer.reportService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                page: '' + page,
+                pageSize: '' + size,
+                sortBy: '' + sort,
+                sortingOrder: '' + order,
+                from: '' + from,
+                to: '' + to,
+            }
+        };
+        
+        return this._httpClient.get<{ pagination: SettlementPagination; settlement: Settlement[] }>
+            (reportService + '/store/' + id + '/settlement', header)
+            .pipe(
+                tap((response) => {
+                    
+                    this._logging.debug("Response from ReportService (getSettlement)", response);
+
+                    // Pagination
+                    let _pagination = {
+                        length: response["data"].totalElements,
+                        size: response["data"].size,
+                        page: response["data"].number,
+                        lastPage: response["data"].totalPages,
+                        startIndex: response["data"].pageable.offset,
+                        endIndex: response["data"].pageable.offset + response["data"].numberOfElements - 1
+                    };
+                    this._logging.debug("Response from StoresService (getSettlement pagination)", _pagination);
+
+                    this._settlementPagination.next(_pagination);
+                    this._settlement.next(response["data"].content);
                 })
             );
     }
