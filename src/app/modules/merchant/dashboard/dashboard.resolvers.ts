@@ -193,4 +193,46 @@ export class TotalSalesResolver implements Resolve<any>
     {
         return this._dashboardService.getTotalSales(this.storeId$);
     }
+
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class SettlementResolver implements Resolve<any>
+{
+    /**
+     * Constructor
+     */
+    constructor(private _dashboardService: DashboardService)
+    {
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Accessors
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Getter for storeId
+     */
+
+    get storeId$(): string
+    {
+        return localStorage.getItem('storeId') ?? '';
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Resolver
+     *
+     * @param route
+     * @param state
+     */
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
+    {
+        return this._dashboardService.getSettlement(this.storeId$);
+    }
 }

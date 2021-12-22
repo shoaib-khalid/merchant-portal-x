@@ -117,3 +117,36 @@ export interface TotalSalesTotal
     total: number;
     completionStatus: string;
 }
+
+////
+
+export interface Settlement
+{
+    id: string;
+    cycle: number;
+    storeId: string;
+    clientId: string;
+    clientName: string;
+    storeName: string;
+    totalTransactionValue: number;
+    totalServiceFee: number;
+    totalCommisionFee: number;
+    totalDeliveryFee: number;
+    totalRefund: number;
+    totalStoreShare: number;
+    settlementStatus: string;
+    cycleStartDate: string;
+    cycleEndDate: string;
+    settlementDate: string;
+    referenceId: string;
+}
+
+export interface SettlementPagination
+{
+    length: number;
+    size: number;
+    page: number;
+    lastPage: number;
+    startIndex: number;
+    endIndex: number;
+}

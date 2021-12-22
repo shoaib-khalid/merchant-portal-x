@@ -7,7 +7,7 @@ import { ApexOptions } from 'ng-apexcharts';
 import { DashboardService } from 'app/modules/merchant/dashboard/dashboard.service';
 import { Store, StoreRegionCountries } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
-import { DailyTopProducts, DailyTopProductsPagination, DetailedDailySales, DetailedDailySalesPagination, SummarySales, SummarySalesPagination, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly } from './dashboard.types';
+import { DailyTopProducts, DailyTopProductsPagination, DetailedDailySales, DetailedDailySalesPagination, Settlement, SettlementPagination, SummarySales, SummarySalesPagination, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly } from './dashboard.types';
 import { items } from 'app/mock-api/apps/file-manager/data';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { formatDate } from '@angular/common';
@@ -23,6 +23,7 @@ export class DashboardComponent implements OnInit, OnDestroy
     @ViewChild("dailyTopProductsPaginator", {read: MatPaginator}) private _dailyTopProductsPaginator: MatPaginator;
     @ViewChild("detailedDailySalesPaginator", {read: MatPaginator}) private _detailedDailySalesPaginator: MatPaginator;
     @ViewChild("summarySalesPaginator", {read: MatPaginator}) private _summarySalesPaginator: MatPaginator;
+    @ViewChild("settlementPaginator", {read: MatPaginator}) private _settlementPaginator: MatPaginator;
     
     store: Store;
     stores: Store[];
@@ -78,6 +79,19 @@ export class DashboardComponent implements OnInit, OnDestroy
     detailedDailySalesDateInputStart: FormControl = new FormControl();
     detailedDailySalesDateInputEnd: FormControl = new FormControl();
 
+    // -------------------------------
+    // Settlements Properties
+    // -------------------------------
+
+    settlementCol = ["payoutDate","startDate","cutoffDate","grossAmount","serviceCharges","deliveryCharges","commission","netAmount"]
+    settlementRow = [];
+    settlementPagination: SettlementPagination;
+    settlementDateRange: any = {
+        start : null,
+        end: null
+    }
+    settlementDateInputStart: FormControl = new FormControl();
+    settlementDateInputEnd: FormControl = new FormControl();
 
 
     completeCompletionStatus = ["DELIVERED_TO_CUSTOMER"];
@@ -321,6 +335,41 @@ export class DashboardComponent implements OnInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             });      
         
+
+        // Get the Settlement
+        this._dashboardService.settlement$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((settlement: Settlement[])=>{
+                this.settlementRow = [];
+                settlement.forEach(items => {
+                    this.settlementRow.push({ 
+                        payoutDate: items.settlementDate,
+                        startDate: items.cycleStartDate,
+                        cutoffDate: items.cycleEndDate,
+                        grossAmount: items.totalTransactionValue,
+                        serviceCharges: items.totalServiceFee,
+                        deliveryCharges: items.totalDeliveryFee,
+                        commission: items.totalCommisionFee,
+                        netAmount: items.totalStoreShare
+                    });
+                });
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });    
+        
+        // Get the Settlement Pagination
+        this._dashboardService.settlementPagination$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((pagination: SettlementPagination) => {
+
+                // Update the pagination
+                this.settlementPagination = pagination;
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+
         // Sum up Total Sales Total
         this.totalSalesTotalRow.forEach(a => {
             
@@ -621,6 +670,61 @@ export class DashboardComponent implements OnInit, OnDestroy
                 })
             )
             .subscribe();
+
+        // -------------------------------
+        // Settlement Date Range Input
+        // -------------------------------
+
+        // Subscribe to start date input field value changes 
+        this.settlementDateInputStart.valueChanges
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((query) => {
+                    this.isLoading = true;
+                    
+                    // reformat date 
+                    const format = 'yyyy-MM-dd';
+                    const myDate = query;
+                    const locale = 'en-MY';
+                    const formattedDate = formatDate(myDate, format, locale);
+                    
+                    this.settlementDateRange.start = formattedDate;
+                        
+                    // do nothing
+                    return of(true);
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
+
+        // Subscribe to end date input field value changes
+        this.settlementDateInputEnd.valueChanges
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((query) => {
+                    this.isLoading = true;
+
+                    // reformat date 
+                    const format = 'yyyy-MM-dd';
+                    const myDate = query;
+                    const locale = 'en-MY';
+                    const formattedDate = formatDate(myDate, format, locale);
+                    
+                    this.settlementDateRange.end = formattedDate;
+
+                    return this._dashboardService.getSettlement(this.storeId$, 0, 10, 'created', 'cycleStartDate',
+                                                                            this.settlementDateRange.start, this.settlementDateRange.end);
+                }),
+                map(() => {
+
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
         // Mark for check
         this._changeDetectorRef.markForCheck();
 
@@ -696,6 +800,30 @@ export class DashboardComponent implements OnInit, OnDestroy
                         else
                             return this._dashboardService.getSummarySales(this.storeId$, this._summarySalesPaginator.pageIndex, this._summarySalesPaginator.pageSize, "date", "asc", "", 
                                                                             this.summarySalesDateRange.start, this.summarySalesDateRange.end);
+
+                    }),
+                    map(() => {
+                        this.isLoading = false;
+                    })
+                ).subscribe();
+            }
+            if ( this._settlementPaginator )
+            {
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+
+
+                // Get customers if sort or page changes
+                merge(this._settlementPaginator.page).pipe(
+                    switchMap(() => {
+                        this.isLoading = true;
+
+                        if (this.settlementDateRange.start == null && this.settlementDateRange.end == null)
+                            return this._dashboardService.getSettlement(this.storeId$, this._settlementPaginator.pageIndex, this._settlementPaginator.pageSize, "date", "cycleStartDate");
+                        else
+                            return this._dashboardService.getSettlement(this.storeId$, this._settlementPaginator.pageIndex, this._settlementPaginator.pageSize, "date", "cycleStartDate", 
+                                                                            this.settlementDateRange.start, this.settlementDateRange.end);
 
                     }),
                     map(() => {
