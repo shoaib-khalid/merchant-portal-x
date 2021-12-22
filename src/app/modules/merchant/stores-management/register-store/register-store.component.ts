@@ -571,7 +571,7 @@ export class RegisterStoreComponent implements OnInit
 
             // Navigate to the confirmation required page
             this._router.navigateByUrl('/stores');
-        }, 7000);
+        }, 3000);
     }
 
     updateStates(countryId: string){

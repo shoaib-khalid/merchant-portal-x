@@ -250,13 +250,26 @@ export class StoresService
             }
         };
         
-        return this.store$.pipe(
+        return this.stores$.pipe(
             take(1),
             // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
             switchMap(stores => this._httpClient.post<Store>(productService + '/stores', storeBody , header).pipe(
                 map((response) => {
 
                     this._logging.debug("Response from StoresService (Create Store)",response);
+
+                    let newResponse = response["data"];
+                    newResponse.slug = newResponse.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
+                    newResponse.duration = 30;
+                    newResponse.totalSteps = 3;
+                    newResponse.featured = true;
+                    newResponse.progress = { completed: 2, currentStep: 2  };
+                    newResponse.category = newResponse.type;
+                    newResponse.completed = 2;
+                    newResponse.currentStep = 3;
+
+                    // Update the products with the new product
+                    this._stores.next([newResponse, ...stores]);
 
                     // Return the new product
                     return response;
