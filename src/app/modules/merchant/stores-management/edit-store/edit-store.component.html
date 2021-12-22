@@ -437,6 +437,9 @@
                                         <mat-error *ngIf="editStoreForm.get('deliveryType').hasError('required')">
                                             Required
                                         </mat-error>
+                                        <mat-error *ngIf="editStoreForm.get('deliveryType').hasError('noDeliveryPartners')">
+                                            No available delivery partner
+                                        </mat-error>
                                         <mat-icon
                                             matPrefix
                                             [svgIcon]="'mat_solid:delivery_dining'">
@@ -472,7 +475,14 @@
                             <div class="flex w-full flex-auto flex-wrap">
                                 <!-- Delivery Partner -->
                                 <div *ngIf="editStoreForm.get('deliveryType').value === 'SCHEDULED' || editStoreForm.get('deliveryType').value === 'ADHOC'" class="flex flex-col w-full">
-                                    <mat-label class="font-medium">Delivery Partner *</mat-label>
+                                    <div class="flex w-full">
+                                        <mat-label class="flex flex-col font-medium">Delivery Partner *</mat-label>
+                                        <mat-icon
+                                            matTooltip="Below delivery partner will be provided to the customer to choose when purchasing from this store."
+                                            class="flex flex-wrap transform scale-75"
+                                            [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                        </mat-icon>
+                                    </div>
                                     <div class="mb-0.5"></div>
                                     <div class="border border-gray-300 rounded min-h-26 max-h-72 overflow-auto">
                                         <div class="pt-4 pl-2 w-full">
@@ -505,14 +515,21 @@
                                                 class="flex flex-col w-full"
                                                 [formControlName]="'deliveryPartner'"
                                             >
-                                                <section class="p-2" *ngFor="let deliveryPartner of deliveryPartners">
-                                                    <mat-radio-button [value]="deliveryPartner.id">{{deliveryPartner.name}}</mat-radio-button>
-                                                </section>
+                                                <ng-container *ngIf="deliveryPartners.length > 0; else noDeliveryPartners">
+                                                    <section class="p-2" *ngFor="let deliveryPartner of deliveryPartners">
+                                                        <mat-radio-button [value]="deliveryPartner.id">{{deliveryPartner.name}}</mat-radio-button>
+                                                    </section>
+                                                    <mat-error *ngIf="editStoreForm.get('deliveryPartner').hasError('required')">
+                                                        Required at least 1
+                                                    </mat-error>
+                                                </ng-container>
+                                                <ng-template #noDeliveryPartners>
+                                                    <section class="p-2">
+                                                        <h1 class="text-warn">Sorry there is no delivery partner for this delivery type, please choose another delivery type</h1>
+                                                    </section>
+                                                </ng-template>
                                             </mat-radio-group>
                                         </div>
-                                        <mat-error *ngIf="editStoreForm.get('deliveryType').hasError('required')">
-                                            Required at least 1
-                                        </mat-error>
                                         &#160;
                                     </div>
                                 </div>

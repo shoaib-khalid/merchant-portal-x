@@ -499,10 +499,28 @@ export class StoresService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
 
-        return this._httpClient.post<any>(productService + '/stores/' + storeId + '/assets', storeAssets , header ).pipe(
-            map((response) => {
-                this._logging.debug("Response from StoresService (postAssets)",response);
-            })
+        return this.stores$.pipe(
+            take(1),
+            switchMap(stores => this._httpClient.post<any>(productService + '/stores/' + storeId + '/assets', storeAssets , header ).pipe(
+                map((response) => {
+
+                    this._logging.debug("Response from StoresService (postAssets)",response);
+
+                    // Find the index of the updated product
+                    const index = stores.findIndex(item => item.id === storeId);
+
+                    let updateResponse = Object.assign(stores[index],{storeAsset:{ logoUrl: response["data"].logoUrl}});
+
+                    // Update the product
+                    stores[index] = { ...stores[index], ...updateResponse};
+
+                    // Update the products
+                    this._stores.next(stores);
+
+                    // return value
+                    return response["data"];
+                })
+            ))
         );
     }
 
