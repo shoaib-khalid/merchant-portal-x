@@ -15,6 +15,8 @@ import { appRoutes } from 'app/app.routing';
 import { AppConfig } from 'app/config/service.config';
 
 import { GraphHelper } from 'app/modules/merchant/social-media/flow-builder/components/helpers/graph-helper';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AppInterceptor } from './app.interceptor';
 
 const routerConfig: ExtraOptions = {
     preloadingStrategy       : PreloadAllModules,
@@ -53,6 +55,11 @@ const routerConfig: ExtraOptions = {
           useFactory: initializeApp,
           deps: [AppConfig], 
           multi: true 
+        },
+        {
+            provide : HTTP_INTERCEPTORS,
+            useClass: AppInterceptor,
+            multi   : true
         }
     ],
     bootstrap   : [
