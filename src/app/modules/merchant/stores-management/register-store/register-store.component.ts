@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, NgForm, ValidationErrors, Validators } from '@angular/forms';
 import { fuseAnimations } from '@fuse/animations';
 import { RegisterStoreValidationService } from 'app/modules/merchant/stores-management/register-store/register-store.validation.service';
 import { Observable } from 'rxjs';
@@ -67,7 +67,7 @@ export class RegisterStoreComponent implements OnInit
         type   : 'success',
         message: ''
     };
-    isError: boolean = false;
+    isDisplayStatus: boolean = false;
     
     /**
      * Constructor
@@ -373,18 +373,33 @@ export class RegisterStoreComponent implements OnInit
     sendForm(): void
     {
         // Do nothing if the form is invalid
-        if ( this.createStoreForm.invalid )
-        {
-            this.alert = {
-                type   : 'error',
-                message: 'You need to fill in all the required fields'
-            }
-            this.isError = true;
+        console.log("masuk")
+
+        let BreakException = {};
+        try {
+            Object.keys(this.createStoreForm.controls).forEach(key => {
+                const controlErrors: ValidationErrors = this.createStoreForm.get(key).errors;
+                if (controlErrors != null) {
+                    Object.keys(controlErrors).forEach(keyError => {
+                        this.alert = {
+                            type   : 'error',
+                            message: 'Field ' + key + ' error: ' + keyError
+                        }
+                        this.isDisplayStatus = true;
+                        throw BreakException;
+                    });
+                }
+            });
+        } catch (error) {
             return;
         }
+    
+        // if (this.isDisplayStatus === true){
+        //   return;
+        // }
 
         // Hide the alert
-        this.isError = false;
+        this.isDisplayStatus = false;
 
         // this will remove the item from the object
         const { allowedSelfDeliveryStates, allowScheduledDelivery, allowStorePickup, 
@@ -527,8 +542,6 @@ export class RegisterStoreComponent implements OnInit
 
                 }
 
-                // Navigate to the confirmation required page
-                this._router.navigateByUrl('/stores');
             },
             (response) => {
                 // Re-enable the form
@@ -549,15 +562,16 @@ export class RegisterStoreComponent implements OnInit
         // and remove it after 5 seconds
         this.alert = {
             type   : 'success',
-            message: 'Your request has been delivered! A member of our support staff will respond as soon as possible.'
+            message: 'Store Created'
         };
+        this.isDisplayStatus = true;
 
         setTimeout(() => {
-            this.alert = null;
-        }, 7000);
+            this.isDisplayStatus = false;
 
-        // Clear the form
-        this.clearForm();
+            // Navigate to the confirmation required page
+            this._router.navigateByUrl('/stores');
+        }, 7000);
     }
 
     updateStates(countryId: string){

@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, NgForm, ValidationErrors, Validators } from '@angular/forms';
 import { fuseAnimations } from '@fuse/animations';
 import { RegisterStoreValidationService } from 'app/modules/merchant/stores-management/register-store/register-store.validation.service';
 import { Observable } from 'rxjs';
@@ -69,7 +69,7 @@ export class EditStoreComponent implements OnInit
         type   : 'success',
         message: ''
     };
-    isError: boolean = false;
+    isDisplayStatus: boolean = false;
     
     /**
      * Constructor
@@ -424,18 +424,27 @@ export class EditStoreComponent implements OnInit
     updateForm(): void
     {
         // Do nothing if the form is invalid
-        if ( this.editStoreForm.invalid )
-        {
-            this.alert = {
-                type   : 'error',
-                message: 'You need to fill in all the required fields'
-            }
-            this.isError = true;
+        let BreakException = {};
+        try {
+            Object.keys(this.editStoreForm.controls).forEach(key => {
+                const controlErrors: ValidationErrors = this.editStoreForm.get(key).errors;
+                if (controlErrors != null) {
+                    Object.keys(controlErrors).forEach(keyError => {
+                        this.alert = {
+                            type   : 'error',
+                            message: 'Field ' + key + ' error: ' + keyError
+                        }
+                        this.isDisplayStatus = true;
+                        throw BreakException;
+                    });
+                }
+            });
+        } catch (error) {
             return;
         }
 
         // Hide the alert
-        this.isError = false;
+        this.isDisplayStatus = false;
 
         /**
          * 
@@ -642,18 +651,19 @@ export class EditStoreComponent implements OnInit
                 };
 
                 // Show the alert
-                this.isError = true;
+                this.isDisplayStatus = true;
             });
 
         // Show a success message (it can also be an error message)
         // and remove it after 5 seconds
         this.alert = {
             type   : 'success',
-            message: 'Your request has been delivered! A member of our support staff will respond as soon as possible.'
+            message: 'Store Updated'
         };
+        this.isDisplayStatus = true;
 
         setTimeout(() => {
-            this.alert = null;
+            this.isDisplayStatus = false;
         }, 7000);
 
         // Enable the form
