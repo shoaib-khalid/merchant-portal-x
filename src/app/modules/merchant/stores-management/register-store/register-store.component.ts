@@ -373,8 +373,6 @@ export class RegisterStoreComponent implements OnInit
     sendForm(): void
     {
         // Do nothing if the form is invalid
-        console.log("masuk")
-
         let BreakException = {};
         try {
             Object.keys(this.createStoreForm.controls).forEach(key => {
@@ -438,7 +436,6 @@ export class RegisterStoreComponent implements OnInit
                 let _assets = {};
                 const formData = new FormData();
                 this.files.forEach(item =>{
-                    console.log(item);
                     if (item.selectedFiles !== null){
                         formData.append(item.type,item.selectedFiles[0])
                     }
@@ -459,7 +456,7 @@ export class RegisterStoreComponent implements OnInit
                         }
                       },
                       (err: any) => {
-                          console.log('Could not upload the file');
+                          console.error('Could not upload the file', err);
                       });
                 }
 
@@ -646,7 +643,7 @@ export class RegisterStoreComponent implements OnInit
         } else if (attribute === "deliveryCharges") {
             this._allowedSelfDeliveryStates[index].deliveryCharges = value;
         } else {
-            console.log("this should not happen")
+            console.error("this should not happen")
         }
 
         // push to allowedSelfDeliveryStates (form)

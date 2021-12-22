@@ -198,7 +198,6 @@ export class EditStoreComponent implements OnInit
                 // Choose Vertical service
                 // -------------------------
 
-                console.log(response)
                 // get domain name from (vertical service)
                 this._chooseVerticalService.getVerticalById(response.verticalCode)
                     .subscribe((response) => {
@@ -252,9 +251,9 @@ export class EditStoreComponent implements OnInit
 
                 this._storesService.getStoreDeliveryProvider({deliveryType: _deliveryType, regionCountryId: _regionCountryId}).subscribe(
                     (response: StoreDeliveryProvider[]) => {
+                        // reset this.deliveryPartners first to initial state
+                        this.deliveryPartners = [];
                         response.forEach(item => {
-                            // reset this.deliveryPartners first to initial state
-                            this.deliveryPartners = [];
                             // push the data into array
                             this.deliveryPartners.push({
                                 id: item.id,
@@ -263,9 +262,9 @@ export class EditStoreComponent implements OnInit
                                 label: item.name,
                                 selected: false
                             });
-                            // check changes
-                            // this.checkDeliveryPartner();
-                        })
+                        });
+                        // check changes
+                        this.checkDeliveryPartner();
                     }
                 );
 
@@ -281,9 +280,6 @@ export class EditStoreComponent implements OnInit
                 );
            } 
         );
-
-
-
 
         // get states service
         this.statesList = [
@@ -505,7 +501,7 @@ export class EditStoreComponent implements OnInit
                         }
                       },
                       (err: any) => {
-                          console.log('Could not upload the file');
+                          console.error('Could not upload the file');
                       });
                 }
 
@@ -606,7 +602,6 @@ export class EditStoreComponent implements OnInit
                             // no nothing
                             console.log("Do nothing", this._originalAllowedSelfDeliveryStates[i].deliveryStates)
                         } else {
-                            console.log("masuk")
                             this._storesService.deleteSelfDeliveryStateCharges(this.storeId, this._originalAllowedSelfDeliveryStates[i].id).subscribe(
                                 (response) => {
                                     this._originalAllowedSelfDeliveryStates.push({
@@ -742,7 +737,7 @@ export class EditStoreComponent implements OnInit
         } else if (attribute === "deliveryCharges") {
             this._allowedSelfDeliveryStates[index].deliveryCharges = value;
         } else {
-            console.log("this should not happen")
+            console.error("this should not happen")
         }
 
         // push to allowedSelfDeliveryStates (form)
