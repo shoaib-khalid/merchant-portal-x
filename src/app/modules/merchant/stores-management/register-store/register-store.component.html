@@ -781,11 +781,11 @@
                         <div class="flex items-center justify-end">
                             <!-- Alert -->
                             <fuse-alert
-                                *ngIf="isError"
+                                *ngIf="isDisplayStatus"
                                 [appearance]="'outline'"
                                 [showIcon]="false"
                                 [type]="alert.type"
-                                [ngClass]="alert.type === 'error' ? 'text-warn' : 'text-primary'"
+                                [ngClass]="alert.type === 'error' ? 'text-warn' : 'text-green-500'"
                                 [@shake]="alert.type === 'error'">
                                 {{alert.message}}
                             </fuse-alert>
