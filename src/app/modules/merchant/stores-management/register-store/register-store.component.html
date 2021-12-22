@@ -31,14 +31,6 @@
             <!-- Form -->
             <ng-container *ngIf="invalidVertical === false; else wrongVertical">
                 <div class="mt-8 sm:mt-12 p-6 pb-7 sm:p-10 sm:pb-7 shadow rounded-2xl bg-card">
-                    <!-- Alert -->
-                    <fuse-alert
-                        class="mb-8"
-                        *ngIf="alert"
-                        [type]="alert.type"
-                        [showIcon]="false">
-                        {{alert.message}}
-                    </fuse-alert>
                     <form
                         class="space-y-3 flex flex-col w-full"
                         [formGroup]="createStoreForm"
@@ -787,6 +779,16 @@
     
                         <!-- Actions -->
                         <div class="flex items-center justify-end">
+                            <!-- Alert -->
+                            <fuse-alert
+                                *ngIf="isError"
+                                [appearance]="'outline'"
+                                [showIcon]="false"
+                                [type]="alert.type"
+                                [ngClass]="alert.type === 'error' ? 'text-warn' : 'text-primary'"
+                                [@shake]="alert.type === 'error'">
+                                {{alert.message}}
+                            </fuse-alert>
                             <button
                                 mat-button
                                 [color]="'accent'"
@@ -798,7 +800,7 @@
                                 class="ml-2"
                                 mat-flat-button
                                 [color]="'primary'"
-                                [disabled]="createStoreForm.pristine || createStoreForm.invalid"
+                                [disabled]="createStoreForm.pristine"
                                 (click)="sendForm()">
                                 Submit
                             </button>
