@@ -12,6 +12,7 @@ import { JwtService } from 'app/core/jwt/jwt.service';
 import { debounce } from 'lodash';
 import { HttpResponse } from '@angular/common/http';
 import { ChooseVerticalService } from '../choose-vertical/choose-vertical.service';
+import { FuseAlertType } from '@fuse/components/alert';
 
 @Component({
     selector     : 'register-store-page',
@@ -30,7 +31,6 @@ export class RegisterStoreComponent implements OnInit
 
     domainName:string;
 
-    alert: any;
     createStoreForm: FormGroup;
     otherStoreForm: FormGroup;
 
@@ -61,6 +61,13 @@ export class RegisterStoreComponent implements OnInit
     message: string[] = [];
     
     files: any;
+
+    // display error
+    alert: { type: FuseAlertType; message: string } = {
+        type   : 'success',
+        message: ''
+    };
+    isError: boolean = false;
     
     /**
      * Constructor
@@ -368,11 +375,16 @@ export class RegisterStoreComponent implements OnInit
         // Do nothing if the form is invalid
         if ( this.createStoreForm.invalid )
         {
+            this.alert = {
+                type   : 'error',
+                message: 'You need to fill in all the required fields'
+            }
+            this.isError = true;
             return;
         }
 
         // Hide the alert
-        this.alert = false;
+        this.isError = false;
 
         // this will remove the item from the object
         const { allowedSelfDeliveryStates, allowScheduledDelivery, allowStorePickup, 
@@ -530,9 +542,7 @@ export class RegisterStoreComponent implements OnInit
                     type   : 'error',
                     message: 'Something went wrong, please try again.'
                 };
-
-                // Show the alert
-                this.alert = true;
+                
             });
 
         // Show a success message (it can also be an error message)

@@ -11,6 +11,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { debounce } from 'lodash';
 import { HttpEventType, HttpResponse } from '@angular/common/http';
+import { FuseAlertType } from '@fuse/components/alert';
 import { ChooseVerticalService } from '../choose-vertical/choose-vertical.service';
 
 @Component({
@@ -37,33 +38,39 @@ export class EditStoreComponent implements OnInit
 
     storeName: string;
     
-    alert: any;
     editStoreForm: FormGroup;
     otherStoreForm: FormGroup;
-
+    
     statesList: any;
     statesByCountry: string;
     /** for selected state refer form builder */ 
-
+    
     countriesList: any = [];
     /** for selected country refer form builder */ 
-
+    
     regionsList: any;
     /** for selected country refer form builder */ 
-
+    
     deliveryFullfilment: any;
     deliveryPartners: any = [];
-
+    
     _originalAllowedSelfDeliveryStates: any = [];
     _allowedSelfDeliveryStates: any = [];
     allowedSelfDeliveryStates: FormArray;
-
+    
     _storeTiming: any;
     storeTiming: FormArray;
-
+    
     // Image part    
     files: any;
-
+    
+    // display error
+    alert: { type: FuseAlertType; message: string } = {
+        type   : 'success',
+        message: ''
+    };
+    isError: boolean = false;
+    
     /**
      * Constructor
      */
@@ -207,7 +214,7 @@ export class EditStoreComponent implements OnInit
                     this.subDomainName = this.fullDomain.split(".")[0]
                 } else {
                     console.error("Invalid domain name from backend : ",this.fullDomain);
-                    this.alert("Invalid domain name from backend : " + this.fullDomain)
+                    alert("Invalid domain name from backend : " + this.fullDomain)
                 }
 
                 this.editStoreForm.get('subdomain').patchValue(this.subDomainName);
@@ -257,7 +264,7 @@ export class EditStoreComponent implements OnInit
                                 selected: false
                             });
                             // check changes
-                            this.checkDeliveryPartner();
+                            // this.checkDeliveryPartner();
                         })
                     }
                 );
@@ -326,15 +333,23 @@ export class EditStoreComponent implements OnInit
         // -------------------------------------
         // store allowed self delivery states
         // -------------------------------------
+        
         this._storesService.getSelfDeliveryStateCharges(this.storeId).subscribe(
             (response: StoreSelfDeliveryStateCharges[]) => {
-                response.forEach(item => {
-                    this._allowedSelfDeliveryStates.push({
-                        id: item.id,
-                        deliveryStates: item.region_country_state_id,
-                        deliveryCharges: item.delivery_charges
+                
+                if (response.length) {
+                    response.forEach(item => {
+                        this._allowedSelfDeliveryStates.push({
+                            id: item.id,
+                            deliveryStates: item.region_country_state_id,
+                            deliveryCharges: item.delivery_charges
+                        });
                     });
-                });
+                } else {
+                    this._allowedSelfDeliveryStates = [
+                        { deliveryStates: "", deliveryCharges:"" }
+                    ];
+                }
 
                 this._allowedSelfDeliveryStates.forEach(item => {
                     this.allowedSelfDeliveryStates = this.editStoreForm.get('allowedSelfDeliveryStates') as FormArray;
@@ -411,11 +426,16 @@ export class EditStoreComponent implements OnInit
         // Do nothing if the form is invalid
         if ( this.editStoreForm.invalid )
         {
+            this.alert = {
+                type   : 'error',
+                message: 'You need to fill in all the required fields'
+            }
+            this.isError = true;
             return;
         }
 
         // Hide the alert
-        this.alert = false;
+        this.isError = false;
 
         /**
          * 
@@ -622,7 +642,7 @@ export class EditStoreComponent implements OnInit
                 };
 
                 // Show the alert
-                this.alert = true;
+                this.isError = true;
             });
 
         // Show a success message (it can also be an error message)

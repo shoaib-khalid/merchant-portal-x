@@ -769,7 +769,18 @@
 
                     <!-- Actions -->
                     <div class="flex items-center justify-end">
+                        <!-- Alert -->
+                        <fuse-alert
+                            *ngIf="isError"
+                            [appearance]="'outline'"
+                            [showIcon]="false"
+                            [type]="alert.type"
+                            [ngClass]="alert.type === 'error' ? 'text-warn' : 'text-primary'"
+                            [@shake]="alert.type === 'error'">
+                            {{alert.message}}
+                        </fuse-alert>
                         <button
+                            class="ml-2"
                             mat-button
                             [color]="'accent'"
                             [disabled]="editStoreForm.pristine || editStoreForm.untouched"
@@ -780,7 +791,6 @@
                             class="ml-2"
                             mat-flat-button
                             [color]="'primary'"
-                            [disabled]="editStoreForm.pristine"
                             (click)="updateForm()">
                             Update
                         </button>
