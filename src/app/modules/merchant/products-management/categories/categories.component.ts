@@ -20,18 +20,10 @@ import { Product } from 'app/core/product/inventory.types';
         /* language=SCSS */
         `
             .inventory-grid {
-                grid-template-columns: 48px 112px auto 40px;
+                grid-template-columns: 48px auto 40px;
 
                 @screen sm {
-                    grid-template-columns: 48px 112px auto 112px 72px;
-                }
-
-                @screen md {
-                    grid-template-columns: 48px 112px auto 150px 96px;
-                }
-
-                @screen lg {
-                    grid-template-columns: 48px auto 500px 96px;
+                    grid-template-columns: 48px 112px auto 40px;
                 }
             }
         `
@@ -244,16 +236,12 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
             };
             const formData = new FormData();
             formData.append("file", result.imagefiles[0]);
-            console.log("result>>>>>>",result);
     
             // Create category on the server
             this._inventoryService.createCategory(category,formData)
                 .pipe(takeUntil(this._unsubscribeAll))
                 .subscribe((response) => {
-                    response["data"];
-                    console.log('response["data"]',response["data"]);
-    
-                    
+                    response["data"]; 
                 });            
         });
     }
@@ -261,16 +249,54 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
     /**
      * Update the selected category using the form data
      */
-    updateCategory(category: ProductCategory): void
+    updateCategory(): void
     {
-        let formData = new FormData();
-        // create a new one
-        formData.append('file',this.files[0].selectedFiles[0]);
+        let formData = null;
+        if (this.files[0].selectedFiles) {
+            formData = new FormData()
+            // create a new one
+            formData.append('file',this.files[0].selectedFiles[0]);
+        }
+
+        let categoryData = this.categoriesForm.getRawValue();
 
         // Update the category on the server
-        this._inventoryService.updateCategory(category.id, category, formData)
+        this._inventoryService.updateCategory(this.selectedCategory.id, categoryData, formData)
             .pipe(debounceTime(300))
-            .subscribe();
+            .subscribe(()=>{
+                this.showFlashMessage('success');
+            });
+    }
+
+    deleteCategory(){
+
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title  : 'Delete category',
+            message: 'Are you sure you want to disable this category? Current category of this product will be remove permenantly!',
+            actions: {
+                confirm: {
+                    label: 'Delete'
+                }
+            }
+        });
+
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+
+            // If the confirm button pressed...
+            if ( result === 'confirmed' )
+            {
+                // Delete the category on the server
+                this._inventoryService.deleteCategory(this.selectedCategory.id)
+                    .pipe(debounceTime(300))
+                    .subscribe();
+            }
+                
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
+
     }
 
     /**
@@ -328,7 +354,6 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
     this.files[index].selectedFileName = "";
     this.files[index].selectedFiles = event.target.files;
     
-    // console.log("hghghgh", this.files)
     if (this.files[index].selectedFiles && this.files[index].selectedFiles[0]) {
         const numberOfFiles = this.files[index].selectedFiles.length;
         for (let i = 0; i < numberOfFiles; i++) {
