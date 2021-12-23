@@ -201,14 +201,14 @@
                                     </div>
 
                                     <!-- normal price -->
-                                    <div class="flex flex-wrap w-full lg:w-2/12 items-center justify-center pl-6">
+                                    <!-- <div class="flex flex-wrap w-full lg:w-2/12 items-center justify-center pl-6">
                                         <mat-slide-toggle
                                             class="flex items-center justify-center flex-wrap w-full "
                                             [color]="'primary'"
                                             [matTooltip]="'To enable normal price if there is already discount applied'">
                                             Normal Price
                                         </mat-slide-toggle>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </div>
 
@@ -217,7 +217,7 @@
                                 <input
                                     id="product-remove-button"
                                     type="button"
-                                    (click)="deleteSelectedDiscount()"
+                                    (click)="deleteSelectedCategory(category.id)"
                                     class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                     mat-button>
                                 <label 
@@ -257,7 +257,7 @@
                                     <button
                                         mat-flat-button
                                         [color]="'primary'"
-                                        (click)="updateCategory(selectedCategory)">
+                                        (click)="updateCategory(category.id)">
                                         Update
                                     </button>
                                 </div>

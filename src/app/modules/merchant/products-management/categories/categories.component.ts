@@ -228,6 +228,36 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
 
     }
 
+    deleteSelectedCategory(categoryId: string): void
+    {
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title  : 'Delete category',
+            message: 'Are you sure you want to remove this category? This action cannot be undone!',
+            actions: {
+                confirm: {
+                    label: 'Delete'
+                }
+            }
+        });
+
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+
+            // If the confirm button pressed...
+            if ( result === 'confirmed' )
+            {
+
+                // Delete the product on the server
+                this._inventoryService.deleteCategory(categoryId).subscribe(() => {
+
+                    // Close the details
+                    this.closeDetails();
+                });
+            }
+        });
+    }
+
     /**
      * Create category
      */
@@ -261,16 +291,44 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
     /**
      * Update the selected category using the form data
      */
-    updateCategory(category: ProductCategory): void
+    updateCategory(categoryId: string): void
     {
-        let formData = new FormData();
-        // create a new one
-        formData.append('file',this.files[0].selectedFiles[0]);
 
-        // Update the category on the server
-        this._inventoryService.updateCategory(category.id, category, formData)
-            .pipe(debounceTime(300))
-            .subscribe();
+        // Open the confirmation dialog
+           const confirmation = this._fuseConfirmationService.open({
+            title  : 'Update category',
+            message: 'Are you sure you want to update this category?',
+            actions: {
+                confirm: {
+                    label: 'Yes'
+                }
+            }
+        });
+
+        //fetch value from form
+
+        // let formData = new FormData();
+
+      
+        // // create a new one
+        // formData.append('file',this.files[0].selectedFiles[0]);
+
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+
+            // If the confirm button pressed...
+            if ( result === 'confirmed' )
+            {
+
+                // Update the product on the server
+                // this._inventoryService.updateCategory(categoryId, category, formData).subscribe(() => {
+
+                //     // Close the details
+                //     this.closeDetails();
+                // });
+            }
+        });
+        
     }
 
     /**
