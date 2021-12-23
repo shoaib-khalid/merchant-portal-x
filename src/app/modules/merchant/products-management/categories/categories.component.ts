@@ -8,7 +8,7 @@ import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { MatDialog } from '@angular/material/dialog';
 import { InventoryService } from 'app/core/product/inventory.service';
-import { ProductCategory, ProductPagination } from 'app/core/product/inventory.types';
+import { ProductCategory, ProductCategoryPagination } from 'app/core/product/inventory.types';
 import { AddCategoryComponent } from '../add-category/add-category.component';
 import { DiscountPagination } from '../../discounts-management/list/discounts.types';
 import { Product } from 'app/core/product/inventory.types';
@@ -45,8 +45,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
     selectedCategory: ProductCategory | null = null;
     categoriesForm: FormGroup;
 
-    pagination: ProductPagination;
-
+    pagination: ProductCategoryPagination;
 
     // discount tier
     calculationType: string;
@@ -115,7 +114,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
         // Get the pagination
         this._inventoryService.pagination$
         .pipe(takeUntil(this._unsubscribeAll))
-        .subscribe((pagination: ProductPagination) => {
+        .subscribe((pagination: ProductCategoryPagination) => {
 
             // Update the pagination
             this.pagination = pagination;

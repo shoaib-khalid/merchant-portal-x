@@ -108,6 +108,22 @@ thumbnailUrl: string;
 
 /**
  * 
+ * Product Category Pagination
+ * 
+ */
+
+ export interface ProductCategoryPagination
+ {
+     length: number;
+     size: number;
+     page: number;
+     lastPage: number;
+     startIndex: number;
+     endIndex: number;
+ }
+
+/**
+ * 
  *  Product Assets
  */
 

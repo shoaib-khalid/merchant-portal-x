@@ -759,7 +759,7 @@ export class InventoryService
         );
     }
 
-        // -----------------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
 
@@ -772,43 +772,42 @@ export class InventoryService
      * @param order
      * @param search
      */
-     getByQueryCategories(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = ''):
-     Observable<{ pagination: ProductPagination; products: ProductCategory[] }>
- {
-     let productService = this._apiServer.settings.apiServer.productService;
-     let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+    getByQueryCategories(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = ''):
+    Observable<{ pagination: ProductPagination; products: ProductCategory[] }>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
 
-     const header = {
-         headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
-         params: {
-             page        : '' + page,
-             pageSize    : '' + size,
-             sortByCol   : '' + sort,
-             sortingOrder: '' + order.toUpperCase(),
-             name        : '' + search,
-             storeId : '' + this.storeId$,
-         }
-     };
-
-     return this._httpClient.get<any>(productService  + '/store-categories',header).pipe(
-        tap((response) => {
-
-            this._logging.debug("Response from ProductsService (getCategories)",response);
-
-            let _pagination = {
-                length: response.data.totalElements,
-                size: response.data.size,
-                page: response.data.number,
-                lastPage: response.data.totalPages,
-                startIndex: response.data.pageable.offset,
-                endIndex: response.data.pageable.offset + response.data.numberOfElements - 1
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                page        : '' + page,
+                pageSize    : '' + size,
+                sortByCol   : '' + sort,
+                sortingOrder: '' + order.toUpperCase(),
+                name        : '' + search,
+                storeId : '' + this.storeId$,
             }
-            this._pagination.next(_pagination);
-            this._categories.next(response.data.content);
-        })
-    );
+        };
 
- }
+        return this._httpClient.get<any>(productService  + '/store-categories',header).pipe(
+            tap((response) => {
+
+                this._logging.debug("Response from ProductsService (getByQueryCategories)",response);
+
+                let _pagination = {
+                    length: response.data.totalElements,
+                    size: response.data.size,
+                    page: response.data.number,
+                    lastPage: response.data.totalPages,
+                    startIndex: response.data.pageable.offset,
+                    endIndex: response.data.pageable.offset + response.data.numberOfElements - 1
+                }
+                this._pagination.next(_pagination);
+                this._categories.next(response.data.content);
+            })
+        );
+    }
 
     /**
      * Get ctegory by id
