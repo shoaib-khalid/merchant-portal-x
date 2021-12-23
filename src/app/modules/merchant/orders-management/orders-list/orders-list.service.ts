@@ -99,7 +99,7 @@ export class OrdersListService
      * Get data
      */
     getOrders(page: number = 0, size: number = 10, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', receiverName: string = '', phoneNumber: string = '', from: string = '', to: string = '',
-             completionStatus: string[] = ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE", "BEING_PREPARED", "AWAITING_PICKUP", "BEING_DELIVERED", "DELIVERED_TO_CUSTOMER", "REJECTED_BY_STORE"]): 
+             completionStatus: string[] = ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE", "BEING_PREPARED", "AWAITING_PICKUP", "BEING_DELIVERED", "DELIVERED_TO_CUSTOMER", "REJECTED_BY_STORE"], invoiceId: string = ''): 
     Observable<{ pagination: OrdersListPagination; stores: Order[] }>
     {
         
@@ -119,6 +119,8 @@ export class OrdersListService
                 sortByCol: '' + sort,
                 sortingOrder: '' + order.toUpperCase(),
                 storeId: this.storeId$,
+                receiverName: '' + receiverName,
+                invoiceId: '' + invoiceId
             }
         };
         

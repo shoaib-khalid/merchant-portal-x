@@ -69,10 +69,10 @@
                                     [value]="filterList"
                                     #selectFilter
                                 >
-                                    <mat-option [value]="'transactionId'">Transaction Id</mat-option>
+                                    <mat-option [value]="'transactionId'">Transaction ID</mat-option>
                                     <mat-option [value]="'name'">Customer Name</mat-option>
                                     <mat-option [value]="'date'">Date</mat-option>
-                                    <mat-option [value]="'status'">Status</mat-option>
+                                    <!-- <mat-option [value]="'status'">Status</mat-option> -->
                                 </mat-select>
                                 <label
                                     class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
@@ -85,7 +85,7 @@
                                 </label>
                             </div>
                             <mat-form-field
-                                *ngIf="selectFilter.value === 'transactionId' || selectFilter.value === 'name'"
+                                *ngIf="selectFilter.value === 'transactionId'"
                                 class="fuse-mat-no-subscript w-full sm:w-72"
                                 [floatLabel]="'always'">
                                 <mat-icon
@@ -93,8 +93,38 @@
                                     class="icon-size-5"
                                     [svgIcon]="'heroicons_solid:search'"></mat-icon>
                                 <input
-                                    [formControl]="filterControl"
-                                    [placeholder]="'Search by ' + selectFilter.triggerValue"
+                                    [formControl]="filterTrxIdControl"
+                                    [placeholder]="'Search by Transaction ID'"
+                                    matInput
+                                    #query>
+                                <div>
+                                    <input
+                                        id="clear-search-button"
+                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                        type="button"
+                                        (click)="clearFilter()"
+                                        mat-icon-button>
+                                    <label 
+                                        class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
+                                        for="clear-search-button"
+                                        matRipple>
+                                        <mat-icon
+                                            class="text-gray-400 icon-size-5"
+                                            [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                                    </label>
+                                </div>
+                            </mat-form-field>
+                            <mat-form-field
+                                *ngIf="selectFilter.value === 'name'"
+                                class="fuse-mat-no-subscript w-full sm:w-72"
+                                [floatLabel]="'always'">
+                                <mat-icon
+                                    matPrefix
+                                    class="icon-size-5"
+                                    [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                <input
+                                    [formControl]="filterCustNameControl"
+                                    [placeholder]="'Search by Customer Name'"
                                     matInput
                                     #query>
                                 <div>
@@ -119,9 +149,10 @@
                                 class="fuse-mat-no-subscript w-full sm:w-72"
                                 appearance="fill"
                             >
-                                <mat-date-range-input [formGroup]="range" [rangePicker]="picker">
-                                  <input matStartDate formControlName="start" placeholder="mm/dd/yyyy" [value]="range.start">
-                                  <input matEndDate formControlName="end" placeholder="mm/dd/yyyy" [value]="range.end">
+
+                                <mat-date-range-input [rangePicker]="picker">
+                                    <input matStartDate [formControl]="filterDateInputStartControl" placeholder="mm/dd/yyyy" >
+                                    <input matEndDate [formControl]="filterDateInputEndControl" placeholder="mm/dd/yyyy">
                                 </mat-date-range-input>
                                 <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                                 <mat-date-range-picker #picker></mat-date-range-picker>
