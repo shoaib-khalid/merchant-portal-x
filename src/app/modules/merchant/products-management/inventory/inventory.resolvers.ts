@@ -29,9 +29,10 @@ export class InventoryCategoriesResolver implements Resolve<any>
      * @param route
      * @param state
      */
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<ProductCategory[]>
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<{ pagination: ProductPagination; products: ProductCategory[] }>
+    
     {
-        return this._inventoryService.getCategories();
+        return this._inventoryService.getByQueryCategories();
     }
 }
 
