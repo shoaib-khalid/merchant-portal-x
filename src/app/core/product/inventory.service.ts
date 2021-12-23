@@ -508,7 +508,6 @@ export class InventoryService
                     // Update the products
                     this._products.next(products);
 
-
                     // Return the new product
                     return response["data"];
                 })
@@ -816,8 +815,11 @@ export class InventoryService
             take(1),
             switchMap(categories => this._httpClient.post<any>(productService + '/store-categories', body , header).pipe(
                 map((newCategory) => {
+
+                    this._logging.debug("Response from ProductsService (createCategory)",category);
+
                     // Update the categories with the new category
-                    this._categories.next([...categories, newCategory.data]);
+                    this._categories.next([newCategory.data, ...categories]);
 
                     // Return new category from observable
                     return newCategory;
@@ -832,7 +834,7 @@ export class InventoryService
       * @param id
       * @param category
       */
-    updateCategory(id: string, category: ProductCategory, formdata:FormData = null): Observable<ProductCategory>
+    updateCategory(id: string, category: ProductCategory, formdata: FormData = null): Observable<ProductCategory>
     {
 
         let productService = this._apiServer.settings.apiServer.productService;
@@ -845,7 +847,30 @@ export class InventoryService
         let queryParam = "?storeId=" + this.storeId$ + "&name=" + category.name;
 
         // product-service/v1/swagger-ui.html#/store-category-controller/putStoreProductAssetsByIdUsingPUT
-        return this._httpClient.put<any>(productService + '/store-categories/' + id + queryParam, formdata , header);
+        return this.categories$.pipe(
+            take(1),
+            switchMap(categories => this._httpClient.put<any>(productService + '/store-categories/' + id + queryParam, formdata , header).pipe(
+                map((newCategory) => {
+
+                    this._logging.debug("Response from ProductsService (updateCategory)",newCategory);
+
+                    // Find the index of the updated product
+                    const index = categories.findIndex(item => item.id === id);
+
+                    let updatedCategory = categories[index];
+                    updatedCategory = category;
+                    
+                    // Update the categories
+                    categories[index] = { ...categories[index], ...updatedCategory};
+
+                    // Update the categories with the new category
+                    this._categories.next(categories);
+
+                    // Return new category from observable
+                    return newCategory["data"];
+                })
+            ))
+        );
     }
   
      /**
@@ -867,7 +892,10 @@ export class InventoryService
             take(1),
             switchMap(categories => this._httpClient.delete(productService + '/store-categories/' + id ,header)
             .pipe(
-                map((isDeleted: boolean) => {
+                map((response) => {
+
+
+                    this._logging.debug("Response from ProductsService (deleteCategory)", response);
 
                     // Find the index of the deleted category
                     const index = categories.findIndex(item => item.id === id);
@@ -879,7 +907,7 @@ export class InventoryService
                     this._categories.next(categories);
 
                     // Return the deleted status
-                    return isDeleted;
+                    return response["status"];
                 }),
                 filter(isDeleted => isDeleted),
                 switchMap(isDeleted => this.products$.pipe(
