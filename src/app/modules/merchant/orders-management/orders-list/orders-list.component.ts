@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { merge, Subject } from 'rxjs';
+import { merge, of, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { OrdersListService } from 'app/modules/merchant/orders-management/orders-list/orders-list.service';
 import { Order, OrdersCountSummary, OrdersListPagination } from 'app/modules/merchant/orders-management/orders-list/orders-list.types'
@@ -14,6 +14,7 @@ import { ChooseProviderDateTimeComponent } from 'app/modules/merchant/orders-man
 import { Router } from '@angular/router';
 import { Store } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
+import { formatDate } from '@angular/common';
 
 @Component({
     selector       : 'orders-list',
@@ -37,7 +38,19 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
 
     pagination: OrdersListPagination;
     isLoading: boolean = false;
-    filterControl: FormControl = new FormControl();
+
+    filterCustNameControl: FormControl = new FormControl();
+    filterCustNameControlValue: string;
+
+    filterTrxIdControl: FormControl = new FormControl();
+    filterTrxIdControlValue: string;
+
+    filterDateRange: any = {
+        start : null,
+        end: null
+    }
+    filterDateInputStartControl: FormControl = new FormControl();
+    filterDateInputEndControl: FormControl = new FormControl();
     tabControl: FormControl = new FormControl();
     filterList: string = "name";
 
@@ -46,6 +59,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     recentTransactionsDataSource: MatTableDataSource<any> = new MatTableDataSource();
     recentTransactionsTableColumns: string[] = ['transactionId', 'date', 'name', 'amount', 'status', 'action'];
     private _unsubscribeAll: Subject<any> = new Subject<any>();
+
 
     /**
      * Constructor
@@ -142,13 +156,79 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
             this.store = response;
         })
 
-        this.filterControl.valueChanges
+        this.filterCustNameControl.valueChanges
         .pipe(
             takeUntil(this._unsubscribeAll),
             debounceTime(300),
             switchMap((query) => {
                 this.isLoading = true;
+                this.filterCustNameControlValue = query;
+
                 return this._orderslistService.getOrders(0, 10, 'name', 'asc', query, '', '', '', this.tabControl.value);
+            }),
+            map(() => {
+                this.isLoading = false;
+            })
+        )
+        .subscribe();
+
+        
+        this.filterTrxIdControl.valueChanges
+        .pipe(
+            takeUntil(this._unsubscribeAll),
+            debounceTime(300),
+            switchMap((query) => {
+                this.isLoading = true;
+                this.filterTrxIdControlValue = query;
+
+                return this._orderslistService.getOrders(0, 10, 'name', 'asc', '', '', '', '', this.tabControl.value, query);
+            }),
+            map(() => {
+                this.isLoading = false;
+            })
+        )
+        .subscribe();
+
+        this.filterDateInputStartControl.valueChanges
+        .pipe(
+            takeUntil(this._unsubscribeAll),
+            debounceTime(300),
+            switchMap((query) => {
+                this.isLoading = true;
+
+                // reformat date 
+                const format = 'yyyy-MM-dd';
+                const myDate = query;
+                const locale = 'en-MY';
+                const formattedDate = formatDate(myDate, format, locale);
+                
+                this.filterDateRange.start = formattedDate;
+                    
+                // do nothing
+                return of(true);
+            }),
+            map(() => {
+                this.isLoading = false;
+            })
+        )
+        .subscribe();
+
+        this.filterDateInputEndControl.valueChanges
+        .pipe(
+            takeUntil(this._unsubscribeAll),
+            debounceTime(300),
+            switchMap((query) => {
+                this.isLoading = true;
+
+                // reformat date 
+                const format = 'yyyy-MM-dd';
+                const myDate = query;
+                const locale = 'en-MY';
+                const formattedDate = formatDate(myDate, format, locale);
+                
+                this.filterDateRange.end = formattedDate;
+                    
+                return this._orderslistService.getOrders(0, 10, 'name', 'asc', '', '', this.filterDateRange.start, this.filterDateRange.end, this.tabControl.value);
             }),
             map(() => {
                 this.isLoading = false;
@@ -202,7 +282,22 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                 merge(this._sort.sortChange, this._paginator.page).pipe(
                     switchMap(() => {
                         this.isLoading = true;
-                        return this._orderslistService.getOrders(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, '' , '', '', '', this.tabControl.value);
+                        
+                        //pagination filtered by date
+                        if (this.filterDateRange.start != null && this.filterDateRange.end != null)
+                            return this._orderslistService.getOrders(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, '' , '', 
+                                                                        this.filterDateRange.start, this.filterDateRange.end, this.tabControl.value);
+                        //pagination filtered by trx id
+                        else if (this.filterTrxIdControlValue != null)
+                            return this._orderslistService.getOrders(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, '' , '', '', '', 
+                                                                        this.tabControl.value, this.filterTrxIdControlValue);
+                        //pagination filtered by cust name
+                        else if (this.filterCustNameControlValue != null)
+                            return this._orderslistService.getOrders(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, 
+                                                                        this.filterCustNameControlValue , '', '', '', this.tabControl.value);
+
+                        else
+                            return this._orderslistService.getOrders(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, '' , '', '', '', this.tabControl.value);
                     }),
                     map(() => {
                         this.isLoading = false;
@@ -259,7 +354,8 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     }
 
     clearFilter(){
-        this.filterControl.reset();
+        this.filterCustNameControl.reset();
+        this.filterTrxIdControl.reset();
     }
 
     openSelector() {
