@@ -542,24 +542,25 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                     this.sortObjects(this.selectedProduct.productVariants)
                     // this.variantChecked = true;
                     // this.toggleDefaultInventory(true)
+                    
+                    // next sort this.selectedProduct.productVariantsAvailable
+                    this.selectedProduct.productVariants.forEach((element: ProductVariant, index) => {
+                        this.sortObjects(element.productVariantsAvailable)
+                        // this.options.push({ name: element.name, id: element.id })
+    
+                        // push empty values array and ids array for each productVariantsAvailable
+                        variantOptions.push({ name: element.name, id: element.id })
+                        variantItems.push({ values: [], ids: [] })
+    
+                        // push productVariantsAvailable.value and productVariantsAvailable.id to the 
+                        // created items above
+                        element.productVariantsAvailable.forEach(item => {
+                            variantItems[index].values.push(item.value);
+                            variantItems[index].ids.push(item.id);
+                        });
+                    });
                 }
 
-                // next sort this.selectedProduct.productVariantsAvailable
-                this.selectedProduct.productVariants.forEach((element: ProductVariant, index) => {
-                    this.sortObjects(element.productVariantsAvailable)
-                    // this.options.push({ name: element.name, id: element.id })
-
-                    // push empty values array and ids array for each productVariantsAvailable
-                    variantOptions.push({ name: element.name, id: element.id })
-                    variantItems.push({ values: [], ids: [] })
-
-                    // push productVariantsAvailable.value and productVariantsAvailable.id to the 
-                    // created items above
-                    element.productVariantsAvailable.forEach(item => {
-                        variantItems[index].values.push(item.value);
-                        variantItems[index].ids.push(item.id);
-                    });
-                });
                 
                 this.getallCombinations(variantItems)
                 
@@ -1451,11 +1452,18 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      */
     removeVariantFromProduct(variant: ProductVariant): void
     {
+        let index = this.selectedProduct.productVariants.findIndex(item => item.id === variant.id);
+        
         // Remove the variant
-        this.selectedProduct.productVariants.splice(this.selectedProduct.productVariants.findIndex(item => item.id === variant.id), 1);
+        this.selectedProduct.productVariants.splice(index, 1);
 
         // Update the selected product form
-        this.selectedProductForm.get('productVariants').patchValue(this.selectedProduct.productVariants);
+        this.productVariants = this.selectedProductForm.get('productVariants') as FormArray;
+        this.productVariants.clear();
+        
+        this.selectedProduct.productVariants.forEach(item => {
+            this.productVariants.push(this._formBuilder.group(item));
+        });
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
