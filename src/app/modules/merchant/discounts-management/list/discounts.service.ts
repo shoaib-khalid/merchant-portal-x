@@ -109,7 +109,7 @@ export class DiscountsService
      * @param order
      * @param search
      */
-    getDiscounts(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', status: string = 'ACTIVE,INACTIVE'):
+    getDiscounts(page: number = 0, size: number = 20, sort: string = 'startDate', order: 'asc' | 'desc' | '' = 'asc', search: string = '', status: string = ''):
         Observable<{ pagination: DiscountPagination; discounts: Discount[] }>
     {
         let productService = this._apiServer.settings.apiServer.productService;
@@ -122,27 +122,29 @@ export class DiscountsService
                 pageSize: '' + size,
                 sortByCol: '' + sort,
                 sortingOrder: '' + order.toUpperCase(),
-                name: '' + search,
-                status: '' + status
+                discountName: '' + search,
+                isActive: '' + status
             }
         };
 
-        return this._httpClient.get<any>(productService +'/stores/'+this.storeId$+'/discount', header).pipe(
+        return this._httpClient.get<any>(productService +'/stores/'+this.storeId$+'/discount/search', header).pipe(
             tap((response) => {
 
                 this._logging.debug("Response from DiscountsService",response);
 
-                // let _pagination = {
-                //     length: response.data.totalElements,
-                //     size: response.data.size,
-                //     page: response.data.number,
-                //     lastPage: response.data.totalPages,
-                //     startIndex: response.data.pageable.offset,
-                //     endIndex: response.data.pageable.offset + response.data.numberOfElements - 1
-                // }
-                let _pagination = { length: 0, size: 0, page: 0, lastPage: 0, startIndex: 0, endIndex: 0 };
+                let _pagination = {
+                    length: response.data.totalElements,
+                    size: response.data.size,
+                    page: response.data.number,
+                    lastPage: response.data.totalPages,
+                    startIndex: response.data.pageable.offset,
+                    endIndex: response.data.pageable.offset + response.data.numberOfElements - 1
+                }
+                // let _pagination = { length: 0, size: 0, page: 0, lastPage: 0, startIndex: 0, endIndex: 0 };
                 this._pagination.next(_pagination);
-                this._discounts.next(response.data);
+                // this._discounts.next(response.data);
+                this._discounts.next(response.data.content);
+
             })
         );
     }
