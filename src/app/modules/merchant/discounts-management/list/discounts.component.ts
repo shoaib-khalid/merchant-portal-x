@@ -64,6 +64,7 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
     searchInputControl: FormControl = new FormControl();
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
+    discountName: string;
 
     /**
      * Constructor
@@ -139,7 +140,8 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
                 switchMap((query) => {
                     this.closeDetails();
                     this.isLoading = true;
-                    return this._discountService.getDiscounts(0, 10, 'name', 'asc', query);
+                    this.discountName = query;
+                    return this._discountService.getDiscounts(0, 10, 'startDate', 'asc', query, '');
                 }),
                 map(() => {
                     this.isLoading = false;
@@ -161,7 +163,7 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
             {
                 // Set the initial sort
                 this._sort.sort({
-                    id          : 'name',
+                    id          : 'startDate',
                     start       : 'asc',
                     disableClear: true
                 });
@@ -185,7 +187,11 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
                     switchMap(() => {
                         this.closeDetails();
                         this.isLoading = true;
-                        return this._discountService.getDiscounts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction);
+                        if (this.discountName != null)
+                            return this._discountService.getDiscounts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, this.discountName, '');
+                        else    
+                            return this._discountService.getDiscounts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, '', '');
+
                     }),
                     map(() => {
                         this.isLoading = false;
