@@ -851,7 +851,7 @@
                                                                             <input
                                                                                 matInput
                                                                                 [value]="variant.name"
-                                                                                (input)="updateLocalVariantTitle(variant, $event)"
+                                                                                (input)="editVariantTitle(variant, $event)"
                                                                                 [readonly]="!productVariantsValueEditMode[i]">
                                                                             <button
                                                                                 *ngIf="!productVariantsValueEditMode[i]"
@@ -865,7 +865,7 @@
                                                                             <button
                                                                                 *ngIf="productVariantsValueEditMode[i]"
                                                                                 mat-icon-button
-                                                                                (click)="productVariantsValueEditMode[i] = !productVariantsValueEditMode[i];updateServerVariantTitle(variant.id);"
+                                                                                (click)="productVariantsValueEditMode[i] = !productVariantsValueEditMode[i];updateVariantTitle(variant.id);"
                                                                                 matSuffix>
                                                                                 <mat-icon
                                                                                     class="icon-size-5"
@@ -915,8 +915,8 @@
                                                 <div class="w-full mt-2 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-auto">
                                                     <!-- Variants Available -->
                                                     <div class="h-44 m-2 leading-none overflow-y-auto border-gray-300 dark:border-gray-500">
-                                                        <div *ngIf="filteredProductVariants">
-                                                            <div *ngFor="let variant of filteredProductVariants; trackBy: trackByFn">
+                                                        <div *ngIf="productVariants$">
+                                                            <div *ngFor="let variant of productVariants$; trackBy: trackByFn">
                                                                 <span class="w-full mb-px font-small leading-tight">{{variant.name}}</span>
                                                                 <div class="flex items-center rounded-full w-full">
                                                                     <div class="ml-0 m-1.5">
@@ -982,13 +982,13 @@
                                                                                         <input
                                                                                             matInput
                                                                                             [value]="variantAvailable.value"
-                                                                                            (input)="updateLocalVariantAvailableTitle(variant, $event)"
+                                                                                            (input)="editVariantAvailableTitle(variant, $event)"
                                                                                             [readonly]="!productVariantAvailableValueEditMode[i]"
                                                                                         >
                                                                                         <button
                                                                                             mat-icon-button
                                                                                             *ngIf="productVariantAvailableValueEditMode[i]"
-                                                                                            (click)="productVariantAvailableValueEditMode[i] = !productVariantAvailableValueEditMode[i]; updateServerVariantAvailableTitle(variant, $event)"
+                                                                                            (click)="productVariantAvailableValueEditMode[i] = !productVariantAvailableValueEditMode[i]; updateVariantAvailableTitle(variant, $event)"
                                                                                             matSuffix>
                                                                                             <mat-icon
                                                                                                 class="icon-size-5 ml-2"
@@ -1019,13 +1019,22 @@
                                                                     <!-- Create variant -->
                                                                     <div
                                                                         class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer hover:bg-hover"
-                                                                        *ngIf="shouldShowCreateVariantAvailableButton(newVariantInput.value)"
+                                                                        *ngIf="shouldShowCreateVariantAvailableButton(newVariantInput.value) && productVariantAvailable$.length < 10"
                                                                         (click)="createVariantAvailable(newVariantInput.value); newVariantInput.value = ''"
                                                                         matRipple>
                                                                         <mat-icon
                                                                             class="mr-2 icon-size-5"
                                                                             [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
                                                                         <div class="break-all">Create "<b>{{newVariantInput.value}}</b>"</div>
+                                                                    </div>
+                                                                    <div
+                                                                        class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-default border-t hover:bg-gray-50 dark:hover:bg-hover"
+                                                                        *ngIf="productVariantAvailable$.length >= 10"
+                                                                    >
+                                                                        <mat-icon
+                                                                            class="mr-2 icon-size-5"
+                                                                            [svgIcon]="'heroicons_outline:exclamation-circle'"></mat-icon>
+                                                                        <div class="md:text-xs">You can only create maximum of 10 variant available</div>
                                                                     </div>
                                                                 </div>
                                                             </div>

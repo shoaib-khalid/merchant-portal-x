@@ -92,6 +92,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     showVariantsSection: boolean = false;
 
     // product variant available
+    productVariantAvailable: FormArray;
     productVariantAvailable$: ProductVariantAvailable[] = [];
     filteredProductVariantAvailable: ProductVariantAvailable[] = [];
     selectedProductVariantAvailable: ProductVariantAvailable[] = [];
@@ -523,78 +524,19 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this.productVariants = this.selectedProductForm.get('productVariants') as FormArray;
                 this.productVariants.clear();
 
-                this.productVariants$.forEach(item=>{
-                    this.productVariants.push(this._formBuilder.group(item));
-                });
-                
-                // reset selectedVariantCombos to empty 
-                this.selectedVariantCombos = [];
-
-                // initialise empty variantItems
-                // this variantItems only for front end use to display variant combination
-                let variantItems:any = [];
-                let variantOptions:any = [];
-
-                // set a new variant object to display @ front end
-                // sort object if there is more than 1 variants
-                if (this.selectedProduct.productVariants.length > 0) {
-                    // sort this selected productVariants
-                    this.sortObjects(this.selectedProduct.productVariants)
-                    // this.variantChecked = true;
-                    // this.toggleDefaultInventory(true)
-                    
-                    // next sort this.selectedProduct.productVariantsAvailable
-                    this.selectedProduct.productVariants.forEach((element: ProductVariant, index) => {
-                        this.sortObjects(element.productVariantsAvailable)
-                        // this.options.push({ name: element.name, id: element.id })
-    
-                        // push empty values array and ids array for each productVariantsAvailable
-                        variantOptions.push({ name: element.name, id: element.id })
-                        variantItems.push({ values: [], ids: [] })
-    
-                        // push productVariantsAvailable.value and productVariantsAvailable.id to the 
-                        // created items above
-                        element.productVariantsAvailable.forEach(item => {
-                            variantItems[index].values.push(item.value);
-                            variantItems[index].ids.push(item.id);
-                        });
+                this.productVariants$.forEach(item => {
+                    let _item = this._formBuilder.group({
+                        id: item.id,
+                        name: item.name,
+                        productVariantsAvailable: [item.productVariantsAvailable] // idk why, but this is the only workable way to archive array in this._formBuilder.group
                     });
-                }
 
-                
-                this.getallCombinations(variantItems)
-                
-                const productIdLength = this.selectedProduct.id.length;
-                (this.selectedProduct.productInventories).forEach((item: ProductInventory, index) => {
-
-                    if (item.itemCode.slice(-1) != "a") {
-                        const index = parseInt(item.itemCode.substring(productIdLength));                
-
-                        if (this.selectedVariantCombos[index]) {
-                            this.selectedVariantCombos[index].itemCode = item.itemCode;
-                            this.selectedVariantCombos[index].price = item.price;
-                            this.selectedVariantCombos[index].sku = item.sku;
-                            this.selectedVariantCombos[index].quantity = item.quantity;
-                        }
-                    }
+                    this.productVariants.push(_item);
                 });
+                
+                // Generate variants combination
 
-                // remove images that does not have itemCode 
-                // so this means arr2 will contains images that related to variants only 
-                const arr2 = (this.selectedProduct.productAssets).filter((item) => 
-                    item.itemCode !== null
-                );
-
-                // get selectedVariantCombos
-                const arr1 = this.selectedVariantCombos;
-
-                const map = new Map();
-                arr1.forEach(item => map.set(item.itemCode, item));
-                arr2.forEach(item => map.set(item.itemCode, {...map.get(item.itemCode), ...item}));
-                const mergedArr = Array.from(map.values());
-
-                // generate displayProductVariantAssets
-                this.displayProductVariantAssets = mergedArr;          
+                this.generateVariantCombo();
 
                 // ---------------------
                 // Category
@@ -1233,6 +1175,134 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     // Product Variant Section
     // --------------------------------------
 
+    generateVariantCombo(){
+        // reset selectedVariantCombos to empty 
+        this.selectedVariantCombos = [];
+
+        // initialise empty variantItems
+        // this variantItems only for front end use to display variant combination
+        let variantItems:any = [];
+        let variantOptions:any = [];
+
+        // set a new variant object to display @ front end
+        // sort object if there is more than 1 variants
+        if (this.selectedProduct.productVariants.length > 0) {
+            // sort this selected productVariants
+            this.sortObjects(this.selectedProduct.productVariants)
+            // this.variantChecked = true;
+            // this.toggleDefaultInventory(true)
+            
+            // next sort this.selectedProduct.productVariantsAvailable
+            this.selectedProduct.productVariants.forEach((element: ProductVariant, index) => {
+                this.sortObjects(element.productVariantsAvailable)
+                // this.options.push({ name: element.name, id: element.id })
+
+                // push empty values array and ids array for each productVariantsAvailable
+                variantOptions.push({ name: element.name, id: element.id })
+                variantItems.push({ values: [], ids: [] })
+
+                // push productVariantsAvailable.value and productVariantsAvailable.id to the 
+                // created items above
+                element.productVariantsAvailable.forEach(item => {
+                    variantItems[index].values.push(item.value);
+                    variantItems[index].ids.push(item.id);
+                });
+            });
+        }
+        
+        this.getallCombinations(variantItems)
+        
+        const productIdLength = this.selectedProduct.id.length;
+        (this.selectedProduct.productInventories).forEach((item: ProductInventory, index) => {
+
+            if (item.itemCode.slice(-1) != "a") {
+                const index = parseInt(item.itemCode.substring(productIdLength));                
+
+                if (this.selectedVariantCombos[index]) {
+                    this.selectedVariantCombos[index].itemCode = item.itemCode;
+                    this.selectedVariantCombos[index].price = item.price;
+                    this.selectedVariantCombos[index].sku = item.sku;
+                    this.selectedVariantCombos[index].quantity = item.quantity;
+                }
+            }
+        });
+
+        // remove images that does not have itemCode 
+        // so this means arr2 will contains images that related to variants only 
+        const arr2 = (this.selectedProduct.productAssets).filter((item) => 
+            item.itemCode !== null
+        );
+
+        // get selectedVariantCombos
+        const arr1 = this.selectedVariantCombos;
+
+        const map = new Map();
+        arr1.forEach(item => map.set(item.itemCode, item));
+        arr2.forEach(item => map.set(item.itemCode, {...map.get(item.itemCode), ...item}));
+        const mergedArr = Array.from(map.values());
+
+        // generate displayProductVariantAssets
+        this.displayProductVariantAssets = mergedArr;
+    }
+
+    deleteEntireInventory() {
+        var promise = new Promise(async (resolve, reject) => {
+          for (var j = 0; j < this.productInventories$.length; j++) {
+            await this._inventoryService.deleteInventoryToProduct(this.selectedProduct.id, this.productInventories$[j].itemCode)
+          }
+          this.productInventories$ = [];
+          resolve("done")
+        });
+        return promise;
+    }
+
+    
+  addInventoryItem(productVariantAvailableIds) {
+    var promise = new Promise(async (resolve, reject) => {
+      var k = 0;
+      for (var i = 0; i < this.selectedVariantCombos.length; i++) {
+        const combosSplitted = this.selectedVariantCombos[i].variant.split("/");
+        for (var j = 0; j < combosSplitted.length; j++) {
+          const productAvailableId = await this.getVariantAvailableByValue(combosSplitted[j], productVariantAvailableIds)
+
+          if (productAvailableId == null) {
+            continue;
+          }
+          try {
+            const test = await this._inventoryService.addInventoryToProduct(this.selectedProduct, {
+              itemCode: this.selectedProduct.id + i,
+              productVariantAvailableId: productAvailableId,
+              productId: this.selectedProduct.id,
+              sequenceNumber: 0
+            })
+            if (test["status"] == 200) {
+              k = k + 1;
+            }
+          } catch (Ex) {
+
+          }
+
+        }
+
+      }
+      resolve("")
+    });
+    return promise;
+  }
+
+  getVariantAvailableByValue(value, productAvailableIds) {
+    var promise = new Promise(async (resolve, reject) => {
+      for (var i = 0; i < productAvailableIds.length; i++) {
+        if (productAvailableIds[i].value == value.trim()) {
+          resolve(productAvailableIds[i].productVariantAvailableId);
+          break;
+        }
+      }
+      resolve(null);
+    });
+    return promise;
+  }
+
     getVariantCombosName(variantCombosArr){
         let variantCombosName: string = "";
         // this features is to sort, due to native of this.variants always sorted by id
@@ -1375,12 +1445,12 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             });
     }
 
-    updateLocalVariantTitle(variants: ProductVariant, event){
+    editVariantTitle(variants: ProductVariant, event){
         // Update the title on the category
         variants.name = event.target.value;
     }
 
-    updateServerVariantTitle(variants: ProductVariant, event){
+    updateVariantTitle(variants: ProductVariant, event){
 
         alert("Update variant, backend not ready yet")
         // Update the category on the server
@@ -1727,7 +1797,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         {
             // Otherwise add the variant to the product
             let variantId
-            this.addVariantAvailableToProduct(variantTag, variantId);
+            this.addVariantAvailableToVariant(variantTag, variantId);
         }
     }
 
@@ -1749,19 +1819,49 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((response) => { 
                 // Add the variant to the product
-                this.addVariantAvailableToProduct(response,this.selectedProductVariants.id);
+                this.addVariantAvailableToVariant(response,this.selectedProductVariants.id);
 
                 // reset current filteredProductVariantAvailable
                 this.filteredProductVariantAvailable = this.productVariantAvailable$;
             });
+
+        // generate inventory on form (FE only)
+        
+        this.productVariants = this.selectedProductForm.get('productVariants') as FormArray;
+        this.productInventories = this.selectedProductForm.get('productInventories') as FormArray;
+
+        // if productVariants === 2, it mean that's it's a meet requirement to genarate the combo table
+        if (this.selectedProductForm.get('productVariants').value.length === 2){
+
+            // if productInventories === 1, it mean that's there's no variant in product inventory yet
+            // so lets clear up the non variant product inventory first
+            if (this.selectedProductForm.get('productInventories').value.length === 1){
+                this.productInventories.clear();
+                this.productInventories.push(this._formBuilder.group({
+                    itemCode: null,
+                    price: this.productInventories$[0].price,
+                    productId: this.selectedProduct.id,
+                    quantity: this.productInventories$[0].quantity,
+                    sku: this.productInventories$[0].sku,
+                    status: "AVAILABLE",
+                    productInventoryItems: this._formBuilder.array([])
+                }));
+            }
+        } else {
+            console.log("this.productInventories", this.productInventories)
+        }
+
+        // this.productInventories$.forEach(item => {
+        //     this.productInventories.push(this._formBuilder.group(item));
+        // });
     }
  
-    updateLocalVariantAvailableTitle(variantsAvailable: ProductVariantAvailable, event){
+    editVariantAvailableTitle(variantsAvailable: ProductVariantAvailable, event){
         // Update the title on the category
         variantsAvailable.value = event.target.value;
     }
 
-    updateServerVariantAvailableTitle(variantsAvailable: ProductVariantAvailable, event){
+    updateVariantAvailableTitle(variantsAvailable: ProductVariantAvailable, event){
 
         alert("Update variant available, backend not ready yet")
         // Update the category on the server
@@ -1809,20 +1909,31 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
       *
       * @param variant
       */
-    addVariantAvailableToProduct(productVariantAvailable: ProductVariantAvailable, variantId: string): void
+    addVariantAvailableToVariant(productVariantAvailable: ProductVariantAvailable, variantId: string): void
     {
-        let selectedProductVariant = this.selectedProduct.productVariants.find(variant=> variant.id === variantId);
+        let index = this.productVariants$.findIndex(variant=> variant.id === variantId);
         
+        // if null define empty array
+        if (this.productVariants$[index].productVariantsAvailable === null){
+            this.productVariants$[index].productVariantsAvailable = Array();
+            this.productVariants$[index].productVariantsAvailable.push(productVariantAvailable);
+        } 
         // Add the productVariantAvailable
-        selectedProductVariant.productVariantsAvailable.unshift(productVariantAvailable);
+        this.productVariants$[index].productVariantsAvailable.unshift(productVariantAvailable);
 
-        // Get Current Selected Variant (since variant not changed in this case)
-        // things that change is variant available
-        let currentSelectedVariant = this.selectedProductForm.get('productVariants').value;
-        currentSelectedVariant.push(selectedProductVariant);
+        // Update the product variant form
+        this.productVariants = this.selectedProductForm.get('productVariants') as FormArray;
+        this.productVariants.clear();
+        
+        this.productVariants$.forEach(item => {
+            let _item = this._formBuilder.group({
+                id: item.id,
+                name: item.name,
+                productVariantsAvailable: [item.productVariantsAvailable] // idk why, but this is the only workable way to archive array in this._formBuilder.group
+            });
 
-        // Update the selected product form
-        this.selectedProductForm.get('productVariants').patchValue(currentSelectedVariant);
+            this.productVariants.push(_item);
+        });
         
         // Mark for check
         this._changeDetectorRef.markForCheck();

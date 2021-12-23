@@ -516,6 +516,47 @@ export class InventoryService
         );
     }
 
+    /**
+     * Delete Inventory to the product
+     *
+     * @param product
+     */
+    deleteInventoryToProduct(productId: string, productInventoriesId: string): Observable<ProductInventory>{
+
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._products.pipe(
+            take(1),
+            switchMap(products => this._httpClient.delete<Product>(productService +'/stores/'+this.storeId$+'/products/' + productId + "/inventory/" + productInventoriesId, header).pipe(
+                map((response) => {
+
+                    this._logging.debug("Response from ProductsService (deleteInventoryToProduct)",response);
+
+                    // Find the index of the updated product
+                    const productIndex = products.findIndex(item => item.id === productId);
+
+                    // Find the index of the updated product inventory
+                    const productInventoryIndex = products[productIndex].productInventories.findIndex(element => element.itemCode === response["data"].itemCode);
+
+                    // Update the product
+                    products[productIndex].productInventories.splice(productInventoryIndex, 1);
+                    
+                    // Update the products
+                    this._products.next(products);
+
+                    // Return the new product
+                    return response["data"];
+                })
+            ))
+        );
+    }
+
 
     getVariants(){
         let productService = this._apiServer.settings.apiServer.productService;
@@ -594,12 +635,18 @@ export class InventoryService
             take(1),
             // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
             switchMap(products => this._httpClient.post<ProductVariant>(productService + '/stores/' + this.storeId$ + '/products/' + productId + "/variants", variant , header).pipe(
-                map((newProduct) => {
+                map((response) => {
 
-                    this._logging.debug("Response from ProductsService (Current Variant)",newProduct);
+                    this._logging.debug("Response from ProductsService (Create Variant)",response);
+
+                    let newProduct = response["data"];
+                    // check productVariantsAvailable exists or not in the response
+                    if (!response.productVariantsAvailable) {
+                        newProduct["productVariantsAvailable"] = [];
+                    }
 
                     // Return the new product
-                    return newProduct["data"];
+                    return newProduct;
                 })
             ))
         );
@@ -686,7 +733,7 @@ export class InventoryService
             switchMap(products => this._httpClient.post<ProductVariantAvailable>(productService + '/stores/' + this.storeId$ + '/products/' + productId + "/variants-available", variantAvailable , header).pipe(
                 map((newProduct) => {
 
-                    this._logging.debug("Response from ProductsService (Current Variant Available)",newProduct);
+                    this._logging.debug("Response from ProductsService (Create Variant Available)",newProduct);
 
                     // Return the new product
                     return newProduct["data"];
@@ -747,15 +794,19 @@ export class InventoryService
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
             params: {
-                name
+                storeId: this.storeId$
             }
         };
+        
+        if (name !== null) {
+            header.params["name"] = name;
+        }
 
         // product-service/v1/swagger-ui.html#/store-controller/putStoreCategoryByStoreIdUsingGET
-        return this._httpClient.get<any>(productService + '/stores/' + this.storeId$ + '/store-categories',header).pipe(
+        return this._httpClient.get<any>(productService + '/store-categories',header).pipe(
             tap((categories) => {
                 this._logging.debug("Response from ProductsService (getCategories)",categories);
-                this._categories.next(categories.data);
+                this._categories.next(categories["data"].content);
             })
         );
     }
