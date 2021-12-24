@@ -898,7 +898,7 @@ export class InventoryService
       *
       * @param category
       */
-    createCategory(category: ProductCategory, body = {}): Observable<ProductCategory>
+    createCategory(category: ProductCategory, formData: FormData = null): Observable<ProductCategory>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -914,7 +914,7 @@ export class InventoryService
         // product-service/v1/swagger-ui.html#/store-category-controller/postStoreCategoryByStoreIdUsingPOST
         return this.categories$.pipe(
             take(1),
-            switchMap(categories => this._httpClient.post<any>(productService + '/store-categories', body , header).pipe(
+            switchMap(categories => this._httpClient.post<any>(productService + '/store-categories', formData , header).pipe(
                 map((newCategory) => {
 
                     this._logging.debug("Response from ProductsService (createCategory)",category);
@@ -929,13 +929,13 @@ export class InventoryService
         );
     }
   
-     /**
-      * Update the category
-      *
-      * @param id
-      * @param category
-      */
-    updateCategory(id: string, category: ProductCategory, formdata: FormData = null): Observable<ProductCategory>
+    /**
+     * Update the category
+     *
+     * @param id
+     * @param category
+     */
+    updateCategory(id: string, category: ProductCategory, formdata: FormData = null, fileSource = null): Observable<ProductCategory>
     {
 
         let productService = this._apiServer.settings.apiServer.productService;
@@ -960,6 +960,11 @@ export class InventoryService
 
                     let updatedCategory = categories[index];
                     updatedCategory = category;
+
+                    // assign sourceFile from FE back to categories
+                    if (fileSource !== null) {
+                        updatedCategory = Object.assign(updatedCategory,{thumbnailUrl: fileSource});
+                    }
                     
                     // Update the categories
                     categories[index] = { ...categories[index], ...updatedCategory};
@@ -1009,24 +1014,7 @@ export class InventoryService
 
                     // Return the deleted status
                     return response["status"];
-                }),
-                filter(isDeleted => isDeleted),
-                switchMap(isDeleted => this.products$.pipe(
-                    take(1),
-                    map((products) => {
-
-                        // Iterate through the products
-                        products.forEach((product) => {
-
-                            // remove that category in each products 
-                            product.categoryId = "";
-
-                        });
-
-                        // Return the deleted status
-                        return isDeleted;
-                    })
-                ))
+                })
             ))
         );
     }

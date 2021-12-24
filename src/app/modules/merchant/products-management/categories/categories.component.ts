@@ -294,13 +294,12 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
                 storeId: this.storeId$,
                 parentCategoryId: null,
                 thumbnailUrl:null,
-
             };
             const formData = new FormData();
             formData.append("file", result.imagefiles[0]);
     
             // Create category on the server
-            this._inventoryService.createCategory(category,formData)
+            this._inventoryService.createCategory(category, formData)
                 .pipe(takeUntil(this._unsubscribeAll))
                 .subscribe((response) => {
                     response["data"]; 
@@ -314,16 +313,20 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
     updateCategory(): void
     {
         let formData = null;
+        let fileSource = null;
         if (this.files[0].selectedFiles) {
-            formData = new FormData()
             // create a new one
+            formData = new FormData();
             formData.append('file',this.files[0].selectedFiles[0]);
+
+            // load sourceFile with new data
+            fileSource = this.files[0].fileSource;
         }
 
         let categoryData = this.categoriesForm.getRawValue();
 
         // Update the category on the server
-        this._inventoryService.updateCategory(this.selectedCategory.id, categoryData, formData)
+        this._inventoryService.updateCategory(this.selectedCategory.id, categoryData, formData, fileSource)
             .pipe(debounceTime(300))
             .subscribe(()=>{
                 this.showFlashMessage('success');
@@ -410,7 +413,6 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
     // find index of object this.files
     let index = this.files.findIndex(preview => preview.type === fileType);
 
-    
     // set each of the attributes
     this.files[index].fileSource = null;
     this.files[index].selectedFileName = "";
@@ -440,7 +442,6 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
 
             this._changeDetectorRef.markForCheck();                
         };
-        // console.log("this.files["+index+"].selectedFiles["+i+"]",this.files[index].selectedFiles[i])
         reader.readAsDataURL(this.files[index].selectedFiles[i]);
         this.files[index].selectedFileName = this.files[index].selectedFiles[i].name;
         }

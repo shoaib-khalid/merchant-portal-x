@@ -606,55 +606,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 return;
             }
 
-            if (productType === "normal") {
-                // get category by name = no-category
-                this._inventoryService.getCategories("no-category").subscribe(async (res)=>{
-    
-                    let _noCategory = res["data"].find(obj => obj.name === "no-category");
-    
-                    // if there is no category with "no-category" name, create one    
-                    if (!_noCategory || _noCategory["name"] !== "no-category"){
-                        await this._inventoryService.createCategory({
-                            name: "no-category",
-                            parentCategoryId: "",
-                            storeId: this.storeId$,
-                            thumbnailUrl: ""
-                        }).subscribe((res)=>{
-                            if (res["status"] !== 201){
-                                console.error("an error has occur",res)
-                            } else {
-                                this.createProduct(res["data"].id, productType, result);
-                            }
-                        });
-                    } else {
-                        this.createProduct(_noCategory.id, productType, result);
-                    }
-                });
-            } else if (productType === "combo") {
-                // get category by name =Combos
-                this._inventoryService.getCategories("Combos").subscribe(async (res)=>{
-    
-                    let _noCategory = res["data"].find(obj => obj.name === "Combos");
-    
-                    // if there is no category with "Combos" name, create one   
-                    if (!_noCategory || _noCategory["name"] !== "Combos"){
-                        await this._inventoryService.createCategory({
-                            name: "Combos",
-                            parentCategoryId: "",
-                            storeId: this.storeId$,
-                            thumbnailUrl: ""
-                        }).subscribe((res)=>{
-                            if (res["status"] !== 201){
-                                console.error("an error has occur",res)
-                            } else {
-                                this.createProduct(res["data"].id, productType, result);
-                            }
-                        });
-                    } else {
-                        this.createProduct(_noCategory.id, productType, result);
-                    }
-                });
-            }
+            this.createProduct(result.categoryId, productType, result);
         });
     }
 
@@ -732,10 +684,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      */
     updateSelectedProduct(): void
     {
-        console.log("hare: ", this.selectedProductForm.getRawValue());
-        
-        return;
-
         // Get
         // let storeFrontDomain = this._apiServer.settings.storeFrontDomain;
         let storeFrontDomain = 'symplified.ai';
@@ -2088,13 +2036,13 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
       * @param category
       * @param event
       */
-    updateLocalCategoryTitle(category: ProductCategory, event): void
+    editCategoryTitle(category: ProductCategory, event): void
     {
         // Update the title on the category
         category.name = event.target.value;
     }
 
-    updateServerCategoryTitle(category: ProductCategory, event): void
+    updateCategoryTitle(category: ProductCategory, event): void
     {
         // Update the category on the server
         this._inventoryService.updateCategory(category.id, category)
@@ -2179,6 +2127,24 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     {
         if (change.checked) {
             this.addCategoryToProduct(category);
+
+            // --------------------------------
+            // Reposition selected category
+            // --------------------------------
+
+            // Sort the filtered categories, put selected category on top
+            // First get selected array index by using this.selectedProduct.categoryId
+            let selectedProductCategoryIndex = this.filteredProductCategories.findIndex(item => item.id === this.selectedProduct.categoryId);
+            // if selectedProductCategoryIndex < -1 // category not selected
+            // if selectedProductCategoryIndex = 0 // category selected already in first element
+            if (selectedProductCategoryIndex > 0) {
+                // if index exists get the object of selectedProductCategory
+                this.selectedProductCategory = this.filteredProductCategories[selectedProductCategoryIndex];
+                // remove the object from this.filteredProductCategories
+                this.filteredProductCategories.splice(selectedProductCategoryIndex,1);
+                // re add this.selectedProductCategory in front
+                this.filteredProductCategories.unshift(this.selectedProductCategory);
+            }
         } else {
             this.removeCategoryFromProduct(category);
         }

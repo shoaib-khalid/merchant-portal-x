@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef, Inject } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
@@ -123,12 +123,11 @@ export class AddProductComponent implements OnInit, OnDestroy
             allowOutOfStockPurchases: [false],
             minQuantityForAlarm: [-1],
             packingSize      : ['', [Validators.required]],
-            availableStock   : [''],
-            sku              : [''],
-            price            : [''],
+            availableStock   : ['', [Validators.required]],
+            sku              : ['', [Validators.required]],
+            price            : ['', [Validators.required]],
             images           : [[]],
             imagefiles       : [[]],
-
 
             // form completion
             valid            : [false]
@@ -170,10 +169,8 @@ export class AddProductComponent implements OnInit, OnDestroy
         this.addProductForm.valueChanges.subscribe(data => {
             if (data.description) {
                 this.checkinput['description'] = true;
-                this.message = "";
             } else {
                 this.checkinput['description'] = false;
-                this.message = "Please insert product description";
             }
         })
 
@@ -268,7 +265,7 @@ export class AddProductComponent implements OnInit, OnDestroy
 
         // If there is a category...
         const category = this.filteredProductCategories[0];
-        const isCategoryApplied = this.selectedProduct.categoryId;
+        const isCategoryApplied = this.addProductForm.get('categoryId').value;
 
         // If the found category is already applied to the product...
         if ( isCategoryApplied )
@@ -400,6 +397,24 @@ export class AddProductComponent implements OnInit, OnDestroy
     {
         if (change.checked) {
             this.addCategoryToProduct(category);
+
+            // --------------------------------
+            // Reposition selected category
+            // --------------------------------
+
+            // Sort the filtered categories, put selected category on top
+            // First get selected array index by using this.selectedProduct.categoryId
+            let selectedProductCategoryIndex = this.filteredProductCategories.findIndex(item => item.id === this.addProductForm.get('categoryId').value);
+            // if selectedProductCategoryIndex < -1 // category not selected
+            // if selectedProductCategoryIndex = 0 // category selected already in first element
+            if (selectedProductCategoryIndex > 0) {
+                // if index exists get the object of selectedProductCategory
+                this.selectedProductCategory = this.filteredProductCategories[selectedProductCategoryIndex];
+                // remove the object from this.filteredProductCategories
+                this.filteredProductCategories.splice(selectedProductCategoryIndex,1);
+                // re add this.selectedProductCategory in front
+                this.filteredProductCategories.unshift(this.selectedProductCategory);
+            }
         } else {
             this.removeCategoryFromProduct();
         }
@@ -530,6 +545,27 @@ export class AddProductComponent implements OnInit, OnDestroy
     }
 
     addNewProduct() {
+
+        // Do nothing if the form is invalid
+        let BreakException = {};
+        try {
+            Object.keys(this.addProductForm.controls).forEach(key => {
+                const controlErrors: ValidationErrors = this.addProductForm.get(key).errors;
+                if (controlErrors != null) {
+                    Object.keys(controlErrors).forEach(keyError => {
+                        this.message = 'Field "' + key + '" error: ' + keyError;                        
+                        throw BreakException;
+                    });
+                }
+            });
+        } catch (error) {
+            return;
+        }
+
+        // --------------------
+        // Process
+        // --------------------
+
         this.addProductForm.get('images').patchValue(this.images);
         this.addProductForm.get('imagefiles').patchValue(this.imagesFile);
         this.dialogRef.close(this.addProductForm.value);
@@ -546,10 +582,8 @@ export class AddProductComponent implements OnInit, OnDestroy
             (input === 'category' && event.target.checked)
             ) {
             this.checkinput[input] = true;
-            this.message = "";
         } else {
             this.checkinput[input] = false;
-            this.message = "Please insert product " + input;
         }
 
     }

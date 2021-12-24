@@ -543,8 +543,9 @@
                                                                             [id]="'category-input-' + category.id"
                                                                             [value]="category.name"
                                                                             [readonly]="!productCategoriesValueEditMode[i]"
-                                                                            (input)="updateLocalCategoryTitle(category, $event)"
+                                                                            (input)="editCategoryTitle(category, $event)"
                                                                         >
+                                                                        <!-- Display Edit -->
                                                                         <input
                                                                             [id]="'category-edit-' + category.id"
                                                                             type="button"
@@ -560,16 +561,17 @@
                                                                                 class="icon-size-5"
                                                                                 [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
                                                                         </label>
+                                                                        <!-- Update to backend -->
                                                                         <input
-                                                                            [id]="'category-add-' + category.id"
+                                                                            [id]="'category-update-' + category.id"
                                                                             type="button"
-                                                                            (click)="productCategoriesValueEditMode[i] = !productCategoriesValueEditMode[i]; updateServerCategoryTitle(category, $event)"
+                                                                            (click)="productCategoriesValueEditMode[i] = !productCategoriesValueEditMode[i]; updateCategoryTitle(category, $event)"
                                                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                                             mat-button>
                                                                         <label 
                                                                             *ngIf="productCategoriesValueEditMode[i]"
                                                                             class="flex items-center justify-center p-2 rounded-full cursor-pointer hover:bg-hover"
-                                                                            [for]="'category-add-' + category.id"
+                                                                            [for]="'category-update-' + category.id"
                                                                             matRipple>
                                                                             <mat-icon
                                                                                 class="icon-size-5"
