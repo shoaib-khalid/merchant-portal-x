@@ -8,7 +8,7 @@ import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { MatDialog } from '@angular/material/dialog';
 import { InventoryService } from 'app/core/product/inventory.service';
-import { ProductCategory } from 'app/core/product/inventory.types';
+import { ProductCategory, ProductCategoryPagination } from 'app/core/product/inventory.types';
 import { AddCategoryComponent } from '../add-category/add-category.component';
 import { DiscountPagination } from '../../discounts-management/list/discounts.types';
 import { Product } from 'app/core/product/inventory.types';
@@ -44,6 +44,8 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
     categories$: Observable<ProductCategory[]>;
     selectedCategory: ProductCategory | null = null;
     categoriesForm: FormGroup;
+
+    pagination: ProductCategoryPagination;
 
     // discount tier
     calculationType: string;
@@ -108,6 +110,36 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
         // Get the categories
         this.categories$ = this._inventoryService.categories$;
 
+
+        // Get the pagination
+        this._inventoryService.pagination$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe((pagination: ProductCategoryPagination) => {
+
+            // Update the pagination
+            this.pagination = pagination;
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
+
+        
+        // Subscribe to search input field value changes
+        this.searchInputControl.valueChanges
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((query) => {
+                    this.closeDetails();
+                    this.isLoading = true;
+                    return this._inventoryService.getByQueryCategories(0, 10, 'name', 'asc', query);
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
+
         // Mark for check
         this._changeDetectorRef.markForCheck();
 
@@ -162,7 +194,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
                      switchMap(() => {
                          this.closeDetails();
                          this.isLoading = true;
-                         return this._inventoryService.getProducts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction);
+                         return this._inventoryService.getByQueryCategories(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction);
                      }),
                      map(() => {
                          this.isLoading = false;
