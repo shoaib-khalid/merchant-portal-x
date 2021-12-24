@@ -16,6 +16,7 @@ export interface ClientPaymentDetails
     id?: string;
     bankName: string;
     bankAccountNumber: string;
+    bankAccountTitle?: string;
     clientId?: string;
     created?: string;
     updated?: string;
