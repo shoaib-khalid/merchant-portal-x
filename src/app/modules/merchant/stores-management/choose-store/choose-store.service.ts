@@ -87,8 +87,8 @@ export class ChooseStoreService
                         name: "Food and Beverages"
                     },
                     {
-                        id: "E-Commerece",
-                        slug: "E-Commerece",
+                        id: "E-Commerce",
+                        slug: "E-Commerce",
                         name: "E-commerce"   
                     }
                 ];

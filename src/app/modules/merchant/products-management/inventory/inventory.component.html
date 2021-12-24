@@ -25,7 +25,7 @@
                     [placeholder]="'Search products'">
             </mat-form-field>
             <!-- Add product button -->
-            <ng-container *ngIf="store$.verticalCode === 'E-Commerece' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'">
+            <ng-container *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'">
                 <button
                     class="ml-4"
                     (click)="initCreateProduct('normal')"
@@ -451,7 +451,7 @@
                                             <!-- Product status -->
                                             <mat-form-field 
                                                 class="w-full pr-2"
-                                                *ngIf="store$.verticalCode === 'E-Commerece' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'">
+                                                *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'">
                                                 <mat-label>Packing Size</mat-label>
                                                 <mat-select
                                                     class="w-full"
@@ -688,7 +688,7 @@
                                                 </mat-slide-toggle>
                                             </div>
                                         </div>
-                                        <div *ngIf="store$.verticalCode === 'E-Commerece' || store$.verticalCode === 'e-commerce-b2b2c' || store$.verticalCode === 'ECommerce_PK'" class="flex flex-col w-full sm:w-1/5 sm:pl-2 py-2 sm:py-0">
+                                        <div *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'e-commerce-b2b2c' || store$.verticalCode === 'ECommerce_PK'" class="flex flex-col w-full sm:w-1/5 sm:pl-2 py-2 sm:py-0">
                                             <span class="mb-2 sm:mb-4 font-medium leading-tight">Variants 
                                                 <mat-icon
                                                     matTooltip="This product have variants ?"

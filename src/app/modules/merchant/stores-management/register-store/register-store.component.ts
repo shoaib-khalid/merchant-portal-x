@@ -175,7 +175,7 @@ export class RegisterStoreComponent implements OnInit
                 // check if vertical selected is valid for selected country
                 if ((_verticalCode === "ECommerce_PK" || _verticalCode === "FnB_PK") && symplifiedCountryId === "PAK") {
                     this.invalidVertical = false;
-                } else if ((_verticalCode === 'E-Commerece' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'FnB') && symplifiedCountryId === "MYS") {
+                } else if ((_verticalCode === 'E-Commerce' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'FnB') && symplifiedCountryId === "MYS") {
                     this.invalidVertical = false;
                 } else {
                     this.invalidVertical = true;
@@ -207,7 +207,7 @@ export class RegisterStoreComponent implements OnInit
 
                 if (_verticalCode === "FnB" || _verticalCode === "FnB_PK") {
                     _deliveryType = "ADHOC";
-                } else if (_verticalCode === 'E-Commerece' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'ECommerce_PK') {
+                } else if (_verticalCode === 'E-Commerce' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'ECommerce_PK') {
                     _deliveryType = "SCHEDULED";
                 } else {
                     console.error("Invalid vertical code: ", _verticalCode)
@@ -466,7 +466,7 @@ export class RegisterStoreComponent implements OnInit
 
                 let _itemType;
                 let _deliveryType;
-                if (this.createStoreForm.get('verticalCode').value === "E-Commerece" || this.createStoreForm.get('verticalCode').value === "e-commerce-b2b2c" || this.createStoreForm.get('verticalCode').value === "ECommerce_PK") {
+                if (this.createStoreForm.get('verticalCode').value === "E-Commerce" || this.createStoreForm.get('verticalCode').value === "e-commerce-b2b2c" || this.createStoreForm.get('verticalCode').value === "ECommerce_PK") {
                     // this is actually handled by front end (but incase of hacking)
                     if (deliveryType === "SELF") { 
                         _itemType = null;

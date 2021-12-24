@@ -238,7 +238,7 @@ export class EditStoreComponent implements OnInit
 
                 if (_verticalCode === "FnB" || _verticalCode === "FnB_PK") {
                     _deliveryType = "ADHOC";
-                } else if (_verticalCode === 'E-Commerece' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'ECommerce_PK') {
+                } else if (_verticalCode === 'E-Commerce' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'ECommerce_PK') {
                     _deliveryType = "SCHEDULED";
                 } else {
                     console.error("Invalid vertical code: ", _verticalCode)
@@ -511,7 +511,7 @@ export class EditStoreComponent implements OnInit
 
                 let _itemType;
                 let _deliveryType;
-                if (this.editStoreForm.get('verticalCode').value === "E-Commerece" || this.editStoreForm.get('verticalCode').value === "e-commerce-b2b2c" || this.editStoreForm.get('verticalCode').value === "ECommerce_PK") {
+                if (this.editStoreForm.get('verticalCode').value === "E-Commerce" || this.editStoreForm.get('verticalCode').value === "e-commerce-b2b2c" || this.editStoreForm.get('verticalCode').value === "ECommerce_PK") {
                     // this is actually handled by front end (but incase of hacking)
                     if (deliveryType === "SELF") { 
                         _itemType = null;
