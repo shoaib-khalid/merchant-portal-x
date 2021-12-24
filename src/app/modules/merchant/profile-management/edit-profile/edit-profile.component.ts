@@ -67,6 +67,8 @@ export class EditProfileComponent implements OnInit
             // phoneNumber        : ['', RegisterStoreValidationService.phonenumberValidator],
             bankName           : ['', Validators.required],
             bankAccountNumber  : ['', Validators.required],
+            bankAccountTitle  : ['', Validators.required],
+            
             
         });
 
@@ -115,6 +117,7 @@ export class EditProfileComponent implements OnInit
             (response) => {
                 // Fill the form
                 this.editProfileForm.patchValue(response);
+                
             } 
         );
         
@@ -127,6 +130,7 @@ export class EditProfileComponent implements OnInit
                   // Fill the form
                 this.editProfileForm.get('bankAccountNumber').patchValue(response.bankAccountNumber);
                 this.editProfileForm.get('bankName').patchValue(response.bankName);
+                this.editProfileForm.get('bankAccountTitle').patchValue(response.bankAccountTitle);
 
                 this.clientPaymentId = response.id;
             } 
@@ -180,7 +184,8 @@ export class EditProfileComponent implements OnInit
 
         let newBody = {
             bankAccountNumber: this.editProfileForm.get('bankAccountNumber').value,
-            bankName : this.editProfileForm.get('bankName').value
+            bankName : this.editProfileForm.get('bankName').value,
+            bankAccountTitle : this.editProfileForm.get('bankAccountTitle').value
         };
 
         // update payment profile

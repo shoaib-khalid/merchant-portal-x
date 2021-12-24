@@ -117,7 +117,7 @@
                             </mat-form-field>
                         </div>
                         <!-- phone number -->
-                        <div class="flex flex-col lg:w-full sm:px-4">
+                        <!-- <div class="flex flex-col lg:w-full sm:px-4">
                             <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
                                 <input
                                     matInput
@@ -131,6 +131,29 @@
                                    [svgIcon]="'heroicons_outline:phone'">
                                </mat-icon>  
                                 <mat-label>Phone Number</mat-label>
+                                <mat-error *ngIf="editProfileForm.get('name').hasError('required')">
+                                    Required
+                                </mat-error>
+                                <mat-error *ngIf="editProfileForm.get('name').hasError('storeNameAlreadyTaken')">
+                                    The store name entered is already taken
+                                </mat-error>
+                            </mat-form-field>
+                        </div> -->
+                            <!-- Bank account title -->
+                        <div class="flex flex-col lg:w-full sm:px-4">
+                            <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
+                                <input
+                                    matInput
+                                    maxlength="100"
+                                    placeholder="Enter bank title"
+                                    [formControlName]="'bankAccountTitle'"
+                                    [required]="true"
+                                    >
+                                <mat-icon
+                                    matPrefix
+                                    [svgIcon]="'heroicons_outline:currency-dollar'">
+                                </mat-icon>  
+                                <mat-label>Bank Account Title</mat-label>
                                 <mat-error *ngIf="editProfileForm.get('name').hasError('required')">
                                     Required
                                 </mat-error>
@@ -196,7 +219,7 @@
                             <!-- ID(front&back) -->
                             <div class="flex flex-col sm:flex-row">
                                 <!-- frontside ID -->
-                                <div class="flex flex-col w-full lg:w-2/4 sm:pr-2">
+                                <!-- <div class="flex flex-col w-full lg:w-2/4 sm:pr-2">
                                     <mat-form-field class="w-full fuse-mat-emphasized-affix">
                                         <mat-label class="font-medium">Frontside Picture ID</mat-label>
                                         <mat-toolbar>
@@ -214,9 +237,9 @@
                                             [svgIcon]="'heroicons_solid:identification'">
                                         </mat-icon> 
                                     </mat-form-field>
-                                </div>
+                                </div> -->
                                 <!-- Backside ID -->
-                                <div class="flex flex-col w-full lg:w-2/4 sm:pl-2">
+                                <!-- <div class="flex flex-col w-full lg:w-2/4 sm:pl-2">
                                     <mat-form-field class="w-full fuse-mat-emphasized-affix">
                                         <mat-label class="font-medium">Backside Picture ID </mat-label>
                                         <mat-toolbar>
@@ -234,9 +257,9 @@
                                             [svgIcon]="'heroicons_solid:identification'">
                                         </mat-icon>  
                                     </mat-form-field>
-                                </div>
+                                </div> -->
                             </div>
-                            <div class="w-full">
+                            <!-- <div class="w-full">
                                 <mat-label class="font-medium">Preview</mat-label>
                                 <div class="my-2"></div>
                                 <div class="flex flex-wrap content-center border border-gray-300 rounded h-96">
@@ -268,10 +291,10 @@
                                     </div>
                                     &nbsp;
                                 </div> 
-                            </div>
+                            </div> -->
                         </div>
                         <!-- Company Registration document -->
-                        <div class="flex flex-col w-full lg:w-2/4 sm:px-4">
+                        <!-- <div class="flex flex-col w-full lg:w-2/4 sm:px-4">
                             <mat-form-field class="w-full fuse-mat-emphasized-affix">
                                 <mat-label class="font-medium">Company Registration Document</mat-label>
                                 <mat-toolbar>
@@ -307,10 +330,10 @@
                                     </div>
                                 </div> 
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                     <!-- Bank statement  -->
-                    <div class="flex flex-col lg:w-full sm:px-4">
+                    <!-- <div class="flex flex-col lg:w-full sm:px-4">
                         <mat-form-field class="w-full fuse-mat-emphasized-affix">
                             <mat-label class="font-medium">Bank Statement (with registered name)</mat-label>
                             <mat-toolbar>
@@ -346,17 +369,17 @@
                                 </div>
                             </div> 
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- Actions -->
                     <div class="flex items-center justify-end">
-                        <button
+                        <!-- <button
                             mat-button
                             [color]="'accent'"
                             [disabled]="editProfileForm.pristine || editProfileForm.untouched"
                             (click)="clearForm()">
                             Clear
-                        </button>
+                        </button> -->
                         <button
                             class="ml-2"
                             mat-flat-button
