@@ -844,53 +844,67 @@
                                                     <div class="h-44 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
                                                         <!-- Variants -->
                                                         <ng-container *ngIf="!variantsEditMode">
-                                                            <div class="p-4 space-y-2">
-                                                                <ng-container *ngFor="let variant of filteredProductVariants;let i = index; trackBy: trackByFn">
-                                                                    <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full">
-                                                                        <input
-                                                                            matInput
-                                                                            [value]="variant.name"
-                                                                            (input)="updateLocalVariantTitle(variant, $event)"
-                                                                            [readonly]="!productVariantsValueEditMode[i]">
-                                                                        <button
-                                                                            *ngIf="!productVariantsValueEditMode[i]"
-                                                                            mat-icon-button
-                                                                            (click)="productVariantsValueEditMode[i] = !productVariantsValueEditMode[i]"
-                                                                            matSuffix>
-                                                                            <mat-icon
-                                                                                class="icon-size-5"
-                                                                                [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
-                                                                        </button>
-                                                                        <button
-                                                                            *ngIf="productVariantsValueEditMode[i]"
-                                                                            mat-icon-button
-                                                                            (click)="productVariantsValueEditMode[i] = !productVariantsValueEditMode[i];updateServerVariantTitle(variant.id);"
-                                                                            matSuffix>
-                                                                            <mat-icon
-                                                                                class="icon-size-5"
-                                                                                [svgIcon]="'heroicons_solid:check'"></mat-icon>
-                                                                        </button>
-                                                                        <button
-                                                                            mat-icon-button
-                                                                            (click)="deleteVariant(variant)"
-                                                                            matSuffix>
-                                                                            <mat-icon
-                                                                                class="icon-size-5"
-                                                                                [svgIcon]="'heroicons_solid:trash'"></mat-icon>
-                                                                        </button>
-                                                                    </mat-form-field>
+                                                            <div class="flex flex-col p-4 min-h-34 h-34 mb-2 space-y-2">
+                                                                <ng-container *ngIf="filteredProductVariants.length; else productVariantsBlank">
+                                                                    <ng-container *ngFor="let variant of filteredProductVariants;let i = index; trackBy: trackByFn">
+                                                                        <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full">
+                                                                            <input
+                                                                                matInput
+                                                                                [value]="variant.name"
+                                                                                (input)="editVariantTitle(variant, $event)"
+                                                                                [readonly]="!productVariantsValueEditMode[i]">
+                                                                            <button
+                                                                                *ngIf="!productVariantsValueEditMode[i]"
+                                                                                mat-icon-button
+                                                                                (click)="productVariantsValueEditMode[i] = !productVariantsValueEditMode[i]"
+                                                                                matSuffix>
+                                                                                <mat-icon
+                                                                                    class="icon-size-5"
+                                                                                    [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                                                                            </button>
+                                                                            <button
+                                                                                *ngIf="productVariantsValueEditMode[i]"
+                                                                                mat-icon-button
+                                                                                (click)="productVariantsValueEditMode[i] = !productVariantsValueEditMode[i];updateVariantTitle(variant.id);"
+                                                                                matSuffix>
+                                                                                <mat-icon
+                                                                                    class="icon-size-5"
+                                                                                    [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                                                            </button>
+                                                                            <button
+                                                                                mat-icon-button
+                                                                                (click)="deleteVariant(variant)"
+                                                                                matSuffix>
+                                                                                <mat-icon
+                                                                                    class="icon-size-5"
+                                                                                    [svgIcon]="'heroicons_solid:trash'"></mat-icon>
+                                                                            </button>
+                                                                        </mat-form-field>
+                                                                    </ng-container>
                                                                 </ng-container>
+                                                                <ng-template #productVariantsBlank>
+                                                                    <div class="h-full">&nbsp;</div>
+                                                                </ng-template>
                                                             </div>
                                                         </ng-container>
                                                         <div
                                                             class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer border-t hover:bg-gray-50 dark:hover:bg-hover"
-                                                            *ngIf="shouldShowCreateVariantButton(newVariantInput.value)"
+                                                            *ngIf="shouldShowCreateVariantButton(newVariantInput.value) && selectedProductForm.get('productVariants').value.length < 2"
                                                             (click)="createVariant(newVariantInput.value); newVariantInput.value = ''"
                                                             matRipple>
                                                             <mat-icon
                                                                 class="mr-2 icon-size-5"
                                                                 [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
                                                             <div class="break-all">Create "<b>{{newVariantInput.value}}</b>"</div>
+                                                        </div>
+                                                        <div
+                                                            class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-default border-t hover:bg-gray-50 dark:hover:bg-hover"
+                                                            *ngIf="selectedProductForm.get('productVariants').value.length >= 2"
+                                                        >
+                                                            <mat-icon
+                                                                class="mr-2 icon-size-5"
+                                                                [svgIcon]="'heroicons_outline:exclamation-circle'"></mat-icon>
+                                                            <div class="md:text-xs">You can only create maximum of 2 variants</div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -901,8 +915,8 @@
                                                 <div class="w-full mt-2 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-auto">
                                                     <!-- Variants Available -->
                                                     <div class="h-44 m-2 leading-none overflow-y-auto border-gray-300 dark:border-gray-500">
-                                                        <div *ngIf="filteredProductVariants">
-                                                            <div *ngFor="let variant of filteredProductVariants; trackBy: trackByFn">
+                                                        <div *ngIf="productVariants$">
+                                                            <div *ngFor="let variant of productVariants$; trackBy: trackByFn">
                                                                 <span class="w-full mb-px font-small leading-tight">{{variant.name}}</span>
                                                                 <div class="flex items-center rounded-full w-full">
                                                                     <div class="ml-0 m-1.5">
@@ -968,13 +982,13 @@
                                                                                         <input
                                                                                             matInput
                                                                                             [value]="variantAvailable.value"
-                                                                                            (input)="updateLocalVariantAvailableTitle(variant, $event)"
+                                                                                            (input)="editVariantAvailableTitle(variant, $event)"
                                                                                             [readonly]="!productVariantAvailableValueEditMode[i]"
                                                                                         >
                                                                                         <button
                                                                                             mat-icon-button
                                                                                             *ngIf="productVariantAvailableValueEditMode[i]"
-                                                                                            (click)="productVariantAvailableValueEditMode[i] = !productVariantAvailableValueEditMode[i]; updateServerVariantAvailableTitle(variant, $event)"
+                                                                                            (click)="productVariantAvailableValueEditMode[i] = !productVariantAvailableValueEditMode[i]; updateVariantAvailableTitle(variant, $event)"
                                                                                             matSuffix>
                                                                                             <mat-icon
                                                                                                 class="icon-size-5 ml-2"
@@ -1005,13 +1019,22 @@
                                                                     <!-- Create variant -->
                                                                     <div
                                                                         class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer hover:bg-hover"
-                                                                        *ngIf="shouldShowCreateVariantAvailableButton(newVariantInput.value)"
+                                                                        *ngIf="shouldShowCreateVariantAvailableButton(newVariantInput.value) && productVariantAvailable$.length < 10"
                                                                         (click)="createVariantAvailable(newVariantInput.value); newVariantInput.value = ''"
                                                                         matRipple>
                                                                         <mat-icon
                                                                             class="mr-2 icon-size-5"
                                                                             [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
                                                                         <div class="break-all">Create "<b>{{newVariantInput.value}}</b>"</div>
+                                                                    </div>
+                                                                    <div
+                                                                        class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-default border-t hover:bg-gray-50 dark:hover:bg-hover"
+                                                                        *ngIf="productVariantAvailable$.length >= 10"
+                                                                    >
+                                                                        <mat-icon
+                                                                            class="mr-2 icon-size-5"
+                                                                            [svgIcon]="'heroicons_outline:exclamation-circle'"></mat-icon>
+                                                                        <div class="md:text-xs">You can only create maximum of 10 variant available</div>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -1125,13 +1148,14 @@
                                                                                     (click)="toggleVariantDetails(variantCombo.itemCode)">
                                                                                     <mat-icon
                                                                                         class="icon-size-5"
-                                                                                        [svgIcon]="selectedProductInventory?.itemCode === variantCombo.itemCode ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'"></mat-icon>
+                                                                                        [svgIcon]="selectedProductInventories?.itemCode === variantCombo.itemCode ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'"></mat-icon>
                                                                                 </button>
                                                                             </div>
                                                                         </div>
                                                                         <div class="grid">
-                                                                            <ng-container *ngIf="selectedProductInventory?.itemCode === variantCombo.itemCode">
-                                                                                <ng-container *ngTemplateOutlet="rowVariantDetailsTemplate; context: {$implicit: variantlist}"></ng-container>
+                                                                            <ng-container *ngIf="selectedProductInventories?.itemCode === variantCombo.itemCode">
+                                                                                <ng-container *ngTemplateOutlet="rowVariantDetailsTemplate; context: {$implicit: variantCombo}">       
+                                                                                </ng-container>
                                                                             </ng-container>
                                                                         </div>
                                                                     </ng-container>
@@ -1142,9 +1166,10 @@
 
                                                     <ng-template
                                                         #rowVariantDetailsTemplate
-                                                        let-variantlist>
-                                                        <div class="shadow-lg overflow-hidden">
-                                                            <div class="flex border-b">
+                                                        let-variantCombo>
+                                                        <div formArrayName="productInventories" class="shadow-lg overflow-hidden">
+                                                            <div [formGroupName]="indexOfProductInventories" 
+                                                            class="flex border-b">
                                                                 <div class="flex flex-col sm:flex-row p-8 w-full">
                                                                     <div class="flex flex-auto flex-wrap">
                                                                         <!-- Image-->
@@ -1154,10 +1179,10 @@
                                                                                 <div class="flex flex-col items-center">
                                                                                     <!-- Image Frame -->
                                                                                     <div *ngIf="!imagesEditMode" class="w-32 h-44 border rounded overflow-hidden">
-                                                                                        <ng-container *ngIf="images.length; else noImage">
+                                                                                        <ng-container *ngIf="displayProductVariantAssets.length; else noImage">
                                                                                             <img
-                                                                                                class="w-full h-full object-cover"
-                                                                                                [src]="images[currentImageIndex]">
+                                                                                                class="w-full h-full object-cover" 
+                                                                                                [src]="displayProductVariantAssets[indexOfProductInventories].url">
                                                                                         </ng-container>
                                                                                         <ng-template #noImage>
                                                                                             <div
@@ -1272,8 +1297,8 @@
                                                                                 <span class="font-semibold mb-2">Variant status</span>
                                                                                 <mat-select
                                                                                     class="border border-gray-300 w-32 px-2 py-2 rounded"
-                                                                                    [formControlName]="'status'"
-                                                                                    [value]="'status'"
+                                                                                    formControlName="status"
+                                                                                    [value]="variantCombo.status"
                                                                                     (selectionChange)="selectedProductForm.get('status').value = $event.value"
                                                                                     #statusSelector="matSelect"
                                                                                     >
@@ -1283,9 +1308,11 @@
                                                                                         </span>
                                                                                     </mat-select-trigger>
                                                                                     <div>
-                                                                                        <mat-option [value]="'ACTIVE'">Active</mat-option>
+                                                                                        <!-- <mat-option [value]="'ACTIVE'">Active</mat-option>
                                                                                         <mat-option [value]="'INACTIVE'">Inactive</mat-option>
-                                                                                        <mat-option [value]="'DRAF'">Draf</mat-option>
+                                                                                        <mat-option [value]="'DRAF'">Draf</mat-option> -->
+                                                                                        <mat-option [value]="'AVAILABLE'">Available</mat-option>
+                                                                                        <mat-option [value]="'NOTAVAILABLE'">Not Available</mat-option>
                                                                                     </div>
                                                                                 </mat-select>
                                                                                 <!-- <mat-slide-toggle
@@ -1302,7 +1329,8 @@
                                                                                 <mat-label>SKU</mat-label>
                                                                                 <input
                                                                                     matInput
-                                                                                    [formControlName]="'sku'">
+                                                                                    formControlName="sku"
+                                                                                    [value]="variantCombo.sku">
                                                                             </mat-form-field>
                                                                             <!-- Price -->
                                                                             <mat-form-field class="w-full">
@@ -1310,7 +1338,9 @@
                                                                                 <span matSuffix>$</span>
                                                                                 <input
                                                                                     matInput
-                                                                                    [formControlName]="'price'">
+                                                                                    formControlName="price"
+                                                                                    [value]="variantCombo.price"
+                                                                                    type="number">
                                                                             </mat-form-field>                                                                            
                                                                         </div>
 
@@ -1321,7 +1351,8 @@
                                                                                 <input
                                                                                     type="number"
                                                                                     matInput
-                                                                                    [formControlName]="'quantity'">
+                                                                                    formControlName="quantity"
+                                                                                    [value]="variantCombo.quantity">
                                                                             </mat-form-field>
 
                                                                             <!-- Packing Size -->
@@ -1350,6 +1381,7 @@
                                                                                 </mat-select>
                                                                             </mat-form-field> -->
                                                                         </div>
+                                                                       
                                                                     </div>
                                                                 </div>
                                                             </div>
