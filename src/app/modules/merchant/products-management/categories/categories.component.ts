@@ -19,7 +19,7 @@ import { Product } from 'app/core/product/inventory.types';
     styles         : [
         /* language=SCSS */
         `
-            .inventory-grid {
+            .categories-grid {
                 grid-template-columns: 48px auto 40px;
 
                 @screen sm {
