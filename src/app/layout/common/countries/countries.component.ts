@@ -9,6 +9,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ChooseCountryComponent } from 'app/layout/common/countries/choose-country/choose-country.component'
 import { StoresService } from 'app/core/store/store.service';
 import { StoreRegionCountries } from 'app/core/store/store.types';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -27,6 +28,8 @@ export class CountriesComponent implements OnInit, OnDestroy
     promptChooseCountry: boolean = false;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
+    currentURLPath: string;
+
     /**
      * Constructor
      */
@@ -37,6 +40,7 @@ export class CountriesComponent implements OnInit, OnDestroy
         private _storesService: StoresService,
         private _localeService: LocaleService,
         private _matDialog: MatDialog,
+        private _router: Router
     )
     {
     }
@@ -50,6 +54,9 @@ export class CountriesComponent implements OnInit, OnDestroy
      */
     ngOnInit(): void
     {
+        // get current url path location
+        this.currentURLPath = this._router.url;
+        console.log("this.currentURLPath ", this.currentURLPath )
 
         // disable this as we dont want locale service to define the allowed countries
         // this.availableCountries = this._localeService.getAvailableCountries();
@@ -88,7 +95,7 @@ export class CountriesComponent implements OnInit, OnDestroy
             });
 
         // Check if current country from locale service is empty
-        if (!this.activeCountry){
+        if (!this.activeCountry && this.currentURLPath === "/stores/choose-vertical"){
 
             // Open the dialog
             const dialogRef = this._matDialog.open(ChooseCountryComponent, { disableClose: true });
