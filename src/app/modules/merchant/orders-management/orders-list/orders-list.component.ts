@@ -1,8 +1,8 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { merge, of, Subject } from 'rxjs';
-import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, merge, of, Subject } from 'rxjs';
+import { debounceTime, finalize, map, switchMap, takeUntil } from 'rxjs/operators';
 import { OrdersListService } from 'app/modules/merchant/orders-management/orders-list/orders-list.service';
 import { Order, OrdersCountSummary, OrdersListPagination } from 'app/modules/merchant/orders-management/orders-list/orders-list.types'
 import { MatPaginator } from '@angular/material/paginator';
@@ -60,6 +60,9 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     recentTransactionsTableColumns: string[] = ['transactionId', 'date', 'name', 'amount', 'status', 'action'];
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
+    loading: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    submitted: any = []
+    errorMessage: string;
 
     /**
      * Constructor
@@ -122,8 +125,8 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
             { id: "AWAITING_PICKUP", label: "Awaiting Pickup", completionStatus: "AWAITING_PICKUP", count: 0 },
             { id: "SENT_OUT", label: "Sent Out", completionStatus: "BEING_DELIVERED", count: 0 },
             { id: "DELIVERED", label: "Delivered", completionStatus: "DELIVERED_TO_CUSTOMER", count: 0 },
-            { id: "CANCELLED", label: "Cancelled", completionStatus: "REJECTED_BY_STORE", count: 0 },
-            { id: "HISTORY", label: "History", completionStatus: ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE", "BEING_PREPARED", "AWAITING_PICKUP", "BEING_DELIVERED", "DELIVERED_TO_CUSTOMER", "REJECTED_BY_STORE"], count: 0 }
+            { id: "CANCELLED", label: "Cancelled", completionStatus: "CANCELED_BY_MERCHANT", count: 0 },
+            { id: "HISTORY", label: "History", completionStatus: ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE", "BEING_PREPARED", "AWAITING_PICKUP", "BEING_DELIVERED", "DELIVERED_TO_CUSTOMER", "CANCELED_BY_MERCHANT"], count: 0 }
         ];
 
         this._orderslistService.ordersCountSummary$
@@ -364,12 +367,15 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
 
     updateStatus(order: Order, nextCompletionStatus){
 
+        this.submitted[order.id] = true;
+        
         let completionBody = {
             nextCompletionStatus: nextCompletionStatus
         };
         
+
         // First check the order delivery type => Only scheduled to allow choose time
-        if (order.deliveryType === "SCHEDULED") {
+        if (order.deliveryType === "SCHEDULED" && nextCompletionStatus != "CANCELED_BY_MERCHANT") {
             this._orderslistService.getDeliveryProviderDetails(order.orderShipmentDetail.deliveryProviderId)
                 .subscribe(response => {
                     const dialogRef = this._dialog.open(ChooseProviderDateTimeComponent, { disableClose: true, data: response });
@@ -380,24 +386,28 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                             completionBody["date"] = result.date;
                             completionBody["time"] = result.time;
 
-                            this._orderslistService.updateOrder(order.id, completionBody)
+                            this._orderslistService.updateOrder(order.id, completionBody).pipe(finalize(() => {
+                                this.submitted[order.id] = false;
+                                }))
                                 .subscribe((response) => {                    
                                     this._orderslistService.updateCompletion(order.id, nextCompletionStatus).subscribe(() => {
                                     });
-                    
+
                                     // Mark for check
                                     this._changeDetectorRef.markForCheck();
-                                });
+                                }
+                                );
                         }
                     });
                 });
         } else {
-            this._orderslistService.updateOrder(order.id, completionBody)
+            this._orderslistService.updateOrder(order.id, completionBody).pipe(finalize(() => {
+                this.submitted[order.id] = false;
+                }))
                 .subscribe((response) => {
     
                     this._orderslistService.updateCompletion(order.id, nextCompletionStatus).subscribe(() => {
                     });
-    
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
                 });

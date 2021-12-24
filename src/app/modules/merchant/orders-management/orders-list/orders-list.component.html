@@ -334,23 +334,46 @@
                                                     class="text-white group-hover:text-primary icon-size-5"
                                                     [svgIcon]="'heroicons_solid:document-report'"></mat-icon>
                                             </label>
-    
-                                            <!-- Action Button -->
-                                            <input
-                                                [id]="'action-' + transaction.order.id"
-                                                type="button"
-                                                (click)="updateStatus(transaction.order, transaction.nextCompletionStatus)"
-                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                mat-button>
-                                            <label 
-                                                *ngIf="transaction.nextActionText"    
-                                                class="flex items-center justify-center w-2/3 py-2 px-1 rounded-full cursor-pointer border border-primary border-solid group hover:bg-primary"
-                                                [for]="'action-' + transaction.order.id"
-                                                matRipple>
-                                                <span class="font-medium group-hover:text-white text-sm text-primary whitespace-nowrap">
-                                                    {{ transaction.nextActionText }}
-                                                </span>
-                                            </label>
+                                            <ng-container *ngIf= "transaction.currentCompletionStatus != 'PAYMENT_CONFIRMED' && transaction.currentCompletionStatus != 'RECEIVED_AT_STORE'; else cancelTemplate">
+                                                <!-- Action Button -->
+                                                <input
+                                                    [id]="'action-' + transaction.order.id"
+                                                    type="button"
+                                                    [disabled]="submitted[transaction.order.id]"
+                                                    (click)="updateStatus(transaction.order, transaction.nextCompletionStatus)"
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    mat-button>
+                                                <label 
+                                                    *ngIf="transaction.nextActionText" 
+                                                    class="flex items-center justify-center w-2/3 py-2 px-1 rounded-full border border-primary border-solid group hover:bg-primary"
+                                                    [ngClass]="submitted[transaction.order.id] ? 'cursor-wait' : 'cursor-pointer'"   
+                                                    [for]="'action-' + transaction.order.id"
+                                                    matRipple>
+                                                    <span class="font-medium group-hover:text-white text-sm text-primary whitespace-nowrap">
+                                                        {{ transaction.nextActionText }}
+                                                    </span>
+                                                </label>
+
+                                            </ng-container>
+                                            <!-- <label *ngIf="submitted">Hello
+
+                                            </label> -->
+                                            
+                                            <ng-template #cancelTemplate>
+                                                <mat-select
+                                                    [id]="'action-select-' + transaction.order.id"
+                                                    class="flex items-center justify-center w-2/3 py-2 px-1 rounded-full border border-primary border-solid group hover:bg-primary"
+                                                    [disabled]="submitted[transaction.order.id]"
+                                                    [ngClass]="submitted[transaction.order.id] ? 'cursor-wait' : 'cursor-pointer' "
+                                                    >
+                                                    <div>
+                                                        <mat-option (click)="updateStatus(transaction.order, transaction.nextCompletionStatus)">{{ transaction.nextActionText }}</mat-option>
+                                                        <mat-option (click)="updateStatus(transaction.order, 'CANCELED_BY_MERCHANT')">Cancel</mat-option>
+
+                                                    </div>
+                                                        
+                                            </mat-select>
+                                            </ng-template>
                                         </div>
                                     </td>
                                 </ng-container>
