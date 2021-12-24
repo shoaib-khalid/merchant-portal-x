@@ -10,21 +10,21 @@ export const defaultNavigation: FuseNavigationItem[] = [
         link : '/dashboard'
     },
     {
-        id   : 'stores-management',
-        title: 'Stores Management',
+        id   : 'store-management',
+        title: 'Store Management',
         type : 'collapsable',
         icon : 'heroicons_outline:office-building',
         children: [
             {
-                id   : 'apps.stores-management.setup',
+                id   : 'app.create-store',
                 title: 'Create Store',
                 type : 'basic',
                 link : '/stores/choose-vertical',
                 exactMatch: true
             },
             {
-                id   : 'apps.stores-management.list',
-                title: 'Choose Store',
+                id   : 'app.manage-store',
+                title: 'Manage Store',
                 type : 'basic',
                 link : '/stores',
                 exactMatch: true
@@ -32,44 +32,37 @@ export const defaultNavigation: FuseNavigationItem[] = [
         ],
     },
     {
-        id   : 'products-management',
-        title: 'Products Management',
+        id   : 'product-management',
+        title: 'Product Management',
         type : 'collapsable',
         icon : 'heroicons_outline:cube',
         children: [
             {
-                id   : 'apps.ecommerce.inventory',
-                title: 'Inventory',
+                id   : 'app.manage-product',
+                title: 'Manage Product',
                 type : 'basic',
                 link : '/products/inventory',
                 exactMatch: true
             },
             {
-                id   : 'apps.ecommerce.inventory',
-                title: 'Categories',
+                id   : 'app.manage-category',
+                title: 'Manage Category',
                 type : 'basic',
                 link : '/products/categories',
                 exactMatch: true
-            },
-            // {
-            //     id   : 'apps.ecommerce.inventory',
-            //     title: 'Product Category',
-            //     type : 'basic',
-            //     link : '/products',
-            //     exactMatch: true
-            // }
+            }
         ],
     },
     {
-        id   : 'orders-management',
-        title: 'Orders Management',
+        id   : 'order-management',
+        title: 'Order Management',
         type : 'basic',
         icon : 'heroicons_outline:shopping-cart',
         link : '/orders'
     },
     {
-        id   : 'promo-management',
-        title: 'Discounts / Promotion Management',
+        id   : 'discount-management',
+        title: 'Discount Management',
         type : 'basic',
         icon : 'heroicons_outline:gift',
         link : '/discounts'
