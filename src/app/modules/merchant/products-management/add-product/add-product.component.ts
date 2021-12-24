@@ -118,12 +118,12 @@ export class AddProductComponent implements OnInit, OnDestroy
             name             : ['', [Validators.required]],
             description      : ['', [Validators.required]],
             categoryId       : ['', [Validators.required]],
-            status           : ['', [Validators.required]],
+            status           : ['ACTIVE', [Validators.required]],
             trackQuantity    : [false],
             allowOutOfStockPurchases: [false],
             minQuantityForAlarm: [-1],
             packingSize      : ['', [Validators.required]],
-            availableStock   : ['', [Validators.required]],
+            availableStock   : [1, [Validators.required]],
             sku              : ['', [Validators.required]],
             price            : ['', [Validators.required]],
             images           : [[]],
@@ -470,6 +470,7 @@ export class AddProductComponent implements OnInit, OnDestroy
             if(!images.length === true) {
                 this.images.push(reader.result);
                 this.imagesFile.push(file);
+                this.currentImageIndex = this.images.length - 1;
             } else {
                 this.images[this.currentImageIndex] = reader.result + "";
             }
@@ -477,8 +478,6 @@ export class AddProductComponent implements OnInit, OnDestroy
             this.imagesEditMode = false; 
             this._changeDetectorRef.markForCheck();
         }
-
-        const product = this.addProductForm.getRawValue();
     }
 
     /**
@@ -488,7 +487,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     {
         const index = this.currentImageIndex;
         if (index > -1) {
-            this.addProductForm.get('images').value.splice(index, 1);
+            this.images.splice(index, 1);
         }
     }
 
@@ -576,7 +575,6 @@ export class AddProductComponent implements OnInit, OnDestroy
     }
 
     checkInput(input, event = null){
-
         // check input
         if ((this.addProductForm.get(input) && this.addProductForm.get(input).value) || 
             (input === 'category' && event.target.checked)
@@ -585,7 +583,13 @@ export class AddProductComponent implements OnInit, OnDestroy
         } else {
             this.checkinput[input] = false;
         }
+    }
 
+    disabledTrackStock(isTrackStock: boolean) {
+        if (isTrackStock === false){
+            this.addProductForm.get('allowOutOfStockPurchases').patchValue(false);
+            this.addProductForm.get('minQuantityForAlarm').patchValue(-1);
+        }
     }
          
     checkForm(){

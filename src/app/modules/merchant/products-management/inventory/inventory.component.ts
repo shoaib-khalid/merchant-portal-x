@@ -210,10 +210,10 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         this.selectedProductForm = this._formBuilder.group({
             // id               : [''],
             name             : ['', [Validators.required]],
-            description      : [''],
+            description      : ['', [Validators.required]],
             // storeId          : [''], // not used
-            categoryId       : [''],
-            status           : ['INACTIVE'],
+            categoryId       : ['', [Validators.required]],
+            status           : ['', [Validators.required]],
             // thumbnailUrl     : [''],
             // vendor           : [''], // not used
             // region           : [''], // not used
@@ -222,7 +222,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             trackQuantity    : [false],
             allowOutOfStockPurchases: [false],
             minQuantityForAlarm: [-1],
-            packingSize      : [''],
+            packingSize      : ['', [Validators.required]],
             // created          : [''],
             // updated          : [''],
 
@@ -2200,6 +2200,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             if(!images.length === true) {
                 this.images.push(reader.result);
                 this.imagesFile.push(file);
+                this.currentImageIndex = this.images.length - 1;
             } else {
                 this.images[this.currentImageIndex] = reader.result + "";
             }
@@ -2278,20 +2279,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     {
         const index = this.currentImageIndex;
         if (index > -1) {
-            this.selectedProductForm.get('images').value.splice(index, 1);
+            this.images.splice(index, 1);
         }
-
-        // // Get the form control for 'avatar'
-        // const avatarFormControl = this._inventoryService.get('avatar');
-
-        // // Set the avatar as null
-        // avatarFormControl.setValue(null);
-
-        // // Set the file input value as null
-        // this._avatarFileInput.nativeElement.value = null;
-
-        // // Update the contact
-        // this.contact.avatar = null;
     }
 
     /**
@@ -2363,6 +2352,13 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         const MAX_LENGTH = 500;
         if ($event.editor.getLength() > MAX_LENGTH) {
            $event.editor.deleteText(MAX_LENGTH, $event.editor.getLength());
+        }
+    }
+
+    disabledTrackStock(isTrackStock: boolean) {
+        if (isTrackStock === false){
+            this.selectedProductForm.get('allowOutOfStockPurchases').patchValue(false);
+            this.selectedProductForm.get('minQuantityForAlarm').patchValue(-1);
         }
     }
 }

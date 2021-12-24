@@ -251,7 +251,7 @@
                                                                 matRipple>
                                                                 <mat-icon
                                                                     class="text-white"
-                                                                    [svgIcon]="'heroicons_outline:camera'"></mat-icon>
+                                                                    [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
                                                             </label>
                                                         </div>
                                                         <!-- Remove Image -->
@@ -321,6 +321,11 @@
                                                         for="image-edit-button"
                                                         matRipple>
                                                         <mat-icon
+                                                            *ngIf="imagesEditMode"
+                                                            class="icon-size-5"
+                                                            [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                                                        <mat-icon
+                                                            *ngIf="!imagesEditMode"
                                                             class="icon-size-5"
                                                             [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
                                                     </label>
@@ -376,6 +381,7 @@
                                                 [formControlName]="'status'"
                                                 [value]="'status'"
                                                 (selectionChange)="selectedProductForm.get('status').value = $event.value"
+                                                (selectionChange)="statusSelector.value === 'OUT_OF_STOCK' ? displayQuantity = 0 : ''"
                                                 #statusSelector="matSelect"
                                                 >
                                                 <mat-select-trigger>
@@ -386,7 +392,7 @@
                                                 <div>
                                                     <mat-option [value]="'ACTIVE'">Active</mat-option>
                                                     <mat-option [value]="'INACTIVE'">Inactive</mat-option>
-                                                    <mat-option [value]="'DRAF'">Draf</mat-option>
+                                                    <mat-option [value]="'OUT_OF_STOCK'">Out of Stock</mat-option>
                                                 </div>
                                             </mat-select>
                                             <!-- <mat-slide-toggle
@@ -612,9 +618,9 @@
                                     </div>
                                 </div>
 
-                                <!-- Available stock row -->
                                 <div class="flex flex-col sm:flex-row pb-4 border-t pt-4 px-8">
                                     <div class="flex flex-auto flex-wrap">
+                                        <!-- Available stock row -->
                                         <div class="flex flex-col w-full sm:w-1/5 sm:pr-2 sm:border-r py-2 sm:py-0">
                                             <span class="mb-2 font-medium leading-tight">Available Stock
                                                 <mat-icon
@@ -628,10 +634,31 @@
                                                     type="number"
                                                     matInput
                                                     [disabled]="product.productVariants.length > 0"
-                                                    (change)="displayQuantity = $event.target.value"
+                                                    (input)="displayQuantity = $event.target.value"
+                                                    (input)="(displayQuantity > 0 && selectedProductForm.get('status').value === 'OUT_OF_STOCK') ? selectedProductForm.get('status').patchValue('ACTIVE') : ''"
                                                     [value]="displayQuantity">
                                             </mat-form-field>
                                         </div>
+                                        <!-- Track Stock Level -->
+                                        <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
+                                            <span class="mb-2 sm:mb-4 font-medium leading-tight">Track Stock Level
+                                                <mat-icon
+                                                    matTooltip="Keep track the quantity of the stock"
+                                                    class="transform scale-75"
+                                                    [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                                </mat-icon>
+                                            </span>
+                                            <div class="mt-0 flex items-center -my-px w-full">
+                                                <mat-slide-toggle
+                                                    [formControlName]="'trackQuantity'"
+                                                    [color]="'primary'"
+                                                    (change)="disabledTrackStock($event.checked)"
+                                                    >
+                                                    {{selectedProductForm.get('trackQuantity').value === true ? 'Active' : 'Disabled'}}
+                                                </mat-slide-toggle>
+                                            </div>
+                                        </div>
+                                        <!-- Out of Stock Selling -->
                                         <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
                                             <span class="mb-2 font-medium leading-tight">Out of Stock Selling
                                                 <mat-icon
@@ -642,12 +669,14 @@
                                             </span>
                                             <div class="mt-0 sm:mt-3 flex items-center -my-px w-full">
                                                 <mat-slide-toggle
+                                                    [disabled]="selectedProductForm.get('trackQuantity').value === false"
                                                     [formControlName]="'allowOutOfStockPurchases'"
                                                     [color]="'primary'">
                                                     {{selectedProductForm.get('allowOutOfStockPurchases').value === true ? 'Yes' : 'No'}}
                                                 </mat-slide-toggle>
                                             </div>
                                         </div>
+                                        <!-- Low Stock Alarm -->
                                         <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
                                             <span class="mb-2 font-medium leading-tight">Low Stock Alarm
                                                 <mat-icon
@@ -659,6 +688,7 @@
                                             <div *ngIf="selectedProductForm.get('minQuantityForAlarm').value < 0" class="mt-0 sm:mt-3 flex items-center -my-px w-full">
                                                 <mat-slide-toggle
                                                     [color]="'primary'"
+                                                    [disabled]="selectedProductForm.get('trackQuantity').value === false"
                                                     (click)="selectedProductForm.get('minQuantityForAlarm').value = 0"
                                                     >
                                                     {{selectedProductForm.get('minQuantityForAlarm').value >= 0 ? 'Active' : 'Disabled'}}
@@ -671,22 +701,6 @@
                                                     matInput
                                                     [formControlName]="'minQuantityForAlarm'">
                                             </mat-form-field>
-                                        </div>
-                                        <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
-                                            <span class="mb-2 sm:mb-4 font-medium leading-tight">Track Stock 
-                                                <mat-icon
-                                                    matTooltip="Keep track the quantity of the stock"
-                                                    class="transform scale-75"
-                                                    [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                                </mat-icon>
-                                            </span>
-                                            <div class="mt-0 flex items-center -my-px w-full">
-                                                <mat-slide-toggle
-                                                    [formControlName]="'trackQuantity'"
-                                                    [color]="'primary'">
-                                                    {{selectedProductForm.get('trackQuantity').value === true ? 'Active' : 'Disabled'}}
-                                                </mat-slide-toggle>
-                                            </div>
                                         </div>
                                         <div *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'e-commerce-b2b2c' || store$.verticalCode === 'ECommerce_PK'" class="flex flex-col w-full sm:w-1/5 sm:pl-2 py-2 sm:py-0">
                                             <span class="mb-2 sm:mb-4 font-medium leading-tight">Variants 

@@ -54,7 +54,7 @@
                                                         matRipple>
                                                         <mat-icon
                                                             class="text-white"
-                                                            [svgIcon]="'heroicons_outline:camera'"></mat-icon>
+                                                            [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
                                                     </label>
                                                 </div>
                                                 <!-- Remove Image -->
@@ -118,12 +118,16 @@
                                                 (click)="toggleImagesEditMode()"
                                                 mat-icon-button
                                             >
-                                            
                                             <label 
                                                 class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
                                                 for="new-image-edit-button"
                                                 matRipple>
                                                 <mat-icon
+                                                    *ngIf="imagesEditMode"
+                                                    class="icon-size-5"
+                                                    [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                                                <mat-icon
+                                                    *ngIf="!imagesEditMode"
                                                     class="icon-size-5"
                                                     [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
                                             </label>
@@ -178,7 +182,9 @@
                                         appearance="fill" floatLabel="always"
                                         placeholder="Select one option"
                                         class="border border-gray-300 w-full px-2 py-2 rounded"
+                                        [formControlName]="'status'"
                                         (selectionChange)="addProductForm.get('status').patchValue(statusSelector.value)"
+                                        (selectionChange)="statusSelector.value === 'OUT_OF_STOCK' ? addProductForm.get('availableStock').patchValue(0) : ''"
                                         (selectionChange)="checkInput('status');checkForm()"
                                         #statusSelector="matSelect"
                                         >
@@ -190,7 +196,7 @@
                                         <div>
                                             <mat-option [value]="'ACTIVE'">Active</mat-option>
                                             <mat-option [value]="'INACTIVE'">Inactive</mat-option>
-                                            <mat-option [value]="'DRAF'">Draf</mat-option>
+                                            <mat-option [value]="'OUT_OF_STOCK'">Out of Stock</mat-option>
                                         </div>
                                     </mat-select>
                                     <!-- <mat-slide-toggle
@@ -428,9 +434,9 @@
                             </div>
                         </div>
 
-                        <!-- Available stock row -->
                         <div class="flex flex-col sm:flex-row pb-4 border-t pt-4 px-8">
                             <div class="flex flex-auto flex-wrap">
+                                <!-- Available stock row -->
                                 <div class="flex flex-col w-full sm:w-1/5 sm:pr-2 sm:border-r py-2 sm:py-0">
                                     <span class="mb-2 font-medium leading-tight">Available Stock
                                         <mat-icon
@@ -444,6 +450,7 @@
                                         appearance="fill" floatLabel="always"
                                     >
                                         <input
+                                            (input)="(addProductForm.get('availableStock').value > 0 && addProductForm.get('status').value === 'OUT_OF_STOCK') ? addProductForm.get('status').patchValue('ACTIVE') : ''"
                                             (input)="checkInput('availableStock');checkForm()"
                                             placeholder="Insert current stock"
                                             [formControlName]="'availableStock'"
@@ -452,6 +459,26 @@
                                         >
                                     </mat-form-field>
                                 </div>
+                                <!-- Track Stock Level -->
+                                <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
+                                    <span class="mb-2 sm:mb-4 font-medium leading-tight">Track Stock Level
+                                        <mat-icon
+                                            matTooltip="Keep track the quantity of the stock"
+                                            class="transform scale-75"
+                                            [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                        </mat-icon>
+                                    </span>
+                                    <div class="mt-0 flex items-center -my-px w-full">
+                                        <mat-slide-toggle
+                                            [formControlName]="'trackQuantity'"
+                                            [color]="'primary'"
+                                            (change)="disabledTrackStock($event.checked)"
+                                            >
+                                            {{addProductForm.get('trackQuantity').value === true ? 'Active' : 'Disabled'}}
+                                        </mat-slide-toggle>
+                                    </div>
+                                </div>
+                                <!-- Out of Stock Selling -->
                                 <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
                                     <span class="mb-2 font-medium leading-tight">Out of Stock Selling
                                         <mat-icon
@@ -462,12 +489,14 @@
                                     </span>
                                     <div class="mt-0 sm:mt-3 flex items-center -my-px w-full">
                                         <mat-slide-toggle
+                                            [disabled]="addProductForm.get('trackQuantity').value === false"
                                             [formControlName]="'allowOutOfStockPurchases'"
                                             [color]="'primary'">
                                             {{addProductForm.get('allowOutOfStockPurchases').value === true ? 'Yes' : 'No'}}
                                         </mat-slide-toggle>
                                     </div>
                                 </div>
+                                <!-- Low Stock Alarm -->
                                 <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
                                     <span class="mb-2 font-medium leading-tight">Low Stock Alarm
                                         <mat-icon
@@ -479,6 +508,7 @@
                                     <div *ngIf="addProductForm.get('minQuantityForAlarm').value < 0" class="mt-0 sm:mt-3 flex items-center -my-px w-full">
                                         <mat-slide-toggle
                                             [color]="'primary'"
+                                            [disabled]="addProductForm.get('trackQuantity').value === false"
                                             (click)="addProductForm.get('minQuantityForAlarm').value = 0"
                                             >
                                             {{addProductForm.get('minQuantityForAlarm').value >= 0 ? 'Active' : 'Disabled'}}
@@ -490,22 +520,6 @@
                                             matInput
                                             [formControlName]="'minQuantityForAlarm'">
                                     </mat-form-field>
-                                </div>
-                                <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
-                                    <span class="mb-2 sm:mb-4 font-medium leading-tight">Track Stock 
-                                        <mat-icon
-                                            matTooltip="Keep track the quantity of the stock"
-                                            class="transform scale-75"
-                                            [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                        </mat-icon>
-                                    </span>
-                                    <div class="mt-0 flex items-center -my-px w-full">
-                                        <mat-slide-toggle
-                                            [formControlName]="'trackQuantity'"
-                                            [color]="'primary'">
-                                            {{addProductForm.get('trackQuantity').value === true ? 'Active' : 'Disabled'}}
-                                        </mat-slide-toggle>
-                                    </div>
                                 </div>
                             </div>
                         </div>
