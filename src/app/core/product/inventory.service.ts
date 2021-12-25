@@ -197,7 +197,7 @@ export class InventoryService
     /**
      * Create product
      */
-    createProduct(categoryId: string, productType: string, productBody): Observable<Product>
+    createProduct(productBody: Product): Observable<Product>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -207,29 +207,10 @@ export class InventoryService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
 
-        const now = new Date();
-        const date = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate() + " " + now.getHours() + ":" + now.getMinutes()  + ":" + now.getSeconds();
-        const seoName = productBody.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
-
-        const body = {
-            "categoryId": categoryId,
-            "name": productBody.name,
-            "status": productBody.status,
-            "description": productBody.description,
-            "storeId": this.storeId$,
-            "allowOutOfStockPurchases": productBody.allowOutOfStockPurchases,
-            "trackQuantity": productBody.trackQuantity,
-            "seoName":seoName,
-            "seoUrl": "https://cinema-online.symplified.ai/product/name/"+ seoName,
-            "minQuantityForAlarm": productBody.minQuantityForAlarm === false ? -1 : productBody.minQuantityForAlarm,
-            "packingSize": productBody.packagingSize ? productBody.packagingSize : "S",
-            "isPackage": (productType === "combo") ? true : false
-        };
-
         return this.products$.pipe(
             take(1),
             // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
-            switchMap(products => this._httpClient.post<Product>(productService + '/stores/' + this.storeId$ + '/products', body , header).pipe(
+            switchMap(products => this._httpClient.post<Product>(productService + '/stores/' + this.storeId$ + '/products', productBody , header).pipe(
                 map((newProduct) => {
 
                     this._logging.debug("Response from ProductsService (createProduct) - Before",newProduct);

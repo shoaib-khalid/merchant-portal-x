@@ -218,7 +218,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             // thumbnailUrl     : [''],
             // vendor           : [''], // not used
             // region           : [''], // not used
-            // seoUrl           : [''], // not used
+            seoUrl           : [''],
             // seoName          : [''], // not used
             trackQuantity    : [false],
             allowOutOfStockPurchases: [false],
@@ -627,8 +627,19 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
         const { sku, availableStock, price, images, imagefiles, thumbnailIndex, ...newProductBody } = productBody;
 
+        // Get store domain
+        let storeFrontURL = 'https://' + this.store$.domain;
+
+        newProductBody["categoryId"] = categoryId;
+        newProductBody["seoName"] = newProductBody.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
+        newProductBody["seoUrl"] = storeFrontURL + "/products/name/" + newProductBody.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
+        newProductBody["storeId"] = this.store$.id;
+        newProductBody["minQuantityForAlarm"] = newProductBody.minQuantityForAlarm === false ? -1 : newProductBody.minQuantityForAlarm;
+        newProductBody["packingSize"] = newProductBody.packagingSize ? newProductBody.packagingSize : "S";
+        newProductBody["isPackage"] = (productType === "combo") ? true : false;
+
         // Create the product
-        this._inventoryService.createProduct(categoryId, productType, newProductBody)
+        this._inventoryService.createProduct(newProductBody)
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(async (newProduct) => {
 
@@ -694,16 +705,14 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      */
     updateSelectedProduct(): void
     {
-        // Get
-        // let storeFrontDomain = this._apiServer.settings.storeFrontDomain;
-        let storeFrontDomain = 'symplified.ai';
-        let storeFrontURL = 'https://' + this.store$.domain + '.' + storeFrontDomain;
+        // Get store domain
+        let storeFrontURL = 'https://' + this.store$.domain;
         
         // Get the product object
         const { sku, price, quantity, ...product} = this.selectedProductForm.getRawValue();
 
         product.seoName = product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
-        product.seoUrl = storeFrontURL + '/product/name/' + product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
+        product.seoUrl = storeFrontURL + '/products/name/' + product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
 
         // Update the product on the server
         this._inventoryService.updateProduct(this.selectedProduct.id, product)
@@ -2406,5 +2415,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             this.selectedProductForm.get('allowOutOfStockPurchases').patchValue(false);
             this.selectedProductForm.get('minQuantityForAlarm').patchValue(-1);
         }
+    }
+
+    openProductPreview(){
+        window.open(this.selectedProductForm.get('seoUrl').value, '_blank');
     }
 }
