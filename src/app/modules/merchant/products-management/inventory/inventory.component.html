@@ -299,6 +299,7 @@
                                                         #imageFileInput>
                                                     <label
                                                         class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                        matTooltip="Add image"
                                                         for="image-file-input"
                                                         matRipple>
                                                         <mat-icon
@@ -319,6 +320,7 @@
                                                     <label 
                                                         class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
                                                         for="image-edit-button"
+                                                        matTooltip="Edit image"
                                                         matRipple>
                                                         <mat-icon
                                                             *ngIf="imagesEditMode"
@@ -329,6 +331,26 @@
                                                             class="icon-size-5"
                                                             [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
                                                     </label>
+                                                </div>
+                                                <div>
+                                                    <!-- Set Thumbnail -->
+                                                    <div *ngIf="images.length && images.length > 1">
+                                                        <input
+                                                            id="new-set-thumbnail-button"
+                                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                            type="button"
+                                                            (click)="setThumbnail(currentImageIndex)"
+                                                            mat-icon-button>
+                                                        <label 
+                                                            class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                            for="new-set-thumbnail-button"
+                                                            [matTooltip]="currentImageIndex !== thumbnailIndex ? 'Set thumbnail' : ''"
+                                                            matRipple>
+                                                            <mat-icon
+                                                                class="icon-size-5"
+                                                                [svgIcon]="currentImageIndex === thumbnailIndex ? 'heroicons_solid:star' : 'heroicons_outline:star'"></mat-icon>
+                                                        </label>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <!-- Image Cycle -->

@@ -370,11 +370,11 @@ export class InventoryService
     }
 
     /**
-     * Add Inventory to the product
+     * Add assets to the product
      *
      * @param product
      */
-     addProductAssets(productId: string, formData: FormData, productAssets: ProductAssets): Observable<ProductAssets>{
+     addProductAssets(productId: string, formData: FormData, productAssets: ProductAssets, assetIndex: number = null): Observable<ProductAssets>{
 
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -395,12 +395,39 @@ export class InventoryService
         return this.products$.pipe(
             take(1),
             switchMap(products => this._httpClient.post<Product>(productService +'/stores/'+this.storeId$+'/products/' + productId + "/assets", formData , header).pipe(
-                map((newInventory) => {
+                map((response) => {
 
+                    this._logging.debug("Response from ProductsService (addProductAssets)",response);
+                    
                     // Find the index of the updated product
                     const index = products.findIndex(item => item.id === productId);
-                    let updatedProduct = products[index];
-                    updatedProduct.productAssets.push(newInventory["data"]);
+
+                    let updatedProduct;
+                    if (assetIndex !== null) {
+    
+                        // ---------------
+                        // update mechanism
+                        // ---------------
+
+                        const assetIndex = products[index].productAssets.push(response["data"]);
+
+                        updatedProduct = products[index];
+                        updatedProduct.productAssets[assetIndex] = response["data"];
+                        
+                    } else {
+
+                        // ---------------
+                        // add mechanism
+                        // ---------------
+                        
+                        updatedProduct = products[index];
+                        updatedProduct.productAssets.push(response["data"]);
+                        
+                    }
+                    
+                    if (productAssets.isThumbnail === true) {
+                        updatedProduct.thumbnailUrl = response["data"].url;
+                    }
                     
                     // Update the product
                     products[index] = { ...products[index], ...updatedProduct};
@@ -408,14 +435,85 @@ export class InventoryService
                     // Update the products
                     this._products.next(products);
 
-                    this._logging.debug("Response from ProductsService (addProductAssets)",newInventory);
-
                     // Return the new product
-                    return newInventory["data"];
+                    return response["data"];
                 })
             ))
         );
     } 
+
+    updateProductAssets(productId: string, productAssets: ProductAssets, assetId: string) : Observable<ProductAssets> {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this.products$.pipe(
+            take(1),
+            switchMap(products => this._httpClient.put<Product>(productService +'/stores/'+this.storeId$+'/products/' + productId + "/assets/" + assetId, productAssets , header).pipe(
+                map((response) => {
+                    
+                    this._logging.debug("Response from ProductsService (updateProductAssets)",response);
+
+                    // Find the index of the updated product
+                    const index = products.findIndex(item => item.id === productId);
+                    const assetIndex = products[index].productAssets.push(response["data"]);
+
+                    let updatedProduct = products[index];
+                    updatedProduct.productAssets[assetIndex] = response["data"];
+                    updatedProduct.thumbnailUrl = response["data"].url;
+
+                    // Update the product
+                    products[index] = { ...products[index], ...updatedProduct};
+
+                    // Update the products
+                    this._products.next(products);
+
+                    // Return the new product
+                    return response["data"];
+                })
+            ))
+        );
+    }
+
+    deleteProductAssets(productId: string, assetId: string) : Observable<ProductAssets> {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this.products$.pipe(
+            take(1),
+            switchMap(products => this._httpClient.delete<Product>(productService +'/stores/'+this.storeId$+'/products/' + productId + "/assets/" + assetId, header).pipe(
+                map((response) => {
+
+                    this._logging.debug("Response from ProductsService (deleteProductAssets)",response);
+
+                    // Find the index of the updated product
+                    const index = products.findIndex(item => item.id === productId);
+                    const assetIndex = products[index].productAssets.push(response["data"]);
+
+                    let updatedProduct = products[index].productInventories.splice(assetIndex, 1);
+
+                    // Update the product
+                    products[index] = { ...products[index], ...updatedProduct};
+                    
+
+                    // Update the products
+                    this._products.next(products);
+
+                    // Return the new product
+                    return response["data"];
+                })
+            ))
+        );
+    }
 
     /**
      * Add Inventory to the product

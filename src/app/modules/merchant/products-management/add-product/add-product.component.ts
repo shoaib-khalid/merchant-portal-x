@@ -22,8 +22,6 @@ export class AddProductComponent implements OnInit, OnDestroy
     // get current store
     store$: Store;
 
-    disabledProceed: boolean = true;
-
     checkinput = {
         name: false,
         description: false,
@@ -52,6 +50,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     // product assets
     images: any = [];
     imagesFile: any = [];
+    thumbnailIndex: number = 0;
     currentImageIndex: number = 0;
     imagesEditMode: boolean = false;
 
@@ -128,6 +127,7 @@ export class AddProductComponent implements OnInit, OnDestroy
             price            : ['', [Validators.required]],
             images           : [[]],
             imagefiles       : [[]],
+            thumbnailIndex   : [0],
 
             // form completion
             valid            : [false]
@@ -488,6 +488,8 @@ export class AddProductComponent implements OnInit, OnDestroy
         const index = this.currentImageIndex;
         if (index > -1) {
             this.images.splice(index, 1);
+            this.imagesFile.splice(index, 1);
+            this.currentImageIndex = 0;
         }
     }
 
@@ -555,18 +557,22 @@ export class AddProductComponent implements OnInit, OnDestroy
                         this.message = 'Field "' + key + '" error: ' + keyError;                        
                         throw BreakException;
                     });
+                    this.addProductForm.get('valid').patchValue(false);
                 }
             });
         } catch (error) {
             return;
         }
-
+        
         // --------------------
         // Process
         // --------------------
+        
+        this.addProductForm.get('valid').patchValue(true);
 
         this.addProductForm.get('images').patchValue(this.images);
         this.addProductForm.get('imagefiles').patchValue(this.imagesFile);
+        this.addProductForm.get('thumbnailIndex').patchValue(this.thumbnailIndex);
         this.dialogRef.close(this.addProductForm.value);
     }
     
@@ -591,36 +597,8 @@ export class AddProductComponent implements OnInit, OnDestroy
             this.addProductForm.get('minQuantityForAlarm').patchValue(-1);
         }
     }
-         
-    checkForm(){
 
-        console.log("========================================")
-        console.log("name",this.checkinput.name)
-        console.log("description",this.checkinput.description)
-        console.log("status",this.checkinput.status)
-        console.log("sku",this.checkinput.sku)
-        console.log("price",this.checkinput.price)
-        console.log("packingSize",this.checkinput.packingSize)
-        console.log("category",this.checkinput.category)
-        console.log("availableStock",this.checkinput.availableStock)
-
-
-
-        if (this.checkinput.name === true &&
-            this.checkinput.description === true &&
-            this.checkinput.status === true && 
-            this.checkinput.sku === true && 
-            this.checkinput.price === true && 
-            this.checkinput.packingSize === true && 
-            this.checkinput.category === true && 
-            this.checkinput.availableStock === true
-            ) {
-
-            this.disabledProceed = false;
-            this.addProductForm.get('valid').patchValue(true);
-        } else {
-            this.disabledProceed = true;
-            this.addProductForm.get('valid').patchValue(false);
-        }   
+    setThumbnail(currentImageIndex: number){
+        this.thumbnailIndex = currentImageIndex;
     }
 }

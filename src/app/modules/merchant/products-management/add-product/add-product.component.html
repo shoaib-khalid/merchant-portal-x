@@ -103,6 +103,7 @@
                                             <label
                                                 class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
                                                 for="new-image-file-input"
+                                                matTooltip="Add image"
                                                 matRipple>
                                                 <mat-icon
                                                     class="icon-size-5"
@@ -121,6 +122,7 @@
                                             <label 
                                                 class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
                                                 for="new-image-edit-button"
+                                                matTooltip="Edit image"
                                                 matRipple>
                                                 <mat-icon
                                                     *ngIf="imagesEditMode"
@@ -131,6 +133,26 @@
                                                     class="icon-size-5"
                                                     [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
                                             </label>
+                                        </div>
+                                        <div>
+                                            <!-- Set Thumbnail -->
+                                            <div *ngIf="images.length && images.length > 1">
+                                                <input
+                                                    id="new-set-thumbnail-button"
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="button"
+                                                    (click)="setThumbnail(currentImageIndex)"
+                                                    mat-icon-button>
+                                                <label 
+                                                    class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                    for="new-set-thumbnail-button"
+                                                    [matTooltip]="currentImageIndex !== thumbnailIndex ? 'Set thumbnail' : ''"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="icon-size-5"
+                                                        [svgIcon]="currentImageIndex === thumbnailIndex ? 'heroicons_solid:star' : 'heroicons_outline:star'"></mat-icon>
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
                                     <!-- Image Cycle -->
@@ -177,33 +199,37 @@
                                 </div>
                                 <!-- Product status -->
                                 <div class="flex flex-col mt-8 w-full">
-                                    <span class="font-semibold mb-2">Product status</span>
-                                    <mat-select
-                                        appearance="fill" floatLabel="always"
-                                        placeholder="Select one option"
-                                        class="border border-gray-300 w-full px-2 py-2 rounded"
-                                        [formControlName]="'status'"
-                                        (selectionChange)="addProductForm.get('status').patchValue(statusSelector.value)"
-                                        (selectionChange)="statusSelector.value === 'OUT_OF_STOCK' ? addProductForm.get('availableStock').patchValue(0) : ''"
-                                        (selectionChange)="checkInput('status');checkForm()"
-                                        #statusSelector="matSelect"
-                                        >
-                                        <mat-select-trigger>
-                                            <span class="flex items-center">
-                                                <span>{{ statusSelector.triggerValue }}</span>
-                                            </span>
-                                        </mat-select-trigger>
-                                        <div>
-                                            <mat-option [value]="'ACTIVE'">Active</mat-option>
-                                            <mat-option [value]="'INACTIVE'">Inactive</mat-option>
-                                            <mat-option [value]="'OUT_OF_STOCK'">Out of Stock</mat-option>
-                                        </div>
-                                    </mat-select>
-                                    <!-- <mat-slide-toggle
-                                        [formControlName]="'status'"
-                                        [color]="'primary'">
-                                        {{addProductForm.get('status').value === "ACTIVE" ? true : false}}
-                                    </mat-slide-toggle> -->
+                                    <mat-form-field class="w-full" floatLabel="always">
+                                        <mat-label class="font-medium">Product status</mat-label>
+                                        <mat-select
+                                            required
+                                            floatLabel="always"
+                                            placeholder="Select one option"
+                                            [formControlName]="'status'"
+                                            (selectionChange)="addProductForm.get('status').patchValue(statusSelector.value)"
+                                            (selectionChange)="statusSelector.value === 'OUT_OF_STOCK' ? addProductForm.get('availableStock').patchValue(0) : ''"
+                                            #statusSelector="matSelect"
+                                            >
+                                            <mat-select-trigger>
+                                                <span class="flex items-center">
+                                                    <span>{{ statusSelector.triggerValue }}</span>
+                                                </span>
+                                            </mat-select-trigger>
+                                            <div>
+                                                <mat-option [value]="'ACTIVE'">Active</mat-option>
+                                                <mat-option [value]="'INACTIVE'">Inactive</mat-option>
+                                                <mat-option [value]="'OUT_OF_STOCK'">Out of Stock</mat-option>
+                                            </div>
+                                        </mat-select>
+                                        <!-- <mat-slide-toggle
+                                            [formControlName]="'status'"
+                                            [color]="'primary'">
+                                            {{addProductForm.get('status').value === "ACTIVE" ? true : false}}
+                                        </mat-slide-toggle> -->
+                                        <mat-error *ngIf="addProductForm.get('status').hasError('required')">
+                                            Required
+                                        </mat-error>
+                                    </mat-form-field>
                                 </div>
                             </div>
 
@@ -216,25 +242,29 @@
                                         <mat-label>Name</mat-label>
                                         <input
                                             matInput
+                                            required
                                             [placeholder]="'Insert product ' + ((data['productType'] === 'combo') ? 'combo ' : '') + 'name'"
                                             [formControlName]="'name'"
-                                            (input)="checkInput('name');checkForm()"
-                                            (change)="generateSku();checkInput('name');checkForm()"
+                                            (change)="generateSku()"
                                         >
+                                        <mat-error *ngIf="addProductForm.get('name').hasError('required')">
+                                            Required
+                                        </mat-error>
                                     </mat-form-field>
 
                                     <!-- Description -->
                                     <div class="w-full mb-4">
-                                        <span class="font-medium leading-tight">Description</span>
+                                        <span class="font-medium leading-tight">Description *</span>
                                         <div class="mt-1.5 flex items-center -my-px w-full">
                                             <quill-editor
                                                 class="w-full"
                                                 [formControlName]="'description'"
-                                                (input)="checkInput('description');checkForm()"
-                                                (change)="checkInput('description');checkForm()"
                                                 [modules]="quillModules"></quill-editor>
                                             <!-- use (onContentChanged)="textChanged($event)" for limiting quil editor -->
                                         </div>
+                                        <!-- <mat-error *ngIf="addProductForm.get('description').hasError('required')">
+                                            Required
+                                        </mat-error> -->
                                     </div>
                                 </div>
                                 
@@ -245,11 +275,13 @@
                                         <mat-label>SKU</mat-label>
                                         <input
                                             matInput
+                                            required
                                             [formControlName]="'sku'"
                                             placeholder="Insert SKU"
-                                            (input)="checkInput('sku');checkForm()"
-                                            (change)="checkInput('sku');checkForm()"
                                         >
+                                        <mat-error *ngIf="addProductForm.get('sku').hasError('required')">
+                                            Required
+                                        </mat-error>
                                     </mat-form-field>
 
                                     <!-- Price -->
@@ -258,15 +290,17 @@
                                         appearance="fill" floatLabel="always"
                                     >
                                         <mat-label>Price</mat-label>
-                                        <span matSuffix>$</span>
+                                        <span matSuffix>{{store$.regionCountry.currencySymbol}}</span>
                                         <input
                                             matInput
+                                            required
                                             [formControlName]="'price'"
                                             placeholder="Insert price"
-                                            (input)="checkInput('price');checkForm()"
-                                            (change)="checkInput('price');checkForm()"
                                             type="number"
                                         >
+                                        <mat-error *ngIf="addProductForm.get('price').hasError('required')">
+                                            Required
+                                        </mat-error>
                                     </mat-form-field>
 
                                     <!-- Packing Size -->
@@ -276,12 +310,13 @@
                                         *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'">
                                         <mat-label>Packing Size</mat-label>
                                         <mat-select
+                                            required
                                             class="w-full"
                                             appearance="fill"
+                                            [formControlName]="'packingSize'"
                                             [value]="packingSize"
                                             placeholder="Select one option"
                                             (selectionChange)="addProductForm.get('packingSize').patchValue(packingSizeSelector.value)"
-                                            (selectionChange)="checkInput('packingSize');checkForm()"
                                             #packingSizeSelector="matSelect"
                                             >
                                             <mat-select-trigger>
@@ -296,6 +331,9 @@
                                                 <mat-option [value]="'XL'">Xtra Large</mat-option>
                                             </div>
                                         </mat-select>
+                                        <mat-error *ngIf="addProductForm.get('packingSize').hasError('required')">
+                                            Required
+                                        </mat-error>
                                     </mat-form-field>
                                 </div>
 
@@ -353,7 +391,7 @@
                                                         [color]="'primary'"
                                                         [checked]="addProductForm.get('categoryId').value.includes(category.id)"
                                                         (change)="toggleProductCategory(category, $event);"
-                                                        (input)="checkInput('category', $event);checkForm()">
+                                                    >
                                                         {{category.name}}
                                                     </mat-checkbox>
                                                 </ng-container>
@@ -451,12 +489,14 @@
                                     >
                                         <input
                                             (input)="(addProductForm.get('availableStock').value > 0 && addProductForm.get('status').value === 'OUT_OF_STOCK') ? addProductForm.get('status').patchValue('ACTIVE') : ''"
-                                            (input)="checkInput('availableStock');checkForm()"
                                             placeholder="Insert current stock"
                                             [formControlName]="'availableStock'"
                                             type="number"
                                             matInput
                                         >
+                                        <mat-error *ngIf="addProductForm.get('availableStock').hasError('required')">
+                                            Required
+                                        </mat-error>
                                     </mat-form-field>
                                 </div>
                                 <!-- Track Stock Level -->

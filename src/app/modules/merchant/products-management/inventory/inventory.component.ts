@@ -130,6 +130,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     images: any = [];
     imagesFile: any = [];
     currentImageIndex: number = 0;
+    thumbnailIndex: number = 0;
     imagesEditMode: boolean = false;
 
     displayProductVariantAssets:any = [];
@@ -480,13 +481,16 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 // Images
                 // ---------------------
 
-                // Get product image by product id
-                
+                // Sort productAssets and place itemCode null in front, after that variants image
                 let imagesObjSorted = product.productAssets.sort(this.dynamicSort("itemCode"));
                 let imageArr = imagesObjSorted.map(item => item.url);
 
                 this.images = imageArr;
 
+                // get thumbnail index
+                let _thumbnailIndex = imagesObjSorted.findIndex(item => item.isThumbnail === true)
+                this.thumbnailIndex = _thumbnailIndex === -1 ? 0 : _thumbnailIndex;
+                
                 // ---------------------
                 // Product Assets
                 // ---------------------
@@ -496,8 +500,11 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this.productAssets = this.selectedProductForm.get('productAssets') as FormArray;
                 this.productAssets.clear();
 
+                this.imagesFile = [];
+                
                 this.productAssets$.forEach(item => {
                     this.productAssets.push(this._formBuilder.group(item));
+                    this.imagesFile.push(null) // push imagesFile with null to defined now many array in imagesFile
                 });
 
                 // ---------------------
@@ -606,7 +613,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 return;
             }
 
-            this.createProduct(result.categoryId, productType, result);
+            const {valid, ...productBody} = result;
+
+            this.createProduct(result.categoryId, productType, productBody);
         });
     }
 
@@ -616,7 +625,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     createProduct(categoryId: string, productType: string, productBody): void
     {
 
-        const { sku, availableStock, price, images, imagefiles, ...newProductBody } = productBody;
+        const { sku, availableStock, price, images, imagefiles, thumbnailIndex, ...newProductBody } = productBody;
 
         // Create the product
         this._inventoryService.createProduct(categoryId, productType, newProductBody)
@@ -638,7 +647,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                         // create a new one
                         let formData = new FormData();
                         formData.append('file',imagefiles[i]);
-                        this._inventoryService.addProductAssets(newProduct["data"].id, formData, (i === 0) ? { isThumbnail: true } : { isThumbnail: false })
+                        this._inventoryService.addProductAssets(newProduct["data"].id, formData, (i === thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
                             .pipe(takeUntil(this._unsubscribeAll))
                             .subscribe((response)=>{
                                 if (response.isThumbnail){
@@ -654,6 +663,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                     this.currentImageIndex = 0;
                     this.imagesFile = imagefiles;
                     this.images = images;
+                    this.thumbnailIndex = thumbnailIndex;
                 }
 
                 // Go to new product
@@ -722,25 +732,107 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
         // Update the assets product on the server (backend kena enable update)
         if (product.productAssets) {
+            let expression = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+            let regex = new RegExp(expression);
+            let iteration = 0;// this iteration used by new product added to existing old product (not update tau)
+            this.selectedProductForm.get('productAssets').value.forEach((item, i) => {
+                let assetIndex = product.productAssets.findIndex(element => element.id === item.id)
+                let _thumbnailIndex = product.productAssets.findIndex(element => element.isThumbnail === true)
+                if (assetIndex > -1) {
+                    if (!item.url.match(regex)) { // if url is not valid, it mean the data is new data
 
+                        // -----------------
+                        // delete old one
+                        // -----------------
+
+                        this._inventoryService.deleteProductAssets(this.selectedProduct.id, item.id)
+                        .pipe(takeUntil(this._unsubscribeAll))
+                        .subscribe((deleteResponse)=>{
+
+                            // -----------------
+                            // create a new one
+                            // ----------------
+
+                            let formData = new FormData();
+                            formData.append('file',this.imagesFile[i]);
+                            this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false }, i)
+                                .pipe(takeUntil(this._unsubscribeAll))
+                                .subscribe((addResponse)=>{
+
+                                    // update the deleted product assets
+                                    let _updatedProduct = product.productAssets;
+                                    _updatedProduct[assetIndex] = addResponse;
+
+                                    // patch the value
+                                    this.selectedProductForm.get('productAssets').patchValue(_updatedProduct);
+
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                });
+
+                            // Mark for check
+                            this._changeDetectorRef.markForCheck();
+                        });
+
+
+                    } else if (i === this.thumbnailIndex) { // this mean thumbnail index change, diffent from backend
+                        // update the image (only thumbnail)
+                        let updateItemIndex = item;
+                        updateItemIndex.isThumbnail = true;
+
+                        this._inventoryService.updateProductAssets(this.selectedProduct.id, updateItemIndex, item.id)
+                            .pipe(takeUntil(this._unsubscribeAll))
+                            .subscribe((response)=>{
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
+                            });
+                    } else {
+                        
+                    }
+                } else {
+
+                    // -----------------
+                    // create a new one
+                    // ----------------
+
+                    iteration = iteration + 1;
+
+                    let formData = new FormData();
+                    formData.append('file',this.imagesFile[i]);
+
+                    this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false }, i)
+                        .pipe(takeUntil(this._unsubscribeAll))
+                        .subscribe((addResponse)=>{
+
+                            // update the deleted product assets
+                            // let _updatedProduct = this.selectedProductForm.get('productAssets').value;
+                            // _updatedProduct[i + iteration -1] = addResponse;
+
+                            // if (this.selectedProductForm.get('productAssets').value.length > 0 ){
+                            //     // patch the value if have existing value 
+                                this.selectedProductForm.get('productAssets').value[i] = addResponse;
+                            // } else {
+                                // patch the value if empty 
+                                // this.selectedProductForm.get('productAssets').patchValue(_updatedProduct);
+                            // }
+
+                            // Mark for check
+                            this._changeDetectorRef.markForCheck();
+                        });
+                }
+            })
         } else {
-
-            for (var i = 0; i < this.imagesFile.length; i++) {
+            for (let i = 0; i < this.imagesFile.length; i++) {
                 // create a new one
                 let formData = new FormData();
                 formData.append('file',this.imagesFile[i]);
-                this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === 0) ? { isThumbnail: true } : { isThumbnail: false })
+                this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
                     .pipe(takeUntil(this._unsubscribeAll))
                     .subscribe((response)=>{
-                        if (response.isThumbnail){
-                            this.selectedProduct.thumbnailUrl = response.url;
-                        }
-
                         // Mark for check
                         this._changeDetectorRef.markForCheck();
                     });
             }
-
         }
         
         // this._inventoryService.updateInventoryToProduct(product.id, productInventories).subscribe(() => {
@@ -2200,78 +2292,26 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             if(!images.length === true) {
                 this.images.push(reader.result);
                 this.imagesFile.push(file);
+                
+                this.selectedProductForm.get('productAssets').value.push({
+                    url: reader.result + "",
+                    id: this.currentImageIndex,
+                    isThumbnail: false
+                });
+                
                 this.currentImageIndex = this.images.length - 1;
             } else {
                 this.images[this.currentImageIndex] = reader.result + "";
+                this.imagesFile[this.currentImageIndex] = file;
+
+                this.selectedProductForm.get('productAssets').value[this.currentImageIndex].url = this.images[this.currentImageIndex];
             }
 
             this.imagesEditMode = false; 
             this._changeDetectorRef.markForCheck();
         }
-
-        const product = this.selectedProductForm.getRawValue();
-        
-        // // Get the product object
-        // const product = this.selectedProductForm.getRawValue();
-
-        // // Remove the currentImageIndex field
-        // delete product.currentImageIndex;
-
-        // // Update the product on the server
-        // this._inventoryService.updateProduct(product.id, product).subscribe(() => {
-
-        //     // Show a success message
-        //     this.showFlashMessage('success');
-        // });
-
-        // Update the selected product
-        
-        // this._inventoryService.uploadImages(this.selectedProduct.id, file).subscribe();
     }
-
-    /**
-     * Upload avatar
-     *
-     * @param fileList
-     */
-    // uploadImages(fileList: FileList, images): Promise<void>
-    // {
-    //     // Return if canceled
-    //     if ( !fileList.length )
-    //     {
-    //         return;
-    //     }
-
-    //     const allowedTypes = ['image/jpeg', 'image/png'];
-        
-    //     let file = [];
-    //     for( let i = 0; i < fileList.length; i ++){
-            
-    //         file[i] = fileList;
-    //         // Return if the file is not allowed
-    //         if ( !allowedTypes.includes(file[i].type) )
-    //         {
-    //             return;
-    //         }
-            
-    //         var reader = new FileReader();
-    //         reader.readAsDataURL(file[i]); 
-    //         reader.onload = (_event)  => {
-    //             if(!images.length === true) {
-    //                 this.images.push(reader.result);
-    //                 this.imagesFile.push(file[i]);
-    //             } else {
-    //                 this.images[this.currentImageIndex] = reader.result + "";
-    //             }
     
-    //             this.imagesEditMode = false; 
-    //             this._changeDetectorRef.markForCheck();
-    //         }
-    
-    //         const product = this.selectedProductForm.getRawValue();
-    //     }
-    // }
-
     /**
      * Remove the image
      */
@@ -2280,6 +2320,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         const index = this.currentImageIndex;
         if (index > -1) {
             this.images.splice(index, 1);
+            this.imagesFile.splice(index, 1);
+            this.currentImageIndex = 0;
         }
     }
 
@@ -2310,6 +2352,10 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
     resetCycleImages(){
         this.currentImageIndex = 0;
+    }
+
+    setThumbnail(currentImageIndex: number){
+        this.thumbnailIndex = currentImageIndex;
     }
 
     // --------------------------------------
