@@ -2326,12 +2326,44 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      */
     removeImage(): void
     {
-        const index = this.currentImageIndex;
-        if (index > -1) {
-            this.images.splice(index, 1);
-            this.imagesFile.splice(index, 1);
-            this.currentImageIndex = 0;
-        }
+        
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title  : 'Delete image',
+            message: 'Are you sure you want to remove this image? This action cannot be undone!',
+            actions: {
+                confirm: {
+                    label: 'Delete'
+                }
+            }
+        });
+        
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+            
+            // If the confirm button pressed...
+            if ( result === 'confirmed' )
+            {
+                const index = this.currentImageIndex;
+                if (index > -1) {
+                    this.images.splice(index, 1);
+                    this.imagesFile.splice(index, 1);
+                    
+                    let expression = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+                    let regex = new RegExp(expression);
+                    if (this.selectedProductForm.get('productAssets').value[index].url.match(regex)) { // if url is valid, then we delete backend
+                        this._inventoryService.deleteProductAssets(this.selectedProduct.id, this.selectedProductForm.get('productAssets').value[index].id)
+                        .pipe(takeUntil(this._unsubscribeAll))
+                        .subscribe((deleteResponse)=>{
+                            this.resetCycleImages();
+                            this.imagesEditMode = false;
+                        });
+                    }
+                    this.selectedProductForm.get('productAssets').value.splice(index, 1);
+                    this.currentImageIndex = 0;
+                }
+            }
+        });
     }
 
     /**
