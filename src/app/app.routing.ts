@@ -101,6 +101,15 @@ export const appRoutes: Route[] = [
         ]
     },
 
+    // Documentation
+    {
+        path: 'docs',
+        children: [
+            // Changelog
+            {path: 'changelog', loadChildren: () => import('app/modules/admin/docs/changelog/changelog.module').then(m => m.ChangelogModule)}
+        ]
+    },
+
     // Redirect if not exists
     // {path: '**', redirectTo: '/'}
 ];
