@@ -16,9 +16,15 @@ export class ChangelogComponent
             releaseDate: 'Dec 27, 2021',
             changes    : [
                 {
+                    type: 'Added',
+                    list: [
+                        '(Changelog) Added the ChangeLog page'
+                    ]
+                },
+                {
                     type: 'Fixed',
                     list: [
-                        '(QuickChat) Fixed: Wrong css rule causing a lot of problems'
+                        '(ManageProduct) Fixed: Trigger delete image at backend'
                     ]
                 }
             ]
