@@ -61,6 +61,10 @@ export class RegisterStoreComponent implements OnInit
     message: string[] = [];
     
     files: any;
+    timeAlert: any = [];
+    disableForm: boolean = false;
+
+
 
     // display error
     alert: { type: FuseAlertType; message: string } = {
@@ -262,13 +266,13 @@ export class RegisterStoreComponent implements OnInit
         // -------------------------
 
         this._storeTiming = [
-            { day: "Monday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false, isOpen: true },
-            { day: "Tuesday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false, isOpen: true },
-            { day: "Wednesday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false, isOpen: true },
-            { day: "Thursday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false, isOpen: true },
-            { day: "Friday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false, isOpen: true },
-            { day: "Saturday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: true, isOpen: false },
-            { day: "Sunday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: true, isOpen: false },
+            { day: "Monday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false, isOpen: true, isBreakTime: true },
+            { day: "Tuesday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false, isOpen: true, isBreakTime: true },
+            { day: "Wednesday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false, isOpen: true, isBreakTime: true },
+            { day: "Thursday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false, isOpen: true, isBreakTime: true },
+            { day: "Friday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: false, isOpen: true, isBreakTime: true },
+            { day: "Saturday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: true, isOpen: false, isBreakTime: true },
+            { day: "Sunday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: true, isOpen: false, isBreakTime: true },
         ];
 
         this._storeTiming.forEach(item => {
@@ -424,7 +428,7 @@ export class RegisterStoreComponent implements OnInit
                 // ---------------------------
 
                 storeTiming.forEach(item => {
-                    let { isOpen, ...filteredItem } = item;
+                    let { isOpen, isBreakTime,  ...filteredItem } = item;
                     this._storesService.postTiming(this.storeId, filteredItem)
                         .subscribe((response)=>{});
                 });
@@ -607,6 +611,37 @@ export class RegisterStoreComponent implements OnInit
         this._storeTiming[index].isOff = !this._storeTiming[index].isOff;
     }
 
+    toggleBreakHour (e, i){
+        if(e.checked === false){
+            this.createStoreForm.get('storeTiming').value[i].breakStartTime = null;
+            this.createStoreForm.get('storeTiming').value[i].breakEndTime = null;
+
+            this.createStoreForm.get('storeTiming').value[i].isBreakTime = false;
+        } else{
+            this.createStoreForm.get('storeTiming').value[i].breakStartTime = "13:00";
+            this.createStoreForm.get('storeTiming').value[i].breakEndTime = "14:00";
+
+            this.createStoreForm.get('storeTiming').value[i].isBreakTime = true;
+        }
+    }
+
+    applyToAll(index){
+
+        let _storeTiming = {
+            breakStartTime: this.createStoreForm.get('storeTiming').value[index].breakStartTime,
+            breakEndTime: this.createStoreForm.get('storeTiming').value[index].breakEndTime,
+            openTime: this.createStoreForm.get('storeTiming').value[index].openTime,
+            closeTime: this.createStoreForm.get('storeTiming').value[index].closeTime
+        }
+
+        this.createStoreForm.get('storeTiming').value.forEach((item, i) => {
+            this.createStoreForm.get('storeTiming').value[i].breakStartTime = _storeTiming.breakStartTime;
+            this.createStoreForm.get('storeTiming').value[i].breakEndTime =_storeTiming.breakEndTime;
+            this.createStoreForm.get('storeTiming').value[i].openTime =_storeTiming.openTime;
+            this.createStoreForm.get('storeTiming').value[i].closeTime =_storeTiming.closeTime;
+        })
+    }
+
     addSelfDeliveryState(){
 
         let selfDeliveryStateItem = {
@@ -744,5 +779,25 @@ export class RegisterStoreComponent implements OnInit
         if (this.deliveryPartners.length < 1 && this.createStoreForm.get('deliveryType').value !== "SELF"){
             this.createStoreForm.get('deliveryType').setErrors({noDeliveryPartners: true})
         }
+    }
+
+    changeTime(i, type , e){
+        // console.log("i : type : e =", i + " : " + type + " : " + e.target.value);
+        // console.log("tegok object: ", this.createStoreForm.get('storeTiming').value[i])
+        // console.log("tengok event: ", e.target.value)
+        // console.log("hari",this.createStoreForm.get('storeTiming').value[i].day)
+        if(this.createStoreForm.get('storeTiming').value[i].openTime >= this.createStoreForm.get('storeTiming').value[i].closeTime ){
+            this.timeAlert[i] ="End time range incorrect" ;
+        }else{
+            this.timeAlert[i] = "" ;
+        }   
+    }
+
+    changeBreakTime(i, type , e){
+        if(this.createStoreForm.get('storeTiming').value[i].breakStartTime >= this.createStoreForm.get('storeTiming').value[i].breakEndTime ){
+            this.timeAlert[i] ="Break Hour End time range incorrect" ;
+        }else{
+            this.timeAlert[i] = "" ;
+        }   
     }
 }
