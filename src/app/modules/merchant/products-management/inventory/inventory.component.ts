@@ -84,6 +84,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
     productVariants: FormArray;
     productVariants$: ProductVariant[] = [];
+    product_Variants:any[];
     filteredProductVariants: ProductVariant[] = [];
     selectedProductVariants: ProductVariant;
 
@@ -221,7 +222,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             seoUrl           : [''],
             // seoName          : [''], // not used
             trackQuantity    : [false],
-            allowOutOfStockPurchases: [false],
+            allowOutOfStockPurchases: [false], 
             minQuantityForAlarm: [-1],
             packingSize      : ['', [Validators.required]],
             // created          : [''],
@@ -448,9 +449,14 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             return;
         }
 
+        //set the details
+        this.closeDetails();
+
         // set showVariantsSection , showCombosSection to false
         this.showVariantsSection = false;
         this.showCombosSection = false;
+
+        //to 
 
         // Get the product by id
         this._inventoryService.getProductById(productId)
@@ -496,9 +502,12 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 // ---------------------
 
                 this.productAssets$ = product.productAssets;
+                console.log('this.productAssets$',this.productAssets$);
 
                 this.productAssets = this.selectedProductForm.get('productAssets') as FormArray;
-                this.productAssets.clear();
+                // this.productAssets.clear();
+                console.log('this.productAssets',this.productAssets);
+          
 
                 this.imagesFile = [];
                 
@@ -514,7 +523,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this.productInventories$ = product.productInventories;
                 
                 this.productInventories = this.selectedProductForm.get('productInventories') as FormArray;
-                this.productInventories.clear();
+                // this.productInventories.clear();
 
                 this.productInventories$.forEach(item => {
                     this.productInventories.push(this._formBuilder.group(item));
@@ -527,9 +536,10 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 // Set to this productVariants 
                 this.productVariants$ = product.productVariants;
                 this.filteredProductVariants = product.productVariants;
+                console.log('this.filteredProductVariants :::',this.filteredProductVariants);
                 
                 this.productVariants = this.selectedProductForm.get('productVariants') as FormArray;
-                this.productVariants.clear();
+                // this.productVariants.clear();
 
                 this.productVariants$.forEach(item => {
                     let _item = this._formBuilder.group({
@@ -586,14 +596,18 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 // Product Combo Package
                 // ---------------------
 
+                console.log('this.selectedProduct.isPackage:::',this.selectedProduct.isPackage);
                 // get product combo list
                 if (this.selectedProduct.isPackage === true) {
                     this._inventoryService.getProductPackageOptions(productId)
                         .pipe(takeUntil(this._unsubscribeAll))
                         .subscribe((response)=>{
                             this.productsCombos$ = response["data"];
+                            console.log('this.productsCombos$ ::::',this.productsCombos$);
                         });
                 }
+
+                console.log('FORM :',this.selectedProductForm.value);
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -710,6 +724,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         
         // Get the product object
         const { sku, price, quantity, ...product} = this.selectedProductForm.getRawValue();
+        console.log('FORM:',this.selectedProductForm.getRawValue());
+        console.log('this.selectedProduct::::',this.selectedProduct)
+        return;
 
         product.seoName = product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
         product.seoUrl = storeFrontURL + '/products/name/' + product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
@@ -972,7 +989,10 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     closeDetails(): void
     {
         this.selectedProduct = null;
-        (this.selectedProductForm.get('productInventories') as FormArray).clear();//reset form array
+        (this.selectedProductForm.get('productInventories') as FormArray).clear();
+        (this.selectedProductForm.get('productVariants') as FormArray).clear();
+        (this.selectedProductForm.get('productAssets') as FormArray).clear();
+
 
     }
 
@@ -1448,7 +1468,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         if ( this.filteredProductVariants.length === 0 )
         {
             // Create the variant
-            this.createVariant(event.target.value);
+            // this.createVariant(event.target.value); //iman comment this
 
             // Clear the input
             event.target.value = '';
@@ -1484,14 +1504,32 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         const variant = {
             name
         };
+
+ 
+            let _item = this._formBuilder.group({
+                name: name,
+                
+            });
+
+            this.productVariants.push(_item);
+            console.log('Dalam method createVariant : this.selectedProductForm.value',this.selectedProductForm.value);
+
+            console.log('this.productVariants::',this.productVariants);
+            console.log('this.productVariants.value::',this.productVariants.value);
+            this.product_Variants = this.productVariants.value;
+     
+
+
+
+     
         
         // Create variant on the server
-        this._inventoryService.createVariant(variant, this.selectedProduct.id)
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((response) => {
-                // Add the variant to the product
-                this.addVariantToProduct(response);
-            });
+        // this._inventoryService.createVariant(variant, this.selectedProduct.id)
+        //     .pipe(takeUntil(this._unsubscribeAll))
+        //     .subscribe((response) => {
+        //         // Add the variant to the product
+        //         this.addVariantToProduct(response);
+        //     });
     }
 
     editVariantTitle(variants: ProductVariant, event){
