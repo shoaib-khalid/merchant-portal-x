@@ -63,6 +63,8 @@ export class EditStoreComponent implements OnInit
     
     // Image part    
     files: any;
+
+    timeAlert: any = [];
     
     // display error
     alert: { type: FuseAlertType; message: string } = {
@@ -223,6 +225,7 @@ export class EditStoreComponent implements OnInit
                 // set timing
                 this._storeTiming = response.storeTiming;
                 this._storeTiming.map(item => item["isOpen"] = !item.isOff);
+                this._storeTiming.map(item => item["isBreakTime"] = !item.isOff);
 
                 this.files[0].fileSource = response.storeAsset.logoUrl;
                 this.files[1].fileSource = response.storeAsset.bannerUrl;
@@ -701,6 +704,38 @@ export class EditStoreComponent implements OnInit
         this._storeTiming[index].isOff = !this._storeTiming[index].isOff;
     }
 
+    toggleBreakHour (e, i){
+        if(e.checked === false){
+            this.editStoreForm.get('storeTiming').value[i].breakStartTime = null;
+            this.editStoreForm.get('storeTiming').value[i].breakEndTime = null;
+
+            this.editStoreForm.get('storeTiming').value[i].isBreakTime = false;
+        } else{
+            this.editStoreForm.get('storeTiming').value[i].breakStartTime = "13:00";
+            this.editStoreForm.get('storeTiming').value[i].breakEndTime = "14:00";
+
+            this.editStoreForm.get('storeTiming').value[i].isBreakTime = true;
+        }
+    }
+
+    applyToAll(index){
+
+        let _storeTiming = {
+            breakStartTime: this.editStoreForm.get('storeTiming').value[index].breakStartTime,
+            breakEndTime: this.editStoreForm.get('storeTiming').value[index].breakEndTime,
+            openTime: this.editStoreForm.get('storeTiming').value[index].openTime,
+            closeTime: this.editStoreForm.get('storeTiming').value[index].closeTime
+        }
+
+        this.editStoreForm.get('storeTiming').value.forEach((item, i) => {
+            this.editStoreForm.get('storeTiming').value[i].breakStartTime = _storeTiming.breakStartTime;
+            this.editStoreForm.get('storeTiming').value[i].breakEndTime =_storeTiming.breakEndTime;
+            this.editStoreForm.get('storeTiming').value[i].openTime =_storeTiming.openTime;
+            this.editStoreForm.get('storeTiming').value[i].closeTime =_storeTiming.closeTime;
+        })
+    }
+
+
     addSelfDeliveryState(){
 
         let selfDeliveryStateItem = {
@@ -839,4 +874,23 @@ export class EditStoreComponent implements OnInit
         }
     }
     
+    changeTime(i, type , e){
+        // console.log("i : type : e =", i + " : " + type + " : " + e.target.value);
+        // console.log("tegok object: ", this.createStoreForm.get('storeTiming').value[i])
+        // console.log("tengok event: ", e.target.value)
+        // console.log("hari",this.createStoreForm.get('storeTiming').value[i].day)
+        if(this.editStoreForm.get('storeTiming').value[i].openTime >= this.editStoreForm.get('storeTiming').value[i].closeTime ){
+            this.timeAlert[i] ="End time range incorrect" ;
+        }else{
+            this.timeAlert[i] = "" ;
+        }   
+    }
+
+    changeBreakTime(i, type , e){
+        if(this.editStoreForm.get('storeTiming').value[i].breakStartTime >= this.editStoreForm.get('storeTiming').value[i].breakEndTime ){
+            this.timeAlert[i] ="Break Hour End time range incorrect" ;
+        }else{
+            this.timeAlert[i] = "" ;
+        }   
+    }
 }
