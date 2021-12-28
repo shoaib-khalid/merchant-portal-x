@@ -249,7 +249,7 @@
                                 </ng-container>
     
                                 <!-- Name -->
-                                <ng-container matColumnDef="name">
+                                <ng-container matColumnDef="customer.name">
                                     <th
                                         mat-header-cell
                                         mat-sort-header
@@ -260,7 +260,7 @@
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span class="pr-6 whitespace-nowrap">
-                                            {{transaction.order.orderPaymentDetail.accountName | titlecase }}
+                                            {{transaction.order.customer.name | titlecase }}
                                         </span>
                                     </td>
                                 </ng-container>

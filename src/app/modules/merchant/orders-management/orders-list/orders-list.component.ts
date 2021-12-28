@@ -57,7 +57,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     range: any;
 
     recentTransactionsDataSource: MatTableDataSource<any> = new MatTableDataSource();
-    recentTransactionsTableColumns: string[] = ['transactionId', 'date', 'name', 'amount', 'status', 'action'];
+    recentTransactionsTableColumns: string[] = ['transactionId', 'date', 'customer.name', 'amount', 'status', 'action'];
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     loading: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -167,7 +167,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                 this.isLoading = true;
                 this.filterCustNameControlValue = query;
 
-                return this._orderslistService.getOrders(0, 10, 'name', 'asc', query, '', '', '', this.tabControl.value);
+                return this._orderslistService.getOrders(0, 10, 'created', 'desc', query, '', '', '', this.tabControl.value);
             }),
             map(() => {
                 this.isLoading = false;
@@ -184,7 +184,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                 this.isLoading = true;
                 this.filterTrxIdControlValue = query;
 
-                return this._orderslistService.getOrders(0, 10, 'name', 'asc', '', '', '', '', this.tabControl.value, query);
+                return this._orderslistService.getOrders(0, 10, 'created', 'desc', '', '', '', '', this.tabControl.value, query);
             }),
             map(() => {
                 this.isLoading = false;
@@ -231,7 +231,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                 
                 this.filterDateRange.end = formattedDate;
                     
-                return this._orderslistService.getOrders(0, 10, 'name', 'asc', '', '', this.filterDateRange.start, this.filterDateRange.end, this.tabControl.value);
+                return this._orderslistService.getOrders(0, 10, 'created', 'desc', '', '', this.filterDateRange.start, this.filterDateRange.end, this.tabControl.value);
             }),
             map(() => {
                 this.isLoading = false;
@@ -246,7 +246,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
             switchMap((query) => {
                 this.isLoading = true;
                 //kena ubah
-                return this._orderslistService.getOrders(0, 10, 'name', 'asc', '', '', '', '', query);
+                return this._orderslistService.getOrders(0, 10, 'created', 'desc', '', '', '', '', query);
             }),
             map(() => {
                 this.isLoading = false;
@@ -265,8 +265,8 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
             {
                 // Set the initial sort
                 this._sort.sort({
-                    id          : 'name',
-                    start       : 'asc',
+                    id          : 'created',
+                    start       : 'desc',
                     disableClear: true
                 });
                 
@@ -344,9 +344,9 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
 
         let currentOpenTab = displayStatuses;
         if (displayStatuses !== "HISTORY") {
-            this.recentTransactionsTableColumns = ['transactionId', 'date', 'name', 'amount', 'action'];
+            this.recentTransactionsTableColumns = ['transactionId', 'date', 'customer.name', 'amount', 'action'];
         } else {
-            this.recentTransactionsTableColumns = ['transactionId', 'date', 'name', 'amount', 'status', 'action'];
+            this.recentTransactionsTableColumns = ['transactionId', 'date', 'customer.name', 'amount', 'status', 'action'];
         }
 
         this.tabControl.setValue(this._orderCountSummary.find(item => item.id === this.openTab).completionStatus);
