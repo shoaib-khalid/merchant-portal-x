@@ -40,9 +40,12 @@
                         <div class="justify-self-end font-medium tracking-tight text-secondary">CREATED DATE</div>
                         <div class="font-medium">{{ invoiceForm.get('invoiceCreatedDate').value | date:'MMM dd, h:mm a' }}</div>
                         <div class="justify-self-end font-medium tracking-tight text-secondary">UPDATED DATE</div>
-                        <div class="font-medium">{{ invoiceForm.get('invoiceUpdatedDate').value | date:'MMM dd, h:mm a' }}</div>
-                        <div class="justify-self-end font-medium tracking-tight text-secondary">TOTAL</div>
-                        <div class="font-medium">{{ invoiceForm.get('total').value | currency: '$' }}</div>
+                        <div class="font-medium">{{ invoiceForm.get('invoiceUpdatedDate').value | date:'MMM dd, h:mm a'}}</div>
+                        <div class="col-span-2 place-self-center w-30 pt-4">
+                            <img
+                                class="w-30"
+                                [src]="invoiceForm.get('storeQrCode').value">
+                        </div>
                     </div>
                 </div>
     
@@ -60,8 +63,15 @@
                         <!-- Item -->
                         <div class="col-span-8">
                             <div class="text-lg font-medium">{{ item.productName }}</div>
-                            <div class="mt-2 text-md text-secondary">
-                                {{ item.productVariant }}
+                            <div class="mt-2 text-md text-secondary" *ngIf="item.productVariant">
+                                <span class="py-1 px-3 bg-gray-200 text-secondary rounded-full mx-1" *ngFor="let variant of item.productVariant" >
+                                    {{ variant }}
+                                </span>
+                            </div>
+                            <div class="mt-2 text-md text-secondary" *ngIf="item.orderSubItem">
+                                <span class="py-1 px-3 bg-gray-200 text-secondary rounded-full mx-1" *ngFor="let combo of item.orderSubItem" >
+                                    {{combo.productName}}
+                                </span>
                             </div>
                         </div>
                         <div class="self-center text-right">{{ item.productPrice | currency: '$' }}</div>
@@ -75,6 +85,15 @@
                     <!-- Subtotal -->
                     <div class="col-span-10 self-center font-medium tracking-tight text-secondary">SUBTOTAL</div>
                     <div class="col-span-2 text-right text-lg">{{ invoiceForm.get('subtotal').value | currency:'$'}}</div>
+    
+                    <!-- Divider -->
+                    <div class="col-span-12 my-3 border-b"></div>
+
+                    <!-- Order Discount -->
+                    <div class="col-span-10 self-center font-medium tracking-tight text-secondary">ORDER DISCOUNT ({{invoiceForm.get('discountCalculationValue').value}}%)
+                        <span class="font-bold tracking-tight text-secondary" *ngIf="invoiceForm.get('appliedDiscount').value >= invoiceForm.get('discountMaxAmount').value && invoiceForm.get('appliedDiscount').value != 0">Capped at ${{invoiceForm.get('discountMaxAmount').value}}</span>
+                    </div>
+                    <div class="col-span-2 text-right text-lg">-{{ invoiceForm.get('appliedDiscount').value | currency:'$'}}</div>
     
                     <!-- Divider -->
                     <div class="col-span-12 my-3 border-b"></div>
@@ -107,16 +126,7 @@
     
                 <div class="mt-16">
                     <div class="font-medium">This invoice is computer generated. Thank you for your business.</div>
-                    <div class="flex items-start mt-4">
-                        <img
-                            class="flex-0 w-10 mt-2"
-                            [src]="invoiceForm.get('storeLogo').value">
-                        <div class="ml-6 text-sm text-secondary">
-                            In condimentum malesuada efficitur. Mauris volutpat placerat auctor. Ut ac congue dolor. Quisque scelerisque lacus sed feugiat fermentum.
-                            Cras aliquet facilisis pellentesque. Nunc hendrerit quam at leo commodo, a suscipit tellus dapibus. Etiam at felis volutpat est mollis lacinia.
-                            Mauris placerat sem sit amet velit mollis, in porttitor ex finibus. Proin eu nibh id libero tincidunt lacinia et eget.
-                        </div>
-                    </div>
+                    
                 </div>
 
             </div>

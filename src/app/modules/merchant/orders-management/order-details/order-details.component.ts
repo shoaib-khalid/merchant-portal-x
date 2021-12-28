@@ -1,7 +1,9 @@
+import { formatDate } from '@angular/common';
 import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { StoresService } from 'app/core/store/store.service';
+import { Store } from 'app/core/store/store.types';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { OrdersListService } from '../orders-list/orders-list.service';
@@ -17,6 +19,10 @@ export class OrderDetailsComponent implements OnInit {
   private _unsubscribeAll: Subject<any> = new Subject<any>();
   order: Order;
   orderId: string;
+  timezone: string;
+  timezoneString: any;
+  dateCreated: Date;
+  dateUpdated: Date;
   
   constructor(
     private _changeDetectorRef: ChangeDetectorRef,
@@ -59,6 +65,7 @@ export class OrderDetailsComponent implements OnInit {
       storePhoneNumber    : [''],
       storeEmail          : [''],
       storeUrl            : [''],
+      storeQrCode         : [''],
       customerName        : [''],
       customerAddress     : [''],
       customerPhoneNumber : [''],
@@ -77,8 +84,21 @@ export class OrderDetailsComponent implements OnInit {
       storeServiceCharges : [0],
       deliveryCharges     : [0],
       deliveryDiscount    : [0],      
-      total               : [0]
+      total               : [0],
+      discountCalculationValue: [0],
+      appliedDiscount     :[0],
+      discountMaxAmount   :[0]
+
     });
+
+    this._storesService.store$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((store: Store)=>{
+                this.timezone = store.regionCountry.timezone;
+            });  
+
+
+
 
     // Get param from _activatedRoute first
     this._activatedRoute.params.subscribe(async params => {
@@ -106,15 +126,45 @@ export class OrderDetailsComponent implements OnInit {
             this.invoiceForm.get('customerEmail').setValue(order["data"].orderShipmentDetail.email);
 
             this.invoiceForm.get('invoiceId').setValue(order["data"].invoiceId);
-            this.invoiceForm.get('invoiceCreatedDate').setValue(order["data"].created); // xdop lg
-            this.invoiceForm.get('invoiceUpdatedDate').setValue(order["data"].updated);
-
             this.invoiceForm.get('subtotal').setValue(order["data"].subTotal);
             this.invoiceForm.get('discount').setValue(0);
             this.invoiceForm.get('storeServiceCharges').setValue(order["data"].storeServiceCharges);
             this.invoiceForm.get('deliveryCharges').setValue(order["data"].deliveryCharges);
             this.invoiceForm.get('deliveryDiscount').setValue(order["data"].deliveryDiscount);
             this.invoiceForm.get('total').setValue(order["data"].total);
+            if (order["data"].discountCalculationValue != null)
+              this.invoiceForm.get('discountCalculationValue').setValue(order["data"].discountCalculationValue);
+
+            this.invoiceForm.get('appliedDiscount').setValue(order["data"].appliedDiscount);
+            if (order["data"].discountMaxAmount != null)
+              this.invoiceForm.get('discountMaxAmount').setValue(order["data"].discountMaxAmount);
+            
+            var TimezoneName = this.timezone;
+ 
+            // Generating the formatted text
+            var options : any = {timeZone: TimezoneName, timeZoneName: "short"};
+            var dateText = Intl.DateTimeFormat([], options).format(new Date);
+            
+            // Scraping the numbers we want from the text
+            this.timezoneString = dateText.split(" ")[1].slice(3);
+            
+            // Getting the offset
+            var timezoneOffset = parseInt(this.timezoneString.split(':')[0])*60;
+
+            // Checking for a minutes offset and adding if appropriate
+            if (this.timezoneString.includes(":")) {
+              var timezoneOffset = timezoneOffset + parseInt(this.timezoneString.split(':')[1]);
+            }
+
+            this.dateCreated = new Date(order["data"].created);
+            this.dateUpdated = new Date(order["data"].updated);
+
+            this.dateCreated.setHours(this.dateCreated.getHours() - (-timezoneOffset) / 60);
+            this.dateUpdated.setHours(this.dateUpdated.getHours() - (-timezoneOffset) / 60);
+
+            this.invoiceForm.get('invoiceCreatedDate').setValue(this.dateCreated);
+            this.invoiceForm.get('invoiceUpdatedDate').setValue(this.dateUpdated);
+
 
             // Mark for check
             this._changeDetectorRef.markForCheck();
@@ -123,14 +173,51 @@ export class OrderDetailsComponent implements OnInit {
       // next getOrderItemsById
       this._ordersService.getOrderItemsById(this.orderId)
         .pipe(takeUntil(this._unsubscribeAll))
-        .subscribe((orderItems: OrderItem) => {
-            console.log(orderItems["data"].content)
-            this.invoiceForm.get('items').setValue(orderItems["data"].content);
+        .subscribe((orderItems: OrderItem[]) => {
+          
+          // Clear items form array
+          (this.invoiceForm.get('items') as FormArray).clear();
+          
+          // Setup item form array
+          const itemsFormGroups = [];
+          
+          // Iterate through OrderItem from BE
+          orderItems["data"].content.forEach((item) => {
+            
+              // Split product variant and set as array
+              if (item.productVariant != null) {
+
+                var variant = item.productVariant;
+                var variantArr = variant.split(',');
+                item.productVariant = this._formBuilder.array(variantArr)
+
+              }
+
+              // Create item form group
+              item.orderSubItem = this._formBuilder.array(item.orderSubItem)
+              itemsFormGroups.push(
+                this._formBuilder.group(item)
+              )
+              
+            })
+            
+            // Add the item form group to the items form array     
+            itemsFormGroups.forEach((itemFormGroup) => {
+              (this.invoiceForm.get('items') as FormArray).push(itemFormGroup)
+              
+            })
+
+
         });
 
-      // next getOrderItemsById
+      // next getStoreAssets
       let storeAsset = await this._storesService.getStoreAssets(this.storeId);
       this.invoiceForm.get('storeLogo').setValue(storeAsset.logoUrl);
+      this.invoiceForm.get('storeQrCode').setValue(storeAsset.qrCodeUrl);
+
+
+      
+
     });
   }
 }
