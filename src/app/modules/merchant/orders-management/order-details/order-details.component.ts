@@ -65,6 +65,7 @@ export class OrderDetailsComponent implements OnInit {
       storePhoneNumber    : [''],
       storeEmail          : [''],
       storeUrl            : [''],
+      storeQrCode         : [''],
       customerName        : [''],
       customerAddress     : [''],
       customerPhoneNumber : [''],
@@ -212,6 +213,7 @@ export class OrderDetailsComponent implements OnInit {
       // next getStoreAssets
       let storeAsset = await this._storesService.getStoreAssets(this.storeId);
       this.invoiceForm.get('storeLogo').setValue(storeAsset.logoUrl);
+      this.invoiceForm.get('storeQrCode').setValue(storeAsset.qrCodeUrl);
 
 
       

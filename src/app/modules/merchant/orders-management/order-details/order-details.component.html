@@ -41,8 +41,11 @@
                         <div class="font-medium">{{ invoiceForm.get('invoiceCreatedDate').value | date:'MMM dd, h:mm a' }}</div>
                         <div class="justify-self-end font-medium tracking-tight text-secondary">UPDATED DATE</div>
                         <div class="font-medium">{{ invoiceForm.get('invoiceUpdatedDate').value | date:'MMM dd, h:mm a'}}</div>
-                        <!-- <div class="justify-self-end font-medium tracking-tight text-secondary">TOTAL</div>
-                        <div class="font-medium">{{ invoiceForm.get('total').value | currency: '$' }}</div> -->
+                        <div class="col-span-2 place-self-center w-30 pt-4">
+                            <img
+                                class="w-30"
+                                [src]="invoiceForm.get('storeQrCode').value">
+                        </div>
                     </div>
                 </div>
     
