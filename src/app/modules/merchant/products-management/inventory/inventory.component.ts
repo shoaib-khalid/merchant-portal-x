@@ -84,8 +84,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
     productVariants: FormArray;
     productVariants$: ProductVariant[] = [];
-    product_Variants:any[];
-    filteredProductVariants: ProductVariant[] = [];
+    filteredProductVariants: any[] = [];
     selectedProductVariants: ProductVariant;
 
     productVariantsEditMode: boolean = false;
@@ -535,9 +534,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
                 // Set to this productVariants 
                 this.productVariants$ = product.productVariants;
-                this.filteredProductVariants = product.productVariants;
-                console.log('this.filteredProductVariants :::',this.filteredProductVariants);
-                
+    
                 this.productVariants = this.selectedProductForm.get('productVariants') as FormArray;
                 // this.productVariants.clear();
 
@@ -550,6 +547,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
                     this.productVariants.push(_item);
                 });
+
+                this.filteredProductVariants = this.productVariants.value;
+                console.log('this.filteredProductVariants :::',this.filteredProductVariants);
                 
                 // Generate variants combination
 
@@ -1448,7 +1448,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         const value = event.target.value.toLowerCase();
 
         // Filter the variants
-        this.filteredProductVariants = this.productVariants$.filter(variant => variant.name.toLowerCase().includes(value));
+        // this.filteredProductVariants = this.productVariants$.filter(variant => variant.name.toLowerCase().includes(value));
+       this.filteredProductVariants=this.productVariants.value.filter(variant => variant.name.toLowerCase().includes(value));
+
     }
 
     /**
@@ -1501,28 +1503,23 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      */
     createVariant(name: string): void
     {
-        const variant = {
-            name
-        };
-
+        this.productVariantAvailable = this.selectedProductForm.get('productVariantAvailable') as FormArray;
+        // this.productVariants.clear();
  
-            let _item = this._formBuilder.group({
-                name: name,
-                
-            });
+        let _item = this._formBuilder.group({
+            name: name,
+            productVariantsAvailable:this.productVariantAvailable
+            
+        });
 
-            this.productVariants.push(_item);
-            console.log('Dalam method createVariant : this.selectedProductForm.value',this.selectedProductForm.value);
+        this.productVariants.push(_item);
+        this.filteredProductVariants= this.productVariants.value;
+      
+    
+        // const variant = {
+        //     name
+        // };
 
-            console.log('this.productVariants::',this.productVariants);
-            console.log('this.productVariants.value::',this.productVariants.value);
-            this.product_Variants = this.productVariants.value;
-     
-
-
-
-     
-        
         // Create variant on the server
         // this._inventoryService.createVariant(variant, this.selectedProduct.id)
         //     .pipe(takeUntil(this._unsubscribeAll))
@@ -1657,7 +1654,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     /**
      * Open variants panel
      */
-    openVariantsPanel(variant: ProductVariant): void
+    openVariantsPanel(variant:any): void
     {
 
         this.selectedProductVariants = variant;
