@@ -34,6 +34,7 @@ export class DashboardComponent implements OnInit, OnDestroy
     seriesChart: any;
     overviewChart: any;
     weeklyGraph: boolean = true;
+    topProductChart:any;
     
     // ------------------------
     // Summary Sales Properties
@@ -123,7 +124,21 @@ export class DashboardComponent implements OnInit, OnDestroy
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     currencySymbol: string;
 
+    dayNames = ["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"];
+    thisWeekStartDate : any;
+    lastMonday: any;
 
+    topProductThisWeekRow = [];
+    topProductLastWeekRow = [];
+
+    firstThisWeek: string;
+    secondThisWeek: string;
+    thirdThisWeek: string;
+
+    firstLastWeek: string;
+    secondLastWeek: string;
+    thirdLastWeek: string;
+    
 
     /**
      * Constructor
@@ -403,13 +418,13 @@ export class DashboardComponent implements OnInit, OnDestroy
             
             if (this.completeCompletionStatus.includes(a.completionStatus))
                 this.sumWeeklyCompleted += a.total;
-            
+                
             else if (this.failedCompletionStatus.includes(a.completionStatus))
                 this.sumWeeklyFailed += a.total;
-            
+                
             else
                 this.sumWeeklyPending += a.total;
-
+                
         })
 
         // Sum up Total Sales Monthly 
@@ -446,7 +461,7 @@ export class DashboardComponent implements OnInit, OnDestroy
                     data: [11, 10, 8, 11, 8, 10, 17]
                 }
             ],
-            'this-month': [
+            'last-week': [
                 {
                     name: 'Completed',
                     type: 'line',
@@ -465,18 +480,9 @@ export class DashboardComponent implements OnInit, OnDestroy
             ]
         }
 
-        this.overviewChart = {
-            'this-week':{
-                            'completed'   : this.sumWeeklyCompleted,
-                            'pending'     : this.sumWeeklyPending,
-                            'failed'     : this.sumWeeklyFailed,
-                        },
-            'this-month':{
-                            'completed'   : this.sumMonthlyCompleted,
-                            'pending'     : this.sumMonthlyPending,
-                            'failed'     : this.sumMonthlyFailed,
-                        }
-        },
+        
+
+        
 
         this._prepareChartData();
 
@@ -661,7 +667,7 @@ export class DashboardComponent implements OnInit, OnDestroy
                     
                     this.dailyTopProductsDateRange.end = formattedDate;
 
-                    return this._dashboardService.getDailyTopProducts(this.storeId$, 0, 10, 'created', 'asc', "",
+                    return this._dashboardService.getDailyTopProducts(this.storeId$, 0, 10, 'date', 'asc', "",
                                                                             this.dailyTopProductsDateRange.start, this.dailyTopProductsDateRange.end);
                 }),
                 map(() => {
@@ -725,6 +731,155 @@ export class DashboardComponent implements OnInit, OnDestroy
                 })
             )
             .subscribe();
+
+        // -------------------------------
+        // Top Product This Week
+        // -------------------------------
+
+        console.log("Last Monday", this.getPreviousMonday());        
+        this.thisWeekStartDate  = new Date();
+        this.thisWeekStartDate.setDate(this.thisWeekStartDate.getDate()-7); 
+        console.log("this.thisWeekDate", this.thisWeekStartDate);
+
+        //Tue Dec 21 2021 21:21:16 GMT+0800 (Malaysia Time)
+
+        var d = new Date(this.thisWeekStartDate);
+        var dayName = this.dayNames[d.getDay()];
+        console.log("dayName", dayName);
+        
+        // set to Monday of this week
+        let lastMonday = this.getPreviousMonday()
+        let today = new Date();
+        let locale = 'en-MY';
+
+        // reformat date 
+        const format = 'yyyy-MM-dd';
+        let formattedLastMonday = formatDate(lastMonday, format, locale);
+        let formattedToday = formatDate(today, format, locale);
+
+        this._dashboardService.getDailyTopProducts(this.storeId$, 0, 10, 'ranking', 'asc', "",
+        formattedLastMonday, formattedToday)
+        .subscribe(response => {
+            
+            this.topProductThisWeekRow = []
+
+            if (response['data'].content.length >=3){
+                for (let i = 0; i < 3 ; i++){
+                    console.log(response['data'].content[i].name);
+                    this.topProductThisWeekRow[i] = response['data'].content[i].name
+                }
+            }
+            else {
+                for (let i = 0; i < response['data'].content.length ; i++){
+                    console.log(response['data'].content[i].name);
+                    this.topProductThisWeekRow[i] = response['data'].content[i].name
+                }
+                this.topProductThisWeekRow[2] = ''
+            }
+            console.log("this.topProductThisWeekRow", this.topProductThisWeekRow[0]);
+
+            this.firstThisWeek = this.topProductThisWeekRow[0];
+            this.secondThisWeek = this.topProductThisWeekRow[1];
+            this.thirdThisWeek = this.topProductThisWeekRow[2];
+
+            // response['data'].content.forEach(a => {
+            //     this.topProductThisWeekRow.push({
+            //         name : a.name,
+            //         ranking : a.ranking
+            //     })
+                
+            // });
+            
+        })
+
+        // -------------------------------
+        // Top Product Last Week
+        // -------------------------------
+
+        // set to Monday of this week
+        let lastWeekStart = this.getPreviousMonday()
+        let lastWeekEnd = new Date();
+
+        // lastWeekStart.setDate(lastWeekStart.getDate() - (lastWeekStart.getDay() + 6) % 7);
+
+        // set to start of last week
+        lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+
+        // set to end of last week
+        lastWeekEnd.setDate(lastWeekStart.getDate() + 6)
+        console.log("Start of last week ", lastWeekStart);
+        console.log("End of last week ", lastWeekEnd);
+        
+        
+        
+        // reformat date 
+        let formattedLastWeekStart = formatDate(lastWeekStart, format, locale);
+        let formattedLastWeekEnd = formatDate(lastWeekEnd, format, locale);
+
+        this._dashboardService.getDailyTopProducts(this.storeId$, 0, 10, 'ranking', 'asc', "",
+        formattedLastWeekStart, formattedLastWeekEnd)
+        .subscribe(response => {
+            
+            this.topProductLastWeekRow = []
+
+            if (response['data'].content.length >=3){
+                for (let i = 0; i < 3 ; i++){
+                    console.log(response['data'].content[i].name);
+                    this.topProductLastWeekRow[i] = response['data'].content[i].name
+                }
+            }
+            else {
+                for (let i = 0; i < response['data'].content.length ; i++){
+                    console.log(response['data'].content[i].name);
+                    this.topProductLastWeekRow[i] = response['data'].content[i].name
+                }
+                this.topProductLastWeekRow[2] = ''
+            }
+            console.log("this.topProductLastWeekRow", this.topProductLastWeekRow[0]);
+
+            this.firstLastWeek = this.topProductLastWeekRow[0];
+            this.secondLastWeek = this.topProductLastWeekRow[1];
+            this.thirdLastWeek = this.topProductLastWeekRow[2];
+
+            // response['data'].content.forEach(a => {
+            //     this.topProductThisWeekRow.push({
+            //         name : a.name,
+            //         ranking : a.ranking
+            //     })
+                
+            // });
+            
+        })
+
+        this.overviewChart = {
+            'this-week':{
+                            'completed'   : this.sumWeeklyCompleted,
+                            'pending'     : this.sumWeeklyPending,
+                            'failed'     : this.sumWeeklyFailed,
+                        },
+            'last-week':{
+                            'completed'   : this.sumMonthlyCompleted,
+                            'pending'     : this.sumMonthlyPending,
+                            'failed'     : this.sumMonthlyFailed,
+                        }
+        },
+
+        this.topProductChart = {
+            'this-week':{
+                            'rank_one'   : this.topProductThisWeekRow[0],
+                            'rank_two'     : this.topProductThisWeekRow[1],
+                            'rank_three'     : this.topProductThisWeekRow[2],
+                        },
+            'last-week':{
+                            'rank_one'   : this.sumMonthlyCompleted,
+                            'rank_two'     : this.sumMonthlyPending,
+                            'rank_three'     : this.sumMonthlyFailed,
+                        }
+        },
+        
+        
+                
+
         // Mark for check
         this._changeDetectorRef.markForCheck();
 
@@ -833,6 +988,21 @@ export class DashboardComponent implements OnInit, OnDestroy
             }
         }, 0);
     }
+
+    getPreviousMonday()
+        {
+            var date = new Date();
+            var day = date.getDay();
+            var prevMonday = new Date();
+            if(date.getDay() == 0){
+                prevMonday.setDate(date.getDate() - 7);
+            }
+            else{
+                prevMonday.setDate(date.getDate() - (day-1));
+            }
+        
+            return prevMonday;
+        }
 
     /**
      * On destroy
