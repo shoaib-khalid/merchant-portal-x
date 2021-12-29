@@ -241,5 +241,41 @@ export class EditProfileService
                 })  
             )) 
         );
-}
+    }
+
+        /**
+     * Create Payment Profile
+     * 
+     * @param variant
+     * @param productId
+     */
+         createPaymentProfile( clientPaymentBody: ClientPaymentDetails){
+            let userService = this._apiServer.settings.apiServer.userService;            
+            let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+            let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        
+    
+            const header = {
+                headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            };
+    
+            const now = new Date();
+            const date = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate() + " " + now.getHours() + ":" + now.getMinutes()  + ":" + now.getSeconds();
+    
+            return this.client$.pipe(
+                take(1),
+                // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
+                switchMap(users => this._httpClient.post<ClientPaymentDetails>(userService + '/clients/' + clientId + '/payment_details/', clientPaymentBody , header).pipe(
+                    map((response) => {
+    
+                        this._logging.debug("Response from  (Create PaymentProfile )",response);
+    
+                        let newUserPaymentDetails = response["data"];
+    
+                        // Return the new user payment details
+                        return newUserPaymentDetails;
+                    })
+                ))
+            );
+        }
 }
