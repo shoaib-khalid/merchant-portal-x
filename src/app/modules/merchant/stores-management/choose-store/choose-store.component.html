@@ -204,7 +204,7 @@
                                             [id]="'edit-store-btn' + store.id"
                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                             type="button"
-                                            [routerLink]="'/stores/edit/'+ store.id"
+                                            (click)="pageRedirect(store.id,'editPage')"
                                         >
                                         <label
                                             class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400"

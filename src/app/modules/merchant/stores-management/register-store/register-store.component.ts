@@ -433,6 +433,12 @@ export class RegisterStoreComponent implements OnInit
                         .subscribe((response)=>{});
                 });
 
+                // manual set store timing to new created store at service
+                console.log("this._storeTiming", this._storeTiming);
+                this._storesService.setTimingToStore(this.storeId, this._storeTiming).subscribe(()=>{
+        
+                });
+
                 // ---------------------------
                 // Create Store Assets
                 // ---------------------------

@@ -112,7 +112,7 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
 
         if (this.storeId$) {
             // this is to set current selected store on page init
-            this._storesService.getStoresById(this.storeId$)
+            this._storesService.getStoreById(this.storeId$)
             .subscribe((store: Store)=>{
                 this.store = store;
                 this.storeLogo = (this.store.storeAsset) ? this.store.storeAsset.logoUrl : null;
@@ -217,7 +217,7 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
 
     changeStore(storeId){
         this.storeId = storeId;
-        this._storesService.getStoresById(storeId)
+        this._storesService.getStoreById(storeId)
             .subscribe((store: Store)=>{
                 this._storesService.store = store;
                 this.store = store;

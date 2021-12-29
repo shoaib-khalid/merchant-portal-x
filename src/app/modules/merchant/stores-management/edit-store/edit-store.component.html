@@ -706,7 +706,7 @@
                                                                 [readonly]="!dayList.value.isOpen"
                                                                 type="time"
                                                                 [value]="dayList.value.openTime"
-                                                                (change)="changeTime(i, 'openTime' , $event)"
+                                                                (change)="changeTime(i)"
                                                             >
                                                             <!-- <mat-error *ngIf="editStoreForm.get('storeTiming').hasError('required')">
                                                                 Required
@@ -745,7 +745,7 @@
                                                                 [formControlName]="'isBreakTime'"
                                                                 [color]="'primary'"
                                                                 (change)="toggleBreakHour($event, i)"
-                                                                >
+                                                                >{{dayList.value.isBreakTime === true ? 'Open' : 'Close'}}
                                                             </mat-slide-toggle>
                                                         </div>
                                                     </div>

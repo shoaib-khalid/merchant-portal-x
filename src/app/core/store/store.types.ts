@@ -86,6 +86,8 @@ export interface StoreTiming
     day: string;
     isOff: boolean;
     openTime: string;
+    breakEndTime: string,
+    breakStartTime: string,
 }
 
 export interface StoreRegionCountries

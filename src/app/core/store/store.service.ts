@@ -237,6 +237,27 @@ export class StoresService
         );
     }
 
+    getStoreById(id: string): Observable<Store>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+        
+        return this._httpClient.get<Store>(productService + '/stores/' + id , header)
+        .pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (getStoreById)",response);
+                this._store.next(response["data"]);
+
+                return response["data"];
+            })
+        )
+    }
+
     post(storeBody: CreateStore): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
@@ -451,6 +472,32 @@ export class StoresService
         );
     }
 
+    setTimingToStore(storeId: string, storeTiming: StoreTiming): Observable<any>
+    {
+        return this.stores$.pipe(
+            take(1),
+            // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
+            map((stores) => {
+                this._logging.debug("Setting Timing To Store manually (setTimingToStore)",stores);
+
+                // Find the index of the updated product
+                const index = stores.findIndex(item => item.id === storeId);
+
+                let updatedStore = stores[index];
+                updatedStore.storeTiming = storeTiming
+
+                // Update the product
+                stores[index] = { ...stores[index], ...updatedStore};
+
+                // Update the products
+                this._stores.next(stores);
+
+                // Return the new product
+                return stores["data"];
+            })
+        );
+    }
+
     putTiming(storeId: string, day: string ,storeTiming: StoreTiming): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
@@ -490,7 +537,7 @@ export class StoresService
         return response.data;
     }
 
-    postAssets(storeId: string, storeAssets): Observable<any>
+    postAssets(storeId: string, storeAssets, storeAssetType = null , storeAssetFiles = null): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -504,18 +551,37 @@ export class StoresService
             switchMap(stores => this._httpClient.post<any>(productService + '/stores/' + storeId + '/assets', storeAssets , header ).pipe(
                 map((response) => {
 
-                    this._logging.debug("Response from StoresService (postAssets)",response);
+                    this._logging.debug("Response from StoresService stores (postAssets)",response);
+
+                    // --------------
+                    // Update Stores
+                    // --------------
 
                     // Find the index of the updated product
                     const index = stores.findIndex(item => item.id === storeId);
 
-                    let updateResponse = Object.assign(stores[index],{storeAsset:{ logoUrl: response["data"].logoUrl}});
-
+                    let updateResponse;
+                    
+                    if (storeAssetType === "logo") {
+                        updateResponse = Object.assign(stores[index],{storeAsset:{ logoUrl: storeAssetFiles}});
+                    } else if (storeAssetType === "banner") {
+                        updateResponse = Object.assign(stores[index],{storeAsset:{ bannerUrl: storeAssetFiles}});
+                    }
                     // Update the product
                     stores[index] = { ...stores[index], ...updateResponse};
 
                     // Update the products
                     this._stores.next(stores);
+
+                    // ---------------
+                    // Update Store
+                    // ---------------
+                    this._store.next(stores[index]);
+
+                    // set this
+                    if (storeAssetType === "logo") {
+                        this.storeControl.setValue(stores[index]);
+                    }
 
                     // return value
                     return response["data"];
@@ -617,6 +683,22 @@ export class StoresService
     }
 
     postStoreRegionCountryDeliveryProvider(storeId: string, deliveryServiceProviderId: string): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.post<any>(productService + '/stores/' + storeId + '/deliveryServiceProvider/' + deliveryServiceProviderId , header).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (postStoreRegionCountryDeliveryProvider)",response);
+            })
+        );
+    }
+
+    putStoreRegionCountryDeliveryProvider(storeId: string, deliveryServiceProviderId: string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;

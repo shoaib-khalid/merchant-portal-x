@@ -234,7 +234,7 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
      * @param storeId
      */
 
-    async pageRedirect(storeId: string) {
+    async pageRedirect(storeId: string, pageType: string = null) {
         this.storeId = storeId;
         await this._storesService.getStoresById(storeId)
             .subscribe((store: Store)=>{
@@ -246,7 +246,9 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
 
         await this._inventoryService.getProducts().subscribe((response)=>{
 
-            if (response["data"]["content"].length < 1)
+            if (pageType === "editPage")
+                this._router.navigateByUrl('/stores/edit/'+ storeId)
+            else if (response["data"]["content"].length < 1)
                 this._router.navigateByUrl('/products/inventory')
             else
                 this._router.navigateByUrl('/dashboard')
