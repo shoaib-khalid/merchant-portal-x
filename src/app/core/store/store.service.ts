@@ -698,7 +698,7 @@ export class StoresService
         );
     }
 
-    putStoreRegionCountryDeliveryProvider(storeId: string, deliveryServiceProviderId: string): Observable<any>
+    putStoreRegionCountryDeliveryProvider(storeId: string, id: string, deliveryServiceProviderId: string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -707,7 +707,25 @@ export class StoresService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
 
-        return this._httpClient.post<any>(productService + '/stores/' + storeId + '/deliveryServiceProvider/' + deliveryServiceProviderId , header).pipe(
+        let queryParam = deliveryServiceProviderId ? "?deliverySpId=" + deliveryServiceProviderId : "";
+
+        return this._httpClient.put<any>(productService + '/stores/' + storeId + '/deliveryServiceProvider/' + id + queryParam , header).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (postStoreRegionCountryDeliveryProvider)",response);
+            })
+        );
+    }
+
+    deleteStoreRegionCountryDeliveryProviderAll(storeId: string): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.delete<any>(productService + '/stores/' + storeId + '/deliveryServiceProvider/all', header).pipe(
             map((response) => {
                 this._logging.debug("Response from StoresService (postStoreRegionCountryDeliveryProvider)",response);
             })

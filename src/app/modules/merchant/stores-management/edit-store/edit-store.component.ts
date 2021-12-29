@@ -54,6 +54,8 @@ export class EditStoreComponent implements OnInit
     deliveryFullfilment: any;
     deliveryPartners: any = [];
     hasDeliveryPartnerError: boolean = true;
+
+    storeDeliveryProvider: StoreDeliveryProvider[] = [];
     
     _originalAllowedSelfDeliveryStates: any = [];
     _allowedSelfDeliveryStates: any = [];
@@ -301,6 +303,9 @@ export class EditStoreComponent implements OnInit
 
                 this._storesService.getStoreRegionCountryDeliveryProvider(this.storeId).subscribe(
                     (response: StoreDeliveryProvider[]) => {
+
+                        this.storeDeliveryProvider = response;
+                        
                         let _deliverySpId = response.length > 0 ? response[0].deliverySpId : "";
                         this.editStoreForm.get('deliveryPartner').patchValue(_deliverySpId);
                     }
@@ -690,18 +695,12 @@ export class EditStoreComponent implements OnInit
                     console.log("this.editStoreForm.get('deliveryPartner').value ", this.editStoreForm.get('deliveryPartner').value)
                     console.log("this.deliveryPartners ", this.deliveryPartners)
 
-                    if (this.editStoreForm.get('deliveryPartner').value !== this.deliveryPartners[0].id) {
-                        this._storesService.putStoreRegionCountryDeliveryProvider(this.storeId, this.editStoreForm.get('deliveryPartner').value)
-                        .subscribe((response) => {
-                            
-                        }); 
-                    } else {
+                    this._storesService.deleteStoreRegionCountryDeliveryProviderAll(this.storeId).subscribe(() => {
                         this._storesService.postStoreRegionCountryDeliveryProvider(this.storeId, this.editStoreForm.get('deliveryPartner').value)
                             .subscribe((response) => {
                                 
-                            }); 
-                    }
-
+                            });
+                    })
                 }
 
                 // Navigate to the confirmation required page
