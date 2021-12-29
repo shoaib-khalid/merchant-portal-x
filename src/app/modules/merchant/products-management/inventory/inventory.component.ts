@@ -15,6 +15,8 @@ import { Store } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
 import { MatDialog } from '@angular/material/dialog';
 import { AddProductComponent } from '../add-product/add-product.component';
+import {v4 as uuidv4} from 'uuid';
+
 
 @Component({
     selector       : 'inventory',
@@ -94,7 +96,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     // product variant available
     productVariantAvailable: FormArray;
     productVariantAvailable$: ProductVariantAvailable[] = [];
-    filteredProductVariantAvailable: ProductVariantAvailable[] = [];
+    filteredProductVariantAvailable: any[] = [];
     selectedProductVariantAvailable: ProductVariantAvailable[] = [];
     
     productVariantAvailableEditMode: boolean = false;
@@ -1503,17 +1505,17 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      */
     createVariant(name: string): void
     {
-        this.productVariantAvailable = this.selectedProductForm.get('productVariantAvailable') as FormArray;
-        // this.productVariants.clear();
- 
+       
         let _item = this._formBuilder.group({
+            id:null,
             name: name,
-            productVariantsAvailable:this.productVariantAvailable
+            productVariantsAvailable:[]
             
         });
 
         this.productVariants.push(_item);
         this.filteredProductVariants= this.productVariants.value;
+        console.log("this.filteredProductVariants",this.filteredProductVariants);
       
     
         // const variant = {
@@ -1648,7 +1650,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      */
     shouldShowCreateVariantButton(inputValue: string): boolean
     {
-        return !!!(inputValue === '' || this.productVariants$.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
+        // return !!!(inputValue === '' || this.productVariants$.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
+        return !!!(inputValue === '' || this.productVariants.value.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
     }
 
     /**
@@ -1662,7 +1665,11 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         if (this.selectedProductVariants){
 
             // get index of filteredVariants that have same id with variantId
+            console.log('this.filteredProductVariants::',this.filteredProductVariants);
+            // let index = this.filteredProductVariants.findIndex(x => x.id === variant.id);            
             let index = this.filteredProductVariants.findIndex(x => x.id === variant.id);
+
+            console.log('index',index);
     
             // get the object of filteredVariantsTag in filteredVariants
             this.productVariantAvailable$ = this.filteredProductVariants[index].productVariantsAvailable;
@@ -1722,7 +1729,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 this._variantsPanelOverlayRef.detach();
 
                 // Reset the variant filter
+                console.log('openVariantsPanel sebelum->filteredProductVariantAvailable',this.filteredProductVariantAvailable);
                 this.filteredProductVariantAvailable = this.productVariantAvailable$;
+                console.log('openVariantsPanel ->filteredProductVariantAvailable',this.filteredProductVariantAvailable);
 
                 // Toggle the edit mode off
                 this.productVariantAvailableEditMode = false;
@@ -1835,9 +1844,10 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     {
         // Get the value
         const value = event.target.value.toLowerCase();
+        console.log('this.filteredProductVariantAvailable>>>',this.filteredProductVariantAvailable);
 
         // Filter the variants
-        this.filteredProductVariantAvailable = this.productVariantAvailable$.filter(variantAvailable => variantAvailable.value.toLowerCase().includes(value));
+        this.filteredProductVariantAvailable = this.productVariantAvailable$?.filter(variantAvailable => variantAvailable.value.toLowerCase().includes(value));
 
     }
  
@@ -1892,48 +1902,63 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      */
     createVariantAvailable(value: string): void
     {
+        
+        //if variant recently created then need to create the variant then push the variant available listing
+        console.log('createVariantAvailable->filteredProductVariantAvailable',this.filteredProductVariantAvailable);
+        console.log('createVariantAvailable->productVariantAvailable$',this.productVariantAvailable$);
+        console.log('createVariantAvailable->selectedProductVariants',this.selectedProductVariants);
         const variant = {
             productId: this.selectedProduct.id,
-            productVariantId: this.selectedProductVariants.id,
+            productVariantId: this.selectedProductVariants.id !==null?this.selectedProductVariants.id:uuidv4(),
             value
-        };
+            }; 
+
+        console.log('variant',variant);
+
+
+        //=================existing code=========
+        // const variant = {
+        //     productId: this.selectedProduct.id,
+        //     productVariantId: this.selectedProductVariants.id,
+        //     value
+        // };
         
-        // Create variant on the server
-        this._inventoryService.createVariantAvailable(variant, this.selectedProduct.id)
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((response) => { 
-                // Add the variant to the product
-                this.addVariantAvailableToVariant(response,this.selectedProductVariants.id);
+        // // Create variant on the server
+        // this._inventoryService.createVariantAvailable(variant, this.selectedProduct.id)
+        //     .pipe(takeUntil(this._unsubscribeAll))
+        //     .subscribe((response) => { 
+        //         // Add the variant to the product
+        //         this.addVariantAvailableToVariant(response,this.selectedProductVariants.id);
 
-                // reset current filteredProductVariantAvailable
-                this.filteredProductVariantAvailable = this.productVariantAvailable$;
-            });
+        //         // reset current filteredProductVariantAvailable
+        //         this.filteredProductVariantAvailable = this.productVariantAvailable$;
+        //     });
 
-        // generate inventory on form (FE only)
+        // // generate inventory on form (FE only)
         
-        this.productVariants = this.selectedProductForm.get('productVariants') as FormArray;
-        this.productInventories = this.selectedProductForm.get('productInventories') as FormArray;
+        // this.productVariants = this.selectedProductForm.get('productVariants') as FormArray;
+        // this.productInventories = this.selectedProductForm.get('productInventories') as FormArray;
 
-        // if productVariants === 2, it mean that's it's a meet requirement to genarate the combo table
-        if (this.selectedProductForm.get('productVariants').value.length === 2){
+        // // if productVariants === 2, it mean that's it's a meet requirement to genarate the combo table
+        // if (this.selectedProductForm.get('productVariants').value.length === 2){
 
-            // if productInventories === 1, it mean that's there's no variant in product inventory yet
-            // so lets clear up the non variant product inventory first
-            if (this.selectedProductForm.get('productInventories').value.length === 1){
-                this.productInventories.clear();
-                this.productInventories.push(this._formBuilder.group({
-                    itemCode: null,
-                    price: this.productInventories$[0].price,
-                    productId: this.selectedProduct.id,
-                    quantity: this.productInventories$[0].quantity,
-                    sku: this.productInventories$[0].sku,
-                    status: "AVAILABLE",
-                    productInventoryItems: this._formBuilder.array([])
-                }));
-            }
-        } else {
-            console.log("this.productInventories", this.productInventories)
-        }
+        //     // if productInventories === 1, it mean that's there's no variant in product inventory yet
+        //     // so lets clear up the non variant product inventory first
+        //     if (this.selectedProductForm.get('productInventories').value.length === 1){
+        //         this.productInventories.clear();
+        //         this.productInventories.push(this._formBuilder.group({
+        //             itemCode: null,
+        //             price: this.productInventories$[0].price,
+        //             productId: this.selectedProduct.id,
+        //             quantity: this.productInventories$[0].quantity,
+        //             sku: this.productInventories$[0].sku,
+        //             status: "AVAILABLE",
+        //             productInventoryItems: this._formBuilder.array([])
+        //         }));
+        //     }
+        // } else {
+        //     console.log("this.productInventories", this.productInventories)
+        // }
 
         // this.productInventories$.forEach(item => {
         //     this.productInventories.push(this._formBuilder.group(item));
@@ -2070,7 +2095,14 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
       */
     shouldShowCreateVariantAvailableButton(inputValue: string): boolean
     {
-        return !!!(inputValue === '' || this.productVariantAvailable$.findIndex(variantTag => variantTag.value.toLowerCase() === inputValue.toLowerCase()) > -1);
+        //conditional when we click the variant that was recently created it will has null value so we need to handle this issue in order to display create button for variant available
+        if(this.productVariantAvailable$ === null){
+            this.productVariantAvailable$ = [];
+        }
+ 
+        return !!!(inputValue === '' || this.productVariantAvailable$?.findIndex(variantTag => variantTag.value.toLowerCase() === inputValue.toLowerCase()) > -1);
+        // return !!!(inputValue === '' || this.filteredProductVariantAvailable?.findIndex(variantTag => variantTag.value.toLowerCase() === inputValue.toLowerCase()) > -1);
+  
     }
 
     // --------------------------------------

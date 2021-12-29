@@ -1033,7 +1033,7 @@
                                                                                 <div class="flex items-center">
                                                                                     <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full mx-4">
                                                                                         <input
-                                                                                            matInput
+                                                                                            matInput 
                                                                                             [value]="variantAvailable.value"
                                                                                             (input)="editVariantAvailableTitle(variant, $event)"
                                                                                             [readonly]="!productVariantAvailableValueEditMode[i]"
@@ -1072,17 +1072,17 @@
                                                                     <!-- Create variant -->
                                                                     <div
                                                                         class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer hover:bg-hover"
-                                                                        *ngIf="shouldShowCreateVariantAvailableButton(newVariantInput.value) && productVariantAvailable$.length < 10"
+                                                                        *ngIf="shouldShowCreateVariantAvailableButton(newVariantInput.value) && filteredProductVariantAvailable.length < 10"
                                                                         (click)="createVariantAvailable(newVariantInput.value); newVariantInput.value = ''"
                                                                         matRipple>
-                                                                        <mat-icon
+                                                                        <mat-icon 
                                                                             class="mr-2 icon-size-5"
                                                                             [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
                                                                         <div class="break-all">Create "<b>{{newVariantInput.value}}</b>"</div>
                                                                     </div>
                                                                     <div
                                                                         class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-default border-t hover:bg-gray-50 dark:hover:bg-hover"
-                                                                        *ngIf="productVariantAvailable$.length >= 10"
+                                                                        *ngIf="filteredProductVariantAvailable?.length >= 10"
                                                                     >
                                                                         <mat-icon
                                                                             class="mr-2 icon-size-5"
