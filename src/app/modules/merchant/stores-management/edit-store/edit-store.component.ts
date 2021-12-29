@@ -53,6 +53,9 @@ export class EditStoreComponent implements OnInit
     
     deliveryFullfilment: any;
     deliveryPartners: any = [];
+    hasDeliveryPartnerError: boolean = true;
+
+    storeDeliveryProvider: StoreDeliveryProvider[] = [];
     
     _originalAllowedSelfDeliveryStates: any = [];
     _allowedSelfDeliveryStates: any = [];
@@ -63,6 +66,8 @@ export class EditStoreComponent implements OnInit
     
     // Image part    
     files: any;
+
+    timeAlert: any = [];
     
     // display error
     alert: { type: FuseAlertType; message: string } = {
@@ -187,12 +192,15 @@ export class EditStoreComponent implements OnInit
         // Get Store Details by Id
         // ----------------------
 
-        this._storesService.getStoresById(this.storeId).subscribe(
+        this._storesService.getStoreById(this.storeId).subscribe(
            (response) => {
+
+                // set store to current store
+                this._storesService.store = response;
+                this._storesService.storeId = this.storeId;
 
                 // Fill the form
                 this.editStoreForm.patchValue(response);
-
 
                 // -------------------------
                 // Choose Vertical service
@@ -220,14 +228,35 @@ export class EditStoreComponent implements OnInit
 
                 this.storeName = response.name
 
+                // ---------------
                 // set timing
+                // ---------------
+
                 this._storeTiming = response.storeTiming;
+                
                 this._storeTiming.map(item => item["isOpen"] = !item.isOff);
+                this._storeTiming.map(item => {
+                    if (item.breakStartTime === null && item.breakEndTime === null){
+                        item["isBreakTime"] = false;
+                    }
+                    else{
+                        item["isBreakTime"] = true;
+                    }
+
+                });
+
+                this._storeTiming.forEach(item => {
+                    this.storeTiming = this.editStoreForm.get('storeTiming') as FormArray;
+                    this.storeTiming.push(this._formBuilder.group(item));
+                });
+
+                // ---------------
+                // set assets image
+                // ---------------
 
                 this.files[0].fileSource = response.storeAsset.logoUrl;
                 this.files[1].fileSource = response.storeAsset.bannerUrl;
                 this.files[2].fileSource = response.storeAsset.bannerMobileUrl;
-
 
                 // Reason why we put de under get vertical code by paramMap is because
                 // we need the verticalCode before we need to query getStoreDeliveryProvider which require verticalCode
@@ -235,7 +264,6 @@ export class EditStoreComponent implements OnInit
                 let _verticalCode = this.editStoreForm.get('verticalCode').value;
                 let _regionCountryId = this.editStoreForm.get('regionCountryId').value;
                 let _deliveryType;
-
                 if (_verticalCode === "FnB" || _verticalCode === "FnB_PK") {
                     _deliveryType = "ADHOC";
                 } else if (_verticalCode === 'E-Commerce' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'ECommerce_PK') {
@@ -265,6 +293,7 @@ export class EditStoreComponent implements OnInit
                         });
                         // check changes
                         this.checkDeliveryPartner();
+
                     }
                 );
 
@@ -274,6 +303,9 @@ export class EditStoreComponent implements OnInit
 
                 this._storesService.getStoreRegionCountryDeliveryProvider(this.storeId).subscribe(
                     (response: StoreDeliveryProvider[]) => {
+
+                        this.storeDeliveryProvider = response;
+                        
                         let _deliverySpId = response.length > 0 ? response[0].deliverySpId : "";
                         this.editStoreForm.get('deliveryPartner').patchValue(_deliverySpId);
                     }
@@ -298,11 +330,6 @@ export class EditStoreComponent implements OnInit
             { regionCode: "SEA", name: "South East Asia", countries: ["MY"] },
             { regionCode: "SE", name: "South East", countries: ["PK"] }
         ];
-
-        this._storeTiming.forEach(item => {
-            this.storeTiming = this.editStoreForm.get('storeTiming') as FormArray;
-            this.storeTiming.push(this._formBuilder.group(item));
-        });
 
         this.deliveryFullfilment = [
             { selected: false, option: "INSTANT_DELIVERY", label: "Instant Delivery", tooltip: "This store support instant delivery. (Provided by store own logistic or delivery partners)" }, 
@@ -367,7 +394,7 @@ export class EditStoreComponent implements OnInit
         // this is to get the current location by using 3rd party api service
         this._localeService.locale$.subscribe((response: Locale)=>{
             
-            let symplifiedCountryId = response.symplifiedCountryId;
+            let symplifiedCountryId = this.editStoreForm.get('regionCountryId').value;
             
             // state (using component variable)
             // INITIALLY (refer below section updateStates(); for changes), get states from symplified backed by using the 3rd party api
@@ -419,6 +446,11 @@ export class EditStoreComponent implements OnInit
      */
     updateForm(): void
     {
+
+        if(this.hasDeliveryPartnerError === false) {
+            this.editStoreForm.get('deliveryPartner').setErrors(null);
+        }
+
         // Do nothing if the form is invalid
         let BreakException = {};
         try {
@@ -448,30 +480,47 @@ export class EditStoreComponent implements OnInit
          * 
          */
 
+
         // this will remove the item from the object
         const { allowedSelfDeliveryStates, allowScheduledDelivery, allowStorePickup, 
             deliveryType, deliveryPartner, storeTiming, subdomain
             ,...editStoreBody } = this.editStoreForm.value;
-
+  
         // add domain when sending to backend.. at frontend form call it subdomain
         editStoreBody["domain"] = subdomain + this.domainName;
 
-        // Disable the form
-        this.editStoreForm.disable();
-
+        // this.editStoreForm.disable();
+            
         this._storesService.update(this.storeId, editStoreBody)
             .subscribe((response) => {
 
                 let storeId = response.id;
+                
+                //get store 
 
                 // ---------------------------
                 // Update Store Timing
                 // ---------------------------
 
-                storeTiming.forEach(item => {
-                    let { isOpen, ...filteredItem } = item;
+                storeTiming.forEach((item,i) => {
+                    let { isOpen, isBreakTime, ...filteredItem } = item;
+                    filteredItem.isOff = !isOpen;
+                    
+                    if (isBreakTime === false) {
+                        filteredItem.breakStartTime = null;
+                        filteredItem.breakEndTime = null;
+                        
+                        this.editStoreForm.get('storeTiming').value[i].breakStartTime = null;
+                        this.editStoreForm.get('storeTiming').value[i].breakEndTime = null;
+
+                    } else {
+                        this.editStoreForm.get('storeTiming').value[i].breakStartTime = filteredItem.breakStartTime;
+                        this.editStoreForm.get('storeTiming').value[i].breakEndTime = filteredItem.breakEndTime;
+                    }
                     this._storesService.putTiming(storeId, item.day, filteredItem)
-                        .subscribe((response)=>{});
+                    .subscribe((response)=>{
+                    });
+                    
                 });
 
                 // ---------------------------
@@ -485,25 +534,45 @@ export class EditStoreComponent implements OnInit
                         formData.append(item.type,item.selectedFiles[0])
                     }
 
+                    let storeAssetFiles = item.fileSource;
+
                     if (item.toDelete === true && item.type === 'logo'){
-                        this._storesService.deleteAssetsLogo(this.storeId).subscribe();
+                        this._storesService.deleteAssetsLogo(this.storeId).subscribe(() => {
+                            if (_assets) {
+                                this._storesService.postAssets(this.storeId, formData, "logo", storeAssetFiles).subscribe(
+                                  (event: any) => {
+                                    if (event instanceof HttpResponse) {
+                                        console.log('Uploaded the file successfully');
+
+                                        // Mark for check
+                                        this._changeDetectorRef.markForCheck();
+                                    }
+                                  },
+                                  (err: any) => {
+                                      console.error('Could not upload the file');
+                                  });
+                            }
+                        });
                     }
                     if (item.toDelete === true && item.type === 'banner'){
-                        this._storesService.deleteAssetsBanner(this.storeId).subscribe();
+                        this._storesService.deleteAssetsBanner(this.storeId).subscribe(() => {
+                            if (_assets) {
+                                this._storesService.postAssets(this.storeId, formData, "banner", storeAssetFiles).subscribe(
+                                  (event: any) => {
+                                    if (event instanceof HttpResponse) {
+                                        console.log('Uploaded the file successfully');
+
+                                        // Mark for check
+                                        this._changeDetectorRef.markForCheck();
+                                    }
+                                  },
+                                  (err: any) => {
+                                      console.error('Could not upload the file');
+                                  });
+                            }
+                        });
                     }
                 });
-                
-                if (_assets) {
-                    this._storesService.postAssets(this.storeId, formData).subscribe(
-                      (event: any) => {
-                        if (event instanceof HttpResponse) {
-                          console.log('Uploaded the file successfully');
-                        }
-                      },
-                      (err: any) => {
-                          console.error('Could not upload the file');
-                      });
-                }
 
                 // ---------------------------
                 // Update Store Provider
@@ -622,11 +691,16 @@ export class EditStoreComponent implements OnInit
                     // Provision ADHOC Delivery Provider
                     // ---------------------------
 
-                    this._storesService.postStoreRegionCountryDeliveryProvider(this.storeId, this.editStoreForm.get('deliveryPartner').value)
-                        .subscribe((response) => {
-                            
-                        });
 
+                    console.log("this.editStoreForm.get('deliveryPartner').value ", this.editStoreForm.get('deliveryPartner').value)
+                    console.log("this.deliveryPartners ", this.deliveryPartners)
+
+                    this._storesService.deleteStoreRegionCountryDeliveryProviderAll(this.storeId).subscribe(() => {
+                        this._storesService.postStoreRegionCountryDeliveryProvider(this.storeId, this.editStoreForm.get('deliveryPartner').value)
+                            .subscribe((response) => {
+                                
+                            });
+                    })
                 }
 
                 // Navigate to the confirmation required page
@@ -636,8 +710,7 @@ export class EditStoreComponent implements OnInit
                 // Re-enable the form
                 this.editStoreForm.enable();
 
-                // Reset the form
-                this.clearForm();
+               
 
                 // Set the alert
                 this.alert = {
@@ -700,6 +773,38 @@ export class EditStoreComponent implements OnInit
         this._storeTiming[index].isOpen = !this._storeTiming[index].isOpen;
         this._storeTiming[index].isOff = !this._storeTiming[index].isOff;
     }
+
+    toggleBreakHour (e, i){
+        if(e.checked === false){
+            this.editStoreForm.get('storeTiming').value[i].breakStartTime = null;
+            this.editStoreForm.get('storeTiming').value[i].breakEndTime = null;
+
+            this.editStoreForm.get('storeTiming').value[i].isBreakTime = false;
+        } else{
+            this.editStoreForm.get('storeTiming').value[i].breakStartTime = "13:00";
+            this.editStoreForm.get('storeTiming').value[i].breakEndTime = "14:00";
+
+            this.editStoreForm.get('storeTiming').value[i].isBreakTime = true;
+        }
+    }
+
+    applyToAll(index){
+
+        let _storeTiming = {
+            breakStartTime: this.editStoreForm.get('storeTiming').value[index].breakStartTime,
+            breakEndTime: this.editStoreForm.get('storeTiming').value[index].breakEndTime,
+            openTime: this.editStoreForm.get('storeTiming').value[index].openTime,
+            closeTime: this.editStoreForm.get('storeTiming').value[index].closeTime
+        }
+
+        this.editStoreForm.get('storeTiming').value.forEach((item, i) => {
+            this.editStoreForm.get('storeTiming').value[i].breakStartTime = _storeTiming.breakStartTime;
+            this.editStoreForm.get('storeTiming').value[i].breakEndTime =_storeTiming.breakEndTime;
+            this.editStoreForm.get('storeTiming').value[i].openTime =_storeTiming.openTime;
+            this.editStoreForm.get('storeTiming').value[i].closeTime =_storeTiming.closeTime;
+        })
+    }
+
 
     addSelfDeliveryState(){
 
@@ -779,7 +884,7 @@ export class EditStoreComponent implements OnInit
             reader.onload = (e: any) => {
                 
                 // set this.files[index].delete to false 
-                this.files[index].toDelete = false;
+                this.files[index].toDelete = true;
 
                 this.files[index].fileSource = e.target.result;
 
@@ -813,15 +918,15 @@ export class EditStoreComponent implements OnInit
     checkDeliveryPartner(){
         // on every change set error to false first (reset state)
         if (this.editStoreForm.get('deliveryType').errors || this.editStoreForm.get('deliveryPartner').errors){
-            this.editStoreForm.get('deliveryPartner').setErrors(null);
+            this.hasDeliveryPartnerError = false; 
         }
-
+        
         // -----------------------------------
         // reset allowedSelfDeliveryStates if user change delivery type
         // -----------------------------------
-
+        
         if (this.editStoreForm.get('deliveryType').value === "SELF") {
-
+            
             // push to allowedSelfDeliveryStates (form)
             this.allowedSelfDeliveryStates = this.editStoreForm.get('allowedSelfDeliveryStates') as FormArray;
             // since backend give full discount tier list .. (not the only one that have been edited only)
@@ -832,11 +937,26 @@ export class EditStoreComponent implements OnInit
                 this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
             });
         }
-
+        
         // then check it again and set if there's an error
         if (this.deliveryPartners.length < 1 && this.editStoreForm.get('deliveryType').value !== "SELF"){
             this.editStoreForm.get('deliveryType').setErrors({noDeliveryPartners: true})
         }
     }
     
+    changeTime(i){
+        if(this.editStoreForm.get('storeTiming').value[i].openTime >= this.editStoreForm.get('storeTiming').value[i].closeTime ){
+            this.timeAlert[i] ="End time range incorrect" ;
+        }else{
+            this.timeAlert[i] = "" ;
+        }   
+    }
+
+    changeBreakTime(i, type , e){
+        if(this.editStoreForm.get('storeTiming').value[i].breakStartTime >= this.editStoreForm.get('storeTiming').value[i].breakEndTime ){
+            this.timeAlert[i] ="Break Hour End time range incorrect" ;
+        }else{
+            this.timeAlert[i] = "" ;
+        }   
+    }
 }
