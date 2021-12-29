@@ -118,6 +118,11 @@ export interface TotalSalesTotal
     completionStatus: string;
 }
 
+export interface WeeklySale
+{
+    total: number;
+    completionStatus: string;
+}
 ////
 
 export interface Settlement
@@ -139,6 +144,7 @@ export interface Settlement
     cycleEndDate: string;
     settlementDate: string;
     referenceId: string;
+    totalSelfDeliveryFee: string;
 }
 
 export interface SettlementPagination

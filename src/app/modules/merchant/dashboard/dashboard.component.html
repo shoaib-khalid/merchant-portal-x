@@ -154,22 +154,31 @@
                                         <div class="flex-auto grid grid-cols-2 gap-4 mt-6">
                                             <!-- Completed -->
                                             <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-blue-50 text-blue-500 dark:bg-white dark:bg-opacity-5 dark:text-blue-400">
-                                                <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
-                                                    {{overviewChart[timeSelector.value]['completed']}}
+                                                <div *ngIf="weeklyGraph" class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                    {{sumThisWeekCompleted}}
+                                                </div>
+                                                <div *ngIf="!weeklyGraph" class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                    {{sumLastWeekCompleted}}
                                                 </div>
                                                 <div class="mt-1 text-sm sm:text-lg font-medium">Completed</div>
                                             </div>
                                             <!-- Pending -->
                                             <div class="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-amber-50 text-amber-500 dark:bg-white dark:bg-opacity-5">
-                                                <div class="text-5xl font-semibold leading-none tracking-tight">
-                                                    {{overviewChart[timeSelector.value]['pending']}}
+                                                <div *ngIf="weeklyGraph" class="text-5xl font-semibold leading-none tracking-tight">
+                                                    {{sumThisWeekPending}}
+                                                </div>
+                                                <div *ngIf="!weeklyGraph" class="text-5xl font-semibold leading-none tracking-tight">
+                                                    {{sumLastWeekPending}}
                                                 </div>
                                                 <div class="mt-1 text-sm font-medium text-center">Pending</div>
                                             </div>
                                             <!-- Failed -->
                                             <div class="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-red-50 text-red-500 dark:bg-white dark:bg-opacity-5">
-                                                <div class="text-5xl font-semibold leading-none tracking-tight">
-                                                    {{overviewChart[timeSelector.value]['failed']}}
+                                                <div *ngIf="weeklyGraph" class="text-5xl font-semibold leading-none tracking-tight">
+                                                    {{sumThisWeekFailed}}
+                                                </div>
+                                                <div *ngIf="!weeklyGraph" class="text-5xl font-semibold leading-none tracking-tight">
+                                                    {{sumLastWeekFailed}}
                                                 </div>
                                                 <div class="mt-1 text-sm font-medium text-center">Failed</div>
                                             </div>
@@ -653,16 +662,16 @@
                                         </ng-container>
 
                                         <!-- Delivery Charges -->
-                                        <ng-container matColumnDef="deliveryCharges">
+                                        <ng-container matColumnDef="selfDeliveryFee">
                                             <th
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                Delivery Charges
+                                                Self Delivery Fee
                                             </th>
                                             <td
                                                 mat-cell
                                                 *matCellDef="let settlement">
-                                                {{settlement.deliveryCharges | currency: currencySymbol}}
+                                                {{settlement.selfDeliveryFee | currency: currencySymbol}}
                                             </td>
                                         </ng-container>
 
