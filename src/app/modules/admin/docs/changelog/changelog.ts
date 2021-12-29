@@ -9,6 +9,22 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 export class ChangelogComponent
 {
     changelog: any[] = [
+        // v0.0.5
+        {
+            version    : 'v0.0.5',
+            releaseDate: 'Dec 29, 2021',
+            changes    : [
+                {
+                    type: 'Fixed',
+                    list: [
+                        '(UserProfilePage) Fix update not working',
+                        '(StoreManagementPage) Fix update store break hour timing',
+                        '(StoreManagementPage) Fix update store logo',
+                        '(DashboardManagementPage) Fix Dashboard Graph'
+                    ]
+                }
+            ]
+        },
         // v0.0.4
         {
             version    : 'v0.0.4',
