@@ -120,7 +120,7 @@
                                         <mat-button-toggle-group
                                             value="this-week"
                                             #timeSelector="matButtonToggleGroup">
-                                            <mat-button-toggle value="this-month" (click)="weeklyGraph = true">Last Week</mat-button-toggle>
+                                            <mat-button-toggle value="last-week" (click)="weeklyGraph = false">Last Week</mat-button-toggle>
                                             <mat-button-toggle value="this-week" (click)="weeklyGraph = true">This Week</mat-button-toggle>
                                         </mat-button-toggle-group>
                                     </div>
@@ -128,8 +128,8 @@
                                 <div class="grid grid-cols-1 md:grid-cols-4 grid-flow-row gap-6 w-full mt-8 sm:mt-4">
                                     <!-- New vs. Closed -->
                                     <div class="flex flex-col flex-auto col-span-2 md:col-span-4 lg:col-span-2">
-                                        <div *ngIf="weeklyGraph" class="font-medium text-secondary">Weekly Graph</div>
-                                        <div *ngIf="!weeklyGraph" class="font-medium text-secondary">Monthly Graph</div>
+                                        <div class="font-medium text-secondary">Weekly Graph</div>
+                                        <!-- <div *ngIf="!weeklyGraph" class="font-medium text-secondary">Monthly Graph</div> -->
                                         <div class="flex flex-col flex-auto">
                                             <apx-chart
                                                 class="flex-auto w-full h-80"
@@ -154,22 +154,31 @@
                                         <div class="flex-auto grid grid-cols-2 gap-4 mt-6">
                                             <!-- Completed -->
                                             <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-blue-50 text-blue-500 dark:bg-white dark:bg-opacity-5 dark:text-blue-400">
-                                                <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
-                                                    {{overviewChart[timeSelector.value]['completed']}}
+                                                <div *ngIf="weeklyGraph" class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                    {{sumThisWeekCompleted}}
+                                                </div>
+                                                <div *ngIf="!weeklyGraph" class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                    {{sumLastWeekCompleted}}
                                                 </div>
                                                 <div class="mt-1 text-sm sm:text-lg font-medium">Completed</div>
                                             </div>
                                             <!-- Pending -->
                                             <div class="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-amber-50 text-amber-500 dark:bg-white dark:bg-opacity-5">
-                                                <div class="text-5xl font-semibold leading-none tracking-tight">
-                                                    {{overviewChart[timeSelector.value]['pending']}}
+                                                <div *ngIf="weeklyGraph" class="text-5xl font-semibold leading-none tracking-tight">
+                                                    {{sumThisWeekPending}}
+                                                </div>
+                                                <div *ngIf="!weeklyGraph" class="text-5xl font-semibold leading-none tracking-tight">
+                                                    {{sumLastWeekPending}}
                                                 </div>
                                                 <div class="mt-1 text-sm font-medium text-center">Pending</div>
                                             </div>
                                             <!-- Failed -->
                                             <div class="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-red-50 text-red-500 dark:bg-white dark:bg-opacity-5">
-                                                <div class="text-5xl font-semibold leading-none tracking-tight">
-                                                    {{overviewChart[timeSelector.value]['failed']}}
+                                                <div *ngIf="weeklyGraph" class="text-5xl font-semibold leading-none tracking-tight">
+                                                    {{sumThisWeekFailed}}
+                                                </div>
+                                                <div *ngIf="!weeklyGraph" class="text-5xl font-semibold leading-none tracking-tight">
+                                                    {{sumLastWeekFailed}}
                                                 </div>
                                                 <div class="mt-1 text-sm font-medium text-center">Failed</div>
                                             </div>
@@ -179,26 +188,35 @@
                                     <div class="flex flex-col flex-auto col-span-2 lg:col-span-1">
                                         <div class="font-medium text-secondary">Top Product</div>
                                         <div class="flex-auto grid grid-cols-2 gap-4 mt-6">
-                                            <!-- Completed -->
+                                            <!-- First -->
                                             <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-blue-50 text-blue-500 dark:bg-white dark:bg-opacity-5 dark:text-blue-400">
-                                                <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
-                                                    <!-- {{data.githubIssues.overview[timeSelector.value]['new-issues']}} -->
+                                                <div *ngIf="weeklyGraph" class="text-sm sm:text-lg text-center font-semibold leading-none tracking-tight">
+                                                    {{firstThisWeek}}
                                                 </div>
-                                                <div class="mt-1 text-sm sm:text-lg font-medium">Completed</div>
+                                                <div *ngIf="!weeklyGraph" class="text-sm sm:text-lg text-center font-semibold leading-none tracking-tight">
+                                                    {{firstLastWeek}}
+                                                </div>
+                                                <div class="mt-1 text-sm sm:text-lg font-medium">1</div>
                                             </div>
-                                            <!-- Pending -->
+                                            <!-- Second -->
                                             <div class="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-amber-50 text-amber-500 dark:bg-white dark:bg-opacity-5">
-                                                <div class="text-5xl font-semibold leading-none tracking-tight">
-                                                    <!-- {{data.githubIssues.overview[timeSelector.value]['fixed']}} -->
+                                                <div *ngIf="weeklyGraph" class="text-sm text-center font-semibold leading-none tracking-tight">
+                                                    {{secondThisWeek}}
                                                 </div>
-                                                <div class="mt-1 text-sm font-medium text-center">Pending</div>
+                                                <div *ngIf="!weeklyGraph" class="text-sm text-center font-semibold leading-none tracking-tight">
+                                                    {{secondLastWeek}}
+                                                </div>
+                                                <div class="mt-1 text-sm font-medium text-center">2</div>
                                             </div>
-                                            <!-- Failed -->
+                                            <!-- Third -->
                                             <div class="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-red-50 text-red-500 dark:bg-white dark:bg-opacity-5">
-                                                <div class="text-5xl font-semibold leading-none tracking-tight">
-                                                    <!-- {{data.githubIssues.overview[timeSelector.value]['wont-fix']}} -->
+                                                <div *ngIf="weeklyGraph" class="text-sm text-center font-semibold leading-none tracking-tight">
+                                                    {{thirdThisWeek}}
                                                 </div>
-                                                <div class="mt-1 text-sm font-medium text-center">Failed</div>
+                                                <div *ngIf="!weeklyGraph" class="text-sm text-center font-semibold leading-none tracking-tight">
+                                                    {{thirdLastWeek}}
+                                                </div>
+                                                <div class="mt-1 text-sm font-medium text-center">3</div>
                                             </div>
                                         </div>
                                     </div>
@@ -644,16 +662,16 @@
                                         </ng-container>
 
                                         <!-- Delivery Charges -->
-                                        <ng-container matColumnDef="deliveryCharges">
+                                        <ng-container matColumnDef="selfDeliveryFee">
                                             <th
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                Delivery Charges
+                                                Self Delivery Fee
                                             </th>
                                             <td
                                                 mat-cell
                                                 *matCellDef="let settlement">
-                                                {{settlement.deliveryCharges | currency: currencySymbol}}
+                                                {{settlement.selfDeliveryFee | currency: currencySymbol}}
                                             </td>
                                         </ng-container>
 

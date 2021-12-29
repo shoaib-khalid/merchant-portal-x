@@ -9,7 +9,7 @@ import { DailyTopProducts, DailyTopProductsPagination,
          DetailedDailySales, DetailedDailySalesPagination, 
          Settlement, 
          SettlementPagination, 
-         SummarySales, SummarySalesPagination, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly 
+         SummarySales, SummarySalesPagination, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly, WeeklySale 
        } from './dashboard.types';
 
 @Injectable({
@@ -39,6 +39,8 @@ export class DashboardService
 
     private _settlement: BehaviorSubject<Settlement[] | null> = new BehaviorSubject(null);
     private _settlementPagination: BehaviorSubject<SettlementPagination | null> = new BehaviorSubject(null);
+
+    private _weeklySale: BehaviorSubject<WeeklySale[] | null> = new BehaviorSubject(null);
 
     fromDate: string;
     todayDate: string;
@@ -195,6 +197,15 @@ export class DashboardService
     }
 
     /**
+     * Getter for weekly sale
+     *
+    */
+     get weeklySale$(): Observable<WeeklySale[]>
+     {
+         return this._weeklySale.asObservable();
+     }
+
+    /**
      * Getter for storeId
      */
 
@@ -223,7 +234,6 @@ export class DashboardService
     {
         return this._httpClient.get('api/dashboards/project').pipe(
             tap((response: any) => {
-                console.log("dashboard response:",response)
                 this._data.next(response);
             })
         );
@@ -391,6 +401,8 @@ export class DashboardService
             );
     }
 
+    
+
     getSettlement(id: string, page: number = 0, size: number = 10, sort: string = 'created', order: 'cycleStartDate' | 'cycleEndDate' | '' = 'cycleStartDate', 
                         from: string = this.fromDate, to: string = this.todayDate):
     Observable<{ pagination: SettlementPagination; settlement: Settlement[] }>
@@ -431,6 +443,34 @@ export class DashboardService
 
                     this._settlementPagination.next(_pagination);
                     this._settlement.next(response["data"].content);
+                })
+            );
+    }
+
+    getWeeklySale(id: string, from: string = this.fromDate, to: string = this.todayDate):
+    Observable<{ weeklySale: WeeklySale[] }>
+    {
+        let reportService = this._apiServer.settings.apiServer.reportService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+
+            params: {
+                from: '' + from,
+                to: '' + to,
+            }
+        };
+        
+        return this._httpClient.get<{ weeklySale: WeeklySale[] }>
+            (reportService + '/store/' + id + '/weeklySale', header)
+            .pipe(
+                tap((response) => {
+                    
+                    this._logging.debug("Response from ReportService (getWeeklySale)", response);
+
+                    this._weeklySale.next(response["weeklySales"]);
                 })
             );
     }
