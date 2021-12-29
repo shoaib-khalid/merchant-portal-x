@@ -127,12 +127,15 @@ export class EditProfileComponent implements OnInit
 
         this._editProfileService.clientPaymentDetails$.subscribe(
             (response) => {
-                  // Fill the form
-                this.editProfileForm.get('bankAccountNumber').patchValue(response.bankAccountNumber);
-                this.editProfileForm.get('bankName').patchValue(response.bankName);
-                this.editProfileForm.get('bankAccountTitle').patchValue(response.bankAccountTitle);
+                // Fill the form
+                //response?. to handle if it is undefined
+                this.editProfileForm.get('bankAccountNumber').patchValue(response?.bankAccountNumber?response.bankAccountNumber:null);
+                this.editProfileForm.get('bankName').patchValue(response?.bankName?response.bankName:null);
+                this.editProfileForm.get('bankAccountTitle').patchValue(response?.bankAccountTitle?response.bankAccountTitle:null);
 
-                this.clientPaymentId = response.id;
+                this.clientPaymentId = response?.id?response.id:null;
+                
+          
             } 
         );   
 
@@ -188,11 +191,19 @@ export class EditProfileComponent implements OnInit
             bankAccountTitle : this.editProfileForm.get('bankAccountTitle').value
         };
 
-        // update payment profile
-        this._editProfileService.updatePaymentProfile(this.clientPaymentId, newBody)
-        .subscribe((response) => {
+        if(this.clientPaymentId !==null){
+            // update payment profile
+            this._editProfileService.updatePaymentProfile(this.clientPaymentId, newBody)
+            .subscribe((response) => {
 
-        });
+            });
+        } else {
+            // create payment profile
+            this._editProfileService.createPaymentProfile(newBody)
+            .subscribe((response) => {
+
+            });
+        }
 
         // Show a success message (it can also be an error message)
                         // Show a success message (it can also be an error message)
