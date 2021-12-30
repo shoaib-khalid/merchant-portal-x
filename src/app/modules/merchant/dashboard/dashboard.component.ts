@@ -799,33 +799,33 @@ export class DashboardComponent implements OnInit, OnDestroy
             this._prepareChartData();
         })
 
-        // -------------------------------
-        // Graph This Week
-        // -------------------------------
+        // // -------------------------------
+        // // Graph This Week
+        // // -------------------------------
 
-        this._dashboardService.getWeeklySale(this.storeId$, formattedLastMonday, formattedToday)
-        .subscribe(response => {
-            this.thisWeekChartArr = [];
-            response['weeklySales'].forEach(item => {
-                this.thisWeekChartArr.push({ 
-                    completionStatus: item.completionStatus,
-                    weeklySaleTotal: item.total
-                });
-            });
-            // Sum up This Week Total
-            this.thisWeekChartArr.forEach(a => {
+        // this._dashboardService.getWeeklySale(this.storeId$, formattedLastMonday, formattedToday)
+        // .subscribe(response => {
+        //     this.thisWeekChartArr = [];
+        //     response['weeklySales'].forEach(item => {
+        //         this.thisWeekChartArr.push({ 
+        //             completionStatus: item.completionStatus,
+        //             weeklySaleTotal: item.total
+        //         });
+        //     });
+        //     // Sum up This Week Total
+        //     this.thisWeekChartArr.forEach(a => {
             
-            if (this.completeCompletionStatus.includes(a.completionStatus))
-                this.thisWeekTotalCompleted += a.weeklySaleTotal;
+        //     if (this.completeCompletionStatus.includes(a.completionStatus))
+        //         this.thisWeekTotalCompleted += a.weeklySaleTotal;
             
-            else if (this.failedCompletionStatus.includes(a.completionStatus))
-                this.thisWeekTotalFailed += a.weeklySaleTotal;
+        //     else if (this.failedCompletionStatus.includes(a.completionStatus))
+        //         this.thisWeekTotalFailed += a.weeklySaleTotal;
             
-            else
-                this.thisWeekTotalPending += a.weeklySaleTotal;
+        //     else
+        //         this.thisWeekTotalPending += a.weeklySaleTotal;
 
-            })
-        })
+        //     })
+        // })
 
 
         //Get dates for last week
@@ -906,35 +906,34 @@ export class DashboardComponent implements OnInit, OnDestroy
 
         })
 
-        // -------------------------------
-        // Graph Last Week
-        // -------------------------------
+        // // -------------------------------
+        // // Graph Last Week
+        // // -------------------------------
 
-        this._dashboardService.getWeeklySale(this.storeId$, formattedLastWeekStart, formattedLastWeekEnd)
-        .subscribe(response => {
-            this.lastWeekChartArr = [];
-            response['weeklySales'].forEach(item => {
-                this.lastWeekChartArr.push({ 
-                    completionStatus: item.completionStatus,
-                    weeklySaleTotal: item.total
-                });
-            });
+        // this._dashboardService.getWeeklySale(this.storeId$, formattedLastWeekStart, formattedLastWeekEnd)
+        // .subscribe(response => {
+        //     this.lastWeekChartArr = [];
+        //     response['weeklySales'].forEach(item => {
+        //         this.lastWeekChartArr.push({ 
+        //             completionStatus: item.completionStatus,
+        //             weeklySaleTotal: item.total
+        //         });
+        //     });
 
-            // Sum up Last Week Total
-            this.lastWeekChartArr.forEach(a => {
+        //     // Sum up Last Week Total
+        //     this.lastWeekChartArr.forEach(a => {
             
-                if (this.completeCompletionStatus.includes(a.completionStatus))
-                    this.lastWeekTotalCompleted += a.weeklySaleTotal;
+        //         if (this.completeCompletionStatus.includes(a.completionStatus))
+        //             this.lastWeekTotalCompleted += a.weeklySaleTotal;
                 
-                else if (this.failedCompletionStatus.includes(a.completionStatus))
-                    this.lastWeekTotalFailed += a.weeklySaleTotal;
+        //         else if (this.failedCompletionStatus.includes(a.completionStatus))
+        //             this.lastWeekTotalFailed += a.weeklySaleTotal;
                 
-                else
-                    this.lastWeekTotalPending += a.weeklySaleTotal;
-            })
-        })
+        //         else
+        //             this.lastWeekTotalPending += a.weeklySaleTotal;
+        //     })
+        // })
 
-        // this.thisWeekChartArr = [];
 
         // this.overviewChart = {
         //     'this-week':{
@@ -1202,20 +1201,20 @@ export class DashboardComponent implements OnInit, OnDestroy
                 {
                     name: 'Completed',
                     type: 'line',
-                    data: [this.thisWeekDayChartCompleted[0], this.thisWeekDayChartCompleted[1], this.thisWeekDayChartCompleted[2], 
-                    this.thisWeekDayChartCompleted[3], this.thisWeekDayChartCompleted[4], this.thisWeekDayChartCompleted[5], this.thisWeekDayChartCompleted[6]]
+                    data: [this.thisWeekDayChartCompleted[1], this.thisWeekDayChartCompleted[2], this.thisWeekDayChartCompleted[3], 
+                    this.thisWeekDayChartCompleted[4], this.thisWeekDayChartCompleted[5], this.thisWeekDayChartCompleted[6], this.thisWeekDayChartCompleted[0]]
                 },
                 {
                     name: 'Pending',
                     type: 'line',
-                    data: [this.thisWeekDayChartPending[0], this.thisWeekDayChartPending[1], this.thisWeekDayChartPending[2], 
-                    this.thisWeekDayChartPending[3], this.thisWeekDayChartPending[4], this.thisWeekDayChartPending[5], this.thisWeekDayChartPending[6]]
+                    data: [this.thisWeekDayChartPending[1], this.thisWeekDayChartPending[2], this.thisWeekDayChartPending[3], 
+                    this.thisWeekDayChartPending[4], this.thisWeekDayChartPending[5], this.thisWeekDayChartPending[6], this.thisWeekDayChartPending[0]]
                 },
                 {
                     name: 'Failed',
                     type: 'column',
-                    data: [this.thisWeekDayChartFailed[0], this.thisWeekDayChartFailed[1], this.thisWeekDayChartFailed[2], 
-                    this.thisWeekDayChartFailed[3], this.thisWeekDayChartFailed[4], this.thisWeekDayChartFailed[5], this.thisWeekDayChartFailed[6]]
+                    data: [this.thisWeekDayChartFailed[1], this.thisWeekDayChartFailed[2], this.thisWeekDayChartFailed[3], 
+                    this.thisWeekDayChartFailed[4], this.thisWeekDayChartFailed[5], this.thisWeekDayChartFailed[6], this.thisWeekDayChartFailed[0]]
                 }
             ],
             'last-week': [
@@ -1223,22 +1222,22 @@ export class DashboardComponent implements OnInit, OnDestroy
                     name: 'Completed',
                     type: 'line',
                     // data: [9, 8, 10, 12, 7, 11, 15]
-                    data: [this.lastWeekDayChartCompleted[0], this.lastWeekDayChartCompleted[1], this.lastWeekDayChartCompleted[2], 
-                    this.lastWeekDayChartCompleted[3], this.lastWeekDayChartCompleted[4], this.lastWeekDayChartCompleted[5], this.lastWeekDayChartCompleted[6]],
+                    data: [this.lastWeekDayChartCompleted[1], this.lastWeekDayChartCompleted[2], this.lastWeekDayChartCompleted[3], 
+                    this.lastWeekDayChartCompleted[4], this.lastWeekDayChartCompleted[5], this.lastWeekDayChartCompleted[6], this.lastWeekDayChartCompleted[0]],
                     
                     
                 },
                 {
                     name: 'Pending',
                     type: 'line',
-                    data: [this.lastWeekDayChartPending[0], this.lastWeekDayChartPending[1], this.lastWeekDayChartPending[2], 
-                    this.lastWeekDayChartPending[3], this.lastWeekDayChartPending[4], this.lastWeekDayChartPending[5], this.lastWeekDayChartPending[6]]
+                    data: [this.lastWeekDayChartPending[1], this.lastWeekDayChartPending[2], this.lastWeekDayChartPending[3], 
+                    this.lastWeekDayChartPending[4], this.lastWeekDayChartPending[5], this.lastWeekDayChartPending[6], this.lastWeekDayChartPending[0]]
                 },
                 {
                     name: 'Failed',
                     type: 'column',
-                    data: [this.lastWeekDayChartFailed[0], this.lastWeekDayChartFailed[1], this.lastWeekDayChartFailed[2], 
-                    this.lastWeekDayChartFailed[3], this.lastWeekDayChartFailed[4], this.lastWeekDayChartFailed[5], this.lastWeekDayChartFailed[6]]
+                    data: [this.lastWeekDayChartFailed[1], this.lastWeekDayChartFailed[2], this.lastWeekDayChartFailed[3], 
+                    this.lastWeekDayChartFailed[4], this.lastWeekDayChartFailed[5], this.lastWeekDayChartFailed[6], this.lastWeekDayChartFailed[0]]
                 }
             ]
         }
@@ -1335,8 +1334,12 @@ export class DashboardComponent implements OnInit, OnDestroy
                     offsetX: -16,
                     style  : {
                         colors: 'var(--fuse-text-secondary)'
-                    }
-                }
+                    },
+                    formatter: function(val) {
+                        return val.toFixed(0)
+                    },
+                },
+                tickAmount: 1,
             },
             markers: {
                 size: 0,
