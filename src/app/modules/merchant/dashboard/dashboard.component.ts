@@ -762,8 +762,6 @@ export class DashboardComponent implements OnInit, OnDestroy
                     day: new Date(item.created).getDay()
                 });
             });
-            console.log("this.overviewThisWeekArr", this.overviewThisWeekArr);
-            
             
             // Sum up Total Sales for This Week
             // Put the sum for status to day array
