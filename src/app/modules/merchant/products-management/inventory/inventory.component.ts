@@ -1509,7 +1509,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         let _item = this._formBuilder.group({
             id:null,
             name: name,
-            productVariantsAvailable:[]
+            productVariantsAvailable:this._formBuilder.array([]),
             
         });
 
@@ -1844,7 +1844,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     {
         // Get the value
         const value = event.target.value.toLowerCase();
-        console.log('this.filteredProductVariantAvailable>>>',this.filteredProductVariantAvailable);
 
         // Filter the variants
         this.filteredProductVariantAvailable = this.productVariantAvailable$?.filter(variantAvailable => variantAvailable.value.toLowerCase().includes(value));
@@ -1902,18 +1901,35 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      */
     createVariantAvailable(value: string): void
     {
-        
-        //if variant recently created then need to create the variant then push the variant available listing
-        console.log('createVariantAvailable->filteredProductVariantAvailable',this.filteredProductVariantAvailable);
-        console.log('createVariantAvailable->productVariantAvailable$',this.productVariantAvailable$);
-        console.log('createVariantAvailable->selectedProductVariants',this.selectedProductVariants);
-        const variant = {
-            productId: this.selectedProduct.id,
-            productVariantId: this.selectedProductVariants.id !==null?this.selectedProductVariants.id:uuidv4(),
-            value
-            }; 
+        // console.log('this.selectedProductForm: sebelum create varaiant available',this.selectedProductForm.value);
+        this.filteredProductVariants= this.productVariants.value;//check balik yg ni
 
-        console.log('variant',variant);
+        //if variant recently created then need to create the variant then push the variant available listing
+        const variant = {
+            value,
+            productId: this.selectedProduct.id,
+            productVariantId: this.selectedProductVariants.id !==null?this.selectedProductVariants.id:uuidv4(),   
+        }; 
+
+        // let variant2 = this._formBuilder.group({
+        //     value,
+        //     productId: this.selectedProduct.id,
+        //     productVariantId: this.selectedProductVariants.id !==null?this.selectedProductVariants.id:uuidv4(),   
+            
+        // });
+        // this.productVariantAvailable.push(variant2);
+
+        this.productVariantAvailable$.push(variant);
+        console.log('check form lepas tekan button create variant available:',this.productVariants);
+        this.filteredProductVariantAvailable= this.productVariantAvailable$;        
+        this.filteredProductVariants= this.productVariants.value;//check balik yg ni
+
+        console.log('check latest lepas push this.productVariantAvailable$',this.productVariantAvailable$);
+        console.log('this.selectedform', this.selectedProductForm.value);
+
+        // this.productVariants.push(_item);
+        // this.filteredProductVariants= this.productVariants.value;
+        // console.log("this.filteredProductVariants",this.filteredProductVariants);
 
 
         //=================existing code=========
