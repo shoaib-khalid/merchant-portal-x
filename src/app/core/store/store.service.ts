@@ -514,6 +514,22 @@ export class StoresService
         );
     }
 
+    putStoreSnooze(storeId: string): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.put<any>(productService + '/stores/' + storeId + '/timings/snooze', header ).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (putTiming)",response);
+            })
+        );
+    }
+
     // ---------------------------
     // Store Assets Section
     // ---------------------------
