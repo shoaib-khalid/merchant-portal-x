@@ -766,18 +766,7 @@ export class DashboardComponent implements OnInit, OnDestroy
             });
             
             // Sum up Total Sales for This Week
-            this.overviewThisWeekArr.forEach(a => {
-                
-                if (this.completeCompletionStatus.includes(a.completionStatus))
-                    this.sumThisWeekCompleted += 1;
-                else if (this.failedCompletionStatus.includes(a.completionStatus))
-                    this.sumThisWeekFailed += 1;
-                else
-                    this.sumThisWeekPending += 1;
-                    
-            })
-
-            // Put sum for status to day array
+            // Put the sum for status to day array
             this.overviewThisWeekArr.forEach(a => {
                 
                 if (this.completeCompletionStatus.includes(a.completionStatus)){
@@ -882,6 +871,7 @@ export class DashboardComponent implements OnInit, OnDestroy
             });
             
             // Sum up Total Sales for Last Week
+            // Put the sum for status to day array
             this.overviewLastWeekArr.forEach(a => {
                 
                 if (this.completeCompletionStatus.includes(a.completionStatus)){
@@ -961,47 +951,6 @@ export class DashboardComponent implements OnInit, OnDestroy
         //                 }
         // },
         
-        
-        // Chart
-
-        // this.seriesChart  = {
-        //     'this-week': [
-        //         {
-        //             name: 'Completed',
-        //             type: 'line',
-        //             data: [42, 28, 43, 34, 20, 25, 22]
-        //         },
-        //         {
-        //             name: 'Pending',
-        //             type: 'line',
-        //             data: [1, 5, 13, 12, 15, 4, 9]
-        //         },
-        //         {
-        //             name: 'Failed',
-        //             type: 'column',
-        //             data: [11, 10, 8, 11, 8, 10, 17]
-        //         }
-        //     ],
-        //     'last-week': [
-        //         {
-        //             name: 'Completed',
-        //             type: 'line',
-        //             data: [9, 8, 10, 12, 7, 11, 15]
-        //             // data: [this.lastWeekDayChartCompleted[0], this.lastWeekDayChartCompleted[1], this.lastWeekDayChartCompleted[2], 
-        //             // this.lastWeekDayChartCompleted[3], this.lastWeekDayChartCompleted[4], this.lastWeekDayChartCompleted[5], this.lastWeekDayChartCompleted[6]]
-        //         },
-        //         {
-        //             name: 'Pending',
-        //             type: 'line',
-        //             data: [9, 8, 10, 12, 7, 11, 15]
-        //         },
-        //         {
-        //             name: 'Failed',
-        //             type: 'column',
-        //             data: [11, 10, 8, 11, 8, 10, 17]
-        //         }
-        //     ]
-        // }
 
         this._prepareChartData();
 
