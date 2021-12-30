@@ -124,8 +124,6 @@ export class DashboardComponent implements OnInit, OnDestroy
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     currencySymbol: string;
 
-    dayNames = ["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"];
-    thisWeekStartDate : any;
     lastMonday: any;
 
     topProductThisWeekRow = [];
@@ -764,25 +762,27 @@ export class DashboardComponent implements OnInit, OnDestroy
                     day: new Date(item.created).getDay()
                 });
             });
+            console.log("this.overviewThisWeekArr", this.overviewThisWeekArr);
+            
             
             // Sum up Total Sales for This Week
             // Put the sum for status to day array
             this.overviewThisWeekArr.forEach(a => {
-                
+
                 if (this.completeCompletionStatus.includes(a.completionStatus)){
 
                     this.sumThisWeekCompleted += 1;
-                    this.thisWeekDayChartCompleted[a.day] = this.sumThisWeekCompleted
+                    this.thisWeekDayChartCompleted[a.day] += 1;
                 }
                 else if (this.failedCompletionStatus.includes(a.completionStatus)){
 
                     this.sumThisWeekFailed += 1;
-                    this.thisWeekDayChartFailed[a.day] = this.sumThisWeekFailed
+                    this.thisWeekDayChartFailed[a.day] += 1;
                  
                 }
                 else {
                     this.sumThisWeekPending += 1;
-                    this.thisWeekDayChartPending[a.day] = this.sumThisWeekPending
+                    this.thisWeekDayChartPending[a.day] += 1;
                 }
             })
             this._prepareChartData();
@@ -877,16 +877,16 @@ export class DashboardComponent implements OnInit, OnDestroy
                 if (this.completeCompletionStatus.includes(a.completionStatus)){
 
                     this.sumLastWeekCompleted += 1;
-                    this.lastWeekDayChartCompleted[a.day] = this.sumLastWeekCompleted
+                    this.lastWeekDayChartCompleted[a.day] += 1;
                 }
                 else if (this.failedCompletionStatus.includes(a.completionStatus)){
 
                     this.sumLastWeekFailed += 1;
-                    this.lastWeekDayChartFailed[a.day] = this.sumLastWeekFailed
+                    this.lastWeekDayChartFailed[a.day] += 1;
                 }
                 else {
                     this.sumLastWeekPending += 1;
-                    this.lastWeekDayChartPending[a.day] = this.sumLastWeekPending
+                    this.lastWeekDayChartPending[a.day] += 1;
                 }
             })
                 
