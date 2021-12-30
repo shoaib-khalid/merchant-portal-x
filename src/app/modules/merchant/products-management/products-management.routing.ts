@@ -42,7 +42,6 @@ export const productsManagementRoutes: Route[] = [
                 component: CategoriesComponent,
                 resolve  : {
                     categories: InventoryCategoriesResolver,
-                    products  : InventoryProductsResolver,
                     tags      : InventoryTagsResolver,
                     storeById : GetStoreByIdResolver
                 }
