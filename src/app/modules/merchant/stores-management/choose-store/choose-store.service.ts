@@ -83,12 +83,12 @@ export class ChooseStoreService
                 let _catagories = [
                     {
                         id: "FnB",
-                        slug: "FnB",
+                        slug: ["FnB","FnB_PK"],
                         name: "Food and Beverages"
                     },
                     {
                         id: "E-Commerce",
-                        slug: "E-Commerce",
+                        slug: ["E-Commerce","ECommerce_PK"],
                         name: "E-commerce"   
                     }
                 ];
@@ -128,6 +128,7 @@ export class ChooseStoreService
                             currentStep: 3
                         }
                     );
+                        console.log("element", element);
                 });
         
                 this._stores.next(_stores);

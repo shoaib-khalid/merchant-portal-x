@@ -2,7 +2,7 @@ export interface StoreCategory
 {
     id?: string;
     name?: string;
-    slug?: string;
+    slug?: string[];
 }
 
 export interface Store
