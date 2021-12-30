@@ -57,7 +57,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     range: any;
 
     recentTransactionsDataSource: MatTableDataSource<any> = new MatTableDataSource();
-    recentTransactionsTableColumns: string[] = ['transactionId', 'date', 'customer.name', 'amount', 'status', 'action'];
+    recentTransactionsTableColumns: string[] = ['invoiceId', 'created', 'customer.name', 'total', 'completionStatus', 'action'];
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     loading: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -92,7 +92,10 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
         });
 
         // Set initial active tab value
-        this.tabControl.setValue("");
+
+        // this.tabControl.setValue("");
+        this.tabControl.setValue(['PAYMENT_CONFIRMED', 'RECEIVED_AT_STORE', 'BEING_PREPARED', 'AWAITING_PICKUP', 'BEING_DELIVERED', 'DELIVERED_TO_CUSTOMER', 'CANCELED_BY_MERCHANT']);
+        
 
         // Get the data
         this._orderslistService.orders$
@@ -344,9 +347,9 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
 
         let currentOpenTab = displayStatuses;
         if (displayStatuses !== "HISTORY") {
-            this.recentTransactionsTableColumns = ['transactionId', 'date', 'customer.name', 'amount', 'action'];
+            this.recentTransactionsTableColumns = ['invoiceId', 'created', 'customer.name', 'total', 'action'];
         } else {
-            this.recentTransactionsTableColumns = ['transactionId', 'date', 'customer.name', 'amount', 'status', 'action'];
+            this.recentTransactionsTableColumns = ['invoiceId', 'created', 'customer.name', 'total', 'completionStatus', 'action'];
         }
 
         this.tabControl.setValue(this._orderCountSummary.find(item => item.id === this.openTab).completionStatus);
