@@ -32,8 +32,6 @@ import { Order, OrderItem } from '../orders-list/orders-list.types';
 })
 export class OrderDetailsComponent implements OnInit {
 
-  @ViewChild('myDiv') myDiv: ElementRef;
-
   invoiceForm: FormGroup;
   private _unsubscribeAll: Subject<any> = new Subject<any>();
   order: Order;
