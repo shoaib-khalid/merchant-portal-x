@@ -53,10 +53,33 @@ export class LocaleService
      */
     get(): Observable<any>
     {   
-        return this._httpClient.get<any>("https://extreme-ip-lookup.com/json")
+        return this._httpClient.get<any>("https://extreme-ip-lookup.com/json?key=47t29ug77EDHEC2zIToW")
         .pipe(
             tap((response) => {
                 this._logging.debug("Response from LocaleService",response);
+
+                let updateResponse = response;
+
+                let symplifiedRegion: string;
+                let symplifiedCountryId: string;
+                if (response.countryCode == 'MY') {
+                    symplifiedCountryId = "MYS";
+                    symplifiedRegion = "SEA";
+                } else if (response.countryCode == 'PK'){
+                    symplifiedCountryId = "PAK";
+                    symplifiedRegion = "SA";
+                } else {
+                    symplifiedCountryId = null;
+                    symplifiedRegion = null;
+                }
+        
+
+                if (response.countryCode) {
+                    updateResponse["symplifiedCountryId"] = symplifiedCountryId;
+                    updateResponse["symplifiedRegion"] = symplifiedRegion;
+                    updateResponse["countryCode"] = response.countryCode;
+                }
+
                 return this._locale.next(response);
             })
         );

@@ -5,6 +5,7 @@ import { catchError } from 'rxjs/operators';
 import { Vertical } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.types'
 import { ChooseVerticalService } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.service';
 import { StoresService } from 'app/core/store/store.service';
+import { LocaleService } from 'app/core/locale/locale.service';
 
 @Injectable({
     providedIn: 'root'
@@ -99,5 +100,36 @@ export class StoreRegionsResolver implements Resolve<any>
                         return throwError(error);
                     })
                 );
+    }
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class LocaleResolver implements Resolve<any>
+{
+    /**
+     * Constructor
+     */
+    constructor(
+        private _router: Router,
+        private _localeService: LocaleService
+    )
+    {
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Resolver
+     *
+     * @param route
+     * @param state
+     */
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
+    {
+        return this._localeService.get();
     }
 }
