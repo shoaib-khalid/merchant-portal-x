@@ -8,12 +8,12 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { UserComponent } from 'app/layout/common/user/user.component';
 import { SharedModule } from 'app/shared/shared.module';
-import { StatusComponent } from './status/status.component';
+import { storeStatusComponent } from './status/status.component';
 
 @NgModule({
     declarations: [
         UserComponent,
-        StatusComponent
+        storeStatusComponent
     ],
     imports     : [
         MatButtonModule,

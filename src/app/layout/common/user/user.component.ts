@@ -8,8 +8,9 @@ import { UserService } from 'app/core/user/user.service';
 import { store } from 'app/mock-api/common/store/data';
 import { StoresService } from 'app/core/store/store.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { StatusComponent } from './status/status.component';
+import { storeStatusComponent } from './status/status.component';
 import { MatDialog } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
     selector       : 'user',
@@ -27,6 +28,8 @@ export class UserComponent implements OnInit, OnDestroy
     @Input() showAvatar: boolean = true;
     user: User;
 
+    selectedStatusForm: FormGroup;
+
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     /**
@@ -38,7 +41,8 @@ export class UserComponent implements OnInit, OnDestroy
         private _userService: UserService,
         private _storesService: StoresService,
         private _fuseConfirmationService: FuseConfirmationService,
-        public _dialog: MatDialog
+        public _dialog: MatDialog,
+        private _formBuilder: FormBuilder
     )
     {
     }
@@ -65,6 +69,7 @@ export class UserComponent implements OnInit, OnDestroy
      */
     ngOnInit(): void
     {
+
         // Subscribe to user changes
         this._userService.user$
             .pipe(takeUntil(this._unsubscribeAll))
@@ -128,22 +133,22 @@ export class UserComponent implements OnInit, OnDestroy
     }
 
     goToStatusMenu(){
-        const dialogRef = this._dialog.open(StatusComponent, { disableClose: true });
-        dialogRef.afterClosed().subscribe(result => {
-            let category = {
-                name:result.name,
-                storeId: this.storeId$,
-                parentCategoryId: null,
-                thumbnailUrl:null,
-            };
-            const formData = new FormData();
-            formData.append("file", result.imagefiles[0]);
-    
-            // Update status on the server
-            // this._storesService.putStoreSnooze(storeId)
-            // .subscribe((response)=>{
-            // });
-        });
+        
+        if (this.storeId$) {
+            const dialogRef = this._dialog.open(storeStatusComponent, { disableClose:true});
+            dialogRef.afterClosed().subscribe((result) => {
+            
+                if (result.status === true) {
+                    // update the status
+                    this._storesService.putStoreSnooze(result).subscribe(() => {
+                           
+                   })
+                }
+                
+            });
+        } else (
+            this._checkStoreSelected()
+        )
     }
 
     storeSetting(): void
