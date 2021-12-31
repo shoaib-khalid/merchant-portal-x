@@ -9,6 +9,28 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 export class ChangelogComponent
 {
     changelog: any[] = [
+        // v0.0.7
+        {
+            version    : 'v0.0.7',
+            releaseDate: 'Dec 30, 2021',
+            changes    : [
+                {
+                    type: 'Added',
+                    list: [
+                        '(CreateStorePage) Limit store creation to 5 store',
+                        '(OrderManagementPage) Add print invoice',
+                        '(SnoozeFeature) Add snooze feature in menu'
+                    ]
+                },
+                {
+                    type: 'Fixed',
+                    list: [
+                        '(CreateStorePage) Fix extreme ip lookup, MP unable to detect location automatically',
+                        '(OrderManagementPage) Fix default tab from history tab to new tab'
+                    ]
+                }
+            ]
+        },
         // v0.0.6
         {
             version    : 'v0.0.6',
