@@ -14,5 +14,8 @@ export const financeRoutes: Route[] = [
     {
         path     : ':order_id',
         component: OrderDetailsComponent,
+        data: {
+            layout: 'empty'
+        },
     }
 ];

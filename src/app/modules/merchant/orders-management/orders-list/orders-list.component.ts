@@ -29,7 +29,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     @ViewChild('selectFilter', {read: MatSelect})  _filter: MatSelect;
 
 
-    openTab: string = "HISTORY";
+    openTab: string = "NEW";
 
     store: Store;
 
@@ -57,7 +57,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     range: any;
 
     recentTransactionsDataSource: MatTableDataSource<any> = new MatTableDataSource();
-    recentTransactionsTableColumns: string[] = ['invoiceId', 'created', 'customer.name', 'total', 'completionStatus', 'action'];
+    recentTransactionsTableColumns: string[] = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'action'];
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     loading: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -94,7 +94,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
         // Set initial active tab value
 
         // this.tabControl.setValue("");
-        this.tabControl.setValue(['PAYMENT_CONFIRMED', 'RECEIVED_AT_STORE', 'BEING_PREPARED', 'AWAITING_PICKUP', 'BEING_DELIVERED', 'DELIVERED_TO_CUSTOMER', 'CANCELED_BY_MERCHANT']);
+        this.tabControl.setValue(["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE"]);
         
 
         // Get the data
@@ -347,9 +347,9 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
 
         let currentOpenTab = displayStatuses;
         if (displayStatuses !== "HISTORY") {
-            this.recentTransactionsTableColumns = ['invoiceId', 'created', 'customer.name', 'total', 'action'];
+            this.recentTransactionsTableColumns = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'action'];
         } else {
-            this.recentTransactionsTableColumns = ['invoiceId', 'created', 'customer.name', 'total', 'completionStatus', 'action'];
+            this.recentTransactionsTableColumns = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'completionStatus', 'action'];
         }
 
         this.tabControl.setValue(this._orderCountSummary.find(item => item.id === this.openTab).completionStatus);
@@ -418,7 +418,10 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     }
 
     viewDetails(orderId){
-        this._router.navigateByUrl('/orders/'+orderId)
+        // this._router.navigateByUrl('/orders/'+orderId)
+        this._dialog.open(OrderDetailsComponent, { data: orderId });
+
+        
     }
 
 }
