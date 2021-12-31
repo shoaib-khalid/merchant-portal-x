@@ -19,7 +19,7 @@ import { financeRoutes } from 'app/modules/merchant/orders-management/orders-man
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-
+import {NgxPrintModule} from 'ngx-print';
 
 @NgModule({
     declarations: [
@@ -43,7 +43,8 @@ import { MatNativeDateModule } from '@angular/material/core';
         MatInputModule,
         MatSelectModule,
         MatDatepickerModule,
-        MatNativeDateModule
+        MatNativeDateModule,
+        NgxPrintModule
     ]
 })
 export class OrdersManagementModule

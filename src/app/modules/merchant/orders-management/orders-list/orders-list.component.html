@@ -249,7 +249,7 @@
                                 </ng-container>
     
                                 <!-- Name -->
-                                <ng-container matColumnDef="customer.name">
+                                <ng-container matColumnDef="orderPaymentDetail.accountName">
                                     <th
                                         mat-header-cell
                                         mat-sort-header
@@ -260,7 +260,7 @@
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span class="pr-6 whitespace-nowrap">
-                                            {{transaction.order.customer?.name | titlecase }}
+                                            {{transaction.order.orderPaymentDetail.accountName | titlecase }}
                                         </span>
                                     </td>
                                 </ng-container>
@@ -299,11 +299,13 @@
                                                         'bg-yellow-200 text-yellow-800 dark:bg-yellow-600 dark:text-yellow-50': transaction.order.completionStatus === 'BEING_PREPARED',
                                                         'bg-orange-200 text-orange-800 dark:bg-orange-600 dark:text-orange-50': transaction.order.completionStatus === 'AWAITING_PICKUP',
                                                         'bg-purple-200 text-purple-800 dark:bg-purple-600 dark:text-purple-50': transaction.order.completionStatus === 'BEING_DELIVERED',
+                                                        'bg-red-200 text-red-800 dark:bg-red-600 dark:text-red-50': transaction.order.completionStatus === 'CANCELED_BY_MERCHANT',
                                                         'bg-blue-200 text-blue-800 dark:bg-blue-600 dark:text-blue-50': transaction.order.completionStatus === 'DELIVERED_TO_CUSTOMER'}">
                                             <span class="leading-relaxed whitespace-nowrap">{{transaction.order.completionStatus}}</span>
                                         </span>
                                     </td>
                                 </ng-container>
+                                
 
                                 <!-- Action -->
                                 <ng-container matColumnDef="action">

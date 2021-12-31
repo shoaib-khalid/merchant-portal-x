@@ -5,7 +5,7 @@
         <div class="flex flex-wrap item-center justify-center w-full max-w-screen-xl mx-auto p-6 md:p-8">
 
             <div class="max-w-240 p-16 rounded-2xl shadow bg-card print:w-auto print:p-0 print:rounded-none print:shadow-none print:bg-transparent">
-
+                <div id="printable">
                 <div class="flex items-start">
                     <div class="grid grid-rows-2 place-items-start gap-y-12">
                         <div class="grid auto-cols-max grid-flow-col gap-x-8">
@@ -128,9 +128,23 @@
                     <div class="font-medium">This invoice is computer generated. Thank you for your business.</div>
                     
                 </div>
-
+            </div><br>
+            <div class="flex items-center justify-end mt-4">
+                <button
+                    (click)="close()"
+                    mat-button>Cancel
+                </button>
+                <button
+                    class="ml-2"
+                    mat-flat-button
+                    [useExistingCss]="true"
+                    printSectionId="printable"
+                    ngxPrint
+                    [color]="'primary'">Print
+                </button>
             </div>
-
+            </div>
+            
         </div>
     </div>
 </div>

@@ -1,6 +1,7 @@
 import { formatDate } from '@angular/common';
-import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { StoresService } from 'app/core/store/store.service';
 import { Store } from 'app/core/store/store.types';
@@ -11,9 +12,27 @@ import { Order, OrderItem } from '../orders-list/orders-list.types';
 
 @Component({
   selector: 'app-order-details',
-  templateUrl: './order-details.component.html'
+  templateUrl: './order-details.component.html',
+//   styles       : [
+//     `
+//     .printme {
+//       display: none;
+//     }
+//     @media print {
+//       .no-printme  {
+//         display: none;
+//       }
+//       .printme  {
+//         display: block;
+//       }
+//     }
+
+//     `
+// ],
 })
 export class OrderDetailsComponent implements OnInit {
+
+  @ViewChild('myDiv') myDiv: ElementRef;
 
   invoiceForm: FormGroup;
   private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -30,6 +49,9 @@ export class OrderDetailsComponent implements OnInit {
     private _formBuilder: FormBuilder,
     private _storesService: StoresService,
     private _ordersService: OrdersListService,
+    public _matDialogRef: MatDialogRef<OrderDetailsComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    
   ) { }
 
 
@@ -102,7 +124,8 @@ export class OrderDetailsComponent implements OnInit {
 
     // Get param from _activatedRoute first
     this._activatedRoute.params.subscribe(async params => {
-      this.orderId =  params['order_id'];
+      // this.orderId =  params['order_id'];
+      this.orderId =  this.data;
 
       // then getOrderById
       this._ordersService.getOrderById(this.orderId)
@@ -220,4 +243,11 @@ export class OrderDetailsComponent implements OnInit {
 
     });
   }
+
+  close(){
+    this._matDialogRef.close()
+  }
+
+ 
+
 }
