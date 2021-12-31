@@ -32,6 +32,8 @@ import { Order, OrderItem } from '../orders-list/orders-list.types';
 })
 export class OrderDetailsComponent implements OnInit {
 
+  store$: Store;
+
   invoiceForm: FormGroup;
   private _unsubscribeAll: Subject<any> = new Subject<any>();
   order: Order;
@@ -114,11 +116,9 @@ export class OrderDetailsComponent implements OnInit {
     this._storesService.store$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((store: Store)=>{
+                this.store$ = store;
                 this.timezone = store.regionCountry.timezone;
             });  
-
-
-
 
     // Get param from _activatedRoute first
     this._activatedRoute.params.subscribe(async params => {

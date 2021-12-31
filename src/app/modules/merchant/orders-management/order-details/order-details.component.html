@@ -74,9 +74,9 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="self-center text-right">{{ item.productPrice | currency: '$' }}</div>
+                        <div class="self-center text-right">{{ item.productPrice | currency: store$.regionCountry.currencySymbol }}</div>
                         <div class="self-center text-right">{{ item.quantity }}</div>
-                        <div class="col-span-2 self-center text-right">{{ (item.productPrice * item.quantity) | currency: '$' }}</div>
+                        <div class="col-span-2 self-center text-right">{{ (item.productPrice * item.quantity) | currency: store$.regionCountry.currencySymbol }}</div>
                     </ng-container>
     
                     <!-- Spacer -->
@@ -84,7 +84,7 @@
     
                     <!-- Subtotal -->
                     <div class="col-span-10 self-center font-medium tracking-tight text-secondary">SUBTOTAL</div>
-                    <div class="col-span-2 text-right text-lg">{{ invoiceForm.get('subtotal').value | currency:'$'}}</div>
+                    <div class="col-span-2 text-right text-lg">{{ invoiceForm.get('subtotal').value | currency: store$.regionCountry.currencySymbol}}</div>
     
                     <!-- Divider -->
                     <div class="col-span-12 my-3 border-b"></div>
@@ -93,35 +93,35 @@
                     <div class="col-span-10 self-center font-medium tracking-tight text-secondary">ORDER DISCOUNT ({{invoiceForm.get('discountCalculationValue').value}}%)
                         <span class="font-bold tracking-tight text-secondary" *ngIf="invoiceForm.get('appliedDiscount').value >= invoiceForm.get('discountMaxAmount').value && invoiceForm.get('appliedDiscount').value != 0">Capped at ${{invoiceForm.get('discountMaxAmount').value}}</span>
                     </div>
-                    <div class="col-span-2 text-right text-lg">-{{ invoiceForm.get('appliedDiscount').value | currency:'$'}}</div>
+                    <div class="col-span-2 text-right text-lg">-{{ invoiceForm.get('appliedDiscount').value | currency: store$.regionCountry.currencySymbol}}</div>
     
                     <!-- Divider -->
                     <div class="col-span-12 my-3 border-b"></div>
     
                     <!-- Service Charges -->
                     <div class="col-span-10 self-center font-medium tracking-tight text-secondary">SERVICE CHARGES</div>
-                    <div class="col-span-2 text-right text-lg">{{ invoiceForm.get('storeServiceCharges').value | currency:'$'}}</div>
+                    <div class="col-span-2 text-right text-lg">{{ invoiceForm.get('storeServiceCharges').value | currency: store$.regionCountry.currencySymbol}}</div>
     
                     <!-- Divider -->
                     <div class="col-span-12 my-3 border-b"></div>
     
                     <!-- Delivery Charges -->
                     <div class="col-span-10 self-center font-medium tracking-tight text-secondary">DELIVERY CHARGES</div>
-                    <div class="col-span-2 text-right text-lg">{{ invoiceForm.get('deliveryCharges').value | currency:'$'}}</div>
+                    <div class="col-span-2 text-right text-lg">{{ invoiceForm.get('deliveryCharges').value | currency: store$.regionCountry.currencySymbol}}</div>
     
                     <!-- Divider -->
                     <div class="col-span-12 my-3 border-b"></div>
 
                     <!-- Delivery Charges -->
                     <div class="col-span-10 self-center font-medium tracking-tight text-secondary">DELIVERY DISCOUNT</div>
-                    <div class="col-span-2 text-right text-lg">{{ invoiceForm.get('deliveryDiscount').value | currency:'$'}}</div>
+                    <div class="col-span-2 text-right text-lg">{{ invoiceForm.get('deliveryDiscount').value | currency: store$.regionCountry.currencySymbol}}</div>
     
                     <!-- Divider -->
                     <div class="col-span-12 my-3 border-b"></div>
     
                     <!-- Total -->
                     <div class="col-span-10 self-center text-2xl font-medium tracking-tight text-secondary">TOTAL</div>
-                    <div class="col-span-2 text-right text-2xl font-medium">{{ invoiceForm.get('total').value | currency:'$'}}</div>
+                    <div class="col-span-2 text-right text-2xl font-medium">{{ invoiceForm.get('total').value | currency: store$.regionCountry.currencySymbol}}</div>
                 </div>
     
                 <div class="mt-16">

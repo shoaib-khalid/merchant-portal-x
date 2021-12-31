@@ -378,13 +378,17 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
         
 
         // First check the order delivery type => Only scheduled to allow choose time
-        if (order.deliveryType === "SCHEDULED" && nextCompletionStatus != "CANCELED_BY_MERCHANT") {
+        if (order.deliveryType === "SCHEDULED" && nextCompletionStatus === "AWAITING_PICKUP") {
             this._orderslistService.getDeliveryProviderDetails(order.orderShipmentDetail.deliveryProviderId)
                 .subscribe(response => {
                     const dialogRef = this._dialog.open(ChooseProviderDateTimeComponent, { disableClose: true, data: response });
                     dialogRef.afterClosed().subscribe(result => {
                         if (result === "cancelled" || !result.date || !result.time){
-                            console.warn("Process cancelled")
+                            this.submitted[order.id] = false;
+                            console.warn("Process cancelled");
+
+                            // Mark for check
+                            this._changeDetectorRef.markForCheck();
                         } else {
                             completionBody["date"] = result.date;
                             completionBody["time"] = result.time;
