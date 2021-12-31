@@ -27,7 +27,12 @@ export class RegisterStoreComponent implements OnInit
 
     storeId: string;
 
-    invalidVertical: boolean = true;
+    // display Errors
+    createStoreCondition: any = {
+        error: null,
+        errorTitle: null,
+        errorDesc: null
+    };
 
     domainName:string;
 
@@ -178,11 +183,13 @@ export class RegisterStoreComponent implements OnInit
 
                 // check if vertical selected is valid for selected country
                 if ((_verticalCode === "ECommerce_PK" || _verticalCode === "FnB_PK") && symplifiedCountryId === "PAK") {
-                    this.invalidVertical = false;
+                    this.createStoreCondition.error = null;
                 } else if ((_verticalCode === 'E-Commerce' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'FnB') && symplifiedCountryId === "MYS") {
-                    this.invalidVertical = false;
+                    this.createStoreCondition.error = null;
                 } else {
-                    this.invalidVertical = true;
+                    this.createStoreCondition.error = "VERTICAL-ERROR";
+                    this.createStoreCondition.errorTitle = "Vertical Error";
+                    this.createStoreCondition.errorDesc = "This vertical is not available at your country, please choose another vertical";
                     let message = symplifiedCountryId ? "Vertical code: " + _verticalCode + " is not available for " + symplifiedCountryId + " country" : "Missing region country id";
                     console.error(message)
                 }
@@ -241,7 +248,14 @@ export class RegisterStoreComponent implements OnInit
             });
         });
 
-
+        // check total of stores this account have
+        this._storesService.stores$.subscribe((response)=>{
+            if (response.length && response.length > 4) {
+                this.createStoreCondition.error = "MAX-STORES";
+                this.createStoreCondition.errorTitle = "Maximum store creation has been reached";
+                this.createStoreCondition.errorDesc = "You have reached the maximum allowed store creation";
+            }
+        })
         
         // get states service
         this.statesList = [

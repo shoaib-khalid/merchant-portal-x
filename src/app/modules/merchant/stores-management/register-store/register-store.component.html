@@ -29,7 +29,7 @@
     <div class="flex flex-col flex-auto items-center p-6 sm:p-10">
         <div class="flex flex-col w-full">
             <!-- Form -->
-            <ng-container *ngIf="invalidVertical === false; else wrongVertical">
+            <ng-container *ngIf="createStoreCondition.error === null; else errorCard">
                 <div class="mt-8 sm:mt-12 p-6 pb-7 sm:p-10 sm:pb-7 shadow rounded-2xl bg-card">
                     <form
                         class="space-y-3 flex flex-col w-full"
@@ -845,17 +845,18 @@
                 </div>
             </ng-container>
 
-            <!-- If vertical code not match with locale -->
-            <ng-template #wrongVertical>
+            <!-- If there is any error -->
+            <ng-template #errorCard>
                 <fuse-card class="m-auto flex flex-col items-center max-w-80 w-full p-8 filter-info">
                     <div class="flex items-center justify-center p-5 rounded-full bg-warn-100 dark:bg-gray-600">
                         <mat-icon
                             class="icon-size-10 text-warn-500 dark:text-warn-300"
                             [svgIcon]="'heroicons_outline:ban'"></mat-icon>
                     </div>
-                    <div class="text-2xl font-semibold leading-tight text-center mt-6">Invalid Vertical</div>
-                    <div class="text-center text-secondary mt-3">This vertical is not available at your country, please choose another vertical</div>
+                    <div class="text-2xl font-semibold leading-tight text-center mt-6">{{ createStoreCondition.errorTitle }}</div>
+                    <div class="text-center text-secondary mt-3">{{ createStoreCondition.errorDesc }}</div>
                     <button
+                        *ngIf="createStoreCondition.error !== 'MAX-STORES'"
                         class="px-6 mt-8"
                         mat-flat-button
                         [color]="'primary'"

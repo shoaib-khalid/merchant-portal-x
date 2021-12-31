@@ -23,6 +23,13 @@ export class ChooseVerticalComponent
 
     activeCountry: string;
 
+    // display Errors
+    createStoreCondition: any = {
+        error: null,
+        errorTitle: null,
+        errorDesc: null
+    };
+
     /**
      * Constructor
      */
@@ -31,7 +38,7 @@ export class ChooseVerticalComponent
         private _chooseVerticalService: ChooseVerticalService,
         private _localeService: LocaleService,
         // private _matDialog: MatDialog,
-        // private _storesService: StoresService
+        private _storesService: StoresService
     )
     {
     }
@@ -62,6 +69,15 @@ export class ChooseVerticalComponent
                 this._changeDetectorRef.markForCheck();
             });
         });
+
+        // check total of stores this account have
+        this._storesService.stores$.subscribe((response)=>{
+            if (response.length && response.length > 4) {
+                this.createStoreCondition.error = "MAX-STORES";
+                this.createStoreCondition.errorTitle = "Maximum store creation has been reached";
+                this.createStoreCondition.errorDesc = "You have reached the maximum allowed store creation";
+            }
+        })
     }
 
     /**

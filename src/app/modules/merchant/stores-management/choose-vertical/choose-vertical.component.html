@@ -33,60 +33,83 @@
             <div class="w-full max-w-sm md:max-w-7xl">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-6 lg:gap-y-0 md:gap-x-6">
                     <!-- Cards -->
-                    <fuse-card *ngFor="let vertical of verticals" class="flex-col max-w-sm md:max-w-none p-6 sm:py-12 sm:px-10 mt-8">
-                        <!-- Price -->
-                        <div class="flex items-baseline whitespace-nowrap">
-                            <img [src]="vertical.thumbnailUrl" alt="">
-                            <!-- <img class="max-h-30 overflow-hidden flex item-center justify-center" [src]="vertical.thumbnailUrl" alt=""> -->
-                        </div>
-                        <div class="w-8 h-1 my-10 rounded bg-accent"></div>
-                        <div class="text-4xl font-bold tracking-tight leading-tight">{{ vertical.name }}</div>
-                        <div class="mt-2 text-lg font-medium tracking-tight text-secondary">{{ vertical.description }}</div>
-                        <!-- CTA -->
-                        <button
-                            class="fuse-mat-button-large mt-10"
-                            mat-stroked-button
-                            [color]="'primary'"
-                            [routerLink]="'/stores/create-store/' + vertical.code">
-                            Get Started
-                        </button>
-                        <!-- Features -->
-                        <div class="flex flex-col mt-12">
-                            <div class="font-semibold">Start building online store with SYMplified</div>
-                            <div class="mt-4 space-y-2">
-                                <div class="flex">
-                                    <mat-icon
-                                        class="icon-size-5 text-green-600"
-                                        [svgIcon]="'heroicons_solid:check'"></mat-icon>
-                                    <div class="ml-2 leading-5">Easy to build a startup</div>
-                                </div>
-                                <div class="flex">
-                                    <mat-icon
-                                        class="icon-size-5 text-green-600"
-                                        [svgIcon]="'heroicons_solid:check'"></mat-icon>
-                                    <div class="ml-2 leading-5">various features available</div>
-                                </div>
-                                <div class="flex">
-                                    <mat-icon
-                                        class="icon-size-5 text-green-600"
-                                        [svgIcon]="'heroicons_solid:check'"></mat-icon>
-                                    <div class="ml-2 leading-5">Create Your Own Bundle</div>
-                                </div>
-                                <div class="flex">
-                                    <mat-icon
-                                        class="icon-size-5 text-green-600"
-                                        [svgIcon]="'heroicons_solid:check'"></mat-icon>
-                                    <div class="ml-2 leading-5">Food & Beverage Ecommerce Brands to Watch</div>
-                                </div>
-                                <div class="flex">
-                                    <mat-icon
-                                        class="icon-size-5 text-green-600"
-                                        [svgIcon]="'heroicons_solid:check'"></mat-icon>
-                                    <div class="ml-2 leading-5">Everything simplified at <b>SYMplified</b></div>
+                    <ng-container *ngIf="createStoreCondition.error === null; else errorCard">
+                        <fuse-card *ngFor="let vertical of verticals" class="flex-col max-w-sm md:max-w-none p-6 sm:py-12 sm:px-10 mt-8">
+                            <!-- Price -->
+                            <div class="flex items-baseline whitespace-nowrap">
+                                <img [src]="vertical.thumbnailUrl" alt="">
+                                <!-- <img class="max-h-30 overflow-hidden flex item-center justify-center" [src]="vertical.thumbnailUrl" alt=""> -->
+                            </div>
+                            <div class="w-8 h-1 my-10 rounded bg-accent"></div>
+                            <div class="text-4xl font-bold tracking-tight leading-tight">{{ vertical.name }}</div>
+                            <div class="mt-2 text-lg font-medium tracking-tight text-secondary">{{ vertical.description }}</div>
+                            <!-- CTA -->
+                            <button
+                                class="fuse-mat-button-large mt-10"
+                                mat-stroked-button
+                                [color]="'primary'"
+                                [routerLink]="'/stores/create-store/' + vertical.code">
+                                Get Started
+                            </button>
+                            <!-- Features -->
+                            <div class="flex flex-col mt-12">
+                                <div class="font-semibold">Start building online store with SYMplified</div>
+                                <div class="mt-4 space-y-2">
+                                    <div class="flex">
+                                        <mat-icon
+                                            class="icon-size-5 text-green-600"
+                                            [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                        <div class="ml-2 leading-5">Easy to build a startup</div>
+                                    </div>
+                                    <div class="flex">
+                                        <mat-icon
+                                            class="icon-size-5 text-green-600"
+                                            [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                        <div class="ml-2 leading-5">various features available</div>
+                                    </div>
+                                    <div class="flex">
+                                        <mat-icon
+                                            class="icon-size-5 text-green-600"
+                                            [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                        <div class="ml-2 leading-5">Create Your Own Bundle</div>
+                                    </div>
+                                    <div class="flex">
+                                        <mat-icon
+                                            class="icon-size-5 text-green-600"
+                                            [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                        <div class="ml-2 leading-5">Food & Beverage Ecommerce Brands to Watch</div>
+                                    </div>
+                                    <div class="flex">
+                                        <mat-icon
+                                            class="icon-size-5 text-green-600"
+                                            [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                        <div class="ml-2 leading-5">Everything simplified at <b>SYMplified</b></div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </fuse-card>
+                        </fuse-card>
+                    </ng-container>
+
+                    <!-- If there is any error -->
+                    <ng-template #errorCard>
+                        <fuse-card class="m-auto flex flex-col items-center max-w-80 w-full p-8 filter-info">
+                            <div class="flex items-center justify-center p-5 rounded-full bg-warn-100 dark:bg-gray-600">
+                                <mat-icon
+                                    class="icon-size-10 text-warn-500 dark:text-warn-300"
+                                    [svgIcon]="'heroicons_outline:ban'"></mat-icon>
+                            </div>
+                            <div class="text-2xl font-semibold leading-tight text-center mt-6">{{ createStoreCondition.errorTitle }}</div>
+                            <div class="text-center text-secondary mt-3">{{ createStoreCondition.errorDesc }}</div>
+                            <button
+                                *ngIf="createStoreCondition.error !== 'MAX-STORES'"
+                                class="px-6 mt-8"
+                                mat-flat-button
+                                [color]="'primary'"
+                                [routerLink]="['/stores/choose-vertical']">
+                                Create Store
+                            </button>
+                        </fuse-card>
+                    </ng-template>
                 </div>
             </div>
         </div>
