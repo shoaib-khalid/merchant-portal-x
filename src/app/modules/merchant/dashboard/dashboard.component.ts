@@ -70,7 +70,7 @@ export class DashboardComponent implements OnInit, OnDestroy
     // Daily Detailed Sales Properties
     // -------------------------------
 
-    detailedDailySalesCol = ["date","customerName","subTotal","serviceCharge","deliveryCharge","commission","total"]
+    detailedDailySalesCol = ["date","customerName","subTotal","serviceCharge","deliveryCharge","total","commission","netTotal"]
     detailedDailySalesRow = [];
     detailedDailySalesPagination: DetailedDailySalesPagination;
     detailedDailySalesDateRange: any = {
@@ -233,7 +233,7 @@ export class DashboardComponent implements OnInit, OnDestroy
                     this.dailyTopProductsRow.push({
                         date: item.date, 
                         productName: item.name, 
-                        rank: 1, 
+                        rank: item.ranking, 
                         totalTransaction: item.totalOrders
                     });
                 });
@@ -264,10 +264,11 @@ export class DashboardComponent implements OnInit, OnDestroy
                         date: item.created, 
                         customerName: item.customer.name, 
                         subTotal: item.subTotal, 
-                        serviceCharge: 3, 
-                        deliveryCharge: 2,
-                        commission: 1,
-                        total: item.total
+                        serviceCharge: item.storeServiceCharges, 
+                        deliveryCharge: item.deliveryCharges,
+                        commission: item.klCommission,
+                        total: item.total,
+                        netTotal: 0
                     });
                 });
 
@@ -385,13 +386,18 @@ export class DashboardComponent implements OnInit, OnDestroy
             .subscribe((settlement: Settlement[])=>{
                 this.settlementRow = [];
                 settlement.forEach(items => {
+                    let tempSelfDeliveryFee = 0;
+                    if (items.totalSelfDeliveryFee == null)
+                        tempSelfDeliveryFee = 0;
+                    else 
+                        tempSelfDeliveryFee = items.totalSelfDeliveryFee
                     this.settlementRow.push({ 
                         payoutDate: items.settlementDate,
                         startDate: items.cycleStartDate,
                         cutoffDate: items.cycleEndDate,
                         grossAmount: items.totalTransactionValue,
                         serviceCharges: items.totalServiceFee,
-                        selfDeliveryFee: items.totalSelfDeliveryFee,
+                        selfDeliveryFee: tempSelfDeliveryFee,
                         commission: items.totalCommisionFee,
                         netAmount: items.totalStoreShare
                     });
@@ -731,19 +737,28 @@ export class DashboardComponent implements OnInit, OnDestroy
         // Top Product This Week
         // -------------------------------
 
-        this._dashboardService.getDailyTopProducts(this.storeId$, 0, 10, 'ranking', 'asc', "",
+        this._dashboardService.getDailyTopProducts(this.storeId$, 0, 10, 'date', 'desc', "",
         formattedLastMonday, formattedToday)
         .subscribe(response => {
             
             this.topProductThisWeekRow = []
-           
-            for (let i = 0; i < 3 ; i++){
-                this.topProductThisWeekRow[i] = response['data'].content[i]?.name;
-            }
+            
+            response['data'].content.forEach(product => {
+                this.topProductThisWeekRow.push({
+                    name : product.name,
+                    rank : product.ranking
 
-            this.firstThisWeek = this.topProductThisWeekRow[0];
-            this.secondThisWeek = this.topProductThisWeekRow[1];
-            this.thirdThisWeek = this.topProductThisWeekRow[2];
+                })
+            })
+
+            //sort the array by rank
+            this.topProductThisWeekRow.sort(function (x, y) {
+                return x.rank - y.rank;
+            });
+
+            this.firstThisWeek = this.topProductThisWeekRow[0]?.name;
+            this.secondThisWeek = this.topProductThisWeekRow[1]?.name;
+            this.thirdThisWeek = this.topProductThisWeekRow[2]?.name;
 
         })
 
@@ -836,19 +851,44 @@ export class DashboardComponent implements OnInit, OnDestroy
         // Top Product Last Week
         // -------------------------------
         
-        this._dashboardService.getDailyTopProducts(this.storeId$, 0, 10, 'ranking', 'asc', "",
+        // this._dashboardService.getDailyTopProducts(this.storeId$, 0, 10, 'ranking', 'asc', "",
+        // formattedLastWeekStart, formattedLastWeekEnd)
+        // .subscribe(response => {
+            
+        //     this.topProductLastWeekRow = []
+
+        //     for (let i = 0; i < 3 ; i++){
+        //         this.topProductLastWeekRow[i] = response['data'].content[i]?.name;
+        //     }
+            
+        //     this.firstLastWeek = this.topProductLastWeekRow[0];
+        //     this.secondLastWeek = this.topProductLastWeekRow[1];
+        //     this.thirdLastWeek = this.topProductLastWeekRow[2];
+            
+        // })
+
+        this._dashboardService.getDailyTopProducts(this.storeId$, 0, 10, 'date', 'desc', "",
         formattedLastWeekStart, formattedLastWeekEnd)
         .subscribe(response => {
             
             this.topProductLastWeekRow = []
 
-            for (let i = 0; i < 3 ; i++){
-                this.topProductLastWeekRow[i] = response['data'].content[i]?.name;
-            }
+            response['data'].content.forEach(product => {
+                this.topProductLastWeekRow.push({
+                    name : product.name,
+                    rank : product.ranking
+
+                })
+            })
+
+            //sort the array by rank
+            this.topProductLastWeekRow.sort(function (x, y) {
+                return x.rank - y.rank;
+            });
             
-            this.firstLastWeek = this.topProductLastWeekRow[0];
-            this.secondLastWeek = this.topProductLastWeekRow[1];
-            this.thirdLastWeek = this.topProductLastWeekRow[2];
+            this.firstLastWeek = this.topProductLastWeekRow[0]?.name;
+            this.secondLastWeek = this.topProductLastWeekRow[1]?.name;
+            this.thirdLastWeek = this.topProductLastWeekRow[2]?.name;
             
         })
         
@@ -922,33 +962,6 @@ export class DashboardComponent implements OnInit, OnDestroy
         //     })
         // })
 
-
-        // this.overviewChart = {
-        //     'this-week':{
-        //                     'completed'   : this.sumWeeklyCompleted,
-        //                     'pending'     : this.sumWeeklyPending,
-        //                     'failed'     : this.sumWeeklyFailed,
-        //                 },
-        //     'last-week':{
-        //                     'completed'   : this.sumMonthlyCompleted,
-        //                     'pending'     : this.sumMonthlyPending,
-        //                     'failed'     : this.sumMonthlyFailed,
-        //                 }
-        // },
-
-        // this.topProductChart = {
-        //     'this-week':{
-        //                     'rank_one'   : this.topProductThisWeekRow[0],
-        //                     'rank_two'     : this.topProductThisWeekRow[1],
-        //                     'rank_three'     : this.topProductThisWeekRow[2],
-        //                 },
-        //     'last-week':{
-        //                     'rank_one'   : this.sumMonthlyCompleted,
-        //                     'rank_two'     : this.sumMonthlyPending,
-        //                     'rank_three'     : this.sumMonthlyFailed,
-        //                 }
-        // },
-        
 
         this._prepareChartData();
 

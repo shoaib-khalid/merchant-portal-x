@@ -7,6 +7,7 @@ export interface DailyTopProducts
     productId: string;
     storeId: string;
     totalOrders: number;
+    ranking: string;
 }
 
 export interface DailyTopProductsPagination
@@ -45,6 +46,11 @@ export interface DetailedDailySales
     }
     subTotal: number;
     total: number;
+    appliedDiscount: number;
+    klCommission: number;
+    deliveryCharges: number;
+    deliveryDiscount: number;
+    storeServiceCharges: number;
   
 }
 
@@ -144,7 +150,7 @@ export interface Settlement
     cycleEndDate: string;
     settlementDate: string;
     referenceId: string;
-    totalSelfDeliveryFee: string;
+    totalSelfDeliveryFee: number;
 }
 
 export interface SettlementPagination

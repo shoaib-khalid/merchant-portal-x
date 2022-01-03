@@ -384,7 +384,7 @@
                                             <th
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                Service Charge
+                                                Service Fee
                                             </th>
                                             <td
                                                 mat-cell
@@ -398,26 +398,12 @@
                                             <th
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                Delivery Charge
+                                                Delivery Fee
                                             </th>
                                             <td
                                                 mat-cell
                                                 *matCellDef="let detailedDailySale">
                                                 {{detailedDailySale.deliveryCharge | currency:currencySymbol}}
-                                            </td>
-                                        </ng-container>
-
-                                        <!-- Commission-->
-                                        <ng-container matColumnDef="commission">
-                                            <th
-                                                mat-header-cell
-                                                *matHeaderCellDef>
-                                                Commission
-                                            </th>
-                                            <td
-                                                mat-cell
-                                                *matCellDef="let detailedDailySale">
-                                                {{detailedDailySale.commission | currency:currencySymbol}}
                                             </td>
                                         </ng-container>
 
@@ -434,6 +420,38 @@
                                                 {{detailedDailySale.total | currency:currencySymbol}}
                                             </td>
                                         </ng-container>
+
+                                        
+                                        <!-- Commission-->
+                                        <ng-container matColumnDef="commission">
+                                            <th
+                                                mat-header-cell
+                                                *matHeaderCellDef>
+                                                Commission
+                                            </th>
+                                            <td
+                                                class="text-red-500"
+                                                mat-cell
+                                                *matCellDef="let detailedDailySale">
+                                                -{{detailedDailySale.commission | currency:currencySymbol}}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Net Total-->
+                                        <ng-container matColumnDef="netTotal">
+                                            <th  
+                                                mat-header-cell
+                                                *matHeaderCellDef>
+                                                Net Total
+                                            </th>
+                                            <td
+                                                class="font-semibold"
+                                                mat-cell
+                                                *matCellDef="let detailedDailySale">
+                                                {{detailedDailySale.netTotal | currency:currencySymbol}}
+                                            </td>
+                                        </ng-container>
+
 
                                         <tr
                                             mat-header-row
@@ -652,7 +670,7 @@
                                             <th
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                Service Charges
+                                                Service Fee
                                             </th>
                                             <td
                                                 mat-cell
