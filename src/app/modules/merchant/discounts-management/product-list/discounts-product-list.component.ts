@@ -10,6 +10,8 @@ import { Discount, DiscountPagination, StoreDiscountTierList } from 'app/modules
 import { DiscountsService } from 'app/modules/merchant/discounts-management/list/discounts.service';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateDiscountProductComponent } from '../create-product-discount/create-product-discount.component';
+import { Product, ProductCategory, ProductPagination } from 'app/core/product/inventory.types';
+import { InventoryService } from 'app/core/product/inventory.service';
 
 @Component({
     selector       : 'discounts-product-list',
@@ -57,6 +59,20 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     discountAmount: number;
     // endTotalSalesAmount: number;
     startTotalSalesAmount: number;
+
+    //product or category 
+    isSelectedItemOrCategory: boolean = true;
+    selectItemOrCategory : string;
+
+    // product category
+    productCategories$: ProductCategory[];
+    filteredProductCategories: ProductCategory[];
+    selectedProductCategory: ProductCategory;
+
+    //products
+    productCategories: Product[]; 
+    filteredProduct: Product[];
+    selectedProduct: ProductCategory;
  
 
     flashMessage: 'success' | 'error' | null = null;
@@ -74,6 +90,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         private _fuseConfirmationService: FuseConfirmationService,
         private _formBuilder: FormBuilder,
         private _discountService: DiscountsService,
+        private _inventoryService: InventoryService ,
         public _dialog: MatDialog,
     )
     {
@@ -148,6 +165,34 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                 })
             )
             .subscribe();
+          
+            // Get the categories
+          this._inventoryService.categories$
+          .pipe(takeUntil(this._unsubscribeAll))
+          .subscribe((categories: ProductCategory[]) => {
+
+              // Update the categories
+              this.productCategories$ = categories;
+              this.filteredProductCategories = categories;
+              console.log("Categorydata::",categories);
+
+              // Mark for check
+              this._changeDetectorRef.markForCheck();
+          });
+
+            // Get the products
+            this._inventoryService.products$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((products:Product[]) => {
+
+                // Update the products
+                console.log('CHECK PRODUCTS',products);
+      
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -531,6 +576,24 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         if (type === 'calculationType') {
             this.calculationType = value;
         }
+    }
+
+    uponSelectItemOrCategory(value){
+        console.log('CHOOSE :',value);
+        if (value === 'CATEGORY'){
+            this.isSelectedItemOrCategory = false;
+            // this.filteredProductCategories = this.productCategories$.filter(category => category.name.toLowerCase().includes(value));
+            this.filteredProductCategories = this.productCategories$.filter(category => category);
+
+        }
+         
+        if(value === 'ITEM'){
+            this.isSelectedItemOrCategory = false;
+        }
+    }
+
+    selectCategoryOrItemList(value){
+        console.log('categoryID',value);
     }
 
     /**
