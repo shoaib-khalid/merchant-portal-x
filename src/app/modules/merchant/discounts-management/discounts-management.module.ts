@@ -19,10 +19,12 @@ import { SharedModule } from 'app/shared/shared.module';
 import { DiscountsComponent } from 'app/modules/merchant/discounts-management/list/discounts.component';
 import { discountsManagementRoutes } from 'app/modules/merchant/discounts-management/discounts-management.routing';
 import { CreateDiscountComponent } from './create-discount/create-discount.component';
+import { DiscountsProductListComponent } from './product-list/discounts-product-list.component';
 
 @NgModule({
     declarations: [
         DiscountsComponent,
+        DiscountsProductListComponent,
         CreateDiscountComponent
     ],
     imports     : [

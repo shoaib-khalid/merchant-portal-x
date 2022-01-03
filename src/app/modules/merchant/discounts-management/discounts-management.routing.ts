@@ -1,6 +1,7 @@
 import { Route } from '@angular/router';
 import { DiscountsComponent } from 'app/modules/merchant/discounts-management/list/discounts.component';
-import { DiscountsResolver } from 'app/modules/merchant/discounts-management/list/discounts.resolvers';
+import { DiscountsProductResolver, DiscountsResolver } from 'app/modules/merchant/discounts-management/list/discounts.resolvers';
+import { DiscountsProductListComponent } from './product-list/discounts-product-list.component';
 
 
 export const discountsManagementRoutes: Route[] = [
@@ -18,6 +19,24 @@ export const discountsManagementRoutes: Route[] = [
                 component: DiscountsComponent,
                 resolve  : {
                     discounts  : DiscountsResolver
+                }
+            }
+        ]
+    },
+    {
+        path      : '',
+        pathMatch : 'full',
+        redirectTo: 'product-list'
+    },
+    {
+        path     : 'product-list',
+        component: DiscountsProductListComponent,
+        children : [
+            {
+                path     : '',
+                component: DiscountsProductListComponent,
+                resolve  : {
+                    discountsproduct  : DiscountsProductResolver
                 }
             }
         ]

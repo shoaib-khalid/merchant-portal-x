@@ -32,3 +32,31 @@ export class DiscountsResolver implements Resolve<any>
         return this._discountService.getDiscounts();
     }
 }
+
+@Injectable({
+    providedIn: 'root'
+})
+export class DiscountsProductResolver implements Resolve<any>
+{
+    /**
+     * Constructor
+     */
+    constructor(private _discountService: DiscountsService)
+    {
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Resolver
+     *
+     * @param route
+     * @param state
+     */
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<{ pagination: DiscountPagination; discounts: Discount[] }>
+    {
+        return this._discountService.getByQueryDiscounts(0, 20, 'startDate', 'asc', '','','ITEM');
+    }
+}

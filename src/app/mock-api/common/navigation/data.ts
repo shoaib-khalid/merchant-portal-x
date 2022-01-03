@@ -60,12 +60,34 @@ export const defaultNavigation: FuseNavigationItem[] = [
         icon : 'heroicons_outline:shopping-cart',
         link : '/orders'
     },
+    // {
+    //     id   : 'discount-management',
+    //     title: 'Discount Management',
+    //     type : 'basic',
+    //     icon : 'heroicons_outline:gift',
+    //     link : '/discounts'
+    // },   
     {
         id   : 'discount-management',
         title: 'Discount Management',
-        type : 'basic',
+        type : 'collapsable',
         icon : 'heroicons_outline:gift',
-        link : '/discounts'
+        children: [
+            {
+                id   : 'app.manage-product',
+                title: 'Manage Order Discount',
+                type : 'basic',
+                link : '/discounts/list',
+                exactMatch: true
+            },
+            {
+                id   : 'app.manage-category',
+                title: 'Manage Product Discount',
+                type : 'basic',
+                link : '/discounts/product-list',
+                exactMatch: true
+            }
+        ],
     },
     // {
     //     id   : 'social-media',
