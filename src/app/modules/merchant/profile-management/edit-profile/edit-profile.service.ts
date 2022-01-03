@@ -176,7 +176,7 @@ export class EditProfileService
      *
      * @param client
      */
-     updateClientProfile(clientBody: Client): Observable<Client>
+    updateClientProfile(clientBody: Client): Observable<Client>
      {
          let userService = this._apiServer.settings.apiServer.userService;
          let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -207,7 +207,7 @@ export class EditProfileService
             );
     }
 
-        /**
+    /**
      * Update the client
      *
      * @param client
@@ -232,6 +232,42 @@ export class EditProfileService
                 map((response) => {
 
                     this._logging.debug("Response from StoresService (EditClientPayment)",response);
+
+                    // Update the products
+                    this._clientPaymentdetails.next(response["data"]);
+
+                    // Return the new product
+                    return response["data"];
+                })  
+            )) 
+        );
+    }
+
+    /**
+     * Update the client
+     *
+     * @param client
+     */
+    updatePasswordProfile(clientPasswordBody: ClientPaymentDetails): Observable<Client>
+    {
+        let userService = this._apiServer.settings.apiServer.userService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                "clientId": clientId
+            }
+        };
+        
+        return this.client$.pipe(
+            take(1),
+            // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
+            switchMap(client => this._httpClient.put<ClientPaymentDetails>(userService + '/clients/' + clientId + '/changepassword', clientPasswordBody , header).pipe(
+                map((response) => {
+
+                    this._logging.debug("Response from StoresService (EditClientPassword)",response);
 
                     // Update the products
                     this._clientPaymentdetails.next(response["data"]);

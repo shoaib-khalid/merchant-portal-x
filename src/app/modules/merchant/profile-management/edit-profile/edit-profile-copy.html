@@ -1,0 +1,506 @@
+<div
+    class="absolute inset-0 flex flex-col min-w-0 overflow-y-auto"
+    cdkScrollable>
+
+    <!-- Header -->
+    <div class="relative flex-0 py-8 px-4 sm:p-8 overflow-hidden bg-gray-800 dark">
+        <!-- Background - @formatter:off -->
+        <!-- Rings -->
+        <svg class="absolute inset-0 pointer-events-none"
+             viewBox="0 0 960 540" width="100%" height="100%" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+            <g class="text-gray-700 opacity-25" fill="none" stroke="currentColor" stroke-width="100">
+                <circle r="234" cx="196" cy="23"></circle>
+                <circle r="234" cx="790" cy="491"></circle>
+            </g>
+        </svg>
+        <!-- @formatter:on -->
+        <div class="z-10 relative flex flex-col items-center">
+            <h2 class="text-xl font-semibold">MANAGE YOUR PROFILE</h2>
+            <!-- <div class="mt-1 text-4xl sm:text-7xl font-extrabold tracking-tight leading-tight text-center">
+                What do you want to learn today?
+            </div> -->
+            <div class="max-w-2xl mt-6 sm:text-2xl text-center tracking-tight text-secondary">
+                Simply manage your profile with SYMPlified
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex flex-col flex-auto items-center p-6 sm:p-10">
+        <div class="flex flex-col w-full">
+            <!-- Form -->
+            <div class="mt-8 sm:mt-12 p-6 pb-7 sm:p-10 sm:pb-7 shadow rounded-2xl bg-card">
+                <!-- Alert -->
+                <fuse-alert
+                    class="mb-8"
+                    *ngIf="alert"
+                    [type]="alert.type"
+                    [showIcon]="false">
+                    {{alert.message}}
+                </fuse-alert>
+                <form
+                    class="space-y-3 flex flex-col w-full"
+                    [formGroup]="editProfileForm"
+                    #supportNgForm="ngForm">
+                    <fieldset class="border border-solid border-gray-300 rounded my-1 mx-5">
+                        <legend class="text font-bold ml-2 px-2 py-4">Profile Details</legend>
+                        <!-- username &store name -->
+                        <div class="flex flex-col lg:flex-row">
+                            <!-- username -->
+                            <div class="flex flex-col lg:w-full sm:px-4">
+                                <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
+                                    <input
+                                        matInput
+                                        maxlength="100"
+                                        placeholder="Enter username"
+                                        [formControlName]="'name'"
+                                        [required]="true"
+                                        >
+                                    <mat-icon
+                                        matPrefix
+                                        [svgIcon]="'heroicons_outline:user'">
+                                    </mat-icon>
+                                    <mat-label>Username</mat-label>
+                                    <mat-error *ngIf="editProfileForm.get('name').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                    <mat-error *ngIf="editProfileForm.get('name').hasError('storeNameAlreadyTaken')">
+                                        The store name entered is already taken
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>                    
+                            <!-- Store name -->
+                            <div class="flex flex-col lg:w-full sm:px-4">
+                                <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
+                                    <input
+                                    matInput
+                                    maxlength="100"
+                                    placeholder="Enter store name"
+                                    [formControlName]="'username'"
+                                    [required]="true"
+                                    >
+                                    <mat-icon
+                                        matPrefix
+                                        [svgIcon]="'mat_outline:storefront'">
+                                    </mat-icon>
+                                    <mat-label>Store Name</mat-label>
+                                    <mat-error *ngIf="editProfileForm.get('name').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                    <mat-error *ngIf="editProfileForm.get('name').hasError('storeNameAlreadyTaken')">
+                                        The store name entered is already taken
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <!-- email & phone number -->
+                        <div class="flex flex-col lg:flex-row">
+                            <!-- Email address -->
+                            <div class="flex flex-col lg:w-full sm:px-4">
+                                <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
+                                    <input
+                                        matInput
+                                        maxlength="100"
+                                        placeholder="Enter Email address"
+                                        [formControlName]="'email'"
+                                        [required]="true"
+                                        >
+                                    <mat-icon
+                                        matPrefix
+                                        [svgIcon]="'heroicons_outline:mail'">
+                                    </mat-icon>                                    
+                                    <mat-label>Email Address</mat-label>
+                                    <mat-error *ngIf="editProfileForm.get('name').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                    <mat-error *ngIf="editProfileForm.get('name').hasError('storeNameAlreadyTaken')">
+                                        The store name entered is already taken
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                            <!-- phone number -->
+                            <!-- <div class="flex flex-col lg:w-full sm:px-4">
+                                <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
+                                    <input
+                                        matInput
+                                        maxlength="100"
+                                        placeholder="Enter phone number"
+                                        [formControlName]
+                                        [required]="true"
+                                    >
+                                    <mat-icon
+                                    matPrefix
+                                    [svgIcon]="'heroicons_outline:phone'">
+                                </mat-icon>  
+                                    <mat-label>Phone Number</mat-label>
+                                    <mat-error *ngIf="editProfileForm.get('name').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                    <mat-error *ngIf="editProfileForm.get('name').hasError('storeNameAlreadyTaken')">
+                                        The store name entered is already taken
+                                    </mat-error>
+                                </mat-form-field>
+                            </div> -->
+                            <!-- Bank account title -->
+                            <div class="flex flex-col lg:w-full sm:px-4">
+                                <div class="flex flex-wrap w-full">
+                                    <mat-form-field class="flex flex-col w-1/2 fuse-mat-emphasized-affix" floatLabel="always">
+                                        <input
+                                            matInput
+                                            type="password"
+                                            maxlength="100"
+                                            placeholder="Enter password"
+                                            [required]="true"
+                                            value="'anokhorom'"
+                                            [formControlName]
+                                            >
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'lock'">
+                                        </mat-icon>  
+                                        <mat-label>Password</mat-label>
+                                    </mat-form-field>
+                                    <div class="flex flex-wrap justify-center items-center w-1/2">
+                                        <button
+                                            class="ml-2"
+                                            mat-flat-button
+                                            [color]="'primary'"
+                                            >
+                                            Change Password
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="border border-solid border-gray-300 rounded my-1 mx-5">
+                        <legend class="text font-bold ml-2 px-2 py-4">Bank Details</legend>
+                            <!-- bank details -->
+                            <div class="flex flex-col lg:flex-row">
+                                <!-- bank name -->
+                                <div class="flex flex-col lg:w-1/3 sm:px-4">
+                                    <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
+                                        <input
+                                            matInput
+                                            maxlength="100"
+                                            placeholder="Enter bank name"
+                                            [formControlName]="'bankName'"
+                                            [required]="true"
+                                            >
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'heroicons_outline:library'">
+                                        </mat-icon>  
+                                        <mat-label>Bank Name</mat-label>
+                                        <mat-error *ngIf="editProfileForm.get('name').hasError('required')">
+                                            Required
+                                        </mat-error>
+                                        <mat-error *ngIf="editProfileForm.get('name').hasError('storeNameAlreadyTaken')">
+                                            The store name entered is already taken
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                                <!-- Bank account title -->
+                                <div class="flex flex-col lg:w-1/3 sm:px-4">
+                                    <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
+                                        <input
+                                            matInput
+                                            maxlength="100"
+                                            placeholder="Enter bank title"
+                                            [formControlName]="'bankAccountTitle'"
+                                            [required]="true"
+                                            >
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'heroicons_outline:currency-dollar'">
+                                        </mat-icon>  
+                                        <mat-label>Bank Account Title</mat-label>
+                                        <mat-error *ngIf="editProfileForm.get('name').hasError('required')">
+                                            Required
+                                        </mat-error>
+                                        <mat-error *ngIf="editProfileForm.get('name').hasError('storeNameAlreadyTaken')">
+                                            The store name entered is already taken
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                                <!-- Bank account number -->
+                                <div class="flex flex-col lg:w-1/3 sm:px-4">
+                                    <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
+                                        <input
+                                            matInput
+                                            maxlength="100"
+                                            placeholder="Enter bank account number"
+                                            [formControlName]="'bankAccountNumber'"
+                                            [required]="true"
+                                            >
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'heroicons_outline:currency-dollar'">
+                                        </mat-icon>  
+                                        <mat-label>Bank Account Number</mat-label>
+                                        <mat-error *ngIf="editProfileForm.get('name').hasError('required')">
+                                            Required
+                                        </mat-error>
+                                        <mat-error *ngIf="editProfileForm.get('name').hasError('storeNameAlreadyTaken')">
+                                            The store name entered is already taken
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                    </fieldset>
+
+                    <!-- ID front and back & company registration -->
+                    <div class="flex flex-col sm:flex-row">
+                        <!-- ID -->
+                        <div class="flex flex-col w-full lg:w-2/4 sm:px-4">
+                            <!-- ID(front&back) -->
+                            <div class="flex flex-col sm:flex-row">
+                                <!-- frontside ID -->
+                                <!-- <div class="flex flex-col w-full lg:w-2/4 sm:pr-2">
+                                    <mat-form-field class="w-full fuse-mat-emphasized-affix">
+                                        <mat-label class="font-medium">Frontside Picture ID</mat-label>
+                                        <mat-toolbar>
+                                            <input class="text-sm" matInput type="text" readonly [value]="this.files[1].selectedFileNames ? this.files[1].selectedFileNames : 'Select Images'" />
+                                        </mat-toolbar>
+                                        <input
+                                            type="file"
+                                            id="banner"
+                                            name="banner"
+                                            accept="image/*" multiple 
+                                            (change)="selectFiles('banner',$event)"
+                                        />
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'heroicons_solid:identification'">
+                                        </mat-icon> 
+                                    </mat-form-field>
+                                </div> -->
+                                <!-- Backside ID -->
+                                <!-- <div class="flex flex-col w-full lg:w-2/4 sm:pl-2">
+                                    <mat-form-field class="w-full fuse-mat-emphasized-affix">
+                                        <mat-label class="font-medium">Backside Picture ID </mat-label>
+                                        <mat-toolbar>
+                                            <input class="text-sm" matInput type="text" readonly [value]="this.files[2].selectedFileNames ? this.files[2].selectedFileNames : 'Select Images'" />
+                                        </mat-toolbar>
+                                        <input
+                                            type="file"
+                                            id="bannerMobile"
+                                            name="bannerMobile"
+                                            accept="image/*" multiple 
+                                            (change)="selectFiles('bannerMobile',$event)"
+                                        />
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'heroicons_solid:identification'">
+                                        </mat-icon>  
+                                    </mat-form-field>
+                                </div> -->
+                            </div>
+                            <!-- <div class="w-full">
+                                <mat-label class="font-medium">Preview</mat-label>
+                                <div class="my-2"></div>
+                                <div class="flex flex-wrap content-center border border-gray-300 rounded h-96">
+                                    <div class="py-2 px-8" *ngIf="this.files[1].fileSource">
+                                        <span class="block">ID <b>Frontside</b> View </span> 
+                                        <span class="block"><b>Image Size</b> : {{ this.files[1].selectedImageWidth }} x {{ this.files[1].selectedImageHeight }} pixel</span>
+                                        <span class="block"><b>Recommended Size</b> : {{ this.files[1].recommendedImageWidth }} x {{ this.files[1].recommendedImageHeight }} pixel</span> 
+                                        <div class="flex w-full flex-auto">
+                                            <img [src]="this.files[1].fileSource" class="object-scale-down h-24" />
+                                            <mat-icon
+                                                class="top-0 right-0 cursor-pointer"
+                                                (click)="deletefiles(1);"
+                                                [svgIcon]="'heroicons_solid:x'">
+                                            </mat-icon>
+                                        </div>
+                                    </div>
+                                    <div class="py-2 px-8" *ngIf="this.files[2].fileSource">
+                                        <span>ID <b>Backside</b> View </span> 
+                                        <span class="block"><b>Image Size</b> : {{ this.files[2].selectedImageWidth }} x {{ this.files[2].selectedImageHeight }} pixel</span>
+                                        <span class="block"><b>Recommended Size</b> : {{ this.files[2].recommendedImageWidth }} x {{ this.files[2].recommendedImageHeight }} pixel</span>  
+                                        <div class="flex w-full flex-auto">
+                                            <img [src]="this.files[2].fileSource" class="object-scale-down h-24" />
+                                            <mat-icon
+                                                class="top-0 right-0 cursor-pointer"
+                                                (click)="deletefiles(2);"
+                                                [svgIcon]="'heroicons_solid:x'">
+                                            </mat-icon>
+                                        </div>
+                                    </div>
+                                    &nbsp;
+                                </div> 
+                            </div> -->
+                        </div>
+                        <!-- Company Registration document -->
+                        <!-- <div class="flex flex-col w-full lg:w-2/4 sm:px-4">
+                            <mat-form-field class="w-full fuse-mat-emphasized-affix">
+                                <mat-label class="font-medium">Company Registration Document</mat-label>
+                                <mat-toolbar>
+                                    <input class="text-sm" matInput type="text" readonly [value]="files[0].selectedFileNames ? files[0].selectedFileNames : 'Select Images'" />
+                                </mat-toolbar>
+                                <input
+                                    type="file"
+                                    id="logo"
+                                    name="logo"
+                                    accept="image/*" multiple 
+                                    (change)="selectFiles('logo',$event)"
+                                />
+                                <mat-icon
+                                    matPrefix
+                                    [svgIcon]="'heroicons_solid:document-text'">
+                                </mat-icon> 
+                            </mat-form-field>
+                            <div class="w-full">
+                                <mat-label class="font-medium">Preview</mat-label>
+                                <div class="my-2"></div>
+                                <div class="p-8 border border-gray-300 rounded h-96">
+                                    <div *ngIf="this.files[0].fileSource">
+                                        <span class="block"><b>Image Size</b> : {{ this.files[0].selectedImageWidth }} x {{ this.files[0].selectedImageHeight }} pixel</span>
+                                        <span class="block"><b>Recommended Size</b> : {{ this.files[0].recommendedImageWidth }} x {{ this.files[0].recommendedImageHeight }} pixel</span>
+                                        <div class="flex w-full flex-auto">
+                                            <img [src]="this.files[0].fileSource" class="object-scale-down h-52" />
+                                            <mat-icon
+                                                class="top-0 right-0 cursor-pointer"
+                                                (click)="deletefiles(0);"
+                                                [svgIcon]="'heroicons_solid:x'">
+                                            </mat-icon>
+                                        </div>
+                                    </div>
+                                </div> 
+                            </div>
+                        </div> -->
+                    </div>
+                    <!-- Bank statement  -->
+                    <!-- <div class="flex flex-col lg:w-full sm:px-4">
+                        <mat-form-field class="w-full fuse-mat-emphasized-affix">
+                            <mat-label class="font-medium">Bank Statement (with registered name)</mat-label>
+                            <mat-toolbar>
+                                <input class="text-sm" matInput type="text" readonly [value]="files[0].selectedFileNames ? files[0].selectedFileNames : 'Select Images'" />
+                            </mat-toolbar>
+                            <input
+                                type="file"
+                                id="logo"
+                                name="logo"
+                                accept="image/*" multiple 
+                                (change)="selectFiles('logo',$event)"
+                            />
+                            <mat-icon
+                                matPrefix
+                                [svgIcon]="'heroicons_solid:document-text'">
+                            </mat-icon>                             
+                        </mat-form-field>
+                        <div class="w-full">
+                            <mat-label class="font-medium">Preview</mat-label>
+                            <div class="my-2"></div>
+                            <div class="p-8 border border-gray-300 rounded h-96">
+                                <div *ngIf="this.files[0].fileSource">
+                                    <span class="block"><b>Image Size</b> : {{ this.files[0].selectedImageWidth }} x {{ this.files[0].selectedImageHeight }} pixel</span>
+                                    <span class="block"><b>Recommended Size</b> : {{ this.files[0].recommendedImageWidth }} x {{ this.files[0].recommendedImageHeight }} pixel</span>
+                                    <div class="flex w-full flex-auto">
+                                        <img [src]="this.files[0].fileSource" class="object-scale-down h-52" />
+                                        <mat-icon
+                                            class="top-0 right-0 cursor-pointer"
+                                            (click)="deletefiles(0);"
+                                            [svgIcon]="'heroicons_solid:x'">
+                                        </mat-icon>
+                                    </div>
+                                </div>
+                            </div> 
+                        </div>
+                    </div> -->
+
+                    <!-- Actions -->
+                    <div class="flex items-center justify-end">
+                        <!-- <button
+                            mat-button
+                            [color]="'accent'"
+                            [disabled]="editProfileForm.pristine || editProfileForm.untouched"
+                            (click)="clearForm()">
+                            Clear
+                        </button> -->
+                        <button
+                            class="ml-2"
+                            mat-flat-button
+                            [color]="'primary'"
+                            (click)="updateClientProfile()"
+                            >
+                            Update
+                        </button>
+                    </div>             
+                    <!-- <fieldset class="border border-solid border-gray-300 rounded my-1 mx-5">
+                        <legend class="text font-bold ml-2 px-2 py-4">Password</legend>
+                            <div class="flex flex-col lg:flex-row">
+                                <div class="flex flex-col lg:w-1/3 sm:px-4">
+                                    <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
+                                        <input
+                                            matInput
+                                            maxlength="100"
+                                            placeholder="Enter bank name"
+                                            [formControlName]="'bankName'"
+                                            [required]="true"
+                                            >
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'heroicons_outline:library'">
+                                        </mat-icon>  
+                                        <mat-label>Password</mat-label>
+                                        <mat-error *ngIf="editProfileForm.get('name').hasError('required')">
+                                            Required
+                                        </mat-error>
+                                        <mat-error *ngIf="editProfileForm.get('name').hasError('storeNameAlreadyTaken')">
+                                            The store name entered is already taken
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                                <div class="flex flex-col lg:w-1/3 sm:px-4">
+                                    <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
+                                        <input
+                                            matInput
+                                            maxlength="100"
+                                            placeholder="Enter bank title"
+                                            [formControlName]="'bankAccountTitle'"
+                                            [required]="true"
+                                            >
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'heroicons_outline:currency-dollar'">
+                                        </mat-icon>  
+                                        <mat-label>New Password</mat-label>
+                                        <mat-error *ngIf="editProfileForm.get('name').hasError('required')">
+                                            Required
+                                        </mat-error>
+                                        <mat-error *ngIf="editProfileForm.get('name').hasError('storeNameAlreadyTaken')">
+                                            The store name entered is already taken
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                                <div class="flex flex-col lg:w-1/3 sm:px-4">
+                                    <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
+                                        <input
+                                            matInput
+                                            maxlength="100"
+                                            placeholder="Enter bank account number"
+                                            [formControlName]="'bankAccountNumber'"
+                                            [required]="true"
+                                            >
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'heroicons_outline:currency-dollar'">
+                                        </mat-icon>  
+                                        <mat-label>Comfirm New Password</mat-label>
+                                        <mat-error *ngIf="editProfileForm.get('name').hasError('required')">
+                                            Required
+                                        </mat-error>
+                                        <mat-error *ngIf="editProfileForm.get('name').hasError('storeNameAlreadyTaken')">
+                                            The store name entered is already taken
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                    </fieldset> -->
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

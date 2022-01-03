@@ -4,6 +4,8 @@ import { fuseAnimations } from '@fuse/animations';
 import { User } from 'app/core/user/user.types';
 import { EditProfileService } from './edit-profile.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { MatDialog } from '@angular/material/dialog';
+import { MatDrawer } from '@angular/material/sidenav';
 
 @Component({
     selector     : 'edit-profile-page',
@@ -15,8 +17,14 @@ import { FuseConfirmationService } from '@fuse/services/confirmation';
 export class EditProfileComponent implements OnInit
 {
     @ViewChild('supportNgForm') supportNgForm: NgForm;
+    @ViewChild('drawer') drawer: MatDrawer;
 
     user$: User;
+
+    drawerMode: 'over' | 'side' = 'side';
+    drawerOpened: boolean = true;
+    panels: any[] = [];
+    selectedPanel: string = 'account';
 
     clientPaymentId: string;
 
@@ -34,6 +42,7 @@ export class EditProfileComponent implements OnInit
         private _editProfileService: EditProfileService,
         private _fuseConfirmationService: FuseConfirmationService,
         private _changeDetectorRef: ChangeDetectorRef,
+        public _dialog: MatDialog,
     )
     {
         // this.checkExistingURL = debounce(this.checkExistingURL, 300);
@@ -72,6 +81,39 @@ export class EditProfileComponent implements OnInit
             
         });
 
+         // Setup available panels
+         this.panels = [
+            {
+                id         : 'account',
+                icon       : 'heroicons_outline:user-circle',
+                title      : 'Account',
+                description: 'Manage your public profile and private information'
+            },
+            {
+                id         : 'security',
+                icon       : 'heroicons_outline:lock-closed',
+                title      : 'Security',
+                description: 'Manage your password and 2-step verification preferences'
+            },
+            {
+                id         : 'plan-billing',
+                icon       : 'heroicons_outline:credit-card',
+                title      : 'Plan & Billing',
+                description: 'Manage your subscription plan, payment method and billing information'
+            },
+            // {
+            //     id         : 'notifications',
+            //     icon       : 'heroicons_outline:bell',
+            //     title      : 'Notifications',
+            //     description: 'Manage when you\'ll be notified on which channels'
+            // },
+            // {
+            //     id         : 'team',
+            //     icon       : 'heroicons_outline:user-group',
+            //     title      : 'Team',
+            //     description: 'Manage your existing team and change roles/permissions'
+            // }
+        ];
         // Logo & Banner
         this.files = [
             { 
@@ -147,6 +189,43 @@ export class EditProfileComponent implements OnInit
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
+
+     /**
+     * Navigate to the panel
+     *
+     * @param panel
+     */
+    goToPanel(panel: string): void
+    {
+        this.selectedPanel = panel;
+
+        // Close the drawer on 'over' mode
+        if ( this.drawerMode === 'over' )
+        {
+            this.drawer.close();
+        }
+    }
+  
+    /**
+     * Get the details of the panel
+     *
+     * @param id
+     */
+    getPanelInfo(id: string): any
+    {
+        return this.panels.find(panel => panel.id === id);
+    }
+
+    /**
+    * Track by function for ngFor loops
+    *
+    * @param index
+    * @param item
+    */
+        trackByFn(index: number, item: any): any
+        {
+            return item.id || index;
+        }
 
     /**
      * Clear the form
