@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { merge, of, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { MatPaginator } from '@angular/material/paginator';
@@ -217,10 +217,13 @@ export class DashboardComponent implements OnInit, OnDestroy
                     this.store = store;
                     this.currentStoreId = store.id;
                     this.storeName = store.name;
+                    
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
+                    this.reload();
                     return [];
                 })
+                
             )
             .subscribe();
 
@@ -1076,6 +1079,11 @@ export class DashboardComponent implements OnInit, OnDestroy
         return prevMonday;
     }
 
+    reload(){
+        this._router.routeReuseStrategy.shouldReuseRoute = () => false;
+        this._router.onSameUrlNavigation = 'reload';
+    }
+
     
 
     /**
@@ -1083,7 +1091,6 @@ export class DashboardComponent implements OnInit, OnDestroy
      */
     ngOnDestroy(): void
     {
-        // Unsubscribe from all subscriptions
         this._unsubscribeAll.next();
         this._unsubscribeAll.complete();
     }

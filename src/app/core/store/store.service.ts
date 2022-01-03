@@ -253,6 +253,9 @@ export class StoresService
                 this._logging.debug("Response from StoresService (getStoreById)",response);
                 this._store.next(response["data"]);
 
+                // set this
+                this.storeControl.setValue(response["data"]);
+
                 return response["data"];
             })
         )
