@@ -109,7 +109,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
             endDate          : [''],
             startTime        : [''],
             endTime          : [''],
-            discountType     : [''],
+            discountType     : ['ITEM'],
             isActive         : [''],
             maxDiscountAmount: [''],
             normalPriceItemOnly: [''],
