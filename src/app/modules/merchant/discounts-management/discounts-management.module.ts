@@ -20,12 +20,14 @@ import { DiscountsComponent } from 'app/modules/merchant/discounts-management/li
 import { discountsManagementRoutes } from 'app/modules/merchant/discounts-management/discounts-management.routing';
 import { CreateDiscountComponent } from './create-discount/create-discount.component';
 import { DiscountsProductListComponent } from './product-list/discounts-product-list.component';
+import { CreateDiscountProductComponent } from './create-product-discount/create-product-discount.component';
 
 @NgModule({
     declarations: [
         DiscountsComponent,
         DiscountsProductListComponent,
-        CreateDiscountComponent
+        CreateDiscountComponent,
+        CreateDiscountProductComponent
     ],
     imports     : [
         RouterModule.forChild(discountsManagementRoutes),

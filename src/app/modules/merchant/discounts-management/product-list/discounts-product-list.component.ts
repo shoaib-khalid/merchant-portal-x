@@ -8,8 +8,8 @@ import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Discount, DiscountPagination, StoreDiscountTierList } from 'app/modules/merchant/discounts-management/list/discounts.types';
 import { DiscountsService } from 'app/modules/merchant/discounts-management/list/discounts.service';
-import { CreateDiscountComponent } from '../create-discount/create-discount.component';
 import { MatDialog } from '@angular/material/dialog';
+import { CreateDiscountProductComponent } from '../create-product-discount/create-product-discount.component';
 
 @Component({
     selector       : 'discounts-product-list',
@@ -279,7 +279,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
      */
     createDiscount(): void
     {
-        const dialogRef = this._dialog.open(CreateDiscountComponent, { disableClose: true });
+        const dialogRef = this._dialog.open(CreateDiscountProductComponent, { disableClose: true });
         dialogRef.afterClosed().subscribe(result => {
             if (result.status === true) {
                 console.log("result", result)
