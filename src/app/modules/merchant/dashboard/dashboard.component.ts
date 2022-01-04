@@ -268,7 +268,7 @@ export class DashboardComponent implements OnInit, OnDestroy
                         deliveryCharge: item.deliveryCharges,
                         commission: item.klCommission,
                         total: item.total,
-                        netTotal: 0
+                        netTotal: item.storeShare
                     });
                 });
 
