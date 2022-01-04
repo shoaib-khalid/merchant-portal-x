@@ -61,7 +61,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     startTotalSalesAmount: number;
 
     //product or category 
-    isSelectedItemOrCategory: boolean = true;
+    isSelectedItemOrCategory: boolean = false;
     selectItemOrCategory : string;
 
     // product category
@@ -407,6 +407,8 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                 }
             }
         );
+
+        this.updateSelectedDiscountTier(this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]);//since the discount tier we only have 1, so just get the form aarray from index 0
     }
 
     /**
@@ -581,14 +583,14 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     uponSelectItemOrCategory(value){
         console.log('CHOOSE :',value);
         if (value === 'CATEGORY'){
-            this.isSelectedItemOrCategory = false;
+            this.isSelectedItemOrCategory = true;
             // this.filteredProductCategories = this.productCategories$.filter(category => category.name.toLowerCase().includes(value));
             this.filteredProductCategories = this.productCategories$.filter(category => category);
 
         }
          
         if(value === 'ITEM'){
-            this.isSelectedItemOrCategory = false;
+            this.isSelectedItemOrCategory = true;
         }
     }
 
