@@ -11,7 +11,7 @@
         <div class="grid sm:grid-cols-4 gap-6 w-full mt-8">
             <!-- Current password -->
             <div class="sm:col-span-4">
-                <mat-form-field class="fuse-mat-emphasized-affix w-full">
+                <mat-form-field class="fuse-mat-emphasized-affix w-full" floatLabel="always">
                     <mat-label>Current password</mat-label>
                     <mat-icon
                         class="icon-size-5"
@@ -20,12 +20,28 @@
                     <input
                         [formControlName]="'currentPassword'"
                         type="password"
-                        matInput>
+                        placeholder="Enter current password"
+                        matInput
+                        #passwordField>
+                    <button
+                        mat-icon-button
+                        type="button"
+                        (click)="passwordField.type === 'password' ? passwordField.type = 'text' : passwordField.type = 'password'"
+                        >
+                        <mat-icon
+                            class="icon-size-5"
+                            *ngIf="passwordField.type === 'password'"
+                            [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                        <mat-icon
+                            class="icon-size-5"
+                            *ngIf="passwordField.type === 'text'"
+                            [svgIcon]="'heroicons_solid:eye-off'"></mat-icon>
+                    </button>
                 </mat-form-field>
             </div>
             <!-- New password -->
             <div class="sm:col-span-4">
-                <mat-form-field class="fuse-mat-emphasized-affix w-full">
+                <mat-form-field class="fuse-mat-emphasized-affix w-full" floatLabel="always">
                     <mat-label>New password</mat-label>
                     <mat-icon
                         class="icon-size-5"
@@ -34,14 +50,30 @@
                     <input
                         [formControlName]="'newPassword'"
                         type="password"
-                        matInput>
+                        matInput
+                        placeholder="Enter new password"
+                        #newPasswordField>
+                    <button
+                        mat-icon-button
+                        type="button"
+                        (click)="newPasswordField.type === 'password' ? newPasswordField.type = 'text' : newPasswordField.type = 'password'"
+                        >
+                        <mat-icon
+                            class="icon-size-5"
+                            *ngIf="newPasswordField.type === 'password'"
+                            [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                        <mat-icon
+                            class="icon-size-5"
+                            *ngIf="newPasswordField.type === 'text'"
+                            [svgIcon]="'heroicons_solid:eye-off'"></mat-icon>
+                    </button>
                 </mat-form-field>
                 <!-- <div class="mt-1 text-md text-hint">Minimum 8 characters. Must include numbers, letters and special characters.</div> -->
             </div>
             <!-- Comfirm New password -->
             <div class="sm:col-span-4">
-                <mat-form-field class="fuse-mat-emphasized-affix w-full">
-                    <mat-label>Comfirm new password</mat-label>
+                <mat-form-field class="fuse-mat-emphasized-affix w-full" floatLabel="always">
+                    <mat-label>Confirm new password</mat-label>
                     <mat-icon
                         class="icon-size-5"
                         [svgIcon]="'heroicons_solid:key'"
@@ -49,7 +81,23 @@
                     <input
                         [formControlName]="'confirmNewPassword'"
                         type="password"
-                        matInput>
+                        matInput
+                        placeholder="Confirm new password"
+                        #comfirmNewPasswordField>
+                    <button
+                        mat-icon-button
+                        type="button"
+                        (click)="comfirmNewPasswordField.type === 'password' ? comfirmNewPasswordField.type = 'text' : comfirmNewPasswordField.type = 'password'"
+                        >
+                        <mat-icon
+                            class="icon-size-5"
+                            *ngIf="comfirmNewPasswordField.type === 'password'"
+                            [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                        <mat-icon
+                            class="icon-size-5"
+                            *ngIf="comfirmNewPasswordField.type === 'text'"
+                            [svgIcon]="'heroicons_solid:eye-off'"></mat-icon>
+                    </button>   
                 </mat-form-field>
             </div>
         </div>
@@ -113,7 +161,7 @@
                 class="ml-4"
                 mat-flat-button
                 type="button"
-                (click)="updateClientProfile()"
+                (click)="updateClientPasswordProfile()"
                 [color]="'primary'">Save
             </button>
         </div>

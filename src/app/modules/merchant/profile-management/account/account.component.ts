@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { EditProfileService } from '../edit-profile/edit-profile.service';
+import { UserService } from 'app/core/user/user.service';
+import { Client } from '../edit-profile/edit-profile.types';
 
 @Component({
     selector       : 'settings-account',
@@ -13,14 +14,17 @@ export class EditAccountComponent implements OnInit
 {
     alert: any;
     accountForm: FormGroup;
+    clientId: string;
+    client: Client;
 
     /**
      * Constructor
      */
     constructor(
         private _formBuilder: FormBuilder,
-        private _editProfileService: EditProfileService,
+        private _userService: UserService,
         private _fuseConfirmationService: FuseConfirmationService,
+        private _changeDetectorRef: ChangeDetectorRef
     )
     {
     }
@@ -52,8 +56,10 @@ export class EditAccountComponent implements OnInit
     // Get client Details
     // ----------------------
 
-    this._editProfileService.client$.subscribe(
+    this._userService.client$.subscribe(
         (response) => {
+            console.log("shinal",response);
+            
             // Fill the form
             this.accountForm.patchValue(response);
             
@@ -85,11 +91,46 @@ export class EditAccountComponent implements OnInit
         this.accountForm.disable();
 
         // update profile
-        this._editProfileService.updateClientProfile(this.accountForm.value)
+
+        this._userService.updateClientProfile(this.accountForm.value)
             .subscribe((response) => {
 
+                let clientId = response.id;
+
+                // Show a success message (it can also be an error message)
+                const confirmation = this._fuseConfirmationService.open({
+                    title  : 'Success',
+                    message: 'Your profile has been updated successfully!',
+                    icon: {
+                        show: true,
+                        name: "heroicons_outline:check",
+                        color: "success"
+                    },
+                    actions: {
+                        confirm: {
+                            label: 'Ok',
+                            color: "primary",
+                        },
+                        cancel: {
+                            show: false,
+                        },
+                    }
+                });
+
+                 // Mark for check
+                 this._changeDetectorRef.markForCheck();
             });
 
+            // this._storesService.getStoreById(storeId)
+            // .subscribe((store: Store)=>{
+            //     this._storesService.store = store;
+            //     this.store = store;
+
+            //     this.storeLogo = (this.store.storeAsset) ? this.store.storeAsset.logoUrl : null;
+
+            //     // Mark for check
+            //     this._changeDetectorRef.markForCheck();
+            // });
         // let newBody = {
         //     bankAccountNumber: this.editProfileForm.get('bankAccountNumber').value,
         //     bankName : this.editProfileForm.get('bankName').value,
@@ -97,36 +138,16 @@ export class EditAccountComponent implements OnInit
         // };
 
         // if(this.clientPaymentId !==null){
-        //     this._editProfileService.updatePaymentProfile(this.clientPaymentId, newBody)
+        //     this._userService.updatePaymentProfile(this.clientPaymentId, newBody)
         //     .subscribe((response) => {
 
         //     });
         // } else {
-        //     this._editProfileService.createPaymentProfile(newBody)
+        //     this._userService.createPaymentProfile(newBody)
         //     .subscribe((response) => {
 
         //     });
         // }
-
-        // Show a success message (it can also be an error message)
-        const confirmation = this._fuseConfirmationService.open({
-            title  : 'Success',
-            message: 'Your profile has been updated successfully!',
-            icon: {
-                show: true,
-                name: "heroicons_outline:check",
-                color: "success"
-            },
-            actions: {
-                confirm: {
-                    label: 'Ok',
-                    color: "primary",
-                },
-                cancel: {
-                    show: false,
-                },
-            }
-        });
 
         setTimeout(() => {
             this.alert = null;

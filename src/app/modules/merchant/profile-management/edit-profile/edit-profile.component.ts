@@ -1,8 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { fuseAnimations } from '@fuse/animations';
-import { User } from 'app/core/user/user.types';
-import { EditProfileService } from './edit-profile.service';
+import { UserService } from 'app/core/user/user.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { MatDialog } from '@angular/material/dialog';
 import { MatDrawer } from '@angular/material/sidenav';
@@ -18,8 +17,6 @@ export class EditProfileComponent implements OnInit
 {
     @ViewChild('supportNgForm') supportNgForm: NgForm;
     @ViewChild('drawer') drawer: MatDrawer;
-
-    user$: User;
 
     drawerMode: 'over' | 'side' = 'side';
     drawerOpened: boolean = true;
@@ -39,7 +36,7 @@ export class EditProfileComponent implements OnInit
      */
     constructor(
         private _formBuilder: FormBuilder,
-        private _editProfileService: EditProfileService,
+        private _userService: UserService,
         private _fuseConfirmationService: FuseConfirmationService,
         private _changeDetectorRef: ChangeDetectorRef,
         public _dialog: MatDialog,
@@ -155,7 +152,7 @@ export class EditProfileComponent implements OnInit
         // Get client Details
         // ----------------------
 
-        this._editProfileService.client$.subscribe(
+        this._userService.client$.subscribe(
             (response) => {
                 // Fill the form
                 this.editProfileForm.patchValue(response);
@@ -167,7 +164,7 @@ export class EditProfileComponent implements OnInit
         // Get client payment Details
         // ----------------------
 
-        this._editProfileService.clientPaymentDetails$.subscribe(
+        this._userService.clientPaymentDetails$.subscribe(
             (response) => {
                 // Fill the form
                 //response?. to handle if it is undefined
@@ -259,7 +256,7 @@ export class EditProfileComponent implements OnInit
         this.editProfileForm.disable();
 
         // update profile
-        this._editProfileService.updateClientProfile(this.editProfileForm.value)
+        this._userService.updateClientProfile(this.editProfileForm.value)
             .subscribe((response) => {
 
             });
@@ -272,13 +269,13 @@ export class EditProfileComponent implements OnInit
 
         if(this.clientPaymentId !==null){
             // update payment profile
-            this._editProfileService.updatePaymentProfile(this.clientPaymentId, newBody)
+            this._userService.updatePaymentProfile(this.clientPaymentId, newBody)
             .subscribe((response) => {
 
             });
         } else {
             // create payment profile
-            this._editProfileService.createPaymentProfile(newBody)
+            this._userService.createPaymentProfile(newBody)
             .subscribe((response) => {
 
             });

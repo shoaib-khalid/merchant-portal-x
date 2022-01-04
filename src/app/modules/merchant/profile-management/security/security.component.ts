@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { EditProfileService } from '../edit-profile/edit-profile.service';
-
+import { UserService } from 'app/core/user/user.service';
 @Component({
     selector       : 'settings-security',
     templateUrl    : './security.component.html',
@@ -19,8 +18,10 @@ export class EditSecurityComponent implements OnInit
      */
     constructor(
         private _formBuilder: FormBuilder,
-        private _editProfileService: EditProfileService,
+        private _userService: UserService,
         private _fuseConfirmationService: FuseConfirmationService,
+        private _changeDetectorRef: ChangeDetectorRef
+
     )
     {
     }
@@ -51,7 +52,7 @@ export class EditSecurityComponent implements OnInit
     /**
     * Send the form
     */
-    updateClientProfile(): void
+    updateClientPasswordProfile(): void
     {
         // Do nothing if the form is invalid
         if ( this.securityForm.invalid )
@@ -71,51 +72,33 @@ export class EditSecurityComponent implements OnInit
         this.securityForm.disable();
 
         // update profile
-        this._editProfileService.updatePasswordProfile(this.securityForm.value)
+        this._userService.updatePasswordProfile(this.securityForm.value)
             .subscribe((response) => {
 
+                // Show a success message (it can also be an error message)
+                const confirmation = this._fuseConfirmationService.open({
+                    title  : 'Success',
+                    message: 'Your password has been updated successfully!',
+                    icon: {
+                        show: true,
+                        name: "heroicons_outline:check",
+                        color: "success"
+                    },
+                    actions: {
+                        confirm: {
+                            label: 'Ok',
+                            color: "primary",
+                        },
+                        cancel: {
+                            show: false,
+                        },
+                    }
+                });
+
+                 // Mark for check
+                 this._changeDetectorRef.markForCheck();
+
             });
-            
-        // let newBody = {
-        //     bankAccountNumber: this.securityForm.get('bankAccountNumber').value,
-        //     bankName : this.securityForm.get('bankName').value,
-        //     bankAccountTitle : this.securityForm.get('bankAccountTitle').value
-        // };
-
-        // if(this.clientPaymentId !==null){
-        //     // update payment profile
-        //     this._editProfileService.updatePaymentProfile(this.securityForm, newBody)
-        //     .subscribe((response) => {
-
-        //     });
-        // } else {
-        //     // create payment profile
-        //     this._editProfileService.createPaymentProfile(newBody)
-        //     .subscribe((response) => {
-
-        //     });
-        // }
-
-        // Show a success message (it can also be an error message)
-                        // Show a success message (it can also be an error message)
-        const confirmation = this._fuseConfirmationService.open({
-            title  : 'Success',
-            message: 'Your password has been updated successfully!',
-            icon: {
-                show: true,
-                name: "heroicons_outline:check",
-                color: "success"
-            },
-            actions: {
-                confirm: {
-                    label: 'Ok',
-                    color: "primary",
-                },
-                cancel: {
-                    show: false,
-                },
-            }
-        });
 
         setTimeout(() => {
             this.alert = null;

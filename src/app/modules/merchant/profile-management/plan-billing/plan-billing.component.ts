@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { EditProfileService } from '../edit-profile/edit-profile.service';
+import { UserService } from 'app/core/user/user.service';
 
 @Component({
     selector       : 'settings-plan-billing',
@@ -22,7 +22,7 @@ export class EditPlanBillingComponent implements OnInit
      */
     constructor(
         private _formBuilder: FormBuilder,
-        private _editProfileService: EditProfileService,
+        private _userService: UserService,
         private _fuseConfirmationService: FuseConfirmationService,
 
     )
@@ -72,11 +72,11 @@ export class EditPlanBillingComponent implements OnInit
             }
         ];
 
-          // ----------------------
+        // ----------------------
         // Get client payment Details
         // ----------------------
 
-        this._editProfileService.clientPaymentDetails$.subscribe(
+        this._userService.clientPaymentDetails$.subscribe(
             (response) => {
                 // Fill the form
                 //response?. to handle if it is undefined
@@ -109,7 +109,7 @@ export class EditPlanBillingComponent implements OnInit
     /**
      * Send the form
      */
-    updateClientProfile(): void
+    updateClientBillingProfile(): void
     {
         // Do nothing if the form is invalid
         if ( this.planBillingForm.invalid )
@@ -128,12 +128,6 @@ export class EditPlanBillingComponent implements OnInit
         // Disable the form
         this.planBillingForm.disable();
 
-        // update profile
-        this._editProfileService.updateClientProfile(this.planBillingForm.value)
-            .subscribe((response) => {
-
-            });
-
         let newBody = {
             bankAccountNumber: this.planBillingForm.get('bankAccountNumber').value,
             bankName : this.planBillingForm.get('bankName').value,
@@ -142,20 +136,19 @@ export class EditPlanBillingComponent implements OnInit
 
         if(this.clientPaymentId !==null){
             // update payment profile
-            this._editProfileService.updatePaymentProfile(this.clientPaymentId, newBody)
+            this._userService.updatePaymentProfile(this.clientPaymentId, newBody)
             .subscribe((response) => {
 
             });
         } else {
             // create payment profile
-            this._editProfileService.createPaymentProfile(newBody)
+            this._userService.createPaymentProfile(newBody)
             .subscribe((response) => {
 
             });
         }
 
         // Show a success message (it can also be an error message)
-                        // Show a success message (it can also be an error message)
         const confirmation = this._fuseConfirmationService.open({
             title  : 'Success',
             message: 'Your bank details has been updated successfully!',
