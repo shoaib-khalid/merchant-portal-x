@@ -42,6 +42,8 @@ export class OrderDetailsComponent implements OnInit {
   timezoneString: any;
   dateCreated: Date;
   dateUpdated: Date;
+  deliveryDiscountDescription: any;
+  appliedDiscountDescription: any;
   
   constructor(
     private _changeDetectorRef: ChangeDetectorRef,
@@ -106,10 +108,12 @@ export class OrderDetailsComponent implements OnInit {
       storeServiceCharges : [0],
       deliveryCharges     : [0],
       deliveryDiscount    : [0],      
+      deliveryDiscountDescription: [0],
       total               : [0],
       discountCalculationValue: [0],
       appliedDiscount     :[0],
-      discountMaxAmount   :[0]
+      discountMaxAmount   :[0],
+      appliedDiscountDescription : [0]
 
     });
 
@@ -138,14 +142,11 @@ export class OrderDetailsComponent implements OnInit {
             this.invoiceForm.get('storeAddress').setValue(order["data"].store.address);
             this.invoiceForm.get('storePhoneNumber').setValue(order["data"].store.phone);
             this.invoiceForm.get('storeEmail').setValue(order["data"].store.email);
-            this.invoiceForm.get('storeUrl').setValue(""); // xdop lagi
-
-
+            this.invoiceForm.get('storeUrl').setValue(""); 
             this.invoiceForm.get('customerName').setValue(order["data"].orderPaymentDetail.accountName);
             this.invoiceForm.get('customerAddress').setValue(order["data"].orderShipmentDetail.address); // xdop lg
             this.invoiceForm.get('customerPhoneNumber').setValue(order["data"].orderShipmentDetail.phoneNumber);
             this.invoiceForm.get('customerEmail').setValue(order["data"].orderShipmentDetail.email);
-
             this.invoiceForm.get('invoiceId').setValue(order["data"].invoiceId);
             this.invoiceForm.get('subtotal').setValue(order["data"].subTotal);
             this.invoiceForm.get('discount').setValue(0);
@@ -154,14 +155,41 @@ export class OrderDetailsComponent implements OnInit {
             this.invoiceForm.get('deliveryDiscount').setValue(order["data"].deliveryDiscount);
             this.invoiceForm.get('total').setValue(order["data"].total);
             if (order["data"].discountCalculationValue != null)
-              this.invoiceForm.get('discountCalculationValue').setValue(order["data"].discountCalculationValue);
-
+            this.invoiceForm.get('discountCalculationValue').setValue(order["data"].discountCalculationValue);
             this.invoiceForm.get('appliedDiscount').setValue(order["data"].appliedDiscount);
             if (order["data"].discountMaxAmount != null)
-              this.invoiceForm.get('discountMaxAmount').setValue(order["data"].discountMaxAmount);
+            this.invoiceForm.get('discountMaxAmount').setValue(order["data"].discountMaxAmount);
+            
+            // handle deliveryDiscountDescription
+            if (order["data"].deliveryDiscountDescription != null){
+              
+              if (order["data"].deliveryDiscountDescription.includes("%") && order["data"].deliveryDiscountDescription.includes("-")){
+                this.deliveryDiscountDescription = order["data"].deliveryDiscountDescription.slice(1);
+              }
+              else if (order["data"].deliveryDiscountDescription.includes("-")){
+                this.deliveryDiscountDescription = order["data"].deliveryDiscountDescription.replace('-', this.store$.regionCountry.currencySymbol)
+              }
+              else
+              this.deliveryDiscountDescription = this.store$.regionCountry.currencySymbol.concat(order["data"].deliveryDiscountDescription) 
+              
+            }
+            
+            // handle appliedDiscountDescription
+            if (order["data"].appliedDiscountDescription != null){
+              
+              if (order["data"].appliedDiscountDescription.includes("%") && order["data"].appliedDiscountDescription.includes("-")){
+                this.appliedDiscountDescription = order["data"].appliedDiscountDescription.slice(1);
+              }
+              else if (order["data"].appliedDiscountDescription.includes("-")){
+                this.appliedDiscountDescription = order["data"].appliedDiscountDescription.replace('-', this.store$.regionCountry.currencySymbol)
+              }
+              else
+              this.appliedDiscountDescription = this.store$.regionCountry.currencySymbol.concat(order["data"].appliedDiscountDescription) 
+              
+            }
             
             var TimezoneName = this.timezone;
- 
+            
             // Generating the formatted text
             var options : any = {timeZone: TimezoneName, timeZoneName: "short"};
             var dateText = Intl.DateTimeFormat([], options).format(new Date);
