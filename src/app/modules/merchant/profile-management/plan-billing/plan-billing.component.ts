@@ -158,7 +158,7 @@ export class EditPlanBillingComponent implements OnInit
                         // Show a success message (it can also be an error message)
         const confirmation = this._fuseConfirmationService.open({
             title  : 'Success',
-            message: 'Your profile has been updated successfully!',
+            message: 'Your bank details has been updated successfully!',
             icon: {
                 show: true,
                 name: "heroicons_outline:check",
