@@ -59,6 +59,8 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     discountAmount: number;
     // endTotalSalesAmount: number;
     startTotalSalesAmount: number;
+    storeDiscountTierId: string;
+
 
     //product or category 
     isSelectedItemOrCategory: boolean = false;
@@ -281,6 +283,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
                 // Set the selected discount
                 this.selectedDiscount = discount;
+                console.log('CHECK',discount);
 
                 // Fill the form
                 this.selectedDiscountForm.patchValue(discount);
@@ -288,11 +291,26 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                 // clear discount tier form array
                 (this.selectedDiscountForm.get('storeDiscountTierList') as FormArray).clear();
 
+                this.storeDiscountTierId = this.selectedDiscount.storeDiscountTierList[0]?.id?this.selectedDiscount.storeDiscountTierList[0].id:null;
+                console.log('this.storeDiscountTierId',this.storeDiscountTierId);
                 // load discount tier form array with data frombackend
-                discount.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
+                if(this.storeDiscountTierId !== null){
+                    discount.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
+                        this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
+                        this.storeDiscountTierList.push(this._formBuilder.group(item));
+                    });
+                } else{
                     this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
-                    this.storeDiscountTierList.push(this._formBuilder.group(item));
-                });
+                    this.storeDiscountTierList.push(this._formBuilder.group(
+                        {
+                           discountAmount: null,
+                            startTotalSalesAmount: null,
+                            calculationType:null,
+                        }
+                    ));
+                }
+
+                console.log('check form b4',this.selectedDiscountForm.value);
                 
                 this._discountService.getDiscountsTier(discountId)
                     .subscribe((response) => {
@@ -350,6 +368,16 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     
                     // Update current form with new discount data
                     this.selectedDiscountForm.patchValue(newDiscount["data"]);
+
+                    //initialie the form
+                    this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
+                    this.storeDiscountTierList.push(this._formBuilder.group(
+                        {
+                           discountAmount: null,
+                            startTotalSalesAmount: null,
+                            calculationType:null,
+                        }
+                    ));
     
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
@@ -383,6 +411,29 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     updateSelectedDiscount(): void
     {
 
+        console.log('check form',this.selectedDiscountForm.value);
+        
+        if (this.storeDiscountTierId !== null){
+            this.updateSelectedDiscountTier(this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]);                         //since the discount tier we only have 1, so just get the form aarray from index 0
+        } else {
+
+            console.log('calculationType',this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]['controls']['calculationType'].value);
+            console.log('discountAmount',this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]['controls']['discountAmount'].value);
+            console.log('startTotalSalesAmount',this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]['controls']['startTotalSalesAmount'].value);
+            
+            if(this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]['controls']['startTotalSalesAmount'].value !== null &&
+                this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]['controls']['discountAmount'].value !== null &&
+                this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]['controls']['calculationType'].value !==null
+            ){
+           
+                this.insertTierToDiscount(this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]);
+
+            }else{
+        
+            (this.selectedDiscountForm.get('storeDiscountTierList') as FormArray).clear();                          //SET AS ARRAY(0)
+            }
+        }
+       
         // Update the discount on the server
         this._discountService.updateDiscount(this.selectedDiscountForm.value.id, this.selectedDiscountForm.value).subscribe(() => {
             // Show a success message
@@ -407,8 +458,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                 }
             }
         );
-
-        this.updateSelectedDiscountTier(this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]);//since the discount tier we only have 1, so just get the form aarray from index 0
+        
     }
 
     /**
@@ -447,16 +497,16 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         });
     }
 
-    insertTierToDiscount(){
+    insertTierToDiscount(discountTier){
 
-        let discountTier: StoreDiscountTierList = {
-            calculationType: this.calculationType,
-            discountAmount: this.discountAmount,
-            startTotalSalesAmount: this.startTotalSalesAmount,
-        }
+        // let discountTier: StoreDiscountTierList = {
+        //     calculationType: this.calculationType,
+        //     discountAmount: this.discountAmount,
+        //     startTotalSalesAmount: this.startTotalSalesAmount,
+        // }
 
          // Create the discount
-         this._discountService.createDiscountTier(this.selectedDiscount.id,discountTier).subscribe((response) => {
+         this._discountService.createDiscountTier(this.selectedDiscount.id,discountTier.value).subscribe((response) => {
             
             this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
 

@@ -316,7 +316,7 @@
                                       
                                     
                                         </tr>
-                                        <tr *ngFor="let discountTier of selectedDiscountForm.get('storeDiscountTierList')['controls']; let i = index;" [formGroupName]="0">
+                                        <tr [formGroupName]="0">
                                             <td class="pt-2 pl-2"> 
                                                 <div>
                                                     <mat-form-field class="w-full pr-4">
@@ -324,7 +324,7 @@
                                                             type="number"
                                                             matInput
                                                             [formControlName]="'startTotalSalesAmount'"
-                                                      
+                                                            
                                                         >
                                                     </mat-form-field>
                                                 </div>
