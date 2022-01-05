@@ -31,14 +31,13 @@
                 <ng-template #defaultImage>
                     <img
                         class="w-full h-full rounded-full"
-                        *ngIf="user.avatar"
-                        [src]="user.avatar"
-                        alt="User avatar">
+                        src="assets/images/logo/logo_symplified_bg.png"
+                        alt="Client avatar">
+                        <!-- <mat-icon
+                            class="icon-size-24"
+                            *ngIf="!storeLogo"                         
+                            [svgIcon]="'heroicons_solid:user-circle'"></mat-icon> -->
                 </ng-template>    
-                <mat-icon
-                    class="icon-size-24"
-                    *ngIf="!user.avatar"
-                    [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
             </div>
 
             <!-- Select Store -->
@@ -84,10 +83,10 @@
 
             <div class="flex flex-col items-center justify-center w-full mt-1">
                 <div class="w-full whitespace-nowrap overflow-ellipsis overflow-hidden text-center leading-normal font-medium">
-                    {{user.name}}
+                    {{client.name}}
                 </div>
                 <div class="w-full mt-0.5 whitespace-nowrap overflow-ellipsis overflow-hidden text-center text-md leading-normal font-medium text-secondary">
-                    {{user.email}}
+                    {{client.email}}
                 </div>
             </div>
         </div>

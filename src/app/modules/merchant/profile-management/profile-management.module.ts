@@ -19,15 +19,23 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 import { FuseCardModule } from '@fuse/components/card';
+import { FuseAlertModule } from '@fuse/components/alert';
 
 import { EditProfileComponent } from 'app/modules/merchant/profile-management/edit-profile/edit-profile.component';
 
 import { profileManagementRoutes } from 'app/modules/merchant/profile-management/profile-management.routing';
 
+import { EditAccountComponent } from './account/account.component';
+import { EditSecurityComponent } from './security/security.component';
+import { EditPlanBillingComponent } from './plan-billing/plan-billing.component';
+
 
 @NgModule({
     declarations: [
-        EditProfileComponent
+        EditProfileComponent,
+        EditAccountComponent,
+        EditSecurityComponent,
+        EditPlanBillingComponent     
     ],
     imports     : [
         RouterModule.forChild(profileManagementRoutes),
@@ -48,7 +56,8 @@ import { profileManagementRoutes } from 'app/modules/merchant/profile-management
         MatCheckboxModule,
         MatToolbarModule,
         MatListModule,
-        FuseCardModule
+        FuseCardModule,
+        FuseAlertModule
     ],
     providers: [
         // GraphHelper

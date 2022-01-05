@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { BooleanInput } from '@angular/cdk/coercion';
 import { Observable, of, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { User } from 'app/core/user/user.types';
+import { Client } from 'app/core/user/user.types';
 import { UserService } from 'app/core/user/user.service';
 import { store } from 'app/mock-api/common/store/data';
 import { StoresService } from 'app/core/store/store.service';
@@ -26,7 +26,7 @@ export class UserComponent implements OnInit, OnDestroy
     /* eslint-enable @typescript-eslint/naming-convention */
 
     @Input() showAvatar: boolean = true;
-    user: User;
+    client: Client;
 
     selectedStatusForm: FormGroup;
 
@@ -71,10 +71,10 @@ export class UserComponent implements OnInit, OnDestroy
     {
 
         // Subscribe to user changes
-        this._userService.user$
+        this._userService.client$
             .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((user: User) => {
-                this.user = user;
+            .subscribe((client: Client) => {
+                this.client = client;
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -100,20 +100,20 @@ export class UserComponent implements OnInit, OnDestroy
      *
      * @param status
      */
-    updateUserStatus(status: string): void
-    {
-        // Return if user is not available
-        if ( !this.user )
-        {
-            return;
-        }
+    // updateUserStatus(status: string): void
+    // {
+    //     // Return if user is not available
+    //     if ( !this.user )
+    //     {
+    //         return;
+    //     }
 
-        // Update the user
-        this._userService.update({
-            ...this.user,
-            status
-        }).subscribe();
-    }
+    //     // Update the user
+    //     this._userService.update({
+    //         ...this.user,
+    //         status
+    //     }).subscribe();
+    // }
 
     /**
      * Sign out

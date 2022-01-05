@@ -1,9 +1,10 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { fuseAnimations } from '@fuse/animations';
-import { User } from 'app/core/user/user.types';
-import { EditProfileService } from './edit-profile.service';
+import { UserService } from 'app/core/user/user.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { MatDialog } from '@angular/material/dialog';
+import { MatDrawer } from '@angular/material/sidenav';
 
 @Component({
     selector     : 'edit-profile-page',
@@ -15,8 +16,12 @@ import { FuseConfirmationService } from '@fuse/services/confirmation';
 export class EditProfileComponent implements OnInit
 {
     @ViewChild('supportNgForm') supportNgForm: NgForm;
+    @ViewChild('drawer') drawer: MatDrawer;
 
-    user$: User;
+    drawerMode: 'over' | 'side' = 'side';
+    drawerOpened: boolean = true;
+    panels: any[] = [];
+    selectedPanel: string = 'account';
 
     clientPaymentId: string;
 
@@ -31,9 +36,10 @@ export class EditProfileComponent implements OnInit
      */
     constructor(
         private _formBuilder: FormBuilder,
-        private _editProfileService: EditProfileService,
+        private _userService: UserService,
         private _fuseConfirmationService: FuseConfirmationService,
         private _changeDetectorRef: ChangeDetectorRef,
+        public _dialog: MatDialog,
     )
     {
         // this.checkExistingURL = debounce(this.checkExistingURL, 300);
@@ -72,6 +78,39 @@ export class EditProfileComponent implements OnInit
             
         });
 
+         // Setup available panels
+         this.panels = [
+            {
+                id         : 'account',
+                icon       : 'heroicons_outline:user-circle',
+                title      : 'Account',
+                description: 'Manage your public profile and private information'
+            },
+            {
+                id         : 'security',
+                icon       : 'heroicons_outline:lock-closed',
+                title      : 'Security',
+                description: 'Manage your password and 2-step verification preferences'
+            },
+            {
+                id         : 'plan-billing',
+                icon       : 'heroicons_outline:credit-card',
+                title      : 'Plan & Billing',
+                description: 'Manage your subscription plan, payment method and billing information'
+            },
+            // {
+            //     id         : 'notifications',
+            //     icon       : 'heroicons_outline:bell',
+            //     title      : 'Notifications',
+            //     description: 'Manage when you\'ll be notified on which channels'
+            // },
+            // {
+            //     id         : 'team',
+            //     icon       : 'heroicons_outline:user-group',
+            //     title      : 'Team',
+            //     description: 'Manage your existing team and change roles/permissions'
+            // }
+        ];
         // Logo & Banner
         this.files = [
             { 
@@ -113,7 +152,7 @@ export class EditProfileComponent implements OnInit
         // Get client Details
         // ----------------------
 
-        this._editProfileService.client$.subscribe(
+        this._userService.client$.subscribe(
             (response) => {
                 // Fill the form
                 this.editProfileForm.patchValue(response);
@@ -125,7 +164,7 @@ export class EditProfileComponent implements OnInit
         // Get client payment Details
         // ----------------------
 
-        this._editProfileService.clientPaymentDetails$.subscribe(
+        this._userService.clientPaymentDetails$.subscribe(
             (response) => {
                 // Fill the form
                 //response?. to handle if it is undefined
@@ -147,6 +186,43 @@ export class EditProfileComponent implements OnInit
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
+
+     /**
+     * Navigate to the panel
+     *
+     * @param panel
+     */
+    goToPanel(panel: string): void
+    {
+        this.selectedPanel = panel;
+
+        // Close the drawer on 'over' mode
+        if ( this.drawerMode === 'over' )
+        {
+            this.drawer.close();
+        }
+    }
+  
+    /**
+     * Get the details of the panel
+     *
+     * @param id
+     */
+    getPanelInfo(id: string): any
+    {
+        return this.panels.find(panel => panel.id === id);
+    }
+
+    /**
+    * Track by function for ngFor loops
+    *
+    * @param index
+    * @param item
+    */
+        trackByFn(index: number, item: any): any
+        {
+            return item.id || index;
+        }
 
     /**
      * Clear the form
@@ -180,7 +256,7 @@ export class EditProfileComponent implements OnInit
         this.editProfileForm.disable();
 
         // update profile
-        this._editProfileService.updateClientProfile(this.editProfileForm.value)
+        this._userService.updateClientProfile(this.editProfileForm.value)
             .subscribe((response) => {
 
             });
@@ -193,13 +269,13 @@ export class EditProfileComponent implements OnInit
 
         if(this.clientPaymentId !==null){
             // update payment profile
-            this._editProfileService.updatePaymentProfile(this.clientPaymentId, newBody)
+            this._userService.updatePaymentProfile(this.clientPaymentId, newBody)
             .subscribe((response) => {
 
             });
         } else {
             // create payment profile
-            this._editProfileService.createPaymentProfile(newBody)
+            this._userService.createPaymentProfile(newBody)
             .subscribe((response) => {
 
             });

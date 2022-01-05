@@ -4,8 +4,8 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { StoreCategory, Store, StorePagination } from 'app/core/store/store.types';
 import { ChooseStoreService } from 'app/modules/merchant/stores-management/choose-store/choose-store.service';
-import { EditProfileService } from './edit-profile.service';
 import { Client, ClientPaymentDetails } from './edit-profile.types';
+import { UserService } from 'app/core/user/user.service';
 
 @Injectable({
     providedIn: 'root'
@@ -15,7 +15,7 @@ export class GetProfilePaymentResolver implements Resolve<any>
     /**
      * Constructor
      */
-    constructor(private _editProfileService: EditProfileService)
+    constructor(private _userService: UserService)
     {
     }
 
@@ -31,7 +31,7 @@ export class GetProfilePaymentResolver implements Resolve<any>
      */
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<ClientPaymentDetails>
     {
-        return this._editProfileService.getClientPaymentDetails();
+        return this._userService.getClientPaymentDetails();
     }
 }
 
@@ -44,7 +44,7 @@ export class GetClientResolver implements Resolve<any>
     /**
      * Constructor
      */
-    constructor(private _editProfileService: EditProfileService)
+    constructor(private _userService: UserService)
     {
     }
 
@@ -60,6 +60,6 @@ export class GetClientResolver implements Resolve<any>
      */
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Client>
     {
-        return this._editProfileService.getClient();
+        return this._userService.getClient();
     }
 }
