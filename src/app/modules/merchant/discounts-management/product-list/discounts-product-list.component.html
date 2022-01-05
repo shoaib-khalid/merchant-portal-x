@@ -418,7 +418,7 @@
                                                 class="w-full"
                                                 placeholder="Choose one of the listing"
                                                 [disabled]= "!isSelectedItemOrCategory"
-                                                (value)="calculationType"
+                                                [value]="selectedCategoryId"
                                                 (selectionChange)="selectCategoryOrItemList($event.value)">
                                                 <div *ngIf="isSelectedItemOrCategory" >
                                                     <div *ngFor="let listing of filteredProductCategories;">

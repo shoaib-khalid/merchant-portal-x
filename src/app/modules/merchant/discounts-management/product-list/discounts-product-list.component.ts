@@ -67,6 +67,9 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     isSelectedItemOrCategory: boolean = false;
     selectItemOrCategory : string;
 
+    //select the listing of category
+    selectedCategoryId : string;
+
     // product category
     productCategories$: ProductCategory[];
     filteredProductCategories: ProductCategory[];
@@ -283,16 +286,24 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
         this._discountProductService.getDiscountsProduct(discountId)
         .subscribe((response) => {
-            
-            console.log('CHECK::::',response['data'][0]);                
-            // this.clientPaymentId = response?.id?response.id:null;
-            //to check if it eist it will show the selected option
-            this.selectItemOrCategory = response['data'][0] === undefined ? ''
-                                        :response['data'][0].categoryId !== null ? 'CATEGORY'
-                                        : response['data'][0].itemCode !==null? 'ITEM'
-                                        : '';
+               
+            if (response['data'][0] === undefined){
 
-            console.log('CHECK 2', this.selectItemOrCategory);
+                this.selectItemOrCategory = '';
+
+            }
+            else if(response['data'][0].categoryId !== null){
+
+                this.selectItemOrCategory = 'CATEGORY';
+                this.isSelectedItemOrCategory = true;
+                this.selectedCategoryId = response['data'][0].categoryId;
+
+            } else if(response['data'][0].itemCode !==null){
+
+                this.selectItemOrCategory = 'ITEM';
+                
+            }
+            
             // this.selectedDiscountForm.get('categoryOrItem').patchValue(this.selectItemOrCategory);
 
           // Mark for check
@@ -353,6 +364,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     {
         this.selectedDiscount = null;
         this.selectItemOrCategory = '';
+        this.isSelectedItemOrCategory = false;
     }
 
     /**
@@ -656,7 +668,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     }
 
     uponSelectItemOrCategory(value){
-        console.log('CHOOSE :',value);
+
         if (value === 'CATEGORY'){
             this.isSelectedItemOrCategory = true;
             // this.filteredProductCategories = this.productCategories$.filter(category => category.name.toLowerCase().includes(value));
