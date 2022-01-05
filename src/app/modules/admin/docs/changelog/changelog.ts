@@ -9,6 +9,28 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 export class ChangelogComponent
 {
     changelog: any[] = [
+        // v0.0.9
+        {
+            version    : 'v0.0.9',
+            releaseDate: 'Jan 05, 2022',
+            changes    : [
+                {
+                    type: 'Fixed',
+                    list: [
+                        '(DashboardPage) Fix report data when changing store. (No need to refresh)',
+                        '(ReceiptPage) Fix capped amount currency. (Previously hardcoded $)'
+                    ]
+                },
+                {
+                    type: 'Added',
+                    list: [
+                        '(DashboardPage) Add Net total, Commission, Delivery Charges & Service Charges into Detailed Sales',
+                        '(ProfileSettingPage) Implement new UI for profile setting',
+                        '(ProfileSettingPage) Implement reset password at profile setting',
+                    ]
+                }
+            ]
+        },
         // v0.0.8
         {
             version    : 'v0.0.8',
