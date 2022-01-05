@@ -12,6 +12,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { CreateDiscountProductComponent } from '../create-product-discount/create-product-discount.component';
 import { Product, ProductCategory, ProductPagination } from 'app/core/product/inventory.types';
 import { InventoryService } from 'app/core/product/inventory.service';
+import { DiscountsProductService } from './discountsproduct.service';
 
 @Component({
     selector       : 'discounts-product-list',
@@ -93,6 +94,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         private _formBuilder: FormBuilder,
         private _discountService: DiscountsService,
         private _inventoryService: InventoryService ,
+        private _discountProductService:DiscountsProductService ,
         public _dialog: MatDialog,
     )
     {
@@ -134,6 +136,8 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
             normalPriceItemOnly: [''],
             storeId          : [''], // not used
             storeDiscountTierList : this._formBuilder.array([]),
+            // categoryOrItem: ['']
+            
         });
 
         // Get the discounts
@@ -283,16 +287,15 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
                 // Set the selected discount
                 this.selectedDiscount = discount;
-                console.log('CHECK',discount);
 
                 // Fill the form
                 this.selectedDiscountForm.patchValue(discount);
-
+            
                 // clear discount tier form array
                 (this.selectedDiscountForm.get('storeDiscountTierList') as FormArray).clear();
 
+                //to handle logic if storeDiscount tier list exist or not
                 this.storeDiscountTierId = this.selectedDiscount.storeDiscountTierList[0]?.id?this.selectedDiscount.storeDiscountTierList[0].id:null;
-                console.log('this.storeDiscountTierId',this.storeDiscountTierId);
                 // load discount tier form array with data frombackend
                 if(this.storeDiscountTierId !== null){
                     discount.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
@@ -310,12 +313,30 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                     ));
                 }
 
-                console.log('check form b4',this.selectedDiscountForm.value);
-                
                 this._discountService.getDiscountsTier(discountId)
                     .subscribe((response) => {
 
                     });
+
+                this._discountProductService.getDiscountsProduct(discountId)
+                .subscribe((response) => {
+                    
+                    console.log('CHECK::::',response['data'][0]);                
+                    // this.clientPaymentId = response?.id?response.id:null;
+                    //to check if it eist it will show the selected option
+                    this.selectItemOrCategory = response['data'][0] === undefined ? ''
+                                                :response['data'][0].categoryId !== null ? 'CATEGORY'
+                                                : response['data'][0].itemCode !==null? 'ITEM'
+                                                : '';
+
+                    console.log('CHECK 2', this.selectItemOrCategory);
+                    // this.selectedDiscountForm.get('categoryOrItem').patchValue(this.selectItemOrCategory);
+
+                
+                    // this.selectItemOrCategory = response
+                    // this.selectItemOrCategory = response[0].itemCode
+
+                });
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -369,7 +390,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                     // Update current form with new discount data
                     this.selectedDiscountForm.patchValue(newDiscount["data"]);
 
-                    //initialie the form
+                    //initialize the form
                     this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
                     this.storeDiscountTierList.push(this._formBuilder.group(
                         {
@@ -412,11 +433,11 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     {
 
         console.log('check form',this.selectedDiscountForm.value);
-        
+        //since the storediscounttier id exist meaning that we just need to update it
         if (this.storeDiscountTierId !== null){
             this.updateSelectedDiscountTier(this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]);                         //since the discount tier we only have 1, so just get the form aarray from index 0
         } else {
-
+            //there are two condition inside here , if there is no storeDiscountTierId, need to handle case either the user key all the values in form or leaving it empty
             console.log('calculationType',this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]['controls']['calculationType'].value);
             console.log('discountAmount',this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]['controls']['discountAmount'].value);
             console.log('startTotalSalesAmount',this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]['controls']['startTotalSalesAmount'].value);
