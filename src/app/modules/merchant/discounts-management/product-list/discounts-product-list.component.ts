@@ -281,6 +281,27 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
             return;
         }
 
+        this._discountProductService.getDiscountsProduct(discountId)
+        .subscribe((response) => {
+            
+            console.log('CHECK::::',response['data'][0]);                
+            // this.clientPaymentId = response?.id?response.id:null;
+            //to check if it eist it will show the selected option
+            this.selectItemOrCategory = response['data'][0] === undefined ? ''
+                                        :response['data'][0].categoryId !== null ? 'CATEGORY'
+                                        : response['data'][0].itemCode !==null? 'ITEM'
+                                        : '';
+
+            console.log('CHECK 2', this.selectItemOrCategory);
+            // this.selectedDiscountForm.get('categoryOrItem').patchValue(this.selectItemOrCategory);
+
+          // Mark for check
+          this._changeDetectorRef.markForCheck();
+            // this.selectItemOrCategory = response
+            // this.selectItemOrCategory = response[0].itemCode
+
+        });
+
         // Get the discount by id
         this._discountService.getDiscountById(discountId)
             .subscribe((discount) => {
@@ -318,25 +339,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
                     });
 
-                this._discountProductService.getDiscountsProduct(discountId)
-                .subscribe((response) => {
-                    
-                    console.log('CHECK::::',response['data'][0]);                
-                    // this.clientPaymentId = response?.id?response.id:null;
-                    //to check if it eist it will show the selected option
-                    this.selectItemOrCategory = response['data'][0] === undefined ? ''
-                                                :response['data'][0].categoryId !== null ? 'CATEGORY'
-                                                : response['data'][0].itemCode !==null? 'ITEM'
-                                                : '';
-
-                    console.log('CHECK 2', this.selectItemOrCategory);
-                    // this.selectedDiscountForm.get('categoryOrItem').patchValue(this.selectItemOrCategory);
-
-                
-                    // this.selectItemOrCategory = response
-                    // this.selectItemOrCategory = response[0].itemCode
-
-                });
+           
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -349,6 +352,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     closeDetails(): void
     {
         this.selectedDiscount = null;
+        this.selectItemOrCategory = '';
     }
 
     /**
