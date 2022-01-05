@@ -33,7 +33,11 @@ export class CoreInterceptor implements HttpInterceptor
             catchError((error) => {
                 // Catch "401 Unauthorized" responses
                 // Ignore intercept for login () clients/authenticate
-                if ( error instanceof HttpErrorResponse && !(error.status === 401 && newReq.url.indexOf("clients/authenticate") < 0))
+
+                console.log("sini",error.status );
+                console.log("here", newReq.url.indexOf("clients/authenticate") );
+                
+                if ( error instanceof HttpErrorResponse && !(error.status === 401 && newReq.url.indexOf("clients/authenticate") > -1))
                 {
                 // Show a error message
                 
