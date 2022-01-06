@@ -346,7 +346,7 @@
                                                     >
                                                     <ng-container>
                                                         <mat-option *ngIf="transaction.nextActionText" (click)="updateStatus(transaction.order, transaction.nextCompletionStatus)">{{ transaction.nextActionText }}</mat-option>
-                                                        <mat-option (click)="updateStatus(transaction.order, transaction.nextCompletionStatus)">Details</mat-option>
+                                                        <mat-option (click)="openDetailsDialog(transaction.order.id)">Details</mat-option>
                                                     </ng-container>
                                                 </mat-select>
                                                 <ng-template #onlyButton>
@@ -400,7 +400,7 @@
                                                     >
                                                     <ng-container>
                                                         <mat-option (click)="updateStatus(transaction.order, transaction.nextCompletionStatus)">{{ transaction.nextActionText }}</mat-option>
-                                                        <mat-option (click)="updateStatus(transaction.order, transaction.nextCompletionStatus)">Details</mat-option>
+                                                        <mat-option (click)="openDetailsDialog(transaction.order.id)">Details</mat-option>
                                                         <mat-option class="bg-red-600 text-white" (click)="updateStatus(transaction.order, 'CANCELED_BY_MERCHANT')">Cancel Order</mat-option>
                                                     </ng-container>
                                                 </mat-select>
