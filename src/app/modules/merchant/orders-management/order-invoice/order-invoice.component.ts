@@ -200,7 +200,6 @@ export class OrderInvoiceComponent implements OnInit {
             // Mark for check
             this._changeDetectorRef.markForCheck();
         });
-        console.log("FORM", this.invoiceForm);
         
       // next getOrderItemsById
       this._ordersService.getOrderItemsById(this.orderId)
