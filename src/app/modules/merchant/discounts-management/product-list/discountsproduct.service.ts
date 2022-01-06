@@ -150,10 +150,8 @@ export class DiscountsProductService
         );
     }
 
-    /**
-     * Create discount
-     */
-    createDiscount(body: StoreDiscountProduct): Observable<StoreDiscountProduct>
+
+    createProductDiscount(discountId: string, discountProduct:StoreDiscountProduct ): Observable<StoreDiscountProduct>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -163,21 +161,13 @@ export class DiscountsProductService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
 
-        const now = new Date();
-        const date = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate() + " " + now.getHours() + ":" + now.getMinutes()  + ":" + now.getSeconds();
-
-        return this.discounts$.pipe(
+        return this.discount$.pipe(
             take(1),
-            switchMap(discounts => this._httpClient.post<StoreDiscountProduct>(productService + '/stores/' + this.storeId$ + '/discount', body , header).pipe(
-                map((newDiscount) => {
-
-                    this._logging.debug("Response from DiscountsService (createDiscount)",newDiscount);
-
-                    // Update the discounts with the new discount
-                    this._discountsProduct.next([newDiscount["data"], ...discounts]);
+            switchMap(_discountProduct => this._httpClient.post<any>(productService + '/stores/' + this.storeId$ + '/discount/' + discountId + '/product' , discountProduct , header).pipe(
+                map((newdiscountProduct) => {
 
                     // Return the new discount
-                    return newDiscount;
+                    return newdiscountProduct;
                 })
             ))
         );

@@ -367,6 +367,95 @@
                             </fieldset>
 
                             <fieldset class="border border-solid border-gray-300 rounded my-1 mx-5">
+                                <legend class="text font-bold ml-2 px-2">Add Type Or Catgeory</legend>
+                                
+                                <div class="flex flex-col sm:flex-row px-8 pt-5">
+
+                                    <div class="flex flex-wrap w-full lg:w-6/12 ">
+                                        <div class="flex flex-wrap w-full">
+                                            <mat-label class="flex flex-wrap">Category/Item</mat-label>
+                                            <mat-icon
+                                                matTooltip="Choose what type need to be applied"
+                                                class="flex flex-wrap items-center transform scale-75"
+                                                [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                            </mat-icon>
+                                        </div>
+                                        <mat-form-field appearance="fill" class="w-full pr-4 fuse-mat-emphasized-affix">
+                                            <mat-select
+                                                class="w-full"
+                                                placeholder="Choose Type"
+                                                [value]="selectItemOrCatgeoryCreate"
+                                                (selectionChange)="uponCreateSelectType($event.value)"
+                                                #craeteCategoryOrItemSelector>
+                                                <mat-select-trigger>
+                                                    <span class="flex items-center">
+                                                        <span>{{ craeteCategoryOrItemSelector.triggerValue }}</span>
+                                                    </span>
+                                                </mat-select-trigger>
+                                                <div>
+                                                    <mat-option [value]="'CATEGORY'">Category</mat-option>
+                                                    <mat-option [value]="'ITEM'">Item</mat-option>
+                                                </div>
+                                            </mat-select>
+                                            <mat-icon
+                                                matPrefix
+                                                [svgIcon]="'list'">
+                                            </mat-icon>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <div class="flex flex-wrap w-full lg:w-6/12 ">
+                                        <div class="flex flex-wrap w-full">
+                                            <mat-label class="flex flex-wrap">Listing</mat-label>
+                                            <mat-icon
+                                                matTooltip="Choose the listing"
+                                                class="flex flex-wrap items-center transform scale-75"
+                                                [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                            </mat-icon>
+                                        </div>
+                                        <mat-form-field appearance="fill" class="w-full pr-4 fuse-mat-emphasized-affix">
+                                            <mat-select
+                                                class="w-full"
+                                                placeholder="Choose one of the listing"
+                                                [disabled]= "!isSelectItemOrCategoryCreate"
+                                                [value]="selectedCategoryIdCreate"
+                                                (selectionChange)="selectCategoryOrItemList($event.value)">
+                                               >
+                                                <div *ngIf="isSelectItemOrCategoryCreate" >
+                                                    <div *ngFor="let listing of filteredProductCategories;">
+                                                        <mat-option [value]="listing.id">{{listing.name}}</mat-option>
+                                                    </div>
+                                                </div>
+                                            </mat-select>
+                                            <mat-icon
+                                                matPrefix
+                                                [svgIcon]="'list'">
+                                            </mat-icon>
+                                        </mat-form-field>
+                                    </div>
+               
+                                    <div class="flex flex-wrap w-1/1/2 lg:w-1/12 items-center justify-center">
+                                        <div class="items-center justify-center flex flex-row w-full"> 
+                                            <input
+                                                id="create-discount-tier-btn"
+                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                type="button"
+                                                (click)="createStoreProductDiscount()"
+                                            >
+                                            <label
+                                                for="create-discount-tier-btn"
+                                                class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-primary hover:bg-on-primary-50 mr-3"
+                                                matRipple>
+                                                <mat-icon
+                                                class="text-white icon-size-5"
+                                                [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset> 
+
+                            <fieldset class="border border-solid border-gray-300 rounded my-1 mx-5">
                                 <legend class="text font-bold ml-2 px-2">Category or Item</legend>
                                 
                                 <div class="flex flex-col sm:flex-row px-8 pt-5">

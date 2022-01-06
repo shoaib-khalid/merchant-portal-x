@@ -62,6 +62,12 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     startTotalSalesAmount: number;
     storeDiscountTierId: string;
 
+    //for create product or category
+    isSelectItemOrCategoryCreate : boolean = false;
+    selectItemOrCatgeoryCreate : string = '';
+
+    selectedCategoryIdCreate : string;
+
 
     //product or category 
     isSelectedItemOrCategory: boolean = false;
@@ -78,7 +84,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     //products
     productCategories: Product[]; 
     filteredProduct: Product[];
-    selectedProduct: ProductCategory;
+    selectedProduct: Product;
  
 
     flashMessage: 'success' | 'error' | null = null;
@@ -139,7 +145,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
             normalPriceItemOnly: [''],
             storeId          : [''], // not used
             storeDiscountTierList : this._formBuilder.array([]),
-            // categoryOrItem: ['']
             
         });
 
@@ -286,30 +291,31 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
         this._discountProductService.getDiscountsProduct(discountId)
         .subscribe((response) => {
-               
+
+            console.log('GETTTTT',response);
+    
             if (response['data'][0] === undefined){
 
                 this.selectItemOrCategory = '';
 
             }
-            else if(response['data'][0].categoryId !== null){
+            else if(response['data'][0].categoryId){
 
                 this.selectItemOrCategory = 'CATEGORY';
                 this.isSelectedItemOrCategory = true;
                 this.selectedCategoryId = response['data'][0].categoryId;
 
-            } else if(response['data'][0].itemCode !==null){
+            } else if(response['data'][0].itemCode){
 
                 this.selectItemOrCategory = 'ITEM';
                 
             }
-            
-            // this.selectedDiscountForm.get('categoryOrItem').patchValue(this.selectItemOrCategory);
+            console.log("checkng",this.selectItemOrCategory);
+
+
 
           // Mark for check
           this._changeDetectorRef.markForCheck();
-            // this.selectItemOrCategory = response
-            // this.selectItemOrCategory = response[0].itemCode
 
         });
 
@@ -449,7 +455,32 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     {
 
         console.log('check form',this.selectedDiscountForm.value);
-        //since the storediscounttier id exist meaning that we just need to update it
+        // update or create when centering the details category or item
+        console.log('CHECKING ::::',this.selectedCategoryId);
+        console.log('tetsing',this.selectedDiscountForm.value.id);
+    
+        if(this.selectItemOrCategory === 'ITEM'){
+
+            const payloadProductDiscount ={
+            
+                storeDiscountId:this.selectedDiscountForm.value.id,
+                itemCode:this.selectedCategoryId //will chnage this
+                
+            }
+        } else if(this.selectItemOrCategory === 'CATEGORY'){
+            
+            const payloadProductDiscount ={
+            
+                storeDiscountId:this.selectedDiscountForm.value.id,
+                categoryId:this.selectedCategoryId
+                
+            }
+
+
+        }
+
+
+        // since the storediscounttier id exist meaning that we just need to update it
         if (this.storeDiscountTierId !== null){
             this.updateSelectedDiscountTier(this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]);                         //since the discount tier we only have 1, so just get the form aarray from index 0
         } else {
@@ -471,7 +502,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
             }
         }
        
-        // Update the discount on the server
+        // Update the  main discount on the server
         this._discountService.updateDiscount(this.selectedDiscountForm.value.id, this.selectedDiscountForm.value).subscribe(() => {
             // Show a success message
             this.showFlashMessage('success');
@@ -495,7 +526,29 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                 }
             }
         );
-        
+
+ 
+    }
+
+    //create store dicount product
+    createStoreProductDiscount(){
+
+        const payloadProductDiscount ={
+            
+            storeDiscountId:this.selectedDiscountForm.value.id,
+            categoryId:this.selectedCategoryId
+            
+        }
+
+        this._discountProductService.createProductDiscount(this.selectedDiscountForm.value.id,payloadProductDiscount).
+        subscribe((response) => {
+
+
+            //then clear the form field
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        })
     }
 
     /**
@@ -683,6 +736,22 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
     selectCategoryOrItemList(value){
         console.log('categoryID',value);
+        this.selectedCategoryId=value;
+    }
+
+    uponCreateSelectType(value){
+
+        if (value === 'CATEGORY'){
+            this.isSelectItemOrCategoryCreate = true;
+            // this.filteredProductCategories = this.productCategories$.filter(category => category.name.toLowerCase().includes(value));
+            this.filteredProductCategories = this.productCategories$.filter(category => category);
+
+        }
+         
+        if(value === 'ITEM'){
+            this.isSelectItemOrCategoryCreate = true;
+        }
+
     }
 
     /**
