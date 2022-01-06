@@ -1,6 +1,6 @@
 import { Route } from '@angular/router';
 import { OrdersListComponent } from 'app/modules/merchant/orders-management/orders-list/orders-list.component';
-import { OrderDetailsComponent } from 'app/modules/merchant/orders-management/order-details/order-details.component';
+import { OrderInvoiceComponent } from 'app/modules/merchant/orders-management/order-invoice/order-invoice.component';
 import { OrdersListResolver } from 'app/modules/merchant/orders-management/orders-list/orders-list.resolvers';
 
 export const financeRoutes: Route[] = [
@@ -13,7 +13,7 @@ export const financeRoutes: Route[] = [
     },
     {
         path     : ':order_id',
-        component: OrderDetailsComponent,
+        component: OrderInvoiceComponent,
         data: {
             layout: 'empty'
         },
