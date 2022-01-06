@@ -186,6 +186,31 @@ export class EditStoreComponent implements OnInit
             },
         ];
 
+        // get states service
+        this.statesList = [
+            { countryId: "MYS", states: ["Johor","Kedah","Kelantan","Kuala Lumpur","Malacca","Negeri Sembilan", "Pahang", "Pulau Pinang", "Perak", "Perlis", "Sabah", "Serawak", "Selangor"] },
+            { countryId: "PAK", states: ["Balochistan","Federal","Khyber Pakhtunkhwa", "Punjab", "Sindh"] }
+        ];
+
+        // get countries service
+        // this.countriesList = [
+        //     { countryCode: "MY", name: "Malaysia" },
+        //     { countryCode: "PK", name: "Pakistan" }
+        // ];
+
+        // get regions service
+        this.regionsList = [
+            { regionCode: "SEA", name: "South East Asia", countries: ["MY"] },
+            { regionCode: "SE", name: "South East", countries: ["PK"] }
+        ];
+
+        this.deliveryFullfilment = [
+            { selected: false, option: "INSTANT_DELIVERY", label: "Instant Delivery", tooltip: "This store support instant delivery. (Provided by store own logistic or delivery partners)" }, 
+            { selected: false, option: "REGULAR_DELIVERY", label: "Regular Delivery", tooltip: "This store support regular delivery. (Provided by store own logistic or delivery partners)" },
+            { selected: false, option: "SCHEDULED_DELIVERY", label: "Scheduled Delivery", tooltip: "This store allow scheduled delivery request from customer" },
+            { selected: false, option: "STORE_PICKUP", label: "Allow Store Pickup", tooltip: "This store allow customer to pick up item from store" }
+        ];
+
         this.storeId = this._route.snapshot.paramMap.get('storeid');
 
         // ----------------------
@@ -310,106 +335,81 @@ export class EditStoreComponent implements OnInit
                         this.editStoreForm.get('deliveryPartner').patchValue(_deliverySpId);
                     }
                 );
+
+                // -------------------------------------
+                // store delivery details
+                // -------------------------------------
+
+                this._storesService.getStoreDeliveryDetails(this.storeId).subscribe(
+                    (response: StoreDeliveryDetails) => {
+
+                        let _deliveryType = response ? response.type : "";
+                        let _allowsStorePickup = response ? response.allowsStorePickup : "";
+
+                        this.editStoreForm.get('deliveryType').patchValue(_deliveryType);
+                        this.editStoreForm.get('allowStorePickup').patchValue(_allowsStorePickup);
+                    }
+                );
+
+                // -------------------------------------
+                // store allowed self delivery states
+                // -------------------------------------
+                
+                this._storesService.getSelfDeliveryStateCharges(this.storeId).subscribe(
+                    (response: StoreSelfDeliveryStateCharges[]) => {
+                        
+                        if (response.length) {
+                            response.forEach(item => {
+                                this._allowedSelfDeliveryStates.push({
+                                    id: item.id,
+                                    deliveryStates: item.region_country_state_id,
+                                    deliveryCharges: item.delivery_charges
+                                });
+                            });
+                        } else {
+                            this._allowedSelfDeliveryStates = [
+                                { deliveryStates: "", deliveryCharges:"" }
+                            ];
+                        }
+
+                        this._allowedSelfDeliveryStates.forEach(item => {
+                            this.allowedSelfDeliveryStates = this.editStoreForm.get('allowedSelfDeliveryStates') as FormArray;
+                            this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
+                        });
+                    }
+                );
+                
+                // Get allowed store countries 
+                // this only to get list of country in symplified backend
+                this._storesService.storeRegionCountries$.subscribe((response: StoreRegionCountries[])=>{
+                    response.forEach((country: StoreRegionCountries) => {
+                        this.countriesList.push(country);
+                    });
+                });
+                
+
+                // get locale info from (locale service)
+                // this is to get the current location by using 3rd party api service
+                this._localeService.locale$.subscribe((response: Locale)=>{
+                    
+                    let symplifiedCountryId = this.editStoreForm.get('regionCountryId').value;
+                
+                    // state (using component variable)
+                    // INITIALLY (refer below section updateStates(); for changes), get states from symplified backed by using the 3rd party api
+                    
+                    // Get states by country Z(using symplified backend)
+                    this._storesService.getStoreRegionCountryState(symplifiedCountryId).subscribe((response)=>{
+                        this.statesByCountry = response.data.content;
+                    });
+
+                    // country (using form builder variable)
+                    // this.editStoreForm.get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
+                    
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                });
            } 
         );
-
-        // get states service
-        this.statesList = [
-            { countryId: "MYS", states: ["Johor","Kedah","Kelantan","Kuala Lumpur","Malacca","Negeri Sembilan", "Pahang", "Pulau Pinang", "Perak", "Perlis", "Sabah", "Serawak", "Selangor"] },
-            { countryId: "PAK", states: ["Balochistan","Federal","Khyber Pakhtunkhwa", "Punjab", "Sindh"] }
-        ];
-
-        // get countries service
-        // this.countriesList = [
-        //     { countryCode: "MY", name: "Malaysia" },
-        //     { countryCode: "PK", name: "Pakistan" }
-        // ];
-
-        // get regions service
-        this.regionsList = [
-            { regionCode: "SEA", name: "South East Asia", countries: ["MY"] },
-            { regionCode: "SE", name: "South East", countries: ["PK"] }
-        ];
-
-        this.deliveryFullfilment = [
-            { selected: false, option: "INSTANT_DELIVERY", label: "Instant Delivery", tooltip: "This store support instant delivery. (Provided by store own logistic or delivery partners)" }, 
-            { selected: false, option: "REGULAR_DELIVERY", label: "Regular Delivery", tooltip: "This store support regular delivery. (Provided by store own logistic or delivery partners)" },
-            { selected: false, option: "SCHEDULED_DELIVERY", label: "Scheduled Delivery", tooltip: "This store allow scheduled delivery request from customer" },
-            { selected: false, option: "STORE_PICKUP", label: "Allow Store Pickup", tooltip: "This store allow customer to pick up item from store" }
-        ];
-
-        // -------------------------------------
-        // store delivery details
-        // -------------------------------------
-
-        this._storesService.getStoreDeliveryDetails(this.storeId).subscribe(
-            (response: StoreDeliveryDetails) => {
-
-                let _deliveryType = response ? response.type : "";
-                let _allowsStorePickup = response ? response.allowsStorePickup : "";
-
-                this.editStoreForm.get('deliveryType').patchValue(_deliveryType);
-                this.editStoreForm.get('allowStorePickup').patchValue(_allowsStorePickup);
-            }
-        );
-
-        // -------------------------------------
-        // store allowed self delivery states
-        // -------------------------------------
-        
-        this._storesService.getSelfDeliveryStateCharges(this.storeId).subscribe(
-            (response: StoreSelfDeliveryStateCharges[]) => {
-                
-                if (response.length) {
-                    response.forEach(item => {
-                        this._allowedSelfDeliveryStates.push({
-                            id: item.id,
-                            deliveryStates: item.region_country_state_id,
-                            deliveryCharges: item.delivery_charges
-                        });
-                    });
-                } else {
-                    this._allowedSelfDeliveryStates = [
-                        { deliveryStates: "", deliveryCharges:"" }
-                    ];
-                }
-
-                this._allowedSelfDeliveryStates.forEach(item => {
-                    this.allowedSelfDeliveryStates = this.editStoreForm.get('allowedSelfDeliveryStates') as FormArray;
-                    this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
-                });
-            }
-        );
-        
-        // Get allowed store countries 
-        // this only to get list of country in symplified backend
-        this._storesService.storeRegionCountries$.subscribe((response: StoreRegionCountries[])=>{
-            response.forEach((country: StoreRegionCountries) => {
-                this.countriesList.push(country);
-            });
-        });
-        
-
-        // get locale info from (locale service)
-        // this is to get the current location by using 3rd party api service
-        this._localeService.locale$.subscribe((response: Locale)=>{
-            
-            let symplifiedCountryId = this.editStoreForm.get('regionCountryId').value;
-            
-            // state (using component variable)
-            // INITIALLY (refer below section updateStates(); for changes), get states from symplified backed by using the 3rd party api
-            
-            // Get states by country Z(using symplified backend)
-            this._storesService.getStoreRegionCountryState(symplifiedCountryId).subscribe((response)=>{
-                this.statesByCountry = response.data.content;
-            });
-
-            // country (using form builder variable)
-            // this.editStoreForm.get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
-            
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
-        });
 
         // set required value that does not appear in register-store.component.html
         let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
