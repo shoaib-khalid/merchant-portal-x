@@ -460,7 +460,11 @@
                                                     <mat-checkbox
                                                         class="flex items-center h-10 min-h-10 px-4"
                                                         [color]="'primary'"
+                                                        (change)="checkboxCategories(category,$event)"
+                                                        [checked]="checkedCategories"
                                                     >
+
+                                                    
                                                         {{category.name}}
                                                     </mat-checkbox>
                                                 </ng-container>

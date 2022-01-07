@@ -1,6 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MatSort } from '@angular/material/sort';
 import { merge, Observable, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
@@ -67,6 +68,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     selectItemOrCatgeoryCreate : string = '';
 
     selectedCategoryIdCreate : string;
+    checkedCategories : any =[];
 
 
     //product or category 
@@ -536,19 +538,22 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         const payloadProductDiscount ={
             
             storeDiscountId:this.selectedDiscountForm.value.id,
-            categoryId:this.selectedCategoryId
+            categoryId:this.selectedCategoryIdCreate
             
         }
 
-        this._discountProductService.createProductDiscount(this.selectedDiscountForm.value.id,payloadProductDiscount).
-        subscribe((response) => {
+        console.log('createStoreProductDiscount',payloadProductDiscount);
+        
+
+        // this._discountProductService.createProductDiscount(this.selectedDiscountForm.value.id,payloadProductDiscount).
+        // subscribe((response) => {
 
 
-            //then clear the form field
+        //     //then clear the form field
 
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
-        })
+        //     // Mark for check
+        //     this._changeDetectorRef.markForCheck();
+        // })
     }
 
     /**
@@ -739,11 +744,49 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         this.selectedCategoryId=value;
     }
 
+    uponCreateSelectCategoryOrItemList(value){
+        console.log('event',value);
+        this.selectedCategoryIdCreate=value;
+    }
+
+    checkboxCategories(tag, change: MatCheckboxChange): void
+    {
+        if ( change.checked )
+        {
+            this.addTagToCategory(tag);
+
+
+        }
+        // else
+        // {
+        //     this.removeTagFromProduct(tag);
+        // }
+    }
+
+
+    addTagToCategory(tag): void
+    {
+    
+        console.log('iman check ::',tag);
+        this.checkedCategories.push(tag);
+        console.log("IMAN CHECK LAGI",this.checkedCategories);
+        
+
+        // Add the tag
+        // this.selectedProduct.tags.unshift(tag.id);
+
+        // Update the selected product form
+        // this.selectedProductForm.get('tags').patchValue(this.selectedProduct.tags);
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+    }
+
     uponCreateSelectType(value){
 
         this.selectItemOrCatgeoryCreate = value;        
         console.log("checking",this.selectItemOrCatgeoryCreate);
-        
+
         if (value === 'CATEGORY'){
             this.isSelectItemOrCategoryCreate = true;
             // this.filteredProductCategories = this.productCategories$.filter(category => category.name.toLowerCase().includes(value));
