@@ -741,6 +741,9 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
     uponCreateSelectType(value){
 
+        this.selectItemOrCatgeoryCreate = value;        
+        console.log("checking",this.selectItemOrCatgeoryCreate);
+        
         if (value === 'CATEGORY'){
             this.isSelectItemOrCategoryCreate = true;
             // this.filteredProductCategories = this.productCategories$.filter(category => category.name.toLowerCase().includes(value));

@@ -444,7 +444,7 @@
                                                     [disabled]= "!isSelectItemOrCategoryCreate"
                                                     class="min-w-0 ml-2 py-1 border-0"
                                                     type="text"
-                                                    placeholder="Enter Category name"
+                                                    placeholder="Enter the listing"
                                                     (input)="filterCategories($event)"
                                                     (keydown)="filterCategoriesInputKeyDown($event)"
                                                     [maxLength]="20"
@@ -455,7 +455,7 @@
                                         <!-- Available categories -->
                                         <div class="h-30 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
                                             <!-- Categories -->
-                                            <ng-container *ngIf="isSelectItemOrCategoryCreate">
+                                            <ng-container *ngIf="selectItemOrCatgeoryCreate === 'CATEGORY'">
                                                 <ng-container *ngFor="let category of filteredProductCategories; ">
                                                     <mat-checkbox
                                                         class="flex items-center h-10 min-h-10 px-4"
@@ -559,71 +559,6 @@
                                 
                                 </div>
 
-                                <div class="flex flex-col sm:flex-row px-8 pt-5">
-                             
-                                    <div class="flex flex-wrap w-full lg:w-6/12 ">
-                                        <div class="flex flex-col mt-8 w-full">
-                                            <span class="mb-2">Type</span>
-                                            <mat-select
-                                                class="border border-gray-300 w-full px-2 py-2 rounded"
-                                               
-                                                [value]="'status1'"
-                                                (selectionChange)="selectedProductForm.get('status').value = $event.value"
-                                                #statusSelector="matSelect"
-                                                >
-                                                <mat-select-trigger>
-                                                    <span class="flex items-center">
-                                                        <span>{{ statusSelector.triggerValue }}</span>
-                                                    </span>
-                                                </mat-select-trigger>
-                                                <div>
-                                                    <mat-option [value]="'CATEGORY'">Category</mat-option>
-                                                    <mat-option [value]="'ITEM'">Item</mat-option>
-                                                </div>
-                                            </mat-select>
-                                            <!-- <mat-slide-toggle
-                                                [formControlName]="'status'"
-                                                [color]="'primary'">
-                                                {{selectedProductForm.get('status').value === "ACTIVE" ? true : false}}
-                                            </mat-slide-toggle> -->
-                                        </div>
-                                    </div>
-
-                                    <div class="rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden w-full lg:w-6/12">
-                                        <!-- Header -->
-                                        <div class="flex items-center -my-px py-2 px-3 w-full lg:w-6/12">
-                                            <div class="flex items-center flex-auto min-w-0">
-                                                <mat-icon
-                                                    class="icon-size-5"
-                                                    [svgIcon]="'heroicons_solid:search'"></mat-icon>
-                                                <input
-                                                    class="min-w-0 ml-2 py-1 border-0"
-                                                    type="text"
-                                                    placeholder="Enter Category name"
-                                                    (input)="filterCategories($event)"
-                                                    (keydown)="filterCategoriesInputKeyDown($event)"
-                                                    [maxLength]="20"
-                                                    #newCategoryInput>
-                                            </div>
-                                         
-                                        </div>
-                                        <!-- Available categories -->
-                                        <div class="h-30 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
-                                            <!-- Categories -->
-                                            <ng-container>
-                                                <ng-container *ngFor="let category of filteredProductCategories; ">
-                                                    <mat-checkbox
-                                                        class="flex items-center h-10 min-h-10 px-4"
-                                                        [color]="'primary'"
-                                                    >
-                                                        {{category.name}}
-                                                    </mat-checkbox>
-                                                </ng-container>
-                                            </ng-container>
-                                        </div>
-                                    </div>
-                                
-                                </div>
                             </fieldset> 
 
                             <!-- Delete and update button -->
