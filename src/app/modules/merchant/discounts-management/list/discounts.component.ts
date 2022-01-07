@@ -402,6 +402,26 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
 
     insertTierToDiscount(){
 
+        // check condition first before pass to backend
+
+        if(this.calculationType === 'PERCENT' && this.discountAmount>100){
+
+            const confirmation = this._fuseConfirmationService.open({
+                title  : 'Exceed maximum amount discount percentage',
+                message: 'Please change your discount amount for percentage calculation type',
+                actions: {
+                    confirm: {
+                        label: 'Ok'
+                    },
+                    cancel : {
+                        show : false,
+                    }
+                }
+            });
+
+            return;
+        }
+
         let discountTier: StoreDiscountTierList = {
             calculationType: this.calculationType,
             discountAmount: this.discountAmount,
@@ -489,6 +509,26 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
 
 
     updateSelectedDiscountTier(discountTier){
+
+        // check condition first before pass to backend
+
+        if(discountTier.value.calculationType === 'PERCENT' && discountTier.value.discountAmount>100){
+
+            const confirmation = this._fuseConfirmationService.open({
+                title  : 'Exceed maximum amount discount percentage',
+                message: 'Please change your discount amount for percentage calculation type',
+                actions: {
+                    confirm: {
+                        label: 'Ok'
+                    },
+                    cancel : {
+                        show : false,
+                    }
+                }
+            });
+
+            return;
+        }
 
         // Update the discount on the server
         this._discountService.updateDiscountTier(discountTier.value.storeDiscountId, discountTier.value).subscribe(() => {
