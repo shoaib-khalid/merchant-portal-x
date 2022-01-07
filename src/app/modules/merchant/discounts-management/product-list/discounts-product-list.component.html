@@ -404,7 +404,7 @@
                                         </mat-form-field>
                                     </div>
 
-                                    <div class="flex flex-wrap w-full lg:w-6/12 ">
+                                    <!-- <div class="flex flex-wrap w-full lg:w-6/12 ">
                                         <div class="flex flex-wrap w-full">
                                             <mat-label class="flex flex-wrap">Listing</mat-label>
                                             <mat-icon
@@ -420,7 +420,6 @@
                                                 [disabled]= "!isSelectItemOrCategoryCreate"
                                                 [value]="selectedCategoryIdCreate"
                                                 (selectionChange)="selectCategoryOrItemList($event.value)">
-                                               >
                                                 <div *ngIf="isSelectItemOrCategoryCreate" >
                                                     <div *ngFor="let listing of filteredProductCategories;">
                                                         <mat-option [value]="listing.id">{{listing.name}}</mat-option>
@@ -432,8 +431,43 @@
                                                 [svgIcon]="'list'">
                                             </mat-icon>
                                         </mat-form-field>
-                                    </div>
+                                    </div> -->
                
+                                    <div class="rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden w-full lg:w-6/12">
+                                        <!-- Header -->
+                                        <div class="flex items-center -my-px py-2 px-3 w-full lg:w-6/12">
+                                            <div class="flex items-center flex-auto min-w-0">
+                                                <mat-icon
+                                                    class="icon-size-5"
+                                                    [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                                <input
+                                                    [disabled]= "!isSelectItemOrCategoryCreate"
+                                                    class="min-w-0 ml-2 py-1 border-0"
+                                                    type="text"
+                                                    placeholder="Enter Category name"
+                                                    (input)="filterCategories($event)"
+                                                    (keydown)="filterCategoriesInputKeyDown($event)"
+                                                    [maxLength]="20"
+                                                    #newCategoryInput>
+                                            </div>
+                                         
+                                        </div>
+                                        <!-- Available categories -->
+                                        <div class="h-30 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
+                                            <!-- Categories -->
+                                            <ng-container *ngIf="isSelectItemOrCategoryCreate">
+                                                <ng-container *ngFor="let category of filteredProductCategories; ">
+                                                    <mat-checkbox
+                                                        class="flex items-center h-10 min-h-10 px-4"
+                                                        [color]="'primary'"
+                                                    >
+                                                        {{category.name}}
+                                                    </mat-checkbox>
+                                                </ng-container>
+                                            </ng-container>
+                                        </div>
+                                    </div>
+
                                     <div class="flex flex-wrap w-1/1/2 lg:w-1/12 items-center justify-center">
                                         <div class="items-center justify-center flex flex-row w-full"> 
                                             <input
@@ -555,9 +589,9 @@
                                         </div>
                                     </div>
 
-                                    <div class="mt-0.5 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden">
+                                    <div class="rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden w-full lg:w-6/12">
                                         <!-- Header -->
-                                        <div class="flex items-center -my-px py-2 px-3">
+                                        <div class="flex items-center -my-px py-2 px-3 w-full lg:w-6/12">
                                             <div class="flex items-center flex-auto min-w-0">
                                                 <mat-icon
                                                     class="icon-size-5"
@@ -581,7 +615,7 @@
                                                     <mat-checkbox
                                                         class="flex items-center h-10 min-h-10 px-4"
                                                         [color]="'primary'"
-                                                  >
+                                                    >
                                                         {{category.name}}
                                                     </mat-checkbox>
                                                 </ng-container>
