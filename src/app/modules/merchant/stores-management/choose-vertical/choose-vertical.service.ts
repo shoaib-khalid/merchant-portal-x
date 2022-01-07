@@ -110,10 +110,10 @@ export class ChooseVerticalService
     {
         return this._verticals.pipe(
             take(1),
-            map((stores) => {
-
+            map((verticals) => {
+                
                 // Find the store
-                const store = stores.find(item => item.code === code) || null;
+                const store = verticals.find(item => item.code === code) || null;
 
                 this._logging.debug("Response from StoresService (getVerticalById)",store);
 
@@ -123,14 +123,14 @@ export class ChooseVerticalService
                 // Return the store
                 return store;
             }),
-            switchMap((store) => {
+            switchMap((vertical) => {
 
-                if ( !store )
+                if ( !vertical )
                 {
                     return throwError('Could not found store with code of ' + code + '!');
                 }
 
-                return of(store);
+                return of(vertical);
             })
         );
     }

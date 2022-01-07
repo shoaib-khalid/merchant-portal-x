@@ -866,6 +866,23 @@ export class StoresService
         );
     }
 
+    postBulkSelfDeliveryStateCharges(storeId: string, stateDeliveryCharge: StoreSelfDeliveryStateCharges): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.post<any>(productService + '/stores/' + storeId + '/stateDeliveryCharge/bulk', stateDeliveryCharge , header ).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (postSelfDeliveryStateCharges)",response);
+                return response.data;
+            })
+        );
+    }
+
     putSelfDeliveryStateCharges(storeId: string, stateDeliveryId: string, stateDeliveryCharge: StoreSelfDeliveryStateCharges): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
@@ -895,6 +912,24 @@ export class StoresService
         return this._httpClient.delete<any>(productService + '/stores/' + storeId + '/stateDeliveryCharge/' + stateDeliveryId, header ).pipe(
             map((response) => {
                 this._logging.debug("Response from StoresService (deleteSelfDeliveryStateCharges)",response);
+                return response.data;
+            })
+        );
+    }
+
+
+    deleteAllSelfDeliveryStateCharges(storeId: string): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.delete<any>(productService + '/stores/' + storeId + '/stateDeliveryCharge/all', header ).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (deleteAllSelfDeliveryStateCharges)",response);
                 return response.data;
             })
         );

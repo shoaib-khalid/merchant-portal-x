@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnInit, ViewChild, ViewEncapsulation } fr
 import { FormArray, FormBuilder, FormGroup, NgForm, ValidationErrors, Validators } from '@angular/forms';
 import { fuseAnimations } from '@fuse/animations';
 import { RegisterStoreValidationService } from 'app/modules/merchant/stores-management/register-store/register-store.validation.service';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { LocaleService } from 'app/core/locale/locale.service';
 import { Locale } from 'app/core/locale/locale.types';
 import { StoresService } from 'app/core/store/store.service';
@@ -13,6 +13,9 @@ import { debounce } from 'lodash';
 import { HttpEventType, HttpResponse } from '@angular/common/http';
 import { FuseAlertType } from '@fuse/components/alert';
 import { ChooseVerticalService } from '../choose-vertical/choose-vertical.service';
+import { MatDrawer } from '@angular/material/sidenav';
+import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
     selector     : 'edit-store-page',
@@ -29,7 +32,13 @@ import { ChooseVerticalService } from '../choose-vertical/choose-vertical.servic
 export class EditStoreComponent implements OnInit
 {
     @ViewChild('supportNgForm') supportNgForm: NgForm;
-
+    @ViewChild('drawer') drawer: MatDrawer;
+    drawerMode: 'over' | 'side' = 'side';
+    drawerOpened: boolean = true;
+    panels: any[] = [];
+    selectedPanel: string = 'account';
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
+    
     storeId: string;
     
     fullDomain: string;
@@ -87,7 +96,8 @@ export class EditStoreComponent implements OnInit
         private _localeService: LocaleService,
         private _chooseVerticalService: ChooseVerticalService,
         private _router: Router,
-        private _route: ActivatedRoute
+        private _route: ActivatedRoute,
+        private _fuseMediaWatcherService: FuseMediaWatcherService
     )
     {
         this.checkExistingURL = debounce(this.checkExistingURL, 300);
@@ -148,6 +158,61 @@ export class EditStoreComponent implements OnInit
             isBranch: [false],
             isSnooze: [false],
         });
+
+        // Setup available panels
+        this.panels = [
+            {
+                id         : 'account',
+                icon       : 'mat_solid:storefront',
+                title      : 'Store Account',
+                description: 'Manage your public profile and information'
+            },
+            {
+                id         : 'security',
+                icon       : 'mat_outline:image',
+                title      : 'Store Assets',
+                description: 'Manage your store logo and images'
+            },
+            {
+                id         : 'delivery',
+                icon       : 'mat_outline:delivery_dining',
+                title      : 'Delivery',
+                description: 'Manage your subscription plan, payment method and billing information'
+            },
+            {
+                id         : 'timing',
+                icon       : 'mat_outline:access_time',
+                title      : 'Store Timing',
+                description: 'Manage when your store timing'
+            },
+            {
+                id         : 'analytics',
+                icon       : 'mat_outline:analytics',
+                title      : 'Google Analytic',
+                description: 'Store Google analytic section'
+            }
+        ];
+
+        // Subscribe to media changes
+        this._fuseMediaWatcherService.onMediaChange$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(({matchingAliases}) => {
+
+                // Set the drawerMode and drawerOpened
+                if ( matchingAliases.includes('lg') )
+                {
+                    this.drawerMode = 'side';
+                    this.drawerOpened = true;
+                }
+                else
+                {
+                    this.drawerMode = 'over';
+                    this.drawerOpened = false;
+                }
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
 
         // Logo & Banner
         this.files = [
@@ -426,6 +491,16 @@ export class EditStoreComponent implements OnInit
             // this way , we keep _originalAllowedSelfDeliveryStates integrity
             this._originalAllowedSelfDeliveryStates = this._allowedSelfDeliveryStates;
         }, 0);
+    }
+
+    /**
+    * On destroy
+    */
+    ngOnDestroy(): void
+    {
+        // Unsubscribe from all subscriptions
+        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.complete();
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -958,5 +1033,46 @@ export class EditStoreComponent implements OnInit
         }else{
             this.timeAlert[i] = "" ;
         }   
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Panel Section
+    // -----------------------------------------------------------------------------------------------------
+    
+    /**
+    * Navigate to the panel
+    *
+    * @param panel
+    */
+    goToPanel(panel: string): void
+    {
+        this.selectedPanel = panel;
+
+        // Close the drawer on 'over' mode
+        if ( this.drawerMode === 'over' )
+        {
+            this.drawer.close();
+        }
+    }
+ 
+    /**
+    * Get the details of the panel
+    *
+    * @param id
+    */
+    getPanelInfo(id: string): any
+    {
+        return this.panels.find(panel => panel.id === id);
+    }
+ 
+    /**
+    * Track by function for ngFor loops
+    *
+    * @param index
+    * @param item
+    */
+    trackByFn(index: number, item: any): any
+    {
+        return item.id || index;
     }
 }

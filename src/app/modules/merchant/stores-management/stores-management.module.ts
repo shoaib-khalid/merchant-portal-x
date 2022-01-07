@@ -27,6 +27,7 @@ import { ChooseStoreComponent } from 'app/modules/merchant/stores-management/cho
 import { EditStoreComponent } from 'app/modules/merchant/stores-management/edit-store/edit-store.component';
 
 import { storesManagementRoutes } from 'app/modules/merchant/stores-management/stores-management.routing';
+import { EditStoreModule } from './edit-store/edit-store.module';
 
 
 @NgModule({
@@ -56,7 +57,8 @@ import { storesManagementRoutes } from 'app/modules/merchant/stores-management/s
         MatCheckboxModule,
         MatToolbarModule,
         MatListModule,
-        FuseCardModule
+        FuseCardModule,
+        EditStoreModule
     ],
     providers: [
         // GraphHelper
