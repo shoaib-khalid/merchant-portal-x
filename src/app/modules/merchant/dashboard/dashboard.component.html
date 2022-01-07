@@ -258,7 +258,7 @@
                                                 mat-cell
                                                 *matCellDef="let summarySale">
                                                 <span class="font-medium text-right">
-                                                    {{summarySale.date | date:'MMM dd, h:mm a'}}
+                                                    {{summarySale.date | date:'MMM dd, yyyy'}}
                                                 </span>
                                             </td>
                                         </ng-container>
@@ -346,7 +346,7 @@
                                                 mat-cell
                                                 *matCellDef="let detailedDailySale">
                                                 <span class="font-medium text-right">
-                                                    {{detailedDailySale.date | date:'MMM dd, h:mm a'}}
+                                                    {{detailedDailySale.date | date:'MMM dd, yyyy'}}
                                                 </span>
                                             </td>
                                         </ng-container>
@@ -354,56 +354,16 @@
                                         <!-- Customer Name -->
                                         <ng-container matColumnDef="customerName">
                                             <th
+                                                
                                                 mat-header-cell
                                                 *matHeaderCellDef>
                                                 Customer Name
                                             </th>
                                             <td
+                                                class="truncate-cell"
                                                 mat-cell
                                                 *matCellDef="let detailedDailySale">
                                                 {{detailedDailySale.customerName}}
-                                            </td>
-                                        </ng-container>
-
-                                        <!-- Subtotal -->
-                                        <ng-container matColumnDef="subTotal">
-                                            <th
-                                                mat-header-cell
-                                                *matHeaderCellDef>
-                                                Subtotal
-                                            </th>
-                                            <td
-                                                mat-cell
-                                                *matCellDef="let detailedDailySale">
-                                                {{detailedDailySale.subTotal | currency: currencySymbol}}
-                                            </td>
-                                        </ng-container>
-
-                                        <!-- Service Charge -->
-                                        <ng-container matColumnDef="serviceCharge">
-                                            <th
-                                                mat-header-cell
-                                                *matHeaderCellDef>
-                                                Service Fee
-                                            </th>
-                                            <td
-                                                mat-cell
-                                                *matCellDef="let detailedDailySale">
-                                                {{detailedDailySale.serviceCharge | currency:currencySymbol}}
-                                            </td>
-                                        </ng-container>
-
-                                        <!-- Delivery Charge -->
-                                        <ng-container matColumnDef="deliveryCharge">
-                                            <th
-                                                mat-header-cell
-                                                *matHeaderCellDef>
-                                                Delivery Fee
-                                            </th>
-                                            <td
-                                                mat-cell
-                                                *matCellDef="let detailedDailySale">
-                                                {{detailedDailySale.deliveryCharge | currency:currencySymbol}}
                                             </td>
                                         </ng-container>
 
@@ -418,6 +378,83 @@
                                                 mat-cell
                                                 *matCellDef="let detailedDailySale">
                                                 {{detailedDailySale.total | currency:currencySymbol}}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Subtotal -->
+                                        <ng-container matColumnDef="subTotal">
+                                            <th
+                                                mat-header-cell
+                                                *matHeaderCellDef>
+                                                Order
+                                            </th>
+                                            <td
+                                                mat-cell
+                                                *matCellDef="let detailedDailySale">
+                                                {{detailedDailySale.subTotal | currency: currencySymbol}}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Subtotal Discount -->
+                                        <ng-container matColumnDef="appliedDiscount">
+                                            <th
+                                                mat-header-cell
+                                                *matHeaderCellDef>
+                                                &nbsp; Order <br>
+                                                Discount
+                                            </th>
+                                            <td
+                                                mat-cell
+                                                *matCellDef="let detailedDailySale">
+                                                -{{detailedDailySale.appliedDiscount | currency: currencySymbol}}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Store Service Charge -->
+                                        <ng-container matColumnDef="serviceCharge">
+                                            <th
+                                            
+                                                mat-header-cell
+                                                *matHeaderCellDef>
+                                                &nbsp; &nbsp; &nbsp; &nbsp; Store <br>
+                                                Service
+                                                Charge
+                                            </th>
+                                            <td
+                                                class="mat-cell-break-word"
+                                                mat-cell
+                                                *matCellDef="let detailedDailySale">
+                                                {{detailedDailySale.serviceCharge | currency:currencySymbol}}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Delivery Charge -->
+                                        <ng-container matColumnDef="deliveryCharge">
+                                            <th
+                                                mat-header-cell
+                                                *matHeaderCellDef>
+                                                Delivery <br>
+                                                Charge
+                                            </th>
+                                            <td
+                                                mat-cell
+                                                *matCellDef="let detailedDailySale">
+                                                {{ (detailedDailySale.deliveryType == 'SELF') ? ( detailedDailySale.deliveryCharge | currency:currencySymbol ) : ('-' + detailedDailySale.deliveryCharge | currency:currencySymbol )}}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Delivery Discount -->
+                                        <ng-container matColumnDef="deliveryDiscount">
+                                            <th
+                                                mat-header-cell
+                                                *matHeaderCellDef>
+                                                Delivery <br>
+                                                Discount
+                                            </th>
+                                            <td
+                                                mat-cell
+                                                *matCellDef="let detailedDailySale">
+                                                -{{detailedDailySale.deliveryDiscount | currency:currencySymbol}}
                                             </td>
                                         </ng-container>
 
@@ -437,12 +474,13 @@
                                             </td>
                                         </ng-container>
 
-                                        <!-- Net Total-->
+                                        <!-- Amount Earned-->
                                         <ng-container matColumnDef="netTotal">
                                             <th  
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                Net Total
+                                                Amount <br>
+                                                Earned
                                             </th>
                                             <td
                                                 class="font-semibold text-green-700"
@@ -509,7 +547,7 @@
                                                 mat-cell
                                                 *matCellDef="let dailyTopProduct">
                                                 <span class="font-medium text-right">
-                                                    {{dailyTopProduct.date | date:'MMM dd, h:mm a'}}
+                                                    {{dailyTopProduct.date | date:'MMM dd, yyyy'}}
                                                 </span>
                                             </td>
                                         </ng-container>
@@ -614,7 +652,7 @@
                                                 mat-cell
                                                 *matCellDef="let settlement">
                                                 <span class="font-medium text-right">
-                                                    {{settlement.payoutDate | date:'MMM dd yyyy'}}
+                                                    {{settlement.payoutDate | date:'MMM dd, yyyy'}}
                                                 </span>
                                             </td>
                                         </ng-container>
@@ -630,7 +668,7 @@
                                                 mat-cell
                                                 *matCellDef="let settlement">
                                                 <span class="font-medium text-right">
-                                                    {{settlement.startDate | date:'MMM dd yyyy'}}
+                                                    {{settlement.startDate | date:'MMM dd, yyyy'}}
                                                 </span>
                                             </td>
                                         </ng-container>
@@ -646,7 +684,7 @@
                                                 mat-cell
                                                 *matCellDef="let settlement">
                                                 <span class="font-medium text-right">
-                                                    {{settlement.cutoffDate | date:'MMM dd yyyy'}}
+                                                    {{settlement.cutoffDate | date:'MMM dd, yyyy'}}
                                                 </span>
                                             </td>
                                         </ng-container>

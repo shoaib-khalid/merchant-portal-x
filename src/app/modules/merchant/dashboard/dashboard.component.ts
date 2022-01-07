@@ -15,6 +15,23 @@ import { formatDate } from '@angular/common';
 @Component({
     selector       : 'dashboard',
     templateUrl    : './dashboard.component.html',
+    styles       : [
+        `
+        /* to truncate long text  */
+        .truncate-cell {
+            max-width: 130px; 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+        /* to break long words (currently not being used) */
+        .mat-cell-break-word {
+            white-space: normal;
+            word-wrap: break-word;
+            max-width: 50px;
+        }
+        `
+    ],
     encapsulation  : ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -70,7 +87,7 @@ export class DashboardComponent implements OnInit, OnDestroy
     // Daily Detailed Sales Properties
     // -------------------------------
 
-    detailedDailySalesCol = ["date","customerName","subTotal","serviceCharge","deliveryCharge","total","commission","netTotal"]
+    detailedDailySalesCol = ["date","customerName","total","subTotal", "appliedDiscount","serviceCharge","deliveryCharge", "deliveryDiscount","commission","netTotal"]
     detailedDailySalesRow = [];
     detailedDailySalesPagination: DetailedDailySalesPagination;
     detailedDailySalesDateRange: any = {
@@ -271,7 +288,10 @@ export class DashboardComponent implements OnInit, OnDestroy
                         deliveryCharge: item.deliveryCharges,
                         commission: item.klCommission,
                         total: item.total,
-                        netTotal: item.storeShare
+                        netTotal: item.storeShare,
+                        deliveryDiscount: item.deliveryDiscount,
+                        appliedDiscount: item.appliedDiscount,
+                        deliveryType: item.deliveryType
                     });
                 });
 

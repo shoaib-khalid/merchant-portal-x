@@ -26,6 +26,7 @@ export interface DailyTopProductsPagination
 
 export interface DetailedDailySales
 {
+    deliveryType: string;
     cartId: string;
     completionStatus: string;
     created: string;
