@@ -526,6 +526,7 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
                     }
                 }
             });
+            this.storeDiscountTierListValueEditMode = [true];
 
             return;
         }
