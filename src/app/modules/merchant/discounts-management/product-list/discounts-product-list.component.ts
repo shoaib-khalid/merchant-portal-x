@@ -68,7 +68,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     selectItemOrCatgeoryCreate : string = '';
 
     selectedCategoryIdCreate : string;
-    checkedCategories : any =[];
+    checkedCategoriesId : any =[];
 
 
     //product or category 
@@ -190,7 +190,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
               // Update the categories
               this.productCategories$ = categories;
               this.filteredProductCategories = categories;
-              console.log("Categorydata::",categories);
 
               // Mark for check
               this._changeDetectorRef.markForCheck();
@@ -535,15 +534,29 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     //create store dicount product
     createStoreProductDiscount(){
 
-        const payloadProductDiscount ={
-            
-            storeDiscountId:this.selectedDiscountForm.value.id,
-            categoryId:this.selectedCategoryIdCreate
-            
-        }
 
-        console.log('createStoreProductDiscount',payloadProductDiscount);
-        
+        console.log("checking",this.checkedCategoriesId);
+   
+        this.checkedCategoriesId
+        .forEach((catId)=>{
+
+                let payloadProductDiscount ={
+                    storeDiscountId:this.selectedDiscountForm.value.id,
+                    categoryId:catId
+
+                }                
+
+                this._discountProductService.createProductDiscount(this.selectedDiscountForm.value.id,payloadProductDiscount).
+                subscribe((response) => {
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+                })
+            }
+        )
+
+        this.checkedCategoriesId.pop();//empty the array back
+        this._changeDetectorRef.markForCheck();
 
         // this._discountProductService.createProductDiscount(this.selectedDiscountForm.value.id,payloadProductDiscount).
         // subscribe((response) => {
@@ -744,51 +757,30 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         this.selectedCategoryId=value;
     }
 
-    uponCreateSelectCategoryOrItemList(value){
-        console.log('event',value);
-        this.selectedCategoryIdCreate=value;
-    }
-
-    checkboxCategories(tag, change: MatCheckboxChange): void
+    checkboxCategories(tagCategoryId, change: MatCheckboxChange): void
     {
         if ( change.checked )
         {
-            this.addTagToCategory(tag);
-
-
+            // this.checkedCategoriesId.push(tagCategoryId);     
+            this.checkedCategoriesId.unshift(tagCategoryId);
         }
-        // else
-        // {
-        //     this.removeTagFromProduct(tag);
-        // }
-    }
+        else
+        {
 
-
-    addTagToCategory(tag): void
-    {
-    
-        console.log('iman check ::',tag);
-        this.checkedCategories.push(tag);
-        console.log("IMAN CHECK LAGI",this.checkedCategories);
-        
-
-        // Add the tag
-        // this.selectedProduct.tags.unshift(tag.id);
-
-        // Update the selected product form
-        // this.selectedProductForm.get('tags').patchValue(this.selectedProduct.tags);
-
-        // Mark for check
+            this.checkedCategoriesId.splice(this.checkedCategoriesId.findIndex(tagId => tagId === tagCategoryId), 1);
+            
+        }
+        console.log('CHECK BEFORE SEND TO BACKEND',this.checkedCategoriesId);
         this._changeDetectorRef.markForCheck();
     }
 
     uponCreateSelectType(value){
 
         this.selectItemOrCatgeoryCreate = value;        
-        console.log("checking",this.selectItemOrCatgeoryCreate);
 
         if (value === 'CATEGORY'){
             this.isSelectItemOrCategoryCreate = true;
+            this.checkedCategoriesId.pop();//empty the array for any selected checkbox previous
             // this.filteredProductCategories = this.productCategories$.filter(category => category.name.toLowerCase().includes(value));
             this.filteredProductCategories = this.productCategories$.filter(category => category);
 
@@ -796,6 +788,8 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
          
         if(value === 'ITEM'){
             this.isSelectItemOrCategoryCreate = true;
+            this.checkedCategoriesId.pop();//empty the array
+
         }
 
     }

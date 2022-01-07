@@ -456,12 +456,12 @@
                                         <div class="h-30 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
                                             <!-- Categories -->
                                             <ng-container *ngIf="selectItemOrCatgeoryCreate === 'CATEGORY'">
-                                                <ng-container *ngFor="let category of filteredProductCategories; ">
+                                                <ng-container *ngFor="let category of filteredProductCategories; trackBy: trackByFn ">
                                                     <mat-checkbox
                                                         class="flex items-center h-10 min-h-10 px-4"
                                                         [color]="'primary'"
-                                                        (change)="checkboxCategories(category,$event)"
-                                                        [checked]="checkedCategories"
+                                                        (change)="checkboxCategories(category.id,$event)"
+                                                        [checked]="checkedCategoriesId"
                                                     >
 
                                                     
