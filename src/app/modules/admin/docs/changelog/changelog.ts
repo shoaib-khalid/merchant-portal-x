@@ -9,6 +9,20 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 export class ChangelogComponent
 {
     changelog: any[] = [
+        // v0.0.11
+        {
+            version    : 'v0.0.11',
+            releaseDate: 'Jan 07, 2022',
+            changes    : [
+                {
+                    type: 'Fixed',
+                    list: [
+                        '(DashboardPage) Fix store dashboard data',
+                        '(DiscountPage) Fix disabled percentage more than 100%'
+                    ]
+                }
+            ]
+        },
         // v0.0.10
         {
             version    : 'v0.0.10',
@@ -17,7 +31,7 @@ export class ChangelogComponent
                 {
                     type: 'Fixed',
                     list: [
-                        '(DashboardPage) Fix store self delivery states on edit store page'
+                        '(StoreEditPage) Fix store self delivery states on edit store page'
                     ]
                 }
             ]
