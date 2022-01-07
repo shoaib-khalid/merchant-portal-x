@@ -333,11 +333,41 @@
                                                 matRipple>
                                                 <mat-icon
                                                     class="text-white group-hover:text-primary icon-size-5"
-                                                    [svgIcon]="'heroicons_solid:document-report'"></mat-icon>
+                                                    >receipt</mat-icon>
                                             </label>
                                             <ng-container *ngIf= "transaction.currentCompletionStatus != 'PAYMENT_CONFIRMED' && transaction.currentCompletionStatus != 'RECEIVED_AT_STORE'; else cancelTemplate">
                                                 <!-- Action Button -->
-                                                <input
+                                                <mat-select *ngIf= "transaction.nextActionText ; else onlyButton"
+                                                    [id]="'action-select-' + transaction.order.id"
+                                                    class="flex placeholder-black items-center justify-center w-3/5 py-2 px-1 rounded-full border border-primary border-solid group hover:bg-primary"
+                                                    [placeholder]="'&nbsp; &nbsp; &nbsp;' + transaction.nextActionText"
+                                                    [disabled]="submitted[transaction.order.id]"
+                                                    [ngClass]="submitted[transaction.order.id] ? 'cursor-wait' : 'cursor-pointer' "
+                                                    >
+                                                    <ng-container>
+                                                        <mat-option *ngIf="transaction.nextActionText" (click)="updateStatus(transaction.order, transaction.nextCompletionStatus)">{{ transaction.nextActionText }}</mat-option>
+                                                        <mat-option (click)="openDetailsDialog(transaction.order.id)">Details</mat-option>
+                                                    </ng-container>
+                                                </mat-select>
+                                                <ng-template #onlyButton>
+                                                        <input
+                                                        [id]="'action-' + transaction.order.id"
+                                                        type="button"
+                                                        (click)="openDetailsDialog(transaction.order.id)"
+                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                        mat-button>
+                                                    <label 
+                                                        class="flex items-center justify-center w-3/5 py-2 px-1 rounded-full border border-primary border-solid group hover:bg-primary"
+                                                        [ngClass]="submitted[transaction.order.id] ? 'cursor-wait' : 'cursor-pointer'"   
+                                                        [for]="'action-' + transaction.order.id"
+                                                        matRipple>
+                                                        <span class="font-medium group-hover:text-white text-sm text-primary whitespace-nowrap">
+                                                            Details
+                                                        </span>
+                                                    </label> 
+                                                </ng-template>
+
+                                                <!-- <input
                                                     [id]="'action-' + transaction.order.id"
                                                     type="button"
                                                     [disabled]="submitted[transaction.order.id]"
@@ -353,7 +383,7 @@
                                                     <span class="font-medium group-hover:text-white text-sm text-primary whitespace-nowrap">
                                                         {{ transaction.nextActionText }}
                                                     </span>
-                                                </label>
+                                                </label> -->
 
                                             </ng-container>
                                             <!-- <label *ngIf="submitted">Hello
@@ -363,14 +393,15 @@
                                             <ng-template #cancelTemplate>
                                                 <mat-select
                                                     [id]="'action-select-' + transaction.order.id"
-                                                    class="flex placeholder-black items-center justify-center w-2/3 py-2 px-1 rounded-full border border-primary border-solid group hover:bg-primary"
+                                                    class="flex placeholder-black items-center justify-center w-3/5 py-2 px-1 rounded-full border border-primary border-solid group hover:bg-primary"
                                                     [placeholder]="'&nbsp; &nbsp; &nbsp;' + transaction.nextActionText"
                                                     [disabled]="submitted[transaction.order.id]"
                                                     [ngClass]="submitted[transaction.order.id] ? 'cursor-wait' : 'cursor-pointer' "
                                                     >
                                                     <ng-container>
                                                         <mat-option (click)="updateStatus(transaction.order, transaction.nextCompletionStatus)">{{ transaction.nextActionText }}</mat-option>
-                                                        <mat-option (click)="updateStatus(transaction.order, 'CANCELED_BY_MERCHANT')">Cancel</mat-option>
+                                                        <mat-option (click)="openDetailsDialog(transaction.order.id)">Details</mat-option>
+                                                        <mat-option class="bg-red-600 text-white" (click)="updateStatus(transaction.order, 'CANCELED_BY_MERCHANT')">Cancel Order</mat-option>
                                                     </ng-container>
                                                 </mat-select>
                                             </ng-template>

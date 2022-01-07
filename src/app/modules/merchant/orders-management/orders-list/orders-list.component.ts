@@ -9,16 +9,25 @@ import { MatPaginator } from '@angular/material/paginator';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
 import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { OrderDetailsComponent } from 'app/modules/merchant/orders-management/order-details/order-details.component';
+import { OrderInvoiceComponent } from 'app/modules/merchant/orders-management/order-invoice/order-invoice.component';
 import { ChooseProviderDateTimeComponent } from 'app/modules/merchant/orders-management/choose-provider-datetime/choose-provider-datetime.component';
 import { Router } from '@angular/router';
 import { Store } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
 import { formatDate } from '@angular/common';
+import { OrderDetailsComponent } from '../order-details/order-details.component';
 
 @Component({
     selector       : 'orders-list',
     templateUrl    : './orders-list.component.html',
+    styles       : [
+        /* to remove visible container when window dialog is opened  */
+        `
+        .mat-dialog-container {
+          padding: 0 !important;
+      }
+        `
+    ],
     encapsulation  : ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -423,9 +432,21 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
 
     viewDetails(orderId){
         // this._router.navigateByUrl('/orders/'+orderId)
-        this._dialog.open(OrderDetailsComponent, { data: orderId });
-
+        const dialogRef = this._dialog.open(OrderInvoiceComponent, { data: orderId });
         
+        dialogRef.afterClosed()
+        .subscribe((result) => {
+        });
+        
+    }
+
+    openDetailsDialog(orderId){
+        // Open the dialog
+        const dialogRef = this._dialog.open(OrderDetailsComponent, { data: orderId});
+
+        dialogRef.afterClosed()
+                 .subscribe((result) => {
+                 });
     }
 
 }

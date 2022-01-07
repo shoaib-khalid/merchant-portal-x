@@ -15,6 +15,23 @@ import { formatDate } from '@angular/common';
 @Component({
     selector       : 'dashboard',
     templateUrl    : './dashboard.component.html',
+    styles       : [
+        `
+        /* to truncate long text  */
+        .truncate-cell {
+            max-width: 130px; 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+        /* to break long words (currently not being used) */
+        .mat-cell-break-word {
+            white-space: normal;
+            word-wrap: break-word;
+            max-width: 50px;
+        }
+        `
+    ],
     encapsulation  : ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -70,7 +87,7 @@ export class DashboardComponent implements OnInit, OnDestroy
     // Daily Detailed Sales Properties
     // -------------------------------
 
-    detailedDailySalesCol = ["date","customerName","subTotal","serviceCharge","deliveryCharge","total","commission","netTotal"]
+    detailedDailySalesCol = ["date","customerName","total","subTotal", "appliedDiscount","serviceCharge","deliveryCharge", "deliveryDiscount","commission","netTotal"]
     detailedDailySalesRow = [];
     detailedDailySalesPagination: DetailedDailySalesPagination;
     detailedDailySalesDateRange: any = {
@@ -271,7 +288,10 @@ export class DashboardComponent implements OnInit, OnDestroy
                         deliveryCharge: item.deliveryCharges,
                         commission: item.klCommission,
                         total: item.total,
-                        netTotal: item.storeShare
+                        netTotal: item.storeShare,
+                        deliveryDiscount: item.deliveryDiscount,
+                        appliedDiscount: item.appliedDiscount,
+                        deliveryType: item.deliveryType
                     });
                 });
 
@@ -725,8 +745,11 @@ export class DashboardComponent implements OnInit, OnDestroy
             )
             .subscribe();
 
+        //-----------------------------
+        // Get dates for This Week
+        //-----------------------------
         
-        // set to Monday of this week
+        // get last Monday and today's date
         let lastMonday = this.getPreviousMonday()
         let today = new Date();
         let locale = 'en-MY';
@@ -754,11 +777,12 @@ export class DashboardComponent implements OnInit, OnDestroy
                 })
             })
 
-            //sort the array by rank
+            // sort the array by rank
             this.topProductThisWeekRow.sort(function (x, y) {
                 return x.rank - y.rank;
             });
 
+            // assign product name to the top three
             this.firstThisWeek = this.topProductThisWeekRow[0]?.name;
             this.secondThisWeek = this.topProductThisWeekRow[1]?.name;
             this.thirdThisWeek = this.topProductThisWeekRow[2]?.name;
@@ -832,23 +856,22 @@ export class DashboardComponent implements OnInit, OnDestroy
         //     })
         // })
 
+        //-----------------------------
+        // Get dates for last week
+        //-----------------------------
 
-        //Get dates for last week
-
-        // set to Monday of this week
+        // get this week monday
         let lastWeekStart = this.getPreviousMonday()
-        let lastWeekEnd = new Date();
-
-        // set to start of last week
-        lastWeekStart.setDate(lastWeekStart.getDate() - 7);
-
-        // set to end of last week
-        lastWeekEnd.setDate(lastWeekStart.getDate() + 6)
         
-        // reformat date 
-        let formattedLastWeekStart = formatDate(lastWeekStart, format, locale);
-        let formattedLastWeekEnd = formatDate(lastWeekEnd, format, locale);
+        // set lastWeekStartFixed to last week monday
+        const lastWeekStartFixed = new Date(lastWeekStart.setDate(lastWeekStart.getDate() - 7)); 
+        
+        // set lastWeekEnd to end of last week        
+        let lastWeekEnd = new Date(lastWeekStart.setDate(lastWeekStart.getDate() + 6));
 
+        // reformat date 
+        let formattedLastWeekStart = formatDate(lastWeekStartFixed, format, locale);
+        let formattedLastWeekEnd = formatDate(lastWeekEnd, format, locale);
 
         // -------------------------------
         // Top Product Last Week
@@ -884,11 +907,12 @@ export class DashboardComponent implements OnInit, OnDestroy
                 })
             })
 
-            //sort the array by rank
+            // sort the array by rank
             this.topProductLastWeekRow.sort(function (x, y) {
                 return x.rank - y.rank;
             });
             
+            // assign product name to the top three
             this.firstLastWeek = this.topProductLastWeekRow[0]?.name;
             this.secondLastWeek = this.topProductLastWeekRow[1]?.name;
             this.thirdLastWeek = this.topProductLastWeekRow[2]?.name;
@@ -1079,14 +1103,20 @@ export class DashboardComponent implements OnInit, OnDestroy
 
     getPreviousMonday()
     {
-        let date = new Date();
-        let day = date.getDay();
+        let today = new Date();
+        
+        // get the day of date (0-6)
+        let day = today.getDay();
         let prevMonday = new Date();
-        if(date.getDay() == 0){
-            prevMonday.setDate(date.getDate() - 7);
+
+        // if today is Monday, return today's date
+        if(today.getDay() == 0){
+            // prevMonday.setDate(date.getDate() - 7);
+            return today;
         }
+        // else, set prevMonday to previous Monday's date
         else{
-            prevMonday.setDate(date.getDate() - (day-1));
+            prevMonday.setDate(today.getDate() - (day-1));
         }
     
         return prevMonday;
