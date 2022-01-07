@@ -333,7 +333,7 @@
                                                 matRipple>
                                                 <mat-icon
                                                     class="text-white group-hover:text-primary icon-size-5"
-                                                    [svgIcon]="'heroicons_solid:document-report'"></mat-icon>
+                                                    >receipt</mat-icon>
                                             </label>
                                             <ng-container *ngIf= "transaction.currentCompletionStatus != 'PAYMENT_CONFIRMED' && transaction.currentCompletionStatus != 'RECEIVED_AT_STORE'; else cancelTemplate">
                                                 <!-- Action Button -->

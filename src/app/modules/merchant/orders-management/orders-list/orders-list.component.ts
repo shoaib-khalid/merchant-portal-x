@@ -21,7 +21,7 @@ import { OrderDetailsComponent } from '../order-details/order-details.component'
     selector       : 'orders-list',
     templateUrl    : './orders-list.component.html',
     styles       : [
-        /* language=SCSS */
+        /* to remove visible container when window dialog is opened  */
         `
         .mat-dialog-container {
           padding: 0 !important;
@@ -442,7 +442,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
 
     openDetailsDialog(orderId){
         // Open the dialog
-        const dialogRef = this._dialog.open(OrderDetailsComponent);
+        const dialogRef = this._dialog.open(OrderDetailsComponent, { data: orderId});
 
         dialogRef.afterClosed()
                  .subscribe((result) => {

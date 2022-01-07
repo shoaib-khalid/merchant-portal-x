@@ -256,6 +256,10 @@ export class OrderInvoiceComponent implements OnInit {
     this._matDialogRef.close()
   }
 
+  print(){
+    window.print();
+  }
+
  
 
 }
