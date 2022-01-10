@@ -134,8 +134,32 @@ export class StoreAssetComponent implements OnInit
     this.files[index].fileSource = null;
     this.files[index].selectedFileName = "";
     this.files[index].selectedFiles = event.target.files;
+        
+        let maxSize = 2600000;
+        if (this.files[index].selectedFiles[0].size > maxSize ){
+            // Show a success message (it can also be an error message)
+            const confirmation = this._fuseConfirmationService.open({
+                title  : 'Image size limit',
+                message: 'Your uploaded image is exceeds the maximum size of ' + maxSize + ' bytes !',
+                icon: {
+                    show: true,
+                    name: "heroicons_outline:exclamation",
+                    color: "warn"
+                },
+                actions: {
+                    confirm: {
+                        label: 'Ok',
+                        color: "primary",
+                    },
+                    cancel: {
+                        show: false,
+                    },
+                }
+            });
+            return;
+        }
 
-        if (this.files[index].selectedFiles && this.files[index].selectedFiles[0]) {
+        if (this.files[index].selectedFiles && this.files[index].selectedFiles[0] && this.files[index].selectedFiles[0].size < maxSize ) {
             const numberOfFiles = this.files[index].selectedFiles.length;
             for (let i = 0; i < numberOfFiles; i++) {
             const reader = new FileReader();
@@ -165,9 +189,10 @@ export class StoreAssetComponent implements OnInit
             }
         }
         this._changeDetectorRef.markForCheck();
-    }
+    } 
 
     deletefiles(index: number) { 
+        
         this.files[index].toDelete = true;
         this.files[index].fileSource = '';
 
@@ -192,40 +217,66 @@ export class StoreAssetComponent implements OnInit
             if (item.toDelete === true && item.type === 'logo'){
                 this._storesService.deleteAssetsLogo(this.storeId).subscribe(() => {
                     if (_assets) {
-                        this._storesService.postAssets(this.storeId, formData, "logo", storeAssetFiles).subscribe(
-                            (event: any) => {
-                            if (event instanceof HttpResponse) {
-                                console.log('Uploaded the file successfully');
-
-                                // Mark for check
-                                this._changeDetectorRef.markForCheck();
-                            }
-                            },
-                            (err: any) => {
-                                console.error('Could not upload the file');
-                            });
+                        console.log("storeAssetFiles: ", "'"+storeAssetFiles+"'")
+                        if (storeAssetFiles && storeAssetFiles !== "") {
+                            this._storesService.postAssets(this.storeId, formData, "logo", storeAssetFiles).subscribe(
+                                (event: any) => {
+                                if (event instanceof HttpResponse) {
+                                    console.log('Uploaded the file successfully');
+    
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                }
+                                },
+                                (err: any) => {
+                                    console.error('Could not upload the file');
+                                });
+                        }
                     }
                 });
             }
             if (item.toDelete === true && item.type === 'banner'){
                 this._storesService.deleteAssetsBanner(this.storeId).subscribe(() => {
                     if (_assets) {
-                        this._storesService.postAssets(this.storeId, formData, "banner", storeAssetFiles).subscribe(
-                            (event: any) => {
-                            if (event instanceof HttpResponse) {
-                                console.log('Uploaded the file successfully');
-
-                                // Mark for check
-                                this._changeDetectorRef.markForCheck();
-                            }
-                            },
-                            (err: any) => {
-                                console.error('Could not upload the file');
-                            });
+                        console.log("storeAssetFiles 1: ", "'"+storeAssetFiles+"'")
+                        if (storeAssetFiles && storeAssetFiles !== ""){
+                            this._storesService.postAssets(this.storeId, formData, "banner", storeAssetFiles).subscribe(
+                                (event: any) => {
+                                if (event instanceof HttpResponse) {
+                                    console.log('Uploaded the file successfully');
+    
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                }
+                                },
+                                (err: any) => {
+                                    console.error('Could not upload the file');
+                                });
+                        }
                     }
                 });
             }
-            
+            if (item.toDelete === true && item.type === 'bannerMobile'){
+                this._storesService.deleteAssetsBannerMobile(this.storeId).subscribe(() => {
+                    if (_assets) {
+                        console.log("storeAssetFiles 2: ", "'"+storeAssetFiles+"'")
+                        if (storeAssetFiles && storeAssetFiles !== ""){
+                            this._storesService.postAssets(this.storeId, formData, "bannerMobile", storeAssetFiles).subscribe(
+                                (event: any) => {
+                                if (event instanceof HttpResponse) {
+                                    console.log('Uploaded the file successfully');
+    
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                }
+                                },
+                                (err: any) => {
+                                    console.error('Could not upload the file');
+                                });
+                        }
+                    }
+                });
+            }
         });
 
         // Show a success message (it can also be an error message)
