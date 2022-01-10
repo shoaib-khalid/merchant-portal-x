@@ -1,0 +1,847 @@
+<div
+    class="absolute inset-0 flex flex-col min-w-0 overflow-y-auto"
+    cdkScrollable>
+
+    <!-- Header -->
+    <div class="relative flex-0 py-8 px-4 sm:p-8 overflow-hidden bg-gray-800 dark">
+        <!-- Background - @formatter:off -->
+        <!-- Rings -->
+        <svg class="absolute inset-0 pointer-events-none"
+             viewBox="0 0 960 540" width="100%" height="100%" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+            <g class="text-gray-700 opacity-25" fill="none" stroke="currentColor" stroke-width="100">
+                <circle r="234" cx="196" cy="23"></circle>
+                <circle r="234" cx="790" cy="491"></circle>
+            </g>
+        </svg>
+        <!-- @formatter:on -->
+        <div class="z-10 relative flex flex-col items-center">
+            <h2 class="text-xl font-semibold">EDIT YOUR STORE HERE</h2>
+            <!-- <div class="mt-1 text-4xl sm:text-7xl font-extrabold tracking-tight leading-tight text-center">
+                What do you want to learn today?
+            </div> -->
+            <div class="max-w-2xl mt-6 sm:text-2xl text-center tracking-tight text-secondary">
+                Simply edit your store
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex flex-col flex-auto items-center p-6 sm:p-10">
+        <div class="flex flex-col w-full">
+            <!-- Form -->
+            <div class="mt-8 sm:mt-12 p-6 pb-7 sm:p-10 sm:pb-7 shadow rounded-2xl bg-card">
+                <form
+                    class="space-y-3 flex flex-col w-full"
+                    [formGroup]="editStoreForm"
+                    #supportNgForm="ngForm">
+
+                    <!-- Name, Store URL, Description, Email, Phonenumber, Message, City, State, Country, Postcode -->
+                    <div class="flex flex-col sm:flex-row">
+                        <div class="flex flex-auto flex-wrap">
+                            <div class="flex flex-col w-full lg:w-2/4 sm:px-4">
+                                <!-- Store Name -->
+                                <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
+                                    <input
+                                        matInput
+                                        maxlength="100"
+                                        placeholder="Tell us, what is your store name ?"
+                                        [formControlName]="'name'"
+                                        [required]="true"
+                                        (input)="checkExistingName($event.target.value)">
+                                    <mat-icon
+                                        matPrefix
+                                        [svgIcon]="'mat_solid:store'">
+                                  </mat-icon>
+                                    <mat-label>Store Name</mat-label>
+                                    <mat-error *ngIf="editStoreForm.get('name').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                    <mat-error *ngIf="editStoreForm.get('name').hasError('storeNameAlreadyTaken')">
+                                        The store name entered is already taken
+                                    </mat-error>
+                                </mat-form-field>
+                                <!-- Store URL -->
+                                <mat-form-field class="w-full fuse-mat-emphasized-affix">
+                                    <mat-label>Store URL</mat-label>
+                                    <span>https://</span> 
+                                    <input
+                                        matInput
+                                        minlength="4"
+                                        maxlength="15"
+                                        [formControlName]="'subdomain'"
+                                        [required]="true"
+                                        (input)="checkExistingURL($event.target.value)">
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'heroicons_outline:globe-alt'">
+                                        </mat-icon>
+                                    <span matSuffix>{{domainName}}</span>
+                                    <mat-error *ngIf="editStoreForm.get('subdomain').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                    <mat-error *ngIf="editStoreForm.get('subdomain').hasError('invalidDomain')">
+                                        Invalid URL
+                                    </mat-error>
+                                    <mat-error *ngIf="editStoreForm.get('subdomain').hasError('minlength')">
+                                        Minimum character length not meet (mininum 4 character)
+                                    </mat-error>
+                                    <mat-error *ngIf="editStoreForm.get('subdomain').hasError('maxlength')">
+                                        Maximum character length exceed (maximum 15 character)
+                                    </mat-error>
+                                    <mat-error *ngIf="editStoreForm.get('subdomain').hasError('domainAlreadyTaken')">
+                                        The subdomain name entered is already taken
+                                    </mat-error>
+                                </mat-form-field>
+                                <!-- Store Description -->
+                                <mat-form-field class="fuse-mat-textarea w-full" floatLabel="always">
+                                    <textarea
+                                        matInput
+                                        placeholder="Describe to us about your store"
+                                        [formControlName]="'storeDescription'"
+                                        [required]="true"
+                                        [rows]="5"
+                                        maxlength="100"
+                                        matTextareaAutosize></textarea>
+                                    <mat-label>Store Description</mat-label>
+                                    <mat-error *ngIf="editStoreForm.get('storeDescription').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                </mat-form-field>
+                                <!-- Email -->
+                                <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
+                                    <input
+                                        type="email"
+                                        placeholder="example@yourstore.com"
+                                        matInput
+                                        [formControlName]="'email'"
+                                        [required]="true">
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'mat_solid:email'">
+                                        </mat-icon>
+                                    <mat-label>Store Email</mat-label>
+                                    <mat-error *ngIf="editStoreForm.get('email').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                    <mat-error *ngIf="editStoreForm.get('email').hasError('email')">
+                                        Enter a valid email address
+                                    </mat-error>
+                                </mat-form-field>
+                                <!-- Phonenumber -->
+                                <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
+                                    <input
+                                        matInput
+                                        placeholder="+60123456789"
+                                        [formControlName]="'phoneNumber'"
+                                        [required]="true">
+                                    <mat-icon
+                                        matPrefix
+                                        [svgIcon]="'mat_solid:phone_iphone'">
+                                    </mat-icon>
+                                    <mat-label>Store Phone Number</mat-label>
+                                    <mat-error *ngIf="editStoreForm.get('phoneNumber').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                    <mat-error *ngIf="editStoreForm.get('phoneNumber').hasError('invalidPhonenumber')">
+                                        Invalid Phonenumber
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="flex flex-col w-full lg:w-2/4 sm:px-4">
+                                <!-- Address -->
+                                <mat-form-field class="fuse-mat-textarea w-full" floatLabel="always">
+                                    <textarea
+                                        matInput
+                                        placeholder="Your customer will be looking for your store, add your store address now !"
+                                        maxlength="500"
+                                        [formControlName]="'address'"
+                                        [required]="true"
+                                        [rows]="5"
+                                        matTextareaAutosize></textarea>
+                                    <mat-label>Address</mat-label>
+                                    <mat-error *ngIf="editStoreForm.get('address').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                    <mat-icon
+                                        matPrefix
+                                        [svgIcon]="'heroicons_solid:location-marker'">
+                                    </mat-icon>
+                                </mat-form-field>
+                                <!-- City -->
+                                <mat-form-field class="w-full " floatLabel="always">
+                                    <input
+                                        matInput
+                                        maxlength="100"
+                                        [formControlName]="'city'"
+                                        [required]="true">
+                                    <mat-label>City</mat-label>
+                                    <mat-error *ngIf="editStoreForm.get('city').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                </mat-form-field>
+                                <!-- State -->
+                                <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+                                    <mat-label class="font-medium">State</mat-label>
+                                    <mat-select
+                                        [formControlName]="'regionCountryStateId'"
+                                        [required]="true"
+                                        [value]="'regionCountryStateId'"
+                                        [placeholder]="'Select State'"
+                                        (selectionChange)="editStoreForm.get('regionCountryStateId').patchValue($event.value)"
+                                        #stateSelector="matSelect"
+                                        >
+                                        <mat-select-trigger>
+                                            <span class="flex items-center">
+                                                <span>{{ stateSelector.triggerValue }}</span>
+                                            </span>
+                                        </mat-select-trigger>
+                                        <div *ngFor="let state of statesByCountry">
+                                            <mat-option [value]="state.id">{{state.name}}</mat-option>
+                                        </div>
+                                    </mat-select>
+                                    <mat-error *ngIf="editStoreForm.get('regionCountryStateId').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                </mat-form-field>
+                                <!-- Postcode -->
+                                <mat-form-field class="w-full">
+                                    <input
+                                        matInput
+                                        [formControlName]="'postcode'"
+                                        minlength="5"
+                                        maxlength="10"
+                                        [required]="true">
+                                    <mat-label>Postcode</mat-label>
+                                    <mat-error *ngIf="editStoreForm.get('postcode').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                    <mat-error *ngIf="editStoreForm.get('postcode').hasError('invalidPostcode')">
+                                        Invalid postcode
+                                    </mat-error>
+                                    <mat-error *ngIf="editStoreForm.get('postcode').hasError('minlength')">
+                                        Minimum length of postcode not meet
+                                    </mat-error>
+                                    <mat-error *ngIf="editStoreForm.get('postcode').hasError('maxlength')">
+                                        Exceed maximum length of postcode
+                                    </mat-error>
+                                </mat-form-field>
+                                <!-- Country -->
+                                <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+                                    <mat-label class="font-medium">Country</mat-label>
+                                    <mat-select
+                                        [formControlName]="'regionCountryId'"
+                                        [required]="true"
+                                        [value]="'regionCountryId'"
+                                        [placeholder]="'Select Country'"
+                                        (selectionChange)="editStoreForm.get('regionCountryId').patchValue($event.value);updateStates(countrySelector.value)"
+                                        #countrySelector="matSelect"
+                                        >
+                                        <mat-select-trigger>
+                                            <span class="flex items-center">
+                                                <span>{{ countrySelector.triggerValue }}</span>
+                                            </span>
+                                        </mat-select-trigger>
+                                        <div *ngFor="let country of countriesList">
+                                            <mat-option [value]="country.id">{{country.name}}</mat-option>
+                                        </div>
+                                    </mat-select>
+                                    <mat-error *ngIf="editStoreForm.get('regionCountryId').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                </mat-form-field>
+                                <!-- Region -->
+                                <!-- <mat-form-field class="w-full" appearance="fill">
+                                    <mat-label class="font-medium">Region</mat-label>
+                                    <mat-select
+                                        [formControlName]="'region'"
+                                        [required]="true"
+                                        [value]="'region'"
+                                        (selectionChange)="editStoreForm.get('region').patchValue($event.value)"
+                                        #regionSelector="matSelect"
+                                        >
+                                        <mat-select-trigger>
+                                            <span class="flex items-center">
+                                                <span>{{ regionSelector.triggerValue }}</span>
+                                            </span>
+                                        </mat-select-trigger>
+                                        <mat-option [disabled]="'disabled'" [value]="''">Select Region</mat-option>
+                                        <div *ngFor="let region of regionsList">
+                                            <mat-option [value]="region.regionCode">{{region.name}}</mat-option>
+                                        </div>
+                                    </mat-select>
+                                    <mat-error *ngIf="editStoreForm.get('region').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                </mat-form-field> -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logo and Banner -->
+                    <div class="flex flex-col sm:flex-row">
+                        <!-- Logo -->
+                        <div class="flex flex-col w-full lg:w-2/4 sm:px-4">
+                            <mat-form-field class="w-full fuse-mat-emphasized-affix">
+                                <mat-label class="font-medium">Store Logo</mat-label>
+                                <mat-toolbar>
+                                    <input class="text-sm" matInput type="text" readonly [value]="files[0].selectedFileNames ? files[0].selectedFileNames : 'Select Images'" />
+                                </mat-toolbar>
+                                <input
+                                    type="file"
+                                    id="logo"
+                                    name="logo"
+                                    accept="image/*" multiple 
+                                    (change)="selectFiles('logo',$event)"
+                                />
+                                <mat-icon
+                                    matPrefix
+                                    [svgIcon]="'mat_solid:image'">
+                                </mat-icon>
+                            </mat-form-field>
+                            <div class="w-full">
+                                <mat-label class="font-medium">Preview</mat-label>
+                                <div class="my-2"></div>
+                                <div class="p-8 border border-gray-300 rounded h-96">
+                                    <div *ngIf="this.files[0].fileSource">
+                                        <span class="block"><b>Image Size</b> : {{ this.files[0].selectedImageWidth }} x {{ this.files[0].selectedImageHeight }} pixel</span>
+                                        <span class="block"><b>Recommended Size</b> : {{ this.files[0].recommendedImageWidth }} x {{ this.files[0].recommendedImageHeight }} pixel</span>
+                                        <div class="flex w-full flex-auto">
+                                            <img [src]="this.files[0].fileSource" class="object-scale-down h-52" />
+                                            <mat-icon
+                                                class="top-0 right-0 cursor-pointer"
+                                                (click)="deletefiles(0);"
+                                                [svgIcon]="'heroicons_solid:x'">
+                                            </mat-icon>
+                                        </div>
+                                    </div>
+                                </div> 
+                            </div>
+                        </div>
+                        <!-- Banner -->
+                        <div class="flex flex-col w-full lg:w-2/4 sm:px-4">
+                            <!-- Store Banner(Desktop) & Store Banner(Mobile) -->
+                            <div class="flex flex-col sm:flex-row">
+                                <!-- Store Banner (Desktop) -->
+                                <div class="flex flex-col w-full lg:w-2/4 sm:pr-2">
+                                    <mat-form-field class="w-full fuse-mat-emphasized-affix">
+                                        <mat-label class="font-medium">Store Banner (Desktop)</mat-label>
+                                        <mat-toolbar>
+                                            <input class="text-sm" matInput type="text" readonly [value]="this.files[1].selectedFileNames ? this.files[1].selectedFileNames : 'Select Images'" />
+                                        </mat-toolbar>
+                                        <input
+                                            type="file"
+                                            id="banner"
+                                            name="banner"
+                                            accept="image/*" multiple 
+                                            (change)="selectFiles('banner',$event)"
+                                        />
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'mat_solid:image'">
+                                        </mat-icon>
+                                    </mat-form-field>
+                                </div>
+                                <!-- Store Banner (Mobile) -->
+                                <div class="flex flex-col w-full lg:w-2/4 sm:pl-2">
+                                    <mat-form-field class="w-full fuse-mat-emphasized-affix">
+                                        <mat-label class="font-medium">Store Banner (Mobile)</mat-label>
+                                        <mat-toolbar>
+                                            <input class="text-sm" matInput type="text" readonly [value]="this.files[2].selectedFileNames ? this.files[2].selectedFileNames : 'Select Images'" />
+                                        </mat-toolbar>
+                                        <input
+                                            type="file"
+                                            id="bannerMobile"
+                                            name="bannerMobile"
+                                            accept="image/*" multiple 
+                                            (change)="selectFiles('bannerMobile',$event)"
+                                        />
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'mat_solid:image'">
+                                        </mat-icon>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                            <div class="w-full">
+                                <mat-label class="font-medium">Preview</mat-label>
+                                <div class="my-2"></div>
+                                <div class="flex flex-wrap content-center border border-gray-300 rounded h-96">
+                                    <div class="py-2 px-8" *ngIf="this.files[1].fileSource">
+                                        <span class="block">Banner for <b>Desktop</b> View </span> 
+                                        <span class="block"><b>Image Size</b> : {{ this.files[1].selectedImageWidth }} x {{ this.files[1].selectedImageHeight }} pixel</span>
+                                        <span class="block"><b>Recommended Size</b> : {{ this.files[1].recommendedImageWidth }} x {{ this.files[1].recommendedImageHeight }} pixel</span> 
+                                        <div class="flex w-full flex-auto">
+                                            <img [src]="this.files[1].fileSource" class="object-scale-down h-24" />
+                                            <mat-icon
+                                                class="top-0 right-0 cursor-pointer"
+                                                (click)="deletefiles(1);"
+                                                [svgIcon]="'heroicons_solid:x'">
+                                            </mat-icon>
+                                        </div>
+                                    </div>
+                                    <div class="py-2 px-8" *ngIf="this.files[2].fileSource">
+                                        <span>Banner for <b>Mobile</b> View </span> 
+                                        <span class="block"><b>Image Size</b> : {{ this.files[2].selectedImageWidth }} x {{ this.files[2].selectedImageHeight }} pixel</span>
+                                        <span class="block"><b>Recommended Size</b> : {{ this.files[2].recommendedImageWidth }} x {{ this.files[2].recommendedImageHeight }} pixel</span>  
+                                        <div class="flex w-full flex-auto">
+                                            <img [src]="this.files[2].fileSource" class="object-scale-down h-24" />
+                                            <mat-icon
+                                                class="top-0 right-0 cursor-pointer"
+                                                (click)="deletefiles(2);"
+                                                [svgIcon]="'heroicons_solid:x'">
+                                            </mat-icon>
+                                        </div>
+                                    </div>
+                                    &nbsp;
+                                </div> 
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--  -->
+                    <div class="mb-2"></div>
+                    <div class="flex flex-col sm:flex-row">
+                        <!-- Delivery Type & Delivery Fullfilment -->
+                        <div class="flex flex-col w-full lg:w-2/4 sm:px-4">
+                            <!-- Delivery Type & Delivery Fullfillment -->
+                            <div class="flex flex-col sm:flex-row">
+                                <!-- Delivery Type -->
+                                <div class="flex flex-col w-full">
+                                    <mat-form-field class="w-full fuse-mat-emphasized-affix" appearance="fill" floatLabel="always">
+                                        <mat-label class="font-medium">Delivery Type</mat-label>
+                                        <mat-select
+                                            [formControlName]="'deliveryType'"
+                                            [required]="true"
+                                            [value]="'deliveryType'"
+                                            [placeholder]="'Select Delivery Type'"
+                                            (selectionChange)="editStoreForm.get('deliveryType').patchValue($event.value)"
+                                            (selectionChange)="checkDeliveryPartner()"
+                                            #deliverySelector="matSelect"
+                                            >
+                                            <mat-select-trigger>
+                                                <span class="flex items-center">
+                                                    <span>{{ deliverySelector.triggerValue }}</span>
+                                                </span>
+                                            </mat-select-trigger>
+                                            <div>
+                                                <mat-option [value]="'SELF'">Self Delivery</mat-option>
+                                                <mat-option 
+                                                    *ngIf="this.editStoreForm.get('verticalCode').value === 'E-Commerce' || this.editStoreForm.get('verticalCode').value === 'e-commerce-b2b2c' || this.editStoreForm.get('verticalCode').value === 'ECommerce_PK'" 
+                                                    [value]="'SCHEDULED'">Regular Delivery</mat-option>
+                                                <mat-option 
+                                                *ngIf="this.editStoreForm.get('verticalCode').value === 'FnB' || this.editStoreForm.get('verticalCode').value === 'FnB_PK'"
+                                                    [value]="'ADHOC'">Instant Delivery</mat-option>
+                                            </div>
+                                        </mat-select>
+                                        <mat-error *ngIf="editStoreForm.get('deliveryType').hasError('required')">
+                                            Required
+                                        </mat-error>
+                                        <mat-error *ngIf="editStoreForm.get('deliveryType').hasError('noDeliveryPartners')">
+                                            No available delivery partner
+                                        </mat-error>
+                                        <mat-icon
+                                            matPrefix
+                                            [svgIcon]="'mat_solid:delivery_dining'">
+                                        </mat-icon>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                            <!-- Delivery Fullfillment -->
+                            <div class="flex flex-col w-full mb-3">
+                                <div class="flex flex-col w-full">
+                                    <mat-label class="font-medium">Delivery Fulfillment *</mat-label>
+                                    <div class="flex flex-col sm:flex-row">
+                                        <!-- <div class="flex w-full lg:w-2/4">
+                                            <mat-checkbox class="" [formControlName]="'allowScheduledDelivery'" [checked]="deliveryFullfilment[2].selected">{{deliveryFullfilment[2].label}}</mat-checkbox>
+                                            <mat-icon
+                                                [matTooltip]="deliveryFullfilment[2].tooltip"
+                                                class="flex flex-wrap transform scale-75"
+                                                [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                            </mat-icon>
+                                        </div> -->
+                                        <div class="flex w-full lg:w-2/4">
+                                            <mat-checkbox class="" [formControlName]="'allowStorePickup'" [checked]="deliveryFullfilment[3].selected">{{deliveryFullfilment[3].label}}</mat-checkbox>
+                                            <mat-icon
+                                                [matTooltip]="deliveryFullfilment[3].tooltip"
+                                                class="flex flex-wrap transform scale-75"
+                                                [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                            </mat-icon>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Delivery Partner, Self Delivery -->
+                            <div class="flex w-full flex-auto flex-wrap">
+                                <!-- Delivery Partner -->
+                                <div *ngIf="editStoreForm.get('deliveryType').value === 'SCHEDULED' || editStoreForm.get('deliveryType').value === 'ADHOC'" class="flex flex-col w-full">
+                                    <div class="flex w-full">
+                                        <mat-label class="flex flex-col font-medium">Delivery Partner *</mat-label>
+                                        <mat-icon
+                                            matTooltip="Below delivery partner will be provided to the customer to choose when purchasing from this store."
+                                            class="flex flex-wrap transform scale-75"
+                                            [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                        </mat-icon>
+                                    </div>
+                                    <div class="mb-0.5"></div>
+                                    <div class="border border-gray-300 rounded min-h-26 max-h-72 overflow-auto">
+                                        <div class="pt-4 pl-2 w-full">
+                                            <section class="flex flex-col px-2" *ngFor="let deliveryPartner of deliveryPartners">
+                                                <mat-form-field
+                                                    appearance="fill" 
+                                                    floatLabel="always"
+                                                    *ngIf="editStoreForm.get('deliveryType').value === 'SCHEDULED'"
+                                                    class="flex flex-col w-full fuse-mat-emphasized-affix">
+                                                    <input
+                                                        matInput
+                                                        [value]="deliveryPartner.name"
+                                                        [readonly]="true"/>
+                                                    <img
+                                                        matSuffix
+                                                        class="w-30"
+                                                        *ngIf="deliveryPartner.providerImage"
+                                                        [alt]="'Product thumbnail image'"
+                                                        [src]="deliveryPartner.providerImage">
+                                                </mat-form-field>
+                                            </section >
+
+                                            <!-- <ng-container *ngIf="editStoreForm.get('deliveryType').value === 'SCHEDULED'">
+                                                <section class="p-2" *ngFor="let deliveryPartner of deliveryPartners">
+                                                    <span class="py-0.5">{{deliveryPartner.name}}</span>
+                                                </section>
+                                            </ng-container> -->
+                                            <mat-radio-group 
+                                                *ngIf="editStoreForm.get('deliveryType').value === 'ADHOC'"
+                                                class="flex flex-col w-full"
+                                                [formControlName]="'deliveryPartner'"
+                                            >
+                                                <ng-container *ngIf="deliveryPartners.length > 0; else noDeliveryPartners">
+                                                    <section class="p-2" *ngFor="let deliveryPartner of deliveryPartners">
+                                                        <mat-radio-button [value]="deliveryPartner.id">{{deliveryPartner.name}}</mat-radio-button>
+                                                    </section>
+                                                    <mat-error *ngIf="editStoreForm.get('deliveryPartner').hasError('required')">
+                                                        Required at least 1
+                                                    </mat-error>
+                                                </ng-container>
+                                                <ng-template #noDeliveryPartners>
+                                                    <section class="p-2">
+                                                        <h1 class="text-warn">Sorry there is no delivery partner for this delivery type, please choose another delivery type</h1>
+                                                    </section>
+                                                </ng-template>
+                                            </mat-radio-group>
+                                        </div>
+                                        &#160;
+                                    </div>
+                                </div>
+                                <!-- Self Delivery -->
+                                <div *ngIf="editStoreForm.get('deliveryType').value === 'SELF'" class="flex flex-col w-full">
+                                    <mat-label class="font-medium">Self Delivery *</mat-label>
+                                    <div class="mb-0.5"></div>
+                                    <div class="border border-gray-300 rounded min-h-26 max-h-72 overflow-auto">
+                                        <div class="flex flex-auto flex-wrap p-2">
+                                            <ng-container formArrayName="allowedSelfDeliveryStates" *ngFor="let allowedSelfDeliveryState of editStoreForm.get('allowedSelfDeliveryStates')['controls']; let i = index;">
+                                                <ng-container [formGroupName]="i">
+                                                    <!-- Select Field -->
+                                                    <div class="flex flex-col w-full lg:w-2/4 lg:pr-2">
+                                                        <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+                                                            <mat-select
+                                                                placeholder="Select State"
+                                                                [required]="true"
+                                                                [formControlName]="'deliveryStates'"
+                                                                [value]="allowedSelfDeliveryState.deliveryStates"
+                                                                (selectionChange)="editSelfDeliveryState('deliveryStates', i, deliveryStatesSelector.value)"
+                                                                #deliveryStatesSelector="matSelect"
+                                                                >
+                                                                <mat-select-trigger>
+                                                                    <span class="flex items-center">
+                                                                        <span>{{ deliveryStatesSelector.triggerValue }}</span>
+                                                                    </span>
+                                                                </mat-select-trigger>
+                                                                <div>
+                                                                    <ng-container *ngFor="let state of statesByCountry">
+                                                                        <mat-option [disabled]="checkCurrDeliveryStates(state.id)" [value]="state.id">{{ state.name }}</mat-option>
+                                                                    </ng-container>
+                                                                </div>
+                                                            </mat-select>
+                                                        </mat-form-field>
+                                                    </div>
+                                                    <!-- Input Field -->
+                                                    <div class="flex flex-col w-full lg:w-2/4">
+                                                        <div class="flex flex-col sm:flex-row">
+                                                            <!-- Input -->
+                                                            <mat-form-field class="flex flex-col w-full sm:w-5/6">
+                                                                <span matSuffix>$</span>
+                                                                <input
+                                                                    matInput
+                                                                    type="number"
+                                                                    placeholder="Delivery Charges"
+                                                                    [formControlName]="'deliveryCharges'"
+                                                                    [required]="true"
+                                                                    (change)="editSelfDeliveryState('deliveryCharges', i, $event.target.value)">
+                                                            </mat-form-field>
+                                                            <div class="flex flex-col w-full sm:w-1/6 sm:py-1 sm:px-2">
+                                                                <input
+                                                                    [id]="'state-add-button' + i"
+                                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                    type="button"
+                                                                    (click)="addSelfDeliveryState()"
+                                                                    mat-icon-button>
+                                                                <label 
+                                                                    class="flex items-center justify-center sm:w-5 sm:h-5 rounded-full cursor-pointer hover:bg-hover"
+                                                                    [for]="'state-add-button'+i"
+                                                                    matRipple>
+                                                                    <mat-icon
+                                                                        class="text-gray transform scale-75"
+                                                                        [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                                                                </label>
+                                                                <input
+                                                                    [id]="'state-remove-button'+i"
+                                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                    type="button"
+                                                                    (click)="removeSelfDeliveryState(i)"
+                                                                    mat-icon-button>
+                                                                <label 
+                                                                    class="flex items-center justify-center sm:w-5 sm:h-5 rounded-full cursor-pointer hover:bg-hover"
+                                                                    [for]="'state-remove-button'+i"
+                                                                    matRipple>
+                                                                    <mat-icon
+                                                                        class="text-gray transform scale-75"
+                                                                        [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </ng-container>
+                                            </ng-container>
+                                        </div>
+                                        <mat-error *ngIf="editStoreForm.get('deliveryType').hasError('required')">
+                                            Required at least 1
+                                        </mat-error>
+                                        &#160;
+                                    </div>
+                                </div>
+                                <!-- Defalut -->
+                                <div *ngIf="!editStoreForm.get('deliveryType').value || editStoreForm.get('deliveryType').value === ''" class="flex flex-col w-full">
+                                    <mat-label class="font-medium">Please choose a delivery type</mat-label>
+                                    <div class="mb-2"></div>
+                                    <div class="border border-gray-300 rounded h-72 overflow-auto">
+                                        &nbsp;
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Payment & Store Opening Hour -->
+                        <div class="flex flex-col w-full lg:w-2/4 sm:px-4">
+                            <!-- Payment Type -->
+                            <mat-form-field class="w-full fuse-mat-emphasized-affix" appearance="fill" floatLabel="always">
+                                <mat-label class="font-medium">Payment Type</mat-label>
+                                <mat-select
+                                    [formControlName]="'paymentType'"
+                                    [required]="true"
+                                    [value]="'paymentType'"
+                                    [placeholder]="'Select Payment Type'"
+                                    (selectionChange)="editStoreForm.get('paymentType').patchValue($event.value)"
+                                    #paymentSelector="matSelect"
+                                    >
+                                    <mat-select-trigger>
+                                        <span class="flex items-center">
+                                            <span>{{ paymentSelector.triggerValue }}</span>
+                                        </span>
+                                    </mat-select-trigger>
+                                    <div>
+                                        <mat-option [value]="'COD'">Cash On Delivery</mat-option>
+                                        <mat-option [value]="'ONLINEPAYMENT'">Online Payment</mat-option>
+                                    </div>
+                                </mat-select>
+                                <mat-error *ngIf="editStoreForm.get('paymentType').hasError('required')">
+                                    Required
+                                </mat-error>
+                                <mat-icon
+                                    matPrefix
+                                    [svgIcon]="'payment'">
+                                </mat-icon>
+                            </mat-form-field>
+                            <!-- Opening Hour -->
+                            <div class="flex flex-col w-full">
+                                <mat-label class="font-medium">Store Operating Hour *</mat-label>
+                                <div class="mb-0.5"></div>
+                                <div class="border border-gray-300 rounded h-96 overflow-auto">
+                                    <div class="flex flex-auto flex-wrap p-2">
+                                        <div class="flex flex-col w-full">
+                                            <ng-container formArrayName="storeTiming" *ngFor="let dayList of editStoreForm.get('storeTiming')['controls']; let i = index;">
+                                                <fieldset [ngClass]="dayList.value.isOpen === true ? '' : 'bg-gray-100 text-gray-500'" class="flex flex-wrap flex-row w-full border border-solid border-gray-300 rounded my-1 px-3" [formGroupName]="i">
+                                                    <!-- Days -->
+                                                    <legend class="text font-bold ml-2 px-2">{{dayList.value.day | titlecase }}</legend>
+                                                    <input 
+                                                        matInput
+                                                        [formControlName]="'day'"
+                                                        [value]="dayList.value.day"
+                                                        readonly
+                                                        hidden
+                                                    />
+
+                                                    <!-- Open / Closing Toggle -->
+                                                    <div class="flex flex-row w-full justify-end mb-2">
+                                                        <mat-slide-toggle
+                                                            matInput
+                                                            [formControlName]="'isOpen'"
+                                                            [color]="'primary'"
+                                                            (change)="updateStoreOpening(dayList.value.day)">
+                                                            {{dayList.value.isOpen === true ? 'Open' : 'Close'}}
+                                                        </mat-slide-toggle>
+                                                    </div>
+
+                                                    <!-- Working Hour Label -->
+                                                    <span class="flex flex-col justify-center w-full h-16 lg:w-1/3 lg:pr-2">
+                                                        Working Hour
+                                                    </span>
+
+                                                    <!-- Open Time -->
+                                                    <div class="flex flex-col w-full h-16 lg:w-1/3 lg:pr-2">
+                                                        <mat-form-field class="w-full p-0 m-0" floatLabel="always" appearance="outline">
+                                                            <mat-label>Start time</mat-label>
+                                                            <input
+                                                                matInput
+                                                                [formControlName]="'openTime'"
+                                                                [readonly]="!dayList.value.isOpen"
+                                                                type="time"
+                                                                [value]="dayList.value.openTime"
+                                                                (change)="changeTime(i)"
+                                                            >
+                                                            <!-- <mat-error *ngIf="editStoreForm.get('storeTiming').hasError('required')">
+                                                                Required
+                                                            </mat-error> -->
+                                                        </mat-form-field>
+                                                    </div>
+
+                                                    <!-- Close Time -->
+                                                    <div class="flex flex-col w-full h-16 lg:w-1/3 lg:pr-2">
+                                                        <mat-form-field class="w-full p-0 m-0" floatLabel="always" appearance="outline">
+                                                            <mat-label>End time</mat-label>
+                                                            <input
+                                                                matInput
+                                                                [formControlName]="'closeTime'"
+                                                                [readonly]="!dayList.value.isOpen"
+                                                                type="time"
+                                                                [value]="dayList.value.closeTime"
+                                                                (change)="changeTime(i, 'closeTime' , $event)"
+                                                            >
+                                                            <!-- <mat-error *ngIf="editStoreForm.get('storeCloseTime').hasError('required')">
+                                                                Required
+                                                            </mat-error> -->
+                                                        </mat-form-field>
+                                                    </div>
+
+                                                    <!-- Break Hour Section -->
+                                                    <div class="flex flex-col justify-center w-full h-16 lg:w-1/3 lg:pr-2">
+                                                        <!-- Closing Label -->
+                                                        <span class="flex flex-col justify-center w-full">
+                                                            Break Hour
+                                                        </span>
+                                                        <!-- Open / Closing Toggle -->
+                                                        <div class="flex flex-col w-full justify-start mb-2">
+                                                            <mat-slide-toggle
+                                                                matInput
+                                                                [formControlName]="'isBreakTime'"
+                                                                [color]="'primary'"
+                                                                (change)="toggleBreakHour($event, i)"
+                                                                >{{dayList.value.isBreakTime === true ? 'Open' : 'Close'}}
+                                                            </mat-slide-toggle>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Break Time Start -->
+                                                    <div class="flex flex-col w-full h-16 lg:w-1/3 lg:pr-2">
+                                                        <mat-form-field class="w-full" floatLabel="always" appearance="outline">
+                                                            <mat-label>Start time</mat-label>
+                                                            <input
+                                                                matInput
+                                                                [formControlName]="'breakStartTime'"
+                                                                [readonly]="!dayList.value.isOpen"
+                                                                type="time"
+                                                                [value]="dayList.value.breakStartTime"
+                                                                (change)="changeBreakTime(i, 'breakStartTime' , $event);"
+                                                            >
+                                                            <!-- <mat-error *ngIf="editStoreForm.get('storeCloseTime').hasError('required')">
+                                                                Required
+                                                            </mat-error> -->
+                                                        </mat-form-field>
+                                                    </div>
+                                                    <!-- Break Time End -->
+                                                    <div class="flex flex-col w-full h-16 lg:w-1/3 lg:pr-2">
+                                                        <mat-form-field class="w-full" floatLabel="always" appearance="outline">
+                                                            <mat-label>End time</mat-label>
+                                                            <input
+                                                                matInput
+                                                                [formControlName]="'breakEndTime'"
+                                                                [readonly]="!dayList.value.isOpen"
+                                                                type="time"
+                                                                [value]="dayList.value.breakEndTime"
+                                                                (change)="changeBreakTime(i, 'breakEndTime' , $event)"
+                                                            >
+                                                            <!-- <mat-error *ngIf="editStoreForm.get('storeCloseTime').hasError('required')">
+                                                                Required
+                                                            </mat-error> -->
+                                                        </mat-form-field>
+                                                    </div>
+                                                    <div class="justify-between mb-2 mt-2 flex flex-row w-full ">
+                                                        <div *ngIf="timeAlert[i] !== 'invisible'" class="flex flex-wrap text-warn items-center">
+                                                            {{timeAlert[i]}}
+                                                        </div>
+                                                        <div class="items-center">
+                                                            <input
+                                                                [id]="'apply-to-all-button' + i"
+                                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                type="button"
+                                                                (click)="applyToAll(i)"
+                                                                mat-icon-button>
+                                                            <label 
+                                                                class="flex items-center justify-center sm:w-28 sm:h-8 rounded-full cursor-pointer bg-primary hover:bg-primary-500"
+                                                                [for]="'apply-to-all-button' + i"
+                                                                matRipple>
+                                                                <span class="text-white text-extrabold">Apply to all</span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </ng-container>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center justify-end">
+                        <!-- Alert -->
+                        <fuse-alert
+                            *ngIf="isDisplayStatus"
+                            [appearance]="'outline'"
+                            [showIcon]="false"
+                            [type]="alert.type"
+                            [ngClass]="alert.type === 'error' ? 'text-warn' : 'text-green-500'"
+                            [@shake]="alert.type === 'error'">
+                            {{alert.message}}
+                        </fuse-alert>
+                        <button
+                            class="ml-2"
+                            mat-button
+                            [color]="'accent'"
+                            [disabled]="editStoreForm.pristine || editStoreForm.untouched"
+                            (click)="clearForm()">
+                            Clear
+                        </button>
+                        <button
+                            class="ml-2"
+                            mat-flat-button
+                            [color]="'primary'"
+                            (click)="updateForm()">
+                            Update
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

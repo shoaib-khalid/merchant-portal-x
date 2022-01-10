@@ -1,0 +1,56 @@
+<div class="w-full max-w-3xl">
+
+    <!-- Form -->
+    <form [formGroup]="googleAnalyticForm">
+
+        <!-- Section -->
+        <div class="w-full text-xl">Store Gooogle Analytic</div>
+        <div class="grid sm:grid-cols-4 gap-6 w-full mt-8">
+            <!-- Google Analytics -->
+            <div class="sm:col-span-3 flex flex-col sm:flex-row w-full items-center">
+                <mat-form-field class="fuse-mat-emphasized-affix w-full" floatLabel="always">
+                    <mat-label>Google Analytic ID</mat-label>
+                    <mat-icon
+                        class="icon-size-5"
+                        [svgIcon]="'mat_solid:analytics'"
+                        matPrefix></mat-icon>
+                    <input
+                        [formControlName]="'googleAnalyticId'"
+                        maxlength="100"
+                        placeholder="Your Google Analytics ID"
+                        matInput>
+                </mat-form-field>
+                <div class="items-center justify-items-start flex flex-wrap w-full pl-4 pt-2"> 
+                    <input
+                        id="clear-form-btn"
+                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                        type="button"
+                        (click)="clearForm()"
+                    >
+                    <label
+                        for="clear-form-btn"
+                        class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-primary hover:bg-on-primary-50 mr-3"
+                        matRipple>
+                        <mat-icon
+                        class="text-white icon-size-5"
+                        [svgIcon]="'mat_solid:clear'"></mat-icon>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="my-10 border-t"></div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end">
+            <button
+                class="ml-4"
+                mat-flat-button
+                type="button"
+                (click)="updateGoogleAnalytic()"
+                [color]="'primary'">Save
+            </button>
+        </div>
+    </form>
+</div>

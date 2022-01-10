@@ -6,7 +6,7 @@ import { tap } from 'rxjs/operators';
 @Injectable({
     providedIn: 'root'
 })
-export class RegisterStoreValidationService {
+export class EditStoreValidationService {
 
     /**
      * Constructor

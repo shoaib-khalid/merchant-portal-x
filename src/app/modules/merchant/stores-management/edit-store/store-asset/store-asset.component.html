@@ -1,0 +1,156 @@
+<div class="w-full max-w-3xl">
+
+    <!-- Form -->
+    <form>
+
+        <!-- Section -->
+        <div class="w-full">
+            <div class="text-xl">Manage your store view</div>
+            <div class="text-secondary">Simply manage you own store logo and banners.</div>
+        </div>
+         <!-- Plan -->
+        <!-- <div class="grid sm:grid-cols-3 gap-6 w-full mt-8">
+            <div class="sm:col-span-3">
+                <fuse-alert
+                    [appearance]="'outline'"
+                    [type]="'info'">
+                    Changing the plan will take effect immediately. You will be charged for the rest of the current month.
+                </fuse-alert>
+            </div>
+        </div> -->
+
+        <div class="grid grid-cols-4 gap-6 w-full mt-8">
+            <div class="col-span-4 sm:col-span-4">
+                <!-- Store Logo -->
+                <div class="w-full">
+                    <mat-form-field class="fuse-mat-emphasized-affix w-full">
+                        <mat-label class="font-medium">Store Logo</mat-label>
+                        <mat-toolbar>
+                            <input class="text-sm" matInput type="text" readonly [value]="files[0].selectedFileNames ? files[0].selectedFileNames : 'Select Images'"  />
+                        </mat-toolbar>
+                        <input
+                            type="file"
+                            id="logo"
+                            name="logo"
+                            accept="image/*" multiple 
+                            (change)="selectFiles('logo',$event)"
+                        />
+                        <mat-icon
+                            matPrefix
+                            [svgIcon]="'mat_solid:image'">
+                        </mat-icon>
+                    </mat-form-field>
+                </div>
+                <div class="w-full">
+                    <mat-label class="font-medium">Preview</mat-label>
+                    <div class="my-2"></div>
+                    <div class="p-8 border border-gray-300 rounded h-96">
+                        <div *ngIf="this.files[0].fileSource">
+                            <span *ngIf="this.files[0].selectedImageWidth && this.files[0].selectedImageHeight" class="block"><b>Uploaded Image Size</b> : {{ this.files[0].selectedImageWidth }} x {{ this.files[0].selectedImageHeight }} pixel</span>
+                            <span class="block"><b>Recommended Size</b> : {{ this.files[0].recommendedImageWidth }} x {{ this.files[0].recommendedImageHeight }} pixel</span>
+                            <div class="flex w-full flex-auto">
+                                <img [src]="this.files[0].fileSource" class="object-scale-down h-52"/>
+                                <mat-icon
+                                    class="top-0 right-0 cursor-pointer"
+                                    (click)="deletefiles(0);"
+                                    [svgIcon]="'heroicons_solid:x'">
+                                </mat-icon>
+                            </div>
+                        </div>
+                    </div> 
+                </div>
+            </div>
+            <!-- Store Banner (Desktop) -->
+            <div class="col-span-4 sm:col-span-2">
+                <mat-form-field class="fuse-mat-emphasized-affix w-full">
+                    <mat-label class="font-medium">Store Banner (Desktop)</mat-label>
+                    <mat-toolbar>
+                        <input class="text-sm" matInput type="text" readonly [value]="this.files[1].selectedFileNames ? this.files[1].selectedFileNames : 'Select Images'" />
+                    </mat-toolbar>
+                    <input
+                        type="file"
+                        id="banner"
+                        name="banner"
+                        accept="image/*" multiple 
+                        (change)="selectFiles('banner',$event)"
+                    />
+                    <mat-icon
+                        matPrefix
+                        [svgIcon]="'mat_solid:image'">
+                    </mat-icon>
+                </mat-form-field>
+                <div class="w-full">
+                    <mat-label class="font-medium">Preview</mat-label>
+                    <div class="my-2"></div>
+                    <div class="p-8 border border-gray-300 rounded h-96">
+                        <div *ngIf="this.files[1].fileSource">
+                            <span *ngIf="this.files[1].selectedImageWidth && this.files[1].selectedImageHeight" class="block"><b>Uploaded Image Size</b>: {{ this.files[1].selectedImageWidth }} x {{ this.files[1].selectedImageHeight }} pixel </span>
+                            <span class="block"><b>Recommended Size</b>: {{ this.files[1].recommendedImageWidth }} x {{ this.files[1].recommendedImageHeight }} pixel </span>
+                            <div class="flex w-full flex-auto">
+                                <img [src]="this.files[1].fileSource" class="object-scale-down h-52" />
+                                <mat-icon
+                                    class="top-0 right-0 cursor-pointer"
+                                    (click)="deletefiles(1);"
+                                    [svgIcon]="'heroicons_solid:x'">
+                                </mat-icon>
+                            </div>
+                        </div>
+                    </div> 
+                </div>
+            </div>
+            <!-- Store Banner (Mobile) -->
+            <div class="col-span-4 sm:col-span-2">
+                <mat-form-field class="fuse-mat-emphasized-affix w-full">
+                    <mat-label class="font-medium">Store Banner (Mobile)</mat-label>
+                    <mat-toolbar>
+                        <input class="text-sm" matInput type="text" readonly />
+                    </mat-toolbar>
+                    <input
+                        type="file"
+                        id="bannerMobile"
+                        name="bannerMobile"
+                        accept="image/*" multiple 
+                        (change)="selectFiles('bannerMobile',$event)"
+                    />
+                    <mat-icon
+                        matPrefix
+                        [svgIcon]="'mat_solid:image'">
+                    </mat-icon>
+                </mat-form-field>
+                <div class="w-full">
+                    <mat-label class="font-medium">Preview</mat-label>
+                    <div class="my-2"></div>
+                    <div class="p-8 border border-gray-300 rounded h-96">
+                        <div *ngIf="this.files[2].fileSource">
+                            <span *ngIf="this.files[2].selectedImageWidth && this.files[2].selectedImageHeight" class="block"><b>Uploaded Image Size</b>: {{ this.files[2].selectedImageWidth }} x {{ this.files[2].selectedImageHeight }} pixel </span>
+                            <span class="block"><b>Recommended Size</b>: {{ this.files[2].recommendedImageWidth }} x {{ this.files[2].recommendedImageHeight }} pixel </span>
+                            <div class="flex w-full flex-auto">
+                                <img [src]="this.files[2].fileSource" class="object-scale-down h-52" />
+                                <mat-icon
+                                    class="top-0 right-0 cursor-pointer"
+                                    (click)="deletefiles(2);"
+                                    [svgIcon]="'heroicons_solid:x'">
+                                </mat-icon>
+                            </div>
+                        </div>
+                    </div> 
+                </div>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="mt-11 mb-10 border-t"></div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end">
+            <button
+                class="ml-4"
+                mat-flat-button
+                type="button"
+                (click)="updateStoreAsset()"
+                [color]="'primary'">Save
+            </button>
+        </div>
+    </form>
+
+</div>
