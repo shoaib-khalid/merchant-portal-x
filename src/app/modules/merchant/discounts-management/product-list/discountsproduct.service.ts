@@ -6,7 +6,7 @@ import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { StoreDiscountProduct, StoreDiscountProductPagination } from './discountsproduct.types';
+import { ApiResponseModel, StoreDiscountProduct, StoreDiscountProductPagination } from './discountsproduct.types';
 import { TranslocoTestingModule } from '@ngneat/transloco';
 
 @Injectable({
@@ -148,6 +148,18 @@ export class DiscountsProductService
                 return of(discount);
             })
         );
+    }
+
+    //get store discount products
+    getStoreDiscountProduct(discountId: string) : Observable<ApiResponseModel<StoreDiscountProduct>>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+        return this._httpClient.get<ApiResponseModel<StoreDiscountProduct>>(productService +'/stores/'+this.storeId$+'/discount/'+discountId+'/product',header);
     }
 
 

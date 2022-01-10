@@ -14,6 +14,7 @@ import { CreateDiscountProductComponent } from '../create-product-discount/creat
 import { Product, ProductCategory, ProductPagination } from 'app/core/product/inventory.types';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { DiscountsProductService } from './discountsproduct.service';
+import { ApiResponseModel, StoreDiscountProduct } from './discountsproduct.types';
 
 @Component({
     selector       : 'discounts-product-list',
@@ -53,6 +54,11 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     selectedDiscountForm: FormGroup;
     storeDiscountTierList: FormArray;
     storeDiscountTierListValueEditMode:any = [];
+
+    // store discount product
+    storeDiscountProduct : StoreDiscountProduct[] = [];
+    _storeDiscountProduct : StoreDiscountProduct[] = [];
+
 
     pagination: DiscountPagination;
 
@@ -294,24 +300,27 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         .subscribe((response) => {
 
             console.log('GETTTTT',response);
+
     
-            if (response['data'][0] === undefined){
+            // if (response['data'][0] === undefined){
 
-                this.selectItemOrCategory = '';
+            //     this.selectItemOrCategory = '';
 
-            }
-            else if(response['data'][0].categoryId){
+            // }
+            // else if(response['data'][0].categoryId){
 
-                this.selectItemOrCategory = 'CATEGORY';
-                this.isSelectedItemOrCategory = true;
-                this.selectedCategoryId = response['data'][0].categoryId;
+            //     this.selectItemOrCategory = 'CATEGORY';
+            //     this.isSelectedItemOrCategory = true;
+            //     this.selectedCategoryId = response['data'][0].categoryId;
 
-            } else if(response['data'][0].itemCode){
+            // } else if(response['data'][0].itemCode){
 
-                this.selectItemOrCategory = 'ITEM';
+            //     this.selectItemOrCategory = 'ITEM';
                 
-            }
-            console.log("checkng",this.selectItemOrCategory);
+            // }
+            // console.log("checkng",this.selectItemOrCategory);
+
+
 
 
 
@@ -319,6 +328,17 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
           this._changeDetectorRef.markForCheck();
 
         });
+
+        this._discountProductService.getStoreDiscountProduct(discountId)
+        .subscribe((response: ApiResponseModel<StoreDiscountProduct>)=>{
+
+            this.storeDiscountProduct = response.data;
+
+            this._changeDetectorRef.markForCheck();
+
+        }
+
+        )
 
         // Get the discount by id
         this._discountService.getDiscountById(discountId)
@@ -793,6 +813,19 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         }
 
     }
+
+    // Edit discount product
+    editStoreProductDiscount(productDiscountId){
+        console.log("editStoreProductDiscount",productDiscountId);
+        
+    }
+
+    deleteStoreProductDiscount(productDiscountId){
+        console.log("deleteStoreProductDiscount",productDiscountId);
+
+        //delete service
+    }
+    
 
     /**
      * Show flash message
