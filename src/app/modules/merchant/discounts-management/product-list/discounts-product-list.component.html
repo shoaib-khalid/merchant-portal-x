@@ -600,7 +600,7 @@
                                                     class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                     type="button"
                                                     [id]="'edit-button'+discountProducts.id"
-                                                    (click)="editStoreProductDiscount(discountProducts.id)"
+                                                    (click)="editStoreProductDiscount(discountProducts)"
 
                                                 
                                                     >
@@ -619,7 +619,7 @@
                                                     class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                     type="button"
                                                     [id]="'delete-button'+discountProducts.id"
-                                                    (click)="deleteStoreProductDiscount(discountProducts.id)"
+                                                    (click)="deleteStoreProductDiscount(discountProducts)"
                                                     >
                                                     <label
                                                         class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-warn hover:bg-warn-700 mb-3"

@@ -240,7 +240,7 @@ export class DiscountsProductService
      *
      * @param discountId
      */
-    deleteDiscount(discountId: string): Observable<boolean>
+    deleteDiscountProduct(discountId,discountProductId: string): Observable<boolean>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -252,17 +252,8 @@ export class DiscountsProductService
       
         return this.discounts$.pipe(
             take(1),
-            switchMap(discounts => this._httpClient.delete(productService +'/stores/'+this.storeId$+'/discount/'+discountId, header).pipe(
+            switchMap(discounts => this._httpClient.delete(productService +'/stores/'+this.storeId$+'/discount/'+discountId + '/product/'+discountProductId, header).pipe(
                 map((status: number) => {
-
-                    // Find the index of the deleted discount
-                    const index = discounts.findIndex(item => item.id === discountId);
-
-                    // Delete the discount
-                    discounts.splice(index, 1);
-
-                    // Update the discounts
-                    this._discountsProduct.next(discounts);
 
                     let isDeleted:boolean = false;
                     if (status === 200) {

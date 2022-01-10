@@ -58,6 +58,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     // store discount product
     storeDiscountProduct : StoreDiscountProduct[] = [];
     _storeDiscountProduct : StoreDiscountProduct[] = [];
+    selectedStoreDiscountProduct : StoreDiscountProduct;
 
 
     pagination: DiscountPagination;
@@ -392,6 +393,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         this.selectedDiscount = null;
         this.selectItemOrCategory = '';
         this.isSelectedItemOrCategory = false;
+        this.storeDiscountProduct =[];
     }
 
     /**
@@ -505,11 +507,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         if (this.storeDiscountTierId !== null){
             this.updateSelectedDiscountTier(this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]);                         //since the discount tier we only have 1, so just get the form aarray from index 0
         } else {
-            //there are two condition inside here , if there is no storeDiscountTierId, need to handle case either the user key all the values in form or leaving it empty
-            console.log('calculationType',this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]['controls']['calculationType'].value);
-            console.log('discountAmount',this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]['controls']['discountAmount'].value);
-            console.log('startTotalSalesAmount',this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]['controls']['startTotalSalesAmount'].value);
-            
+            //there are two condition inside here , if there is no storeDiscountTierId, need to handle case either the user key all the values in form or leaving it empty         
             if(this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]['controls']['startTotalSalesAmount'].value !== null &&
                 this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]['controls']['discountAmount'].value !== null &&
                 this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]['controls']['calculationType'].value !==null
@@ -815,15 +813,45 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     }
 
     // Edit discount product
-    editStoreProductDiscount(productDiscountId){
-        console.log("editStoreProductDiscount",productDiscountId);
+    editStoreProductDiscount(productDiscount){
+        this.selectedStoreDiscountProduct = productDiscount;
+        console.log("checking",this.selectedStoreDiscountProduct);
         
     }
 
-    deleteStoreProductDiscount(productDiscountId){
-        console.log("deleteStoreProductDiscount",productDiscountId);
+    //Delete discount product
+    deleteStoreProductDiscount(productDiscount){
+        console.log("deleteStoreProductDiscount",productDiscount);
 
-        //delete service
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title  : 'Delete discount',
+            message: 'Are you sure you want to remove this discount? This action cannot be undone!',
+            actions: {
+                confirm: {
+                    label: 'Delete'
+                }
+            }
+        });
+
+
+        //after user choose either delete or cancel
+        confirmation.afterClosed().subscribe((result) => {
+
+            // If the confirm button pressed...
+            if ( result === 'confirmed' )
+            {
+                // Delete the store discount product from server
+                this._discountProductService.deleteDiscountProduct(this.selectedDiscount.id, productDiscount.id).subscribe(() => {
+              
+                    this.storeDiscountProduct.splice(this.storeDiscountProduct.findIndex(x => x.id === productDiscount.id), 1);
+              
+                    this._changeDetectorRef.markForCheck();
+
+                });
+            }
+        });
+        
     }
     
 
