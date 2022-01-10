@@ -578,20 +578,44 @@
                                          
                                             <td>    
                                                 <mat-form-field class="w-full pr-4">
-                                                <input
-                                                    matInput
-                                                    [value] = "discountProducts.categoryId?'Category':'Item'"
-                                                >
+                                                    <mat-select
+                                                        class="w-full"
+                                                        placeholder="Type"
+                                                        [value]="discountProducts.categoryId?'CATEGORY':'ITEM'"
+                                                        disabled
+                                                       >
+                                                        <div>
+                                                            <mat-option [value]="'CATEGORY'">Category</mat-option>
+                                                            <mat-option [value]="'ITEM'">Item</mat-option>
+                                                        </div>
+                                                    </mat-select>
+                                                    <mat-icon
+                                                        matPrefix
+                                                        [svgIcon]="'list'">
+                                                    </mat-icon>
                                                 </mat-form-field>
                                             </td>
 
                                             <td>    
                                                 <mat-form-field class="w-full pr-4">
-                                                <input
-                                                    matInput
-                                                    [value] = "discountProducts.categoryId?discountProducts.categoryId : discountProducts.itemCode"
-                                                >
+                                                    <mat-select
+                                                        class="w-full"
+                                                        placeholder="Choose one of the listing"
+                                                        [value]="discountProducts.categoryId?discountProducts.categoryId : discountProducts.itemCode"
+                                                       >
+                                                        <div *ngIf="discountProducts.categoryId">
+                                                            <div *ngFor="let listing of filteredProductCategories;">
+                                                                <mat-option [value]="listing.id">{{listing.name}}</mat-option>
+                                                            </div>
+                                                        </div>
+                                                    </mat-select>
+                                                    <mat-icon
+                                                        matPrefix
+                                                        [svgIcon]="'list'">
+                                                    </mat-icon>
                                                 </mat-form-field>
+
+
                                             </td>  
                                             <td>
                                                 <div class="flex flex-wrap items-center justify-center ">

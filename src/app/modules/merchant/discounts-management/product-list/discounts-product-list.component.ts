@@ -551,9 +551,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
     //create store dicount product
     createStoreProductDiscount(){
-
-
-        console.log("checking",this.checkedCategoriesId);
    
         this.checkedCategoriesId
         .forEach((catId)=>{
@@ -569,9 +566,8 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
                     this.storeDiscountProduct.unshift(response["data"]);
    
+                    //remove the check category
                     this.checkedCategoriesId.splice(this.checkedCategoriesId.findIndex(tagId => tagId === response["data"].categoryId), 1);
-                    console.log("ttttt",this.checkedCategoriesId);
-                
 
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
