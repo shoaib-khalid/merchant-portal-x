@@ -607,7 +607,9 @@ export class StoresService
                         updateResponse = Object.assign(stores[index],{storeAsset:{ logoUrl: storeAssetFiles}});
                     } else if (storeAssetType === "banner") {
                         updateResponse = Object.assign(stores[index],{storeAsset:{ bannerUrl: storeAssetFiles}});
-                    }
+                    } else if (storeAssetType === "bannerMobile") {
+                        updateResponse = Object.assign(stores[index],{storeAsset:{ bannerMobileUrl: storeAssetFiles}});
+                    }                    
                     // Update the product
                     stores[index] = { ...stores[index], ...updateResponse};
 
@@ -631,6 +633,22 @@ export class StoresService
         );
     }
 
+    deleteAssetsLogo(storeId: string): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.delete<any>(productService + '/stores/' + storeId + '/assets/logo' , header ).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (deleteAssetsLogo)",response);
+            })
+        );
+    }
+
     deleteAssetsBanner(storeId: string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
@@ -647,7 +665,7 @@ export class StoresService
         );
     }
 
-    deleteAssetsLogo(storeId: string): Observable<any>
+    deleteAssetsBannerMobile(storeId: string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -656,9 +674,9 @@ export class StoresService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
 
-        return this._httpClient.delete<any>(productService + '/stores/' + storeId + '/assets/logo' , header ).pipe(
+        return this._httpClient.delete<any>(productService + '/stores/' + storeId + '/assets/bannermobile' , header ).pipe(
             map((response) => {
-                this._logging.debug("Response from StoresService (deleteAssetsLogo)",response);
+                this._logging.debug("Response from StoresService (deleteAssetsBanner)",response);
             })
         );
     }
