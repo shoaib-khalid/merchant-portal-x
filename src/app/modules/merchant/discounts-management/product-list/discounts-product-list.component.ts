@@ -567,24 +567,44 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                 this._discountProductService.createProductDiscount(this.selectedDiscountForm.value.id,payloadProductDiscount).
                 subscribe((response) => {
 
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-                })
+                    this.storeDiscountProduct.unshift(response["data"]);
+   
+                    this.checkedCategoriesId.splice(this.checkedCategoriesId.findIndex(tagId => tagId === response["data"].categoryId), 1);
+                    console.log("ttttt",this.checkedCategoriesId);
+                
+
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                }
+                , error => {
+                    console.log(error);
+
+                        if (error.status === 409) {
+                            // Open the confirmation dialog
+                            const confirmation = this._fuseConfirmationService.open({
+                                title  : 'Category already exist',
+                                message: 'Please choose other category',
+                                actions: {
+                                    confirm: {
+                                        label: 'Ok'
+                                    },
+                                    cancel : {
+                                        show : false,
+                                    }
+                                }
+                            });
+                        }
+
+                }
+                )
             }
         )
 
-        this.checkedCategoriesId.pop();//empty the array back
-        this._changeDetectorRef.markForCheck();
+        // this.checkedCategoriesId.pop();//empty the array back
+        // console.log('this.checkedCategoriesId',this.checkedCategoriesId);
+        
+        this._changeDetectorRef.markForCheck();   
 
-        // this._discountProductService.createProductDiscount(this.selectedDiscountForm.value.id,payloadProductDiscount).
-        // subscribe((response) => {
-
-
-        //     //then clear the form field
-
-        //     // Mark for check
-        //     this._changeDetectorRef.markForCheck();
-        // })
     }
 
     /**
@@ -777,6 +797,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
     checkboxCategories(tagCategoryId, change: MatCheckboxChange): void
     {
+        console.log(change);
         if ( change.checked )
         {
             // this.checkedCategoriesId.push(tagCategoryId);     
