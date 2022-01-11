@@ -599,6 +599,7 @@
                                             <td>    
                     
                                                 <mat-form-field class="w-full pr-4" appearance="fill" *ngIf="discountProducts.categoryId">
+                                                    
                                                     <input type="text"
                                                            placeholder="Choose one"
                                                            aria-label="Category"
@@ -607,12 +608,14 @@
                                                            (input)="filterCategories($event)"
                                                            (keydown)="filterCategoriesInputKeyDown($event)"
                                                            [matAutocomplete]="auto">
-                                                    <mat-autocomplete #auto="matAutocomplete">
-                                                      <mat-option *ngFor="let listing of filteredProductCategories;" [value]="listing.name">
+
+                                                    <mat-autocomplete #auto="matAutocomplete" [displayWith]="getCategoryName.bind(this)">
+                                                      <mat-option *ngFor="let listing of filteredProductCategories;" [value]="listing.id" (onSelectionChange)="onEditSelectCategoryList(listing.id)">
                                                         {{listing.name}}
                                                       </mat-option>
                                                     </mat-autocomplete>
-                                                  </mat-form-field>
+                                                     
+                                                </mat-form-field>
 
 
                                             </td>  

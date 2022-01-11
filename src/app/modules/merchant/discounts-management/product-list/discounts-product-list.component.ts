@@ -77,6 +77,9 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     selectedCategoryIdCreate : string;
     checkedCategoriesId : any =[];
 
+    //upon edit category listing
+    editCategoryList :any;
+
 
     //product or category 
     isSelectedItemOrCategory: boolean = false;
@@ -786,10 +789,16 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         }
     }
 
-    selectCategoryOrItemList(value){
-        console.log('categoryID',value);
-        this.selectedCategoryId=value;
+    // selectCategoryOrItemList(value){
+    //     console.log('categoryID',value);
+    //     this.selectedCategoryId=value;
+    // }
+
+    onEditSelectCategoryList(categryId){
+        console.log(categryId);
+
     }
+
 
     checkboxCategories(tagCategoryId, change: MatCheckboxChange): void
     {
@@ -829,11 +838,16 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
     }
 
+    getCategoryName(categoryId: string) {
+        return this.filteredProductCategories.find(cat => cat.id === categoryId).name;
+      }
+
     // Edit discount product
     editStoreProductDiscount(productDiscount){
         this.selectedStoreDiscountProduct = productDiscount;
         console.log("checking",this.selectedStoreDiscountProduct);
         console.log('discountProducts.storeCategory.name',productDiscount.storeCategory.name);
+        console.log('editCategoryList',this.editCategoryList);
         
     }
 
