@@ -223,6 +223,7 @@
                                         Transaction ID
                                     </th>
                                     <td
+                                        class="cell-style"
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span class="pr-6 font-medium text-sm text-secondary whitespace-nowrap">
@@ -240,6 +241,7 @@
                                         Date
                                     </th>
                                     <td
+                                        class="cell-style"
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span class="pr-6 whitespace-nowrap">
@@ -257,6 +259,7 @@
                                         Customer Name
                                     </th>
                                     <td
+                                        class="truncate-cell"
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span class="pr-6 whitespace-nowrap">
@@ -274,6 +277,7 @@
                                         Amount
                                     </th>
                                     <td
+                                        class="cell-style"
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span class="pr-6 font-medium whitespace-nowrap">
@@ -291,6 +295,7 @@
                                         Status
                                     </th>
                                     <td
+                                        class="cell-style"
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span
@@ -303,6 +308,30 @@
                                                         'bg-blue-200 text-blue-800 dark:bg-blue-600 dark:text-blue-50': transaction.order.completionStatus === 'DELIVERED_TO_CUSTOMER'}">
                                             <span class="leading-relaxed whitespace-nowrap">{{transaction.order.completionStatus}}</span>
                                         </span>
+                                    </td>
+                                </ng-container>
+
+                                
+                                <!-- Pickup -->
+                                <ng-container matColumnDef="pickup">
+                                    <th
+                                        class="mat-cell-break-word"
+                                        mat-header-cell
+                                        *matHeaderCellDef>
+                                        Store Pickup
+                                    </th>
+                                    <td
+                                        class="cell-style px-2 pr-6 sm:px-3 md:px-6 "
+                                        mat-cell
+                                        *matCellDef="let transaction">
+                                        <div class="flex items-start items-center">
+                                            <input 
+                                            class="bg-gray-50 border-gray-300 focus:ring-0 focus:ring-blue-300 h-6 w-6 rounded-full" 
+                                            type="checkbox" 
+                                            [checked]="transaction.order.orderShipmentDetail.storePickup"
+                                            onclick="return false;"
+                                            >
+                                      </div>
                                     </td>
                                 </ng-container>
                                 

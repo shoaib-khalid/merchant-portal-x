@@ -793,7 +793,7 @@ export class DashboardComponent implements OnInit, OnDestroy
         // Overview This Week
         // -------------------------------
 
-        this._dashboardService.getDetailedDailySales(this.storeId$, 0, 10, 'created', 'desc',
+        this._dashboardService.getDetailedDailySales_NoPageSize(this.storeId$, 0, '', 'created', 'desc',
         formattedLastMonday, formattedToday)
         .subscribe(response => {
             this.overviewThisWeekArr = [];
@@ -923,7 +923,7 @@ export class DashboardComponent implements OnInit, OnDestroy
         // Overview Last Week
         // -------------------------------
 
-        this._dashboardService.getDetailedDailySales(this.storeId$, 0, 10, 'created', 'desc',
+        this._dashboardService.getDetailedDailySales_NoPageSize(this.storeId$, 0, '', 'created', 'desc',
         formattedLastWeekStart, formattedLastWeekEnd)
         .subscribe(response => {
             this.overviewLastWeekArr = [];
@@ -956,7 +956,6 @@ export class DashboardComponent implements OnInit, OnDestroy
             })
                 
                 
-            // })
             this._prepareChartData();
 
         })
@@ -1040,9 +1039,9 @@ export class DashboardComponent implements OnInit, OnDestroy
                         this.isLoading = true;
 
                         if (this.detailedDailySalesDateRange.start == null && this.detailedDailySalesDateRange.end == null)
-                            return this._dashboardService.getDetailedDailySales(this.storeId$, this._detailedDailySalesPaginator.pageIndex, this._detailedDailySalesPaginator.pageSize, "date", "asc");
+                            return this._dashboardService.getDetailedDailySales(this.storeId$, this._detailedDailySalesPaginator.pageIndex, this._detailedDailySalesPaginator.pageSize, "created", "asc");
                         else
-                            return this._dashboardService.getDetailedDailySales(this.storeId$, this._detailedDailySalesPaginator.pageIndex, this._detailedDailySalesPaginator.pageSize, "date", "asc", 
+                            return this._dashboardService.getDetailedDailySales(this.storeId$, this._detailedDailySalesPaginator.pageIndex, this._detailedDailySalesPaginator.pageSize, "created", "asc", 
                                                                                     this.detailedDailySalesDateRange.start, this.detailedDailySalesDateRange.end);
                     }),
                     map(() => {
@@ -1127,7 +1126,6 @@ export class DashboardComponent implements OnInit, OnDestroy
         this._router.onSameUrlNavigation = 'reload';
     }
 
-    
 
     /**
      * On destroy

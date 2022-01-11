@@ -23,12 +23,55 @@
                 </div>
 
                 <!-- Spacer -->
-                <div class="col-span-12 mt-1"></div>
+                <div class="col-span-12 mt-2"></div>
+
+                <!-- Customer Details -->
 
                 <div class="bg-white shadow overflow-hidden sm:rounded-lg">
                     <div class="px-4 py-1.5 ">
                     <h3 class="text-base leading-6 font-medium text-gray-900">
-                        Rider Information
+                        Customer Details
+                    </h3>
+                    <!-- <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                        Personal details and application.
+                    </p> -->
+                    </div>
+                    <div class="border-t border-gray-200">
+                    <dl>
+                        <div class="bg-gray-50 px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Name
+                        </dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                            {{ detailsForm.get('customerName').value }}
+                        </dd>
+                        </div>
+                        <div class="bg-white px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Transaction ID
+                        </dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                            {{ detailsForm.get('invoiceId').value }}
+                        </dd>
+                        </div>
+                        
+                        
+                        <!-- <div class="bg-white px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
+                        
+                        </div> -->
+                    </dl>
+                    </div>
+                </div>
+
+                <!-- Spacer -->
+                <div class="col-span-12 mt-2"></div>
+
+                <!-- Rider Details -->
+
+                <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                    <div class="px-4 py-1.5 ">
+                    <h3 class="text-base leading-6 font-medium text-gray-900">
+                        Rider Details
                     </h3>
                     <!-- <p class="mt-1 max-w-2xl text-sm text-gray-500">
                         Personal details and application.
@@ -60,7 +103,15 @@
                             {{ detailsForm.get('riderDetails').value.plateNumber }}
                         </dd>
                         </div>
-                        <div class="bg-white px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
+                        <div class="bg-white-50 px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
+                            <dt class="text-sm font-medium text-gray-500">
+                                Order Number
+                            </dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {{ detailsForm.get('riderDetails').value.orderNumber }}
+                            </dd>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
                         <dt class="text-sm font-medium text-gray-500">
                             Provider
                         </dt>
@@ -70,11 +121,20 @@
                         <img
                                     *ngIf = "detailsForm.get('riderDetails').value.providerImage != ''"
                                     matSuffix
-                                    class="w-15"
-                                    [alt]="'Product thumbnail image'"
+                                    class="w-15 justify-self-center"
                                     [src]= "detailsForm.get('riderDetails').value.providerImage">
                                     <!-- [src]="deliveryPartner.providerImage"> -->
                         </div>
+                        <div class="bg-white-50 px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
+                            <dt class="text-sm font-medium text-gray-500">
+                                Tracking URL
+                            </dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {{ detailsForm.get('riderDetails').value.trackingUrl }}
+                            </dd>
+                        </div>
+                    
+                        
                         
                         <!-- <div class="bg-white px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
                         
@@ -84,10 +144,12 @@
                 </div>
 
                 <!-- Spacer -->
-                <div class="col-span-12 mt-1"></div>
+                <div class="col-span-12 mt-2"></div>
+
+                <!-- Items -->
 
                 <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-                    <div class="py-1.5 grid grid-cols-10 gap-x-1">
+                    <div class="py-1.5 grid grid-cols-10">
                     <h3 class="px-4 text-base leading-6 font-medium text-gray-900 col-span-8">
                         Items
                     </h3>
@@ -101,7 +163,7 @@
                         Total
                     </h3>
                     </div>
-                    <div class="grid grid-cols-10 gap-x-1 border-t border-gray-200">
+                    <div class="grid grid-cols-10 border-t border-gray-200">
                         <!-- <div class="col-span-6"></div>
                         <div class="font-medium text-md text-right text-secondary pt-2">RATE</div>
                         <div class="font-medium text-md text-right text-secondary pt-2">QTY</div>
@@ -111,15 +173,19 @@
 
                             <!-- Item -->
                             <div class="col-span-5 px-4 py-1.5">
-                                <div class="font-medium">{{ item.productName }}</div>
-                                <div class="text-secondary" *ngIf="item.productVariant">
-                                    <span class="py-1 px-3 bg-gray-200 text-secondary rounded-full mx-1 text-sm" *ngFor="let variant of item.productVariant" >
-                                        {{ variant }}
+                                <div class="mb-1 font-medium ">{{ item.productName }}</div>
+                                <div class="flex flex-wrap text-secondary" *ngIf="item.productVariant">
+                                    <span class="mr-1 mb-1" *ngFor="let variant of item.productVariant">
+                                        <span class="py-0.5 px-1.5 bg-gray-200 text-secondary rounded-full text-sm" >
+                                            {{ variant }}
+                                        </span>
                                     </span>
                                 </div>
-                                <div class="text-secondary" *ngIf="item.orderSubItem">
-                                    <span class="py-1 px-3 bg-gray-200 text-secondary rounded-full mx-1 text-sm" *ngFor="let combo of item.orderSubItem" >
-                                        {{combo.productName}}
+                                <div class="flex flex-wrap text-secondary" *ngIf="item.orderSubItem">
+                                    <span class="mr-1 mb-1" *ngFor="let combo of item.orderSubItem">
+                                        <span class="py-0.5 px-1.5 bg-gray-200 text-secondary rounded-full text-sm"  >
+                                            {{combo.productName}}
+                                        </span>
                                     </span>
                                 </div>
                             </div>
@@ -132,7 +198,9 @@
 
 
                 <!-- Spacer -->
-                <div class="col-span-12 mt-1"></div>
+                <div class="col-span-12 mt-2"></div>
+
+                <!-- Payment Details -->
 
                 <div class="bg-white shadow overflow-hidden sm:rounded-lg">
                     <div class="px-4 py-1.5 sm:px-4">

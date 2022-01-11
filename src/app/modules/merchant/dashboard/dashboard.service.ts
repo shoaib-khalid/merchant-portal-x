@@ -24,6 +24,7 @@ export class DashboardService
 
     private _detailedDailySale: BehaviorSubject<DetailedDailySales | null> = new BehaviorSubject(null);
     private _detailedDailySales: BehaviorSubject<DetailedDailySales[] | null> = new BehaviorSubject(null);
+    private _detailedDailySalesNoPage: BehaviorSubject<DetailedDailySales[] | null> = new BehaviorSubject(null);
     private _detailedDailySalesPagination: BehaviorSubject<DetailedDailySalesPagination | null> = new BehaviorSubject(null);
 
     private _summarySale: BehaviorSubject<SummarySales | null> = new BehaviorSubject(null);
@@ -324,6 +325,38 @@ export class DashboardService
 
                     this._detailedDailySalesPagination.next(_pagination);
                     this._detailedDailySales.next(response["data"].content);
+                })
+            );
+    }
+
+    getDetailedDailySales_NoPageSize(id: string, page: number = 0, size: string = '', sort: string = 'created', order: 'asc' | 'desc' | '' = 'asc', 
+                        from: string = this.fromDate, to: string = this.todayDate):
+    Observable<{ pagination: DetailedDailySalesPagination; detailedDailySales: DetailedDailySales[] }>
+    {
+        let reportService = this._apiServer.settings.apiServer.reportService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                page: '' + page,
+                pageSize: '' + size,
+                sortBy: '' + sort,
+                sortingOrder: '' + order.toUpperCase(),
+                startDate: '' + from,
+                endDate: '' + to,
+            }
+        };
+        
+        return this._httpClient.get<{ pagination: DetailedDailySalesPagination; detailedDailySales: DetailedDailySales[] }>
+            (reportService + '/store/' + id + '/report/merchantDetailedDailySales', header)
+            .pipe(
+                tap((response) => {
+                    
+                    this._logging.debug("Response from ReportService (getDetailedDailySales_NoPageSize)", response);
+
+                    this._detailedDailySalesNoPage.next(response["data"].content);
                 })
             );
     }

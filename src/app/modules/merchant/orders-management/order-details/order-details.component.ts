@@ -275,7 +275,8 @@ export class OrderDetailsComponent implements OnInit
                             phoneNumber : rider.phoneNumber? rider.phoneNumber : '',
                             plateNumber : rider.plateNumber? rider.plateNumber : '',
                             provider    : rider.provider? rider.provider.name : '',
-                            providerImage: rider.provider? rider.provider.providerImage : '',                                            
+                            providerImage: rider.provider? rider.provider.providerImage : '',
+                            trackingUrl : rider.trackingUrl? rider.trackingUrl : '',                                         
                            }
           })
         });

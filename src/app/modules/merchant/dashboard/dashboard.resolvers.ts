@@ -116,6 +116,47 @@ export class DetailedDailySalesResolver implements Resolve<any>
 @Injectable({
     providedIn: 'root'
 })
+export class DetailedDailySalesNoPageSizeResolver implements Resolve<any>
+{
+    /**
+     * Constructor
+     */
+    constructor(private _dashboardService: DashboardService)
+    {
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Accessors
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Getter for storeId
+     */
+
+    get storeId$(): string
+    {
+        return localStorage.getItem('storeId') ?? '';
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Resolver
+     *
+     * @param route
+     * @param state
+     */
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
+    {
+        return this._dashboardService.getDetailedDailySales_NoPageSize(this.storeId$);
+    }
+}
+
+@Injectable({
+    providedIn: 'root'
+})
 export class SummarySalesResolver implements Resolve<any>
 {
     /**
