@@ -191,7 +191,7 @@ export class DiscountsProductService
      * @param id
      * @param discount
      */
-    updateDiscount(id: string, body: StoreDiscountProduct): Observable<StoreDiscountProduct>
+    updateProductDiscount(discountId: string, body: StoreDiscountProduct): Observable<StoreDiscountProduct>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -204,33 +204,21 @@ export class DiscountsProductService
         return this.discounts$.pipe(
             take(1),
             // switchMap(discounts => this._httpClient.post<InventoryDiscount>('api/apps/ecommerce/inventory/discount', {}).pipe(
-            switchMap(discounts => this._httpClient.put<StoreDiscountProduct>(productService + '/stores/' + this.storeId$ + '/discount/' , body , header).pipe(
+            switchMap(discounts => this._httpClient.put<StoreDiscountProduct>(productService + '/stores/' + this.storeId$ + '/discount/'+ discountId + '/product', body , header).pipe(
                 map((updatedDiscount) => {
 
-                    // Find the index of the updated discount
-                    const index = discounts.findIndex(item => item.id === id);
+                    // // Find the index of the updated discount
+                    // const index = discounts.findIndex(item => item.id === discountId);
 
-                    // Update the discount
-                    discounts[index] = { ...discounts[index], ...updatedDiscount["data"]};
+                    // // Update the discount
+                    // discounts[index] = { ...discounts[index], ...updatedDiscount["data"]};
 
-                    // Update the discounts
-                    this._discountsProduct.next(discounts);
+                    // // Update the discounts
+                    // this._discountsProduct.next(discounts);
 
                     // Return the updated discount
                     return updatedDiscount["data"];
-                }),
-                switchMap(updatedDiscount => this.discount$.pipe(
-                    take(1),
-                    filter(item => item && item.id === id),
-                    tap(() => {
-
-                        // Update the discount if it's selected
-                        this._discountProduct.next(updatedDiscount["data"]);
-
-                        // Return the updated discount
-                        return updatedDiscount["data"];
-                    })
-                ))
+                })
             ))
         );
     }

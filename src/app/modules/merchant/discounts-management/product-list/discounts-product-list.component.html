@@ -607,6 +607,7 @@
                                                            [value]="discountProducts.storeCategory.name"
                                                            (input)="filterCategories($event)"
                                                            (keydown)="filterCategoriesInputKeyDown($event)"
+                                                           [readonly]="!editModeListing[i]"
                                                            [matAutocomplete]="auto">
 
                                                     <mat-autocomplete #auto="matAutocomplete" [displayWith]="getCategoryName.bind(this)">
@@ -614,7 +615,7 @@
                                                         {{listing.name}}
                                                       </mat-option>
                                                     </mat-autocomplete>
-                                                     
+
                                                 </mat-form-field>
 
 
@@ -626,17 +627,34 @@
                                                     class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                     type="button"
                                                     [id]="'edit-button'+discountProducts.id"
-                                                    (click)="editStoreProductDiscount(discountProducts)"
-
-                                                
+                                                    (click)="editModeListing[i] = !editModeListing[i]"
                                                     >
                                                     <label
+                                                        *ngIf="!editModeListing[i]"
                                                         class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
                                                         [for]="'edit-button'+discountProducts.id"
                                                         matRipple>
                                                         <mat-icon
                                                             class="text-white icon-size-5"
                                                             [svgIcon]="'heroicons_outline:pencil-alt'">
+                                                        </mat-icon>
+                                                    </label>
+
+                                                    <input
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="button"
+                                                    [id]="'update-button'+discountProducts.id"
+                                                    (click)="editModeListing[i] = !editModeListing[i]"
+                                                    (click)="editStoreProductDiscount(discountProducts)"
+                                                    >
+                                                    <label
+                                                        *ngIf="editModeListing[i]"
+                                                        class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
+                                                        [for]="'update-button'+discountProducts.id"
+                                                        matRipple>
+                                                        <mat-icon
+                                                            class="text-white icon-size-5"
+                                                            [svgIcon]="'heroicons_outline:check'">
                                                         </mat-icon>
                                                     </label>
 

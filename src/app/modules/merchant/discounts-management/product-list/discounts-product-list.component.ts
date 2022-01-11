@@ -78,7 +78,8 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     checkedCategoriesId : any =[];
 
     //upon edit category listing
-    editCategoryList :any;
+    editSelectedCategory :string = '';
+    editModeListing:any = [];
 
 
     //product or category 
@@ -795,7 +796,8 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     // }
 
     onEditSelectCategoryList(categryId){
-        console.log(categryId);
+     
+        this.editSelectedCategory = categryId;
 
     }
 
@@ -844,10 +846,26 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
     // Edit discount product
     editStoreProductDiscount(productDiscount){
-        this.selectedStoreDiscountProduct = productDiscount;
-        console.log("checking",this.selectedStoreDiscountProduct);
-        console.log('discountProducts.storeCategory.name',productDiscount.storeCategory.name);
-        console.log('editCategoryList',this.editCategoryList);
+        
+        let categoryPayload = {
+            
+                id: productDiscount.id,
+                storeDiscountId: productDiscount.storeDiscountId,
+                categoryId: this.editSelectedCategory
+            
+        }
+
+        this._discountProductService.updateProductDiscount(productDiscount.storeDiscountId,categoryPayload).
+                subscribe((response) => {
+
+                    // this.storeDiscountProduct.unshift(response["data"]);
+   
+                    // //remove the check category
+                    // this.checkedCategoriesId.splice(this.checkedCategoriesId.findIndex(tagId => tagId === response["data"].categoryId), 1);
+
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                });
         
     }
 
