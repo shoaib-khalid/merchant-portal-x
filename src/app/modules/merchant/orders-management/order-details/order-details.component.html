@@ -4,145 +4,212 @@
     <div class="flex flex-col flex-auto w-full">
         <div class="flex flex-wrap item-center justify-center w-full max-w-screen-xl mx-auto p-6 md:p-8">
 
-            <div class="max-w-240 p-16 rounded-2xl shadow bg-card print:w-auto print:p-0 print:rounded-none print:shadow-none print:bg-transparent">
+            <div class="max-w-180 p-10 rounded-2xl shadow bg-card print:w-auto print:p-0 print:rounded-none print:shadow-none print:bg-transparent text-sm">
                 <div>
-                    <div class="grid grid-cols-2 gap-x-4 gap-y-1 ml-auto">
-                        <div class="grid grid-cols-3 gap-x-4 gap-y-1 ml-auto mb-10">
-                            <div class="col-span-3 justify-self-start text-6xl tracking-tight text-secondary">ORDER DETAILS</div>
-                            <div class="justify-self-end font-medium tracking-tight text-secondary">CREATED DATE</div>
-                            <div class="font-medium">{{ detailsForm.get('invoiceCreatedDate').value | date:'MMM dd, h:mm a' }}</div>
-                            <div></div>
-                            <div class="justify-self-end font-medium tracking-tight text-secondary">UPDATED DATE</div>
-                            <div class="font-medium">{{ detailsForm.get('invoiceUpdatedDate').value | date:'MMM dd, h:mm a'}}</div>
-                        </div>
-                        
-                    </div>
-                <div class="flex items-start">
-                    <div class="grid grid-rows-2 place-items-start gap-y-12">
-                        <div class="grid row-span-2 auto-cols-max grid-flow-col gap-x-8">
-                            <div class="place-self-center w-24">
-                                <img
-                                    class="w-24"
-                                    [src]="detailsForm.get('storeLogo').value">
-                            </div>
-                            <div class="pl-10 border-l text-md">
-                                <div class="font-medium">{{ detailsForm.get('storeName').value }}</div>
-                                <div class="w-40"> {{ detailsForm.get('storeAddress').value }} </div>
-                                <div>{{ detailsForm.get('storePhoneNumber').value }}</div>
-                                <div>{{ detailsForm.get('storeEmail').value }}</div>
-                                <div>{{ detailsForm.get('storeUrl').value }}</div>
-                            </div>
-                        </div>
-                        <!-- <div class="grid auto-cols-max grid-flow-col gap-x-8">
-                            <div class="place-self-center w-24 text-center text-2xl text-secondary">
-                                Bill To
-                            </div>
-                            <div class="pl-10 border-l text-md">
-                                <div class="font-medium">{{ detailsForm.get('customerName').value }}</div>
-                                <div class="w-40"> {{ detailsForm.get('customerAddress').value }} </div>
-                                <div>{{ detailsForm.get('customerPhoneNumber').value }}</div>
-                                <div>{{ detailsForm.get('customerEmail').value }}</div>
-                            </div>
-                        </div> -->
-                    </div>
-                    <!-- <div class="grid grid-cols-2 gap-x-4 gap-y-1 ml-auto">
-                        <div class="justify-self-end text-4xl tracking-tight text-secondary">INVOICE</div>
-                        <div class="text-4xl">{{ detailsForm.get('invoiceId').value }}</div>
-                        <div class="justify-self-end font-medium tracking-tight text-secondary">CREATED DATE</div>
-                        <div class="font-medium">{{ detailsForm.get('invoiceCreatedDate').value | date:'MMM dd, h:mm a' }}</div>
-                        <div class="justify-self-end font-medium tracking-tight text-secondary">UPDATED DATE</div>
-                        <div class="font-medium">{{ detailsForm.get('invoiceUpdatedDate').value | date:'MMM dd, h:mm a'}}</div>
-                        <div class="col-span-2 place-self-center w-30 pt-4">
-                            <img
-                                class="w-30"
-                                [src]="detailsForm.get('storeQrCode').value">
-                        </div>
-                    </div> -->
-                </div>
-    
-                <div class="grid grid-cols-12 gap-x-1 mt-16">
-                    <!-- Columns -->
-                    <div class="col-span-8 font-medium text-md text-secondary">ITEMS</div>
-                    <div class="font-medium text-md text-right text-secondary">RATE</div>
-                    <div class="font-medium text-md text-right text-secondary">QTY</div>
-                    <div class="col-span-2 font-medium text-md text-right text-secondary">TOTAL</div>
-    
-                    <ng-container *ngFor="let item of detailsForm.get('items').value">
-                        <!-- Divider -->
-                        <div class="col-span-12 my-4 border-b"></div>
-        
-                        <!-- Item -->
-                        <div class="col-span-8">
-                            <div class="text-lg font-medium">{{ item.productName }}</div>
-                            <div class="mt-2 text-md text-secondary" *ngIf="item.productVariant">
-                                <span class="py-1 px-3 bg-gray-200 text-secondary rounded-full mx-1" *ngFor="let variant of item.productVariant" >
-                                    {{ variant }}
-                                </span>
-                            </div>
-                            <div class="mt-2 text-md text-secondary" *ngIf="item.orderSubItem">
-                                <span class="py-1 px-3 bg-gray-200 text-secondary rounded-full mx-1" *ngFor="let combo of item.orderSubItem" >
-                                    {{combo.productName}}
-                                </span>
-                            </div>
-                        </div>
-                        <div class="self-center text-right">{{ item.productPrice | currency: store$.regionCountry.currencySymbol }}</div>
-                        <div class="self-center text-right">{{ item.quantity }}</div>
-                        <div class="col-span-2 self-center text-right">{{ (item.productPrice * item.quantity) | currency: store$.regionCountry.currencySymbol }}</div>
-                    </ng-container>
-    
-                    <!-- Spacer -->
-                    <div class="col-span-12 mt-16"></div>
-    
-                    <!-- Subtotal -->
-                    <div class="col-span-10 self-center font-medium tracking-tight text-secondary">SUBTOTAL</div>
-                    <div class="col-span-2 text-right text-lg">{{ detailsForm.get('subTotal').value | currency: store$.regionCountry.currencySymbol}}</div>
-    
-                    <!-- Divider -->
-                    <div class="col-span-12 my-3 border-b"></div>
 
-                    <!-- Order Discount -->
-                    <div class="col-span-10 self-center font-medium tracking-tight text-secondary">ORDER DISCOUNT 
-                        <span class="font-medium tracking-tight text-secondary" *ngIf="appliedDiscountDescription">({{appliedDiscountDescription}})</span>
-                        <span class="font-bold pl-1 tracking-tight text-secondary" *ngIf="detailsForm.get('discountMaxAmount').value != 0 && detailsForm.get('appliedDiscount').value >= detailsForm.get('discountMaxAmount').value && detailsForm.get('appliedDiscount').value != 0">Capped at {{store$.regionCountry.currencySymbol}}{{detailsForm.get('discountMaxAmount').value}}</span>
-                    </div>
-                    <div class="col-span-2 text-right text-lg">-{{ detailsForm.get('appliedDiscount').value | currency: store$.regionCountry.currencySymbol}}</div>
-    
-                    <!-- Divider -->
-                    <div class="col-span-12 my-3 border-b"></div>
-    
-                    <!-- Service Charges -->
-                    <div class="col-span-10 self-center font-medium tracking-tight text-secondary">SERVICE CHARGES</div>
-                    <div class="col-span-2 text-right text-lg">{{ detailsForm.get('storeServiceCharges').value | currency: store$.regionCountry.currencySymbol}}</div>
-    
-                    <!-- Divider -->
-                    <div class="col-span-12 my-3 border-b"></div>
-    
-                    <!-- Delivery Charges -->
-                    <div class="col-span-10 self-center font-medium tracking-tight text-secondary">DELIVERY CHARGES</div>
-                    <div class="col-span-2 text-right text-lg">{{ detailsForm.get('deliveryCharges').value | currency: store$.regionCountry.currencySymbol}}</div>
-    
-                    <!-- Divider -->
-                    <div class="col-span-12 my-3 border-b"></div>
+                <div class="grid grid-cols-2 gap-x-4">
 
-                    <!-- Delivery Discount -->
-                    <div class="col-span-10 self-center font-medium tracking-tight text-secondary">DELIVERY DISCOUNT
-                        <span class="font-medium tracking-tight text-secondary" *ngIf="deliveryDiscountDescription">({{deliveryDiscountDescription}})</span>  
+                    <div class="grid grid-cols-4 gap-x-4">
+                        <div class="col-span-4 justify-self-start text-3xl tracking-tight text-secondary mb-4 -ml-1">ORDER DETAILS</div>
                     </div>
-                    <div class="col-span-2 text-right text-lg">-{{ detailsForm.get('deliveryDiscount').value | currency: store$.regionCountry.currencySymbol}}</div>
-    
-                    <!-- Divider -->
-                    <div class="col-span-12 my-3 border-b"></div>
-    
-                    <!-- Total -->
-                    <div class="col-span-10 self-center text-2xl font-medium tracking-tight text-secondary">TOTAL</div>
-                    <div class="col-span-2 text-right text-2xl font-medium">{{ detailsForm.get('total').value | currency: store$.regionCountry.currencySymbol}}</div>
-                </div>
-    
-                <div class="mt-16">
-                    <div class="font-medium">This invoice is computer generated. Thank you for your business.</div>
+                    <div class="grid grid-cols-2 gap-x-4">
+                        <div class="font-medium tracking-tight text-secondary ml-1 justify-self-end">CREATED DATE</div>
+                        <div class="font-medium justify-self-end">{{ detailsForm.get('invoiceCreatedDate').value | date:'MMM dd, h:mm a' }}</div>
+                        <div class="font-medium tracking-tight text-secondary ml-1 justify-self-end">UPDATED DATE</div>
+                        <div class="font-medium justify-self-end">{{ detailsForm.get('invoiceUpdatedDate').value | date:'MMM dd, h:mm a'}}</div>
+
+                    </div>
                     
                 </div>
-                </div><br>
+
+                <!-- Spacer -->
+                <div class="col-span-12 mt-1"></div>
+
+                <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                    <div class="px-4 py-1.5 ">
+                    <h3 class="text-base leading-6 font-medium text-gray-900">
+                        Rider Information
+                    </h3>
+                    <!-- <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                        Personal details and application.
+                    </p> -->
+                    </div>
+                    <div class="border-t border-gray-200">
+                    <dl>
+                        <div class="bg-gray-50 px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Name
+                        </dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                            {{ detailsForm.get('riderDetails').value.name }}
+                        </dd>
+                        </div>
+                        <div class="bg-white px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Phone Number
+                        </dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                            {{ detailsForm.get('riderDetails').value.phoneNumber }}
+                        </dd>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Vehicle Number
+                        </dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                            {{ detailsForm.get('riderDetails').value.plateNumber }}
+                        </dd>
+                        </div>
+                        <div class="bg-white px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Provider
+                        </dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-1">
+                            {{ detailsForm.get('riderDetails').value.provider }}
+                        </dd>
+                        <img
+                                    *ngIf = "detailsForm.get('riderDetails').value.providerImage != ''"
+                                    matSuffix
+                                    class="w-15"
+                                    [alt]="'Product thumbnail image'"
+                                    [src]= "detailsForm.get('riderDetails').value.providerImage">
+                                    <!-- [src]="deliveryPartner.providerImage"> -->
+                        </div>
+                        
+                        <!-- <div class="bg-white px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
+                        
+                        </div> -->
+                    </dl>
+                    </div>
+                </div>
+
+                <!-- Spacer -->
+                <div class="col-span-12 mt-1"></div>
+
+                <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                    <div class="py-1.5 grid grid-cols-10 gap-x-1">
+                    <h3 class="px-4 text-base leading-6 font-medium text-gray-900 col-span-8">
+                        Items
+                    </h3>
+                    <!-- <h3 class="text-base leading-6 font-medium text-gray-900 text-right">
+                        Rate
+                    </h3>
+                    <h3 class="text-base leading-6 font-medium text-gray-900 text-right">
+                        Qty
+                    </h3> -->
+                    <h3 class="px-4 text-base leading-6 font-medium text-gray-900 col-span-2 text-right">
+                        Total
+                    </h3>
+                    </div>
+                    <div class="grid grid-cols-10 gap-x-1 border-t border-gray-200">
+                        <!-- <div class="col-span-6"></div>
+                        <div class="font-medium text-md text-right text-secondary pt-2">RATE</div>
+                        <div class="font-medium text-md text-right text-secondary pt-2">QTY</div>
+                        <div class="col-span-2 font-medium text-md text-right text-secondary pt-2">TOTAL</div> -->
+        
+                        <ng-container *ngFor="let item of detailsForm.get('items').value">
+
+                            <!-- Item -->
+                            <div class="col-span-5 px-4 py-1.5">
+                                <div class="font-medium">{{ item.productName }}</div>
+                                <div class="text-secondary" *ngIf="item.productVariant">
+                                    <span class="py-1 px-3 bg-gray-200 text-secondary rounded-full mx-1 text-sm" *ngFor="let variant of item.productVariant" >
+                                        {{ variant }}
+                                    </span>
+                                </div>
+                                <div class="text-secondary" *ngIf="item.orderSubItem">
+                                    <span class="py-1 px-3 bg-gray-200 text-secondary rounded-full mx-1 text-sm" *ngFor="let combo of item.orderSubItem" >
+                                        {{combo.productName}}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-span-2 self-center text-right">{{ item.productPrice | currency: store$.regionCountry.currencySymbol }}</div>
+                            <div class="self-center text-right">x {{ item.quantity }}</div>
+                            <div class="col-span-2 self-center text-right pr-2">{{ (item.productPrice * item.quantity) | currency: store$.regionCountry.currencySymbol }}</div>
+                        </ng-container>
+                    </div>
+                </div>
+
+
+                <!-- Spacer -->
+                <div class="col-span-12 mt-1"></div>
+
+                <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                    <div class="px-4 py-1.5 sm:px-4">
+                    <h3 class="text-base leading-6 font-medium text-gray-900">
+                        Payment Details
+                    </h3>
+                    <!-- <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                        Personal details and application.
+                    </p> -->
+                    </div>
+                    <div class="border-t border-gray-200">
+                    <dl>
+                        <div class="bg-gray-50 px-4 py-1.5 sm:grid grid-cols-2 sm:gap-4 sm:px-4">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Subtotal
+                        </dt>
+                        <dd class="text-sm text-gray-900 mt-0 text-right">
+                            {{ detailsForm.get('subTotal').value | currency: store$.regionCountry.currencySymbol}}
+                        </dd>
+                        </div>
+                        <div class="bg-white px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Order Discount
+                            <span class="font-medium tracking-tight text-secondary" *ngIf="appliedDiscountDescription">({{appliedDiscountDescription}})</span>
+                            <span class="font-bold pl-1 tracking-tight text-secondary" *ngIf="detailsForm.get('discountMaxAmount').value && detailsForm.get('discountMaxAmount').value != 0 && detailsForm.get('appliedDiscount').value >= detailsForm.get('discountMaxAmount').value && detailsForm.get('appliedDiscount').value != 0">
+                                Capped at {{store$.regionCountry.currencySymbol}}{{detailsForm.get('discountMaxAmount').value}}</span>    
+                        </dt>
+                        <dd class="text-sm text-gray-900 mt-0 text-right">
+                            -{{ detailsForm.get('appliedDiscount').value | currency: store$.regionCountry.currencySymbol}}
+                        </dd>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Service Charge
+                        </dt>
+                        <dd class="text-sm text-gray-900 mt-0 text-right">
+                            {{ detailsForm.get('storeServiceCharges').value | currency: store$.regionCountry.currencySymbol}}
+                        </dd>
+                        </div>
+                        <div class="bg-white px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Delivery Charge
+                        </dt>
+                        <dd class="text-sm text-gray-900 mt-0 text-right">
+                            {{ detailsForm.get('deliveryCharges').value | currency: store$.regionCountry.currencySymbol}}
+                        </dd>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Delivery Discount
+                            <span class="font-medium tracking-tight text-secondary" *ngIf="deliveryDiscountDescription">({{deliveryDiscountDescription}})</span>  
+                            <span class="font-bold pl-1 tracking-tight text-secondary" *ngIf="detailsForm.get('deliveryDiscountMaxAmount').value && detailsForm.get('deliveryDiscountMaxAmount').value != 0 && detailsForm.get('deliveryDiscount').value >= detailsForm.get('deliveryDiscountMaxAmount').value && detailsForm.get('deliveryDiscount').value != 0">
+                                Capped at {{store$.regionCountry.currencySymbol}}{{detailsForm.get('deliveryDiscountMaxAmount').value}}</span>    
+                        </dt>
+                        <dd class="text-sm text-gray-900 mt-0 text-right">
+                            -{{ detailsForm.get('deliveryDiscount').value | currency: store$.regionCountry.currencySymbol}}
+                        </dd>
+                        </div>
+                        <div class="bg-white px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Total
+                        </dt>
+                        <dd class="text-sm text-gray-900 mt-0 text-right">
+                            {{ detailsForm.get('total').value | currency: store$.regionCountry.currencySymbol}}
+                        </dd>
+                        </div>
+                        
+                        <!-- <div class="bg-white px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
+                        
+                        </div> -->
+                    </dl>
+                    </div>
+                </div>
+
+            
+    
+                </div>
             <div class="flex items-center justify-end mt-4 print:hidden">
                 <button
                     (click)="close()"

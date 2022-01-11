@@ -92,7 +92,8 @@
                     <!-- Order Discount -->
                     <div class="col-span-10 self-center font-medium tracking-tight text-secondary">ORDER DISCOUNT 
                         <span class="font-medium tracking-tight text-secondary" *ngIf="appliedDiscountDescription">({{appliedDiscountDescription}})</span>
-                        <span class="font-bold pl-1 tracking-tight text-secondary" *ngIf="invoiceForm.get('discountMaxAmount').value != 0 && invoiceForm.get('appliedDiscount').value >= invoiceForm.get('discountMaxAmount').value && invoiceForm.get('appliedDiscount').value != 0">Capped at {{store$.regionCountry.currencySymbol}}{{invoiceForm.get('discountMaxAmount').value}}</span>
+                        <span class="font-bold pl-1 tracking-tight text-secondary" *ngIf="invoiceForm.get('discountMaxAmount').value && invoiceForm.get('discountMaxAmount').value != 0 && invoiceForm.get('appliedDiscount').value >= invoiceForm.get('discountMaxAmount').value && invoiceForm.get('appliedDiscount').value != 0">
+                            Capped at {{store$.regionCountry.currencySymbol}}{{invoiceForm.get('discountMaxAmount').value}}</span>
                     </div>
                     <div class="col-span-2 text-right text-lg">-{{ invoiceForm.get('appliedDiscount').value | currency: store$.regionCountry.currencySymbol}}</div>
     
@@ -100,14 +101,14 @@
                     <div class="col-span-12 my-3 border-b"></div>
     
                     <!-- Service Charges -->
-                    <div class="col-span-10 self-center font-medium tracking-tight text-secondary">SERVICE CHARGES</div>
+                    <div class="col-span-10 self-center font-medium tracking-tight text-secondary">SERVICE CHARGE</div>
                     <div class="col-span-2 text-right text-lg">{{ invoiceForm.get('storeServiceCharges').value | currency: store$.regionCountry.currencySymbol}}</div>
     
                     <!-- Divider -->
                     <div class="col-span-12 my-3 border-b"></div>
     
                     <!-- Delivery Charges -->
-                    <div class="col-span-10 self-center font-medium tracking-tight text-secondary">DELIVERY CHARGES</div>
+                    <div class="col-span-10 self-center font-medium tracking-tight text-secondary">DELIVERY CHARGE</div>
                     <div class="col-span-2 text-right text-lg">{{ invoiceForm.get('deliveryCharges').value | currency: store$.regionCountry.currencySymbol}}</div>
     
                     <!-- Divider -->
@@ -116,6 +117,8 @@
                     <!-- Delivery Discount -->
                     <div class="col-span-10 self-center font-medium tracking-tight text-secondary">DELIVERY DISCOUNT
                         <span class="font-medium tracking-tight text-secondary" *ngIf="deliveryDiscountDescription">({{deliveryDiscountDescription}})</span>  
+                        <span class="font-bold pl-1 tracking-tight text-secondary" *ngIf="invoiceForm.get('deliveryDiscountMaxAmount').value && invoiceForm.get('deliveryDiscountMaxAmount').value != 0 && invoiceForm.get('deliveryDiscount').value >= invoiceForm.get('deliveryDiscountMaxAmount').value && invoiceForm.get('deliveryDiscount').value != 0">
+                            Capped at {{store$.regionCountry.currencySymbol}}{{invoiceForm.get('deliveryDiscountMaxAmount').value}}</span>
                     </div>
                     <div class="col-span-2 text-right text-lg">-{{ invoiceForm.get('deliveryDiscount').value | currency: store$.regionCountry.currencySymbol}}</div>
     

@@ -7,7 +7,7 @@ import { Store } from 'app/core/store/store.types';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { OrdersListService } from '../orders-list/orders-list.service';
-import { Order, OrderItem } from '../orders-list/orders-list.types';
+import { DeliveryRiderDetails, Order, OrderItem } from '../orders-list/orders-list.types';
 
 @Component({
     selector     : 'app-order-details',
@@ -98,8 +98,18 @@ export class OrderDetailsComponent implements OnInit
         discountCalculationValue: [0],
         appliedDiscount     :[0],
         discountMaxAmount   :[0],
-        appliedDiscountDescription : [0]
-  
+        appliedDiscountDescription : [0],
+        riderDetails        : this._formBuilder.group({
+          name: [''],
+          phoneNumber: [''],
+          plateNumber: [''],
+          trackingUrl: [''],
+          orderNumber: [''],
+          provider: [''],
+          providerImage: [''],
+          airwayBill: [''],
+        }),
+        deliveryDiscountMaxAmount : []
       });
   
       this._storesService.store$
@@ -142,7 +152,11 @@ export class OrderDetailsComponent implements OnInit
               // set discountMaxAmount if not null
               if (order["data"].discountMaxAmount != null)
                 this.detailsForm.get('discountMaxAmount').setValue(order["data"].discountMaxAmount);
-              
+                
+              // set deliveryDiscountMaxAmount if not null
+              if (order["data"].deliveryDiscountMaxAmount != null)
+                this.detailsForm.get('deliveryDiscountMaxAmount').setValue(order["data"].deliveryDiscountMaxAmount);
+
               // to add currency symbol to fixed value, and remove negative (-) sign
               if (order["data"].deliveryDiscountDescription != null){
                 
@@ -246,10 +260,26 @@ export class OrderDetailsComponent implements OnInit
         let storeAsset = await this._storesService.getStoreAssets(this.storeId);
         this.detailsForm.get('storeLogo').setValue(storeAsset.logoUrl);
         this.detailsForm.get('storeQrCode').setValue(storeAsset.qrCodeUrl);
-  
-  
+
+
+        // get DeliveryRiderDetails
+        this._ordersService.getDeliveryRiderDetails(this.orderId)
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe((rider: DeliveryRiderDetails) => {
         
-  
+        this.detailsForm.patchValue(
+          { 
+            riderDetails : { 
+                            name        : rider.name? rider.name : '',
+                            orderNumber : rider.orderNumber? rider.orderNumber : '',   
+                            phoneNumber : rider.phoneNumber? rider.phoneNumber : '',
+                            plateNumber : rider.plateNumber? rider.plateNumber : '',
+                            provider    : rider.provider? rider.provider.name : '',
+                            providerImage: rider.provider? rider.provider.providerImage : '',                                            
+                           }
+          })
+        });
+
       });
     }
   
