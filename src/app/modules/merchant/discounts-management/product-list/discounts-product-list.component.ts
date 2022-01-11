@@ -482,25 +482,25 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         console.log('CHECKING ::::',this.selectedCategoryId);
         console.log('tetsing',this.selectedDiscountForm.value.id);
     
-        if(this.selectItemOrCategory === 'ITEM'){
+        // if(this.selectItemOrCategory === 'ITEM'){
 
-            const payloadProductDiscount ={
+        //     const payloadProductDiscount ={
             
-                storeDiscountId:this.selectedDiscountForm.value.id,
-                itemCode:this.selectedCategoryId //will chnage this
+        //         storeDiscountId:this.selectedDiscountForm.value.id,
+        //         itemCode:this.selectedCategoryId //will chnage this
                 
-            }
-        } else if(this.selectItemOrCategory === 'CATEGORY'){
+        //     }
+        // } else if(this.selectItemOrCategory === 'CATEGORY'){
             
-            const payloadProductDiscount ={
+        //     const payloadProductDiscount ={
             
-                storeDiscountId:this.selectedDiscountForm.value.id,
-                categoryId:this.selectedCategoryId
+        //         storeDiscountId:this.selectedDiscountForm.value.id,
+        //         categoryId:this.selectedCategoryId
                 
-            }
+        //     }
 
 
-        }
+        // }
 
 
         // since the storediscounttier id exist meaning that we just need to update it
@@ -833,6 +833,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     editStoreProductDiscount(productDiscount){
         this.selectedStoreDiscountProduct = productDiscount;
         console.log("checking",this.selectedStoreDiscountProduct);
+        console.log('discountProducts.storeCategory.name',productDiscount.storeCategory.name);
         
     }
 
@@ -923,5 +924,44 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
             return (result * sortOrder);
         }
     }
+
+      /**
+     * Filter category
+     *
+     * @param event
+     */
+       filterCategories(event): void
+       {
+           // Get the value
+           const value = event.target.value.toLowerCase();
+   
+           // Filter the categories
+           this.filteredProductCategories = this.productCategories$.filter(category => category.name.toLowerCase().includes(value));
+       }
+
+        /**
+     * Filter category input key down event
+     *
+     * @param event
+     */
+        filterCategoriesInputKeyDown(event): void
+        {
+             // Return if the pressed key is not 'Enter'
+             if ( event.key !== 'Enter' )
+             {
+                 return;
+             }
+     
+             // If there is no category available...
+             if ( this.filteredProductCategories.length === 0 )
+             {
+        
+             }
+     
+             // If there is a category...
+             const category = this.filteredProductCategories[0];
+             const isCategoryApplied = this.selectedProduct.categoryId;
+     
+        }
 
 }

@@ -11,6 +11,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatRippleModule } from '@angular/material/core';
 import { MatSortModule } from '@angular/material/sort';
 import { MatSelectModule } from '@angular/material/select';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTableModule } from '@angular/material/table';
 import { QuillModule } from 'ngx-quill';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -43,6 +44,7 @@ import { CreateDiscountProductComponent } from './create-product-discount/create
         MatRippleModule,
         MatSortModule,
         MatSelectModule,
+        MatAutocompleteModule,
         MatTableModule,
         MatSlideToggleModule,
         MatTooltipModule,
