@@ -11,6 +11,7 @@ import { DailyTopProducts, DailyTopProductsPagination, DetailedDailySales, Detai
 import { items } from 'app/mock-api/apps/file-manager/data';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { formatDate } from '@angular/common';
+import * as XLSX from 'xlsx';
 
 @Component({
     selector       : 'dashboard',
@@ -184,6 +185,11 @@ export class DashboardComponent implements OnInit, OnDestroy
     lastWeekDayChartCompleted = [0,0,0,0,0,0,0];
     lastWeekDayChartPending = [0,0,0,0,0,0,0];
     lastWeekDayChartFailed = [0,0,0,0,0,0,0];
+
+    summarySalesFileExel= 'SummarySales.xlsx';
+    dailySalesFileExel= 'DailySales.xlsx';
+    dailyTopProductFileExel= 'DailyTopProduct.xlsx';
+    settlementFileExel= 'Settlement.xlsx';
 
     /**
      * Constructor
@@ -1346,4 +1352,64 @@ export class DashboardComponent implements OnInit, OnDestroy
               }
         };
     }
+    exportSummarySalesToExcel(): void
+    {
+    /* pass here the table id */
+    let element = document.getElementById('excel-table');
+    const ws: XLSX.WorkSheet =XLSX.utils.table_to_sheet(element);
+
+    /* generate workbook and add the worksheet */
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+    /* save to file */  
+    XLSX.writeFile(wb, this.summarySalesFileExel);
+
+    }
+
+    exportDailySalesToExcel(): void
+    {
+    /* pass here the table id */
+    let element = document.getElementById('dailySales-table');
+    const ws: XLSX.WorkSheet =XLSX.utils.table_to_sheet(element);
+
+    /* generate workbook and add the worksheet */
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+    /* save to file */  
+    XLSX.writeFile(wb, this.dailySalesFileExel);
+
+    }
+
+    exportDailyTopProductToExcel(): void
+    {
+    /* pass here the table id */
+    let element = document.getElementById('dailyTopProduct-table');
+    const ws: XLSX.WorkSheet =XLSX.utils.table_to_sheet(element);
+
+    /* generate workbook and add the worksheet */
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+    /* save to file */  
+    XLSX.writeFile(wb, this.dailyTopProductFileExel);
+
+    }
+
+    exportSettlementToExcel(): void
+    {
+    /* pass here the table id */
+    let element = document.getElementById('settlement-table');
+    const ws: XLSX.WorkSheet =XLSX.utils.table_to_sheet(element);
+
+    /* generate workbook and add the worksheet */
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+    /* save to file */  
+    XLSX.writeFile(wb, this.settlementFileExel);
+
+    }
+    
 }

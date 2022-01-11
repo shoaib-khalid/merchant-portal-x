@@ -243,6 +243,7 @@
                                 </div>
                                 <div class="flex flex-col flex-auto mt-2 overflow-x-auto">
                                     <table
+                                        id="excel-table"
                                         class="min-w-240 overflow-y-visible"
                                         mat-table
                                         [dataSource]="summarySalesRow">
@@ -299,15 +300,28 @@
                                             *matRowDef="let row; columns: summarySalesCol;"></tr>
                                     </table>
                                 </div>
-                                <mat-paginator
-                                    class=""
-                                    [ngClass]="{'pointer-events-none': isLoading}"
-                                    [length]="summarySalesPagination.length"
-                                    [pageIndex]="summarySalesPagination.page"
-                                    [pageSize]="summarySalesPagination.size"
-                                    [pageSizeOptions]="[5, 10, 25, 100]"
-                                    [showFirstLastButtons]="true"
-                                    #summarySalesPaginator></mat-paginator>
+                                <div class="flex items-center justify-between">
+                                    <mat-paginator
+                                        class=""
+                                        [ngClass]="{'pointer-events-none': isLoading}"
+                                        [length]="summarySalesPagination.length"
+                                        [pageIndex]="summarySalesPagination.page"
+                                        [pageSize]="summarySalesPagination.size"
+                                        [pageSizeOptions]="[5, 10, 25, 100]"
+                                        [showFirstLastButtons]="true"
+                                        #summarySalesPaginator>
+                                    </mat-paginator>
+                                    <button
+                                        class="hidden sm:inline-flex ml-3"
+                                        (click)="exportSummarySalesToExcel()"
+                                        mat-flat-button
+                                        [color]="'primary'">
+                                        <mat-icon
+                                            class="icon-size-5"
+                                            [svgIcon]="'heroicons_solid:save'"></mat-icon>
+                                        <span class="ml-2">Export</span>
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Daily Detailed Sales details -->
@@ -331,6 +345,7 @@
                                 </div>
                                 <div class="flex flex-col flex-auto mt-2 overflow-x-auto">
                                     <table
+                                        id="dailySales-table"
                                         class="min-w-240 overflow-y-visible"
                                         mat-table
                                         [dataSource]="detailedDailySalesRow">
@@ -499,15 +514,28 @@
                                             *matRowDef="let row; columns: detailedDailySalesCol;"></tr>
                                     </table>
                                 </div>
-                                <mat-paginator
-                                    class=""
-                                    [ngClass]="{'pointer-events-none': isLoading}"
-                                    [length]="detailedDailySalesPagination.length"
-                                    [pageIndex]="detailedDailySalesPagination.page"
-                                    [pageSize]="detailedDailySalesPagination.size"
-                                    [pageSizeOptions]="[5, 10, 25, 100]"
-                                    [showFirstLastButtons]="true"
-                                    #detailedDailySalesPaginator></mat-paginator>
+                                <div class="flex items-center justify-between">
+                                    <mat-paginator
+                                        class=""
+                                        [ngClass]="{'pointer-events-none': isLoading}"
+                                        [length]="detailedDailySalesPagination.length"
+                                        [pageIndex]="detailedDailySalesPagination.page"
+                                        [pageSize]="detailedDailySalesPagination.size"
+                                        [pageSizeOptions]="[5, 10, 25, 100]"
+                                        [showFirstLastButtons]="true"
+                                        #detailedDailySalesPaginator>
+                                    </mat-paginator>
+                                    <button
+                                        class="hidden sm:inline-flex ml-3"
+                                        (click)="exportDailySalesToExcel()"
+                                        mat-flat-button
+                                        [color]="'primary'">
+                                        <mat-icon
+                                            class="icon-size-5"
+                                            [svgIcon]="'heroicons_solid:save'"></mat-icon>
+                                        <span class="ml-2">Export</span>
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Daily Top Products details -->
@@ -532,6 +560,7 @@
                                 </div>
                                 <div class="flex flex-col flex-auto mt-2 overflow-x-auto">
                                     <table
+                                        id="dailyTopProduct-table"
                                         class="min-w-240 overflow-y-visible"
                                         mat-table
                                         [dataSource]="dailyTopProductsRow">
@@ -604,15 +633,28 @@
                                             *matRowDef="let row; columns: dailyTopProductsCol;"></tr>
                                     </table>
                                 </div>
-                                <mat-paginator
-                                    class=""
-                                    [ngClass]="{'pointer-events-none': isLoading}"
-                                    [length]="dailyTopProductsPagination.length"
-                                    [pageIndex]="dailyTopProductsPagination.page"
-                                    [pageSize]="dailyTopProductsPagination.size"
-                                    [pageSizeOptions]="[5, 10, 25, 100]"
-                                    [showFirstLastButtons]="true"
-                                    #dailyTopProductsPaginator></mat-paginator>
+                                <div class="flex items-center justify-between">
+                                    <mat-paginator
+                                        class=""
+                                        [ngClass]="{'pointer-events-none': isLoading}"
+                                        [length]="dailyTopProductsPagination.length"
+                                        [pageIndex]="dailyTopProductsPagination.page"
+                                        [pageSize]="dailyTopProductsPagination.size"
+                                        [pageSizeOptions]="[5, 10, 25, 100]"
+                                        [showFirstLastButtons]="true"
+                                        #dailyTopProductsPaginator>
+                                    </mat-paginator>
+                                    <button
+                                        class="hidden sm:inline-flex ml-3"
+                                        (click)="exportDailyTopProductToExcel()"
+                                        mat-flat-button
+                                        [color]="'primary'">
+                                        <mat-icon
+                                            class="icon-size-5"
+                                            [svgIcon]="'heroicons_solid:save'"></mat-icon>
+                                        <span class="ml-2">Export</span>
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Settlement -->
@@ -637,6 +679,7 @@
                                 </div>
                                 <div class="flex flex-col flex-auto mt-2 overflow-x-auto">
                                     <table
+                                        id="settlement-table"
                                         class="min-w-240 overflow-y-visible"
                                         mat-table
                                         [dataSource]="settlementRow">
@@ -767,15 +810,28 @@
                                             *matRowDef="let row; columns: settlementCol;"></tr>
                                     </table>
                                 </div>
-                                <mat-paginator
-                                    class=""
-                                    [ngClass]="{'pointer-events-none': isLoading}"
-                                    [length]="settlementPagination.length"
-                                    [pageIndex]="settlementPagination.page"
-                                    [pageSize]="settlementPagination.size"
-                                    [pageSizeOptions]="[5, 10, 25, 100]"
-                                    [showFirstLastButtons]="true"
-                                    #settlementPaginator></mat-paginator>
+                                <div class="flex items-center justify-between">
+                                    <mat-paginator
+                                        class=""
+                                        [ngClass]="{'pointer-events-none': isLoading}"
+                                        [length]="settlementPagination.length"
+                                        [pageIndex]="settlementPagination.page"
+                                        [pageSize]="settlementPagination.size"
+                                        [pageSizeOptions]="[5, 10, 25, 100]"
+                                        [showFirstLastButtons]="true"
+                                        #settlementPaginator>
+                                    </mat-paginator>
+                                    <button
+                                        class="hidden sm:inline-flex ml-3"
+                                        (click)="exportSettlementToExcel()"
+                                        mat-flat-button
+                                        [color]="'primary'">
+                                        <mat-icon
+                                            class="icon-size-5"
+                                            [svgIcon]="'heroicons_solid:save'"></mat-icon>
+                                        <span class="ml-2">Export</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
