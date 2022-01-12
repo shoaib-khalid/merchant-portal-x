@@ -20,6 +20,7 @@ import { NgApexchartsModule } from 'ng-apexcharts';
 import { SharedModule } from 'app/shared/shared.module';
 import { DashboardComponent } from 'app/modules/merchant/dashboard/dashboard.component';
 import { dashboardRoutes } from 'app/modules/merchant/dashboard/dashboard.routing';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @NgModule({
     declarations: [
@@ -44,7 +45,8 @@ import { dashboardRoutes } from 'app/modules/merchant/dashboard/dashboard.routin
         MatFormFieldModule,
         NgApexchartsModule,
         TranslocoModule,
-        SharedModule
+        SharedModule,
+        MatTooltipModule
     ]
 })
 export class DashboardModule
