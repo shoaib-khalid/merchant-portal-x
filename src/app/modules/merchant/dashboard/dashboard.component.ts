@@ -299,8 +299,8 @@ export class DashboardComponent implements OnInit, OnDestroy
                         appliedDiscount: item.appliedDiscount,
                         deliveryType: item.deliveryType
                     });
-                });
-
+                });                
+            
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
@@ -799,7 +799,7 @@ export class DashboardComponent implements OnInit, OnDestroy
         // Overview This Week
         // -------------------------------
 
-        this._dashboardService.getDetailedDailySales_NoPageSize(this.storeId$, 0, '', 'created', 'desc',
+        this._dashboardService.getDetailedDailySales(this.storeId$, 0, 10, 'created', 'desc',
         formattedLastMonday, formattedToday)
         .subscribe(response => {
             this.overviewThisWeekArr = [];
@@ -929,7 +929,7 @@ export class DashboardComponent implements OnInit, OnDestroy
         // Overview Last Week
         // -------------------------------
 
-        this._dashboardService.getDetailedDailySales_NoPageSize(this.storeId$, 0, '', 'created', 'desc',
+        this._dashboardService.getDetailedDailySales(this.storeId$, 0, 10, 'created', 'desc',
         formattedLastWeekStart, formattedLastWeekEnd)
         .subscribe(response => {
             this.overviewLastWeekArr = [];

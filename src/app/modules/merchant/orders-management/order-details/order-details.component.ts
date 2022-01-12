@@ -276,7 +276,8 @@ export class OrderDetailsComponent implements OnInit
                             plateNumber : rider.plateNumber? rider.plateNumber : '',
                             provider    : rider.provider? rider.provider.name : '',
                             providerImage: rider.provider? rider.provider.providerImage : '',
-                            trackingUrl : rider.trackingUrl? rider.trackingUrl : '',                                         
+                            trackingUrl : rider.trackingUrl? rider.trackingUrl : '',     
+                            airwayBill  : rider.airwayBill? rider.airwayBill : ''                                    
                            }
           })
         });

@@ -1,6 +1,6 @@
 import { Route } from '@angular/router';
 import { DashboardComponent } from 'app/modules/merchant/dashboard/dashboard.component';
-import { DashboardResolver, DailyTopProductsResolver, DetailedDailySalesResolver, SummarySalesResolver, TotalSalesResolver, SettlementResolver, WeeklySaleResolver, DetailedDailySalesNoPageSizeResolver } from 'app/modules/merchant/dashboard/dashboard.resolvers';
+import { DashboardResolver, DailyTopProductsResolver, DetailedDailySalesResolver, SummarySalesResolver, TotalSalesResolver, SettlementResolver, WeeklySaleResolver } from 'app/modules/merchant/dashboard/dashboard.resolvers';
 
 export const dashboardRoutes: Route[] = [
     {
@@ -13,8 +13,7 @@ export const dashboardRoutes: Route[] = [
             summarySalesResolver: SummarySalesResolver,
             totalSalesResolver: TotalSalesResolver,
             settlementResolver: SettlementResolver,
-            weeklySalesResolver: WeeklySaleResolver,
-            detailedDailySalesNoPageSizeResolver: DetailedDailySalesNoPageSizeResolver
+            weeklySalesResolver: WeeklySaleResolver
         }
     }
 ];
