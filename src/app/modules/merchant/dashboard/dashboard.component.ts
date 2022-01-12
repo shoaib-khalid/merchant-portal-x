@@ -191,6 +191,11 @@ export class DashboardComponent implements OnInit, OnDestroy
     dailyTopProductFileExel= 'DailyTopProduct.xlsx';
     settlementFileExel= 'Settlement.xlsx';
 
+    summarySalesPageSize: number = 10;
+    detailedDailySalesPageSize: number = 10;
+    dailyTopProductsPageSize: number = 10;
+    settlementPageSize: number = 10;
+
     /**
      * Constructor
      */
@@ -224,8 +229,7 @@ export class DashboardComponent implements OnInit, OnDestroy
      * On init
      */
     ngOnInit(): void
-    {
-        
+    {        
         this._storesService.store$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((store: Store)=>{
@@ -576,7 +580,7 @@ export class DashboardComponent implements OnInit, OnDestroy
                     
                     this.summarySalesDateRange.end = formattedDate;
 
-                    return this._dashboardService.getSummarySales(this.storeId$, 0, 10, 'created', 'asc','', 
+                    return this._dashboardService.getSummarySales(this.storeId$, 0, this.summarySalesPageSize, 'created', 'asc','', 
                                                                     this.summarySalesDateRange.start, this.summarySalesDateRange.end);
                 }),
                 map(() => {
@@ -631,7 +635,7 @@ export class DashboardComponent implements OnInit, OnDestroy
                     
                     this.detailedDailySalesDateRange.end = formattedDate;
 
-                    return this._dashboardService.getDetailedDailySales(this.storeId$, 0, 10, 'created', 'asc', 
+                    return this._dashboardService.getDetailedDailySales(this.storeId$, 0, this.detailedDailySalesPageSize, 'created', 'asc', 
                                                                             this.detailedDailySalesDateRange.start, this.detailedDailySalesDateRange.end);
                 }),
                 map(() => {
@@ -686,7 +690,7 @@ export class DashboardComponent implements OnInit, OnDestroy
                     
                     this.dailyTopProductsDateRange.end = formattedDate;
 
-                    return this._dashboardService.getDailyTopProducts(this.storeId$, 0, 10, 'date', 'asc', "",
+                    return this._dashboardService.getDailyTopProducts(this.storeId$, 0, this.dailyTopProductsPageSize, 'date', 'asc', "",
                                                                             this.dailyTopProductsDateRange.start, this.dailyTopProductsDateRange.end);
                 }),
                 map(() => {
@@ -741,7 +745,7 @@ export class DashboardComponent implements OnInit, OnDestroy
                     
                     this.settlementDateRange.end = formattedDate;
 
-                    return this._dashboardService.getSettlement(this.storeId$, 0, 10, 'created', 'cycleStartDate',
+                    return this._dashboardService.getSettlement(this.storeId$, 0, this.settlementPageSize, 'created', 'cycleStartDate',
                                                                             this.settlementDateRange.start, this.settlementDateRange.end);
                 }),
                 map(() => {
@@ -1021,6 +1025,8 @@ export class DashboardComponent implements OnInit, OnDestroy
                     switchMap(() => {
                         this.isLoading = true;
 
+                        this.dailyTopProductsPageSize = this._dailyTopProductsPaginator.pageSize;
+
                         if (this.dailyTopProductsDateRange.start == null && this.dailyTopProductsDateRange.end == null)
                             return this._dashboardService.getDailyTopProducts(this.storeId$, this._dailyTopProductsPaginator.pageIndex, this._dailyTopProductsPaginator.pageSize, "date", "asc");
                         else
@@ -1045,6 +1051,8 @@ export class DashboardComponent implements OnInit, OnDestroy
                     switchMap(() => {
                         this.isLoading = true;
 
+                        this.detailedDailySalesPageSize = this._detailedDailySalesPaginator.pageSize;
+
                         if (this.detailedDailySalesDateRange.start == null && this.detailedDailySalesDateRange.end == null)
                             return this._dashboardService.getDetailedDailySales(this.storeId$, this._detailedDailySalesPaginator.pageIndex, this._detailedDailySalesPaginator.pageSize, "date", "asc");
                         else
@@ -1067,6 +1075,8 @@ export class DashboardComponent implements OnInit, OnDestroy
                 merge(this._summarySalesPaginator.page).pipe(
                     switchMap(() => {
                         this.isLoading = true;
+
+                        this.summarySalesPageSize = this._summarySalesPaginator.pageSize;
 
                         if (this.summarySalesDateRange.start == null && this.summarySalesDateRange.end == null)
                             return this._dashboardService.getSummarySales(this.storeId$, this._summarySalesPaginator.pageIndex, this._summarySalesPaginator.pageSize, "date", "asc");
@@ -1091,6 +1101,8 @@ export class DashboardComponent implements OnInit, OnDestroy
                 merge(this._settlementPaginator.page).pipe(
                     switchMap(() => {
                         this.isLoading = true;
+
+                        this.settlementPageSize = this._settlementPaginator.pageSize;
 
                         if (this.settlementDateRange.start == null && this.settlementDateRange.end == null)
                             return this._dashboardService.getSettlement(this.storeId$, this._settlementPaginator.pageIndex, this._settlementPaginator.pageSize, "date", "cycleStartDate");

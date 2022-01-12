@@ -315,6 +315,7 @@
                                         class="hidden sm:inline-flex ml-3"
                                         (click)="exportSummarySalesToExcel()"
                                         mat-flat-button
+                                        [matTooltip]="'Export summary sales details data to .csv file maximum of ' + summarySalesPageSize + ' items per page' "
                                         [color]="'primary'">
                                         <mat-icon
                                             class="icon-size-5"
@@ -528,6 +529,7 @@
                                     <button
                                         class="hidden sm:inline-flex ml-3"
                                         (click)="exportDailySalesToExcel()"
+                                        [matTooltip]="'Export daily detailed sales details data to .csv file maximum of ' + detailedDailySalesPageSize + ' items per page' "
                                         mat-flat-button
                                         [color]="'primary'">
                                         <mat-icon
@@ -648,6 +650,7 @@
                                         class="hidden sm:inline-flex ml-3"
                                         (click)="exportDailyTopProductToExcel()"
                                         mat-flat-button
+                                        [matTooltip]="'Export daily top products details data to .csv file maximum of ' + dailyTopProductsPageSize + ' items per page' "
                                         [color]="'primary'">
                                         <mat-icon
                                             class="icon-size-5"
@@ -824,6 +827,7 @@
                                     <button
                                         class="hidden sm:inline-flex ml-3"
                                         (click)="exportSettlementToExcel()"
+                                        [matTooltip]="'Export settlement data to .csv file maximum of ' + settlementPageSize + ' items per page' "
                                         mat-flat-button
                                         [color]="'primary'">
                                         <mat-icon
