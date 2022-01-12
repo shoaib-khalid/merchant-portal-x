@@ -403,37 +403,8 @@
                                             </mat-icon>
                                         </mat-form-field>
                                     </div>
-
-                                    <!-- <div class="flex flex-wrap w-full lg:w-6/12 ">
-                                        <div class="flex flex-wrap w-full">
-                                            <mat-label class="flex flex-wrap">Listing</mat-label>
-                                            <mat-icon
-                                                matTooltip="Choose the listing"
-                                                class="flex flex-wrap items-center transform scale-75"
-                                                [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                            </mat-icon>
-                                        </div>
-                                        <mat-form-field appearance="fill" class="w-full pr-4 fuse-mat-emphasized-affix">
-                                            <mat-select
-                                                class="w-full"
-                                                placeholder="Choose one of the listing"
-                                                [disabled]= "!isSelectItemOrCategoryCreate"
-                                                [value]="selectedCategoryIdCreate"
-                                                (selectionChange)="selectCategoryOrItemList($event.value)">
-                                                <div *ngIf="isSelectItemOrCategoryCreate" >
-                                                    <div *ngFor="let listing of filteredProductCategories;">
-                                                        <mat-option [value]="listing.id">{{listing.name}}</mat-option>
-                                                    </div>
-                                                </div>
-                                            </mat-select>
-                                            <mat-icon
-                                                matPrefix
-                                                [svgIcon]="'list'">
-                                            </mat-icon>
-                                        </mat-form-field>
-                                    </div> -->
                
-                                    <div class="rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden w-full lg:w-6/12">
+                                    <div class="rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden w-full lg:w-6/12 my-4">
                                         <!-- Header -->
                                         <div class="flex items-center -my-px py-2 px-3 w-full lg:w-6/12">
                                             <div class="flex items-center flex-auto min-w-0">
@@ -491,14 +462,50 @@
 
                                         </div>
 
-                                        <div>
-                                            <ng-container *ngIf="isSelectProductListCreate">
-                                                <p>
-                                                TESINGGGGG
-                                                </p>
-      
-                                            </ng-container>
-                                        </div>
+                                    </div>
+                                    <div>
+                                        <ng-container *ngIf="isSelectProductListCreate">
+                                            <div class="rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden w-full lg:w-6/12 my-4">
+                                                <!-- Header -->
+                                                <div class="flex items-center -my-px py-2 px-3 w-full lg:w-6/12">
+                                                    <div class="flex items-center flex-auto min-w-0">
+                                                        <mat-icon
+                                                            class="icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                                        <!-- INPUT SEARCH FOR SEARCHING SKU -->
+                                                        <input
+                                                            class="min-w-0 ml-2 py-1 border-0"
+                                                            type="text"
+                                                            placeholder="Enter SKU"
+                                                            (input)="filterProductsOrCategories('INVENTORIES',$event)"
+                                                            (keydown)="filterProductsOrCategoriesInputKeyDown('INVENTORIES',$event)"
+                                                            [maxLength]="20"
+                                                        >
+        
+                                                    </div>
+                                                 
+                                                </div>
+                                                <!-- Available product inventories -->
+                                                <div class="h-20 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
+                                                    <!-- Products iventories -->
+                                             
+                                                        <ng-container *ngFor="let inventory of filteredProductInventories; trackBy: trackByFn ">
+                                                            <mat-checkbox
+                                                                class="flex items-center h-10 min-h-10 px-4"
+                                                                [color]="'primary'"
+                                                            >
+        
+                                                            
+                                                                {{inventory.sku}}
+                                                            </mat-checkbox>
+                                                        </ng-container>
+                                            
+        
+                                                </div>
+        
+                                            </div>
+  
+                                        </ng-container>
                                     </div>
 
                                     <div class="flex flex-wrap w-1/1/2 lg:w-1/12 items-center justify-center py-1">
@@ -521,77 +528,6 @@
                                     </div>
                                 </div>
                             </fieldset> 
-
-                            <!-- <fieldset class="border border-solid border-gray-300 rounded my-1 mx-5">
-                                <legend class="text font-bold ml-2 px-2">Category or Item</legend>
-                                
-                                <div class="flex flex-col sm:flex-row px-8 pt-5">
-                             
-                                    <div class="flex flex-wrap w-full lg:w-6/12 ">
-                                        <div class="flex flex-wrap w-full">
-                                            <mat-label class="flex flex-wrap">Category/Item</mat-label>
-                                            <mat-icon
-                                                matTooltip="Choose what type need to be applied"
-                                                class="flex flex-wrap items-center transform scale-75"
-                                                [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                            </mat-icon>
-                                        </div>
-                                        <mat-form-field appearance="fill" class="w-full pr-4 fuse-mat-emphasized-affix">
-                                            <mat-select
-                                                class="w-full"
-                                                placeholder="Choose Type"
-                                                [value]="selectItemOrCategory"
-                                                (selectionChange)="uponSelectItemOrCategory($event.value)"
-                                                #categoryOrItemSelector>
-                                                <mat-select-trigger>
-                                                    <span class="flex items-center">
-                                                        <span>{{ categoryOrItemSelector.triggerValue }}</span>
-                                                    </span>
-                                                </mat-select-trigger>
-                                                <div>
-                                                    <mat-option [value]="'CATEGORY'">Category</mat-option>
-                                                    <mat-option [value]="'ITEM'">Item</mat-option>
-                                                </div>
-                                            </mat-select>
-                                            <mat-icon
-                                                matPrefix
-                                                [svgIcon]="'list'">
-                                            </mat-icon>
-                                        </mat-form-field>
-                                    </div>
-
-                                    <div class="flex flex-wrap w-full lg:w-6/12 ">
-                                        <div class="flex flex-wrap w-full">
-                                            <mat-label class="flex flex-wrap">Listing</mat-label>
-                                            <mat-icon
-                                                matTooltip="Choose the listing"
-                                                class="flex flex-wrap items-center transform scale-75"
-                                                [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                            </mat-icon>
-                                        </div>
-                                        <mat-form-field appearance="fill" class="w-full pr-4 fuse-mat-emphasized-affix">
-                                            <mat-select
-                                                class="w-full"
-                                                placeholder="Choose one of the listing"
-                                                [disabled]= "!isSelectedItemOrCategory"
-                                                [value]="selectedCategoryId"
-                                                (selectionChange)="selectCategoryOrItemList($event.value)">
-                                                <div *ngIf="isSelectedItemOrCategory" >
-                                                    <div *ngFor="let listing of filteredProductCategories;">
-                                                        <mat-option [value]="listing.id">{{listing.name}}</mat-option>
-                                                    </div>
-                                                </div>
-                                            </mat-select>
-                                            <mat-icon
-                                                matPrefix
-                                                [svgIcon]="'list'">
-                                            </mat-icon>
-                                        </mat-form-field>
-                                    </div>
-                                
-                                </div>
-
-                            </fieldset>  -->
 
                             <fieldset class="border border-solid border-gray-300 rounded my-1 mx-5">
                                 <legend class="text font-bold ml-2 px-2">Edit the category listing</legend>
@@ -634,8 +570,8 @@
                                                            aria-label="Category"
                                                            matInput
                                                            [value]="discountProducts.storeCategory.name"
-                                                           (input)="filterCategories($event)"
-                                                           (keydown)="filterCategoriesInputKeyDown($event)"
+                                                           (input)="filterProductsOrCategories('CATEGORY',$event)"
+                                                           (keydown)="filterProductsOrCategoriesInputKeyDown('CATEGORY',$event)"
                                                            [readonly]="!editModeListing[i]"
                                                            [matAutocomplete]="auto">
 

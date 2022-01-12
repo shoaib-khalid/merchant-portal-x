@@ -11,7 +11,7 @@ import { Discount, DiscountPagination, StoreDiscountTierList } from 'app/modules
 import { DiscountsService } from 'app/modules/merchant/discounts-management/list/discounts.service';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateDiscountProductComponent } from '../create-product-discount/create-product-discount.component';
-import { Product, ProductCategory, ProductPagination } from 'app/core/product/inventory.types';
+import { Product, ProductCategory, ProductInventory, ProductPagination } from 'app/core/product/inventory.types';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { DiscountsProductService } from './discountsproduct.service';
 import { ApiResponseModel, StoreDiscountProduct } from './discountsproduct.types';
@@ -113,7 +113,12 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     products: Product[]; 
     filteredProduct: Product[];
     selectedProduct: Product;
- 
+
+    //Product Inventories > item code
+    productInventories$ :Observable<ProductInventory[]>;
+    productInventories : ProductInventory[];
+    filteredProductInventories :ProductInventory[];
+    selectedProductInventory : ProductInventory;
 
     flashMessage: 'success' | 'error' | null = null;
     isLoading: boolean = false;
@@ -229,6 +234,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                 // Update the products
                 this.products = products;
                 this.filteredProduct = products;
+                console.log('THIS OBSERVABLE',this.products);
       
 
                 // Mark for check
@@ -788,8 +794,26 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
             {
                 // this.checkedCategoriesId.push(tagCategoryId);     
                 this.checkedCategoriesOrProduct.unshift(tagId);
+
                 //to be display layout for choose the item code
                 this.isSelectProductListCreate = true;
+
+                this._inventoryService.getProductById(this.checkedCategoriesOrProduct[0])
+                .pipe(takeUntil(this._unsubscribeAll))
+                .subscribe((product:Product) => {
+    
+                    // Update the products
+                    // this.products = products;
+                    this.filteredProductInventories = product.productInventories;
+
+                    this.productInventories =product.productInventories;
+                    console.log('product',product);
+                    console.log('this.productInventories',this.productInventories);
+    
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                });
+                // this._inventoryService.getProductById(this.checkedCategoriesOrProduct[0])
             }
             else
             {
@@ -879,7 +903,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
             // If the confirm button pressed...
             if ( result === 'confirmed' )
             {
-                // Delete the store discount product from server
+                // Delete the store discount product from server //param (main discount id, product discount id)
                 this._discountProductService.deleteDiscountProduct(this.selectedDiscount.id, productDiscount.id).subscribe(() => {
               
                     this.storeDiscountProduct.splice(this.storeDiscountProduct.findIndex(x => x.id === productDiscount.id), 1);
@@ -945,48 +969,9 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         }
     }
 
-    /**
-     * Filter category
-     *
-     * @param event
-     */
-       filterCategories(event): void
-       {
-           // Get the value
-           const value = event.target.value.toLowerCase();
-   
-           // Filter the categories
-           this.filteredProductCategories = this.productCategories$.filter(category => category.name.toLowerCase().includes(value));
-       }
-
-        /**
-     * Filter category input key down event
-     *
-     * @param event
-     */
-        filterCategoriesInputKeyDown(event): void
-        {
-             // Return if the pressed key is not 'Enter'
-             if ( event.key !== 'Enter' )
-             {
-                 return;
-             }
-     
-             // If there is no category available...
-             if ( this.filteredProductCategories.length === 0 )
-             {
-        
-             }
-     
-             // If there is a category...
-             const category = this.filteredProductCategories[0];
-             const isCategoryApplied = this.selectedProduct.categoryId;
-     
-        }
-
     filterProductsOrCategories(type,event): void
     {
-        //Expected type : CATEGORY / ITEM
+        //Expected type : CATEGORY / ITEM / INVENTORY
 
         // Get the value
         const value = event.target.value.toLowerCase();
@@ -995,7 +980,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
             // Filter the categories
             this.filteredProductCategories = this.productCategories$.filter(category => category.name.toLowerCase().includes(value));
         }
-        else{
+        else if (type === 'ITEM'){
             //filter the product but only have 20 listing only
             this.filteredProduct = this.products.filter(product => product.name.toLowerCase().includes(value)); 
             
@@ -1024,6 +1009,11 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                 
             // } );
     
+        }else{
+            // 
+            this.filteredProductInventories = this.productInventories.filter(inventories => inventories.sku.toLowerCase().includes(value));
+            console.log('filter iventory',this.filteredProductInventories);
+             
         }
     }
 
@@ -1042,5 +1032,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     
     
     }
+
 
 }
