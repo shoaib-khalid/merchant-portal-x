@@ -1,10 +1,10 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef, Output, EventEmitter } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MatSort } from '@angular/material/sort';
-import { merge, Observable, Subject } from 'rxjs';
-import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
+import { fromEvent, merge, Observable, Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, startWith, switchMap, takeUntil } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Discount, DiscountPagination, StoreDiscountTierList } from 'app/modules/merchant/discounts-management/list/discounts.types';
@@ -47,6 +47,10 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 {
     @ViewChild(MatPaginator) private _paginator: MatPaginator;
     @ViewChild(MatSort) private _sort: MatSort;
+    @ViewChild('searchInput') input: ElementRef;
+    @Output('onSearch') onSearch = new EventEmitter<string>();
+
+    private subscription: Subscription;
 
     // discount
     discounts$: Observable<Discount[]>;
@@ -77,6 +81,12 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     selectedCategoryIdCreate : string;
     checkedCategoriesId : any =[];
 
+    checkedCategoriesOrProduct : any =[];
+    isSelectProductListCreate : boolean = false;
+
+    checkedProductId :any = [];
+
+
     //upon edit category listing
     editSelectedCategory :string = '';
     editModeListing:any = [];
@@ -95,7 +105,12 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     selectedProductCategory: ProductCategory;
 
     //products
-    productCategories: Product[]; 
+    // products$:Observable<Product[]>;
+    products$:Observable<{ pagination: ProductPagination; products: Product[] }>
+    filteredProduct$: Observable<{ pagination: ProductPagination; products: Product[] }>
+    // selectedProduct$: Product;
+    
+    products: Product[]; 
     filteredProduct: Product[];
     selectedProduct: Product;
  
@@ -212,7 +227,8 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
             .subscribe((products:Product[]) => {
 
                 // Update the products
-                console.log('CHECK PRODUCTS',products);
+                this.products = products;
+                this.filteredProduct = products;
       
 
                 // Mark for check
@@ -303,31 +319,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
         this._discountProductService.getDiscountsProduct(discountId)
         .subscribe((response) => {
-
-            console.log('GETTTTT',response);
-
-    
-            // if (response['data'][0] === undefined){
-
-            //     this.selectItemOrCategory = '';
-
-            // }
-            // else if(response['data'][0].categoryId){
-
-            //     this.selectItemOrCategory = 'CATEGORY';
-            //     this.isSelectedItemOrCategory = true;
-            //     this.selectedCategoryId = response['data'][0].categoryId;
-
-            // } else if(response['data'][0].itemCode){
-
-            //     this.selectItemOrCategory = 'ITEM';
-                
-            // }
-            // console.log("checkng",this.selectItemOrCategory);
-
-
-
-
 
           // Mark for check
           this._changeDetectorRef.markForCheck();
@@ -481,31 +472,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     updateSelectedDiscount(): void
     {
 
-        console.log('check form',this.selectedDiscountForm.value);
         // update or create when centering the details category or item
-        console.log('CHECKING ::::',this.selectedCategoryId);
-        console.log('tetsing',this.selectedDiscountForm.value.id);
-    
-        // if(this.selectItemOrCategory === 'ITEM'){
-
-        //     const payloadProductDiscount ={
-            
-        //         storeDiscountId:this.selectedDiscountForm.value.id,
-        //         itemCode:this.selectedCategoryId //will chnage this
-                
-        //     }
-        // } else if(this.selectItemOrCategory === 'CATEGORY'){
-            
-        //     const payloadProductDiscount ={
-            
-        //         storeDiscountId:this.selectedDiscountForm.value.id,
-        //         categoryId:this.selectedCategoryId
-                
-        //     }
-
-
-        // }
-
 
         // since the storediscounttier id exist meaning that we just need to update it
         if (this.storeDiscountTierId !== null){
@@ -778,22 +745,13 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
     uponSelectItemOrCategory(value){
 
-        if (value === 'CATEGORY'){
+        if (value === 'CATEGORY' || value === 'ITEM' ){
+            //to be display listing to be choose 
             this.isSelectedItemOrCategory = true;
-            // this.filteredProductCategories = this.productCategories$.filter(category => category.name.toLowerCase().includes(value));
-            this.filteredProductCategories = this.productCategories$.filter(category => category);
 
         }
-         
-        if(value === 'ITEM'){
-            this.isSelectedItemOrCategory = true;
-        }
+
     }
-
-    // selectCategoryOrItemList(value){
-    //     console.log('categoryID',value);
-    //     this.selectedCategoryId=value;
-    // }
 
     onEditSelectCategoryList(categryId){
      
@@ -820,6 +778,38 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         this._changeDetectorRef.markForCheck();
     }
 
+    checkboxCategoriesOrProducts(type,tagId, change: MatCheckboxChange): void
+    {
+
+        
+        if (type === 'ITEM'){
+
+            if ( change.checked )
+            {
+                // this.checkedCategoriesId.push(tagCategoryId);     
+                this.checkedCategoriesOrProduct.unshift(tagId);
+                //to be display layout for choose the item code
+                this.isSelectProductListCreate = true;
+            }
+            else
+            {
+                this.checkedCategoriesOrProduct.splice(this.checkedCategoriesId.findIndex(elementId => elementId === tagId), 1);
+            }
+
+        }
+
+        console.log('checkboxCategoriesOrProducts will SEND TO BACKEND',this.checkedCategoriesOrProduct);
+        console.log('isSelectProductListCreate',this.isSelectProductListCreate);
+        
+        this._changeDetectorRef.markForCheck();
+    }
+
+    uponCreateChooseItemList(){
+
+    }
+
+    
+
     uponCreateSelectType(value){
 
         this.selectItemOrCatgeoryCreate = value;        
@@ -827,8 +817,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         if (value === 'CATEGORY'){
             this.isSelectItemOrCategoryCreate = true;
             this.checkedCategoriesId.pop();//empty the array for any selected checkbox previous
-            // this.filteredProductCategories = this.productCategories$.filter(category => category.name.toLowerCase().includes(value));
-            this.filteredProductCategories = this.productCategories$.filter(category => category);
 
         }
          
@@ -957,7 +945,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         }
     }
 
-      /**
+    /**
      * Filter category
      *
      * @param event
@@ -995,5 +983,64 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
              const isCategoryApplied = this.selectedProduct.categoryId;
      
         }
+
+    filterProductsOrCategories(type,event): void
+    {
+        //Expected type : CATEGORY / ITEM
+
+        // Get the value
+        const value = event.target.value.toLowerCase();
+
+        if (type === 'CATEGORY'){
+            // Filter the categories
+            this.filteredProductCategories = this.productCategories$.filter(category => category.name.toLowerCase().includes(value));
+        }
+        else{
+            //filter the product but only have 20 listing only
+            this.filteredProduct = this.products.filter(product => product.name.toLowerCase().includes(value)); 
+            
+            // WILL IMPLEMENT UPON SEARCH INPUT WITH SUBSCRIPTION  
+            // Subscribe to search input field value changes
+            //    console.log("checking input ",this.input.nativeElement);
+            //    fromEvent<any>(this.input.nativeElement, 'keydown')
+            //    .pipe(
+            //         takeUntil(this._unsubscribeAll),
+            //         debounceTime(300),
+            //         switchMap((query:string) => {
+            //             // this.closeDetails();
+            //             // this.isLoading = true;
+            //             this.filteredProduct$ =this._inventoryService.getProducts(0, 10, 'name', 'asc', query);
+            //             return this.filteredProduct$;
+
+            //         }),
+            //         map(() => {
+            //             this.isLoading = false;
+            //         })
+            //     )
+            // .subscribe( (response) => {
+                
+            //     console.log("iman checking this ,",response);
+              
+                
+            // } );
+    
+        }
+    }
+
+    filterProductsOrCategoriesInputKeyDown(type,event): void
+    {
+            // Return if the pressed key is not 'Enter'
+            if ( event.key !== 'Enter' )
+            {
+                return;
+            }
+            // If there is no category available...
+            if ( this.filteredProductCategories.length === 0 )
+            {
+    
+            }
+    
+    
+    }
 
 }
