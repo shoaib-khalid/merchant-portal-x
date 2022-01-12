@@ -36,11 +36,11 @@
                     <ng-container *ngIf="createStoreCondition.error === null; else errorCard">
                         <fuse-card *ngFor="let vertical of verticals" class="flex-col max-w-sm md:max-w-none p-6 sm:py-12 sm:px-10 mt-8">
                             <!-- Price -->
-                            <div class="flex items-baseline whitespace-nowrap">
+                            <div class="flex items-baseline whitespace-nowrap mb-6">
                                 <img [src]="vertical.thumbnailUrl" alt="">
                                 <!-- <img class="max-h-30 overflow-hidden flex item-center justify-center" [src]="vertical.thumbnailUrl" alt=""> -->
                             </div>
-                            <div class="w-8 h-1 my-10 rounded bg-accent"></div>
+                            <!-- <div class="w-8 h-1 my-10 rounded bg-accent"></div> -->
                             <div class="text-4xl font-bold tracking-tight leading-tight">{{ vertical.name }}</div>
                             <!-- <div class="mt-2 text-lg font-medium tracking-tight text-secondary">{{ vertical.description }}</div> -->
                             <!-- CTA -->
@@ -92,7 +92,7 @@
 
                     <!-- If there is any error -->
                     <ng-template #errorCard>
-                        <fuse-card class="m-auto flex flex-col items-center max-w-80 w-full p-8 filter-info">
+                        <fuse-card class="lg:m-30 lg:ml-90 justify-center flex flex-col items-center max-w-80 w-full p-8 filter-info">
                             <div class="flex items-center justify-center p-5 rounded-full bg-warn-100 dark:bg-gray-600">
                                 <mat-icon
                                     class="icon-size-10 text-warn-500 dark:text-warn-300"
