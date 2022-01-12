@@ -204,7 +204,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                 switchMap((query) => {
                     this.closeDetails();
                     this.isLoading = true;
-                    this.discountName = query;
+                    this.discountName = query;                    
                     return this._discountService.getByQueryDiscounts(0, 10, 'startDate', 'asc', query, '','ITEM');
                 }),
                 map(() => {
@@ -278,13 +278,12 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                 // Get discounts if sort or page changes
                 merge(this._sort.sortChange, this._paginator.page).pipe(
                     switchMap(() => {
-                        this.closeDetails();
+                        this.closeDetails();                        
                         this.isLoading = true;
                         if (this.discountName != null)
-                            return this._discountService.getDiscounts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, this.discountName, '');
+                            return this._discountService.getByQueryDiscounts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, this.discountName, '','ITEM');
                         else    
-                            return this._discountService.getDiscounts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, '', '');
-
+                            return this._discountService.getByQueryDiscounts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, '','','ITEM');
                     }),
                     map(() => {
                         this.isLoading = false;
