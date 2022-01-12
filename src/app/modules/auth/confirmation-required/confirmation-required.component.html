@@ -7,20 +7,24 @@
             </div>
 
             <!-- Title -->
-            <div class="mt-8 text-4xl font-extrabold tracking-tight leading-tight">Confirmation required</div>
+            <div class="mt-8 text-4xl font-extrabold tracking-tight leading-tight">Thank you for creating a merchant account on Symplified.Biz platform</div>
             <div class="mt-4">
-                A confirmation mail with instructions has been sent to your email address.
-                Follow those instructions to confirm your email address and activate your account.
+                <span>“Your account has been successfully activated.  Please log in to your account with your username or email</span>
+                <a
+                    class="ml-1 text-primary-500 hover:underline"
+                    [routerLink]="['/sign-in']">here
+                </a>
+                <span>and create an online store in minutes.”</span>
             </div>
 
             <!-- Form footer -->
-            <div class="mt-8 text-md font-medium text-secondary">
+            <!-- <div class="mt-8 text-md font-medium text-secondary">
                 <span>Return to</span>
                 <a
                     class="ml-1 text-primary-500 hover:underline"
                     [routerLink]="['/sign-in']">sign in
                 </a>
-            </div>
+            </div> -->
         </div>
     </div>
     <div class="relative hidden md:flex flex-auto items-center justify-center w-1/2 h-full p-16 lg:px-28 overflow-hidden bg-gray-800 dark:border-l">
