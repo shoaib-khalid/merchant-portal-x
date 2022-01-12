@@ -23,7 +23,7 @@
                 </div>
 
                 <!-- Spacer -->
-                <div class="col-span-12 mt-2"></div>
+                <div class="col-span-12 mt-3"></div>
 
                 <!-- Customer Details -->
 
@@ -54,17 +54,12 @@
                             {{ detailsForm.get('invoiceId').value }}
                         </dd>
                         </div>
-                        
-                        
-                        <!-- <div class="bg-white px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
-                        
-                        </div> -->
                     </dl>
                     </div>
                 </div>
 
                 <!-- Spacer -->
-                <div class="col-span-12 mt-2"></div>
+                <div class="col-span-12 mt-3"></div>
 
                 <!-- Rider Details -->
 
@@ -123,28 +118,28 @@
                                     matSuffix
                                     class="w-15 justify-self-center"
                                     [src]= "detailsForm.get('riderDetails').value.providerImage">
-                                    <!-- [src]="deliveryPartner.providerImage"> -->
                         </div>
                         <div class="bg-white-50 px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
                             <dt class="text-sm font-medium text-gray-500">
                                 Tracking URL
                             </dt>
-                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                            <a 
+                                class="truncate no-underline text-blue-600 hover:text-blue-800 hover:underline visited:text-purple-600"
+                                href="{{detailsForm.get('riderDetails').value.trackingUrl}}"
+                                target="_blank"
+                            >
                                 {{ detailsForm.get('riderDetails').value.trackingUrl }}
-                            </dd>
+                            </a>
+                            <!-- <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {{ detailsForm.get('riderDetails').value.trackingUrl }}
+                            </dd> -->
                         </div>
-                    
-                        
-                        
-                        <!-- <div class="bg-white px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
-                        
-                        </div> -->
                     </dl>
                     </div>
                 </div>
 
                 <!-- Spacer -->
-                <div class="col-span-12 mt-2"></div>
+                <div class="col-span-12 mt-3"></div>
 
                 <!-- Items -->
 
@@ -198,7 +193,7 @@
 
 
                 <!-- Spacer -->
-                <div class="col-span-12 mt-2"></div>
+                <div class="col-span-12 mt-3"></div>
 
                 <!-- Payment Details -->
 
@@ -267,10 +262,6 @@
                             {{ detailsForm.get('total').value | currency: store$.regionCountry.currencySymbol}}
                         </dd>
                         </div>
-                        
-                        <!-- <div class="bg-white px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
-                        
-                        </div> -->
                     </dl>
                     </div>
                 </div>

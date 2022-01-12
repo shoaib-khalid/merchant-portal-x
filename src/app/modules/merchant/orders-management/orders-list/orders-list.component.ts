@@ -43,6 +43,9 @@ import { OrderDetailsComponent } from '../order-details/order-details.component'
         .cell-style {
             width: 130px
         }
+        .cell-style-small {
+            width: 90px
+        }
         `
     ],
     encapsulation  : ViewEncapsulation.None,
