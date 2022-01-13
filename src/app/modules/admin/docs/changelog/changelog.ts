@@ -9,6 +9,36 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 export class ChangelogComponent
 {
     changelog: any[] = [
+        // v0.0.13
+        {
+            version    : 'v0.0.13',
+            releaseDate: 'Jan 13, 2022',
+            changes    : [
+                {
+                    type: 'Fixed',
+                    list: [
+                        '(ReceiptPage) Add capped description to receipt page',
+                        '(CreateStorePage) Fix UI for error card, centralise the card container',
+                        '(DashboardPage) Fix top product test from number to ranks. Eg: 1st, 2nd, 3rd',
+                        '(DashboardPage) Use new endpoint for chart and overview, handle dashboard services not resolved when choose different store from dropdown'
+                    ]
+                },
+                {
+                    type: 'Added',
+                    list: [
+                        '(OrderDetailsPage) Add Customer detail, rider details & delivery info',
+                        '(OrderDetailsPage) Add order details such as tracking url & consignment note',
+                        '(DashboardPage) Add download report for every report type',
+                    ]
+                },
+                {
+                    type: 'Bugged',
+                    list: [
+                        '(DashboardPage) Fix graph data, data on graph limited to pagination causing inaccurate data being displayed - still need backend to fix',
+                    ]
+                }
+            ]
+        },
         // v0.0.12
         {
             version    : 'v0.0.12',
