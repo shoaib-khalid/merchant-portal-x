@@ -108,3 +108,18 @@ export interface DeliveryProviderDetails
   name: string;
   providerImage: string;
 }
+
+export interface DeliveryRiderDetails
+{
+  name: string;
+  phoneNumber: string;
+  plateNumber: string;
+  trackingUrl: string;
+  orderNumber: string;
+  provider: {
+    id : number;
+    name : string;
+    providerImage : string;
+  }
+  airwayBill: string;
+}

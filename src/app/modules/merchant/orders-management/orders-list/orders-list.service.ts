@@ -5,7 +5,7 @@ import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service';
-import { DeliveryProviderDetails, Order, OrderItem, OrdersCountSummary, OrdersListPagination } from './orders-list.types';
+import { DeliveryProviderDetails, DeliveryRiderDetails, Order, OrderItem, OrdersCountSummary, OrdersListPagination } from './orders-list.types';
 
 @Injectable({
     providedIn: 'root'
@@ -313,5 +313,24 @@ export class OrdersListService
                 this._ordersCountSummary.next(response["data"]);
             })
         );
+    }
+
+    getDeliveryRiderDetails(orderId): Observable<DeliveryRiderDetails>
+    {
+        let deliveryService = this._apiServer.settings.apiServer.deliveryService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+        
+        return this._httpClient.get<any>(deliveryService + '/orders/getDeliveryRiderDetails/' + orderId , header)
+            .pipe(
+                map((response) => {
+                    this._logging.debug("Response from OrdersService (getDeliveryRiderDetails)",response);
+                    return response["data"];
+                })
+            );
     }
 }

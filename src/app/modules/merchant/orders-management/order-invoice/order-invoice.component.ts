@@ -97,7 +97,8 @@ export class OrderInvoiceComponent implements OnInit {
       discountCalculationValue: [0],
       appliedDiscount     :[0],
       discountMaxAmount   :[0],
-      appliedDiscountDescription : [0]
+      appliedDiscountDescription : [0],
+      deliveryDiscountMaxAmount : [0]
 
     });
 
@@ -141,6 +142,10 @@ export class OrderInvoiceComponent implements OnInit {
             // set discountMaxAmount if not null
             if (order["data"].discountMaxAmount != null)
               this.invoiceForm.get('discountMaxAmount').setValue(order["data"].discountMaxAmount);
+
+            // set deliveryDiscountMaxAmount if not null
+            if (order["data"].deliveryDiscountMaxAmount != null)
+            this.invoiceForm.get('deliveryDiscountMaxAmount').setValue(order["data"].deliveryDiscountMaxAmount);
             
             // to add currency symbol to fixed value, and remove negative (-) sign
             if (order["data"].deliveryDiscountDescription != null){
@@ -195,8 +200,7 @@ export class OrderInvoiceComponent implements OnInit {
 
             this.invoiceForm.get('invoiceCreatedDate').setValue(this.dateCreated);
             this.invoiceForm.get('invoiceUpdatedDate').setValue(this.dateUpdated);
-
-
+            
             // Mark for check
             this._changeDetectorRef.markForCheck();
         });

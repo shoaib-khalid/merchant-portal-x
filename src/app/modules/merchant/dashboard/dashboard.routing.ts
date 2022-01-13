@@ -6,6 +6,7 @@ export const dashboardRoutes: Route[] = [
     {
         path     : '',
         component: DashboardComponent,
+        runGuardsAndResolvers: "always",
         resolve  : {
             data: DashboardResolver,
             dailyTopProducts: DailyTopProductsResolver,

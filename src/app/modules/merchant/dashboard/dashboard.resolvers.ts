@@ -113,6 +113,7 @@ export class DetailedDailySalesResolver implements Resolve<any>
     }
 }
 
+
 @Injectable({
     providedIn: 'root'
 })

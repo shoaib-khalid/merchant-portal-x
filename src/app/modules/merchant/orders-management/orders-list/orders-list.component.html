@@ -223,6 +223,7 @@
                                         Transaction ID
                                     </th>
                                     <td
+                                        class="cell-style"
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span class="pr-6 font-medium text-sm text-secondary whitespace-nowrap">
@@ -240,6 +241,7 @@
                                         Date
                                     </th>
                                     <td
+                                        class="cell-style"
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span class="pr-6 whitespace-nowrap">
@@ -257,6 +259,7 @@
                                         Customer Name
                                     </th>
                                     <td
+                                        class="truncate-cell"
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span class="pr-6 whitespace-nowrap">
@@ -274,9 +277,10 @@
                                         Amount
                                     </th>
                                     <td
+                                        class="cell-style-small"
                                         mat-cell
                                         *matCellDef="let transaction">
-                                        <span class="pr-6 font-medium whitespace-nowrap">
+                                        <span class="font-medium whitespace-nowrap">
                                             {{ transaction.order.total | currency: store.regionCountry.currencySymbol }}
                                         </span>
                                     </td>
@@ -291,6 +295,7 @@
                                         Status
                                     </th>
                                     <td
+                                        class="cell-style"
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span
@@ -305,11 +310,42 @@
                                         </span>
                                     </td>
                                 </ng-container>
+
+                                
+                                <!-- Pickup -->
+                                <ng-container matColumnDef="pickup">
+                                    <th
+                                        class="mat-cell-break-word"
+                                        mat-header-cell
+                                        *matHeaderCellDef>
+                                        Store Pickup
+                                    </th>
+                                    <td
+                                        class="cell-style-small px-2 pr-6 sm:px-3 md:px-4 lg:px-6"
+                                        mat-cell
+                                        *matCellDef="let transaction">
+                                        <div class="flex items-start items-center">
+
+                                            <mat-icon
+                                            *ngIf="transaction.order.orderShipmentDetail.storePickup"
+                                            class="text-green-400 icon-size-5"
+                                            [svgIcon]="'heroicons_outline:check'"></mat-icon>
+
+                                            <!-- <input 
+                                            class="bg-gray-50 border-gray-300 focus:ring-0 focus:ring-blue-300 h-6 w-6 rounded-full" 
+                                            type="checkbox" 
+                                            [checked]="transaction.order.orderShipmentDetail.storePickup"
+                                            onclick="return false;"
+                                            > -->
+                                      </div>
+                                    </td>
+                                </ng-container>
                                 
 
                                 <!-- Action -->
                                 <ng-container matColumnDef="action">
                                     <th
+                                        class="pl-2"
                                         mat-header-cell
                                         *matHeaderCellDef>
                                         Action
@@ -332,7 +368,7 @@
                                                 [for]="'view-receipt-' + transaction.order.id"
                                                 matRipple>
                                                 <mat-icon
-                                                    class="text-white group-hover:text-primary icon-size-5"
+                                                    class="text-white group-hover:text-primary icon-size-4"
                                                     >receipt</mat-icon>
                                             </label>
                                             <ng-container *ngIf= "transaction.currentCompletionStatus != 'PAYMENT_CONFIRMED' && transaction.currentCompletionStatus != 'RECEIVED_AT_STORE'; else cancelTemplate">

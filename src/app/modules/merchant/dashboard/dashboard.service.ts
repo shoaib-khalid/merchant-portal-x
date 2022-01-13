@@ -9,7 +9,7 @@ import { DailyTopProducts, DailyTopProductsPagination,
          DetailedDailySales, DetailedDailySalesPagination, 
          Settlement, 
          SettlementPagination, 
-         SummarySales, SummarySalesPagination, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly, WeeklySale 
+         SummarySales, SummarySalesPagination, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly, WeeklyGraph, WeeklySale 
        } from './dashboard.types';
 
 @Injectable({
@@ -41,6 +41,7 @@ export class DashboardService
     private _settlementPagination: BehaviorSubject<SettlementPagination | null> = new BehaviorSubject(null);
 
     private _weeklySale: BehaviorSubject<WeeklySale[] | null> = new BehaviorSubject(null);
+    private _weeklyGraph: BehaviorSubject<WeeklyGraph[] | null> = new BehaviorSubject(null);
 
     fromDate: string;
     todayDate: string;
@@ -205,6 +206,15 @@ export class DashboardService
          return this._weeklySale.asObservable();
      }
 
+     /**
+     * Getter for weekly graph
+     *
+    */
+      get weeklyGraph$(): Observable<WeeklyGraph[]>
+      {
+          return this._weeklyGraph.asObservable();
+      }
+
     /**
      * Getter for storeId
      */
@@ -303,7 +313,6 @@ export class DashboardService
                 endDate: '' + to,
             }
         };
-        
         return this._httpClient.get<{ pagination: DetailedDailySalesPagination; detailedDailySales: DetailedDailySales[] }>
             (reportService + '/store/' + id + '/report/merchantDetailedDailySales', header)
             .pipe(
@@ -471,6 +480,34 @@ export class DashboardService
                     this._logging.debug("Response from ReportService (getWeeklySale)", response);
 
                     this._weeklySale.next(response["weeklySales"]);
+                })
+            );
+    }
+
+    getWeeklyGraph(id: string, from: string = '', to: string = '' ):
+    Observable<{ weeklyGraph: WeeklyGraph[] }>
+    {
+        let reportService = this._apiServer.settings.apiServer.reportService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+
+            params: {
+                from: '' + from,
+                to: '' + to,
+            }
+        };
+        
+        return this._httpClient.get<{ weeklyGraph: WeeklyGraph[] }>
+            (reportService + '/store/' + id + '/weeklyGraph', header)
+            .pipe(
+                tap((response) => {
+                    
+                    this._logging.debug("Response from ReportService (getWeeklyGraph)", response);
+
+                    this._weeklyGraph.next(response["dashboardGraph"]);
                 })
             );
     }

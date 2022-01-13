@@ -132,6 +132,15 @@ export interface WeeklySale
 }
 ////
 
+export interface WeeklyGraph
+{
+    date: string;
+    total: number;
+    completionStatus: string;
+}
+
+////
+
 export interface Settlement
 {
     id: string;

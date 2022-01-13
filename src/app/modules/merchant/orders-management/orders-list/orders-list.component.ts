@@ -21,11 +21,31 @@ import { OrderDetailsComponent } from '../order-details/order-details.component'
     selector       : 'orders-list',
     templateUrl    : './orders-list.component.html',
     styles       : [
-        /* to remove visible container when window dialog is opened  */
         `
+        /* to remove visible container when window dialog is opened  */
         .mat-dialog-container {
           padding: 0 !important;
-      }
+        }
+        /* to truncate long text  */
+        .truncate-cell {
+            max-width: 150px; 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        /* to break long words */
+        .mat-cell-break-word {
+            white-space: normal;
+            word-wrap: break-word;
+            max-width: 50px;
+        }
+
+        .cell-style {
+            width: 130px
+        }
+        .cell-style-small {
+            width: 90px
+        }
         `
     ],
     encapsulation  : ViewEncapsulation.None,
@@ -66,7 +86,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     range: any;
 
     recentTransactionsDataSource: MatTableDataSource<any> = new MatTableDataSource();
-    recentTransactionsTableColumns: string[] = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'action'];
+    recentTransactionsTableColumns: string[] = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'pickup', 'action'];
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     loading: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -356,9 +376,9 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
 
         let currentOpenTab = displayStatuses;
         if (displayStatuses !== "HISTORY") {
-            this.recentTransactionsTableColumns = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'action'];
+            this.recentTransactionsTableColumns = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'pickup', 'action'];
         } else {
-            this.recentTransactionsTableColumns = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'completionStatus', 'action'];
+            this.recentTransactionsTableColumns = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'completionStatus', 'pickup', 'action'];
         }
 
         this.tabControl.setValue(this._orderCountSummary.find(item => item.id === this.openTab).completionStatus);
