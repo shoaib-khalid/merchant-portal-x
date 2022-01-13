@@ -241,6 +241,15 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                 this._changeDetectorRef.markForCheck();
             });
 
+            // this._inventoryService.getProducts(0, 10, 'name', 'asc', '').subscribe((response)=>{
+                
+            //     console.log("ngonit",response["data"].content);
+              
+
+            //     // this.products = this.products.push()
+                
+            // });
+
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -293,9 +302,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         }, 0);
     }
 
-    /**
-     * On destroy
-     */
     ngOnDestroy(): void
     {
         // Unsubscribe from all subscriptions
@@ -303,15 +309,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         this._unsubscribeAll.complete();
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
-
-    /**
-     * Toggle discount details
-     *
-     * @param discountId
-     */
     toggleDetails(discountId: string): void
     {
         // If the discount is already selected...
@@ -385,9 +382,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
             });
     }
 
-    /**
-     * Close the details
-     */
     closeDetails(): void
     {
         this.selectedDiscount = null;
@@ -396,16 +390,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         this.storeDiscountProduct =[];
     }
 
-    /**
-     * 
-     *  DISCOUNTS
-     * 
-     */ 
-
-
-    /**
-     * Create discount
-     */
     createDiscount(): void
     {
         const dialogRef = this._dialog.open(CreateDiscountProductComponent, { disableClose: true });
@@ -471,9 +455,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         });
     }
 
-    /**
-     * Update the selected discount using the form data
-     */
     updateSelectedDiscount(): void
     {
 
@@ -525,7 +506,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
  
     }
 
-    //create store dicount product
     createStoreProductDiscount(){
    
         this.checkedCategoriesId
@@ -571,9 +551,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                 )
             }
         )
-
-        // this.checkedCategoriesId.pop();//empty the array back
-        // console.log('this.checkedCategoriesId',this.checkedCategoriesId);
         
         this._changeDetectorRef.markForCheck();   
 
@@ -616,12 +593,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     }
 
     insertTierToDiscount(discountTier){
-
-        // let discountTier: StoreDiscountTierList = {
-        //     calculationType: this.calculationType,
-        //     discountAmount: this.discountAmount,
-        //     startTotalSalesAmount: this.startTotalSalesAmount,
-        // }
 
          // Create the discount
          this._discountService.createDiscountTier(this.selectedDiscount.id,discountTier.value).subscribe((response) => {
@@ -691,30 +662,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     
     }
     
-    validateDiscountTier(type, value){
-        if (type === 'startTotalSalesAmount') {
-            this.startTotalSalesAmount = value;
-        }
-        // if (type === 'endTotalSalesAmount') {
-        //     this.endTotalSalesAmount = value;
-        // }
-        if (type === 'discountAmount') {
-            this.discountAmount = value;
-        }
-        if (type === 'calculationType') {
-            this.calculationType = value;
-        }
-    }
-
-    uponSelectItemOrCategory(value){
-
-        if (value === 'CATEGORY' || value === 'ITEM' ){
-            //to be display listing to be choose 
-            this.isSelectedItemOrCategory = true;
-
-        }
-
-    }
 
     onEditSelectCategoryList(categryId){
      
@@ -750,6 +697,8 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
             if ( change.checked )
             {
+                //since i just want to make it single selection i will remove any selected product in order
+                this.checkedCategoriesOrProduct.pop();
                 // this.checkedCategoriesId.push(tagCategoryId);     
                 this.checkedCategoriesOrProduct.unshift(tagId);
 
@@ -786,12 +735,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         this._changeDetectorRef.markForCheck();
     }
 
-    uponCreateChooseItemList(){
-
-    }
-
-    
-
     uponCreateSelectType(value){
 
         this.selectItemOrCatgeoryCreate = value;        
@@ -799,12 +742,15 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         if (value === 'CATEGORY'){
             this.isSelectItemOrCategoryCreate = true;
             this.checkedCategoriesId.pop();//empty the array for any selected checkbox previous
+            this.isSelectProductListCreate = false;
+            this.checkedCategoriesOrProduct.pop();
 
         }
          
         if(value === 'ITEM'){
             this.isSelectItemOrCategoryCreate = true;
             this.checkedCategoriesId.pop();//empty the array
+            this.checkedCategoriesOrProduct.pop();
 
         }
 
@@ -896,12 +842,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         }, 3000);
     }
 
-    /**
-     * Track by function for ngFor loops
-     *
-     * @param index
-     * @param item
-     */
     trackByFn(index: number, item: any): any
     {
         return item.id || index;
@@ -941,31 +881,29 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         else if (type === 'ITEM'){
             //filter the product but only have 20 listing only
             this.filteredProduct = this.products.filter(product => product.name.toLowerCase().includes(value)); 
+            console.log('this.products',this.products);
             
-            // WILL IMPLEMENT UPON SEARCH INPUT WITH SUBSCRIPTION  
-            // Subscribe to search input field value changes
-            //    console.log("checking input ",this.input.nativeElement);
-            //    fromEvent<any>(this.input.nativeElement, 'keydown')
-            //    .pipe(
-            //         takeUntil(this._unsubscribeAll),
-            //         debounceTime(300),
-            //         switchMap((query:string) => {
-            //             // this.closeDetails();
-            //             // this.isLoading = true;
-            //             this.filteredProduct$ =this._inventoryService.getProducts(0, 10, 'name', 'asc', query);
-            //             return this.filteredProduct$;
+            console.log("this.filteredProduct",this.filteredProduct);
 
-            //         }),
-            //         map(() => {
-            //             this.isLoading = false;
-            //         })
-            //     )
-            // .subscribe( (response) => {
-                
-            //     console.log("iman checking this ,",response);
-              
-                
-            // } );
+            // Subscribe to search input field value changes
+            if(this.filteredProduct.length ===0){
+            
+                fromEvent(event.target,'keyup')
+                    .pipe(
+                        takeUntil(this._unsubscribeAll),
+                        debounceTime(300),
+                        switchMap((event:any) => {
+                                    
+                            return this._inventoryService.getProducts(0, 10, 'name', 'asc', event.target.value)
+                        }),
+                        map(() => {
+                            this.isLoading = false;
+                        })
+                    )
+                .subscribe();
+            }
+            
+            
     
         }else{
             // 
@@ -980,17 +918,17 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
             // Return if the pressed key is not 'Enter'
             if ( event.key !== 'Enter' )
             {
-                console.log('return not enter');
                 return;
             }
+
             // If there is no category available...
             if ( this.filteredProductCategories.length === 0 )
-            {
+            {                
                 // Clear the input
                 event.target.value = '';
                 return;
             }
-
+            
         // If there is a tag...
         const tag = this.checkedCategoriesId;
         const isTagApplied = this.checkedCategoriesId.find(catId => catId === tag);

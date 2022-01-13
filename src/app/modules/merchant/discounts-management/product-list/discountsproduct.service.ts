@@ -84,15 +84,6 @@ export class DiscountsProductService
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
 
-    /**
-     * Get discounts
-     *
-     * @param page
-     * @param size
-     * @param sort
-     * @param order
-     * @param search
-     */
     getDiscountsProduct(discountId):
     Observable<StoreDiscountProduct>
     {
