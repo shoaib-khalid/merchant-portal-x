@@ -661,48 +661,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         );
     }
 
-    deleteSelectedDiscountTier(discountTierId: string): void
-    {
-        // Open the confirmation dialog
-        const confirmation = this._fuseConfirmationService.open({
-            title  : 'Delete discount tier',
-            message: 'Are you sure you want to remove this discount tier? This action cannot be undone!',
-            actions: {
-                confirm: {
-                    label: 'Delete'
-                }
-            }
-        });
-
-        // Subscribe to the confirmation dialog closed action
-        confirmation.afterClosed().subscribe((result) => {
-
-            // If the confirm button pressed...
-            if ( result === 'confirmed' )
-            {
-
-                // Delete the discount on the server
-                this._discountService.deleteDiscountTier(this.selectedDiscount.id, discountTierId).subscribe(() => {
-                    this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
-
-                    let index = (this.storeDiscountTierList.value.findIndex(x => x.id === discountTierId));
-
-                    // remove from discount tier list
-                    if (index > -1) {
-                        this.storeDiscountTierList.removeAt(index);
-                    }
-
-                    // console.log("this.storeDiscountTierList.value", this.storeDiscountTierList.value);
-                    // this.storeDiscountTierList. patchValue(this.storeDiscountTierList.value);
-
-                    // Mark for check
-                    this._changeDetectorRef.markForCheck();
-                });
-            }
-        });
-    }
-
-
     updateSelectedDiscountTier(discountTier){
 
         // Update the discount on the server
@@ -772,15 +730,16 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         {
             // this.checkedCategoriesId.push(tagCategoryId);     
             this.checkedCategoriesId.unshift(tagCategoryId);
+            this._changeDetectorRef.markForCheck();
         }
         else
         {
 
             this.checkedCategoriesId.splice(this.checkedCategoriesId.findIndex(tagId => tagId === tagCategoryId), 1);
+            this._changeDetectorRef.markForCheck();
             
         }
         console.log('CHECK BEFORE SEND TO BACKEND',this.checkedCategoriesId);
-        this._changeDetectorRef.markForCheck();
     }
 
     checkboxCategoriesOrProducts(type,tagId, change: MatCheckboxChange): void
@@ -1021,14 +980,33 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
             // Return if the pressed key is not 'Enter'
             if ( event.key !== 'Enter' )
             {
+                console.log('return not enter');
                 return;
             }
             // If there is no category available...
             if ( this.filteredProductCategories.length === 0 )
             {
-    
+                // Clear the input
+                event.target.value = '';
+                return;
             }
-    
+
+        // If there is a tag...
+        const tag = this.checkedCategoriesId;
+        const isTagApplied = this.checkedCategoriesId.find(catId => catId === tag);
+          // If the found tag is already applied to the product...
+          if ( isTagApplied )
+          {
+              // Remove the tag from the product
+              this.checkedCategoriesId.splice(this.checkedCategoriesId.findIndex(elementId => elementId === tag), 1);
+              this._changeDetectorRef.markForCheck();
+            }
+          else
+          {
+              // Otherwise add the tag to the product
+              this.checkedCategoriesId.unshift(tag);
+              this._changeDetectorRef.markForCheck();
+          }
     
     }
 
