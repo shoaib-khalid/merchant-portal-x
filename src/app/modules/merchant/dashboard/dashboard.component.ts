@@ -8,7 +8,6 @@ import { DashboardService } from 'app/modules/merchant/dashboard/dashboard.servi
 import { Store, StoreRegionCountries } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
 import { DailyTopProducts, DailyTopProductsPagination, DetailedDailySales, DetailedDailySalesPagination, Settlement, SettlementPagination, SummarySales, SummarySalesPagination, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly } from './dashboard.types';
-import { items } from 'app/mock-api/apps/file-manager/data';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { formatDate } from '@angular/common';
 import * as XLSX from 'xlsx';
@@ -267,7 +266,6 @@ export class DashboardComponent implements OnInit, OnDestroy
                         totalTransaction: item.totalOrders
                     });
                 });
-
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
@@ -304,7 +302,7 @@ export class DashboardComponent implements OnInit, OnDestroy
                         deliveryType: item.deliveryType
                     });
                 });                
-            
+                
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
@@ -333,7 +331,6 @@ export class DashboardComponent implements OnInit, OnDestroy
                         amountEarned: items.amountEarned
                     });
                 });
-
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });    
@@ -377,7 +374,6 @@ export class DashboardComponent implements OnInit, OnDestroy
                         total: items.total
                     });
                 });
-                
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });  
@@ -392,7 +388,6 @@ export class DashboardComponent implements OnInit, OnDestroy
                         total: items.total
                     });
                 });
-                
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });  
@@ -407,7 +402,6 @@ export class DashboardComponent implements OnInit, OnDestroy
                         total: items.total
                     });
                 });
-                
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });      
@@ -435,7 +429,6 @@ export class DashboardComponent implements OnInit, OnDestroy
                         netAmount: items.totalStoreShare
                     });
                 });
-
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });    
@@ -507,19 +500,6 @@ export class DashboardComponent implements OnInit, OnDestroy
                 this.sumMonthlyPending += a.total;
 
         })
-
-        
-        // Get the data
-        this._dashboardService.data$
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((data) => {
-
-                // Store the data
-                this.data = data;
-
-                // Prepare the chart data
-                // this._prepareChartData();
-            });
 
         // Attach SVG fill fixer to all ApexCharts
         window['Apex'] = {
@@ -799,72 +779,46 @@ export class DashboardComponent implements OnInit, OnDestroy
 
         })
 
-        // -------------------------------
-        // Overview This Week
-        // -------------------------------
+        // // -------------------------------
+        // // Graph & Overview This Week
+        // // -------------------------------
 
-        this._dashboardService.getDetailedDailySales(this.storeId$, 0, 10, 'created', 'desc',
-        formattedLastMonday, formattedToday)
+        this._dashboardService.getWeeklyGraph(this.storeId$, formattedLastMonday, formattedToday)
         .subscribe(response => {
             this.overviewThisWeekArr = [];
-            response['data'].content.forEach(item => {
+            response['dashboardGraph'].forEach(item => {
                 this.overviewThisWeekArr.push({ 
                     completionStatus: item.completionStatus,
-                    dateCreated: item.created,
-                    day: new Date(item.created).getDay()
+                    total: item.total,
+                    //get the day of the week
+                    day: new Date(item.date).getDay()
                 });
             });
-            
-            // Sum up Total Sales for This Week
-            // Put the sum for status to day array
+            // Sum up This Week Total and plot the Chart based on Day
             this.overviewThisWeekArr.forEach(a => {
+            
+            if (this.completeCompletionStatus.includes(a.completionStatus)){
 
-                if (this.completeCompletionStatus.includes(a.completionStatus)){
+                this.sumThisWeekCompleted += a.total;
+                this.thisWeekDayChartCompleted[a.day] += a.total;
+            }
+            
+            else if (this.failedCompletionStatus.includes(a.completionStatus)){
 
-                    this.sumThisWeekCompleted += 1;
-                    this.thisWeekDayChartCompleted[a.day] += 1;
-                }
-                else if (this.failedCompletionStatus.includes(a.completionStatus)){
+                this.sumThisWeekFailed += a.total;
+                this.thisWeekDayChartFailed[a.day] += a.total;
+            }
+            
+            else {
 
-                    this.sumThisWeekFailed += 1;
-                    this.thisWeekDayChartFailed[a.day] += 1;
-                 
-                }
-                else {
-                    this.sumThisWeekPending += 1;
-                    this.thisWeekDayChartPending[a.day] += 1;
-                }
+                this.sumThisWeekPending += a.total;
+                this.thisWeekDayChartPending[a.day] += a.total;
+            }
+
             })
+
             this._prepareChartData();
         })
-
-        // // -------------------------------
-        // // Graph This Week
-        // // -------------------------------
-
-        // this._dashboardService.getWeeklySale(this.storeId$, formattedLastMonday, formattedToday)
-        // .subscribe(response => {
-        //     this.thisWeekChartArr = [];
-        //     response['weeklySales'].forEach(item => {
-        //         this.thisWeekChartArr.push({ 
-        //             completionStatus: item.completionStatus,
-        //             weeklySaleTotal: item.total
-        //         });
-        //     });
-        //     // Sum up This Week Total
-        //     this.thisWeekChartArr.forEach(a => {
-            
-        //     if (this.completeCompletionStatus.includes(a.completionStatus))
-        //         this.thisWeekTotalCompleted += a.weeklySaleTotal;
-            
-        //     else if (this.failedCompletionStatus.includes(a.completionStatus))
-        //         this.thisWeekTotalFailed += a.weeklySaleTotal;
-            
-        //     else
-        //         this.thisWeekTotalPending += a.weeklySaleTotal;
-
-        //     })
-        // })
 
         //-----------------------------
         // Get dates for last week
@@ -886,22 +840,6 @@ export class DashboardComponent implements OnInit, OnDestroy
         // -------------------------------
         // Top Product Last Week
         // -------------------------------
-        
-        // this._dashboardService.getDailyTopProducts(this.storeId$, 0, 10, 'ranking', 'asc', "",
-        // formattedLastWeekStart, formattedLastWeekEnd)
-        // .subscribe(response => {
-            
-        //     this.topProductLastWeekRow = []
-
-        //     for (let i = 0; i < 3 ; i++){
-        //         this.topProductLastWeekRow[i] = response['data'].content[i]?.name;
-        //     }
-            
-        //     this.firstLastWeek = this.topProductLastWeekRow[0];
-        //     this.secondLastWeek = this.topProductLastWeekRow[1];
-        //     this.thirdLastWeek = this.topProductLastWeekRow[2];
-            
-        // })
 
         this._dashboardService.getDailyTopProducts(this.storeId$, 0, 10, 'date', 'desc', "",
         formattedLastWeekStart, formattedLastWeekEnd)
@@ -929,74 +867,48 @@ export class DashboardComponent implements OnInit, OnDestroy
             
         })
         
-        // -------------------------------
-        // Overview Last Week
-        // -------------------------------
+        // // -------------------------------
+        // // Graph & Overview Last Week
+        // // -------------------------------
 
-        this._dashboardService.getDetailedDailySales(this.storeId$, 0, 10, 'created', 'desc',
-        formattedLastWeekStart, formattedLastWeekEnd)
+        this._dashboardService.getWeeklyGraph(this.storeId$, formattedLastWeekStart, formattedLastWeekEnd)
         .subscribe(response => {
             this.overviewLastWeekArr = [];
-            response['data'].content.forEach(item => {
+            response['dashboardGraph'].forEach(item => {
                 this.overviewLastWeekArr.push({ 
                     completionStatus: item.completionStatus,
-                    day: new Date(item.created).getDay(),
-                    dateCreated: item.created
+                    total: item.total,
+                    //get the day of the week
+                    day: new Date(item.date).getDay()
                 });
             });
-            
-            // Sum up Total Sales for Last Week
-            // Put the sum for status to day array
+
+            // Sum up Last Week Total and plot the Chart based on Day
             this.overviewLastWeekArr.forEach(a => {
-                
+            
                 if (this.completeCompletionStatus.includes(a.completionStatus)){
 
-                    this.sumLastWeekCompleted += 1;
-                    this.lastWeekDayChartCompleted[a.day] += 1;
+                    this.sumLastWeekCompleted += a.total;
+                    this.lastWeekDayChartCompleted[a.day] += a.total;
+                    
                 }
+                
                 else if (this.failedCompletionStatus.includes(a.completionStatus)){
 
-                    this.sumLastWeekFailed += 1;
-                    this.lastWeekDayChartFailed[a.day] += 1;
+                    this.sumLastWeekFailed += a.total;
+                    this.lastWeekDayChartFailed[a.day] += a.total;
                 }
+                
                 else {
-                    this.sumLastWeekPending += 1;
-                    this.lastWeekDayChartPending[a.day] += 1;
+
+                    this.sumLastWeekPending += a.total;
+                    this.lastWeekDayChartPending[a.day] += a.total;
                 }
             })
-                
-                
+
             this._prepareChartData();
-
-        })
-
-        // // -------------------------------
-        // // Graph Last Week
-        // // -------------------------------
-
-        // this._dashboardService.getWeeklySale(this.storeId$, formattedLastWeekStart, formattedLastWeekEnd)
-        // .subscribe(response => {
-        //     this.lastWeekChartArr = [];
-        //     response['weeklySales'].forEach(item => {
-        //         this.lastWeekChartArr.push({ 
-        //             completionStatus: item.completionStatus,
-        //             weeklySaleTotal: item.total
-        //         });
-        //     });
-
-        //     // Sum up Last Week Total
-        //     this.lastWeekChartArr.forEach(a => {
             
-        //         if (this.completeCompletionStatus.includes(a.completionStatus))
-        //             this.lastWeekTotalCompleted += a.weeklySaleTotal;
-                
-        //         else if (this.failedCompletionStatus.includes(a.completionStatus))
-        //             this.lastWeekTotalFailed += a.weeklySaleTotal;
-                
-        //         else
-        //             this.lastWeekTotalPending += a.weeklySaleTotal;
-        //     })
-        // })
+        })
 
 
         this._prepareChartData();
