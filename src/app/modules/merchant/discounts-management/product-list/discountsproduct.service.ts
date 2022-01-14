@@ -8,6 +8,7 @@ import { LogService } from 'app/core/logging/log.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { ApiResponseModel, StoreDiscountProduct, StoreDiscountProductPagination } from './discountsproduct.types';
 import { TranslocoTestingModule } from '@ngneat/transloco';
+import { Product } from 'app/core/product/inventory.types';
 
 @Injectable({
     providedIn: 'root'
@@ -15,15 +16,17 @@ import { TranslocoTestingModule } from '@ngneat/transloco';
 export class DiscountsProductService
 {
     // Private
+    //for discount product service
     private _discountProduct: BehaviorSubject<StoreDiscountProduct | null> = new BehaviorSubject(null);
     private _discountsProduct: BehaviorSubject<StoreDiscountProduct[] | null> = new BehaviorSubject(null);
     private _pagination: BehaviorSubject<StoreDiscountProductPagination | null> = new BehaviorSubject(null);
 
-  
+    //for product 
+    private _product: BehaviorSubject<Product | null> = new BehaviorSubject(null);
+    private _products: BehaviorSubject<Product[]| null> = new BehaviorSubject(null);
 
-    /**
-     * Constructor
-     */
+    // private static readonly SERVICE_URL = `${_apiServer.settings.apiServer.productService}/core2/tnt/dm/cms-posts`;
+  
     constructor(
         private _httpClient: HttpClient,
         private _apiServer: AppConfig,
@@ -31,70 +34,67 @@ export class DiscountsProductService
         private _jwt: JwtService,
         private _fuseConfirmationService: FuseConfirmationService,
     )
+
     {
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Accessors
-    // -----------------------------------------------------------------------------------------------------
-
-    /**
-     * Getter for discount
-     */
     get discount$(): Observable<StoreDiscountProduct>
     {
         return this._discountProduct.asObservable();
     }
 
-    /**
-     * Getter for discounts
-     */
     get discounts$(): Observable<StoreDiscountProduct[]>
     {
         return this._discountsProduct.asObservable();
     }
 
-    /**
-     * Getter for pagination
-     */
     get pagination$(): Observable<StoreDiscountProductPagination>
     {
         return this._pagination.asObservable();
     }
 
-    /**
-     * Getter for access token
-     */
- 
-     get accessToken(): string
-     {
-         return localStorage.getItem('accessToken') ?? '';
-     }
-
-    /**
-     * Getter for storeId
-     */
- 
-     get storeId$(): string
-     {
-         return localStorage.getItem('storeId') ?? '';
-     }
-
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
-
-    getDiscountsProduct(discountId):
-    Observable<StoreDiscountProduct>
+    get product$(): Observable<Product>
     {
-        let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        return this._product.asObservable();
+    }
 
-        const header = {
-            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+    get products$(): Observable<Product[]>
+    {
+        return this._products.asObservable();
+    }
+
+    get accessToken(): string
+    {
+        return localStorage.getItem('accessToken') ?? '';
+    }
+
+    get storeId$(): string
+    {
+         return localStorage.getItem('storeId') ?? '';
+    }
+
+    get httpOptions$() {
+        return {
+          headers: new HttpHeaders().set("Authorization", `Bearer ${this.jwtToken$}`),
         };
+    }
+    
+    get jwtToken$(){
+        return this._jwt.getJwtPayload(this.accessToken).act;
+    }
 
-        return this._httpClient.get<any>(productService +'/stores/'+this.storeId$+'/discount/'+discountId+'/product', header).pipe(
+    get productService$()
+    {
+        return this._apiServer.settings.apiServer.productService;
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // Product Discount
+    // -----------------------------------------------------------------------------------------------------
+
+    getDiscountsProduct(discountId):Observable<StoreDiscountProduct>
+    {
+        return this._httpClient.get<any>(this.productService$ +'/stores/'+this.storeId$+'/discount/'+discountId+'/product', this.httpOptions$).pipe(
             tap((response) => {
 
                 this._logging.debug("Response from DiscountsService",response);
@@ -108,10 +108,6 @@ export class DiscountsProductService
         );
     }
 
-
-    /**
-     * Get discount by id
-     */
     getDiscountById(id: string): Observable<StoreDiscountProduct>
     {
         return this._discountsProduct.pipe(
@@ -141,32 +137,18 @@ export class DiscountsProductService
         );
     }
 
-    //get store discount products
     getStoreDiscountProduct(discountId: string) : Observable<ApiResponseModel<StoreDiscountProduct>>
     {
-        let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
 
-        const header = {
-            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
-        };
-        return this._httpClient.get<ApiResponseModel<StoreDiscountProduct>>(productService +'/stores/'+this.storeId$+'/discount/'+discountId+'/product',header);
+        return this._httpClient.get<ApiResponseModel<StoreDiscountProduct>>(this.productService$ +'/stores/'+this.storeId$+'/discount/'+discountId+'/product',this.httpOptions$);
     }
 
 
     createProductDiscount(discountId: string, discountProduct:StoreDiscountProduct ): Observable<StoreDiscountProduct>
     {
-        let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
-
-        const header = {
-            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
-        };
-
         return this.discount$.pipe(
             take(1),
-            switchMap(_discountProduct => this._httpClient.post<any>(productService + '/stores/' + this.storeId$ + '/discount/' + discountId + '/product' , discountProduct , header).pipe(
+            switchMap(_discountProduct => this._httpClient.post<any>(this.productService$ + '/stores/' + this.storeId$ + '/discount/' + discountId + '/product' , discountProduct , this.httpOptions$).pipe(
                 map((newdiscountProduct) => {
 
                     // Return the new discount
@@ -176,26 +158,12 @@ export class DiscountsProductService
         );
     }
 
-    /**
-     * Update discount
-     *
-     * @param id
-     * @param discount
-     */
     updateProductDiscount(discountId: string, body: StoreDiscountProduct): Observable<StoreDiscountProduct>
     {
-        let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
-
-        const header = {
-            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
-        };
-
         return this.discounts$.pipe(
             take(1),
             // switchMap(discounts => this._httpClient.post<InventoryDiscount>('api/apps/ecommerce/inventory/discount', {}).pipe(
-            switchMap(discounts => this._httpClient.put<StoreDiscountProduct>(productService + '/stores/' + this.storeId$ + '/discount/'+ discountId + '/product', body , header).pipe(
+            switchMap(discounts => this._httpClient.put<StoreDiscountProduct>(this.productService$ + '/stores/' + this.storeId$ + '/discount/'+ discountId + '/product', body , this.httpOptions$).pipe(
                 map((updatedDiscount) => {
 
                     // // Find the index of the updated discount
@@ -214,24 +182,12 @@ export class DiscountsProductService
         );
     }
 
-    /**
-     * Delete the discount
-     *
-     * @param discountId
-     */
     deleteDiscountProduct(discountId,discountProductId: string): Observable<boolean>
     {
-        let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
-
-        const header = {
-            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
-        };
-      
+       
         return this.discounts$.pipe(
             take(1),
-            switchMap(discounts => this._httpClient.delete(productService +'/stores/'+this.storeId$+'/discount/'+discountId + '/product/'+discountProductId, header).pipe(
+            switchMap(discounts => this._httpClient.delete(this.productService$ +'/stores/'+this.storeId$+'/discount/'+discountId + '/product/'+discountProductId, this.httpOptions$).pipe(
                 map((status: number) => {
 
                     let isDeleted:boolean = false;
@@ -246,5 +202,34 @@ export class DiscountsProductService
         );
     }
 
+    
+    // -----------------------------------------------------------------------------------------------------
+    // Product Service
+    // -----------------------------------------------------------------------------------------------------
+    // this service we use for dropdown listing
+    getProducts():Observable<ApiResponseModel<Product[]>>
+    {
+        return this._httpClient.get<ApiResponseModel<Product[]>>(this.productService$ +'/stores/'+this.storeId$+'/products', this.httpOptions$).pipe(
+            tap((response : ApiResponseModel<Product[]>) => {
+
+                this._logging.debug("Response from Product Service in Product Discount Service",response);
+
+                // this._products.next(response.data);
+            })
+        );
+    }
+
+    getProductById(productId:string):Observable<ApiResponseModel<Product>>
+    {
+        return this._httpClient.get<ApiResponseModel<Product>>(this.productService$ +'/stores/'+this.storeId$+'/products/'+productId, this.httpOptions$).pipe(
+            tap((response : ApiResponseModel<Product>) => {
+
+                this._logging.debug("Response from Product Service in Product Discount Service",response);
+
+                // this._product.next(response.data);
+            })
+        );
+
+    }
 
 }
