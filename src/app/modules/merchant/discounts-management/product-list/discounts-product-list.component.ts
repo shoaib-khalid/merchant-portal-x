@@ -47,10 +47,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 {
     @ViewChild(MatPaginator) private _paginator: MatPaginator;
     @ViewChild(MatSort) private _sort: MatSort;
-    @ViewChild('searchInput') input: ElementRef;
-    @Output('onSearch') onSearch = new EventEmitter<string>();
-
-    private subscription: Subscription;
 
     // discount
     discounts$: Observable<Discount[]>;
@@ -81,11 +77,9 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     selectedCategoryIdCreate : string;
     checkedCategoriesId : any =[];
 
-    checkedCategoriesOrProduct : any =[];
-    isSelectProductListCreate : boolean = false;
+    checkedProduct : any =[];//store product id only
 
-    checkedProductId :any = [];
-
+    checkedProductInventory: any = [];
 
     //upon edit category listing
     editSelectedCategory :string = '';
@@ -241,15 +235,14 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                 this._changeDetectorRef.markForCheck();
             });
 
-            // this._inventoryService.getProducts(0, 10, 'name', 'asc', '').subscribe((response)=>{
-                
-            //     console.log("ngonit",response["data"].content);
-              
-
-            //     // this.products = this.products.push()
-                
-            // });
-
+            this._discountProductService.getProducts()
+            .subscribe((response: ApiResponseModel<Product[]>)=>{
+    
+                console.log("HELLO:",response.data['content']);
+    
+                this._changeDetectorRef.markForCheck();
+    
+            });
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -388,6 +381,12 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         this.selectItemOrCategory = '';
         this.isSelectedItemOrCategory = false;
         this.storeDiscountProduct =[];
+        //to reset any check box related
+        this.selectItemOrCatgeoryCreate ='';
+        this.isSelectItemOrCategoryCreate = false;
+        this.checkedCategoriesId.pop();//empty the array
+        this.checkedProduct.pop();
+        this.checkedProductInventory.pop();
     }
 
     createDiscount(): void
@@ -506,51 +505,67 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
  
     }
 
-    createStoreProductDiscount(){
-   
-        this.checkedCategoriesId
-        .forEach((catId)=>{
+    createStoreProductDiscount(selectItemOrCatgeoryCreate){
 
-                let payloadProductDiscount ={
-                    storeDiscountId:this.selectedDiscountForm.value.id,
-                    categoryId:catId
+        console.log('type',selectItemOrCatgeoryCreate);
+        console.log('checkedCategoriesId',this.checkedCategoriesId);
+        console.log('checkedProduct',this.checkedProduct);
+        console.log('checkedProductInventory',this.checkedProductInventory);
+        
+        // return;
 
-                }                
-
-                this._discountProductService.createProductDiscount(this.selectedDiscountForm.value.id,payloadProductDiscount).
-                subscribe((response) => {
-
-                    this.storeDiscountProduct.unshift(response["data"]);
-   
-                    //remove the check category
-                    this.checkedCategoriesId.splice(this.checkedCategoriesId.findIndex(tagId => tagId === response["data"].categoryId), 1);
-
-                    // Mark for check
-                    this._changeDetectorRef.markForCheck();
-                }
-                , error => {
-                    console.log(error);
-
-                        if (error.status === 409) {
-                            // Open the confirmation dialog
-                            const confirmation = this._fuseConfirmationService.open({
-                                title  : 'Category already exist',
-                                message: 'Please choose other category',
-                                actions: {
-                                    confirm: {
-                                        label: 'Ok'
-                                    },
-                                    cancel : {
-                                        show : false,
+        if(selectItemOrCatgeoryCreate === 'CATEGORY'){
+            
+            this.checkedCategoriesId
+            .forEach((catId)=>{
+    
+                    let payloadProductDiscount ={
+                        storeDiscountId:this.selectedDiscountForm.value.id,
+                        categoryId:catId
+    
+                    }                
+    
+                    this._discountProductService.createProductDiscount(this.selectedDiscountForm.value.id,payloadProductDiscount).
+                    subscribe((response) => {
+    
+                        this.storeDiscountProduct.unshift(response["data"]);
+       
+                        //remove the check category
+                        this.checkedCategoriesId.splice(this.checkedCategoriesId.findIndex(tagId => tagId === response["data"].categoryId), 1);
+    
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    }
+                    , error => {
+                        console.log(error);
+    
+                            if (error.status === 409) {
+                                // Open the confirmation dialog
+                                const confirmation = this._fuseConfirmationService.open({
+                                    title  : 'Category already exist',
+                                    message: 'Please choose other category',
+                                    actions: {
+                                        confirm: {
+                                            label: 'Ok'
+                                        },
+                                        cancel : {
+                                            show : false,
+                                        }
                                     }
-                                }
-                            });
-                        }
-
+                                });
+                            }
+    
+                    }
+                    )
                 }
-                )
-            }
-        )
+            )
+
+        }
+        else if(selectItemOrCatgeoryCreate === 'ITEM'){
+
+        }
+   
+
         
         this._changeDetectorRef.markForCheck();   
 
@@ -698,14 +713,12 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
             if ( change.checked )
             {
                 //since i just want to make it single selection i will remove any selected product in order
-                this.checkedCategoriesOrProduct.pop();
+                this.checkedProduct.pop();
                 // this.checkedCategoriesId.push(tagCategoryId);     
-                this.checkedCategoriesOrProduct.unshift(tagId);
+                this.checkedProduct.unshift(tagId);
 
-                //to be display layout for choose the item code
-                this.isSelectProductListCreate = true;
-
-                this._inventoryService.getProductById(this.checkedCategoriesOrProduct[0])
+                //upon checked the product we will call the service for get product id in order to get the product inventory
+                this._inventoryService.getProductById(this.checkedProduct[0])
                 .pipe(takeUntil(this._unsubscribeAll))
                 .subscribe((product:Product) => {
     
@@ -720,17 +733,34 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
                 });
-                // this._inventoryService.getProductById(this.checkedCategoriesOrProduct[0])
+                // this._inventoryService.getProductById(this.checkedProduct[0])
             }
             else
             {
-                this.checkedCategoriesOrProduct.splice(this.checkedCategoriesId.findIndex(elementId => elementId === tagId), 1);
+                this.checkedProduct.splice(this.checkedProduct.findIndex(elementId => elementId === tagId), 1);
             }
+
+        } else if(type === 'INVENTORIES'){
+
+            if ( change.checked )
+            {
+            
+                // this.checkedCategoriesId.push(tagCategoryId);     
+                this.checkedProductInventory.unshift(tagId);
+                console.log('this.checkedProductInventory',this.checkedProductInventory);
+                
+            }
+            else
+            {
+                this.checkedProductInventory.splice(this.checkedProductInventory.findIndex(elementId => elementId === tagId), 1);
+            }
+
 
         }
 
-        console.log('checkboxCategoriesOrProducts will SEND TO BACKEND',this.checkedCategoriesOrProduct);
-        console.log('isSelectProductListCreate',this.isSelectProductListCreate);
+        console.log('Products will SEND TO BACKEND',this.checkedProduct);
+        console.log('inventory will SEND TO BACKEND',this.checkedProductInventory);
+
         
         this._changeDetectorRef.markForCheck();
     }
@@ -742,15 +772,16 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         if (value === 'CATEGORY'){
             this.isSelectItemOrCategoryCreate = true;
             this.checkedCategoriesId.pop();//empty the array for any selected checkbox previous
-            this.isSelectProductListCreate = false;
-            this.checkedCategoriesOrProduct.pop();
+            this.checkedProduct.pop();
+            this.checkedProductInventory.pop();
 
         }
          
         if(value === 'ITEM'){
             this.isSelectItemOrCategoryCreate = true;
             this.checkedCategoriesId.pop();//empty the array
-            this.checkedCategoriesOrProduct.pop();
+            this.checkedProduct.pop();
+            this.checkedProductInventory.pop();
 
         }
 
