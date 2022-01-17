@@ -15,6 +15,7 @@ import { Product, ProductCategory, ProductInventory, ProductPagination } from 'a
 import { InventoryService } from 'app/core/product/inventory.service';
 import { DiscountsProductService } from './discountsproduct.service';
 import { ApiResponseModel, StoreDiscountProduct } from './discountsproduct.types';
+import { DialogProductListComponent } from '../dialog-product-list/dialog-product-list.component';
 
 @Component({
     selector       : 'discounts-product-list',
@@ -978,6 +979,13 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
           }
     
     }
-
+    //********* 
+    //CODE BARU
+    //********* 
+    dialogProductList(): void
+    {
+        const dialogRef = this._dialog.open(DialogProductListComponent, { disableClose: true });
+     
+    }
 
 }

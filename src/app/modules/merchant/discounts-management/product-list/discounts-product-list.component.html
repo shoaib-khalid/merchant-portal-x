@@ -419,7 +419,9 @@
                                                     [disabled]= "!isSelectItemOrCategoryCreate"
                                                     class="min-w-0 ml-2 py-1 border-0"
                                                     type="text"
-                                                    [placeholder]="selectItemOrCatgeoryCreate === 'ITEM'? 'Product' : 'Category'"
+                                                    [placeholder]="selectItemOrCatgeoryCreate === 'ITEM'? 'Product' 
+                                                    :selectItemOrCatgeoryCreate === 'CATEGORY'?'Category'
+                                                    :'' "
                                                     (input)="filterProductsOrCategories(selectItemOrCatgeoryCreate,$event)"
                                                     (keydown)="filterProductsOrCategoriesInputKeyDown(selectItemOrCatgeoryCreate,$event)"
                                                     [maxLength]="20"
@@ -454,7 +456,7 @@
                                                         class="flex items-center h-10 min-h-10 px-4"
                                                         [color]="'primary'"
                                                         (change)="checkboxCategoriesOrProducts(selectItemOrCatgeoryCreate,product.id,$event)"
-                                                        [checked]="checkedCategoriesOrProduct.includes(product.id)"
+                                                        [checked]="checkedProduct.includes(product.id)"
                                                     >
 
                                                     
@@ -467,7 +469,7 @@
 
                                     </div>
                                     
-                                        <ng-container *ngIf="checkedCategoriesOrProduct.length>0">
+                                        <ng-container *ngIf="checkedProduct.length>0">
                                             <div class="rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden w-full lg:w-3/12 my-4 mx-4">
                                                 <!-- Header -->
                                                 <div class="flex items-center -my-px py-2 px-3 w-full lg:w-6/12">
