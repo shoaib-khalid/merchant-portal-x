@@ -232,7 +232,7 @@ export class DiscountsProductService
 
     }
 
-    getByQueryProducts(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', status: string = 'ACTIVE,INACTIVE'):
+    getByQueryProducts(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', status: string = 'ACTIVE,INACTIVE',categoryId?:string):
     Observable<{ pagination: ProductPagination; products: Product[] }>
 {
 
@@ -247,6 +247,9 @@ export class DiscountsProductService
             status      : '' + status
         }
     };
+    if (categoryId) {
+        headerParam.params["categoryId"] = categoryId;
+      }
     const header = Object.assign(this.httpOptions$, headerParam);
 
     return this._httpClient.get<any>(this.productService$ +'/stores/'+this.storeId$+'/products', header).pipe(

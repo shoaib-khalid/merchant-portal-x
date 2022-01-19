@@ -2,10 +2,11 @@ import { ChangeDetectorRef, Component, Inject, OnInit, ViewChild } from '@angula
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { Product, ProductCategory, ProductPagination } from 'app/core/product/inventory.types';
-import { merge, Observable, Subject } from 'rxjs';
-import { map, switchMap, takeUntil } from 'rxjs/operators';
+import { fromEvent, merge, Observable, Subject } from 'rxjs';
+import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { DiscountsProductService } from '../product-list/discountsproduct.service';
 import { ApiResponseModel, StoreDiscountProduct } from '../product-list/discountsproduct.types';
 
@@ -38,8 +39,9 @@ export class DialogProductListComponent implements OnInit {
  inputSearchProducts : string = '';
 
  selectedCategory:string ='';
+ selectedProduct:any=[];
 
- pagination: ProductPagination;
+ productPagination: ProductPagination;
 
  private _unsubscribeAll: Subject<any> = new Subject<any>();
 
@@ -49,6 +51,7 @@ export class DialogProductListComponent implements OnInit {
     private _inventoryService: InventoryService ,
     private _discountProductService : DiscountsProductService,
     private _changeDetectorRef: ChangeDetectorRef,
+    private _fuseConfirmationService: FuseConfirmationService,
     @Inject(MAT_DIALOG_DATA) public data: MatDialog
 
 
@@ -113,7 +116,7 @@ export class DialogProductListComponent implements OnInit {
           .subscribe((pagination: ProductPagination) => {
 
               // Update the pagination
-              this.pagination = pagination;
+              this.productPagination = pagination;
 
               // Mark for check
               this._changeDetectorRef.markForCheck();
@@ -190,13 +193,89 @@ export class DialogProductListComponent implements OnInit {
 
 
   
-  onSelectCategoryList(categoryId){
+  onSelectCategoryList(event){
+
+    this.selectedCategory = event.value;
+
+    if(this.selectedCategory ){
+        return this._discountProductService.getByQueryProducts(0, 5, 'name', 'asc','','ACTIVE,INACTIVE',this.selectedCategory).subscribe();
+    } else{
+        return this._discountProductService.getByQueryProducts(0, 5, 'name', 'asc','','ACTIVE,INACTIVE').subscribe();
+
+    }
+
+   }
+
+   closeDialog(){
      
-    this.selectedCategory = categoryId;
-    console.log('selectedCategory',this.selectedCategory);
+    this.discountId = '';
+    this.dialogRef.close({ status: false });
 
-}
+   }
+   
+   inputSearchProduct(event){
+    // Get the value
+    const value = event.target.value.toLowerCase();
 
+    fromEvent(event.target,'keyup')
+    .pipe(
+        takeUntil(this._unsubscribeAll),
+        debounceTime(500),
+        switchMap((event:any) => {
+                    
+            return this._discountProductService.getByQueryProducts(0, 5, 'name', 'asc', event.target.value)
+        }),
+        map(() => {
+            this.isLoading = false;
+        })
+    )
+    .subscribe();
 
-  
+   }
+
+   addProductDiscount(){
+       console.log('this.selectedProduct',this.selectedProduct);
+       
+       if (this.selectedProduct.length === 0){
+            const confirmation = this._fuseConfirmationService.open({
+                title  : 'Please select the product',
+                message: 'Please select product to add product discount',
+                actions: {
+                    confirm: {
+                        label: 'Ok'
+                    },
+                    cancel : {
+                        show : false,
+                    }
+                }
+            });  
+
+            
+     
+        }
+        else {
+
+            const confirmation = this._fuseConfirmationService.open({
+                title  : 'Confirm action',
+                message: 'Are you sure you want to confirm this action?',
+                icon:{
+                    show : true,
+                    name : 'heroicons_outline:check-circle',
+                    color: 'info'
+                },
+                actions: {
+                    confirm: {
+                        label: 'Ok',
+                        color: 'primary'
+                    },
+                    cancel : {
+                        show : true,
+                    }
+                }
+            });  
+
+        }
+
+   }
+
 }
