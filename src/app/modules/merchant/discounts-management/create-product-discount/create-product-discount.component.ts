@@ -67,8 +67,8 @@ export class CreateDiscountProductComponent implements OnInit {
         endDate: this.endDate,
         endTime: this.endTime,
         isActive :this.isActive,
-        maxDiscountAmount :this.maxDiscountAmount,
-        normalPriceItemOnly : this.normalPriceItemOnly
+        // maxDiscountAmount :this.maxDiscountAmount,
+        // normalPriceItemOnly : this.normalPriceItemOnly
     });
   }
 
@@ -135,7 +135,7 @@ export class CreateDiscountProductComponent implements OnInit {
 
   checkForm(){
     
-    if (this.checkname === true && this.checkdate === true && this.checkstatus === true && this.checkdiscountamount == true) {
+    if (this.checkname === true && this.checkdate === true && this.checkstatus === true) {
         this.disabledProceed = false;
     } else {
         this.disabledProceed = true;

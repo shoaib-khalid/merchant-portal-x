@@ -1,8 +1,156 @@
-<div class="flex flex-col max-w-340 md:min-w-160 -m-6">
+<div class="flex flex-col max-w-440 md:min-w-160 -m-6">
     
     <div class="flex flex-col flex-auto p-6 sm:p-8 overflow-y-auto h-140">
         <!-- <inventory></inventory> -->
-   
+        <div class="relative flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between px-6 md:px-8 ">
+        <!-- 
+            <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-40">
+                                                    
+                <input type="text"
+                       placeholder="Category"
+                       aria-label="Category"
+                       matInput
+                       (input)="filterProductsOrCategories('CATEGORY',$event)"
+                       [value]="inputSearchCategory"
+                       (keydown)="filterProductsOrCategoriesInputKeyDown('CATEGORY',$event)"
+                       [matAutocomplete]="auto">
+
+                <mat-autocomplete #auto="matAutocomplete" [displayWith]="getCategoryName.bind(this)">
+                    <mat-option *ngFor="let listing of filteredCategories;" [value]="listing.id" (onSelectionChange)="onSelectCategoryList(listing.id)">
+                        {{listing.name}}
+                      </mat-option>
+                </mat-autocomplete>
+
+            </mat-form-field> -->
+
+            <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-40">
+                <mat-select
+                    class="w-full"
+                    placeholder="Category"
+                    [value]="inputSearchCategory"
+                   >
+                    <div>
+                        <mat-option *ngFor="let listing of filteredCategories;" [value]="listing.id" (onSelectionChange)="onSelectCategoryList(listing.id)">
+                            {{listing.name}}
+                        </mat-option>
+                    </div>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-40">
+                <mat-icon
+                    class="icon-size-5"
+                    matPrefix
+                    [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                <input
+                    matInput
+                    [autocomplete]="'off'"
+                    [placeholder]="'Products'">
+            </mat-form-field>
+        </div>
+        <table *ngIf="(products$ | async) as products" class="table-auto my-4 mr-2 w-full sm:flex-row">
+            <tr class="border-b border-gray-300 pt-2 pl-2">
+                <th>Select</th>
+                <th>Product Name</th>
+                <th>Original Price</th>
+            </tr>
+            <tr class="border-b border-gray-300 pt-2 pl-2" *ngFor="let productList of products;let i =index;" >
+                <td>
+                    <mat-checkbox  class="flex items-center h-10 min-h-10 px-4"
+                    [color]="'primary'">
+                        
+                    </mat-checkbox>
+                </td>
+                <td>{{productList.name}}</td>
+                <td>{{productList.productInventories[0].price}}</td>
+
+            </tr>
+        </table>
+
+        <mat-paginator
+        [ngClass]="{'pointer-events-none': isLoading}"
+        [length]="pagination.length"
+        [pageIndex]="pagination.page"
+        [pageSize]="pagination.size"
+        [pageSizeOptions]="[5, 10, 25, 100]"
+        [showFirstLastButtons]="true"></mat-paginator>
+
+        <hr>
+
+        <table>
+            <tr class="border-b border-gray-300 pt-2 pl-2">
+                <th>Product Name (SKU)</th>
+                <th>Original Price</th>
+                <th>Discount</th>
+                <th>Action</th>
+            </tr>
+            <tr class="border-b border-gray-300 pt-2 pl-2" *ngFor="let productDiscountList of storeDiscountProduct;let i =index;" >
+                <td>{{ productDiscountList.productInventory.product.name + " ( "+productDiscountList.productInventory.sku +  " ) " }}</td>
+                <td>{{productDiscountList.productInventory.price}}</td>
+                <td>{{productDiscountList.discountAmount}}%</td>
+                <td>
+                    <div class="flex flex-wrap items-center justify-center ">
+                        <input
+                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                        type="button"
+                        [id]="'edit-button'+productDiscountList.id"
+                        >
+                        <label
+                        class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
+                        [for]="'edit-button'+productDiscountList.id"
+                        matRipple>
+                        <mat-icon
+                            class="text-white icon-size-5"
+                            [svgIcon]="'heroicons_outline:pencil-alt'">
+                        </mat-icon>
+                        </label>
+
+                        <!-- <input
+                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                        type="button"
+                        [id]="'update-button'+productDiscountList.id"
+                        >
+                        <label
+                            class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
+                            [for]="'update-button'+productDiscountList.id"
+                            matRipple>
+                            <mat-icon
+                                class="text-white icon-size-5"
+                                [svgIcon]="'heroicons_outline:check'">
+                            </mat-icon>
+                        </label> -->
+
+                        <input
+                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                        type="button"
+                        [id]="'delete-button'+productDiscountList.id"
+                        >
+                        <label
+                            class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-warn hover:bg-warn-700 mb-3"
+                            [for]="'delete-button'+productDiscountList.id"
+                            matRipple>
+                            <mat-icon
+                                class="text-white icon-size-5"
+                                [svgIcon]="'heroicons_outline:trash'">
+                            </mat-icon>
+                        </label>
+                    </div>
+                </td>
+
+            </tr>
+
+        </table>
+        <mat-paginator
+        [ngClass]="{'pointer-events-none': isLoading}"
+        [length]="pagination.length"
+        [pageIndex]="pagination.page"
+        [pageSize]="pagination.size"
+        [pageSizeOptions]="[5, 10, 25, 100]"
+        [showFirstLastButtons]="true"></mat-paginator>
+
+        <div>
+            
+        </div>
     </div>
       
   

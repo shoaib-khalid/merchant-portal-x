@@ -8,7 +8,7 @@ import { LogService } from 'app/core/logging/log.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { ApiResponseModel, StoreDiscountProduct, StoreDiscountProductPagination } from './discountsproduct.types';
 import { TranslocoTestingModule } from '@ngneat/transloco';
-import { Product } from 'app/core/product/inventory.types';
+import { Product, ProductPagination } from 'app/core/product/inventory.types';
 
 @Injectable({
     providedIn: 'root'
@@ -231,5 +231,42 @@ export class DiscountsProductService
         );
 
     }
+
+    getByQueryProducts(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', status: string = 'ACTIVE,INACTIVE'):
+    Observable<{ pagination: ProductPagination; products: Product[] }>
+{
+
+    const headerParam = {
+   
+        params: {
+            page        : '' + page,
+            pageSize    : '' + size,
+            sortByCol   : '' + sort,
+            sortingOrder: '' + order.toUpperCase(),
+            name        : '' + search,
+            status      : '' + status
+        }
+    };
+    const header = Object.assign(this.httpOptions$, headerParam);
+
+    return this._httpClient.get<any>(this.productService$ +'/stores/'+this.storeId$+'/products', header).pipe(
+        tap((response) => {
+
+            this._logging.debug("Response from ProductsService",response);
+
+            let _pagination = {
+                length: response.data.totalElements,
+                size: response.data.size,
+                page: response.data.number,
+                lastPage: response.data.totalPages,
+                startIndex: response.data.pageable.offset,
+                endIndex: response.data.pageable.offset + response.data.numberOfElements - 1
+            }
+            this._pagination.next(_pagination);
+            this._products.next(response.data.content);
+        })
+    );
+}
+
 
 }

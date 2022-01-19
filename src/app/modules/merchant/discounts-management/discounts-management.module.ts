@@ -30,7 +30,7 @@ import { DialogProductListComponent } from './dialog-product-list/dialog-product
         DiscountsProductListComponent,
         CreateDiscountComponent,
         CreateDiscountProductComponent,
-        DialogProductListComponent
+        DialogProductListComponent,
     ],
     imports     : [
         RouterModule.forChild(discountsManagementRoutes),

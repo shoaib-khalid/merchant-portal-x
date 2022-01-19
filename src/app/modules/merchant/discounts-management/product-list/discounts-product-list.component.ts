@@ -186,6 +186,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
                 // Update the pagination
                 this.pagination = pagination;
+                console.log('this.pagination',this.pagination);
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -984,7 +985,15 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     //********* 
     dialogProductList(): void
     {
-        const dialogRef = this._dialog.open(DialogProductListComponent, { disableClose: true });
+        //we pass data in order to use the value in DialogProductListComponent
+        const dialogRef = this._dialog.open(
+        DialogProductListComponent, 
+        {
+            width: '90vw',
+            maxWidth: '90vw', 
+            disableClose: true, 
+            data:{discountId:this.selectedDiscountForm.get('id').value} 
+        });
      
     }
 

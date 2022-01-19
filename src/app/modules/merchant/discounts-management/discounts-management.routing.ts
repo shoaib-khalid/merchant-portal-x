@@ -1,7 +1,7 @@
 import { Route } from '@angular/router';
 import { DiscountsComponent } from 'app/modules/merchant/discounts-management/list/discounts.component';
-import { DiscountsProductResolver, DiscountsResolver } from 'app/modules/merchant/discounts-management/list/discounts.resolvers';
-import { InventoryCategoriesResolver, InventoryProductsResolver } from '../products-management/inventory/inventory.resolvers';
+import { DiscountsProductResolver, DiscountsResolver, InventoryProductsResolver } from 'app/modules/merchant/discounts-management/list/discounts.resolvers';
+import { InventoryCategoriesResolver } from '../products-management/inventory/inventory.resolvers';
 import { DiscountsProductListComponent } from './product-list/discounts-product-list.component';
 
 
