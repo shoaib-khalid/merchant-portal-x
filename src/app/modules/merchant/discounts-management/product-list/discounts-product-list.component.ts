@@ -317,13 +317,14 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
             return;
         }
 
-        this._discountProductService.getDiscountsProduct(discountId)
+        this._discountProductService.getByQueryDiscountsProduct(discountId,0,5)
         .subscribe((response) => {
 
           // Mark for check
           this._changeDetectorRef.markForCheck();
 
         });
+
 
         this._discountProductService.getStoreDiscountProduct(discountId)
         .subscribe((response: ApiResponseModel<StoreDiscountProduct>)=>{

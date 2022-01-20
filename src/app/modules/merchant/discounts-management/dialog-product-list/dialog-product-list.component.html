@@ -72,11 +72,12 @@
 
             <div class="flex items-center justify-between w-full sm:flex-row sm:items-center justify-end mt-4 sm:mt-6">
                 <mat-paginator
+                #_paginator
                 [ngClass]="{'pointer-events-none': isLoading}"
                 [length]="productPagination.length"
                 [pageIndex]="productPagination.page"
                 [pageSize]="productPagination.size"
-                [pageSizeOptions]="[5, 10, 25, 100]"
+                [pageSizeOptions]="[5]"
                 [showFirstLastButtons]="true">
                 </mat-paginator>
                 <div>
@@ -95,14 +96,14 @@
         </div>
 
         <div class="border border-solid border-gray-300 rounded my-2 mx-2 py-3 px-3">
-            <table class="table-auto my-4 mr-2 w-full sm:flex-row">
+            <table *ngIf="(storeDiscountProduct$ | async) as storeDiscountProducts" class="table-auto my-4 mr-2 w-full sm:flex-row">
                 <tr class="border-b border-gray-300 pt-2 pl-2">
                     <th>Product Name (SKU)</th>
                     <th>Original Price</th>
                     <th>Discount</th>
                     <th>Action</th>
                 </tr>
-                <tr class="border-b border-gray-300 pt-2 pl-2" *ngFor="let productDiscountList of storeDiscountProduct;let i =index;" >
+                <tr class="border-b border-gray-300 pt-2 pl-2" *ngFor="let productDiscountList of storeDiscountProducts;let i =index;" >
                     <td>{{ productDiscountList.productInventory.product.name + " ( "+productDiscountList.productInventory.sku +  " ) " }}</td>
                     <td>{{productDiscountList.productInventory.price}}</td>
                     <td>{{productDiscountList.discountAmount}}%</td>
@@ -160,11 +161,12 @@
             </table>
             <div class="flex items-center justify-between w-full sm:flex-row sm:items-center justify-end mt-4 sm:mt-6">
                 <mat-paginator
+                #_paginatorDiscountProduct
                 [ngClass]="{'pointer-events-none': isLoading}"
                 [length]="storeDiscountPagination.length"
                 [pageIndex]="storeDiscountPagination.page"
                 [pageSize]="storeDiscountPagination.size"
-                [pageSizeOptions]="[5, 10, 25, 100]"
+                [pageSizeOptions]="[1, 2, 5]"
                 [showFirstLastButtons]="true">
                 </mat-paginator>
             </div>

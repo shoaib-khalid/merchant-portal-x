@@ -16,8 +16,8 @@ import { ApiResponseModel, StoreDiscountProduct, StoreDiscountProductPagination 
 })
 export class DialogProductListComponent implements OnInit {
   
-  @ViewChild(MatPaginator) private _paginator: MatPaginator;//paginator for product
-  @ViewChild(MatPaginator) private _paginatorDiscountProduct: MatPaginator;//paginator selected discount product
+  @ViewChild('_paginator') private _paginator: MatPaginator;//paginator for product
+  @ViewChild('_paginatorDiscountProduct') private _paginatorDiscountProduct: MatPaginator;
   @ViewChild(MatSort) private _sort: MatSort;
 
   discountId : string= '';
@@ -34,6 +34,7 @@ export class DialogProductListComponent implements OnInit {
  _products:Product[];
  filteredProductsOptions: Product[] = [];
 
+ storeDiscountProduct$: Observable<StoreDiscountProduct[]>;
  storeDiscountProduct : StoreDiscountProduct[] = [];
 
  inputSearchCategory : string ='';
@@ -77,6 +78,8 @@ export class DialogProductListComponent implements OnInit {
           this._changeDetectorRef.markForCheck();
       });
 
+      //==================== PRODUCTS =====================
+
       this.products$ = this._discountProductService.products$;
 
       // Assign to local products
@@ -102,18 +105,30 @@ export class DialogProductListComponent implements OnInit {
               // Mark for check
               this._changeDetectorRef.markForCheck();
           });
-    
-        //get product discount listing
-        this._discountProductService.getDiscountsProduct(this.discountId)
-        .subscribe((response) => {
-            this.storeDiscountProduct = response['data'].content;
-    
-          // Mark for check
-          this._changeDetectorRef.markForCheck();
 
+    //==================== PRODUCT DISCOUNT =====================
+
+        this.storeDiscountProduct$ = this._discountProductService.discounts$;
+
+        // Assign to local products
+        this.storeDiscountProduct$
+        .pipe(takeUntil(this._unsubscribeAll))    
+        .subscribe((response)=>{
+            this.storeDiscountProduct = response;
         });
+            
+        this._discountProductService.pagination$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((pagination: StoreDiscountProductPagination) => {
 
-        // this._discountProductService.getByQueryDiscountsProduct(this.discountId)
+                // Update the pagination
+                this.storeDiscountPagination = pagination;
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+
+        // this._discountProductService.getByQueryDiscountsProduct(this.discountId,0, 5)
         // .subscribe((response) => {
         //     this.storeDiscountProduct = response['data'].content;
     
@@ -122,18 +137,18 @@ export class DialogProductListComponent implements OnInit {
 
         // });
 
-        this._discountProductService.pagination$
-        .pipe(takeUntil(this._unsubscribeAll))
-        .subscribe((pagination: StoreDiscountProductPagination) => {
+        // this._discountProductService.pagination$
+        // .pipe(takeUntil(this._unsubscribeAll))
+        // .subscribe((pagination: StoreDiscountProductPagination) => {
 
-            // Update the pagination
-            console.log('store discount pagination',pagination);
+        //     // Update the pagination
+        //     console.log('store discount pagination',pagination);
             
-            this.storeDiscountPagination = pagination;
+        //     this.storeDiscountPagination = pagination;
 
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
-        });
+        //     // Mark for check
+        //     this._changeDetectorRef.markForCheck();
+        // });
 
              // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -158,7 +173,21 @@ export class DialogProductListComponent implements OnInit {
                   })
               ).subscribe();
           }
+          if (this._paginatorDiscountProduct)
+          {
+    
+             this._paginatorDiscountProduct.page.pipe(
+                  switchMap(() => {
+                      return this._discountProductService.getByQueryDiscountsProduct(this.discountId, this._paginatorDiscountProduct.pageIndex, this._paginatorDiscountProduct.pageSize);
+                  }),
+                  map(() => {
+                      this.isLoading = false;
+                  })
+              ).subscribe();
+          }
+
       }, 0);
+
 
   }
 

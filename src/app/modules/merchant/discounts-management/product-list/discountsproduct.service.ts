@@ -122,7 +122,7 @@ export class DiscountsProductService
         );
     }
 
-    getByQueryDiscountsProduct(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', status: string = 'ACTIVE,INACTIVE'):
+    getByQueryDiscountsProduct(discountId:string,page: number = 0, size: number = 5, order: 'asc' | 'desc' | '' = 'asc'):
     Observable<{ pagination: StoreDiscountProductPagination; products: StoreDiscountProduct[] }>
 {
 
@@ -131,19 +131,16 @@ export class DiscountsProductService
         params: {
             page        : '' + page,
             pageSize    : '' + size,
-            sortByCol   : '' + sort,
             sortingOrder: '' + order.toUpperCase(),
-            name        : '' + search,
-            status      : '' + status
         }
     };
 
     const header = Object.assign(this.httpOptions$, headerParam);
 
-    return this._httpClient.get<any>(this.productService$ +'/stores/'+this.storeId$+'/products', header).pipe(
+    return this._httpClient.get<any>(this.productService$ +'/stores/'+this.storeId$+'/discount/'+discountId+'/product', header).pipe(
         tap((response) => {
 
-            this._logging.debug("Response from ProductsService",response);
+            this._logging.debug("RRRRRRRRRRRRRRRRRRRRRRRRt",response);
 
             let _pagination = {
                 length: response.data.totalElements,
