@@ -1,4 +1,5 @@
 import { ChangeDetectorRef, Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -33,6 +34,8 @@ export class DialogProductListComponent implements OnInit {
  products$: Observable<Product[]>;
  _products:Product[];
  filteredProductsOptions: Product[] = [];
+ onChangeSelectProductObject : Product[] = [];// to keep object which has been select
+ onChangeSelectProductValue : any =[];//to be display on checkbox
 
  storeDiscountProduct$: Observable<StoreDiscountProduct[]>;
  storeDiscountProduct : StoreDiscountProduct[] = [];
@@ -41,7 +44,6 @@ export class DialogProductListComponent implements OnInit {
  inputSearchProducts : string = '';
 
  selectedCategory:string ='';
- selectedProduct:any=[];
 
  productPagination: ProductPagination;
  storeDiscountPagination:StoreDiscountProductPagination;
@@ -243,7 +245,7 @@ export class DialogProductListComponent implements OnInit {
 
    addProductDiscount(){
        
-       if (this.selectedProduct.length === 0){
+       if (this.onChangeSelectProductValue.length === 0){
             const confirmation = this._fuseConfirmationService.open({
                 title  : 'Please select the product',
                 message: 'Please select product to add product discount',
@@ -262,27 +264,50 @@ export class DialogProductListComponent implements OnInit {
         }
         else {
 
-            const confirmation = this._fuseConfirmationService.open({
-                title  : 'Confirm action',
-                message: 'Are you sure you want to confirm this action?',
-                icon:{
-                    show : true,
-                    name : 'heroicons_outline:check-circle',
-                    color: 'info'
-                },
-                actions: {
-                    confirm: {
-                        label: 'Ok',
-                        color: 'primary'
-                    },
-                    cancel : {
-                        show : true,
-                    }
-                }
-            });  
+            // console.log('CHECK BEFORE SEND TO BACKEND 1 ',this.onChangeSelectProductValue);
+            console.log('Clear ',this.onChangeSelectProductValue.length = 0);
+            console.log('Lepas clear ',this.onChangeSelectProductValue);
+            console.log('Clear O ',this.onChangeSelectProductObject.length = 0);
+            console.log('Lepas clear  O',this.onChangeSelectProductObject);
+
+
+            
+
+
 
         }
 
    }
+
+   onChangeSelectProduct(product, change: MatCheckboxChange): void
+   {
+       console.log(change);
+       if ( change.checked )
+       {
+           this.onChangeSelectProductValue.push(product.id);
+           this.onChangeSelectProductObject.push(product);
+           this._changeDetectorRef.markForCheck();
+       }
+       else
+       {
+
+           this.onChangeSelectProductValue.splice(this.onChangeSelectProductValue.findIndex(el => el  === product.id), 1);
+           this.onChangeSelectProductObject.splice(this.onChangeSelectProductObject.findIndex(el => el.id  === product.id), 1);
+
+           this._changeDetectorRef.markForCheck();
+           
+       }
+       console.log('CHECK BEFORE SEND TO BACKEND',this.onChangeSelectProductValue);
+       console.log('onChangeSelectProductObject,',this.onChangeSelectProductObject);
+
+       const itemCodesArr = this.onChangeSelectProductObject.map( el=> el.productInventories.map(el2=>el2.itemCode));
+       const itemCodes = Array.prototype.concat.apply([],itemCodesArr);
+
+       console.log('ITEMCODESSS',itemCodes);
+       
+       
+
+   }
+
 
 }
