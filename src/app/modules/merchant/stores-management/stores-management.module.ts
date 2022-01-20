@@ -28,6 +28,7 @@ import { EditStoreComponent } from 'app/modules/merchant/stores-management/edit-
 
 import { storesManagementRoutes } from 'app/modules/merchant/stores-management/stores-management.routing';
 import { EditStoreModule } from './edit-store/edit-store.module';
+import { MatStepperModule } from '@angular/material/stepper';
 
 
 @NgModule({
@@ -58,7 +59,8 @@ import { EditStoreModule } from './edit-store/edit-store.module';
         MatToolbarModule,
         MatListModule,
         FuseCardModule,
-        EditStoreModule
+        MatStepperModule,
+        EditStoreModule,
     ],
     providers: [
         // GraphHelper

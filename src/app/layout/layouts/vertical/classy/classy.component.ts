@@ -60,15 +60,6 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
     }
 
     /**
-     * Getter for storeId
-    */
- 
-    get storeId$(): string
-    {
-        return localStorage.getItem('storeId') ?? '';
-    }
-
-    /**
      * Setter for storeId
     */
 
@@ -87,7 +78,7 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
     ngOnInit(): void
     {
 
-        this.currentStoreId = this.storeId$;
+        this.currentStoreId = this._storesService.storeId$;
 
         // Subscribe to navigation data
         this._navigationService.navigation$
@@ -108,11 +99,14 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
             .pipe((takeUntil(this._unsubscribeAll)))
             .subscribe((stores: Store[]) => {
                 this.stores = stores;
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
             });
 
-        if (this.storeId$) {
+        if (this._storesService.storeId$ && this._storesService.storeId$ !== '') {
             // this is to set current selected store on page init
-            this._storesService.getStoreById(this.storeId$)
+            this._storesService.getStoreById(this._storesService.storeId$)
             .subscribe((store: Store)=>{
                 this.store = store;
                 this.storeLogo = (this.store.storeAsset) ? this.store.storeAsset.logoUrl : null;
@@ -128,8 +122,15 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
                 takeUntil(this._unsubscribeAll),
                 switchMap((store: Store) => {
                     this.store = store;
-                    this.currentStoreId = store.id;
-                    this.storeLogo = (this.store.storeAsset) ? this.store.storeAsset.logoUrl : null;
+
+                    if (this.store) {
+                        this.currentStoreId = store.id;
+                        this.storeLogo = (this.store.storeAsset) ? this.store.storeAsset.logoUrl : null;
+                    } else{
+                        this.currentStoreId = '';
+                        this.storeLogo = null;
+                    }
+
                     return [];
                 })
             )
@@ -143,6 +144,9 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
                 // Check if the screen is small
                 this.isScreenSmall = !matchingAliases.includes('md');
             });
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
 
     // ngAfterViewInit(): void
