@@ -284,10 +284,13 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                     switchMap(() => {
                         this.closeDetails();                        
                         this.isLoading = true;
-                        if (this.discountName != null)
+                        if (this.discountName != null){                            
                             return this._discountService.getByQueryDiscounts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, this.discountName, '','ITEM');
+                        }
                         else    
+                        {
                             return this._discountService.getByQueryDiscounts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, '','','ITEM');
+                        }
                     }),
                     map(() => {
                         this.isLoading = false;

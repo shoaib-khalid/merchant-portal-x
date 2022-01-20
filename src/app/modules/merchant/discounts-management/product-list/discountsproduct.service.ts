@@ -24,6 +24,8 @@ export class DiscountsProductService
     //for product 
     private _product: BehaviorSubject<Product | null> = new BehaviorSubject(null);
     private _products: BehaviorSubject<Product[]| null> = new BehaviorSubject(null);
+    private _productPagination: BehaviorSubject<ProductPagination | null> = new BehaviorSubject(null);
+
 
     // private static readonly SERVICE_URL = `${_apiServer.settings.apiServer.productService}/core2/tnt/dm/cms-posts`;
   
@@ -51,6 +53,11 @@ export class DiscountsProductService
     get pagination$(): Observable<StoreDiscountProductPagination>
     {
         return this._pagination.asObservable();
+    }
+
+    get productpagination$(): Observable<ProductPagination>
+    {
+        return this._productPagination.asObservable();
     }
 
     get product$(): Observable<Product>
@@ -98,15 +105,59 @@ export class DiscountsProductService
             tap((response) => {
 
                 this._logging.debug("Response from DiscountsService",response);
-           
-                // let _pagination = { length: 0, size: 0, page: 0, lastPage: 0, startIndex: 0, endIndex: 0 };
-                // this._pagination.next(_pagination);
-                // this._discountsProduct.next(response.data);
-                // this._discountsProduct.next(response.data.content);
+
+                
+            let _pagination = {
+                length: response.data.totalElements,
+                size: response.data.size,
+                page: response.data.number,
+                lastPage: response.data.totalPages,
+                startIndex: response.data.pageable.offset,
+                endIndex: response.data.pageable.offset + response.data.numberOfElements - 1
+            }
+            this._pagination.next(_pagination);
+            this._discountsProduct.next(response.data.content);
 
             })
         );
     }
+
+    getByQueryDiscountsProduct(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', status: string = 'ACTIVE,INACTIVE'):
+    Observable<{ pagination: StoreDiscountProductPagination; products: StoreDiscountProduct[] }>
+{
+
+    const headerParam = {
+   
+        params: {
+            page        : '' + page,
+            pageSize    : '' + size,
+            sortByCol   : '' + sort,
+            sortingOrder: '' + order.toUpperCase(),
+            name        : '' + search,
+            status      : '' + status
+        }
+    };
+
+    const header = Object.assign(this.httpOptions$, headerParam);
+
+    return this._httpClient.get<any>(this.productService$ +'/stores/'+this.storeId$+'/products', header).pipe(
+        tap((response) => {
+
+            this._logging.debug("Response from ProductsService",response);
+
+            let _pagination = {
+                length: response.data.totalElements,
+                size: response.data.size,
+                page: response.data.number,
+                lastPage: response.data.totalPages,
+                startIndex: response.data.pageable.offset,
+                endIndex: response.data.pageable.offset + response.data.numberOfElements - 1
+            }
+            this._pagination.next(_pagination);
+            this._discountsProduct.next(response.data.content);
+        })
+    );
+}
 
     getDiscountById(id: string): Observable<StoreDiscountProduct>
     {
@@ -257,7 +308,7 @@ export class DiscountsProductService
 
             this._logging.debug("Response from ProductsService",response);
 
-            let _pagination = {
+            let _productPagination = {
                 length: response.data.totalElements,
                 size: response.data.size,
                 page: response.data.number,
@@ -265,7 +316,7 @@ export class DiscountsProductService
                 startIndex: response.data.pageable.offset,
                 endIndex: response.data.pageable.offset + response.data.numberOfElements - 1
             }
-            this._pagination.next(_pagination);
+            this._productPagination.next(_productPagination);
             this._products.next(response.data.content);
         })
     );

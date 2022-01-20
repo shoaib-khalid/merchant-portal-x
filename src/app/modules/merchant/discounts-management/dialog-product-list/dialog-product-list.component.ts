@@ -8,7 +8,7 @@ import { Product, ProductCategory, ProductPagination } from 'app/core/product/in
 import { fromEvent, merge, Observable, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { DiscountsProductService } from '../product-list/discountsproduct.service';
-import { ApiResponseModel, StoreDiscountProduct } from '../product-list/discountsproduct.types';
+import { ApiResponseModel, StoreDiscountProduct, StoreDiscountProductPagination } from '../product-list/discountsproduct.types';
 
 @Component({
   selector: 'dialog-product-list',
@@ -16,7 +16,8 @@ import { ApiResponseModel, StoreDiscountProduct } from '../product-list/discount
 })
 export class DialogProductListComponent implements OnInit {
   
-  @ViewChild(MatPaginator) private _paginator: MatPaginator;
+  @ViewChild(MatPaginator) private _paginator: MatPaginator;//paginator for product
+  @ViewChild(MatPaginator) private _paginatorDiscountProduct: MatPaginator;//paginator selected discount product
   @ViewChild(MatSort) private _sort: MatSort;
 
   discountId : string= '';
@@ -42,6 +43,7 @@ export class DialogProductListComponent implements OnInit {
  selectedProduct:any=[];
 
  productPagination: ProductPagination;
+ storeDiscountPagination:StoreDiscountProductPagination;
 
  private _unsubscribeAll: Subject<any> = new Subject<any>();
 
@@ -75,27 +77,6 @@ export class DialogProductListComponent implements OnInit {
           this._changeDetectorRef.markForCheck();
       });
 
-      // this._discountProductService.getProducts()
-      // .subscribe((response: ApiResponseModel<Product[]>)=>{
-
-     
-      //     this.productLists$ = response.data['content'];
-      //     console.log('this.productLists$',response);
-      //     let pagination = {
-      //       length: response.data['totalElements'],
-      //       size: response.data['size'],
-      //       page: response.data['number'],
-      //       lastPage: response.data['totalPages'],
-      //       startIndex: response.data['pageable'].offset,
-      //       endIndex: response.data['pageable'].offset + response.data['numberOfElements'] - 1
-      //   }
-      //   // let _pagination = { length: 0, size: 0, page: 0, lastPage: 0, startIndex: 0, endIndex: 0 };
-      //   this.pagination=pagination;
-
-      //     this._changeDetectorRef.markForCheck();
-
-      // });
-
       this.products$ = this._discountProductService.products$;
 
       // Assign to local products
@@ -111,7 +92,7 @@ export class DialogProductListComponent implements OnInit {
           this.filteredProductsOptions = _filteredProductsOptions;
       });
           
-      this._discountProductService.pagination$
+      this._discountProductService.productpagination$
           .pipe(takeUntil(this._unsubscribeAll))
           .subscribe((pagination: ProductPagination) => {
 
@@ -125,11 +106,33 @@ export class DialogProductListComponent implements OnInit {
         //get product discount listing
         this._discountProductService.getDiscountsProduct(this.discountId)
         .subscribe((response) => {
-            this.storeDiscountProduct = response['data'];
+            this.storeDiscountProduct = response['data'].content;
     
           // Mark for check
           this._changeDetectorRef.markForCheck();
 
+        });
+
+        // this._discountProductService.getByQueryDiscountsProduct(this.discountId)
+        // .subscribe((response) => {
+        //     this.storeDiscountProduct = response['data'].content;
+    
+        //   // Mark for check
+        //   this._changeDetectorRef.markForCheck();
+
+        // });
+
+        this._discountProductService.pagination$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe((pagination: StoreDiscountProductPagination) => {
+
+            // Update the pagination
+            console.log('store discount pagination',pagination);
+            
+            this.storeDiscountPagination = pagination;
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
         });
 
              // Mark for check
@@ -141,38 +144,13 @@ export class DialogProductListComponent implements OnInit {
   ngAfterViewInit(): void
   {
       setTimeout(() => {
-          if ( this._sort && this._paginator )
+          if (this._paginator )
           {
-              // Set the initial sort
-              this._sort.sort({
-                  id          : 'name',
-                  start       : 'asc',
-                  disableClear: true
-              });
-
-              // Mark for check
-              this._changeDetectorRef.markForCheck();
-
-              // If the user changes the sort order...
-              this._sort.sortChange
-                  .pipe(takeUntil(this._unsubscribeAll))
-                  .subscribe(() => {
-                      // Reset back to the first page
-                      this._paginator.pageIndex = 0;
-
-                      // Close the details
-                      // this.closeDetails();
-                  });
-
-              merge(this._sort.sortChange, this._paginator.page).pipe(
+    
+             this._paginator.page.pipe(
                   switchMap(() => {
-                      // this.closeDetails();                        
-                      this.isLoading = true;
-                      // if (this.inputSearchProducts != null)
-                      // return this._inventoryService.getProducts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction);
-                      // else    
-                      // return this._inventoryService.getProducts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction);
-                      return this._discountProductService.getByQueryProducts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction);
+
+                      return this._discountProductService.getByQueryProducts(this._paginator.pageIndex, this._paginator.pageSize, 'name', 'asc');
 
                     }),
                   map(() => {
@@ -181,6 +159,7 @@ export class DialogProductListComponent implements OnInit {
               ).subscribe();
           }
       }, 0);
+
   }
 
   ngOnDestroy(): void
@@ -234,7 +213,6 @@ export class DialogProductListComponent implements OnInit {
    }
 
    addProductDiscount(){
-       console.log('this.selectedProduct',this.selectedProduct);
        
        if (this.selectedProduct.length === 0){
             const confirmation = this._fuseConfirmationService.open({
