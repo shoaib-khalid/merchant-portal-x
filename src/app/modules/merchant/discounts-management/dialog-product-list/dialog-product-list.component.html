@@ -51,7 +51,7 @@
                 </mat-form-field>
             </div>
             <!-- <div class="font-extrabold tracking-tight">Product Listing</div> -->
-            <table *ngIf="(products$ | async) as products" class="table-auto my-4 mr-2 w-full sm:flex-row">
+            <table *ngIf="(products$ | async) as products" class="table-fixed my-4 mr-2 w-full sm:flex-row">
                 <tr class="border-b border-gray-300 pt-2 pl-2">
                     <th>Select</th>
                     <th>Product Name</th>
@@ -100,7 +100,7 @@
         </div>
 
         <div class="border border-solid border-gray-300 rounded my-2 mx-2 py-3 px-3">
-            <table *ngIf="(storeDiscountProduct$ | async) as storeDiscountProducts" class="table-auto my-4 mr-2 w-full sm:flex-row">
+            <table *ngIf="(storeDiscountProduct$ | async) as storeDiscountProducts" class="table-fixed my-4 mr-2 w-full sm:flex-row">
                 <tr class="border-b border-gray-300 pt-2 pl-2">
                     <th>Product Name (SKU)</th>
                     <th>Original Price</th>

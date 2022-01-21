@@ -4,6 +4,7 @@ import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dialog/dialog.component';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { Product, ProductCategory, ProductPagination } from 'app/core/product/inventory.types';
 import { fromEvent, merge, Observable, Subject } from 'rxjs';
@@ -134,28 +135,6 @@ export class DialogProductListComponent implements OnInit {
                 this._changeDetectorRef.markForCheck();
             });
 
-        // this._discountProductService.getByQueryDiscountsProduct(this.discountId,0, 5)
-        // .subscribe((response) => {
-        //     this.storeDiscountProduct = response['data'].content;
-    
-        //   // Mark for check
-        //   this._changeDetectorRef.markForCheck();
-
-        // });
-
-        // this._discountProductService.pagination$
-        // .pipe(takeUntil(this._unsubscribeAll))
-        // .subscribe((pagination: StoreDiscountProductPagination) => {
-
-        //     // Update the pagination
-        //     console.log('store discount pagination',pagination);
-            
-        //     this.storeDiscountPagination = pagination;
-
-        //     // Mark for check
-        //     this._changeDetectorRef.markForCheck();
-        // });
-
              // Mark for check
         this._changeDetectorRef.markForCheck();
 
@@ -170,9 +149,9 @@ export class DialogProductListComponent implements OnInit {
     
              this._paginator.page.pipe(
                   switchMap(() => {
-
-                      return this._discountProductService.getByQueryProducts(this._paginator.pageIndex, this._paginator.pageSize, 'name', 'asc');
-
+             
+                        return this._discountProductService.getByQueryProducts(this._paginator.pageIndex, this._paginator.pageSize, 'name', 'asc',this.inputSearchProducts,'ACTIVE,INACTIVE',this.selectedCategory);
+                  
                     }),
                   map(() => {
                       this.isLoading = false;
@@ -212,9 +191,9 @@ export class DialogProductListComponent implements OnInit {
     this.selectedCategory = event.value;
 
     if(this.selectedCategory ){
-        return this._discountProductService.getByQueryProducts(0, 5, 'name', 'asc','','ACTIVE,INACTIVE',this.selectedCategory).subscribe();
+        return this._discountProductService.getByQueryProducts(0, 5, 'name', 'asc',this.inputSearchProducts,'ACTIVE,INACTIVE',this.selectedCategory).subscribe();
     } else{
-        return this._discountProductService.getByQueryProducts(0, 5, 'name', 'asc','','ACTIVE,INACTIVE').subscribe();
+        return this._discountProductService.getByQueryProducts(0, 5, 'name', 'asc',this.inputSearchProducts,'ACTIVE,INACTIVE').subscribe();
 
     }
 
@@ -230,6 +209,7 @@ export class DialogProductListComponent implements OnInit {
    inputSearchProduct(event){
     // Get the value
     const value = event.target.value.toLowerCase();
+    this.inputSearchProducts = value;
 
     fromEvent(event.target,'keyup')
     .pipe(
@@ -237,7 +217,7 @@ export class DialogProductListComponent implements OnInit {
         debounceTime(500),
         switchMap((event:any) => {
                     
-            return this._discountProductService.getByQueryProducts(0, 5, 'name', 'asc', event.target.value)
+            return this._discountProductService.getByQueryProducts(0, 5, 'name', 'asc', event.target.value,'ACTIVE,INACTIVE',this.selectedCategory)
         }),
         map(() => {
             this.isLoading = false;
@@ -250,20 +230,8 @@ export class DialogProductListComponent implements OnInit {
    addProductDiscount(){
 
        if (this.onChangeSelectProductValue.length === 0){
-            const confirmation = this._fuseConfirmationService.open({
-                title  : 'Please select the product',
-                message: 'Please select product to add product discount',
-                actions: {
-                    confirm: {
-                        label: 'Ok'
-                    },
-                    cancel : {
-                        show : false,
-                    }
-                }
-            });  
-
             
+            this.displayMessage('Please select the product','Please select product to add product discount','Ok',false); 
      
         }
         else {
@@ -293,6 +261,8 @@ export class DialogProductListComponent implements OnInit {
                     }
                     , error => {
                         console.log(error);
+                        this.displayMessage('Cannot be add','The selected product already exist','Ok',false);
+
                     }
                     )
                 }
@@ -313,17 +283,7 @@ export class DialogProductListComponent implements OnInit {
     //Delete discount product
     deleteStoreProductDiscount(productDiscount){
 
-        // Open the confirmation dialog
-        const confirmation = this._fuseConfirmationService.open({
-            title  : 'Delete discount',
-            message: 'Are you sure you want to remove this discount? This action cannot be undone!',
-            actions: {
-                confirm: {
-                    label: 'Delete'
-                }
-            }
-        });
-
+        const confirmation = this.displayMessage('Delete discount','Are you sure you want to remove this discount? This action cannot be undone!','Delete',true);
 
         //after user choose either delete or cancel
         confirmation.afterClosed().subscribe((result) => {
@@ -398,6 +358,25 @@ export class DialogProductListComponent implements OnInit {
        console.log('CHECK BEFORE SEND TO BACKEND',this.onChangeSelectProductValue);
        console.log('onChangeSelectProductObject,',this.onChangeSelectProductObject);       
        
+   }
+
+   displayMessage(getTitle:string,getMessage:string,getLabelConfirm:string,showCancel:boolean):MatDialogRef<FuseConfirmationDialogComponent,any>{
+
+        const confirmation = this._fuseConfirmationService.open({
+            title  : getTitle,
+            message: getMessage,
+            actions: {
+                confirm: {
+                    label: getLabelConfirm
+                },
+                cancel : {
+                    show : showCancel,
+                }
+            }
+        });
+
+       return confirmation;
+
    }
 
 
