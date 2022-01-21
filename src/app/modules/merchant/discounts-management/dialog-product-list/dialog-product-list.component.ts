@@ -284,7 +284,9 @@ export class DialogProductListComponent implements OnInit {
                     this._discountProductService.createProductDiscount(this.discountId,payloadProductDiscount).
                     subscribe((response) => {
     
-                        this.storeDiscountProduct.push(response["data"]);
+                        // this.storeDiscountProduct.push(response["data"]);
+                        // this._discountProductService.getByQueryDiscountsProduct(this.discountId, 0, 5);
+
 
                         // Mark for check
                         this._changeDetectorRef.markForCheck();
@@ -301,7 +303,7 @@ export class DialogProductListComponent implements OnInit {
             this.onChangeSelectProductObject.length = 0;
 
             //CALL BACK THE DISCOUNT PRODUCT
-            // return this._discountProductService.getByQueryDiscountsProduct(this.discountId, 0, 5).subscribe();
+            // return this._discountProductService.getByQueryDiscountsProduct(this.discountId, 0, 5);
 
 
         }
