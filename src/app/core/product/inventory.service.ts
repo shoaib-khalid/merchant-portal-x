@@ -787,6 +787,23 @@ export class InventoryService
         );
     }
 
+
+    async getVariantAvailable(productId)
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            
+        };
+
+        let response = await this._httpClient.get<any>(productService +'/stores/'+ this.storeId$ +'/products/' + productId + '/variants-available', header).toPromise();
+        
+        return response.data;
+            
+    }
+
     /**
      * Create Product Variant
      * 

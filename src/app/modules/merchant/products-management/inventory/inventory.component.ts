@@ -43,6 +43,23 @@ import {v4 as uuidv4} from 'uuid';
             .option-grid {
                 grid-template-columns: 120px 112px auto 112px;
             }
+
+            .variant-grid {
+                grid-template-columns: 68px auto 40px;
+
+                @screen sm {
+                    grid-template-columns: 68px auto 128px;
+                }
+
+                @screen md {
+                    grid-template-columns: 68px auto 128px 128px;
+                }
+
+                @screen lg {
+                    grid-template-columns: 68px auto 128px 128px 84px 96px;
+                }
+            }
+
         `
     ],
     encapsulation  : ViewEncapsulation.None,
@@ -93,9 +110,17 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     productVariantsValueEditMode:any = [];
     showVariantsSection: boolean = false;
 
+    variantComboItems: any = [];
+    variantComboOptions: any = [];
+
+
     // product variant available
     productVariantAvailable: FormArray;
     productVariantAvailable$: ProductVariantAvailable[] = [];
+
+    //for new variant option added
+    newProductVariantAvailable$: ProductVariantAvailable[] = [];
+
     filteredProductVariantAvailable: any[] = [];
     selectedProductVariantAvailable: ProductVariantAvailable[] = [];
     
@@ -134,6 +159,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     currentImageIndex: number = 0;
     thumbnailIndex: number = 0;
     imagesEditMode: boolean = false;
+    variantimagesEditMode: any = [];
 
     displayProductVariantAssets:any = [];
 
@@ -169,6 +195,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             ['blockquote','clean']
         ]
     };
+    variantIndex: number = 0;
 
     /**
      * Constructor
@@ -442,6 +469,13 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      */
     toggleDetails(productId: string): void
     {
+
+        // this._inventoryService.getVariantAvailable(productId).then(data => {
+
+        //     console.log('VARIANT AVAILABLE', data);
+        // })
+        
+
         // If the product is already selected...
         if ( this.selectedProduct && this.selectedProduct.id === productId )
         {
@@ -1062,7 +1096,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
             title  : 'Delete option',
-            message: 'Are you sure you want to delete this option? This option will be remove permenantly!',
+            message: 'Are you sure you want to delete this option? This option will be removed permenantly!',
             actions: {
                 confirm: {
                     label: 'Delete'
@@ -1278,11 +1312,23 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                     variantItems[index].values.push(item.value);
                     variantItems[index].ids.push(item.id);
                 });
+                this.variantComboItems
+                this.variantComboOptions
             });
         }
         
-        this.getallCombinations(variantItems)
+        this.variantComboItems = variantItems
+        this.variantComboOptions = variantOptions
+
+        //old
+        // this.getallCombinations(variantItems)
+
+        this.getallCombinations(this.variantComboItems)
+        console.log('variantComboItems', this.variantComboItems);
+        console.log('variantComboOptions', this.variantComboOptions);
+
         
+        //set inventory
         const productIdLength = this.selectedProduct.id.length;
         (this.selectedProduct.productInventories).forEach((item: ProductInventory, index) => {
 
@@ -1298,14 +1344,21 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             }
         });
 
+        // this.selectedVariantCombos
+
+        // get selectedVariantCombos
+        const arr1 = this.selectedVariantCombos;
+        console.log('arr1', arr1);
         // remove images that does not have itemCode 
         // so this means arr2 will contains images that related to variants only 
         const arr2 = (this.selectedProduct.productAssets).filter((item) => 
             item.itemCode !== null
         );
+        console.log('arr2', arr2);
 
-        // get selectedVariantCombos
-        const arr1 = this.selectedVariantCombos;
+
+        
+        
 
         const map = new Map();
         arr1.forEach(item => map.set(item.itemCode, item));
@@ -1314,6 +1367,11 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
         // generate displayProductVariantAssets
         this.displayProductVariantAssets = mergedArr;
+        
+        this.selectedVariantCombos = mergedArr;
+
+        console.log('VARIANT IMAGES', this.displayProductVariantAssets);
+        
     }
 
     deleteEntireInventory() {
@@ -1395,7 +1453,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         var nameCombo = "";
         if (n == combos.length) {
             if (nameComboOutput.substring(1) != "") {
-            this.selectedVariantCombos.push({ itemCode: itemCode, variant: nameComboOutput.substring(1), price: 0, quantity: 0, sku: 0, status: "AVAILABLE" })
+            this.selectedVariantCombos.push({ itemCode: itemCode, variant: nameComboOutput.substring(1), price: 0, quantity: 0, sku: 0, status: "UNAVAILABLE" })
             // this.images.push([])
           }
           return nameComboOutput.substring(1);
@@ -1411,6 +1469,21 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
           this.getallCombinations(combos, itemCode, nameCombo, n + 1)
         }
+
+        // get unique values from object array 
+        var resArr = [];
+        this.selectedVariantCombos.filter(function(item){
+            var i = resArr.findIndex(x => (x.variant == item.variant));
+            if(i <= -1){
+                    resArr.push(item);
+            }
+            return null;
+            });
+
+
+        this.selectedVariantCombos = resArr;
+        console.log("AFTER DO THE COMBINATION", this.selectedVariantCombos);
+        
     }
 
     setVariants() {
@@ -1555,7 +1628,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
             title  : 'Delete variant',
-            message: 'Are you sure you want to delete this variant? This variant will be remove permenantly!',
+            message: 'Are you sure you want to delete this variant? This variant will be removed permenantly!',
             actions: {
                 confirm: {
                     label: 'Delete'
@@ -1669,6 +1742,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             // let index = this.filteredProductVariants.findIndex(x => x.id === variant.id);            
             let index = this.filteredProductVariants.findIndex(x => x.id === variant.id);
 
+            this.variantIndex = index;
+            
             console.log('index',index);
     
             // get the object of filteredVariantsTag in filteredVariants
@@ -1899,33 +1974,41 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      *
      * @param value
      */
-    createVariantAvailable(value: string): void
+    createVariantAvailable(value: string, variantIdx: number): void
     {
         // console.log('this.selectedProductForm: sebelum create varaiant available',this.selectedProductForm.value);
-        this.filteredProductVariants= this.productVariants.value;//check balik yg ni
+        this.filteredProductVariants= this.productVariants.value;//check balik yg ni      
+        
+        //push new variant option (available) value to variant items array 
+        this.variantComboItems[variantIdx].values.push(value);
 
+        console.log('VARIANT ITEMS AFTER CREATE NEW OPTIONS', this.variantComboItems);
+        
         //if variant recently created then need to create the variant then push the variant available listing
         const variant = {
             value,
             productId: this.selectedProduct.id,
-            productVariantId: this.selectedProductVariants.id !==null?this.selectedProductVariants.id:uuidv4(),   
+            productVariantId: this.selectedProductVariants.id !==null?this.selectedProductVariants.id:uuidv4(),
+            sequenceNumber: this.variantComboItems[variantIdx].values.length - 1
         }; 
 
-        // let variant2 = this._formBuilder.group({
-        //     value,
-        //     productId: this.selectedProduct.id,
-        //     productVariantId: this.selectedProductVariants.id !==null?this.selectedProductVariants.id:uuidv4(),   
-            
-        // });
-        // this.productVariantAvailable.push(variant2);
-
         this.productVariantAvailable$.push(variant);
-        console.log('check form lepas tekan button create variant available:',this.productVariants);
+
+        //---USE THIS TO CREATE NEW VARIANT AVAILABLE TO BE
+        this.newProductVariantAvailable$.push(variant);
+
         this.filteredProductVariantAvailable= this.productVariantAvailable$;        
         this.filteredProductVariants= this.productVariants.value;//check balik yg ni
 
-        console.log('check latest lepas push this.productVariantAvailable$',this.productVariantAvailable$);
-        console.log('this.selectedform', this.selectedProductForm.value);
+        console.log('this.productVariantAvailable$',this.productVariantAvailable$);
+        console.log('this.newProductVariantAvailable$',this.newProductVariantAvailable$);
+
+        this.getallCombinations(this.variantComboItems)
+
+        // if (this.variantComboOptions[i].id) {
+        //     this.apiCalls.addVariantValues(this.product.id, { productVariantId: this.options[i].id, value: data.value, sequenceNumber: this.items[i].values.length - 1 })
+        //   }
+        // this.getallCombinations(this.variantComboItems)
 
         // this.productVariants.push(_item);
         // this.filteredProductVariants= this.productVariants.value;
@@ -2000,12 +2083,12 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      *
      * @param variant
      */
-    deleteVariantAvailable(variantAvailable: ProductVariantAvailable): void
+    deleteVariantAvailable(variantAvailable: ProductVariantAvailable, value): void
     {
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
             title  : 'Delete variant',
-            message: 'Are you sure you want to delete this variant value ? This variant value will be remove permenantly!',
+            message: 'Are you sure you want to delete this variant value ? This variant value will be removed permenantly!',
             actions: {
                 confirm: {
                     label: 'Delete'
@@ -2019,12 +2102,24 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             // If the confirm button pressed...
             if ( result === 'confirmed' )
             {
+
+                console.log('Delete value', value);
+
+                const index = this.productVariantAvailable$.indexOf(variantAvailable);
+                if (index > -1) {
+                    this.productVariantAvailable$.splice(index, 1);
+                }
+                console.log('After Delete -> this.productVariantAvailable$', this.productVariantAvailable$);
+
+                // this.getallCombinations();
                 // Delete the variant from the server
-                this._inventoryService.deleteVariantAvailable(variantAvailable, this.selectedProduct.id)
-                    .pipe(takeUntil(this._unsubscribeAll))
-                    .subscribe((response)=>{
-                        this.removeVariantAvailableFromProduct(response)
-                    });
+                // this._inventoryService.deleteVariantAvailable(variantAvailable, this.selectedProduct.id)
+                //     .pipe(takeUntil(this._unsubscribeAll))
+                //     .subscribe((response)=>{
+                //         this.removeVariantAvailableFromProduct(response)
+                //     });
+
+
             }
         });
     }
@@ -2044,7 +2139,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             this.productVariants$[index].productVariantsAvailable.push(productVariantAvailable);
         } 
         // Add the productVariantAvailable
-        this.productVariants$[index].productVariantsAvailable.unshift(productVariantAvailable);
+        this.productVariants$[index].productVariantsAvailable.push(productVariantAvailable);
 
         // Update the product variant form
         this.productVariants = this.selectedProductForm.get('productVariants') as FormArray;
@@ -2351,9 +2446,21 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     /**
      * Toggle the categories edit mode
      */
-    toggleImagesEditMode(): void
+    toggleImagesEditMode(imgType: string, index?:string): void
     {
-        this.imagesEditMode = !this.imagesEditMode;
+        //set images Edit Mode for product image
+        if (imgType == 'productImg'){
+            this.imagesEditMode = !this.imagesEditMode;
+            
+        }
+        //set images Edit Mode for variant image
+
+        //TAK JADII, KENA BUAT BALIK
+        else if (imgType == 'variantOptionImg'){
+            this.variantimagesEditMode[index] = !this.variantimagesEditMode[index];
+            
+
+        }
     }
      
     /**
