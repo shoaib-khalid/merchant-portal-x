@@ -1,330 +1,334 @@
-<div class="w-full max-w-3xl">
-
-    <!-- Form -->
-    <form [formGroup]="storeAccountForm">
-
-        <!-- Section -->
-        <div class="w-full">
-            <div class="text-xl">Profile</div>
-            <div class="text-secondary">Following information is about your store details</div>
-        </div>
-        <div class="grid sm:grid-cols-4 gap-6 w-full mt-8">
-            <!-- Store Name -->
-            <div class="sm:col-span-4">
-                <mat-form-field class="fuse-mat-no-subscript fuse-mat-emphasized-affix w-full" floatLabel="always">
-                    <mat-label>Store Name</mat-label>
-                    <mat-icon
-                        class="icon-size-5"
-                        [svgIcon]="'mat_solid:store'"
-                        matPrefix></mat-icon>
-                    <input
-                        [formControlName]="'name'"
-                        [required]="true"
-                        (input)="checkExistingName($event.target.value)"
-                        maxlength="100"
-                        placeholder="Tell us, what is your store name ?"
-                        matInput>
-                    <mat-error *ngIf="storeAccountForm.get('name').hasError('required')">
-                        Required
-                    </mat-error>
-                    <mat-error *ngIf="storeAccountForm.get('name').hasError('storeNameAlreadyTaken')">
-                        The store name entered is already taken
-                    </mat-error>
-                </mat-form-field>
-            </div>
-            <!-- Store Url -->
-            <div class="sm:col-span-4">
-                <mat-form-field class="fuse-mat-no-subscript fuse-mat-emphasized-affix w-full" floatLabel="always">
-                    <mat-label>Store URL</mat-label>
-                    <span>https://</span> 
-                    <mat-icon
-                        matPrefix
-                        [svgIcon]="'heroicons_outline:globe-alt'">
-                    </mat-icon>
-                    <div
-                        class="text-secondary"
-                        matSuffix>
-                        {{domainName}}
+<ng-container>
+    <div class="shadow rounded-2xl bg-card">
+        <div class="flex flex-col flex-auto items-center m-5 p-6 sm:p-10">
+            <div class="w-full">
+                <!-- Form -->
+                <form [formGroup]="storeAccountForm">
+                    <!-- Section -->
+                    <div class="w-full">
+                        <div class="text-xl">Profile</div>
+                        <div class="text-secondary">Following information is about your store details</div>
                     </div>
-                    <input
-                        minlength="4"
-                        maxlength="15"
-                        [formControlName]="'subdomain'"
-                        [required]="true"
-                        (input)="checkExistingURL($event.target.value)"
-                        matInput>
-                    <mat-error *ngIf="storeAccountForm.get('subdomain').hasError('required')">
-                        Required
-                    </mat-error>
-                    <mat-error *ngIf="storeAccountForm.get('subdomain').hasError('invalidDomain')">
-                        Invalid URL
-                    </mat-error>
-                    <mat-error *ngIf="storeAccountForm.get('subdomain').hasError('minlength')">
-                        Minimum character length not meet (mininum 4 character)
-                    </mat-error>
-                    <mat-error *ngIf="storeAccountForm.get('subdomain').hasError('maxlength')">
-                        Maximum character length exceed (maximum 15 character)
-                    </mat-error>
-                    <mat-error *ngIf="storeAccountForm.get('subdomain').hasError('domainAlreadyTaken')">
-                        The subdomain name entered is already taken
-                    </mat-error>
-                </mat-form-field>
-            </div>
-            <!-- Title -->
-            <!-- <div class="sm:col-span-2">
-                <mat-form-field class="fuse-mat-no-subscript w-full">
-                    <mat-label>Title</mat-label>
-                    <mat-icon
-                        class="icon-size-5"
-                        [svgIcon]="'heroicons_solid:briefcase'"
-                        matPrefix></mat-icon>
-                    <input
-                        [formControlName]="'title'"
-                        matInput>
-                </mat-form-field>
-            </div> -->
-            <!-- Company -->
-            <!-- <div class="sm:col-span-2">
-                <mat-form-field class="fuse-mat-no-subscript w-full">
-                    <mat-label>Company</mat-label>
-                    <mat-icon
-                        class="icon-size-5"
-                        [svgIcon]="'heroicons_solid:office-building'"
-                        matPrefix></mat-icon>
-                    <input
-                        [formControlName]="'company'"
-                        matInput>
-                </mat-form-field>
-            </div> -->
-           
-            <!-- Store Description -->
-            <div class="sm:col-span-4">
-                <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full" floatLabel="always">
-                    <mat-label>Store Description</mat-label>
-                    <textarea
-                        matInput
-                        [required]="true"
-                        [rows]="5"
-                        maxlength="100"
-                        placeholder="Describe to us about your store"
-                        [formControlName]="'storeDescription'"
-                        cdkTextareaAutosize
-                        [cdkAutosizeMinRows]="5"></textarea>
-                    <mat-error *ngIf="storeAccountForm.get('storeDescription').hasError('required')">
-                        Required
-                    </mat-error>
-                </mat-form-field>
-                <div class="mt-1 text-md text-hint">Brief description for your profile.</div>
-            </div>
-        </div>
-
-        <!-- Divider -->
-        <div class="my-10 border-t"></div>
-
-        <!-- Section -->
-        <div class="w-full">
-            <div class="text-xl">Store Information</div>
-            <div class="text-secondary">Communication and information details in case customer want to connect with you.</div>
-        </div>
-        <div class="grid sm:grid-cols-4 gap-6 w-full mt-8">
-            <!-- Email -->
-            <div class="sm:col-span-2">
-                <mat-form-field class="fuse-mat-emphasized-affix w-full" floatLabel="always">
-                    <mat-label>Store Email</mat-label>
-                    <mat-icon
-                        class="icon-size-5"
-                        [svgIcon]="'heroicons_solid:mail'"
-                        matPrefix></mat-icon>
-                    <input
-                        type="email"
-                        placeholder="example@yourstore.com"
-                        [formControlName]="'email'"
-                        [required]="true"
-                        matInput>
-                    <mat-error *ngIf="storeAccountForm.get('email').hasError('required')">
-                        Required
-                    </mat-error>
-                    <mat-error *ngIf="storeAccountForm.get('email').hasError('email')">
-                        Enter a valid email address
-                    </mat-error>
-                </mat-form-field>
-            </div>
-            <!-- Phone -->
-            <div class="sm:col-span-2">
-                <mat-form-field class="fuse-mat-emphasized-affix w-full" floatLabel="always">
-                    <mat-label>Store Phone Number</mat-label>
-                    <mat-icon
-                        class="icon-size-5"
-                        [svgIcon]="'heroicons_solid:phone'"
-                        matPrefix></mat-icon>
-                    <input
-                        [formControlName]="'phoneNumber'"
-                        [required]="true"
-                        placeholder="+60123456789"
-                        matInput>
-                    <mat-error *ngIf="storeAccountForm.get('phoneNumber').hasError('required')">
-                        Required
-                    </mat-error>
-                    <mat-error *ngIf="storeAccountForm.get('phoneNumber').hasError('invalidPhonenumber')">
-                        Invalid Phonenumber
-                    </mat-error>
-                </mat-form-field>
-            </div>
-            <!-- Store Address -->
-            <div class="sm:col-span-4">
-                <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full" floatLabel="always">
-                    <mat-label>Address</mat-label>
-                    <textarea
-                        matInput
-                        placeholder="Your customer will be looking for your store, add your store address now !"
-                        maxlength="500"
-                        [required]="true"
-                        [rows]="5"
-                        [formControlName]="'address'"
-                        cdkTextareaAutosize
-                        [cdkAutosizeMinRows]="5"></textarea>
-                    <mat-error *ngIf="storeAccountForm.get('address').hasError('required')">
-                        Required
-                    </mat-error>
-                </mat-form-field>
-            </div>
-            <!-- City -->
-            <div class="sm:col-span-2">
-                <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
-                    <mat-label>City</mat-label>
-                    <input
-                        maxlength="100"
-                        [required]="true"
-                        [formControlName]="'city'"
-                        matInput>
-                    <mat-error *ngIf="storeAccountForm.get('city').hasError('required')">
-                        Required
-                    </mat-error>
-                </mat-form-field>
-            </div>
-            <!-- Postcode -->
-            <div class="sm:col-span-2">
-                <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
-                    <mat-label>Postcode</mat-label>
-                    <input
-                        [formControlName]="'postcode'"
-                        minlength="5"
-                        maxlength="10"
-                        [required]="true"
-                        matInput>
-                    <mat-error *ngIf="storeAccountForm.get('postcode').hasError('required')">
-                        Required
-                    </mat-error>
-                    <mat-error *ngIf="storeAccountForm.get('postcode').hasError('invalidPostcode')">
-                        Invalid postcode
-                    </mat-error>
-                    <mat-error *ngIf="storeAccountForm.get('postcode').hasError('minlength')">
-                        Minimum length of postcode not meet
-                    </mat-error>
-                    <mat-error *ngIf="storeAccountForm.get('postcode').hasError('maxlength')">
-                        Exceed maximum length of postcode
-                    </mat-error>
-                </mat-form-field>
-            </div>
-            <!-- State -->
-            <div class="sm:col-span-2">
-                <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
-                    <mat-label>State</mat-label>
-                    <mat-select 
-                        [formControlName]="'regionCountryStateId'"
-                        [required]="true"
-                        [value]="'regionCountryStateId'"
-                        [placeholder]="'Select State'"
-                        (selectionChange)="storeAccountForm.get('regionCountryStateId').patchValue($event.value);"
-                        #stateSelector="matSelect">
-                        <mat-select-trigger>
-                            <span class="flex items-center">
-                                <span>{{ stateSelector.triggerValue }}</span>
-                            </span>
-                        </mat-select-trigger>
-                        <div *ngFor="let state of statesByCountry">
-                            <mat-option [value]="state.id">{{state.name}}</mat-option>
+                    <div class="grid sm:grid-cols-4 gap-6 w-full mt-8">
+                        <!-- Store Name -->
+                        <div class="sm:col-span-4">
+                            <mat-form-field class="fuse-mat-no-subscript fuse-mat-emphasized-affix w-full" floatLabel="always">
+                                <mat-label>Store Name</mat-label>
+                                <mat-icon
+                                    class="icon-size-5"
+                                    [svgIcon]="'mat_solid:store'"
+                                    matPrefix></mat-icon>
+                                <input
+                                    [formControlName]="'name'"
+                                    [required]="true"
+                                    (input)="checkExistingName($event.target.value)"
+                                    maxlength="100"
+                                    placeholder="Tell us, what is your store name ?"
+                                    matInput>
+                                <mat-error *ngIf="storeAccountForm.get('name').hasError('required')">
+                                    Required
+                                </mat-error>
+                                <mat-error *ngIf="storeAccountForm.get('name').hasError('storeNameAlreadyTaken')">
+                                    The store name entered is already taken
+                                </mat-error>
+                            </mat-form-field>
                         </div>
-                    </mat-select>
-                    <mat-error *ngIf="storeAccountForm.get('regionCountryStateId').hasError('required')">
-                        Required
-                    </mat-error>
-                </mat-form-field>
-            </div>
-            <!-- Country -->
-            <div class="sm:col-span-2">
-                <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
-                    <mat-label>Country</mat-label>
-                    <mat-select 
-                        [formControlName]="'regionCountryId'"
-                        [required]="true"
-                        [value]="'regionCountryId'"
-                        [placeholder]="'Select Country'"
-                        (selectionChange)="storeAccountForm.get('regionCountryId').patchValue($event.value);updateStates(countrySelector.value)"
-                        #countrySelector="matSelect"
-                        >
-                        <mat-select-trigger>
-                            <span class="flex items-center">
-                                <span>{{ countrySelector.triggerValue }}</span>
-                            </span>
-                        </mat-select-trigger>
-                        <div *ngFor="let country of countriesList">
-                            <mat-option [value]="country.id">{{country.name}}</mat-option>
+                        <!-- Store Url -->
+                        <div class="sm:col-span-4">
+                            <mat-form-field class="fuse-mat-no-subscript fuse-mat-emphasized-affix w-full" floatLabel="always">
+                                <mat-label>Store URL</mat-label>
+                                <span>https://</span> 
+                                <mat-icon
+                                    matPrefix
+                                    [svgIcon]="'heroicons_outline:globe-alt'">
+                                </mat-icon>
+                                <div
+                                    class="text-secondary"
+                                    matSuffix>
+                                    {{domainName}}
+                                </div>
+                                <input
+                                    minlength="4"
+                                    maxlength="15"
+                                    [formControlName]="'subdomain'"
+                                    [required]="true"
+                                    (input)="checkExistingURL($event.target.value)"
+                                    matInput>
+                                <mat-error *ngIf="storeAccountForm.get('subdomain').hasError('required')">
+                                    Required
+                                </mat-error>
+                                <mat-error *ngIf="storeAccountForm.get('subdomain').hasError('invalidDomain')">
+                                    Invalid URL
+                                </mat-error>
+                                <mat-error *ngIf="storeAccountForm.get('subdomain').hasError('minlength')">
+                                    Minimum character length not meet (mininum 4 character)
+                                </mat-error>
+                                <mat-error *ngIf="storeAccountForm.get('subdomain').hasError('maxlength')">
+                                    Maximum character length exceed (maximum 15 character)
+                                </mat-error>
+                                <mat-error *ngIf="storeAccountForm.get('subdomain').hasError('domainAlreadyTaken')">
+                                    The subdomain name entered is already taken
+                                </mat-error>
+                            </mat-form-field>
                         </div>
-                    </mat-select>
-                    <mat-error *ngIf="storeAccountForm.get('regionCountryId').hasError('required')">
-                        Required
-                    </mat-error>
-                </mat-form-field>
-            </div>
-        </div>
-
-        <!-- Divider -->
-        <div class="mt-8 mb-10 border-t"></div>
-        <!-- Section -->
-        <div class="w-full ">
-            <div class="text-xl">Payment</div>
-            <div class="text-secondary">This selection is to choose your payment type</div>
-        </div>
-        <!-- Payment Type -->
-        <div class="grid sm:grid-cols-4 gap-6 w-full mt-8">
-            <div class="sm:col-span-2">
-                <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
-                    <mat-label>Payment Type</mat-label>
-                    <mat-select
-                    [formControlName]="'paymentType'"
-                    [required]="true"
-                    [value]="'paymentType'"
-                    [placeholder]="'Select Payment Type'"
-                    (selectionChange)="storeAccountForm.get('paymentType').patchValue($event.value)"
-                    #paymentSelector="matSelect"
-                    >
-                    <mat-select-trigger>
-                        <span class="flex items-center">
-                            <span>{{ paymentSelector.triggerValue }}</span>
-                        </span>
-                    </mat-select-trigger>
-                        <div>
-                            <mat-option [value]="'COD'">Cash On Delivery</mat-option>
-                            <mat-option [value]="'ONLINEPAYMENT'">Online Payment</mat-option>
+                        <!-- Title -->
+                        <!-- <div class="sm:col-span-2">
+                            <mat-form-field class="fuse-mat-no-subscript w-full">
+                                <mat-label>Title</mat-label>
+                                <mat-icon
+                                    class="icon-size-5"
+                                    [svgIcon]="'heroicons_solid:briefcase'"
+                                    matPrefix></mat-icon>
+                                <input
+                                    [formControlName]="'title'"
+                                    matInput>
+                            </mat-form-field>
+                        </div> -->
+                        <!-- Company -->
+                        <!-- <div class="sm:col-span-2">
+                            <mat-form-field class="fuse-mat-no-subscript w-full">
+                                <mat-label>Company</mat-label>
+                                <mat-icon
+                                    class="icon-size-5"
+                                    [svgIcon]="'heroicons_solid:office-building'"
+                                    matPrefix></mat-icon>
+                                <input
+                                    [formControlName]="'company'"
+                                    matInput>
+                            </mat-form-field>
+                        </div> -->
+                       
+                        <!-- Store Description -->
+                        <div class="sm:col-span-4">
+                            <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full" floatLabel="always">
+                                <mat-label>Store Description</mat-label>
+                                <textarea
+                                    matInput
+                                    [required]="true"
+                                    [rows]="5"
+                                    maxlength="100"
+                                    placeholder="Describe to us about your store"
+                                    [formControlName]="'storeDescription'"
+                                    cdkTextareaAutosize
+                                    [cdkAutosizeMinRows]="5"></textarea>
+                                <mat-error *ngIf="storeAccountForm.get('storeDescription').hasError('required')">
+                                    Required
+                                </mat-error>
+                            </mat-form-field>
+                            <div class="mt-1 text-md text-hint">Brief description for your profile.</div>
                         </div>
-                    </mat-select>
-                </mat-form-field>
+                    </div>
+            
+                    <!-- Divider -->
+                    <div class="my-10 border-t"></div>
+            
+                    <!-- Section -->
+                    <div class="w-full">
+                        <div class="text-xl">Store Information</div>
+                        <div class="text-secondary">Communication and information details in case customer want to connect with you.</div>
+                    </div>
+                    <div class="grid sm:grid-cols-4 gap-6 w-full mt-8">
+                        <!-- Email -->
+                        <div class="sm:col-span-2">
+                            <mat-form-field class="fuse-mat-emphasized-affix w-full" floatLabel="always">
+                                <mat-label>Store Email</mat-label>
+                                <mat-icon
+                                    class="icon-size-5"
+                                    [svgIcon]="'heroicons_solid:mail'"
+                                    matPrefix></mat-icon>
+                                <input
+                                    type="email"
+                                    placeholder="example@yourstore.com"
+                                    [formControlName]="'email'"
+                                    [required]="true"
+                                    matInput>
+                                <mat-error *ngIf="storeAccountForm.get('email').hasError('required')">
+                                    Required
+                                </mat-error>
+                                <mat-error *ngIf="storeAccountForm.get('email').hasError('email')">
+                                    Enter a valid email address
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <!-- Phone -->
+                        <div class="sm:col-span-2">
+                            <mat-form-field class="fuse-mat-emphasized-affix w-full" floatLabel="always">
+                                <mat-label>Store Phone Number</mat-label>
+                                <mat-icon
+                                    class="icon-size-5"
+                                    [svgIcon]="'heroicons_solid:phone'"
+                                    matPrefix></mat-icon>
+                                <input
+                                    [formControlName]="'phoneNumber'"
+                                    [required]="true"
+                                    placeholder="+60123456789"
+                                    matInput>
+                                <mat-error *ngIf="storeAccountForm.get('phoneNumber').hasError('required')">
+                                    Required
+                                </mat-error>
+                                <mat-error *ngIf="storeAccountForm.get('phoneNumber').hasError('invalidPhonenumber')">
+                                    Invalid Phonenumber
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <!-- Store Address -->
+                        <div class="sm:col-span-4">
+                            <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full" floatLabel="always">
+                                <mat-label>Address</mat-label>
+                                <textarea
+                                    matInput
+                                    placeholder="Your customer will be looking for your store, add your store address now !"
+                                    maxlength="500"
+                                    [required]="true"
+                                    [rows]="5"
+                                    [formControlName]="'address'"
+                                    cdkTextareaAutosize
+                                    [cdkAutosizeMinRows]="5"></textarea>
+                                <mat-error *ngIf="storeAccountForm.get('address').hasError('required')">
+                                    Required
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <!-- City -->
+                        <div class="sm:col-span-2">
+                            <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
+                                <mat-label>City</mat-label>
+                                <input
+                                    maxlength="100"
+                                    [required]="true"
+                                    [formControlName]="'city'"
+                                    matInput>
+                                <mat-error *ngIf="storeAccountForm.get('city').hasError('required')">
+                                    Required
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <!-- Postcode -->
+                        <div class="sm:col-span-2">
+                            <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
+                                <mat-label>Postcode</mat-label>
+                                <input
+                                    [formControlName]="'postcode'"
+                                    minlength="5"
+                                    maxlength="10"
+                                    [required]="true"
+                                    matInput>
+                                <mat-error *ngIf="storeAccountForm.get('postcode').hasError('required')">
+                                    Required
+                                </mat-error>
+                                <mat-error *ngIf="storeAccountForm.get('postcode').hasError('invalidPostcode')">
+                                    Invalid postcode
+                                </mat-error>
+                                <mat-error *ngIf="storeAccountForm.get('postcode').hasError('minlength')">
+                                    Minimum length of postcode not meet
+                                </mat-error>
+                                <mat-error *ngIf="storeAccountForm.get('postcode').hasError('maxlength')">
+                                    Exceed maximum length of postcode
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <!-- State -->
+                        <div class="sm:col-span-2">
+                            <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
+                                <mat-label>State</mat-label>
+                                <mat-select 
+                                    [formControlName]="'regionCountryStateId'"
+                                    [required]="true"
+                                    [value]="'regionCountryStateId'"
+                                    [placeholder]="'Select State'"
+                                    (selectionChange)="storeAccountForm.get('regionCountryStateId').patchValue($event.value);"
+                                    #stateSelector="matSelect">
+                                    <mat-select-trigger>
+                                        <span class="flex items-center">
+                                            <span>{{ stateSelector.triggerValue }}</span>
+                                        </span>
+                                    </mat-select-trigger>
+                                    <div *ngFor="let state of statesByCountry">
+                                        <mat-option [value]="state.id">{{state.name}}</mat-option>
+                                    </div>
+                                </mat-select>
+                                <mat-error *ngIf="storeAccountForm.get('regionCountryStateId').hasError('required')">
+                                    Required
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <!-- Country -->
+                        <div class="sm:col-span-2">
+                            <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
+                                <mat-label>Country</mat-label>
+                                <mat-select 
+                                    [formControlName]="'regionCountryId'"
+                                    [required]="true"
+                                    [value]="'regionCountryId'"
+                                    [placeholder]="'Select Country'"
+                                    (selectionChange)="storeAccountForm.get('regionCountryId').patchValue($event.value);updateStates(countrySelector.value)"
+                                    #countrySelector="matSelect"
+                                    >
+                                    <mat-select-trigger>
+                                        <span class="flex items-center">
+                                            <span>{{ countrySelector.triggerValue }}</span>
+                                        </span>
+                                    </mat-select-trigger>
+                                    <div *ngFor="let country of countriesList">
+                                        <mat-option [value]="country.id">{{country.name}}</mat-option>
+                                    </div>
+                                </mat-select>
+                                <mat-error *ngIf="storeAccountForm.get('regionCountryId').hasError('required')">
+                                    Required
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+            
+                    <!-- Divider -->
+                    <div class="mt-8 mb-10 border-t"></div>
+                    <!-- Section -->
+                    <div class="w-full ">
+                        <div class="text-xl">Payment</div>
+                        <div class="text-secondary">This selection is to choose your payment type</div>
+                    </div>
+                    <!-- Payment Type -->
+                    <div class="grid sm:grid-cols-4 gap-6 w-full mt-8">
+                        <div class="sm:col-span-2">
+                            <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
+                                <mat-label>Payment Type</mat-label>
+                                <mat-select
+                                [formControlName]="'paymentType'"
+                                [required]="true"
+                                [value]="'paymentType'"
+                                [placeholder]="'Select Payment Type'"
+                                (selectionChange)="storeAccountForm.get('paymentType').patchValue($event.value)"
+                                #paymentSelector="matSelect"
+                                >
+                                <mat-select-trigger>
+                                    <span class="flex items-center">
+                                        <span>{{ paymentSelector.triggerValue }}</span>
+                                    </span>
+                                </mat-select-trigger>
+                                    <div>
+                                        <mat-option [value]="'COD'">Cash On Delivery</mat-option>
+                                        <mat-option [value]="'ONLINEPAYMENT'">Online Payment</mat-option>
+                                    </div>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <!-- Divider -->
+                    <div class="mt-11 mb-10 border-t"></div>
+            
+                    <!-- Actions -->
+                    <div class="flex items-center justify-end">
+                        <button
+                            class="ml-4"
+                            mat-flat-button
+                            type="button"
+                            [color]="'primary'"
+                            (click)="updateStoreAccount()">
+                            Save
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
-        <!-- Divider -->
-        <div class="mt-11 mb-10 border-t"></div>
-
-        <!-- Actions -->
-        <div class="flex items-center justify-end">
-            <button
-                class="ml-4"
-                mat-flat-button
-                type="button"
-                [color]="'primary'"
-                (click)="updateStoreAccount()">
-                Save
-            </button>
-        </div>
-    </form>
-</div>
+    </div>
+</ng-container>

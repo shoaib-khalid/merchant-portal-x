@@ -119,17 +119,17 @@ export class RegisterStoreComponent implements OnInit
         // Vertical stepper form
         this.createStoreForm = this._formBuilder.group({
             step1: this._formBuilder.group({
-                name                : ['sss', Validators.required],
-                subdomain           : ['ssdds',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
-                address             : ['sssssss', Validators.required],
-                storeDescription    : ['sssssssss', [Validators.required, Validators.maxLength(100)]],
-                city                : ['ssss', Validators.required],
-                regionCountryStateId: ['sss', Validators.required],
-                email               : ['sss@sss.com', [Validators.required, Validators.email]],
-                phoneNumber         : ['123456', RegisterStoreValidationService.phonenumberValidator],
-                postcode            : ['123456', [Validators.required, Validators.minLength(5), Validators.maxLength(10), RegisterStoreValidationService.postcodeValidator]],
-                regionCountryId     : ['sssss', Validators.required],
-                paymentType         : ['ssss', Validators.required],
+                name                : ['', Validators.required],
+                subdomain           : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
+                address             : ['', Validators.required],
+                storeDescription    : ['', [Validators.required, Validators.maxLength(100)]],
+                city                : ['', Validators.required],
+                regionCountryStateId: ['', Validators.required],
+                email               : ['', [Validators.required, Validators.email]],
+                phoneNumber         : ['', RegisterStoreValidationService.phonenumberValidator],
+                postcode            : ['', [Validators.required, Validators.minLength(5), Validators.maxLength(10), RegisterStoreValidationService.postcodeValidator]],
+                regionCountryId     : ['', Validators.required],
+                paymentType         : ['', Validators.required],
             }),
             step3: this._formBuilder.group({
                 // Delivery Provider
@@ -720,8 +720,14 @@ export class RegisterStoreComponent implements OnInit
 
     updateStoreOpening(day: string){
         let index = this._storeTiming.findIndex(dayList => dayList.day === day);
-        this.storeTiming.value[index].isOpen = !this.storeTiming.value[index].isOpen;
-        this.storeTiming.value[index].isOff = !this.storeTiming.value[index].isOff;
+        this._storeTiming[index].isOpen = !this._storeTiming[index].isOpen;
+        this._storeTiming[index].isOff = !this._storeTiming[index].isOff;
+
+        this.storeTiming.clear();
+        this._storeTiming.forEach(item => {
+            this.storeTiming = this.createStoreForm.get('step4').get('storeTiming') as FormArray;
+            this.storeTiming.push(this._formBuilder.group(item));
+        }); 
     }
 
     toggleBreakHour (e, i){

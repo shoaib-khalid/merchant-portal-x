@@ -324,10 +324,10 @@
                                         mat-flat-button
                                         [color]="'primary'"
                                         type="button"
+                                        [disabled]="verticalStepperStep1.stepControl.pristine || verticalStepperStep1.stepControl.invalid"
                                         matStepperNext>
                                         Next 
                                     </button>
-                                    <!-- [disabled]="verticalStepperStep1.stepControl.pristine || verticalStepperStep1.stepControl.invalid" -->
                                 </div>
                             </mat-step>
                             <!-- Store Assets -->

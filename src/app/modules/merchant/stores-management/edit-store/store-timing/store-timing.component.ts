@@ -120,6 +120,12 @@ export class StoreTimingComponent implements OnInit
         let index = this._storeTiming.findIndex(dayList => dayList.day === day);
         this._storeTiming[index].isOpen = !this._storeTiming[index].isOpen;
         this._storeTiming[index].isOff = !this._storeTiming[index].isOff;
+
+        this.storeTiming.clear();
+        this._storeTiming.forEach(item => {
+            this.storeTiming = this.storeTimingForm.get('storeTiming') as FormArray;
+            this.storeTiming.push(this._formBuilder.group(item));
+        }); 
     }
 
     toggleBreakHour (e, i){
