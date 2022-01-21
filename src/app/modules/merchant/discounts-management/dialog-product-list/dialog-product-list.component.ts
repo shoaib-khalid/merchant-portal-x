@@ -48,6 +48,10 @@ export class DialogProductListComponent implements OnInit {
  productPagination: ProductPagination;
  storeDiscountPagination:StoreDiscountProductPagination;
 
+ //================EDIT SECTION
+ editModeDiscountProduct:any = [];
+ editDiscountAmount :number;
+
  private _unsubscribeAll: Subject<any> = new Subject<any>();
 
 
@@ -337,6 +341,38 @@ export class DialogProductListComponent implements OnInit {
             }
         });
     
+    }
+
+    // Edit discount product
+    editStoreProductDiscount(productDiscount){
+    
+        console.log('EDIT::::',productDiscount);
+        
+        let payloadProductDiscount = {
+            
+                id: productDiscount.id,
+                storeDiscountId: productDiscount.storeDiscountId,
+                itemCode:productDiscount.itemCode,
+                calculationType:'PERCENT',
+                discountAmount:this.editDiscountAmount
+            
+        }
+
+        this._discountProductService.updateProductDiscount(productDiscount.storeDiscountId,payloadProductDiscount).
+                subscribe((response) => {
+
+                    console.log("lepas edit:::::",response);
+                    
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                });
+        
+    }
+
+    inputEditDiscountAmount(event){
+
+        this.editDiscountAmount =event.target.value;
+      
     }
 
    onChangeSelectProduct(product, change: MatCheckboxChange): void
