@@ -244,7 +244,7 @@ export class DialogProductListComponent implements OnInit {
    }
 
    addProductDiscount(){
-       
+
        if (this.onChangeSelectProductValue.length === 0){
             const confirmation = this._fuseConfirmationService.open({
                 title  : 'Please select the product',
@@ -264,20 +264,80 @@ export class DialogProductListComponent implements OnInit {
         }
         else {
 
-            // console.log('CHECK BEFORE SEND TO BACKEND 1 ',this.onChangeSelectProductValue);
-            console.log('Clear ',this.onChangeSelectProductValue.length = 0);
-            console.log('Lepas clear ',this.onChangeSelectProductValue);
-            console.log('Clear O ',this.onChangeSelectProductObject.length = 0);
-            console.log('Lepas clear  O',this.onChangeSelectProductObject);
+            const itemCodesArr = this.onChangeSelectProductObject.map( el=> el.productInventories.map(el2=>el2.itemCode));//[[a,c,g],[d,e],[f]]
+            const itemCodes = Array.prototype.concat.apply([],itemCodesArr);//[a,c,g,d,e,f]
 
+            itemCodes
+            .forEach((catId)=>{
+    
+                    let payloadProductDiscount ={
+                        storeDiscountId:this.discountId,
+                        itemCode:catId,
+                        calculationType:'PERCENT',
+                        discountAmount:0.00
+                    }                
+    
+                    this._discountProductService.createProductDiscount(this.discountId,payloadProductDiscount).
+                    subscribe((response) => {
+    
+                        this.storeDiscountProduct.push(response["data"]);
 
-            
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    }
+                    , error => {
+                        console.log(error);
+                    }
+                    )
+                }
+            )
+     
+            //clear the array after we post the data
+            this.onChangeSelectProductValue.length = 0;
+            this.onChangeSelectProductObject.length = 0;
 
+            //CALL BACK THE DISCOUNT PRODUCT
+            // return this._discountProductService.getByQueryDiscountsProduct(this.discountId, 0, 5).subscribe();
 
 
         }
 
    }
+
+    //Delete discount product
+    deleteStoreProductDiscount(productDiscount){
+
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title  : 'Delete discount',
+            message: 'Are you sure you want to remove this discount? This action cannot be undone!',
+            actions: {
+                confirm: {
+                    label: 'Delete'
+                }
+            }
+        });
+
+
+        //after user choose either delete or cancel
+        confirmation.afterClosed().subscribe((result) => {
+
+            // If the confirm button pressed...
+            if ( result === 'confirmed' )
+            {
+                // Delete the store discount product from server //param (main discount id, product discount id)
+                this._discountProductService.deleteDiscountProduct(this.discountId, productDiscount.id).subscribe(() => {
+                
+                    // this.storeDiscountProduct.splice(this.storeDiscountProduct.findIndex(x => x.id === productDiscount.id), 1);
+   
+                
+                    this._changeDetectorRef.markForCheck();
+
+                });
+            }
+        });
+    
+    }
 
    onChangeSelectProduct(product, change: MatCheckboxChange): void
    {
@@ -298,15 +358,8 @@ export class DialogProductListComponent implements OnInit {
            
        }
        console.log('CHECK BEFORE SEND TO BACKEND',this.onChangeSelectProductValue);
-       console.log('onChangeSelectProductObject,',this.onChangeSelectProductObject);
-
-       const itemCodesArr = this.onChangeSelectProductObject.map( el=> el.productInventories.map(el2=>el2.itemCode));
-       const itemCodes = Array.prototype.concat.apply([],itemCodesArr);
-
-       console.log('ITEMCODESSS',itemCodes);
+       console.log('onChangeSelectProductObject,',this.onChangeSelectProductObject);       
        
-       
-
    }
 
 

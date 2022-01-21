@@ -147,6 +147,7 @@
                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                             type="button"
                             [id]="'delete-button'+productDiscountList.id"
+                            (click)="deleteStoreProductDiscount(productDiscountList)"
                             >
                             <label
                                 class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-warn hover:bg-warn-700 mb-3"
@@ -170,7 +171,7 @@
                 [length]="storeDiscountPagination.length"
                 [pageIndex]="storeDiscountPagination.page"
                 [pageSize]="storeDiscountPagination.size"
-                [pageSizeOptions]="[1, 2, 5]"
+                [pageSizeOptions]="[5]"
                 [showFirstLastButtons]="true">
                 </mat-paginator>
             </div>
