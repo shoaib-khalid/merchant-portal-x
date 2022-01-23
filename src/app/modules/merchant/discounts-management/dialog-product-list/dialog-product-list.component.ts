@@ -79,7 +79,6 @@ export class DialogProductListComponent implements OnInit {
 
           this.categoriesListing$ = categories;
           this.filteredCategories = categories;
-          console.log('categories');
 
           // Mark for check
           this._changeDetectorRef.markForCheck();
@@ -94,7 +93,6 @@ export class DialogProductListComponent implements OnInit {
       .pipe(takeUntil(this._unsubscribeAll))    
       .subscribe((response)=>{
           this._products = response;
-          console.log('hihihi',response);
 
           // remove object for array of object where item.isPackage !== true
           let _filteredProductsOptions = response.filter(item => item.isPackage !== true );
@@ -239,35 +237,8 @@ export class DialogProductListComponent implements OnInit {
             const itemCodesArr = this.onChangeSelectProductObject.map( el=> el.productInventories.map(el2=>el2.itemCode));//[[a,c,g],[d,e],[f]]
             const itemCodes = Array.prototype.concat.apply([],itemCodesArr);//[a,c,g,d,e,f]
 
-            itemCodes
-            .forEach((catId)=>{
-    
-                    let payloadProductDiscount ={
-                        storeDiscountId:this.discountId,
-                        itemCode:catId,
-                        calculationType:'PERCENT',
-                        discountAmount:0.00
-                    }                
-    
-                    this._discountProductService.createProductDiscount(this.discountId,payloadProductDiscount).
-                    subscribe((response) => {
-    
-                        // this.storeDiscountProduct.push(response["data"]);
-                        // this._discountProductService.getByQueryDiscountsProduct(this.discountId, 0, 5);
+            this.addAndReloadProductDiscount(itemCodes,this.discountId);
 
-
-                        // Mark for check
-                        this._changeDetectorRef.markForCheck();
-                    }
-                    , error => {
-                        console.log(error);
-                        this.displayMessage('Cannot be add','The selected product already exist','Ok',false);
-
-                    }
-                    )
-                }
-            )
-     
             //clear the array after we post the data
             this.onChangeSelectProductValue.length = 0;
             this.onChangeSelectProductObject.length = 0;
@@ -277,6 +248,7 @@ export class DialogProductListComponent implements OnInit {
 
 
         }
+        this._changeDetectorRef.markForCheck();
 
    }
 
@@ -307,9 +279,7 @@ export class DialogProductListComponent implements OnInit {
 
     // Edit discount product
     editStoreProductDiscount(productDiscount){
-    
-        console.log('EDIT::::',productDiscount);
-        
+            
         let payloadProductDiscount = {
             
                 id: productDiscount.id,
@@ -339,7 +309,6 @@ export class DialogProductListComponent implements OnInit {
 
    onChangeSelectProduct(product, change: MatCheckboxChange): void
    {
-       console.log(change);
        if ( change.checked )
        {
            this.onChangeSelectProductValue.push(product.id);
@@ -354,9 +323,7 @@ export class DialogProductListComponent implements OnInit {
 
            this._changeDetectorRef.markForCheck();
            
-       }
-       console.log('CHECK BEFORE SEND TO BACKEND',this.onChangeSelectProductValue);
-       console.log('onChangeSelectProductObject,',this.onChangeSelectProductObject);       
+       }      
        
    }
 
@@ -377,6 +344,39 @@ export class DialogProductListComponent implements OnInit {
 
        return confirmation;
 
+   }
+
+   async addAndReloadProductDiscount(itemCodes,discountId){
+       await this.insertProductDiscount(itemCodes,discountId);
+       
+       setTimeout(() => {
+        return this._discountProductService.getByQueryDiscountsProduct(this.discountId, 0, 5).subscribe();
+        }, 1000);
+
+        return;
+   }
+
+   async insertProductDiscount(itemCodes,discountId){
+        itemCodes
+        .forEach((itemCode)=>{
+
+                let payloadProductDiscount ={
+                    storeDiscountId:discountId,
+                    itemCode:itemCode,
+                    calculationType:'PERCENT',
+                    discountAmount:0.00
+                }                
+
+                this._discountProductService.createProductDiscount(this.discountId,payloadProductDiscount).
+                subscribe((response) => {}
+                , error => {
+                    this.displayMessage('Cannot be add','The selected product already exist','Ok',false);
+
+                }
+                )
+            }
+        ) 
+        return;
    }
 
 
