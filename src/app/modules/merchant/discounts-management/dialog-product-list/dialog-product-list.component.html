@@ -111,18 +111,19 @@
                     <td>{{ productDiscountList.productInventory.product.name + " ( "+productDiscountList.productInventory.sku +  " ) " }}</td>
                     <td>{{productDiscountList.productInventory.price}}</td>
                     <td>
+                        <div *ngIf=!editModeDiscountProduct[i]>{{productDiscountList.discountAmount}}</div>
                      
+                        <div *ngIf=editModeDiscountProduct[i]>
                             <mat-form-field>
                                 <input
                                     type="number"
                                     matInput
                                     [value]="productDiscountList.discountAmount"
-                                    (input)="inputEditDiscountAmount($event)"
-                                    [disabled]="!editModeDiscountProduct[i]"
+                                    (input)="inputEditDiscountAmount(i,$event)"
 
                                 >
                             </mat-form-field>
-                        
+                        </div>
                       
                     </td>
                     <td>

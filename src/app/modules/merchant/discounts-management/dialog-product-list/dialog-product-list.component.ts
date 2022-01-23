@@ -265,10 +265,7 @@ export class DialogProductListComponent implements OnInit {
             {
                 // Delete the store discount product from server //param (main discount id, product discount id)
                 this._discountProductService.deleteDiscountProduct(this.discountId, productDiscount.id).subscribe(() => {
-                
-                    // this.storeDiscountProduct.splice(this.storeDiscountProduct.findIndex(x => x.id === productDiscount.id), 1);
-   
-                
+                                
                     this._changeDetectorRef.markForCheck();
 
                 });
@@ -301,8 +298,8 @@ export class DialogProductListComponent implements OnInit {
         
     }
 
-    inputEditDiscountAmount(event){
-
+    inputEditDiscountAmount(index,event){
+        
         this.editDiscountAmount =event.target.value;
       
     }

@@ -215,17 +215,27 @@ export class DiscountsProductService
                 map((updatedDiscount) => {
 
                     // // Find the index of the updated discount
-                    // const index = discounts.findIndex(item => item.id === discountId);
+                    const index = discounts.findIndex(el => el.id === body.id);
 
                     // // Update the discount
-                    // discounts[index] = { ...discounts[index], ...updatedDiscount["data"]};
+                    discounts[index] = { ...discounts[index], ...updatedDiscount["data"]};
 
                     // // Update the discounts
-                    // this._discountsProduct.next(discounts);
+                    this._discountsProduct.next(discounts);
 
                     // Return the updated discount
                     return updatedDiscount["data"];
-                })
+                }),
+                switchMap(updatedDiscount => this.discount$.pipe(
+                    take(1),
+                    filter(el => el && el.id === body.id),
+                    tap(() => {
+
+                        this._discountProduct.next(updatedDiscount["data"]);
+
+                        return updatedDiscount["data"];
+                    })
+                ))
             ))
         );
     }
