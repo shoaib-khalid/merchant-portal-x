@@ -9,13 +9,14 @@ import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Discount, DiscountPagination, StoreDiscountTierList } from 'app/modules/merchant/discounts-management/list/discounts.types';
 import { DiscountsService } from 'app/modules/merchant/discounts-management/list/discounts.service';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { CreateDiscountProductComponent } from '../create-product-discount/create-product-discount.component';
 import { Product, ProductCategory, ProductInventory, ProductPagination } from 'app/core/product/inventory.types';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { DiscountsProductService } from './discountsproduct.service';
 import { ApiResponseModel, StoreDiscountProduct } from './discountsproduct.types';
 import { DialogProductListComponent } from '../dialog-product-list/dialog-product-list.component';
+import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dialog/dialog.component';
 
 @Component({
     selector       : 'discounts-product-list',
@@ -98,6 +99,9 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     discountName: string;
+
+    checkdate = false;
+    message: string = "";
 
     /**
      * Constructor
@@ -410,18 +414,8 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
                         if (error.status === 417) {
                             // Open the confirmation dialog
-                            const confirmation = this._fuseConfirmationService.open({
-                                title  : 'Discount date overlap',
-                                message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
-                                actions: {
-                                    confirm: {
-                                        label: 'Ok'
-                                    },
-                                    cancel : {
-                                        show : false,
-                                    }
-                                }
-                            });
+                            this.displayMessage('Discount date overlap','Your discount date range entered overlapping with existing discount date! Please change your date range','Ok',false);
+
                         }
 
                 });
@@ -432,50 +426,29 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     updateSelectedDiscount(): void
     {
 
-        // update or create when centering the details category or item
+        this.checkDate();
+        if(this.checkdate === true){
 
-        // since the storediscounttier id exist meaning that we just need to update it
-        if (this.storeDiscountTierId !== null){
-            this.updateSelectedDiscountTier(this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]);                         //since the discount tier we only have 1, so just get the form aarray from index 0
-        } else {
-            //there are two condition inside here , if there is no storeDiscountTierId, need to handle case either the user key all the values in form or leaving it empty         
-            if(this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]['controls']['startTotalSalesAmount'].value !== null &&
-                this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]['controls']['discountAmount'].value !== null &&
-                this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]['controls']['calculationType'].value !==null
-            ){
-           
-                this.insertTierToDiscount(this.selectedDiscountForm.get('storeDiscountTierList')['controls'][0]);
+            // Update the  main discount on the server
+            this._discountService.updateDiscount(this.selectedDiscountForm.value.id, this.selectedDiscountForm.value).subscribe(() => {
+                // Show a success message
+                this.showFlashMessage('success');
+            }, error => {
+                console.log(error);
 
-            }else{
-        
-            (this.selectedDiscountForm.get('storeDiscountTierList') as FormArray).clear();                          //SET AS ARRAY(0)
-            }
-        }
-       
-        // Update the  main discount on the server
-        this._discountService.updateDiscount(this.selectedDiscountForm.value.id, this.selectedDiscountForm.value).subscribe(() => {
-            // Show a success message
-            this.showFlashMessage('success');
-        }, error => {
-            console.log(error);
+                    if (error.status === 417) {
+                        // Open the confirmation dialog
+                        this.displayMessage('Discount date overlap','Your discount date range entered overlapping with existing discount date! Please change your date range','Ok',false);
 
-                if (error.status === 417) {
-                    // Open the confirmation dialog
-                    const confirmation = this._fuseConfirmationService.open({
-                        title  : 'Discount date overlap',
-                        message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
-                        actions: {
-                            confirm: {
-                                label: 'Ok'
-                            },
-                            cancel : {
-                                show : false,
-                            }
-                        }
-                    });
+                    }
                 }
-            }
-        );
+            );
+
+        } else{
+
+            this.displayMessage('Date/time range incorrect','Please change your date range or time','Ok',false);
+
+        }
 
  
     }
@@ -489,31 +462,13 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         //check if the there is product disocunt , if yes just show pop up to delete the product level first
         if(this.storeDiscountProduct['content'].length>0){
             
-            const confirmation = this._fuseConfirmationService.open({
-                title  : 'Cannot delete',
-                message: 'Delete the selected product first before delete this.',
-                actions: {
-                    confirm: {
-                        label: 'Ok'
-                    },
-                    cancel : {
-                        show : false,
-                    }
-                }
-            });
+            this.displayMessage('Cannot delete','Delete the selected product first before delete this.','Ok',false);
 
         } else{
 
                     // Open the confirmation dialog
-        const confirmation = this._fuseConfirmationService.open({
-            title  : 'Delete discount',
-            message: 'Are you sure you want to remove this discount? This action cannot be undone!',
-            actions: {
-                confirm: {
-                    label: 'Delete'
-                }
-            }
-        });
+            const confirmation = this.displayMessage('Delete discount','Are you sure you want to remove this discount? This action cannot be undone!','Delete',true);
+           
 
         // Subscribe to the confirmation dialog closed action
         confirmation.afterClosed().subscribe((result) => {
@@ -542,79 +497,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
     }
 
-    insertTierToDiscount(discountTier){
-
-         // Create the discount
-         this._discountService.createDiscountTier(this.selectedDiscount.id,discountTier.value).subscribe((response) => {
-            
-            this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
-
-            // since backend give full discount tier list .. (not the only one that have been created only)
-            this.storeDiscountTierList.clear();
-
-            response["data"].forEach(item => {
-                this.storeDiscountTierList.push(this._formBuilder.group(item));
-            });
-
-
-
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
-        }, error => {
-            console.log(error);
-
-                if (error.status === 417) {
-                    // Open the confirmation dialog
-                    const confirmation = this._fuseConfirmationService.open({
-                        title  : 'Minimum subtotal overlap',
-                        message: 'Your minimum subtotal entered overlapping with existing amount! Please change your minimum subtotal',
-                        actions: {
-                            confirm: {
-                                label: 'Ok'
-                            },
-                            cancel : {
-                                show : false,
-                            }
-                        }
-                    });
-                }
-            }
-        );
-    }
-
-    updateSelectedDiscountTier(discountTier){
-
-        // Update the discount on the server
-        this._discountService.updateDiscountTier(discountTier.value.storeDiscountId, discountTier.value).subscribe(() => {
-            // Show a success message
-            this.showFlashMessage('success');
-        }, error => {
-            console.log(error);
-
-                if (error.status === 417) {
-                    // Open the confirmation dialog
-                    const confirmation = this._fuseConfirmationService.open({
-                        title  : 'Minimum subtotal overlap',
-                        message: 'Your minimum subtotal entered overlapping with existing amount! Please change your minimum subtotal',
-                        actions: {
-                            confirm: {
-                                label: 'Ok'
-                            },
-                            cancel : {
-                                show : false,
-                            }
-                        }
-                    });
-                }
-            }
-        );
-
-    
-    }
-
-    /**
-     * Show flash message
-     */
     showFlashMessage(type: 'success' | 'error'): void
     {
         // Show the message
@@ -658,10 +540,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         }
     }
 
-
-    //********* 
-    //CODE BARU
-    //********* 
     dialogProductList(): void
     {
         //we pass data in order to use the value in DialogProductListComponent
@@ -675,5 +553,40 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         });
      
     }
+
+    checkDate(){
+               
+           if (this.selectedDiscountForm.get('startDate').value < this.selectedDiscountForm.get('endDate').value){
+               this.checkdate = true;
+           } else if (this.selectedDiscountForm.get('startDate').value == this.selectedDiscountForm.get('endDate').value) {
+               if (this.selectedDiscountForm.get('startTime').value < this.selectedDiscountForm.get('endTime').value) {
+                   this.checkdate = true;
+               } else {
+                   this.checkdate = false;
+                  
+               }
+           }
+           
+      return this.checkdate; 
+    } 
+    
+    displayMessage(getTitle:string,getMessage:string,getLabelConfirm:string,showCancel:boolean):MatDialogRef<FuseConfirmationDialogComponent,any>{
+
+        const confirmation = this._fuseConfirmationService.open({
+            title  : getTitle,
+            message: getMessage,
+            actions: {
+                confirm: {
+                    label: getLabelConfirm
+                },
+                cancel : {
+                    show : showCancel,
+                }
+            }
+        });
+
+       return confirmation;
+
+   }
 
 }

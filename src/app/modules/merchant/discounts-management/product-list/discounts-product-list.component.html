@@ -197,7 +197,6 @@
                                             matInput 
                                             type="date" 
                                             [formControlName]="'startDate'"
-                                            (change)="checkDate()"
                                             [min]="mindate"
                                         >
                                         </mat-form-field>
@@ -231,7 +230,6 @@
                                                         matInput 
                                                         type="date" 
                                                         [formControlName]="'endDate'"
-                                                        (change)="checkDate()"
                                                         [min]="mindate"
                                                     >
                                                 </mat-form-field>
@@ -277,6 +275,12 @@
                                                 class="text-red-500"
                                                 [svgIcon]="'heroicons_outline:x'"></mat-icon>
                                             <span class="ml-2">An error occurred, try again!</span>
+                                        </ng-container>
+                                        <ng-container *ngIf="message !== ''" class="mr-3 text-warn">
+                                            <mat-icon
+                                            class="text-red-500"
+                                            [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                                            <span class="ml-2">{{message}}</span>
                                         </ng-container>
                                     </div>
                                     <button

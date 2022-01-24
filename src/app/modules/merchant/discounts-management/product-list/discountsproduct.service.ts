@@ -248,14 +248,14 @@ export class DiscountsProductService
             switchMap(discounts => this._httpClient.delete(this.productService$ +'/stores/'+this.storeId$+'/discount/'+discountId + '/product/'+discountProductId, this.httpOptions$).pipe(
                 map((status: number) => {
                     
-                    // Find the index of the deleted discount
-                    const index = discounts.findIndex(item => item.id === discountProductId);
+                    // // Find the index of the deleted discount
+                    // const index = discounts.findIndex(item => item.id === discountProductId);
 
-                    // Delete the discount
-                    discounts.splice(index, 1);
+                    // // Delete the discount
+                    // discounts.splice(index, 1);
 
-                    // Update the discounts
-                    this._discountsProduct.next(discounts);
+                    // // Update the discounts
+                    // this._discountsProduct.next(discounts);
 
                     let isDeleted:boolean = false;
                     if (status === 200) {

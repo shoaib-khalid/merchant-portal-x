@@ -1,61 +1,44 @@
-<div class="flex flex-col max-w-440 md:min-w-160 -m-6">
+<div class="flex flex-row max-w-440 md:min-w-160 -m-6">
     
     <div class="flex flex-col flex-auto p-6 sm:p-8 overflow-y-auto h-140">
         
         <div class="border border-solid border-gray-300 rounded my-2 mx-2 py-3 px-2">
             <div class="relative flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between px-6 md:px-8 ">
-            <!-- 
-                <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-40">
-                                                        
-                    <input type="text"
-                        placeholder="Category"
-                        aria-label="Category"
-                        matInput
-                        (input)="filterProductsOrCategories('CATEGORY',$event)"
-                        [value]="inputSearchCategory"
-                        (keydown)="filterProductsOrCategoriesInputKeyDown('CATEGORY',$event)"
-                        [matAutocomplete]="auto">
+                <div class="text-lg font-extrabold">Product Search</div>
+                <div class="flex flex-shrink-0 items-center mt-6 sm:mt-0 sm:ml-4">
+                    <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-40 px-2">
+                        <mat-select
+                            class="w-full"
+                            placeholder="Category"
+                            (selectionChange)="onSelectCategoryList($event)">
+                            <div>
+                                <mat-option [value]="">All Categories</mat-option>
+                                <mat-option *ngFor="let listing of filteredCategories;" [value]="listing.id">
+                                    {{listing.name}}
+                                </mat-option>
+                            </div>
+                        </mat-select>
+                    </mat-form-field>
 
-                    <mat-autocomplete #auto="matAutocomplete" [displayWith]="getCategoryName.bind(this)">
-                        <mat-option *ngFor="let listing of filteredCategories;" [value]="listing.id" (onSelectionChange)="onSelectCategoryList(listing.id)">
-                            {{listing.name}}
-                        </mat-option>
-                    </mat-autocomplete>
-
-                </mat-form-field> -->
-
-                <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-40">
-                    <mat-select
-                        class="w-full"
-                        placeholder="Category"
-                        (selectionChange)="onSelectCategoryList($event)">
-                        <div>
-                            <mat-option [value]="">All Categories</mat-option>
-                            <mat-option *ngFor="let listing of filteredCategories;" [value]="listing.id">
-                                {{listing.name}}
-                            </mat-option>
-                        </div>
-                    </mat-select>
-                </mat-form-field>
-
-                <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-40">
-                    <mat-icon
-                        class="icon-size-5"
-                        matPrefix
-                        [svgIcon]="'heroicons_solid:search'"></mat-icon>
-                    <input
-                        matInput
-                        [autocomplete]="'off'"
-                        [placeholder]="'Products'"
-                        (input) = "inputSearchProduct($event)">
-                </mat-form-field>
+                    <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-40">
+                        <mat-icon
+                            class="icon-size-5"
+                            matPrefix
+                            [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                        <input
+                            matInput
+                            [autocomplete]="'off'"
+                            [placeholder]="'Products'"
+                            (input) = "inputSearchProduct($event)">
+                    </mat-form-field>
+                </div>
             </div>
             <!-- <div class="font-extrabold tracking-tight">Product Listing</div> -->
             <table *ngIf="(products$ | async) as products" class="table-fixed my-4 mr-2 w-full sm:flex-row">
                 <tr class="border-b border-gray-300 pt-2 pl-2">
-                    <th>Select</th>
-                    <th>Product Name</th>
-                    <th>Original Price</th>
+                    <th class="text-left">Select</th>
+                    <th class="text-left">Product Name</th>
+                    <th class="text-left"> Original Price</th>
                 </tr>
                 <tr class="border-b border-gray-300 pt-2 pl-2" *ngFor="let productList of products;let i =index;" >
                     <td>
@@ -100,11 +83,12 @@
         </div>
 
         <div class="border border-solid border-gray-300 rounded my-2 mx-2 py-3 px-3">
+            <div class="text-lg font-extrabold mx-4">Selected Product</div>
             <table *ngIf="(storeDiscountProduct$ | async) as storeDiscountProducts" class="table-fixed my-4 mr-2 w-full sm:flex-row">
                 <tr class="border-b border-gray-300 pt-2 pl-2">
-                    <th>Product Name (SKU)</th>
-                    <th>Original Price</th>
-                    <th>Discount%</th>
+                    <th class="text-left">Product Name (SKU)</th>
+                    <th class="text-left">Original Price</th>
+                    <th class="text-left">Discount%</th>
                     <th>Action</th>
                 </tr>
                 <tr class="border-b border-gray-300 pt-2 pl-2" *ngFor="let productDiscountList of storeDiscountProducts;let i =index;" >
@@ -209,6 +193,6 @@
                 </button>
             </div>
         </div>
-      
+    </div>  
   
 </div>

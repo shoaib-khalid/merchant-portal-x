@@ -269,6 +269,11 @@ export class DialogProductListComponent implements OnInit {
                     this._changeDetectorRef.markForCheck();
 
                 });
+
+                 
+                setTimeout(() => {
+                    return this._discountProductService.getByQueryDiscountsProduct(this.discountId, 0, 5).subscribe();
+                    }, 1000);
             }
         });
     
@@ -276,7 +281,12 @@ export class DialogProductListComponent implements OnInit {
 
     // Edit discount product
     editStoreProductDiscount(productDiscount){
-            
+        
+        if(this.editDiscountAmount>100){
+            const confirmation = this.displayMessage('Cannot more than 100','Please change the discount amount','Ok',false);
+
+        } 
+        else{
         let payloadProductDiscount = {
             
                 id: productDiscount.id,
@@ -295,6 +305,7 @@ export class DialogProductListComponent implements OnInit {
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
                 });
+        }
         
     }
 
