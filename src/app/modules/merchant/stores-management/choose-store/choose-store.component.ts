@@ -96,6 +96,9 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((stores: Store[]) => {
                 this.filteredStores = stores;
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
             });
 
         // Get the store
@@ -103,6 +106,8 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((store: Store) => {
                 // console.log("cini: ",store)
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
             });
 
         // Get the pagination
@@ -164,6 +169,8 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
                 })
             )
             .subscribe();
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
 
     /**
@@ -281,7 +288,10 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
                 this._storesService.delete(storeId).subscribe(() => {
                     
                     // empty out storeId
-                    this.storeId = null;
+                    this.storeId = '';
+
+                    // set selected store to null anyway
+                    this._storesService.store = null;
                     
                     // Mark for check
                     this._changeDetectorRef.markForCheck();

@@ -176,8 +176,8 @@ export class EditStoreComponent implements OnInit
             {
                 id         : 'delivery',
                 icon       : 'mat_outline:delivery_dining',
-                title      : 'Delivery',
-                description: 'Manage your subscription plan, payment method and billing information'
+                title      : 'Delivery Details',
+                description: 'Manage your delivery type details and information'
             },
             {
                 id         : 'timing',
@@ -602,7 +602,6 @@ export class EditStoreComponent implements OnInit
                 // Update Store Assets
                 // ---------------------------
 
-                let _assets = {};
                 const formData = new FormData();
                 this.files.forEach(item =>{
                     if (item.selectedFiles !== null){
@@ -613,7 +612,6 @@ export class EditStoreComponent implements OnInit
 
                     if (item.toDelete === true && item.type === 'logo'){
                         this._storesService.deleteAssetsLogo(this.storeId).subscribe(() => {
-                            if (_assets) {
                                 this._storesService.postAssets(this.storeId, formData, "logo", storeAssetFiles).subscribe(
                                   (event: any) => {
                                     if (event instanceof HttpResponse) {
@@ -626,25 +624,22 @@ export class EditStoreComponent implements OnInit
                                   (err: any) => {
                                       console.error('Could not upload the file');
                                   });
-                            }
                         });
                     }
                     if (item.toDelete === true && item.type === 'banner'){
                         this._storesService.deleteAssetsBanner(this.storeId).subscribe(() => {
-                            if (_assets) {
-                                this._storesService.postAssets(this.storeId, formData, "banner", storeAssetFiles).subscribe(
-                                  (event: any) => {
-                                    if (event instanceof HttpResponse) {
-                                        console.log('Uploaded the file successfully');
+                            this._storesService.postAssets(this.storeId, formData, "banner", storeAssetFiles).subscribe(
+                                (event: any) => {
+                                if (event instanceof HttpResponse) {
+                                    console.log('Uploaded the file successfully');
 
-                                        // Mark for check
-                                        this._changeDetectorRef.markForCheck();
-                                    }
-                                  },
-                                  (err: any) => {
-                                      console.error('Could not upload the file');
-                                  });
-                            }
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                }
+                                },
+                                (err: any) => {
+                                    console.error('Could not upload the file');
+                                });
                         });
                     }
                 });

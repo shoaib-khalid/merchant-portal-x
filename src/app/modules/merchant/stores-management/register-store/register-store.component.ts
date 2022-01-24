@@ -13,6 +13,7 @@ import { debounce } from 'lodash';
 import { HttpResponse } from '@angular/common/http';
 import { ChooseVerticalService } from '../choose-vertical/choose-vertical.service';
 import { FuseAlertType } from '@fuse/components/alert';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 @Component({
     selector     : 'register-store-page',
@@ -69,7 +70,7 @@ export class RegisterStoreComponent implements OnInit
     timeAlert: any = [];
     disableForm: boolean = false;
 
-
+    verticalStepperForm: FormGroup;
 
     // display error
     alert: { type: FuseAlertType; message: string } = {
@@ -89,7 +90,8 @@ export class RegisterStoreComponent implements OnInit
         private _localeService: LocaleService,
         private _chooseVerticalService: ChooseVerticalService,
         private _router: Router,
-        private _route: ActivatedRoute
+        private _route: ActivatedRoute,
+        private _fuseConfirmationService: FuseConfirmationService,
     )
     {
         this.checkExistingURL = debounce(this.checkExistingURL, 300);
@@ -114,42 +116,80 @@ export class RegisterStoreComponent implements OnInit
      */
     ngOnInit(): void
     {
-        // Create the support form
+        // Vertical stepper form
         this.createStoreForm = this._formBuilder.group({
-            // Main Store Section
-            name               : ['', Validators.required],
-            city               : ['', Validators.required],
-            address            : ['', Validators.required],
-            postcode           : ['', [Validators.required, Validators.minLength(5), Validators.maxLength(10), RegisterStoreValidationService.postcodeValidator]],
-            storeDescription   : ['', [Validators.required, Validators.maxLength(100)]],
-            email              : ['', [Validators.required, Validators.email]],
-            clientId           : [''],
-            subdomain             : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
-            regionCountryId: ['', Validators.required],
-            regionCountryStateId: ['', Validators.required],
-            phoneNumber        : ['', RegisterStoreValidationService.phonenumberValidator],
+            step1: this._formBuilder.group({
+                name                : ['', Validators.required],
+                subdomain           : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
+                address             : ['', Validators.required],
+                storeDescription    : ['', [Validators.required, Validators.maxLength(100)]],
+                city                : ['', Validators.required],
+                regionCountryStateId: ['', Validators.required],
+                email               : ['', [Validators.required, Validators.email]],
+                phoneNumber         : ['', RegisterStoreValidationService.phonenumberValidator],
+                postcode            : ['', [Validators.required, Validators.minLength(5), Validators.maxLength(10), RegisterStoreValidationService.postcodeValidator]],
+                regionCountryId     : ['', Validators.required],
+                paymentType         : ['', Validators.required],
+            }),
+            step3: this._formBuilder.group({
+                // Delivery Provider
+                deliveryType             : ['', Validators.required],
+                // Delivery Partner
+                deliveryPartner          : ['', Validators.required],
+                // Allowed Self Delivery States
+                allowedSelfDeliveryStates: this._formBuilder.array([]),
+                // Else
+                allowScheduledDelivery   : [false],
+                allowStorePickup         : [false],
+
+                pushNotifications: ['everything', Validators.required]
+            }),
+            step4: this._formBuilder.group({
+                // Store Timing
+                storeTiming: this._formBuilder.array([]),
+                isSnooze   : [false],
+            }),
+            clientId                : [''],
             serviceChargesPercentage: [0],
-            verticalCode: [''],
-            paymentType        : ['', Validators.required],
-            
-            // Store Timing
-            storeTiming: this._formBuilder.array([]),
-
-            // Allowed Self Delivery States
-            allowedSelfDeliveryStates: this._formBuilder.array([]),
-
-            // Delivery Provider
-            deliveryType       : ['', Validators.required],
-
-            // Delivery Partner
-            deliveryPartner      : ['', Validators.required],
-            
-            // Else
-            allowScheduledDelivery : [false],
-            allowStorePickup : [false],
-            isBranch: [false],
-            isSnooze: [false],
+            verticalCode            : [''],
+            isBranch                : [false],
         });
+        // Create the support form
+        // this.createStoreForm = this._formBuilder.group({
+        //     // Main Store Section
+        //     // name               : ['', Validators.required],
+        //     // city               : ['', Validators.required],
+        //     // address            : ['', Validators.required],
+        //     // postcode           : ['', [Validators.required, Validators.minLength(5), Validators.maxLength(10), RegisterStoreValidationService.postcodeValidator]],
+        //     // storeDescription   : ['', [Validators.required, Validators.maxLength(100)]],
+        //     // email              : ['', [Validators.required, Validators.email]],
+        //     // clientId           : [''],
+        //     // subdomain             : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
+        //     // regionCountryId: ['', Validators.required],
+        //     // regionCountryStateId: ['', Validators.required],
+        //     // phoneNumber        : ['', RegisterStoreValidationService.phonenumberValidator],
+        //     // serviceChargesPercentage: [0],
+        //     // verticalCode: [''],
+        //     // paymentType        : ['', Validators.required],
+            
+        //     // Store Timing
+        //     // storeTiming: this._formBuilder.array([]),
+
+        //     // Allowed Self Delivery States
+        //     // allowedSelfDeliveryStates: this._formBuilder.array([]),
+
+        //     // Delivery Provider
+        //     // deliveryType       : ['', Validators.required],
+
+        //     // Delivery Partner
+        //     // deliveryPartner      : ['', Validators.required],
+            
+        //     // Else
+        //     // allowScheduledDelivery : [false],
+        //     // allowStorePickup : [false],
+        //     // isBranch: [false],
+        //     // isSnooze: [false],
+        // });
 
         // Reason why we put everyting under get vertical code by paramMap is because
         // we need the verticalCode before we need to query getStoreDeliveryProvider which require verticalCode
@@ -207,7 +247,7 @@ export class RegisterStoreComponent implements OnInit
                 });
     
                 // country (using form builder variable)
-                this.createStoreForm.get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
+                this.createStoreForm.get('step1').get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
         
                 // -------------------------------------
                 // Delivery Partner
@@ -290,9 +330,9 @@ export class RegisterStoreComponent implements OnInit
         ];
 
         this._storeTiming.forEach(item => {
-            this.storeTiming = this.createStoreForm.get('storeTiming') as FormArray;
+            this.storeTiming = this.createStoreForm.get('step4').get('storeTiming') as FormArray;
             this.storeTiming.push(this._formBuilder.group(item));
-        });
+        });        
         
         // -------------------------------------
         // store allowed self delivery states
@@ -303,7 +343,7 @@ export class RegisterStoreComponent implements OnInit
         ];
         
         this._allowedSelfDeliveryStates.forEach(item => {
-            this.allowedSelfDeliveryStates = this.createStoreForm.get('allowedSelfDeliveryStates') as FormArray;
+            this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
             this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
         });
         
@@ -369,7 +409,6 @@ export class RegisterStoreComponent implements OnInit
         // set required value that does not appear in register-store.component.html
         let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
         this.createStoreForm.get('clientId').patchValue(clientId);
-
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -379,36 +418,37 @@ export class RegisterStoreComponent implements OnInit
     /**
      * Clear the form
      */
-    clearForm(): void
-    {
-        // Reset the form
-        this.supportNgForm.resetForm();
-    }
+    // clearForm(): void
+    // {
+    //     // Reset the form
+    //     this.supportNgForm.resetForm();
+    // }
 
     /**
      * Send the form
      */
     sendForm(): void
-    {
+    {     
+        
         // Do nothing if the form is invalid
-        let BreakException = {};
-        try {
-            Object.keys(this.createStoreForm.controls).forEach(key => {
-                const controlErrors: ValidationErrors = this.createStoreForm.get(key).errors;
-                if (controlErrors != null) {
-                    Object.keys(controlErrors).forEach(keyError => {
-                        this.alert = {
-                            type   : 'error',
-                            message: 'Field ' + key + ' error: ' + keyError
-                        }
-                        this.isDisplayStatus = true;
-                        throw BreakException;
-                    });
-                }
-            });
-        } catch (error) {
-            return;
-        }
+        // let BreakException = {};
+        // try {
+        //     Object.keys(this.createStoreForm.controls).forEach(key => {
+        //         const controlErrors: ValidationErrors = this.createStoreForm.get(key).errors;
+        //         if (controlErrors != null) {
+        //             Object.keys(controlErrors).forEach(keyError => {
+        //                 this.alert = {
+        //                     type   : 'error',
+        //                     message: 'Field ' + key + ' error: ' + keyError
+        //                 }
+        //                 this.isDisplayStatus = true;
+        //                 throw BreakException;
+        //             });
+        //         }
+        //     });
+        // } catch (error) {
+        //     return;
+        // }
     
         // if (this.isDisplayStatus === true){
         //   return;
@@ -418,15 +458,29 @@ export class RegisterStoreComponent implements OnInit
         this.isDisplayStatus = false;
 
         // this will remove the item from the object
-        const { allowedSelfDeliveryStates, allowScheduledDelivery, allowStorePickup, 
-                deliveryType, deliveryPartner, storeTiming, subdomain
-                ,...createStoreBody}  = this.createStoreForm.value;
+        // const { allowedSelfDeliveryStates, allowScheduledDelivery, allowStorePickup, 
+        //         deliveryType, deliveryPartner, storeTiming, subdomain
+        //         ,...createStoreBody}  = this.createStoreForm.value;
+
+
+        const { subdomain ,...createStoreBody} = this.createStoreForm.get('step1').value; 
+        const storeTimingBody = this.createStoreForm.get('step4').get('storeTiming').value;
+        const deliveryType = this.createStoreForm.get('step3').get('deliveryType').value;
+        const allowStorePickup = this.createStoreForm.get('step3').get('allowStorePickup').value;
+        const allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates').value;
+        const deliveryPartner = this.createStoreForm.get('step3').get('deliveryPartner').value;        
 
         // add domain when sending to backend.. at frontend form call it subdomain
-        createStoreBody["domain"] = subdomain + this.domainName;
+        createStoreBody["domain"] =  this.createStoreForm.get('step1').get('subdomain').value + this.domainName;
+        createStoreBody["clientId"] = this.createStoreForm.get('clientId').value;
+        createStoreBody["isBranch"] = this.createStoreForm.get('isBranch').value;
+        createStoreBody["isSnooze"] = this.createStoreForm.get('step4').get('isSnooze').value;
+        createStoreBody["serviceChargesPercentage"] = this.createStoreForm.get('serviceChargesPercentage').value;
+        createStoreBody["verticalCode"] = this.createStoreForm.get('verticalCode').value;
             
         // Disable the form
         this.createStoreForm.disable();
+
 
         // ---------------------------
         // Register Store Section
@@ -436,19 +490,19 @@ export class RegisterStoreComponent implements OnInit
             .subscribe((response) => {
 
                 this.storeId = response.data.id;
+                                  
 
                 // ---------------------------
                 // Create Store Timing
-                // ---------------------------
-
-                storeTiming.forEach(item => {
+                // ---------------------------                
+                
+                storeTimingBody.forEach(item => {
                     let { isOpen, isBreakTime,  ...filteredItem } = item;
                     this._storesService.postTiming(this.storeId, filteredItem)
                         .subscribe((response)=>{});
                 });
 
                 // manual set store timing to new created store at service
-                console.log("this._storeTiming", this._storeTiming);
                 this._storesService.setTimingToStore(this.storeId, this._storeTiming).subscribe(()=>{
         
                 });
@@ -457,32 +511,73 @@ export class RegisterStoreComponent implements OnInit
                 // Create Store Assets
                 // ---------------------------
 
-                let _assets = {};
-                const formData = new FormData();
                 this.files.forEach(item =>{
+                    
+                    let formData = new FormData();
                     if (item.selectedFiles !== null){
                         formData.append(item.type,item.selectedFiles[0])
                     }
-        
+
+                    let storeAssetFiles = item.fileSource;
+
                     if (item.toDelete === true && item.type === 'logo'){
-                        this._storesService.deleteAssetsLogo(this.storeId).subscribe();
+                        this._storesService.deleteAssetsLogo(this.storeId).subscribe(() => {
+                            // console.log("storeAssetFiles: ", "'"+storeAssetFiles+"'")
+                            if (storeAssetFiles && storeAssetFiles !== "") {
+                                this._storesService.postAssets(this.storeId, formData, "logo", storeAssetFiles).subscribe(
+                                    (event: any) => {
+                                    if (event instanceof HttpResponse) {
+                                        console.log('Uploaded the file successfully');
+        
+                                        // Mark for check
+                                        this._changeDetectorRef.markForCheck();
+                                    }
+                                    },
+                                    (err: any) => {
+                                        console.error('Could not upload the logo file');
+                                    });
+                            }
+                        });
                     }
-                    if (item.toDelete === true && item.type === 'banner'){
-                        this._storesService.deleteAssetsBanner(this.storeId).subscribe();
+                    if (item.toDelete === true && item.type === 'banner'){  
+                        this._storesService.deleteAssetsBanner(this.storeId).subscribe(() => {
+                            // console.log("storeAssetFiles 1: ", "'"+storeAssetFiles+"'")
+                            if (storeAssetFiles && storeAssetFiles !== ""){
+                                this._storesService.postAssets(this.storeId, formData, "banner", storeAssetFiles).subscribe(
+                                    (event: any) => {
+                                    if (event instanceof HttpResponse) {
+                                        console.log('Uploaded the file successfully');
+        
+                                        // Mark for check
+                                        this._changeDetectorRef.markForCheck();
+                                    }
+                                },
+                                (err: any) => {
+                                        console.error('Could not upload the banner file');
+                                    });
+                            }
+                        });
+                    }
+                    if (item.toDelete === true && item.type === 'bannerMobile'){
+                        this._storesService.deleteAssetsBannerMobile(this.storeId).subscribe(() => {
+                            // console.log("storeAssetFiles 2: ", "'"+storeAssetFiles+"'")
+                            if (storeAssetFiles && storeAssetFiles !== ""){
+                                this._storesService.postAssets(this.storeId, formData, "bannerMobile", storeAssetFiles).subscribe(
+                                    (event: any) => {
+                                    if (event instanceof HttpResponse) {
+                                        console.log('Uploaded the file successfully');
+        
+                                        // Mark for check
+                                        this._changeDetectorRef.markForCheck();
+                                    }
+                                    },
+                                    (err: any) => {
+                                        console.error('Could not upload the bannerMobile file');
+                                    });
+                            }
+                        });
                     }
                 });
-                
-                if (_assets) {
-                    this._storesService.postAssets(this.storeId, formData).subscribe(
-                      (event: any) => {
-                        if (event instanceof HttpResponse) {
-                          console.log('Uploaded the file successfully');
-                        }
-                      },
-                      (err: any) => {
-                          console.error('Could not upload the file', err);
-                      });
-                }
 
                 // ---------------------------
                 // Create Store Provider
@@ -529,7 +624,7 @@ export class RegisterStoreComponent implements OnInit
                     }
                 );
 
-                if (this.createStoreForm.get('deliveryType').value === "SELF") {
+                if (deliveryType === "SELF") {
 
                     // ---------------------------
                     // Create State Delivery Charges
@@ -550,55 +645,53 @@ export class RegisterStoreComponent implements OnInit
                     }
                 } 
 
-                if (this.createStoreForm.get('deliveryType').value === "ADHOC") {
+                if (deliveryType === "ADHOC") {
 
                     // ---------------------------
                     // Provision ADHOC Delivery Provider
                     // ---------------------------
 
-                    this._storesService.postStoreRegionCountryDeliveryProvider(this.storeId, this.createStoreForm.get('deliveryPartner').value)
+                    this._storesService.postStoreRegionCountryDeliveryProvider(this.storeId, deliveryPartner)
                         .subscribe((response) => {
                             
                         });
-
                 }
 
             },
-            (response) => {
-                // Re-enable the form
-                this.createStoreForm.enable();
-
-                // Reset the form
-                this.clearForm();
-
-                // Set the alert
-                this.alert = {
-                    type   : 'error',
-                    message: 'Something went wrong, please try again.'
-                };
-                
-            });
+        );
 
         // Show a success message (it can also be an error message)
-        // and remove it after 5 seconds
-        this.alert = {
-            type   : 'success',
-            message: 'Store Created'
-        };
-        this.isDisplayStatus = true;
+        const confirmation = this._fuseConfirmationService.open({
+            title  : 'Store Created',
+            message: 'Your have successfully create store',
+            icon: {
+                show: true,
+                name: "heroicons_outline:clipboard-check",
+                color: "success"
+            },
+            actions: {
+                confirm: {
+                    label: 'Ok',
+                    color: "primary",
+                },
+                cancel: {
+                    show: false,
+                },
+            }
+        });
 
         setTimeout(() => {
             this.isDisplayStatus = false;
 
             // Navigate to the confirmation required page
             this._router.navigateByUrl('/stores');
-        }, 3000);
+        }, 1000);
     }
 
     updateStates(countryId: string){
 
         // reset current regionCountryStateId
-        this.createStoreForm.get('regionCountryStateId').patchValue("");
+        this.createStoreForm.get('step1').get('regionCountryStateId').patchValue("");
 
         // Get states by country (using symplified backend)
         this._storesService.getStoreRegionCountryState(countryId).subscribe((response)=>{
@@ -613,14 +706,14 @@ export class RegisterStoreComponent implements OnInit
         let url = subdomain + this.domainName;
         let status = await this._storesService.getExistingURL(url);
         if (status === 409){
-            this.createStoreForm.get('subdomain').setErrors({domainAlreadyTaken: true});
+            this.createStoreForm.get('step1').get('subdomain').setErrors({domainAlreadyTaken: true});
         }
     }
     
     async checkExistingName(name:string){
         let status = await this._storesService.getExistingName(name);
         if (status ===409){
-            this.createStoreForm.get('name').setErrors({storeNameAlreadyTaken: true});
+            this.createStoreForm.get('step1').get('name').setErrors({storeNameAlreadyTaken: true});
         }
 
     }
@@ -629,36 +722,42 @@ export class RegisterStoreComponent implements OnInit
         let index = this._storeTiming.findIndex(dayList => dayList.day === day);
         this._storeTiming[index].isOpen = !this._storeTiming[index].isOpen;
         this._storeTiming[index].isOff = !this._storeTiming[index].isOff;
+
+        this.storeTiming.clear();
+        this._storeTiming.forEach(item => {
+            this.storeTiming = this.createStoreForm.get('step4').get('storeTiming') as FormArray;
+            this.storeTiming.push(this._formBuilder.group(item));
+        }); 
     }
 
     toggleBreakHour (e, i){
         if(e.checked === false){
-            this.createStoreForm.get('storeTiming').value[i].breakStartTime = null;
-            this.createStoreForm.get('storeTiming').value[i].breakEndTime = null;
+            this.createStoreForm.get('step4').get('storeTiming').value[i].breakStartTime = null;
+            this.createStoreForm.get('step4').get('storeTiming').value[i].breakEndTime = null;
 
-            this.createStoreForm.get('storeTiming').value[i].isBreakTime = false;
+            this.createStoreForm.get('step4').get('storeTiming').value[i].isBreakTime = false;
         } else{
-            this.createStoreForm.get('storeTiming').value[i].breakStartTime = "13:00";
-            this.createStoreForm.get('storeTiming').value[i].breakEndTime = "14:00";
+            this.createStoreForm.get('step4').get('storeTiming').value[i].breakStartTime = "13:00";
+            this.createStoreForm.get('step4').get('storeTiming').value[i].breakEndTime = "14:00";
 
-            this.createStoreForm.get('storeTiming').value[i].isBreakTime = true;
+            this.createStoreForm.get('step4').get('storeTiming').value[i].isBreakTime = true;
         }
     }
 
     applyToAll(index){
 
         let _storeTiming = {
-            breakStartTime: this.createStoreForm.get('storeTiming').value[index].breakStartTime,
-            breakEndTime: this.createStoreForm.get('storeTiming').value[index].breakEndTime,
-            openTime: this.createStoreForm.get('storeTiming').value[index].openTime,
-            closeTime: this.createStoreForm.get('storeTiming').value[index].closeTime
+            breakStartTime: this.createStoreForm.get('step4').get('storeTiming').value[index].breakStartTime,
+            breakEndTime: this.createStoreForm.get('step4').get('storeTiming').value[index].breakEndTime,
+            openTime: this.createStoreForm.get('step4').get('storeTiming').value[index].openTime,
+            closeTime: this.createStoreForm.get('step4').get('storeTiming').value[index].closeTime
         }
 
-        this.createStoreForm.get('storeTiming').value.forEach((item, i) => {
-            this.createStoreForm.get('storeTiming').value[i].breakStartTime = _storeTiming.breakStartTime;
-            this.createStoreForm.get('storeTiming').value[i].breakEndTime =_storeTiming.breakEndTime;
-            this.createStoreForm.get('storeTiming').value[i].openTime =_storeTiming.openTime;
-            this.createStoreForm.get('storeTiming').value[i].closeTime =_storeTiming.closeTime;
+        this.createStoreForm.get('step4').get('storeTiming').value.forEach((item, i) => {
+            this.createStoreForm.get('step4').get('storeTiming').value[i].breakStartTime = _storeTiming.breakStartTime;
+            this.createStoreForm.get('step4').get('storeTiming').value[i].breakEndTime =_storeTiming.breakEndTime;
+            this.createStoreForm.get('step4').get('storeTiming').value[i].openTime =_storeTiming.openTime;
+            this.createStoreForm.get('step4').get('storeTiming').value[i].closeTime =_storeTiming.closeTime;
         })
     }
 
@@ -673,7 +772,7 @@ export class RegisterStoreComponent implements OnInit
         this._allowedSelfDeliveryStates.push(selfDeliveryStateItem);
 
         // push to allowedSelfDeliveryStates (form)
-        this.allowedSelfDeliveryStates = this.createStoreForm.get('allowedSelfDeliveryStates') as FormArray;
+        this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
         this.allowedSelfDeliveryStates.push(this._formBuilder.group(selfDeliveryStateItem));
     }
 
@@ -681,7 +780,7 @@ export class RegisterStoreComponent implements OnInit
         this._allowedSelfDeliveryStates.splice(index,1);
 
         // push to allowedSelfDeliveryStates (form)
-        this.allowedSelfDeliveryStates = this.createStoreForm.get('allowedSelfDeliveryStates') as FormArray;
+        this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
         // since backend give full discount tier list .. (not the only one that have been created only)
         this.allowedSelfDeliveryStates.clear();
 
@@ -692,6 +791,7 @@ export class RegisterStoreComponent implements OnInit
     }
     
     editSelfDeliveryState(attribute: string, index: number, value){
+        
         // push to _allowedSelfDeliveryStates (normal)
         if (attribute === "deliveryStates") {
             this._allowedSelfDeliveryStates[index].deliveryStates = value;
@@ -702,7 +802,7 @@ export class RegisterStoreComponent implements OnInit
         }
 
         // push to allowedSelfDeliveryStates (form)
-        this.allowedSelfDeliveryStates = this.createStoreForm.get('allowedSelfDeliveryStates') as FormArray;
+        this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
         // since backend give full discount tier list .. (not the only one that have been created only)
         this.allowedSelfDeliveryStates.clear();
 
@@ -722,28 +822,52 @@ export class RegisterStoreComponent implements OnInit
      * tahu la
      * @param event 
      */
+
     selectFiles(fileType,event: any): void {
-        this.message = [];
-        this.progressInfos = [];
-      
-        // find index of object this.files
-        let index = this.files.findIndex(preview => preview.type === fileType);
 
-        // set each of the attributes
-        this.files[index].fileSource = "";
-        this.files[index].selectedFileName = "";
-        this.files[index].selectedFiles = event.target.files;
+    // find index of object this.files
+    let index = this.files.findIndex(preview => preview.type === fileType);
 
-        if (this.files[index].selectedFiles && this.files[index].selectedFiles[0]) {
+    // set each of the attributes
+    this.files[index].fileSource = null;
+    this.files[index].selectedFileName = "";
+    this.files[index].selectedFiles = event.target.files;    
+        
+        let maxSize = 2600000;
+        if (this.files[index].selectedFiles[0].size > maxSize ){
+            // Show a success message (it can also be an error message)
+            const confirmation = this._fuseConfirmationService.open({
+                title  : 'Image size limit',
+                message: 'Your uploaded image is exceeds the maximum size of ' + maxSize + ' bytes ! Please choose image with size below of ' + maxSize + ' bytes',
+                icon: {
+                    show: true,
+                    name: "heroicons_outline:exclamation",
+                    color: "warn"
+                },
+                actions: {
+                    confirm: {
+                        label: 'Ok',
+                        color: "primary",
+                    },
+                    cancel: {
+                        show: false,
+                    },
+                }
+            });
+            return;
+        }
+
+        if (this.files[index].selectedFiles && this.files[index].selectedFiles[0] && this.files[index].selectedFiles[0].size < maxSize ) {
             const numberOfFiles = this.files[index].selectedFiles.length;
             for (let i = 0; i < numberOfFiles; i++) {
             const reader = new FileReader();
-        
+            
             reader.onload = (e: any) => {
-               // set this.files[index].delete to false 
-               this.files[index].toDelete = false;
+                
+                // set this.files[index].delete to false 
+                this.files[index].toDelete = true;
 
-               this.files[index].fileSource = e.target.result;
+                this.files[index].fileSource = e.target.result;
 
                 var image = new Image();
                 image.src = e.target.result;
@@ -763,7 +887,8 @@ export class RegisterStoreComponent implements OnInit
             }
         }
         this._changeDetectorRef.markForCheck();
-    }
+
+    } 
 
     deletefiles(index: number) { 
         this.files[index].toDelete = true;
@@ -774,18 +899,18 @@ export class RegisterStoreComponent implements OnInit
 
     checkDeliveryPartner(){
         // on every change set error to false first (reset state)
-        if (this.createStoreForm.get('deliveryType').errors || this.createStoreForm.get('deliveryPartner').errors){
-            this.createStoreForm.get('deliveryPartner').setErrors(null);
+        if (this.createStoreForm.get('step3').get('deliveryType').errors || this.createStoreForm.get('step3').get('deliveryPartner').errors){
+            this.createStoreForm.get('step3').get('deliveryPartner').setErrors(null);
         }
 
         // -----------------------------------
         // reset allowedSelfDeliveryStates if user change delivery type
         // -----------------------------------
 
-        if (this.createStoreForm.get('deliveryType').value === "SELF") {
+        if (this.createStoreForm.get('step3').get('deliveryType').value === "SELF") {
 
             // push to allowedSelfDeliveryStates (form)
-            this.allowedSelfDeliveryStates = this.createStoreForm.get('allowedSelfDeliveryStates') as FormArray;
+            this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
             // since backend give full discount tier list .. (not the only one that have been created only)
             this.allowedSelfDeliveryStates.clear();
             
@@ -796,8 +921,8 @@ export class RegisterStoreComponent implements OnInit
         }
 
         // then check it again and set if there's an error
-        if (this.deliveryPartners.length < 1 && this.createStoreForm.get('deliveryType').value !== "SELF"){
-            this.createStoreForm.get('deliveryType').setErrors({noDeliveryPartners: true})
+        if (this.deliveryPartners.length < 1 && this.createStoreForm.get('step3').get('deliveryType').value !== "SELF"){
+            this.createStoreForm.get('step3').get('deliveryType').setErrors({noDeliveryPartners: true})
         }
     }
 
@@ -806,7 +931,7 @@ export class RegisterStoreComponent implements OnInit
         // console.log("tegok object: ", this.createStoreForm.get('storeTiming').value[i])
         // console.log("tengok event: ", e.target.value)
         // console.log("hari",this.createStoreForm.get('storeTiming').value[i].day)
-        if(this.createStoreForm.get('storeTiming').value[i].openTime >= this.createStoreForm.get('storeTiming').value[i].closeTime ){
+        if(this.createStoreForm.get('step4').get('storeTiming').value[i].openTime >= this.createStoreForm.get('step4').get('storeTiming').value[i].closeTime ){
             this.timeAlert[i] ="End time range incorrect" ;
         }else{
             this.timeAlert[i] = "" ;
@@ -814,7 +939,7 @@ export class RegisterStoreComponent implements OnInit
     }
 
     changeBreakTime(i, type , e){
-        if(this.createStoreForm.get('storeTiming').value[i].breakStartTime >= this.createStoreForm.get('storeTiming').value[i].breakEndTime ){
+        if(this.createStoreForm.get('step4').get('storeTiming').value[i].breakStartTime >= this.createStoreForm.get('step4').get('storeTiming').value[i].breakEndTime ){
             this.timeAlert[i] ="Break Hour End time range incorrect" ;
         }else{
             this.timeAlert[i] = "" ;

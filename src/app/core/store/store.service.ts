@@ -395,7 +395,11 @@ export class StoresService
                     let isDeleted:boolean = false;
                     if (response["status"] === 200) {
                         isDeleted = true
+                        
+                        // set selected store to null anyway
+                        this.storeControl.setValue(null);
                     }
+
 
                     // Return the deleted status
                     return isDeleted;
@@ -592,7 +596,7 @@ export class StoresService
             switchMap(stores => this._httpClient.post<any>(productService + '/stores/' + storeId + '/assets', storeAssets , header ).pipe(
                 map((response) => {
 
-                    this._logging.debug("Response from StoresService stores (postAssets)",response);
+                    this._logging.debug("Response from StoresService stores (postAssets - "+storeAssetType+")",response);
 
                     // --------------
                     // Update Stores
@@ -601,15 +605,22 @@ export class StoresService
                     // Find the index of the updated product
                     const index = stores.findIndex(item => item.id === storeId);
 
-                    let updateResponse;
+                    let updateResponse = Object.assign(stores[index],{ 
+                        storeAsset: { 
+                            logoUrl: stores[index].storeAsset && stores[index].storeAsset.logoUrl ? stores[index].storeAsset.logoUrl : null, 
+                            bannerUrl: stores[index].storeAsset && stores[index].storeAsset.bannerUrl ? stores[index].storeAsset.bannerUrl : null,
+                            bannerMobileUrl: stores[index].storeAsset && stores[index].storeAsset.bannerMobileUrl ? stores[index].storeAsset.bannerMobileUrl : null
+                        }
+                    });
+
+                    console.log("updateResponse", updateResponse);
                     
-                    if (storeAssetType === "logo") {
-                        updateResponse = Object.assign(stores[index],{storeAsset:{ logoUrl: storeAssetFiles}});
-                    } else if (storeAssetType === "banner") {
-                        updateResponse = Object.assign(stores[index],{storeAsset:{ bannerUrl: storeAssetFiles}});
-                    } else if (storeAssetType === "bannerMobile") {
-                        updateResponse = Object.assign(stores[index],{storeAsset:{ bannerMobileUrl: storeAssetFiles}});
-                    }                    
+                    updateResponse.storeAsset.logoUrl = response.data.logoUrl;
+                    updateResponse.storeAsset.bannerUrl = response.data.bannerUrl;
+                    updateResponse.storeAsset.bannerMobileUrl = response.data.bannerMobileUrl;
+                    
+                    console.log("resbown",response.data.logoUrl);
+                    
                     // Update the product
                     stores[index] = { ...stores[index], ...updateResponse};
 
@@ -676,7 +687,7 @@ export class StoresService
 
         return this._httpClient.delete<any>(productService + '/stores/' + storeId + '/assets/bannermobile' , header ).pipe(
             map((response) => {
-                this._logging.debug("Response from StoresService (deleteAssetsBanner)",response);
+                this._logging.debug("Response from StoresService (deleteAssetsBannerMobile)",response);
             })
         );
     }

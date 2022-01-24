@@ -1,174 +1,178 @@
-<div class="w-full max-w-3xl">
-    <!-- Section -->
-    <div class="w-full mb-8">
-        <div class="text-xl">Operating Hour Management</div>
-        <div class="text-secondary">This selection is to manage your store timing operating hour</div>
-    </div>
-    <form 
-        [formGroup]="storeTimingForm"
-        #supportNgForm="ngForm"
-        class="w-full">
-        <!-- Opening Hour -->
-        <div class="flex flex-col w-full">
-            <mat-label class="font-medium">Store Operating Hour *</mat-label>
-            <div class="mb-0.5"></div>
-            <div class="border border-gray-300 rounded h-96 overflow-auto">
-                <div class="flex flex-auto flex-wrap p-2">
-                    <div class="flex flex-col w-full">
-                        <ng-container formArrayName="storeTiming" *ngFor="let dayList of storeTimingForm.get('storeTiming')['controls']; let i = index;">
-                            <fieldset [ngClass]="dayList.value.isOpen === true ? '' : 'bg-gray-100 text-gray-500'" class="flex flex-wrap flex-row w-full border border-solid border-gray-300 rounded my-1 px-3" [formGroupName]="i">
-                                <!-- Days -->
-                                <legend class="text font-bold ml-2 px-2">{{dayList.value.day | titlecase }}</legend>
-                                <input 
-                                    matInput
-                                    [formControlName]="'day'"
-                                    [value]="dayList.value.day"
-                                    readonly
-                                    hidden
-                                />
-
-                                <!-- Open / Closing Toggle -->
-                                <div class="flex flex-row w-full justify-end mb-2">
-                                    <mat-slide-toggle
-                                        matInput
-                                        [formControlName]="'isOpen'"
-                                        [color]="'primary'"
-                                        (change)="updateStoreOpening(dayList.value.day)">
-                                        {{dayList.value.isOpen === true ? 'Open' : 'Close'}}
-                                    </mat-slide-toggle>
-                                </div>
-
-                                <!-- Working Hour Label -->
-                                <span class="flex flex-col justify-center w-full h-16 lg:w-1/3 lg:pr-2">
-                                    Working Hour
-                                </span>
-
-                                <!-- Open Time -->
-                                <div class="flex flex-col w-full h-16 lg:w-1/3 lg:pr-2">
-                                    <mat-form-field class="w-full p-0 m-0" floatLabel="always" appearance="outline">
-                                        <mat-label>Start time</mat-label>
-                                        <input
-                                            matInput
-                                            [formControlName]="'openTime'"
-                                            [readonly]="!dayList.value.isOpen"
-                                            type="time"
-                                            [value]="dayList.value.openTime"
-                                            (change)="changeTime(i)"
-                                        >
-                                        <!-- <mat-error *ngIf="storeTimingForm.get('storeTiming').hasError('required')">
-                                            Required
-                                        </mat-error> -->
-                                    </mat-form-field>
-                                </div>
-
-                                <!-- Close Time -->
-                                <div class="flex flex-col w-full h-16 lg:w-1/3 lg:pr-2">
-                                    <mat-form-field class="w-full p-0 m-0" floatLabel="always" appearance="outline">
-                                        <mat-label>End time</mat-label>
-                                        <input
-                                            matInput
-                                            [formControlName]="'closeTime'"
-                                            [readonly]="!dayList.value.isOpen"
-                                            type="time"
-                                            [value]="dayList.value.closeTime"
-                                            (change)="changeTime(i, 'closeTime' , $event)"
-                                        >
-                                        <!-- <mat-error *ngIf="storeTimingForm.get('storeCloseTime').hasError('required')">
-                                            Required
-                                        </mat-error> -->
-                                    </mat-form-field>
-                                </div>
-
-                                <!-- Break Hour Section -->
-                                <div class="flex flex-col justify-center w-full h-16 lg:w-1/3 lg:pr-2">
-                                    <!-- Closing Label -->
-                                    <span class="flex flex-col justify-center w-full">
-                                        Break Hour
-                                    </span>
-                                    <!-- Open / Closing Toggle -->
-                                    <div class="flex flex-col w-full justify-start mb-2">
-                                        <mat-slide-toggle
-                                            matInput
-                                            [formControlName]="'isBreakTime'"
-                                            [color]="'primary'"
-                                            (change)="toggleBreakHour($event, i)"
-                                            >{{dayList.value.isBreakTime === true ? 'Open' : 'Close'}}
-                                        </mat-slide-toggle>
-                                    </div>
-                                </div>
-
-                                <!-- Break Time Start -->
-                                <div class="flex flex-col w-full h-16 lg:w-1/3 lg:pr-2">
-                                    <mat-form-field class="w-full" floatLabel="always" appearance="outline">
-                                        <mat-label>Start time</mat-label>
-                                        <input
-                                            matInput
-                                            [formControlName]="'breakStartTime'"
-                                            [readonly]="!dayList.value.isOpen"
-                                            type="time"
-                                            [value]="dayList.value.breakStartTime"
-                                            (change)="changeBreakTime(i, 'breakStartTime' , $event);"
-                                        >
-                                        <!-- <mat-error *ngIf="storeTimingForm.get('storeCloseTime').hasError('required')">
-                                            Required
-                                        </mat-error> -->
-                                    </mat-form-field>
-                                </div>
-                                <!-- Break Time End -->
-                                <div class="flex flex-col w-full h-16 lg:w-1/3 lg:pr-2">
-                                    <mat-form-field class="w-full" floatLabel="always" appearance="outline">
-                                        <mat-label>End time</mat-label>
-                                        <input
-                                            matInput
-                                            [formControlName]="'breakEndTime'"
-                                            [readonly]="!dayList.value.isOpen"
-                                            type="time"
-                                            [value]="dayList.value.breakEndTime"
-                                            (change)="changeBreakTime(i, 'breakEndTime' , $event)"
-                                        >
-                                        <!-- <mat-error *ngIf="storeTimingForm.get('storeCloseTime').hasError('required')">
-                                            Required
-                                        </mat-error> -->
-                                    </mat-form-field>
-                                </div>
-                                <div class="justify-between mb-2 mt-2 flex flex-row w-full ">
-                                    <div *ngIf="timeAlert[i] !== 'invisible'" class="flex flex-wrap text-warn items-center">
-                                        {{timeAlert[i]}}
-                                    </div>
-                                    <div class="items-center">
-                                        <input
-                                            [id]="'apply-to-all-button' + i"
-                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                            type="button"
-                                            (click)="applyToAll(i)"
-                                            mat-icon-button>
-                                        <label 
-                                            class="flex items-center justify-center sm:w-28 sm:h-8 rounded-full cursor-pointer bg-primary hover:bg-primary-500"
-                                            [for]="'apply-to-all-button' + i"
-                                            matRipple>
-                                            <span class="text-white text-extrabold">Apply to all</span>
-                                        </label>
-                                    </div>
-                                </div>
-                            </fieldset>
-                        </ng-container>
-                    </div>
+<ng-container>
+    <div class="shadow rounded-2xl bg-card">
+        <div class="flex flex-col flex-auto items-center m-5 p-6 sm:p-10">
+            <div class="w-full">
+                <!-- Section -->
+                <div class="w-full mb-8">
+                    <div class="text-xl">Operating Hour Management</div>
+                    <div class="text-secondary">This selection is to manage your store timing operating hour</div>
                 </div>
-            </div>
+                <form 
+                    [formGroup]="storeTimingForm"
+                    #supportNgForm="ngForm"
+                    class="w-full">
+                    <!-- Opening Hour -->
+                    <div class="flex flex-col w-full">
+                        <mat-label class="font-medium">Store Operating Hour *</mat-label>
+                        <div class="mb-0.5"></div>
+                        <div class="border border-gray-300 rounded h-96 overflow-auto">
+                            <div class="flex flex-auto flex-wrap p-2">
+                                <div class="flex flex-col w-full">
+                                    <ng-container formArrayName="storeTiming" *ngFor="let dayList of storeTimingForm.get('storeTiming')['controls']; let i = index;">
+                                        <fieldset [ngClass]="dayList.value.isOpen === true ? '' : 'bg-gray-100 text-gray-500'" class="flex flex-wrap flex-row w-full border border-solid border-gray-300 rounded my-1 px-3" [formGroupName]="i">
+                                            <!-- Days -->
+                                            <legend class="text font-bold ml-2 px-2">{{dayList.value.day | titlecase }}</legend>
+                                            <input 
+                                                matInput
+                                                [formControlName]="'day'"
+                                                [value]="dayList.value.day"
+                                                readonly
+                                                hidden
+                                            />
+            
+                                            <!-- Open / Closing Toggle -->
+                                            <div class="flex flex-row w-full justify-end mb-2">
+                                                <mat-slide-toggle
+                                                    matInput
+                                                    [formControlName]="'isOpen'"
+                                                    [color]="'primary'"
+                                                    (change)="updateStoreOpening(dayList.value.day)">
+                                                    {{dayList.value.isOpen === true ? 'Open' : 'Close'}}
+                                                </mat-slide-toggle>
+                                            </div>
+            
+                                            <!-- Working Hour Label -->
+                                            <span class="flex flex-col justify-center w-full h-16 lg:w-1/3 lg:pr-2">
+                                                Working Hour
+                                            </span>
+            
+                                            <!-- Open Time -->
+                                            <div class="flex flex-col w-full h-16 lg:w-1/3 lg:pr-2">
+                                                <mat-form-field class="w-full p-0 m-0" floatLabel="always" appearance="outline">
+                                                    <mat-label>Start time</mat-label>
+                                                    <input
+                                                        matInput
+                                                        [formControlName]="'openTime'"
+                                                        [readonly]="!dayList.value.isOpen"
+                                                        type="time"
+                                                        [value]="dayList.value.openTime"
+                                                        (change)="changeTime(i)"
+                                                    >
+                                                    <!-- <mat-error *ngIf="storeTimingForm.get('storeTiming').hasError('required')">
+                                                        Required
+                                                    </mat-error> -->
+                                                </mat-form-field>
+                                            </div>
+            
+                                            <!-- Close Time -->
+                                            <div class="flex flex-col w-full h-16 lg:w-1/3 lg:pr-2">
+                                                <mat-form-field class="w-full p-0 m-0" floatLabel="always" appearance="outline">
+                                                    <mat-label>End time</mat-label>
+                                                    <input
+                                                        matInput
+                                                        [formControlName]="'closeTime'"
+                                                        [readonly]="!dayList.value.isOpen"
+                                                        type="time"
+                                                        [value]="dayList.value.closeTime"
+                                                        (change)="changeTime(i, 'closeTime' , $event)"
+                                                    >
+                                                    <!-- <mat-error *ngIf="storeTimingForm.get('storeCloseTime').hasError('required')">
+                                                        Required
+                                                    </mat-error> -->
+                                                </mat-form-field>
+                                            </div>
+            
+                                            <!-- Break Hour Section -->
+                                            <div class="flex flex-col justify-center w-full h-16 lg:w-1/3 lg:pr-2">
+                                                <!-- Closing Label -->
+                                                <span class="flex flex-col justify-center w-full">
+                                                    Break Hour
+                                                </span>
+                                                <!-- Open / Closing Toggle -->
+                                                <div class="flex flex-col w-full justify-start mb-2">
+                                                    <mat-slide-toggle
+                                                        matInput
+                                                        [formControlName]="'isBreakTime'"
+                                                        [color]="'primary'"
+                                                        (change)="toggleBreakHour($event, i)"
+                                                        >{{dayList.value.isBreakTime === true ? 'Open' : 'Close'}}
+                                                    </mat-slide-toggle>
+                                                </div>
+                                            </div>
+            
+                                            <!-- Break Time Start -->
+                                            <div class="flex flex-col w-full h-16 lg:w-1/3 lg:pr-2">
+                                                <mat-form-field class="w-full" floatLabel="always" appearance="outline">
+                                                    <mat-label>Start time</mat-label>
+                                                    <input
+                                                        matInput
+                                                        [formControlName]="'breakStartTime'"
+                                                        [readonly]="!dayList.value.isOpen"
+                                                        type="time"
+                                                        [value]="dayList.value.breakStartTime"
+                                                        (change)="changeBreakTime(i, 'breakStartTime' , $event);"
+                                                    >
+                                                    <!-- <mat-error *ngIf="storeTimingForm.get('storeCloseTime').hasError('required')">
+                                                        Required
+                                                    </mat-error> -->
+                                                </mat-form-field>
+                                            </div>
+                                            <!-- Break Time End -->
+                                            <div class="flex flex-col w-full h-16 lg:w-1/3 lg:pr-2">
+                                                <mat-form-field class="w-full" floatLabel="always" appearance="outline">
+                                                    <mat-label>End time</mat-label>
+                                                    <input
+                                                        matInput
+                                                        [formControlName]="'breakEndTime'"
+                                                        [readonly]="!dayList.value.isOpen"
+                                                        type="time"
+                                                        [value]="dayList.value.breakEndTime"
+                                                        (change)="changeBreakTime(i, 'breakEndTime' , $event)"
+                                                    >
+                                                    <!-- <mat-error *ngIf="storeTimingForm.get('storeCloseTime').hasError('required')">
+                                                        Required
+                                                    </mat-error> -->
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="justify-between mb-2 mt-2 flex flex-row w-full ">
+                                                <div *ngIf="timeAlert[i] !== 'invisible'" class="flex flex-wrap text-warn items-center">
+                                                    {{timeAlert[i]}}
+                                                </div>
+                                                <div class="items-center">
+                                                    <input
+                                                        [id]="'apply-to-all-button' + i"
+                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                        type="button"
+                                                        (click)="applyToAll(i)"
+                                                        mat-icon-button>
+                                                    <label 
+                                                        class="flex items-center justify-center sm:w-28 sm:h-8 rounded-full cursor-pointer bg-primary hover:bg-primary-500"
+                                                        [for]="'apply-to-all-button' + i"
+                                                        matRipple>
+                                                        <span class="text-white text-extrabold">Apply to all</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <!-- Actions -->
+                <div class="mt-6 flex items-center justify-end">
+                    <button
+                        class="ml-4"
+                        mat-flat-button
+                        type="button"
+                        [color]="'primary'"
+                        (click)="updateStoreTiming()">
+                        Save
+                    </button>
+                </div>
+            </div>   
         </div>
-    </form>
-    <!-- Divider -->
-    <div class="mt-11 mb-10 border-t"></div>
-    <!-- Actions -->
-    <div class="flex items-center justify-end">
-    <button
-        class="ml-4"
-        mat-flat-button
-        type="button"
-        [color]="'primary'"
-        (click)="updateStoreTiming()">
-        Save
-    </button>
-</div>
+    </div>
+</ng-container>
 
-</div>
