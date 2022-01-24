@@ -1,8 +1,9 @@
-import { ChangeDetectorRef, Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, MatPaginatorIntl } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
+import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dialog/dialog.component';
 import { InventoryService } from 'app/core/product/inventory.service';
@@ -14,7 +15,10 @@ import { ApiResponseModel, StoreDiscountProduct, StoreDiscountProductPagination 
 
 @Component({
   selector: 'dialog-product-list',
-  templateUrl: './dialog-product-list.component.html'
+  templateUrl: './dialog-product-list.component.html',
+  encapsulation  : ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations     : fuseAnimations,
 })
 export class DialogProductListComponent implements OnInit {
   
@@ -281,7 +285,7 @@ export class DialogProductListComponent implements OnInit {
 
     // Edit discount product
     editStoreProductDiscount(productDiscount){
-        
+
         if(this.editDiscountAmount>100){
             const confirmation = this.displayMessage('Cannot more than 100','Please change the discount amount','Ok',false);
 
@@ -293,7 +297,7 @@ export class DialogProductListComponent implements OnInit {
                 storeDiscountId: productDiscount.storeDiscountId,
                 itemCode:productDiscount.itemCode,
                 calculationType:'PERCENT',
-                discountAmount:this.editDiscountAmount
+                discountAmount:this.editDiscountAmount?this.editDiscountAmount:productDiscount.discountAmount
             
         }
 
@@ -310,8 +314,8 @@ export class DialogProductListComponent implements OnInit {
     }
 
     inputEditDiscountAmount(index,event){
-        
-        this.editDiscountAmount =event.target.value;
+
+            this.editDiscountAmount =event.target.value;
       
     }
 

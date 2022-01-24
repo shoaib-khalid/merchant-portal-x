@@ -1,187 +1,196 @@
 <div class="flex flex-row max-w-440 md:min-w-160 -m-6">
+    <div class="flex flex-col w-full overflow-y-auto h-140">
+        <div class="flex flex-col md:flex-row flex-auto p-6 ">      
+            <!-- Product Search -->
+            <div class="border border-solid rounded h-100 mx-2 px-2">
+                <!-- Product Search -->
+                <div class="flex flex-row flex-wrap h-14 items-center justify-between py-2">
+                    <div class="text-lg font-extrabold">Product Search</div>
+                    <div class="flex items-center">
+                        <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-40 px-2">
+                            <mat-select
+                                class="w-full"
+                                placeholder="Category"
+                                (selectionChange)="onSelectCategoryList($event)">
+                                <div>
+                                    <mat-option [value]="">All Categories</mat-option>
+                                    <mat-option *ngFor="let listing of filteredCategories;" [value]="listing.id">
+                                        {{listing.name}}
+                                    </mat-option>
+                                </div>
+                            </mat-select>
+                        </mat-form-field>
     
-    <div class="flex flex-col flex-auto p-6 sm:p-8 overflow-y-auto h-140">
+                        <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-40">
+                            <mat-icon
+                                class="icon-size-5"
+                                matPrefix
+                                [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                            <input
+                                matInput
+                                [autocomplete]="'off'"
+                                [placeholder]="'Products'"
+                                (input) = "inputSearchProduct($event)">
+                        </mat-form-field>
+                    </div>
+                </div>
+                <!-- Table -->
+                <div class="h-64">
+                    <table *ngIf="(products$ | async) as products" class="table-fixed mt-2 mb-4 w-full flex-row">
+                        <tr class="border-b border-gray-300 pt-2 pl-2">
+                            <th class="text-left">Select</th>
+                            <th class="text-left">Product Name</th>
+                            <th class="text-left"> Original Price</th>
+                        </tr>
+                        <tr class="border-b border-gray-300 pt-2 pl-2" *ngFor="let productList of products;let i =index;" >
+                            <td>
+                                <mat-checkbox  
+                                class="flex items-center h-10 min-h-10 px-4"
+                                [color]="'primary'"
+                                (change)="onChangeSelectProduct(productList,$event)"
+                                [checked]="onChangeSelectProductValue.includes(productList.id)"
+                                >
+                                    
+                                </mat-checkbox>
+                            </td>
+                            <td>{{productList.name}}</td>
+                            <td>{{productList.productInventories[0].price}}</td>
         
-        <div class="border border-solid border-gray-300 rounded my-2 mx-2 py-3 px-2">
-            <div class="relative flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between px-6 md:px-8 ">
-                <div class="text-lg font-extrabold">Product Search</div>
-                <div class="flex flex-shrink-0 items-center mt-6 sm:mt-0 sm:ml-4">
-                    <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-40 px-2">
-                        <mat-select
-                            class="w-full"
-                            placeholder="Category"
-                            (selectionChange)="onSelectCategoryList($event)">
-                            <div>
-                                <mat-option [value]="">All Categories</mat-option>
-                                <mat-option *ngFor="let listing of filteredCategories;" [value]="listing.id">
-                                    {{listing.name}}
-                                </mat-option>
-                            </div>
-                        </mat-select>
-                    </mat-form-field>
-
-                    <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-40">
-                        <mat-icon
-                            class="icon-size-5"
-                            matPrefix
-                            [svgIcon]="'heroicons_solid:search'"></mat-icon>
-                        <input
-                            matInput
-                            [autocomplete]="'off'"
-                            [placeholder]="'Products'"
-                            (input) = "inputSearchProduct($event)">
-                    </mat-form-field>
+                        </tr>
+                    </table>
+                </div>
+                <!-- Pagination & Button -->
+                <div class="flex items-center justify-between w-full">
+                    <mat-paginator
+                        #_paginator
+                        [ngClass]="{'pointer-events-none': isLoading}"
+                        [length]="productPagination.length"
+                        [pageIndex]="productPagination.page"
+                        [pageSize]="productPagination.size"
+                        [pageSizeOptions]="[5]"
+                        [showFirstLastButtons]="true">
+                    </mat-paginator>
+                
+                        <div>
+                            <!-- Send -->
+                            <button
+                                class="flex"
+                                mat-flat-button
+                                (click)="addProductDiscount()"
+                                [color]="'primary'">
+                                Add
+                            </button>
+                            
+                        </div>
+                  
                 </div>
             </div>
-            <!-- <div class="font-extrabold tracking-tight">Product Listing</div> -->
-            <table *ngIf="(products$ | async) as products" class="table-fixed my-4 mr-2 w-full sm:flex-row">
-                <tr class="border-b border-gray-300 pt-2 pl-2">
-                    <th class="text-left">Select</th>
-                    <th class="text-left">Product Name</th>
-                    <th class="text-left"> Original Price</th>
-                </tr>
-                <tr class="border-b border-gray-300 pt-2 pl-2" *ngFor="let productList of products;let i =index;" >
-                    <td>
-                        <mat-checkbox  
-                        class="flex items-center h-10 min-h-10 px-4"
-                        [color]="'primary'"
-                        (change)="onChangeSelectProduct(productList,$event)"
-                        [checked]="onChangeSelectProductValue.includes(productList.id)"
-                        >
-                            
-                        </mat-checkbox>
-                    </td>
-                    <td>{{productList.name}}</td>
-                    <td>{{productList.productInventories[0].price}}</td>
-
-                </tr>
-            </table>
-
-            <div class="flex items-center justify-between w-full sm:flex-row sm:items-center justify-end mt-4 sm:mt-6">
-                <mat-paginator
-                #_paginator
-                [ngClass]="{'pointer-events-none': isLoading}"
-                [length]="productPagination.length"
-                [pageIndex]="productPagination.page"
-                [pageSize]="productPagination.size"
-                [pageSizeOptions]="[5]"
-                [showFirstLastButtons]="true">
-                </mat-paginator>
-                <div>
-                    <div class="order-last">
-                        <!-- Send -->
-                        <button
-                            mat-flat-button
-                            (click)="addProductDiscount()"
-                            [color]="'primary'">
-                            Add Product Discount
-                        </button>
-                        
+    
+            <!-- Selected Product -->
+            <div class="my-4 md:my-0 border border-solid border-gray-300 rounded h-100 mx-2 px-2">
+                <div class="flex flex-row text-lg font-extrabold h-14 py-2 items-center">Selected Product</div>
+                <div class="h-64">
+                    <table *ngIf="(storeDiscountProduct$ | async) as storeDiscountProducts" class="table-fixed mt-2 mb-4 w-full flex-row">
+                        <tr class="border-b border-gray-300 pt-2 pl-2">
+                            <th class="text-left truncate">Product Name (SKU)</th>
+                            <th class="text-left w-28">Original Price</th>
+                            <th class="text-left w-24">Discount%</th>
+                            <th>Action</th>
+                        </tr>
+                        <tr class="border-b border-gray-300 pt-2 pl-2" *ngFor="let productDiscountList of storeDiscountProducts;let i =index;" >
+                            <td class="truncate">{{ productDiscountList.productInventory.product.name + " ( "+productDiscountList.productInventory.sku +  " ) " }}</td>
+                            <td>{{productDiscountList.productInventory.price}}</td>
+                            <td>
+                                <div *ngIf=!editModeDiscountProduct[i]>{{productDiscountList.discountAmount}}</div>
+                             
+                                <div *ngIf=editModeDiscountProduct[i]>
+                                        <input
+                                            type="number"
+                                            [value]="productDiscountList.discountAmount"
+                                            (input)="inputEditDiscountAmount(i,$event)"
+                                            style="border: 1px solid rgba(0, 0, 0, 0.200);font-size: 14px;width: 70px; height:30px;"
+                                        >
+                                </div>
+                              
+                            </td>
+                            <td>
+                                <div class="flex flex-wrap items-center justify-center ">
+                                    <input
+                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                    type="button"
+                                    [id]="'edit-button'+productDiscountList.id"
+                                    (click)="editModeDiscountProduct[i] = !editModeDiscountProduct[i]"
+                                    >
+                                    <label
+                                    *ngIf="!editModeDiscountProduct[i]"
+                                    class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
+                                    [for]="'edit-button'+productDiscountList.id"
+                                    matRipple>
+                                    <mat-icon
+                                        class="text-white icon-size-5"
+                                        [svgIcon]="'heroicons_outline:pencil-alt'">
+                                    </mat-icon>
+                                    </label>
+        
+                                    <input
+                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                    type="button"
+                                    [id]="'update-button'+productDiscountList.id"
+                                    (click)="editModeDiscountProduct[i] = !editModeDiscountProduct[i]"
+                                    (click)="editStoreProductDiscount(productDiscountList)"
+                                    >
+                                    <label
+                                        *ngIf="editModeDiscountProduct[i]"
+                                        class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
+                                        [for]="'update-button'+productDiscountList.id"
+                                        matRipple>
+                                        <mat-icon
+                                            class="text-white icon-size-5"
+                                            [svgIcon]="'heroicons_outline:check'">
+                                        </mat-icon>
+                                    </label>
+        
+                                    <input
+                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                    type="button"
+                                    [id]="'delete-button'+productDiscountList.id"
+                                    (click)="deleteStoreProductDiscount(productDiscountList)"
+                                    >
+                                    <label
+                                        class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-warn hover:bg-warn-700 mb-3"
+                                        [for]="'delete-button'+productDiscountList.id"
+                                        matRipple>
+                                        <mat-icon
+                                            class="text-white icon-size-5"
+                                            [svgIcon]="'heroicons_outline:trash'">
+                                        </mat-icon>
+                                    </label>
+                                </div>
+                            </td>
+        
+                        </tr>
+        
+                    </table>
+                </div>
+                <div class="flex items-center justify-between w-full">
+                    <mat-paginator
+                        #_paginatorDiscountProduct
+                        [ngClass]="{'pointer-events-none': isLoading}"
+                        [length]="storeDiscountPagination.length"
+                        [pageIndex]="storeDiscountPagination.page"
+                        [pageSize]="storeDiscountPagination.size"
+                        [pageSizeOptions]="[5]"
+                        [showFirstLastButtons]="true">
+                    </mat-paginator>
+                    <div  class="flex w-6 bg-red-300">
+                   
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="border border-solid border-gray-300 rounded my-2 mx-2 py-3 px-3">
-            <div class="text-lg font-extrabold mx-4">Selected Product</div>
-            <table *ngIf="(storeDiscountProduct$ | async) as storeDiscountProducts" class="table-fixed my-4 mr-2 w-full sm:flex-row">
-                <tr class="border-b border-gray-300 pt-2 pl-2">
-                    <th class="text-left">Product Name (SKU)</th>
-                    <th class="text-left">Original Price</th>
-                    <th class="text-left">Discount%</th>
-                    <th>Action</th>
-                </tr>
-                <tr class="border-b border-gray-300 pt-2 pl-2" *ngFor="let productDiscountList of storeDiscountProducts;let i =index;" >
-                    <td>{{ productDiscountList.productInventory.product.name + " ( "+productDiscountList.productInventory.sku +  " ) " }}</td>
-                    <td>{{productDiscountList.productInventory.price}}</td>
-                    <td>
-                        <div *ngIf=!editModeDiscountProduct[i]>{{productDiscountList.discountAmount}}</div>
-                     
-                        <div *ngIf=editModeDiscountProduct[i]>
-                            <mat-form-field>
-                                <input
-                                    type="number"
-                                    matInput
-                                    [value]="productDiscountList.discountAmount"
-                                    (input)="inputEditDiscountAmount(i,$event)"
-
-                                >
-                            </mat-form-field>
-                        </div>
-                      
-                    </td>
-                    <td>
-                        <div class="flex flex-wrap items-center justify-center ">
-                            <input
-                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                            type="button"
-                            [id]="'edit-button'+productDiscountList.id"
-                            (click)="editModeDiscountProduct[i] = !editModeDiscountProduct[i]"
-                            >
-                            <label
-                            *ngIf="!editModeDiscountProduct[i]"
-                            class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
-                            [for]="'edit-button'+productDiscountList.id"
-                            matRipple>
-                            <mat-icon
-                                class="text-white icon-size-5"
-                                [svgIcon]="'heroicons_outline:pencil-alt'">
-                            </mat-icon>
-                            </label>
-
-                            <input
-                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                            type="button"
-                            [id]="'update-button'+productDiscountList.id"
-                            (click)="editModeDiscountProduct[i] = !editModeDiscountProduct[i]"
-                            (click)="editStoreProductDiscount(productDiscountList)"
-                            >
-                            <label
-                                *ngIf="editModeDiscountProduct[i]"
-                                class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
-                                [for]="'update-button'+productDiscountList.id"
-                                matRipple>
-                                <mat-icon
-                                    class="text-white icon-size-5"
-                                    [svgIcon]="'heroicons_outline:check'">
-                                </mat-icon>
-                            </label>
-
-                            <input
-                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                            type="button"
-                            [id]="'delete-button'+productDiscountList.id"
-                            (click)="deleteStoreProductDiscount(productDiscountList)"
-                            >
-                            <label
-                                class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-warn hover:bg-warn-700 mb-3"
-                                [for]="'delete-button'+productDiscountList.id"
-                                matRipple>
-                                <mat-icon
-                                    class="text-white icon-size-5"
-                                    [svgIcon]="'heroicons_outline:trash'">
-                                </mat-icon>
-                            </label>
-                        </div>
-                    </td>
-
-                </tr>
-
-            </table>
-            <div class="flex items-center justify-between w-full sm:flex-row sm:items-center justify-end mt-4 sm:mt-6">
-                <mat-paginator
-                #_paginatorDiscountProduct
-                [ngClass]="{'pointer-events-none': isLoading}"
-                [length]="storeDiscountPagination.length"
-                [pageIndex]="storeDiscountPagination.page"
-                [pageSize]="storeDiscountPagination.size"
-                [pageSizeOptions]="[5]"
-                [showFirstLastButtons]="true">
-                </mat-paginator>
-            </div>
-        </div>
-        
-        <div class="flex items-center justify-between w-full sm:flex-row sm:items-center justify-end mt-4 sm:mt-6">
+            
+        </div>  
+        <!-- Close Button -->
+        <div class="flex items-center justify-between w-full justify-end">
             <div></div>
             <div class="flex items-center">
                 <button
@@ -193,6 +202,6 @@
                 </button>
             </div>
         </div>
-    </div>  
+    </div>
   
 </div>
