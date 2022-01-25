@@ -167,7 +167,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
                 // Update the pagination
                 this.pagination = pagination;
-                console.log('this.pagination',this.pagination);
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -211,18 +210,14 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                 // Update the products
                 this.products = products;
                 this.filteredProduct = products;
-                console.log('THIS OBSERVABLE',this.products);
       
-
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
 
             this._discountProductService.getProducts()
             .subscribe((response: ApiResponseModel<Product[]>)=>{
-    
-                console.log("HELLO:",response.data['content']);
-    
+        
                 this._changeDetectorRef.markForCheck();
     
             });
@@ -373,7 +368,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         const dialogRef = this._dialog.open(CreateDiscountProductComponent, { disableClose: true });
         dialogRef.afterClosed().subscribe(result => {
             if (result.status === true) {
-                console.log("result", result)
                 // this will remove the item from the object
                 const createDiscountBody  = {
                     discountName: result.discountName,
@@ -410,7 +404,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
                 }, error => {
-                    console.log(error);
 
                         if (error.status === 417) {
                             // Open the confirmation dialog
@@ -434,7 +427,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                 // Show a success message
                 this.showFlashMessage('success');
             }, error => {
-                console.log(error);
 
                     if (error.status === 417) {
                         // Open the confirmation dialog

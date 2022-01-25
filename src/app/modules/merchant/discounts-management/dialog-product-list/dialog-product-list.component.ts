@@ -303,8 +303,6 @@ export class DialogProductListComponent implements OnInit {
 
         this._discountProductService.updateProductDiscount(productDiscount.storeDiscountId,payloadProductDiscount).
                 subscribe((response) => {
-
-                    console.log("lepas edit:::::",response);
                     
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
