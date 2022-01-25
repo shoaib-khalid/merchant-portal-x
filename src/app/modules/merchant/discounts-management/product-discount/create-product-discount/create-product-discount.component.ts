@@ -5,7 +5,7 @@ import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog
   selector: 'dialog-create-product-discount',
   templateUrl: './create-product-discount.component.html'
 })
-export class CreateDiscountProductComponent implements OnInit {
+export class CreateProductDiscountDialogComponent implements OnInit {
 
   disabledProceed: boolean = true;
 
@@ -40,7 +40,7 @@ export class CreateDiscountProductComponent implements OnInit {
   message: string = "";
 
   constructor(
-    public dialogRef: MatDialogRef<CreateDiscountProductComponent>,
+    public dialogRef: MatDialogRef<CreateProductDiscountDialogComponent>,
   ) { }
 
   ngOnInit(): void {

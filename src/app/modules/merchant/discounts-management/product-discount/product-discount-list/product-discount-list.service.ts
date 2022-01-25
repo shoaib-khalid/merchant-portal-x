@@ -6,8 +6,7 @@ import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { ApiResponseModel, StoreDiscountProduct, StoreDiscountProductPagination } from './discountsproduct.types';
-import { TranslocoTestingModule } from '@ngneat/transloco';
+import { ApiResponseModel, StoreDiscountProduct, StoreDiscountProductPagination } from './product-discount-list.types';
 import { Product, ProductPagination } from 'app/core/product/inventory.types';
 
 @Injectable({
@@ -25,20 +24,21 @@ export class DiscountsProductService
     private _product: BehaviorSubject<Product | null> = new BehaviorSubject(null);
     private _products: BehaviorSubject<Product[]| null> = new BehaviorSubject(null);
     private _productPagination: BehaviorSubject<ProductPagination | null> = new BehaviorSubject(null);
-
-
-    // private static readonly SERVICE_URL = `${_apiServer.settings.apiServer.productService}/core2/tnt/dm/cms-posts`;
   
+    /**
+     * Constructor
+     */
     constructor(
         private _httpClient: HttpClient,
         private _apiServer: AppConfig,
         private _logging: LogService,
         private _jwt: JwtService,
-        private _fuseConfirmationService: FuseConfirmationService,
-    )
-
-    {
+    ){
     }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Accessors
+    // -----------------------------------------------------------------------------------------------------
 
     get discount$(): Observable<StoreDiscountProduct>
     {
@@ -99,62 +99,37 @@ export class DiscountsProductService
     // Product Discount
     // -----------------------------------------------------------------------------------------------------
 
-    getDiscountsProduct(discountId):Observable<StoreDiscountProduct>
+    getDiscountProductByDiscountId(discountId:string,page: number = 0, size: number = 5, order: 'asc' | 'desc' | '' = 'asc'): 
+        Observable<{ pagination: StoreDiscountProductPagination; products: StoreDiscountProduct[] }>
     {
-        return this._httpClient.get<any>(this.productService$ +'/stores/'+this.storeId$+'/discount/'+discountId+'/product', this.httpOptions$).pipe(
+        const headerParam = {
+            params: {
+                page        : '' + page,
+                pageSize    : '' + size,
+                sortingOrder: '' + order.toUpperCase(),
+            }
+        };
+
+        const header = Object.assign(this.httpOptions$, headerParam);
+
+        return this._httpClient.get<any>(this.productService$ +'/stores/'+this.storeId$+'/discount/'+discountId+'/product', header).pipe(
             tap((response) => {
 
-                this._logging.debug("Response from DiscountsService",response);
+                this._logging.debug("Response from ProductDiscountsService (getDiscountProductByDiscountId)", response);
 
-                
-            let _pagination = {
-                length: response.data.totalElements,
-                size: response.data.size,
-                page: response.data.number,
-                lastPage: response.data.totalPages,
-                startIndex: response.data.pageable.offset,
-                endIndex: response.data.pageable.offset + response.data.numberOfElements - 1
-            }
-            this._pagination.next(_pagination);
-            this._discountsProduct.next(response.data.content);
-
+                let _pagination = {
+                    length: response.data.totalElements,
+                    size: response.data.size,
+                    page: response.data.number,
+                    lastPage: response.data.totalPages,
+                    startIndex: response.data.pageable.offset,
+                    endIndex: response.data.pageable.offset + response.data.numberOfElements - 1
+                }
+                this._pagination.next(_pagination);
+                this._discountsProduct.next(response.data.content);
             })
         );
     }
-
-    getByQueryDiscountsProduct(discountId:string,page: number = 0, size: number = 5, order: 'asc' | 'desc' | '' = 'asc'):
-    Observable<{ pagination: StoreDiscountProductPagination; products: StoreDiscountProduct[] }>
-{
-
-    const headerParam = {
-   
-        params: {
-            page        : '' + page,
-            pageSize    : '' + size,
-            sortingOrder: '' + order.toUpperCase(),
-        }
-    };
-
-    const header = Object.assign(this.httpOptions$, headerParam);
-
-    return this._httpClient.get<any>(this.productService$ +'/stores/'+this.storeId$+'/discount/'+discountId+'/product', header).pipe(
-        tap((response) => {
-
-            this._logging.debug("RRRRRRRRRRRRRRRRRRRRRRRRt",response);
-
-            let _pagination = {
-                length: response.data.totalElements,
-                size: response.data.size,
-                page: response.data.number,
-                lastPage: response.data.totalPages,
-                startIndex: response.data.pageable.offset,
-                endIndex: response.data.pageable.offset + response.data.numberOfElements - 1
-            }
-            this._pagination.next(_pagination);
-            this._discountsProduct.next(response.data.content);
-        })
-    );
-}
 
     getDiscountById(id: string): Observable<StoreDiscountProduct>
     {
@@ -165,7 +140,7 @@ export class DiscountsProductService
                 // Find the discount
                 const discount = discounts.find(item => item.id === id) || null;
 
-                this._logging.debug("Response from DiscountsService (Current StoreDiscountProduct)",discount);
+                this._logging.debug("Response from ProductDiscountsService (getDiscountById)",discount);
 
                 // Update the discount
                 this._discountProduct.next(discount);
@@ -187,10 +162,11 @@ export class DiscountsProductService
 
     getStoreDiscountProduct(discountId: string) : Observable<ApiResponseModel<StoreDiscountProduct>>
     {
+        let response = this._httpClient.get<ApiResponseModel<StoreDiscountProduct>>(this.productService$ +'/stores/'+this.storeId$+'/discount/'+discountId+'/product',this.httpOptions$);
+        this._logging.debug("Response from ProductDiscountsService (getStoreDiscountProduct)", response);
 
-        return this._httpClient.get<ApiResponseModel<StoreDiscountProduct>>(this.productService$ +'/stores/'+this.storeId$+'/discount/'+discountId+'/product',this.httpOptions$);
+        return response;
     }
-
 
     createProductDiscount(discountId: string, discountProduct:StoreDiscountProduct ): Observable<StoreDiscountProduct>
     {
@@ -198,6 +174,7 @@ export class DiscountsProductService
             take(1),
             switchMap(_discountProduct => this._httpClient.post<any>(this.productService$ + '/stores/' + this.storeId$ + '/discount/' + discountId + '/product' , discountProduct , this.httpOptions$).pipe(
                 map((newdiscountProduct) => {
+                    this._logging.debug("Response from ProductDiscountsService (createProductDiscount)", newdiscountProduct);
 
                     // Return the new discount
                     return newdiscountProduct;
@@ -213,6 +190,8 @@ export class DiscountsProductService
             // switchMap(discounts => this._httpClient.post<InventoryDiscount>('api/apps/ecommerce/inventory/discount', {}).pipe(
             switchMap(discounts => this._httpClient.put<StoreDiscountProduct>(this.productService$ + '/stores/' + this.storeId$ + '/discount/'+ discountId + '/product', body , this.httpOptions$).pipe(
                 map((updatedDiscount) => {
+
+                    this._logging.debug("Response from ProductDiscountsService (updateProductDiscount)", updatedDiscount);
 
                     // // Find the index of the updated discount
                     const index = discounts.findIndex(el => el.id === body.id);
@@ -248,14 +227,7 @@ export class DiscountsProductService
             switchMap(discounts => this._httpClient.delete(this.productService$ +'/stores/'+this.storeId$+'/discount/'+discountId + '/product/'+discountProductId, this.httpOptions$).pipe(
                 map((status: number) => {
                     
-                    // // Find the index of the deleted discount
-                    // const index = discounts.findIndex(item => item.id === discountProductId);
-
-                    // // Delete the discount
-                    // discounts.splice(index, 1);
-
-                    // // Update the discounts
-                    // this._discountsProduct.next(discounts);
+                    this._logging.debug("Response from ProductDiscountsService (deleteDiscountProduct)", status);
 
                     let isDeleted:boolean = false;
                     if (status === 200) {
@@ -268,18 +240,18 @@ export class DiscountsProductService
             ))
         );
     }
-
     
     // -----------------------------------------------------------------------------------------------------
     // Product Service
     // -----------------------------------------------------------------------------------------------------
+    
     // this service we use for dropdown listing
     getProducts():Observable<ApiResponseModel<Product[]>>
     {
         return this._httpClient.get<ApiResponseModel<Product[]>>(this.productService$ +'/stores/'+this.storeId$+'/products', this.httpOptions$).pipe(
             tap((response : ApiResponseModel<Product[]>) => {
 
-                this._logging.debug("Response from Product Service in Product Discount Service",response);
+                this._logging.debug("Response from Product Service in ProductDiscountsService (getProducts)",response);
 
                 // this._products.next(response.data);
             })
@@ -291,7 +263,7 @@ export class DiscountsProductService
         return this._httpClient.get<ApiResponseModel<Product>>(this.productService$ +'/stores/'+this.storeId$+'/products/'+productId, this.httpOptions$).pipe(
             tap((response : ApiResponseModel<Product>) => {
 
-                this._logging.debug("Response from Product Service in Product Discount Service",response);
+                this._logging.debug("Response from Product Service in ProductDiscountsService (getProductById)",response);
 
                 // this._product.next(response.data);
             })
@@ -301,42 +273,40 @@ export class DiscountsProductService
 
     getByQueryProducts(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', status: string = 'ACTIVE,INACTIVE',categoryId?:string):
     Observable<{ pagination: ProductPagination; products: Product[] }>
-{
+    {
 
-    const headerParam = {
-   
-        params: {
-            page        : '' + page,
-            pageSize    : '' + size,
-            sortByCol   : '' + sort,
-            sortingOrder: '' + order.toUpperCase(),
-            name        : '' + search,
-            status      : '' + status
-        }
-    };
-    if (categoryId) {
-        headerParam.params["categoryId"] = categoryId;
-      }
-    const header = Object.assign(this.httpOptions$, headerParam);
-
-    return this._httpClient.get<any>(this.productService$ +'/stores/'+this.storeId$+'/products', header).pipe(
-        tap((response) => {
-
-            this._logging.debug("Response from ProductsService",response);
-
-            let _productPagination = {
-                length: response.data.totalElements,
-                size: response.data.size,
-                page: response.data.number,
-                lastPage: response.data.totalPages,
-                startIndex: response.data.pageable.offset,
-                endIndex: response.data.pageable.offset + response.data.numberOfElements - 1
+        const headerParam = {
+            params: {
+                page        : '' + page,
+                pageSize    : '' + size,
+                sortByCol   : '' + sort,
+                sortingOrder: '' + order.toUpperCase(),
+                name        : '' + search,
+                status      : '' + status
             }
-            this._productPagination.next(_productPagination);
-            this._products.next(response.data.content);
-        })
-    );
-}
+        };
 
+        if (categoryId) {
+            headerParam.params["categoryId"] = categoryId;
+        }
 
+        const header = Object.assign(this.httpOptions$, headerParam);
+        return this._httpClient.get<any>(this.productService$ +'/stores/'+this.storeId$+'/products', header).pipe(
+            tap((response) => {
+
+                this._logging.debug("Response from Product Service in ProductDiscountsService (getByQueryProducts)",response);
+
+                let _productPagination = {
+                    length: response.data.totalElements,
+                    size: response.data.size,
+                    page: response.data.number,
+                    lastPage: response.data.totalPages,
+                    startIndex: response.data.pageable.offset,
+                    endIndex: response.data.pageable.offset + response.data.numberOfElements - 1
+                }
+                this._productPagination.next(_productPagination);
+                this._products.next(response.data.content);
+            })
+        );
+    }
 }

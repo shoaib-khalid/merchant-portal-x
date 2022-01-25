@@ -238,10 +238,6 @@ export class OrdersListService
 
                     // Find the index of the updated product
                     const index = orders.findIndex(item => item.order.id === orderId);
-
-                    console.log("huhuh",response["data"])
-                    // let newResponse = orders[index];
-                    // newResponse.currentComp
                     
                     // Update the product
                     orders[index] = { ...orders[index], ...response["data"]};

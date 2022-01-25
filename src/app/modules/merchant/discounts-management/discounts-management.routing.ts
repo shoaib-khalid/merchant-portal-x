@@ -1,8 +1,8 @@
 import { Route } from '@angular/router';
-import { DiscountsComponent } from 'app/modules/merchant/discounts-management/list/discounts.component';
-import { DiscountsProductResolver, DiscountsResolver, InventoryProductsResolver } from 'app/modules/merchant/discounts-management/list/discounts.resolvers';
+import { OrderDiscountListComponent } from 'app/modules/merchant/discounts-management/order-discount/order-discount-list/order-discount-list.component';
+import { DiscountsProductResolver, DiscountsResolver, InventoryProductsResolver } from 'app/modules/merchant/discounts-management/order-discount/order-discount-list/order-discount-list.resolvers';
 import { InventoryCategoriesResolver } from '../products-management/inventory/inventory.resolvers';
-import { DiscountsProductListComponent } from './product-list/discounts-product-list.component';
+import { ProductDiscountListComponent } from './product-discount/product-discount-list/product-discount-list.component';
 
 
 export const discountsManagementRoutes: Route[] = [
@@ -13,11 +13,11 @@ export const discountsManagementRoutes: Route[] = [
     },
     {
         path     : 'list',
-        component: DiscountsComponent,
+        component: OrderDiscountListComponent,
         children : [
             {
                 path     : '',
-                component: DiscountsComponent,
+                component: OrderDiscountListComponent,
                 resolve  : {
                     discounts  : DiscountsResolver
                 }
@@ -31,11 +31,11 @@ export const discountsManagementRoutes: Route[] = [
     },
     {
         path     : 'product-list',
-        component: DiscountsProductListComponent,
+        component: ProductDiscountListComponent,
         children : [
             {
                 path     : '',
-                component: DiscountsProductListComponent,
+                component: ProductDiscountListComponent,
                 resolve  : {
                     discountsproduct  : DiscountsProductResolver,
                     categories : InventoryCategoriesResolver,

@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { DiscountsService } from 'app/modules/merchant/discounts-management/list/discounts.service';
-import { Discount, DiscountPagination } from 'app/modules/merchant/discounts-management/list/discounts.types';
+import { DiscountsService } from 'app/modules/merchant/discounts-management/order-discount/order-discount-list/order-discount-list.service';
+import { Discount, DiscountPagination } from 'app/modules/merchant/discounts-management/order-discount/order-discount-list/order-discount-list.types';
 import { Product, ProductPagination } from 'app/core/product/inventory.types';
-import { DiscountsProductService } from '../product-list/discountsproduct.service';
+import { DiscountsProductService } from '../../product-discount/product-discount-list/product-discount-list.service';
 
 @Injectable({
     providedIn: 'root'

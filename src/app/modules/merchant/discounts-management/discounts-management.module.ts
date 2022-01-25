@@ -17,20 +17,21 @@ import { QuillModule } from 'ngx-quill';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SharedModule } from 'app/shared/shared.module';
-import { DiscountsComponent } from 'app/modules/merchant/discounts-management/list/discounts.component';
+import { OrderDiscountListComponent } from 'app/modules/merchant/discounts-management/order-discount/order-discount-list/order-discount-list.component';
 import { discountsManagementRoutes } from 'app/modules/merchant/discounts-management/discounts-management.routing';
-import { CreateDiscountComponent } from './create-discount/create-discount.component';
-import { DiscountsProductListComponent } from './product-list/discounts-product-list.component';
-import { CreateDiscountProductComponent } from './create-product-discount/create-product-discount.component';
-import { DialogProductListComponent } from './dialog-product-list/dialog-product-list.component';
+import { CreateOrderDiscountDialogComponent } from './order-discount/create-order-discount/create-order-discount.component';
+import { ProductDiscountListComponent } from './product-discount/product-discount-list/product-discount-list.component';
+import { CreateProductDiscountDialogComponent } from './product-discount/create-product-discount/create-product-discount.component';
+import { ProductListDialogComponent } from './product-discount/product-list-dialog/product-list-dialog.component';
 
 @NgModule({
     declarations: [
-        DiscountsComponent,
-        DiscountsProductListComponent,
-        CreateDiscountComponent,
-        CreateDiscountProductComponent,
-        DialogProductListComponent,
+        OrderDiscountListComponent,
+        CreateOrderDiscountDialogComponent,
+        
+        ProductDiscountListComponent,
+        CreateProductDiscountDialogComponent,
+        ProductListDialogComponent,
     ],
     imports     : [
         RouterModule.forChild(discountsManagementRoutes),

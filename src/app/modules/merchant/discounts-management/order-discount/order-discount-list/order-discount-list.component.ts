@@ -6,30 +6,30 @@ import { merge, Observable, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { Discount, DiscountPagination, StoreDiscountTierList } from 'app/modules/merchant/discounts-management/list/discounts.types';
-import { DiscountsService } from 'app/modules/merchant/discounts-management/list/discounts.service';
-import { CreateDiscountComponent } from '../create-discount/create-discount.component';
+import { Discount, DiscountPagination, StoreDiscountTierList } from 'app/modules/merchant/discounts-management/order-discount/order-discount-list/order-discount-list.types';
+import { DiscountsService } from 'app/modules/merchant/discounts-management/order-discount/order-discount-list/order-discount-list.service';
+import { CreateOrderDiscountDialogComponent } from '../create-order-discount/create-order-discount.component';
 import { MatDialog } from '@angular/material/dialog';
 
 @Component({
-    selector       : 'discounts',
-    templateUrl    : './discounts.component.html',
+    selector       : 'order-discount-list.',
+    templateUrl    : './order-discount-list.component.html',
     styles         : [
         /* language=SCSS */
         `
-            .inventory-grid {
-                grid-template-columns: 48px 112px auto 40px;
+            .order-discount-grid {
+                grid-template-columns: 72px auto 40px;
 
                 @screen sm {
-                    grid-template-columns: 48px 112px auto 112px 72px;
+                    grid-template-columns: 48px 112px auto 112px 40px;
                 }
 
                 @screen md {
-                    grid-template-columns: 48px 112px auto 150px 96px;
+                    grid-template-columns: 48px 112px auto 150px 40px;
                 }
 
                 @screen lg {
-                    grid-template-columns: 48px 112px auto 180px 180px 180px 96px 72px;
+                    grid-template-columns: 48px 112px auto 48px 112px 112px 96px 40px;
                 }
             }
         `
@@ -38,7 +38,7 @@ import { MatDialog } from '@angular/material/dialog';
     changeDetection: ChangeDetectionStrategy.OnPush,
     animations     : fuseAnimations
 })
-export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
+export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDestroy
 {
     @ViewChild(MatPaginator) private _paginator: MatPaginator;
     @ViewChild(MatSort) private _sort: MatSort;
@@ -279,10 +279,10 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
      */
     createDiscount(): void
     {
-        const dialogRef = this._dialog.open(CreateDiscountComponent, { disableClose: true });
+        const dialogRef = this._dialog.open(CreateOrderDiscountDialogComponent, { disableClose: true });
         dialogRef.afterClosed().subscribe(result => {
             if (result.status === true) {
-                console.log("result", result)
+
                 // this will remove the item from the object
                 const createDiscountBody  = {
                     discountName: result.discountName,
@@ -308,25 +308,24 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
     
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
-                }, error => {
-                    console.log(error);
 
-                        if (error.status === 417) {
-                            // Open the confirmation dialog
-                            const confirmation = this._fuseConfirmationService.open({
-                                title  : 'Discount date overlap',
-                                message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
-                                actions: {
-                                    confirm: {
-                                        label: 'Ok'
-                                    },
-                                    cancel : {
-                                        show : false,
-                                    }
+                }, (error) => {
+                    console.error(error);
+                    if (error.status === 417) {
+                        // Open the confirmation dialog
+                        const confirmation = this._fuseConfirmationService.open({
+                            title  : 'Discount date overlap',
+                            message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
+                            actions: {
+                                confirm: {
+                                    label: 'Ok'
+                                },
+                                cancel : {
+                                    show : false,
                                 }
-                            });
-                        }
-
+                            }
+                        });
+                    }
                 });
             }
         });
@@ -339,29 +338,30 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
     {
 
         // Update the discount on the server
-        this._discountService.updateDiscount(this.selectedDiscountForm.value.id, this.selectedDiscountForm.value).subscribe(() => {
-            // Show a success message
-            this.showFlashMessage('success');
-        }, error => {
-            console.log(error);
+        this._discountService.updateDiscount(this.selectedDiscountForm.value.id, this.selectedDiscountForm.value)
+            .subscribe(() => {
+                // Show a success message
+                this.showFlashMessage('success');
+            }, error => {
+                console.error(error);
 
-                if (error.status === 417) {
-                    // Open the confirmation dialog
-                    const confirmation = this._fuseConfirmationService.open({
-                        title  : 'Discount date overlap',
-                        message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
-                        actions: {
-                            confirm: {
-                                label: 'Ok'
-                            },
-                            cancel : {
-                                show : false,
+                    if (error.status === 417) {
+                        // Open the confirmation dialog
+                        const confirmation = this._fuseConfirmationService.open({
+                            title  : 'Discount date overlap',
+                            message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
+                            actions: {
+                                confirm: {
+                                    label: 'Ok'
+                                },
+                                cancel : {
+                                    show : false,
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 }
-            }
-        );
+            );
     }
 
     /**
@@ -408,25 +408,23 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
             startTotalSalesAmount: this.startTotalSalesAmount,
         }
 
-         // Create the discount
-         this._discountService.createDiscountTier(this.selectedDiscount.id,discountTier).subscribe((response) => {
-            
-            this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
+        // Create the discount
+        this._discountService.createDiscountTier(this.selectedDiscount.id,discountTier)
+            .subscribe((response) => {
+                
+                this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
 
-            // since backend give full discount tier list .. (not the only one that have been created only)
-            this.storeDiscountTierList.clear();
+                // since backend give full discount tier list .. (not the only one that have been created only)
+                this.storeDiscountTierList.clear();
 
-            response["data"].forEach(item => {
-                this.storeDiscountTierList.push(this._formBuilder.group(item));
-            });
+                response["data"].forEach(item => {
+                    this.storeDiscountTierList.push(this._formBuilder.group(item));
+                });
 
-
-
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
-        }, error => {
-            console.log(error);
-
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            }, (error) => {
+                console.error(error);
                 if (error.status === 417) {
                     // Open the confirmation dialog
                     const confirmation = this._fuseConfirmationService.open({
@@ -442,8 +440,7 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
                         }
                     });
                 }
-            }
-        );
+            });
     }
 
     deleteSelectedDiscountTier(discountTierId: string): void
@@ -477,9 +474,6 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
                         this.storeDiscountTierList.removeAt(index);
                     }
 
-                    // console.log("this.storeDiscountTierList.value", this.storeDiscountTierList.value);
-                    // this.storeDiscountTierList. patchValue(this.storeDiscountTierList.value);
-
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
                 });
@@ -495,27 +489,23 @@ export class DiscountsComponent implements OnInit, AfterViewInit, OnDestroy
             // Show a success message
             this.showFlashMessage('success');
         }, error => {
-            console.log(error);
-
-                if (error.status === 417) {
-                    // Open the confirmation dialog
-                    const confirmation = this._fuseConfirmationService.open({
-                        title  : 'Minimum subtotal overlap',
-                        message: 'Your minimum subtotal entered overlapping with existing amount! Please change your minimum subtotal',
-                        actions: {
-                            confirm: {
-                                label: 'Ok'
-                            },
-                            cancel : {
-                                show : false,
-                            }
+            console.error(error);
+            if (error.status === 417) {
+                // Open the confirmation dialog
+                const confirmation = this._fuseConfirmationService.open({
+                    title  : 'Minimum subtotal overlap',
+                    message: 'Your minimum subtotal entered overlapping with existing amount! Please change your minimum subtotal',
+                    actions: {
+                        confirm: {
+                            label: 'Ok'
+                        },
+                        cancel : {
+                            show : false,
                         }
-                    });
-                }
+                    }
+                });
             }
-        );
-
-    
+        });
     }
     
     validateDiscountTier(type, value){

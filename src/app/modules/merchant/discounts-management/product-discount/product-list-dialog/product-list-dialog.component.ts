@@ -10,17 +10,17 @@ import { InventoryService } from 'app/core/product/inventory.service';
 import { Product, ProductCategory, ProductPagination } from 'app/core/product/inventory.types';
 import { fromEvent, merge, Observable, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
-import { DiscountsProductService } from '../product-list/discountsproduct.service';
-import { ApiResponseModel, StoreDiscountProduct, StoreDiscountProductPagination } from '../product-list/discountsproduct.types';
+import { DiscountsProductService } from '../product-discount-list/product-discount-list.service';
+import { ApiResponseModel, StoreDiscountProduct, StoreDiscountProductPagination } from '../product-discount-list/product-discount-list.types';
 
 @Component({
-  selector: 'dialog-product-list',
-  templateUrl: './dialog-product-list.component.html',
+  selector: 'product-list-dialog',
+  templateUrl: './product-list-dialog.component.html',
   encapsulation  : ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations     : fuseAnimations,
 })
-export class DialogProductListComponent implements OnInit {
+export class ProductListDialogComponent implements OnInit {
   
   @ViewChild('_paginator') private _paginator: MatPaginator;//paginator for product
   @ViewChild('_paginatorDiscountProduct') private _paginatorDiscountProduct: MatPaginator;
@@ -61,7 +61,7 @@ export class DialogProductListComponent implements OnInit {
 
 
   constructor(
-    public dialogRef: MatDialogRef<DialogProductListComponent>,
+    public dialogRef: MatDialogRef<ProductListDialogComponent>,
     private _inventoryService: InventoryService ,
     private _discountProductService : DiscountsProductService,
     private _changeDetectorRef: ChangeDetectorRef,
@@ -165,7 +165,7 @@ export class DialogProductListComponent implements OnInit {
     
              this._paginatorDiscountProduct.page.pipe(
                   switchMap(() => {
-                      return this._discountProductService.getByQueryDiscountsProduct(this.discountId, this._paginatorDiscountProduct.pageIndex, this._paginatorDiscountProduct.pageSize);
+                      return this._discountProductService.getDiscountProductByDiscountId(this.discountId, this._paginatorDiscountProduct.pageIndex, this._paginatorDiscountProduct.pageSize);
                   }),
                   map(() => {
                       this.isLoading = false;
@@ -274,9 +274,8 @@ export class DialogProductListComponent implements OnInit {
 
                 });
 
-                 
                 setTimeout(() => {
-                    return this._discountProductService.getByQueryDiscountsProduct(this.discountId, 0, 5).subscribe();
+                    return this._discountProductService.getDiscountProductByDiscountId(this.discountId, 0, 5).subscribe();
                     }, 1000);
             }
         });
@@ -360,7 +359,7 @@ export class DialogProductListComponent implements OnInit {
        await this.insertProductDiscount(itemCodes,discountId);
        
        setTimeout(() => {
-        return this._discountProductService.getByQueryDiscountsProduct(this.discountId, 0, 5).subscribe();
+        return this._discountProductService.getDiscountProductByDiscountId(this.discountId, 0, 5).subscribe();
         }, 1000);
 
         return;

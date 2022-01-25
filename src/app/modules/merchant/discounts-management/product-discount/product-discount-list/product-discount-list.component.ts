@@ -7,36 +7,32 @@ import { fromEvent, merge, Observable, Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, startWith, switchMap, takeUntil } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { Discount, DiscountPagination, StoreDiscountTierList } from 'app/modules/merchant/discounts-management/list/discounts.types';
-import { DiscountsService } from 'app/modules/merchant/discounts-management/list/discounts.service';
+import { Discount, DiscountPagination, StoreDiscountTierList } from 'app/modules/merchant/discounts-management/order-discount/order-discount-list/order-discount-list.types';
+import { DiscountsService } from 'app/modules/merchant/discounts-management/order-discount/order-discount-list/order-discount-list.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { CreateDiscountProductComponent } from '../create-product-discount/create-product-discount.component';
+import { CreateProductDiscountDialogComponent } from '../create-product-discount/create-product-discount.component';
 import { Product, ProductCategory, ProductInventory, ProductPagination } from 'app/core/product/inventory.types';
 import { InventoryService } from 'app/core/product/inventory.service';
-import { DiscountsProductService } from './discountsproduct.service';
-import { ApiResponseModel, StoreDiscountProduct } from './discountsproduct.types';
-import { DialogProductListComponent } from '../dialog-product-list/dialog-product-list.component';
+import { DiscountsProductService } from './product-discount-list.service';
+import { ApiResponseModel, StoreDiscountProduct } from './product-discount-list.types';
+import { ProductListDialogComponent } from '../product-list-dialog/product-list-dialog.component';
 import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dialog/dialog.component';
 
 @Component({
-    selector       : 'discounts-product-list',
-    templateUrl    : './discounts-product-list.component.html',
+    selector       : 'product-discount-list',
+    templateUrl    : './product-discount-list.component.html',
     styles         : [
         /* language=SCSS */
         `
-            .inventory-grid {
-                grid-template-columns: 48px 112px auto 40px;
+            .product-discount-grid {
+                grid-template-columns: 72px auto 40px;
 
                 @screen sm {
-                    grid-template-columns: 48px 112px auto 112px 72px;
-                }
-
-                @screen md {
-                    grid-template-columns: 48px 112px auto 150px 96px;
+                    grid-template-columns: 48px 112px auto 72px;
                 }
 
                 @screen lg {
-                    grid-template-columns: 48px 112px auto 180px 180px 180px 96px 72px;
+                    grid-template-columns: 48px 112px auto 180px 180px 180px 72px;
                 }
             }
         `
@@ -45,7 +41,7 @@ import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dia
     changeDetection: ChangeDetectionStrategy.OnPush,
     animations     : fuseAnimations
 })
-export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnDestroy
+export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDestroy
 {
     @ViewChild(MatPaginator) private _paginator: MatPaginator;
     @ViewChild(MatSort) private _sort: MatSort;
@@ -283,6 +279,10 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         this._unsubscribeAll.complete();
     }
 
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public Method
+    // -----------------------------------------------------------------------------------------------------
+
     toggleDetails(discountId: string): void
     {
         // If the discount is already selected...
@@ -293,25 +293,20 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
             return;
         }
 
-        this._discountProductService.getByQueryDiscountsProduct(discountId,0,5)
-        .subscribe((response) => {
-
-          // Mark for check
-          this._changeDetectorRef.markForCheck();
-
-        });
+        this._discountProductService.getDiscountProductByDiscountId(discountId,0,5)
+            .subscribe((response) => {
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
 
 
         this._discountProductService.getStoreDiscountProduct(discountId)
-        .subscribe((response: ApiResponseModel<StoreDiscountProduct>)=>{
+            .subscribe((response: ApiResponseModel<StoreDiscountProduct>)=>{
+                this.storeDiscountProduct = response.data;
 
-            this.storeDiscountProduct = response.data;
-
-            this._changeDetectorRef.markForCheck();
-
-        }
-
-        )
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
 
         // Get the discount by id
         this._discountService.getDiscountById(discountId)
@@ -334,7 +329,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                         this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
                         this.storeDiscountTierList.push(this._formBuilder.group(item));
                     });
-                } else{
+                } else {
                     this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
                     this.storeDiscountTierList.push(this._formBuilder.group(
                         {
@@ -347,10 +342,9 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
                 this._discountService.getDiscountsTier(discountId)
                     .subscribe((response) => {
-
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
                     });
-
-           
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -365,7 +359,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
     createDiscount(): void
     {
-        const dialogRef = this._dialog.open(CreateDiscountProductComponent, { disableClose: true });
+        const dialogRef = this._dialog.open(CreateProductDiscountDialogComponent, { disableClose: true });
         dialogRef.afterClosed().subscribe(result => {
             if (result.status === true) {
                 // this will remove the item from the object
@@ -418,31 +412,23 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
 
     updateSelectedDiscount(): void
     {
-
         this.checkDate();
-        if(this.checkdate === true){
+        if(this.checkdate === true) {
 
             // Update the  main discount on the server
-            this._discountService.updateDiscount(this.selectedDiscountForm.value.id, this.selectedDiscountForm.value).subscribe(() => {
-                // Show a success message
-                this.showFlashMessage('success');
-            }, error => {
-
+            this._discountService.updateDiscount(this.selectedDiscountForm.value.id, this.selectedDiscountForm.value)
+                .subscribe(() => {
+                    // Show a success message
+                    this.showFlashMessage('success');
+                }, error => {
                     if (error.status === 417) {
                         // Open the confirmation dialog
                         this.displayMessage('Discount date overlap','Your discount date range entered overlapping with existing discount date! Please change your date range','Ok',false);
-
                     }
-                }
-            );
-
+                });
         } else{
-
             this.displayMessage('Date/time range incorrect','Please change your date range or time','Ok',false);
-
         }
-
- 
     }
 
     /**
@@ -452,42 +438,52 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
     {
 
         //check if the there is product disocunt , if yes just show pop up to delete the product level first
-        if(this.storeDiscountProduct['content'].length>0){
-            
+        if (this.storeDiscountProduct['content'].length > 0) {
             this.displayMessage('Cannot delete','Delete the selected product first before delete this.','Ok',false);
-
-        } else{
-
-                    // Open the confirmation dialog
+        } else {
+            // Open the confirmation dialog
             const confirmation = this.displayMessage('Delete discount','Are you sure you want to remove this discount? This action cannot be undone!','Delete',true);
            
+            // Subscribe to the confirmation dialog closed action
+            confirmation.afterClosed().subscribe((result) => {
+                // If the confirm button pressed...
+                if ( result === 'confirmed' )
+                {
+                    // Get the discount object
+                    const discount = this.selectedDiscountForm.getRawValue();
 
-        // Subscribe to the confirmation dialog closed action
-        confirmation.afterClosed().subscribe((result) => {
-
-            // If the confirm button pressed...
-            if ( result === 'confirmed' )
-            {
-
-                // Get the discount object
-                const discount = this.selectedDiscountForm.getRawValue();
-
-                // Delete the discount on the server
-                this._discountService.deleteDiscount(discount.id).subscribe(() => {     
-                    // Close the details
-                    this.closeDetails();
-                }, error => {
-
-        
-                });
-            }
-        });
-
-
+                    // Delete the discount on the server
+                    this._discountService.deleteDiscount(discount.id).subscribe(() => {     
+                        // Close the details
+                        this.closeDetails();
+                    });
+                }
+            });
         }
-  
-
     }
+
+    dialogProductList(): void
+    {
+        //we pass data in order to use the value in DialogProductListComponent
+        const dialogRef = this._dialog.open(
+        ProductListDialogComponent, 
+        {
+            width: '90vw',
+            maxWidth: '90vw', 
+            disableClose: true, 
+            data:{discountId:this.selectedDiscountForm.get('id').value} 
+        });
+     
+    }
+    
+    trackByFn(index: number, item: any): any
+    {
+        return item.id || index;
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Private Method
+    // -----------------------------------------------------------------------------------------------------
 
     showFlashMessage(type: 'success' | 'error'): void
     {
@@ -507,45 +503,6 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
         }, 3000);
     }
 
-    trackByFn(index: number, item: any): any
-    {
-        return item.id || index;
-    }
-
-    // This fuction used to sort object
-    dynamicSort(property) {
-        var sortOrder = 1;
-        if(property[0] === "-") {
-            sortOrder = -1;
-            property = property.substr(1);
-        }
-        return function (a,b) {
-            /* next line works with strings and numbers, 
-            * and you may want to customize it to your needs
-            */
-
-            let aProp = a[property] ? a[property] : '';
-            let bProp = b[property] ? b[property] : '';
-
-            var result = ( aProp.toLowerCase() < bProp.toLowerCase()) ? -1 : (aProp.toLowerCase() > bProp.toLowerCase()) ? 1 : 0;
-            return (result * sortOrder);
-        }
-    }
-
-    dialogProductList(): void
-    {
-        //we pass data in order to use the value in DialogProductListComponent
-        const dialogRef = this._dialog.open(
-        DialogProductListComponent, 
-        {
-            width: '90vw',
-            maxWidth: '90vw', 
-            disableClose: true, 
-            data:{discountId:this.selectedDiscountForm.get('id').value} 
-        });
-     
-    }
-
     checkDate(){
                
            if (this.selectedDiscountForm.get('startDate').value < this.selectedDiscountForm.get('endDate').value){
@@ -562,6 +519,25 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
       return this.checkdate; 
     } 
     
+    // This fuction used to sort object
+    dynamicSort(property) {
+        var sortOrder = 1;
+        if(property[0] === "-") {
+            sortOrder = -1;
+            property = property.substr(1);
+        }
+        return function (a,b) {
+            /* next line works with strings and numbers, 
+            * and you may want to customize it to your needs
+            */
+            let aProp = a[property] ? a[property] : '';
+            let bProp = b[property] ? b[property] : '';
+
+            var result = ( aProp.toLowerCase() < bProp.toLowerCase()) ? -1 : (aProp.toLowerCase() > bProp.toLowerCase()) ? 1 : 0;
+            return (result * sortOrder);
+        }
+    }
+
     displayMessage(getTitle:string,getMessage:string,getLabelConfirm:string,showCancel:boolean):MatDialogRef<FuseConfirmationDialogComponent,any>{
 
         const confirmation = this._fuseConfirmationService.open({
@@ -576,9 +552,7 @@ export class DiscountsProductListComponent implements OnInit, AfterViewInit, OnD
                 }
             }
         });
-
        return confirmation;
-
-   }
+    }
 
 }
