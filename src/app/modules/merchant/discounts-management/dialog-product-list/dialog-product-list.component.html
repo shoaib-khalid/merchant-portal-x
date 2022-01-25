@@ -40,7 +40,9 @@
                         <tr class="border-b border-gray-300 pt-2 pl-2 sm:my-12">
                             <th class="text-left">Select</th>
                             <th class="text-left">Product Name</th>
-                            <th class="text-left"> Original Price</th>
+                            <th class="text-left">Original Price</th>
+                            <th class="text-left">Have Variant</th>
+
                         </tr>
                         <tr class="border-b border-gray-300 pt-2 pl-2" *ngFor="let productList of products;let i =index;" >
                             <td>
@@ -55,6 +57,19 @@
                             </td>
                             <td>{{productList.name}}</td>
                             <td>{{productList.productInventories[0].price}}</td>
+                            <td>
+
+                                <ng-container *ngIf="productList.productVariants.length > 0">
+                                    <mat-icon
+                                        class="text-green-400 icon-size-5"
+                                        [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="productList.productVariants.length === 0">
+                                    <mat-icon
+                                        class="text-gray-400 icon-size-5"
+                                        [svgIcon]="'heroicons_solid:x'"></mat-icon>
+                                </ng-container>
+                            </td>
         
                         </tr>
                     </table>
@@ -113,8 +128,8 @@
                                 </div>
                               
                             </td>
-                            <td>
-                                <div class="flex flex-wrap items-center justify-center ">
+                            <td class="flex flex-wrap items-center justify-center">
+                           
                                     <input
                                     class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                     type="button"
@@ -123,7 +138,7 @@
                                     >
                                     <label
                                     *ngIf="!editModeDiscountProduct[i]"
-                                    class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
+                                    class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 my-1.5"
                                     [for]="'edit-button'+productDiscountList.id"
                                     matRipple>
                                     <mat-icon
@@ -141,7 +156,7 @@
                                     >
                                     <label
                                         *ngIf="editModeDiscountProduct[i]"
-                                        class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
+                                        class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 my-1.5"
                                         [for]="'update-button'+productDiscountList.id"
                                         matRipple>
                                         <mat-icon
@@ -157,7 +172,7 @@
                                     (click)="deleteStoreProductDiscount(productDiscountList)"
                                     >
                                     <label
-                                        class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-warn hover:bg-warn-700 mb-3"
+                                        class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-warn hover:bg-warn-700 my-1.5"
                                         [for]="'delete-button'+productDiscountList.id"
                                         matRipple>
                                         <mat-icon
@@ -165,7 +180,7 @@
                                             [svgIcon]="'heroicons_outline:trash'">
                                         </mat-icon>
                                     </label>
-                                </div>
+                               
                             </td>
         
                         </tr>
@@ -191,7 +206,7 @@
             
         </div>  
         <!-- Close Button -->
-        <div class="flex items-center justify-between w-full justify-end">
+        <div class="flex items-center justify-between w-full justify-end p-6">
             <div></div>
             <div class="flex items-center">
                 <button

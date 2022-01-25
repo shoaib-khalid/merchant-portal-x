@@ -286,8 +286,8 @@ export class DialogProductListComponent implements OnInit {
     // Edit discount product
     editStoreProductDiscount(productDiscount){
 
-        if(this.editDiscountAmount>100){
-            const confirmation = this.displayMessage('Cannot more than 100','Please change the discount amount','Ok',false);
+        if(this.editDiscountAmount>100||this.editDiscountAmount<0){
+            const confirmation = this.displayMessage('Cannot more than 100 or less than 0','Please change the discount amount','Ok',false);
 
         } 
         else{
