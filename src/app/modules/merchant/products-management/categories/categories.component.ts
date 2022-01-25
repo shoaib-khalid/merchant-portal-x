@@ -10,7 +10,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { ProductCategory, ProductCategoryPagination } from 'app/core/product/inventory.types';
 import { AddCategoryComponent } from '../add-category/add-category.component';
-import { DiscountPagination } from '../../discounts-management/list/discounts.types';
 import { Product } from 'app/core/product/inventory.types';
 
 @Component({

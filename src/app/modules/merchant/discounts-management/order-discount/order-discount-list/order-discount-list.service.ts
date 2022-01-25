@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
-import { Discount, DiscountPagination, StoreDiscountTierList } from 'app/modules/merchant/discounts-management/list/discounts.types';
+import { Discount, DiscountPagination, StoreDiscountTierList } from 'app/modules/merchant/discounts-management/order-discount/order-discount-list/order-discount-list.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service';
@@ -124,6 +124,56 @@ export class DiscountsService
                 sortingOrder: '' + order.toUpperCase(),
                 discountName: '' + search,
                 isActive: '' + status
+            }
+        };
+
+        return this._httpClient.get<any>(productService +'/stores/'+this.storeId$+'/discount/search', header).pipe(
+            tap((response) => {
+
+                this._logging.debug("Response from DiscountsService",response);
+
+                let _pagination = {
+                    length: response.data.totalElements,
+                    size: response.data.size,
+                    page: response.data.number,
+                    lastPage: response.data.totalPages,
+                    startIndex: response.data.pageable.offset,
+                    endIndex: response.data.pageable.offset + response.data.numberOfElements - 1
+                }
+                // let _pagination = { length: 0, size: 0, page: 0, lastPage: 0, startIndex: 0, endIndex: 0 };
+                this._pagination.next(_pagination);
+                // this._discounts.next(response.data);
+                this._discounts.next(response.data.content);
+
+            })
+        );
+    }
+
+       /**
+     * Get query discounts
+     *
+     * @param page
+     * @param size
+     * @param sort
+     * @param order
+     * @param search
+     */
+    getByQueryDiscounts(page: number = 0, size: number = 20, sort: string = 'startDate', order: 'asc' | 'desc' | '' = 'asc', search: string = '', status: string = '',discounttype:string=''):
+        Observable<{ pagination: DiscountPagination; discounts: Discount[] }>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                page: '' + page,
+                pageSize: '' + size,
+                sortByCol: '' + sort,
+                sortingOrder: '' + order.toUpperCase(),
+                discountName: '' + search,
+                isActive: '' + status,
+                discountType: '' + discounttype,
             }
         };
 

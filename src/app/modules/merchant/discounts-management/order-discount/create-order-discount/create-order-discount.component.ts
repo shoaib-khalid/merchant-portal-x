@@ -2,10 +2,10 @@ import { Component, Inject, OnInit } from '@angular/core';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 
 @Component({
-  selector: 'dialog-create-discount',
-  templateUrl: './create-discount.component.html'
+  selector: 'dialog-create-order-discount',
+  templateUrl: './create-order-discount.component.html'
 })
-export class CreateDiscountComponent implements OnInit {
+export class CreateOrderDiscountDialogComponent implements OnInit {
 
   disabledProceed: boolean = true;
 
@@ -40,7 +40,7 @@ export class CreateDiscountComponent implements OnInit {
   message: string = "";
 
   constructor(
-    public dialogRef: MatDialogRef<CreateDiscountComponent>,
+    public dialogRef: MatDialogRef<CreateOrderDiscountDialogComponent>,
   ) { }
 
   ngOnInit(): void {

@@ -11,19 +11,27 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatRippleModule } from '@angular/material/core';
 import { MatSortModule } from '@angular/material/sort';
 import { MatSelectModule } from '@angular/material/select';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTableModule } from '@angular/material/table';
 import { QuillModule } from 'ngx-quill';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SharedModule } from 'app/shared/shared.module';
-import { DiscountsComponent } from 'app/modules/merchant/discounts-management/list/discounts.component';
+import { OrderDiscountListComponent } from 'app/modules/merchant/discounts-management/order-discount/order-discount-list/order-discount-list.component';
 import { discountsManagementRoutes } from 'app/modules/merchant/discounts-management/discounts-management.routing';
-import { CreateDiscountComponent } from './create-discount/create-discount.component';
+import { CreateOrderDiscountDialogComponent } from './order-discount/create-order-discount/create-order-discount.component';
+import { ProductDiscountListComponent } from './product-discount/product-discount-list/product-discount-list.component';
+import { CreateProductDiscountDialogComponent } from './product-discount/create-product-discount/create-product-discount.component';
+import { ProductListDialogComponent } from './product-discount/product-list-dialog/product-list-dialog.component';
 
 @NgModule({
     declarations: [
-        DiscountsComponent,
-        CreateDiscountComponent
+        OrderDiscountListComponent,
+        CreateOrderDiscountDialogComponent,
+        
+        ProductDiscountListComponent,
+        CreateProductDiscountDialogComponent,
+        ProductListDialogComponent,
     ],
     imports     : [
         RouterModule.forChild(discountsManagementRoutes),
@@ -39,6 +47,7 @@ import { CreateDiscountComponent } from './create-discount/create-discount.compo
         MatRippleModule,
         MatSortModule,
         MatSelectModule,
+        MatAutocompleteModule,
         MatTableModule,
         MatSlideToggleModule,
         MatTooltipModule,
