@@ -244,7 +244,6 @@ export class OrderInvoiceComponent implements OnInit {
               (this.invoiceForm.get('items') as FormArray).push(itemFormGroup)
               
             })
-            console.log('FORM', this.invoiceForm.value);
             
 
         });
