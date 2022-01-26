@@ -86,6 +86,8 @@ export class OrderInvoiceComponent implements OnInit {
         price             : [0],
         quantity          : [0],
         total             : [0],
+        specialInstruction: [''], //item level
+
       }]), 
       subTotal            : [0],
       // discount            : [0],
@@ -98,7 +100,8 @@ export class OrderInvoiceComponent implements OnInit {
       appliedDiscount     :[0],
       discountMaxAmount   :[0],
       appliedDiscountDescription : [0],
-      deliveryDiscountMaxAmount : [0]
+      deliveryDiscountMaxAmount : [0],
+      customerNotes: [''] //order level
 
     });
 
@@ -241,7 +244,8 @@ export class OrderInvoiceComponent implements OnInit {
               (this.invoiceForm.get('items') as FormArray).push(itemFormGroup)
               
             })
-
+            console.log('FORM', this.invoiceForm.value);
+            
 
         });
 

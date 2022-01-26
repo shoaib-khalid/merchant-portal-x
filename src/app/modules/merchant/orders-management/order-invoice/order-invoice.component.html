@@ -63,20 +63,28 @@
                         <!-- Item -->
                         <div class="col-span-8">
                             <div class="mb-1 text-lg font-medium">{{ item.productName }}</div>
-                                <div class="flex flex-wrap text-secondary" *ngIf="item.productVariant">
-                                    <span class="mr-1 mb-1" *ngFor="let variant of item.productVariant">
-                                        <span class="py-0.5 px-1.5 bg-gray-200 text-secondary rounded-full text-sm" >
-                                            {{ variant }}
-                                        </span>
+                            <div class="flex flex-wrap text-secondary" *ngIf="item.productVariant">
+                                <span class="mr-1 mb-1" *ngFor="let variant of item.productVariant">
+                                    <span class="py-0.5 px-1.5 bg-gray-200 text-secondary rounded-full text-sm" >
+                                        {{ variant }}
                                     </span>
-                                </div>
-                                <div class="flex flex-wrap text-secondary" *ngIf="item.orderSubItem">
-                                    <span class="mr-1 mb-1" *ngFor="let combo of item.orderSubItem">
-                                        <span class="py-0.5 px-1.5 bg-gray-200 text-secondary rounded-full text-sm"  >
-                                            {{combo.productName}}
-                                        </span>
+                                </span>
+                            </div>
+                            <div class="flex flex-wrap text-secondary" *ngIf="item.orderSubItem">
+                                <span class="mr-1 mb-1" *ngFor="let combo of item.orderSubItem">
+                                    <span class="py-0.5 px-1.5 bg-gray-200 text-secondary rounded-full text-sm"  >
+                                        {{combo.productName}}
                                     </span>
-                                </div>
+                                </span>
+                            </div>
+                            <div 
+                                class="mb-1 text-secondary text-sm" 
+                                *ngIf="item.specialInstruction">
+                                Instruction: 
+                                <span class="font-medium">
+                                    {{ item.specialInstruction }}
+                                </span>
+                            </div>
                         </div>
                         <div class="self-center text-right">{{ item.productPrice | currency: store$.regionCountry.currencySymbol }}</div>
                         <div class="self-center text-right">{{ item.quantity }}</div>
@@ -85,7 +93,14 @@
     
                     <!-- Spacer -->
                     <div class="col-span-12 mt-16"></div>
-    
+
+                    <!-- Customer Notes -->
+                    <div class="col-span-2 font-medium tracking-tight text-secondary">CUSTOMER NOTES:</div>
+                    <div class="col-span-4 pl-1">{{ invoiceForm.get('customerNotes').value }}</div>
+
+                    <!-- Divider -->
+                    <div class="col-span-12 my-3 border-b"></div>
+
                     <!-- Subtotal -->
                     <div class="col-span-10 self-center font-medium tracking-tight text-secondary">SUBTOTAL</div>
                     <div class="col-span-2 text-right text-lg">{{ invoiceForm.get('subTotal').value | currency: store$.regionCountry.currencySymbol}}</div>
@@ -132,6 +147,7 @@
                     <!-- Total -->
                     <div class="col-span-10 self-center text-2xl font-medium tracking-tight text-secondary">TOTAL</div>
                     <div class="col-span-2 text-right text-2xl font-medium">{{ invoiceForm.get('total').value | currency: store$.regionCountry.currencySymbol}}</div>
+                    
                 </div>
     
                 <div class="mt-16">

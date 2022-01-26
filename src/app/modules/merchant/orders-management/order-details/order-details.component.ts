@@ -109,7 +109,10 @@ export class OrderDetailsComponent implements OnInit
           providerImage: [''],
           airwayBill: [''],
         }),
-        deliveryDiscountMaxAmount : []
+        deliveryDiscountMaxAmount : [],
+        customerNotes: [''], //order level
+        paymentType: [''],
+        completionStatus: ['']
       });
   
       this._storesService.store$

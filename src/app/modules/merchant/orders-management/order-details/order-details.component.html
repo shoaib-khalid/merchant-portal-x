@@ -4,7 +4,7 @@
     <div class="flex flex-col flex-auto w-full">
         <div class="flex flex-wrap item-center justify-center w-full max-w-screen-xl mx-auto p-6 md:p-8">
 
-            <div class="max-w-180 p-10 rounded-2xl shadow bg-card print:w-auto print:p-0 print:rounded-none print:shadow-none print:bg-transparent text-sm">
+            <div class="max-w-160 min-w-160 p-10 rounded-2xl shadow bg-card print:w-auto print:p-0 print:rounded-none print:shadow-none print:bg-transparent text-sm">
                 <div>
 
                 <div class="grid grid-cols-2 gap-x-4">
@@ -17,7 +17,34 @@
                         <div class="font-medium justify-self-end">{{ detailsForm.get('invoiceCreatedDate').value | date:'MMM dd, h:mm a' }}</div>
                         <div class="font-medium tracking-tight text-secondary ml-1 justify-self-end">UPDATED DATE</div>
                         <div class="font-medium justify-self-end">{{ detailsForm.get('invoiceUpdatedDate').value | date:'MMM dd, h:mm a'}}</div>
+                    </div>
+                    
+                </div>
 
+                <!-- Spacer -->
+                <div class="col-span-12 mt-3"></div>
+
+                <!-- Completion Status -->
+                <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                    <div class="border-t border-gray-200">
+                        <dl>
+                            <div class="bg-white px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
+                            <dt class="text-base font-medium text-gray-900">
+                                Completion Status
+                            </dt>
+                            <dd 
+                            [ngClass]="{'text-green-400 dark:text-green-50': detailsForm.get('completionStatus').value === 'PAYMENT_CONFIRMED',
+                            'text-yellow-400 dark:text-yellow-50': detailsForm.get('completionStatus').value === 'BEING_PREPARED',
+                            'text-orange-400 dark:text-orange-50': detailsForm.get('completionStatus').value === 'AWAITING_PICKUP',
+                            'text-purple-400 dark:text-purple-50': detailsForm.get('completionStatus').value === 'BEING_DELIVERED',
+                            'text-red-400 dark:text-red-50': detailsForm.get('completionStatus').value === 'CANCELED_BY_MERCHANT',
+                            'text-blue-400 dark:text-blue-50': detailsForm.get('completionStatus').value === 'DELIVERED_TO_CUSTOMER'}"
+                            class="mt-1 text-sm self-center text-gray-900 sm:mt-0 sm:col-span-2">
+                                {{ detailsForm.get('completionStatus').value }}
+                            </dd>
+                            </div>
+                            
+                        </dl>
                     </div>
                     
                 </div>
@@ -52,6 +79,14 @@
                         </dt>
                         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                             {{ detailsForm.get('invoiceId').value }}
+                        </dd>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Customer Notes
+                        </dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                            {{ detailsForm.get('customerNotes').value }}
                         </dd>
                         </div>
                     </dl>
@@ -198,6 +233,14 @@
                                         </span>
                                     </span>
                                 </div>
+                                <div 
+                                    class="mb-1 text-secondary text-sm" 
+                                    *ngIf="item.specialInstruction">
+                                    Instruction: 
+                                    <span class="font-medium">
+                                        {{ item.specialInstruction }}
+                                    </span>
+                                </div>
                             </div>
                             <div class="col-span-2 self-center text-right">{{ item.productPrice | currency: store$.regionCountry.currencySymbol }}</div>
                             <div class="self-center text-right">x {{ item.quantity }}</div>
@@ -223,6 +266,14 @@
                     </div>
                     <div class="border-t border-gray-200">
                     <dl>
+                        <div class="bg-white px-4 py-1.5 sm:grid grid-cols-2 sm:gap-4 sm:px-4">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Payment Type
+                        </dt>
+                        <dd class="text-sm text-gray-900 mt-0 text-right">
+                            {{ detailsForm.get('paymentType').value}}
+                        </dd>
+                        </div>
                         <div class="bg-gray-50 px-4 py-1.5 sm:grid grid-cols-2 sm:gap-4 sm:px-4">
                         <dt class="text-sm font-medium text-gray-500">
                             Subtotal
