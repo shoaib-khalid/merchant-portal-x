@@ -269,7 +269,7 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
      {
          // Open the confirmation dialog
          const confirmation = this._fuseConfirmationService.open({
-             title  : 'Delete product',
+             title  : 'Delete store',
              message: 'Are you sure you want to remove this store ? This action cannot be undone!',
              actions: {
                  confirm: {

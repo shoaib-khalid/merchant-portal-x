@@ -20,6 +20,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
+import { TimeSelectorInputModule } from 'app/layout/common/time-selector/timeselector.module';
+
 @NgModule({
     declarations: [
         StoreAccountComponent,
@@ -43,6 +45,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
         MatToolbarModule,
         MatCheckboxModule,
         MatTooltipModule,
+
+        TimeSelectorInputModule
 
     ],
     exports     : [
