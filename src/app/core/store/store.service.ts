@@ -474,7 +474,7 @@ export class StoresService
 
         return this._httpClient.post<any>(productService + '/stores/' + storeId + '/timings', storeTiming , header ).pipe(
             map((response) => {
-                this._logging.debug("Response from StoresService (postTiming)",response);
+                this._logging.debug("Response from StoresService (postTiming )["+storeTiming.day+"]",response);
             })
         );
     }
@@ -516,7 +516,7 @@ export class StoresService
 
         return this._httpClient.put<any>(productService + '/stores/' + storeId + '/timings/' + day, storeTiming , header ).pipe(
             map((response) => {
-                this._logging.debug("Response from StoresService (putTiming)",response);
+                this._logging.debug("Response from StoresService (putTiming) ["+storeTiming.day+"]",response);
             })
         );
     }

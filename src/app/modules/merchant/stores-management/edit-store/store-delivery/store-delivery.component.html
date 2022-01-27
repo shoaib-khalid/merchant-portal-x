@@ -35,7 +35,7 @@
                                             [value]="'SCHEDULED'">Regular Delivery</mat-option>
                                         <mat-option 
                                         *ngIf="this.storeDeliveryForm.get('verticalCode').value === 'FnB' || this.storeDeliveryForm.get('verticalCode').value === 'FnB_PK'"
-                                            [value]="'ADHOC'">Instant Delivery</mat-option>
+                                            [value]="'ADHOC'">Delivery Partner</mat-option>
                                     </div>
                                 </mat-select>
                                 <mat-error *ngIf="storeDeliveryForm.get('deliveryType').hasError('required')">

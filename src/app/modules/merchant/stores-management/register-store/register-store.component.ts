@@ -14,6 +14,7 @@ import { HttpResponse } from '@angular/common/http';
 import { ChooseVerticalService } from '../choose-vertical/choose-vertical.service';
 import { FuseAlertType } from '@fuse/components/alert';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { TimeSelector } from 'app/layout/common/time-selector/timeselector.component';
 
 @Component({
     selector     : 'register-store-page',
@@ -154,42 +155,6 @@ export class RegisterStoreComponent implements OnInit
             verticalCode            : [''],
             isBranch                : [false],
         });
-        // Create the support form
-        // this.createStoreForm = this._formBuilder.group({
-        //     // Main Store Section
-        //     // name               : ['', Validators.required],
-        //     // city               : ['', Validators.required],
-        //     // address            : ['', Validators.required],
-        //     // postcode           : ['', [Validators.required, Validators.minLength(5), Validators.maxLength(10), RegisterStoreValidationService.postcodeValidator]],
-        //     // storeDescription   : ['', [Validators.required, Validators.maxLength(100)]],
-        //     // email              : ['', [Validators.required, Validators.email]],
-        //     // clientId           : [''],
-        //     // subdomain             : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
-        //     // regionCountryId: ['', Validators.required],
-        //     // regionCountryStateId: ['', Validators.required],
-        //     // phoneNumber        : ['', RegisterStoreValidationService.phonenumberValidator],
-        //     // serviceChargesPercentage: [0],
-        //     // verticalCode: [''],
-        //     // paymentType        : ['', Validators.required],
-            
-        //     // Store Timing
-        //     // storeTiming: this._formBuilder.array([]),
-
-        //     // Allowed Self Delivery States
-        //     // allowedSelfDeliveryStates: this._formBuilder.array([]),
-
-        //     // Delivery Provider
-        //     // deliveryType       : ['', Validators.required],
-
-        //     // Delivery Partner
-        //     // deliveryPartner      : ['', Validators.required],
-            
-        //     // Else
-        //     // allowScheduledDelivery : [false],
-        //     // allowStorePickup : [false],
-        //     // isBranch: [false],
-        //     // isSnooze: [false],
-        // });
 
         // Reason why we put everyting under get vertical code by paramMap is because
         // we need the verticalCode before we need to query getStoreDeliveryProvider which require verticalCode
@@ -329,10 +294,104 @@ export class RegisterStoreComponent implements OnInit
             { day: "Sunday", openTime: "09:00", closeTime: "23:00", breakStartTime: "13:00", breakEndTime: "14:00",  isOff: true, isOpen: false, isBreakTime: true },
         ];
 
+        this._storeTiming.map(item => item["isOpen"] = !item.isOff);
+                
+        this._storeTiming.map(item => {
+            if (item.breakStartTime === null && item.breakEndTime === null){
+                item["isBreakTime"] = false;
+            }
+            else{
+                item["isBreakTime"] = true;
+            }
+        });
+
         this._storeTiming.forEach(item => {
+                    
+            //----------------
+            //  Start Time
+            //----------------
+            let _itemOpenTimeHour = item.openTime.split(":")[0];
+            if (item.openTime.split(":")[0] > 12) {
+                _itemOpenTimeHour = _itemOpenTimeHour - 12;
+                _itemOpenTimeHour = ((_itemOpenTimeHour < 10) ? '0' : '') + _itemOpenTimeHour;    
+            }                    
+
+            let _itemOpenTimeMinute = item.openTime.split(":")[1];
+
+            let _itemOpenTimeAMPM : 'AM' | 'PM';
+            if (item.openTime.split(":")[0] > 12) {
+                _itemOpenTimeAMPM = "PM";
+            } else {
+                _itemOpenTimeAMPM = "AM";
+            }
+
+            let _item = item;
+            _item["openTime"] = new TimeSelector(_itemOpenTimeHour,_itemOpenTimeMinute, _itemOpenTimeAMPM);
+
+            //----------------
+            //    End Time
+            //----------------
+            let _itemCloseTimeHour = item.closeTime.split(":")[0];
+            if (item.closeTime.split(":")[0] > 12) {
+                _itemCloseTimeHour = _itemCloseTimeHour - 12;
+                _itemCloseTimeHour = ((_itemCloseTimeHour < 10) ? '0' : '') + _itemCloseTimeHour;    
+            }
+
+            let _itemCloseTimeMinute = item.closeTime.split(":")[1];
+
+            let _itemCloseTimeAMPM : 'AM' | 'PM';
+            if (item.closeTime.split(":")[0] > 12) {
+                _itemCloseTimeAMPM = "PM";
+            } else {
+                _itemCloseTimeAMPM = "AM";
+            }
+
+            _item["closeTime"] = new TimeSelector(_itemCloseTimeHour,_itemCloseTimeMinute, _itemCloseTimeAMPM);
+
+            //----------------
+            //Break Start Time
+            //----------------                    
+            let _itemBreakOpenTimeHour = (item.breakStartTime && item.breakStartTime !== null) ? item.breakStartTime.split(":")[0] : "--";
+            if (item.breakStartTime && item.breakStartTime !== null && item.breakStartTime.split(":")[0] > 12) {
+                _itemBreakOpenTimeHour = _itemBreakOpenTimeHour - 12;
+                _itemBreakOpenTimeHour = ((_itemBreakOpenTimeHour < 10) ? '0' : '') + _itemBreakOpenTimeHour;    
+            }
+
+            let _itemBreakOpenTimeMinute = (item.breakStartTime && item.breakStartTime !== null) ? item.breakStartTime.split(":")[1] : "--";
+
+            let _itemBreakOpenTimeAMPM : 'AM' | 'PM' | '--';
+            if (item.breakStartTime && item.breakStartTime !== null && item.breakStartTime.split(":")[0] > 12) {
+                _itemBreakOpenTimeAMPM = (item.breakStartTime && item.breakStartTime !== null) ? "PM" : "--";
+            } else {
+                _itemBreakOpenTimeAMPM = (item.breakStartTime && item.breakStartTime !== null) ? "AM": "--";
+            }
+            
+            _item["breakStartTime"] = new TimeSelector(_itemBreakOpenTimeHour,_itemBreakOpenTimeMinute, _itemBreakOpenTimeAMPM);
+
+            //--------------
+            //Break End Time
+            //--------------
+            let _itemBreakCloseTimeHour = (item.breakEndTime && item.breakEndTime !== null) ? item.breakEndTime.split(":")[0] : "--";
+            if (item.breakEndTime && item.breakEndTime !== null && item.breakEndTime.split(":")[0] > 12) {
+                _itemBreakCloseTimeHour = _itemBreakCloseTimeHour - 12;
+                _itemBreakCloseTimeHour = ((_itemBreakCloseTimeHour < 10) ? '0' : '') + _itemBreakCloseTimeHour;  
+            }
+
+            let _itemBreakeCloseTimeMinute = (item.breakEndTime && item.breakEndTime !== null) ? item.breakEndTime.split(":")[1] : "--";
+
+            let _itemBreakCloseTimeAMPM : 'AM' | 'PM' | '--';
+            
+            if (item.breakEndTime && item.breakEndTime !== null && item.breakEndTime.split(":")[0] > 12) {
+                _itemBreakCloseTimeAMPM = (item.breakEndTime && item.breakEndTime !== null) ? "PM" : "--";
+            } else {
+                _itemBreakCloseTimeAMPM = (item.breakEndTime && item.breakEndTime !== null) ? "AM" : "--";
+            }
+
+            _item["breakEndTime"] = new TimeSelector(_itemBreakCloseTimeHour,_itemBreakeCloseTimeMinute, _itemBreakCloseTimeAMPM);                    
+
             this.storeTiming = this.createStoreForm.get('step4').get('storeTiming') as FormArray;
             this.storeTiming.push(this._formBuilder.group(item));
-        });        
+        });    
         
         // -------------------------------------
         // store allowed self delivery states
@@ -416,15 +475,6 @@ export class RegisterStoreComponent implements OnInit
     // -----------------------------------------------------------------------------------------------------
 
     /**
-     * Clear the form
-     */
-    // clearForm(): void
-    // {
-    //     // Reset the form
-    //     this.supportNgForm.resetForm();
-    // }
-
-    /**
      * Send the form
      */
     sendForm(): void
@@ -457,12 +507,6 @@ export class RegisterStoreComponent implements OnInit
         // Hide the alert
         this.isDisplayStatus = false;
 
-        // this will remove the item from the object
-        // const { allowedSelfDeliveryStates, allowScheduledDelivery, allowStorePickup, 
-        //         deliveryType, deliveryPartner, storeTiming, subdomain
-        //         ,...createStoreBody}  = this.createStoreForm.value;
-
-
         const { subdomain ,...createStoreBody} = this.createStoreForm.get('step1').value; 
         const storeTimingBody = this.createStoreForm.get('step4').get('storeTiming').value;
         const deliveryType = this.createStoreForm.get('step3').get('deliveryType').value;
@@ -481,7 +525,6 @@ export class RegisterStoreComponent implements OnInit
         // Disable the form
         this.createStoreForm.disable();
 
-
         // ---------------------------
         // Register Store Section
         // ---------------------------
@@ -491,15 +534,80 @@ export class RegisterStoreComponent implements OnInit
 
                 this.storeId = response.data.id;
                                   
-
                 // ---------------------------
                 // Create Store Timing
                 // ---------------------------                
                 
                 storeTimingBody.forEach(item => {
                     let { isOpen, isBreakTime,  ...filteredItem } = item;
-                    this._storesService.postTiming(this.storeId, filteredItem)
-                        .subscribe((response)=>{});
+
+                // Start Time if PM read 24hrs format
+                let startTime = filteredItem.openTime;
+                let _startTime;
+        
+                if (startTime.timeAmPm === "PM") {
+                    _startTime = parseInt(startTime.timeHour) + 12;
+                } else {
+                    _startTime = startTime.timeHour;
+                }
+
+                // End Time if PM read 24hrs format
+                let endTime = filteredItem.closeTime;
+                let _endTime;
+
+                if (endTime.timeAmPm === "PM") {
+                    _endTime = parseInt(endTime.timeHour) + 12;
+                } else {
+                    _endTime = endTime.timeHour;
+                }
+
+                // Break Start Time if PM read 24hrs format
+                let breakStartTime = filteredItem.breakStartTime;
+                let _breakStartTime;
+        
+                if (breakStartTime.timeAmPm !== null && breakStartTime.timeAmPm === "PM") {
+                    _breakStartTime = parseInt(breakStartTime.timeHour) + 12;
+                } else {
+                    _breakStartTime = breakStartTime.timeHour;
+                }
+
+                // Break End Time if PM read 24hrs format
+                let breakEndTime = filteredItem.breakEndTime;
+                let _breakendTime;
+        
+                if (breakEndTime.timeAmPm !== null && breakEndTime.timeAmPm === "PM") {
+                    _breakendTime = parseInt(breakEndTime.timeHour) + 12;
+                } else {
+                    _breakendTime = breakEndTime.timeHour;
+                }
+                
+                const _filteredItem = { 
+                    breakEndTime: _breakendTime + ":" + filteredItem.breakEndTime.timeMinute,
+                    breakStartTime: _breakStartTime + ":" + filteredItem.breakStartTime.timeMinute,
+                    closeTime: _endTime + ":" + filteredItem.closeTime.timeMinute,
+                    day: filteredItem.day,
+                    isOff: filteredItem.isOff,
+                    openTime: _startTime + ":" + filteredItem.openTime.timeMinute,
+                    storeId: filteredItem.storeId
+                }
+                _filteredItem.isOff = !isOpen;
+                
+                if (isBreakTime === false) {
+                    _filteredItem.breakStartTime = null;
+                    _filteredItem.breakEndTime = null;
+                    filteredItem.breakStartTime.timeAmPm = null;
+                    filteredItem.breakEndTime.timeAmPm = null;
+                    
+                    this.createStoreForm.get('step4').get('storeTiming').value.breakStartTime = null;
+                    this.createStoreForm.get('step4').get('storeTiming').value.breakEndTime = null;
+                    
+                } else {
+                    this.createStoreForm.get('step4').get('storeTiming').value.breakStartTime = _filteredItem.breakStartTime;
+                    this.createStoreForm.get('step4').get('storeTiming').value.breakEndTime = _filteredItem.breakEndTime;
+                }
+
+                this._storesService.postTiming(this.storeId, _filteredItem)
+                    .subscribe((response)=>{});
                 });
 
                 // manual set store timing to new created store at service
@@ -718,49 +826,6 @@ export class RegisterStoreComponent implements OnInit
 
     }
 
-    updateStoreOpening(day: string){
-        let index = this._storeTiming.findIndex(dayList => dayList.day === day);
-        this._storeTiming[index].isOpen = !this._storeTiming[index].isOpen;
-        this._storeTiming[index].isOff = !this._storeTiming[index].isOff;
-
-        this.storeTiming.clear();
-        this._storeTiming.forEach(item => {
-            this.storeTiming = this.createStoreForm.get('step4').get('storeTiming') as FormArray;
-            this.storeTiming.push(this._formBuilder.group(item));
-        }); 
-    }
-
-    toggleBreakHour (e, i){
-        if(e.checked === false){
-            this.createStoreForm.get('step4').get('storeTiming').value[i].breakStartTime = null;
-            this.createStoreForm.get('step4').get('storeTiming').value[i].breakEndTime = null;
-
-            this.createStoreForm.get('step4').get('storeTiming').value[i].isBreakTime = false;
-        } else{
-            this.createStoreForm.get('step4').get('storeTiming').value[i].breakStartTime = "13:00";
-            this.createStoreForm.get('step4').get('storeTiming').value[i].breakEndTime = "14:00";
-
-            this.createStoreForm.get('step4').get('storeTiming').value[i].isBreakTime = true;
-        }
-    }
-
-    applyToAll(index){
-
-        let _storeTiming = {
-            breakStartTime: this.createStoreForm.get('step4').get('storeTiming').value[index].breakStartTime,
-            breakEndTime: this.createStoreForm.get('step4').get('storeTiming').value[index].breakEndTime,
-            openTime: this.createStoreForm.get('step4').get('storeTiming').value[index].openTime,
-            closeTime: this.createStoreForm.get('step4').get('storeTiming').value[index].closeTime
-        }
-
-        this.createStoreForm.get('step4').get('storeTiming').value.forEach((item, i) => {
-            this.createStoreForm.get('step4').get('storeTiming').value[i].breakStartTime = _storeTiming.breakStartTime;
-            this.createStoreForm.get('step4').get('storeTiming').value[i].breakEndTime =_storeTiming.breakEndTime;
-            this.createStoreForm.get('step4').get('storeTiming').value[i].openTime =_storeTiming.openTime;
-            this.createStoreForm.get('step4').get('storeTiming').value[i].closeTime =_storeTiming.closeTime;
-        })
-    }
-
     addSelfDeliveryState(){
 
         let selfDeliveryStateItem = {
@@ -881,7 +946,7 @@ export class RegisterStoreComponent implements OnInit
 
                 this._changeDetectorRef.markForCheck();                
             };
-            // console.log("this.files["+index+"].selectedFiles["+i+"]",this.files[index].selectedFiles[i])
+
             reader.readAsDataURL(this.files[index].selectedFiles[i]);
             this.files[index].selectedFileName = this.files[index].selectedFiles[i].name;
             }
@@ -926,23 +991,172 @@ export class RegisterStoreComponent implements OnInit
         }
     }
 
+    //---------------------------------
+    //     Store Timing Section
+    //---------------------------------
+
+    updateStoreOpening(day: string){
+        let index = this._storeTiming.findIndex(dayList => dayList.day === day);
+        this._storeTiming[index].isOpen = !this._storeTiming[index].isOpen;
+        this._storeTiming[index].isOff = !this._storeTiming[index].isOff;
+        this._storeTiming[index].isBreakTime = this._storeTiming[index].isOpen;
+        if( this._storeTiming[index].isBreakTime === false){
+            this._storeTiming[index].breakStartTime.timeHour = "--";
+            this._storeTiming[index].breakStartTime.timeMinute = "--";
+            this._storeTiming[index].breakStartTime.timeAmPm = "--";
+
+            this._storeTiming[index].breakEndTime.timeHour = "--";
+            this._storeTiming[index].breakEndTime.timeMinute = "--";
+            this._storeTiming[index].breakEndTime.timeAmPm = "--";
+        } else {
+            this._storeTiming[index].breakStartTime.timeHour = "01";
+            this._storeTiming[index].breakStartTime.timeMinute = "00";
+            this._storeTiming[index].breakStartTime.timeAmPm = "PM";
+
+            this._storeTiming[index].breakEndTime.timeHour = "02";
+            this._storeTiming[index].breakEndTime.timeMinute = "00";
+            this._storeTiming[index].breakEndTime.timeAmPm = "PM";
+        }
+
+        this.storeTiming.clear();
+        this._storeTiming.forEach(item => {
+            this.storeTiming = this.createStoreForm.get('step4').get('storeTiming') as FormArray;
+            this.storeTiming.push(this._formBuilder.group(item));
+        }); 
+    }
+
+    toggleBreakHour (e, i){
+
+        let storeTiming = this.createStoreForm.get('step4').get('storeTiming').value;
+
+        if(e.checked === false){
+
+            storeTiming[i].breakStartTime.timeHour = "--";
+            storeTiming[i].breakStartTime.timeMinute = "--";
+            storeTiming[i].breakStartTime.timeAmPm = "--"
+
+            storeTiming[i].breakEndTime.timeHour = "--";
+            storeTiming[i].breakEndTime.timeMinute = "--";
+            storeTiming[i].breakEndTime.timeAmPm = "--"
+
+            this.createStoreForm.get('step4').get('storeTiming').patchValue(storeTiming);
+            this.createStoreForm.get('step4').get('storeTiming').value[i].isBreakTime = false;
+        } else{
+            storeTiming[i].breakStartTime.timeHour = "01";
+            storeTiming[i].breakStartTime.timeMinute = "00";
+            storeTiming[i].breakStartTime.timeAmPm = "PM"
+
+            storeTiming[i].breakEndTime.timeHour = "02";
+            storeTiming[i].breakEndTime.timeMinute = "00";
+            storeTiming[i].breakEndTime.timeAmPm = "PM"
+
+            this.createStoreForm.get('step4').get('storeTiming').patchValue(storeTiming);
+            this.createStoreForm.get('step4').get('storeTiming').value[i].isBreakTime = true;
+        }
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+    }
+
+    applyToAll(index){
+
+        let storeTiming = this.createStoreForm.get('step4').get('storeTiming').value
+
+        let _storeTiming = {
+            breakStartTimeHour: storeTiming[index].breakStartTime.timeHour,
+            breakStartTimeMinute: storeTiming[index].breakStartTime.timeMinute,
+            breakStartTimeAmPm: storeTiming[index].breakStartTime.timeAmPm,
+
+            breakEndTimeHour: storeTiming[index].breakEndTime.timeHour,
+            breakEndTimeMinute: storeTiming[index].breakEndTime.timeMinute,
+            breakEndTimeAmPm: storeTiming[index].breakEndTime.timeAmPm,
+
+            openTime: storeTiming[index].openTime,
+            closeTime: storeTiming[index].closeTime,
+
+            breakToggle: storeTiming[index].isBreakTime
+        } 
+
+        this.createStoreForm.get('step4').get('storeTiming').value.forEach((item, i) => {
+            storeTiming[i].breakStartTime.timeHour = _storeTiming.breakStartTimeHour;
+            storeTiming[i].breakStartTime.timeMinute = _storeTiming.breakStartTimeMinute;
+            storeTiming[i].breakStartTime.timeAmPm = _storeTiming.breakStartTimeAmPm;
+
+            storeTiming[i].breakEndTime.timeHour =_storeTiming.breakEndTimeHour;
+            storeTiming[i].breakEndTime.timeMinute =_storeTiming.breakEndTimeMinute;
+            storeTiming[i].breakEndTime.timeAmPm =_storeTiming.breakEndTimeAmPm;
+
+            storeTiming[i].openTime =_storeTiming.openTime;
+            storeTiming[i].closeTime =_storeTiming.closeTime;
+
+            storeTiming[i].isBreakTime = _storeTiming.breakToggle;
+
+        })
+        this.createStoreForm.get('step4').get('storeTiming').patchValue(storeTiming);
+    }
+
     changeTime(i, type , e){
-        // console.log("i : type : e =", i + " : " + type + " : " + e.target.value);
-        // console.log("tegok object: ", this.createStoreForm.get('storeTiming').value[i])
-        // console.log("tengok event: ", e.target.value)
-        // console.log("hari",this.createStoreForm.get('storeTiming').value[i].day)
-        if(this.createStoreForm.get('step4').get('storeTiming').value[i].openTime >= this.createStoreForm.get('step4').get('storeTiming').value[i].closeTime ){
+        //Working Hour Start Time
+        let startTime = this.createStoreForm.get('step4').get('storeTiming').value[i].openTime;
+        let _startTime;
+
+        if (startTime.timeAmPm === "PM") {
+            _startTime = parseInt(startTime.timeHour) + 12;
+        } else {
+            _startTime = startTime.timeHour;
+        }
+        const workingHourStartTime = new Date();
+        workingHourStartTime.setHours(_startTime,startTime.timeMinute,0);
+
+        //Working Hour End Time
+        let endTime = this.createStoreForm.get('step4').get('storeTiming').value[i].closeTime;
+        let _endTime;
+    
+        if (endTime.timeAmPm === "PM") {
+            _endTime = parseInt(endTime.timeHour) + 12;
+        } else {
+            _endTime = endTime.timeHour;
+        }        
+        const workingHourEndTime = new Date();
+        workingHourEndTime.setHours(_endTime,endTime.timeMinute,0);
+        
+        //working Hour Display Error
+        if( workingHourStartTime >= workingHourEndTime ){            
             this.timeAlert[i] ="End time range incorrect" ;
         }else{
-            this.timeAlert[i] = "" ;
-        }   
+            this.timeAlert[i] = " " ;
+        }      
     }
 
     changeBreakTime(i, type , e){
-        if(this.createStoreForm.get('step4').get('storeTiming').value[i].breakStartTime >= this.createStoreForm.get('step4').get('storeTiming').value[i].breakEndTime ){
+        //Break Hour Start Time
+        let breakStartTime = this.createStoreForm.get('step4').get('storeTiming').value[i].breakStartTime;
+        let _breakStartTime;
+
+        if (breakStartTime.timeAmPm === "PM") {
+            _breakStartTime = parseInt(breakStartTime.timeHour) + 12;
+        } else {
+            _breakStartTime = breakStartTime.timeHour;
+        }
+        const breakHourStartTime = new Date();
+        breakHourStartTime.setHours(_breakStartTime,breakStartTime.timeMinute,0);
+
+        //Break hour End Time
+        let breakEndTime = this.createStoreForm.get('step4').get('storeTiming').value[i].breakEndTime;
+        let _breakEndTime;
+    
+        if (breakEndTime.timeAmPm === "PM") {
+            _breakEndTime = parseInt(breakEndTime.timeHour) + 12;
+        } else {
+            _breakEndTime = breakEndTime.timeHour;
+        }        
+        const breakHourEndTime = new Date();
+        breakHourEndTime.setHours(_breakEndTime,breakEndTime.timeMinute,0);
+
+        //Display Error
+        if( breakHourStartTime >= breakHourEndTime ){
             this.timeAlert[i] ="Break Hour End time range incorrect" ;
         }else{
-            this.timeAlert[i] = "" ;
-        }   
+            this.timeAlert[i] = " " ;
+        }      
     }
 }

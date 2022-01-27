@@ -29,6 +29,7 @@ import { EditStoreComponent } from 'app/modules/merchant/stores-management/edit-
 import { storesManagementRoutes } from 'app/modules/merchant/stores-management/stores-management.routing';
 import { EditStoreModule } from './edit-store/edit-store.module';
 import { MatStepperModule } from '@angular/material/stepper';
+import { TimeSelectorInputModule } from 'app/layout/common/time-selector/timeselector.module';
 
 
 @NgModule({
@@ -61,6 +62,7 @@ import { MatStepperModule } from '@angular/material/stepper';
         FuseCardModule,
         MatStepperModule,
         EditStoreModule,
+        TimeSelectorInputModule
     ],
     providers: [
         // GraphHelper
