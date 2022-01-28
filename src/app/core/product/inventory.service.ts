@@ -516,15 +516,19 @@ export class InventoryService
 
         const body = {
             "productId": product.id,
-            "itemCode": product.id + date,
+            // "itemCode": product.id + date,
+            "itemCode": productInventory.itemCode,
             "price": productInventory.price,
             "compareAtprice": 0,
             "quantity": productInventory.availableStock,
             "sku": productInventory.sku,
-            "status": "AVAILABLE"
+            // "status": "AVAILABLE"
+            "status": productInventory.status? productInventory.status : "NOTAVAILABLE"
         };
 
-        // return of();
+        
+
+        return of();
 
         return this.products$.pipe(
             take(1),
@@ -566,6 +570,10 @@ export class InventoryService
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
+
+        // console.log("update inventory dalam service -> productId:", productId, "productInventoriesId:", productInventoriesId, "productInventories",productInventories);
+        
+        return of();
 
         return this._products.pipe(
             take(1),
@@ -709,6 +717,9 @@ export class InventoryService
         const now = new Date();
         const date = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate() + " " + now.getHours() + ":" + now.getMinutes()  + ":" + now.getSeconds();
 
+        // variant.id = '1234'
+        // return of (variant)
+        
         return this.products$.pipe(
             take(1),
             // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
@@ -728,6 +739,28 @@ export class InventoryService
                 })
             ))
         );
+    }
+
+    async createVariantPromise(variant: ProductVariant, productId: string){
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        let response = await this._httpClient.post<ProductVariant>(productService + '/stores/' + this.storeId$ + '/products/' + productId + "/variants", variant , header).toPromise();
+
+        this._logging.debug("Response from ProductsService (Create Variant)",response);
+
+        let newProduct = response["data"];
+        // check productVariantsAvailable exists or not in the response
+        if (!response.productVariantsAvailable) {
+            newProduct["productVariantsAvailable"] = [];
+        }
+
+        return newProduct;
     }
 
     /**
@@ -760,6 +793,8 @@ export class InventoryService
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
+
+        return of ()
       
         return this._products.pipe(
             take(1),
@@ -829,6 +864,35 @@ export class InventoryService
                 map((newProduct) => {
 
                     this._logging.debug("Response from ProductsService (Create Variant Available)",newProduct);
+
+                    // Return the new product
+                    return newProduct["data"];
+                })
+            ))
+        );
+    }
+
+    createVariantAvailableBulk(variantAvailable: ProductVariantAvailable[], productId: string){
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        const now = new Date();
+        const date = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate() + " " + now.getHours() + ":" + now.getMinutes()  + ":" + now.getSeconds();
+
+        console.log('variantAvailable in bulk inside service', variantAvailable);
+        return of()
+        return this.products$.pipe(
+            take(1),
+            // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
+            switchMap(products => this._httpClient.post<ProductVariantAvailable>(productService + '/stores/' + this.storeId$ + '/products/' + productId + "/variants-available/bulk", variantAvailable , header).pipe(
+                map((newProduct) => {
+
+                    this._logging.debug("Response from ProductsService (Create Variant Available in Bulk)",newProduct);
 
                     // Return the new product
                     return newProduct["data"];

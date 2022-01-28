@@ -742,7 +742,7 @@
                                         <div *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'e-commerce-b2b2c' || store$.verticalCode === 'ECommerce_PK'" class="flex flex-col w-full sm:w-1/5 sm:pl-2 py-2 sm:py-0">
                                             <span class="mb-2 sm:mb-4 font-medium leading-tight">Variants 
                                                 <mat-icon
-                                                    matTooltip="This product have variants ?"
+                                                    matTooltip="Does this product have variants?"
                                                     class="transform scale-75"
                                                     [svgIcon]="'heroicons_solid:question-mark-circle'">
                                                 </mat-icon>
@@ -926,7 +926,7 @@
                                                                             </button>
                                                                             <button
                                                                                 mat-icon-button
-                                                                                (click)="deleteVariant(variant)"
+                                                                                (click)="deleteVariant(variant, i)"
                                                                                 matSuffix>
                                                                                 <mat-icon
                                                                                     class="icon-size-5"
@@ -969,21 +969,21 @@
                                                     <!-- Variants Available -->
                                                     <div class="h-44 m-2 leading-none overflow-y-auto border-gray-300 dark:border-gray-500">
                                                         <div *ngIf="productVariants.value.length > 0">
-                                                            <div *ngFor="let variant of productVariants.value">
+                                                            <div *ngFor="let variant of productVariants.value; let i = index; trackBy: trackVariant">
                                                                 <span class="w-full mb-px font-small leading-tight">{{variant.name}}</span>
                                                                 <div class="flex items-center rounded-full w-full">
                                                                     <div class="ml-0 m-1.5">
                                                                         <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
                                                                             <input
-                                                                                [id]="'variant-available-edit-button-' + variant.id"
+                                                                                [id]="'variant-available-edit-button-' + variant.name"
                                                                                 class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                                                 type="button"
-                                                                                (click)="openVariantsPanel(variant)"
+                                                                                (click)="openVariantsPanel(variant, i)"
                                                                                 mat-icon-button
                                                                                 #variantsPanelOrigin>
                                                                             <label 
                                                                                 class="flex items-center justify-center p-3 h-7 w-7 cursor-pointer rounded-full leading-9 bg-primary"
-                                                                                [for]="'variant-available-edit-button-' + variant.id"
+                                                                                [for]="'variant-available-edit-button-' + variant.name"
                                                                                 matRipple>
                                                                                 <mat-icon
                                                                                     [svgIcon]="'heroicons_outline:plus'"
@@ -992,7 +992,7 @@
                                                                         </span>
                                                                     </div>
                                                                     <!-- <span>{{variant.productVariantsAvailable}}</span> -->
-                                                                    <div *ngFor="let variantsAvailable of variant.productVariantsAvailable; trackBy: trackByFn" class="px-2 ml-0 m-1 rounded-full leading-7 text-gray-500 bg-gray-300 dark:text-gray-300 dark:bg-gray-700">
+                                                                    <div *ngFor="let variantsAvailable of variant.productVariantsAvailable; trackBy: trackVariantAvailable" class="px-2 ml-0 m-1 rounded-full leading-7 text-gray-500 bg-gray-300 dark:text-gray-300 dark:bg-gray-700">
                                                                         <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
                                                                             <span class="ml-0.5 text-md font-medium whitespace-nowrap">{{variantsAvailable.value}}</span>
                                                                         </span>
@@ -1063,7 +1063,7 @@
                                                                                         </button>
                                                                                         <button
                                                                                             mat-icon-button
-                                                                                            (click)="deleteVariantAvailable(variantAvailable, variantAvailable.value)"
+                                                                                            (click)="deleteVariantAvailable(variantAvailable, variantIndex)"
                                                                                             matSuffix>
                                                                                             <mat-icon
                                                                                                 class="icon-size-5 ml-2"
@@ -1149,27 +1149,45 @@
                                                                                 <div>
                                                                                         <div>
                                                                                             <input
-                                                                                                id="image-add-input-variant"
+                                                                                                [id]="'image-add-input-variant' + variantCombo.variant"
                                                                                                 class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                                                                 type="file"
                                                                                                 [multiple]="false"
                                                                                                 [accept]="'image/jpeg, image/png'"
                                                                                                 [disabled]="imagesEditMode"
-                                                                                                (change)="uploadImages(imageFileInput.files, []);"
+                                                                                                (change)="uploadVariantImages(imageFileInput.files, [], i);"
                                                                                                 #imageFileInput>
                                                                                             <label
                                                                                                 class="flex items-center justify-center w-6 h-6 rounded-full cursor-pointer hover:bg-hover"
                                                                                                 [ngClass]="imagesEditMode ? 'cursor-not-allowed' : 'cursor-pointer'"
                                                                                                 matTooltip="Add image"
-                                                                                                for="image-add-input-variant"
+                                                                                                [for]="'image-add-input-variant' + variantCombo.variant"
                                                                                                 matRipple>
                                                                                                 <mat-icon
                                                                                                     class="icon-size-3"
                                                                                                     [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
                                                                                             </label>
                                                                                         </div>
+                                                                                        <!-- Remove Image -->
+                                                                                        <div *ngIf="variantimages[i]?.preview">
+                                                                                            <input
+                                                                                                [id]="'image-remove-button-variant'+ variantCombo.variant"
+                                                                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                                                type="button"
+                                                                                                (click)="removeVariantImage(i)"
+                                                                                                mat-icon-button>
+                                                                                            <label 
+                                                                                                class="flex items-center justify-center w-6 h-6 rounded-full cursor-pointer hover:bg-hover"
+                                                                                                [for]="'image-remove-button-variant'+ variantCombo.variant"
+                                                                                                matTooltip="Remove image"
+                                                                                                matRipple>
+                                                                                                <mat-icon
+                                                                                                    class="icon-size-3"
+                                                                                                    [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                                                                            </label>
+                                                                                        </div>
                                                                                         <!-- Toggle Image Edit -->
-                                                                                        <div>
+                                                                                        <!-- <div>
                                                                                             <input
                                                                                                 id="image-edit-button-variant"
                                                                                                 class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -1192,7 +1210,7 @@
                                                                                                     class="icon-size-3"
                                                                                                     [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
                                                                                             </label>
-                                                                                        </div>
+                                                                                        </div> -->
                                                                                         
                                                                                     <!-- Add / Edit Image -->
                                                                                     <!-- <div>
@@ -1232,10 +1250,10 @@
                                                                                     </div> -->
                                                                                 </div>
                                                                                 <div class="relative flex flex-0 items-center justify-center w-12 h-12 rounded overflow-hidden border">
-                                                                                    <ng-container *ngIf="variantCombo.url; else noImage">
+                                                                                    <ng-container *ngIf="variantimages[i]?.preview; else noImage">
                                                                                         <img
                                                                                             class="w-full h-full object-cover" 
-                                                                                            [src]="variantCombo.url">
+                                                                                            [src]="variantimages[i]?.preview">
                                                                                     </ng-container>
                                                                                     <ng-template #noImage>
                                                                                         <div
@@ -1253,6 +1271,7 @@
                                                                                     <input
                                                                                         type="text"
                                                                                         matInput
+                                                                                        (input)="variantSkuChanged($event,i)"
                                                                                         [value]="variantCombo.sku">
                                                                                 </mat-form-field>
                                                                             </div>
@@ -1269,7 +1288,7 @@
                                                                                     <span matPrefix>{{store$.regionCountry.currencySymbol}}</span>
                                                                                     <input
                                                                                         matInput
-                                                                                       
+                                                                                        (input)="variantPriceChanged($event,i)"
                                                                                         [value]="variantCombo.price"
                                                                                         type="number">
                                                                                 </mat-form-field> 
@@ -1300,6 +1319,7 @@
                                                                                     <input
                                                                                         type="number"
                                                                                         matInput
+                                                                                        (input)="variantStockChanged($event,i)"
                                                                                         [value]="variantCombo.quantity">
                                                                                 </mat-form-field>
                                                                             </div>
@@ -1322,9 +1342,8 @@
                                                                             <div class="hidden lg:block">
                                                                                 <mat-select
                                                                                     class="border border-gray-300 px-2 py-2 rounded"
-                                                                                    formControlName="status"
                                                                                     [value]="variantCombo.status"
-                                                                                    (selectionChange)="selectedProductForm.get('status').value = $event.value"
+                                                                                    (selectionChange)="variantCombo.status = $event.value"
                                                                                     #statusSelector="matSelect"
                                                                                     >
                                                                                     <mat-select-trigger>
@@ -1592,6 +1611,12 @@
                                                     </ng-template>
                                                 </div>
                                             </div>
+                                            <button
+                                            mat-flat-button
+                                            [color]="'primary'"
+                                            (click)="createVariantCombinationsToBE()">
+                                            Update Variant
+                                        </button>
                                         </div>
                                     </div>
                                     <div class="flex items-center justify-between w-full border-t px-8 py-4 mt-4">
