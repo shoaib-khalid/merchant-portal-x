@@ -4,6 +4,9 @@ import { Router } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
+import { LocaleService } from 'app/core/locale/locale.service';
+import { StoresService } from 'app/core/store/store.service';
+import { StoreRegionCountries } from 'app/core/store/store.types';
 
 @Component({
     selector     : 'auth-sign-up',
@@ -23,13 +26,19 @@ export class AuthSignUpComponent implements OnInit
     showAlert: boolean = false;
     isError: boolean = false;
 
+    //populate country list
+    countriesList: any = [];
+
     /**
      * Constructor
      */
     constructor(
         private _authService: AuthService,
         private _formBuilder: FormBuilder,
-        private _router: Router
+        private _router: Router,
+        private _storesService: StoresService,
+        private _localeService:LocaleService,
+
     )
     {
     }
@@ -49,9 +58,27 @@ export class AuthSignUpComponent implements OnInit
                 email     : ['', [Validators.required, Validators.email]],
                 username  : ['', Validators.required],
                 password  : ['', Validators.required],
-                agreements: ['', Validators.requiredTrue]
+                agreements: ['', Validators.requiredTrue],
+                countryId:['', Validators.required]
             }
         );
+
+        // get value for country list
+        this._storesService.getStoreRegionCountries().subscribe((response: StoreRegionCountries[])=>{
+            
+            response["data"].content.forEach((country: StoreRegionCountries) => {
+                this.countriesList.push(country);
+            });
+
+        });
+
+        //get current location
+        this._localeService.get().subscribe((resp)=>
+            {
+                console.log("RESPONSE ::: _localeService ",resp);
+            }
+        );
+
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -63,6 +90,7 @@ export class AuthSignUpComponent implements OnInit
      */
     signUp(): void
     {
+
         // Do nothing if the form is invalid
         if ( this.signUpForm.invalid )
         {
@@ -76,7 +104,7 @@ export class AuthSignUpComponent implements OnInit
         // Hide the alert
         this.showAlert = false;
         this.isError = false;
-
+    
         // Sign up
         this._authService.signUp(this.signUpForm.value)
             .subscribe(

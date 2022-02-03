@@ -360,7 +360,8 @@ export class AuthService
             "name": user.name,
             "username": user.username,
             "password": user.password,
-            "roleId": "STORE_OWNER"
+            "roleId": "STORE_OWNER",
+            "countryId":(<any>user).countryId
           };
         
         return this._httpClient.post(userService + '/clients/register', body, header).pipe(
