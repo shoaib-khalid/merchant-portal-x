@@ -73,11 +73,11 @@ export class AuthSignUpComponent implements OnInit
         });
 
         //get current location
-        this._localeService.get().subscribe((resp)=>
-            {
-                console.log("RESPONSE ::: _localeService ",resp);
-            }
-        );
+        // this._localeService.get().subscribe((resp)=>
+        //     {
+        //         console.log("RESPONSE ::: _localeService ",resp);
+        //     }
+        // );
 
     }
 
