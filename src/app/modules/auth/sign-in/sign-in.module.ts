@@ -11,10 +11,12 @@ import { FuseAlertModule } from '@fuse/components/alert';
 import { SharedModule } from 'app/shared/shared.module';
 import { AuthSignInComponent } from 'app/modules/auth/sign-in/sign-in.component';
 import { authSignInRoutes } from 'app/modules/auth/sign-in/sign-in.routing';
+import { SharedBackgroundComponent } from '../shared-background/shared-background.component';
 
 @NgModule({
     declarations: [
-        AuthSignInComponent
+        AuthSignInComponent,
+        SharedBackgroundComponent
     ],
     imports     : [
         RouterModule.forChild(authSignInRoutes),
@@ -27,7 +29,7 @@ import { authSignInRoutes } from 'app/modules/auth/sign-in/sign-in.routing';
         FuseCardModule,
         FuseAlertModule,
         SharedModule
-    ]
+    ],
 })
 export class AuthSignInModule
 {
