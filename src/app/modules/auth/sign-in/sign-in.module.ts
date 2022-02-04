@@ -12,11 +12,11 @@ import { SharedModule } from 'app/shared/shared.module';
 import { AuthSignInComponent } from 'app/modules/auth/sign-in/sign-in.component';
 import { authSignInRoutes } from 'app/modules/auth/sign-in/sign-in.routing';
 import { SharedBackgroundComponent } from '../shared-background/shared-background.component';
+import { SharedBackgroundModule } from '../shared-background/shared-background.module';
 
 @NgModule({
     declarations: [
         AuthSignInComponent,
-        SharedBackgroundComponent
     ],
     imports     : [
         RouterModule.forChild(authSignInRoutes),
@@ -28,7 +28,8 @@ import { SharedBackgroundComponent } from '../shared-background/shared-backgroun
         MatProgressSpinnerModule,
         FuseCardModule,
         FuseAlertModule,
-        SharedModule
+        SharedModule,
+        SharedBackgroundModule
     ],
 })
 export class AuthSignInModule

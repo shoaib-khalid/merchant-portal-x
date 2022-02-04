@@ -5,6 +5,7 @@ import { FuseCardModule } from '@fuse/components/card';
 import { SharedModule } from 'app/shared/shared.module';
 import { AuthConfirmationRequiredComponent } from 'app/modules/auth/confirmation-required/confirmation-required.component';
 import { authConfirmationRequiredRoutes } from 'app/modules/auth/confirmation-required/confirmation-required.routing';
+import { SharedBackgroundModule } from '../shared-background/shared-background.module';
 
 @NgModule({
     declarations: [
@@ -14,7 +15,8 @@ import { authConfirmationRequiredRoutes } from 'app/modules/auth/confirmation-re
         RouterModule.forChild(authConfirmationRequiredRoutes),
         MatButtonModule,
         FuseCardModule,
-        SharedModule
+        SharedModule,
+        SharedBackgroundModule
     ]
 })
 export class AuthConfirmationRequiredModule
