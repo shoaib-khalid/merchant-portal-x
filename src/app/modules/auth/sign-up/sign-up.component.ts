@@ -29,6 +29,9 @@ export class AuthSignUpComponent implements OnInit
     //populate country list
     countriesList: any = [];
 
+    //display field country
+    displayCountryField:boolean = false;
+
     /**
      * Constructor
      */
@@ -73,11 +76,21 @@ export class AuthSignUpComponent implements OnInit
         });
 
         //get current location
-        // this._localeService.get().subscribe((resp)=>
-        //     {
-        //         console.log("RESPONSE ::: _localeService ",resp);
-        //     }
-        // );
+        this._localeService.get().subscribe((resp)=>
+            {
+                //the response status either fail or success
+                if(resp.status === "success" && (resp.countryCode === 'MY' || resp.countryCode === 'PK')){
+
+                    this.displayCountryField = true;
+                    this.signUpForm.get('countryId').patchValue(resp.countryCode === 'MY'?'MYS':resp.countryCode === 'PK'?'PAK':null);
+
+                } else{
+                    this.displayCountryField = false;
+                }
+
+                return this.displayCountryField;
+            }
+        );
 
     }
 
@@ -90,7 +103,6 @@ export class AuthSignUpComponent implements OnInit
      */
     signUp(): void
     {
-
         // Do nothing if the form is invalid
         if ( this.signUpForm.invalid )
         {

@@ -99,7 +99,7 @@
                     </mat-error>
                 </mat-form-field>
 
-                <mat-form-field class="w-full">
+                <mat-form-field *ngIf="!displayCountryField" class="w-full">
                     <mat-label class="font-medium">Country</mat-label>
                     <mat-select
                         [formControlName]="'countryId'"     
