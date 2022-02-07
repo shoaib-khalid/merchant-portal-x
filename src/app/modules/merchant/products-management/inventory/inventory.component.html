@@ -906,7 +906,7 @@
                                                                                 [value]="variant.name"
                                                                                 (input)="editVariantTitle(variant, $event)"
                                                                                 [readonly]="!productVariantsValueEditMode[i]">
-                                                                            <button
+                                                                            <!-- <button
                                                                                 *ngIf="!productVariantsValueEditMode[i]"
                                                                                 mat-icon-button
                                                                                 (click)="productVariantsValueEditMode[i] = !productVariantsValueEditMode[i]"
@@ -923,7 +923,7 @@
                                                                                 <mat-icon
                                                                                     class="icon-size-5"
                                                                                     [svgIcon]="'heroicons_solid:check'"></mat-icon>
-                                                                            </button>
+                                                                            </button> -->
                                                                             <button
                                                                                 mat-icon-button
                                                                                 (click)="deleteVariant(variant, i)"
@@ -968,8 +968,8 @@
                                                 <div class="w-full mt-2 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-auto">
                                                     <!-- Variants Available -->
                                                     <div class="h-44 m-2 leading-none overflow-y-auto border-gray-300 dark:border-gray-500">
-                                                        <div *ngIf="productVariants.value.length > 0">
-                                                            <div *ngFor="let variant of productVariants.value; let i = index; trackBy: trackVariant">
+                                                        <div *ngIf="filteredProductVariants.length > 0">
+                                                            <div *ngFor="let variant of filteredProductVariants; let i = index; trackBy: trackVariant">
                                                                 <span class="w-full mb-px font-small leading-tight">{{variant.name}}</span>
                                                                 <div class="flex items-center rounded-full w-full">
                                                                     <div class="ml-0 m-1.5">
@@ -1043,7 +1043,7 @@
                                                                                             (input)="editVariantAvailableTitle(variant, $event)"
                                                                                             [readonly]="!productVariantAvailableValueEditMode[i]"
                                                                                         >
-                                                                                        <button
+                                                                                        <!-- <button
                                                                                             mat-icon-button
                                                                                             *ngIf="productVariantAvailableValueEditMode[i]"
                                                                                             (click)="productVariantAvailableValueEditMode[i] = !productVariantAvailableValueEditMode[i]; updateVariantAvailableTitle(variant, $event)"
@@ -1060,7 +1060,7 @@
                                                                                             <mat-icon
                                                                                                 class="icon-size-5 ml-2"
                                                                                                 [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
-                                                                                        </button>
+                                                                                        </button> -->
                                                                                         <button
                                                                                             mat-icon-button
                                                                                             (click)="deleteVariantAvailable(variantAvailable, variantIndex)"
@@ -1615,7 +1615,7 @@
                                             mat-flat-button
                                             [color]="'primary'"
                                             (click)="createVariantCombinationsToBE()">
-                                            Update Variant
+                                            Preview Variant
                                         </button>
                                         </div>
                                     </div>

@@ -121,7 +121,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     productVariantAvailable: FormArray;
     productVariantAvailable$: ProductVariantAvailable[] = [];
 
-    newProductVariantAvailable$: ProductVariantAvailable[] = []; //for new variant available added
+    variantAvailableToBeCreated: any = []; // use for creating on BE 
+    variantAvailableToBeDeleted: any = []; // use for deleting on BE 
 
     filteredProductVariantAvailable: any[] = [];
     selectedProductVariantAvailable: ProductVariantAvailable[] = [];
@@ -479,6 +480,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     toggleDetails(productId: string): void
     {
 
+    
         // this._inventoryService.getVariantAvailable(productId).then(data => {
 
         //     console.log('VARIANT AVAILABLE', data);
@@ -592,7 +594,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                     this.productVariants.push(_item);
                 });
 
-                this.filteredProductVariants = this.productVariants.value;
+                // this.filteredProductVariants = this.productVariants.value;
                 
                 
                 // Generate variants combination
@@ -702,7 +704,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             .subscribe(async (newProduct) => {
 
                 // Add Inventory to product
-                this._inventoryService.addInventoryToProduct(newProduct["data"], { sku: sku, availableStock: availableStock, price:price } )
+                this._inventoryService.addInventoryToProduct(newProduct["data"], { sku: sku, availableStock: availableStock, price:price, itemCode:newProduct["data"].id + "aa" } )
                     .subscribe((response)=>{
                         // update sku, price, quantity display since it's not part of product but product inventory
                         this.displayPrice = response.price;
@@ -763,9 +765,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      */
     async updateSelectedProduct(): Promise<void>
     {
-        console.log(this.selectedProductForm.get('productAssets').value);
-
-        
         // Get store domain
         let storeFrontURL = 'https://' + this.store$.domain;
         
@@ -775,25 +774,35 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         
         product.seoName = product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
         product.seoUrl = storeFrontURL + '/products/name/' + product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
+
+        // Get the product object for updating the product
+        const { productAssets, productInventories, productReviews, productVariants, ...productToUpdate} = product;
         
+        console.log('product', product);
+        console.log('productToUpdate', productToUpdate);
+        
+        // return;
         // Update the product on the server
-        this._inventoryService.updateProduct(this.selectedProduct.id, product)
+        await this._inventoryService.updateProduct(this.selectedProduct.id, productToUpdate)
         .pipe(takeUntil(this._unsubscribeAll))
-        .subscribe(() => {
-            // Show a success message
-            this.showFlashMessage('success');
-        });
-        
-        // if got variants
-        if (this.selectedProductForm.get('isVariants').value === true) {
+        .subscribe(async () => {
+
+            console.log('hai');
             
-            // HANDLE INVENTORY
-            if (this.selectedVariantCombos.length > 0){
-                for (var i = 0; i < this.selectedVariantCombos.length; i++) {
-    
-                    // no itemCode means it is newly created, so, call POST method
-                    if (!this.selectedVariantCombos[i].itemCode) {
-    
+            
+            // DELETE ENTIRE INVENTORY
+            await this.deleteEntireInventory()
+            // if got variants
+            if (this.selectedProductForm.get('isVariants').value === true) {
+                
+                // HANDLE INVENTORY
+                if (this.selectedVariantCombos.length > 0){
+                    for (var i = 0; i < this.selectedVariantCombos.length; i++) {
+        
+                        // // no itemCode means it is newly created, so, call POST method
+                        // if (!this.selectedVariantCombos[i].itemCode) {
+        
+                        // }
                         const body = {
                             // itemCode: this.selectedProduct.id + "-" + i,
                             itemCode: this.selectedProduct.id + i,
@@ -804,181 +813,282 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                             status: this.selectedVariantCombos[i].status
                         }
     
-                        this._inventoryService.addInventoryToProduct(this.selectedProduct, body)
-                        .subscribe((response)=>{
+                        await this._inventoryService.addInventoryToProduct(this.selectedProduct, body).toPromise()
+                        .then((response)=>{
     
                         });
-                    }
-                    // if itemCode exist, call PUT method
-                    else {
-    
-                        let _productInventories = {
-                            productId: this.selectedProduct.id,
-                            itemCode: this.selectedVariantCombos[i].itemCode,
-                            price: this.selectedVariantCombos[i].price,
-                            compareAtprice: 0,
-                            quantity: this.selectedVariantCombos[i].quantity,
-                            sku: this.selectedVariantCombos[i].sku,
-                            status: this.selectedVariantCombos[i].status
-                        } 
-                        this._inventoryService.updateInventoryToProduct(this.selectedProduct.id, this.selectedProduct.productInventories[i].itemCode, _productInventories).subscribe(() => {
-                            // Show a success message
-                            this.showFlashMessage('success');
-                        });
-    
-                    }
-                }
-                
-            }
-    
-            // HANDLE VARIANT
-            // Delete the variant from the BE
-            this.variantToBeDeleted.forEach(variant => {
-                this._inventoryService.deleteVariant(this.selectedProduct.id, variant.id , variant)
-                    .pipe(takeUntil(this._unsubscribeAll))
-                    .subscribe((response)=>{
-                        // this.removeVariantFromProduct(response)
-                    });
-            })
-    
-            // Create variant on the server
-            let variantsAvailableInBulk = [];
-            let tempArray = [];
-            let m = 0;
-
-            const variantIds = await this.createVariantInBE()
-
-            console.log('variantIds', variantIds);
-
-            await this.createVariantAvailableInBE(variantIds)
-            
-            /*
-            // not working properly
-            this.filteredProductVariants.forEach(variant => {
-
-                // if variant.id is null, means it is new, so, call POST method
-                if(!variant.id) {
-
-                    let variantBody = {
-                        name : variant.name,
-                        sequenceNumber : m
+                        // if itemCode exist, call PUT method
+                        // else {
+        
+                        //     let _productInventories = {
+                        //         productId: this.selectedProduct.id,
+                        //         itemCode: this.selectedVariantCombos[i].itemCode,
+                        //         price: this.selectedVariantCombos[i].price,
+                        //         compareAtprice: 0,
+                        //         quantity: this.selectedVariantCombos[i].quantity,
+                        //         sku: this.selectedVariantCombos[i].sku,
+                        //         status: this.selectedVariantCombos[i].status
+                        //     } 
+                        //     await this._inventoryService.updateInventoryToProduct(this.selectedProduct.id, this.selectedProduct.productInventories[i].itemCode, _productInventories).toPromise().then(() => {
+                        //         // Show a success message
+                        //         this.showFlashMessage('success');
+                        //     });
+        
+                        // }
                     }
                     
+                }
+        
+                // HANDLE VARIANT
+                // Delete the variant from the BE
+                if (this.variantToBeDeleted.length > 0){
     
-                    this._inventoryService.createVariant(variantBody, this.selectedProduct.id)
-                        .pipe(takeUntil(this._unsubscribeAll))
-                        .subscribe((response) => {
-
-
-                            console.log('response after create variant', response);
+                    this.variantToBeDeleted.forEach(variant => {
+                        this._inventoryService.deleteVariant(this.selectedProduct.id, variant.id , variant)
+                            .pipe(takeUntil(this._unsubscribeAll))
+                            .subscribe((response)=>{
+                                console.log('after delete variant response', response);
+                                
+                                // this.removeVariantFromProduct(response)
+                            });
+                    })
+                }
+    
+                // create new variants
+                const variantIds = await this.createVariantInBE()
+    
+                console.log('variantIds', variantIds);
+    
+                // // Delete the variant available from the BE (bulk) - not working, need to ask BE
+                // if (this.variantAvailableToBeDeleted.length > 0){
+    
+                //     console.log('this.variantAvailableToBeDeleted', this.variantAvailableToBeDeleted);
+                    
+    
+                //     this._inventoryService.deleteVariantAvailableInBulk(this.variantAvailableToBeDeleted, this.selectedProduct.id)
+                //         .pipe(takeUntil(this._unsubscribeAll))
+                //         .subscribe((response)=>{
+                //             console.log('after delete variant available response', response);
                             
+                //             // this.removeVariantFromProduct(response)
+                //         });
+                // }
+    
+                // Delete the variant available from the BE
+                if (this.variantAvailableToBeDeleted.length > 0){
+    
+                    console.log('this.variantAvailableToBeDeleted', this.variantAvailableToBeDeleted);
+                    
+                    this.variantAvailableToBeDeleted.forEach(options => {
+                        this._inventoryService.deleteVariantAvailable(options, this.selectedProduct.id)
+                            .pipe(takeUntil(this._unsubscribeAll))
+                            .subscribe((response)=>{
+                                console.log('after delete variant available response', response);
+                                
+                                // this.removeVariantFromProduct(response)
+                            });
+    
+                    })
+                }
+                let variantAvailablesCreated = [];
+                // if got new variant availables, pass the variantIds from the createVariant endpoint
+                if (this.variantAvailableToBeCreated.length > 0){
+                    
+                    variantAvailablesCreated = await this.createVariantAvailableInBE(variantIds);
 
-                            variant.productVariantsAvailable.forEach(option => {
-
-                                // if no productVariantId..
-                                if (!option.productVariantId) {
-
-                                    // then set the id from the response..
-                                    option.productVariantId = response.id;
-                                    // option.productVariantId = '1234'
-
-                                    // then the object push to tempArray array
-                                    tempArray.push(option);
-
-                                }
-                            })
-                            
-                        });
+                    
                 }
                 else {
 
-                    variant.productVariantsAvailable.forEach(options => {
-                        // if no id means it is new, so, push the object to variantsAvailableInBulk array
-                        if (!options.id) {
-                            variantsAvailableInBulk.push(options)
-                        }
+                    await this._inventoryService.getVariantAvailable(this.selectedProduct.id).then((response) => {
 
+                        variantAvailablesCreated = response;
+                        
                     })
 
                 }
+                console.log('variantAvailablesCreated', variantAvailablesCreated);
 
+                // const allIds: any = await this.joinVariantAvailables(variantAvailablesCreated)
+
+                await this.addInventoryItem(variantAvailablesCreated);
+    
+            }
+    
+            // else means no variants
+            else {
+                // Update the inventory product on the server
+                let _productInventories = {
+                    // productId: this.selectedProduct.id,
+                    itemCode: this.selectedProduct.id + "aa",
+                    price: this.displayPrice,
+                    compareAtprice: 0,
+                    quantity: this.displayQuantity,
+                    sku: this.displaySku,
+                    status: "AVAILABLE"
+                } 
+                await this._inventoryService.addInventoryToProduct(this.selectedProduct, _productInventories).toPromise().then(() => {
+                    // Show a success message
+                    this.showFlashMessage('success');
+                });
+    
+    
                 
-                
-                i++;
-            })
-            */
-
-            // idk why, but this is the only way i can think of to push elements into variantsAvailableInBulk without problem (not working)
-            if (tempArray.length > 0){
-
-                for (let k = 0; k < tempArray.length; k++){
-
-                    variantsAvailableInBulk.push(tempArray[k]);
+                // If got product assets
+                if (product.productAssets) {
+                    let expression = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+                    let regex = new RegExp(expression);
+                    let iteration = 0;// this iteration used by new product added to existing old product (not update tau)
+                    this.selectedProductForm.get('productAssets').value.forEach((item, i) => {
+                        let assetIndex = product.productAssets.findIndex(element => element.id === item.id)
+                        console.log('assetIndex', assetIndex);
+                        console.log('this.thumbnailIndex', this.thumbnailIndex);
+                        
+                        
+                        let _thumbnailIndex = product.productAssets.findIndex(element => element.isThumbnail === true)
+                        if (assetIndex > -1) {
+                            if (!item.url.match(regex)) { // if url is not valid, it mean the data is new data
+        
+                                // -----------------
+                                // delete old one
+                                // -----------------
+        
+                                this._inventoryService.deleteProductAssets(this.selectedProduct.id, item.id)
+                                .pipe(takeUntil(this._unsubscribeAll))
+                                .subscribe((deleteResponse)=>{
+        
+                                    // -----------------
+                                    // create a new one
+                                    // ----------------
+        
+                                    let formData = new FormData();
+                                    formData.append('file',this.imagesFile[i]);
+                                    this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false }, i)
+                                        .pipe(takeUntil(this._unsubscribeAll))
+                                        .subscribe((addResponse)=>{
+        
+                                            // update the deleted product assets
+                                            let _updatedProduct = product.productAssets;
+                                            _updatedProduct[assetIndex] = addResponse;
+        
+                                            // patch the value
+                                            this.selectedProductForm.get('productAssets').patchValue(_updatedProduct);
+        
+                                            // Mark for check
+                                            this._changeDetectorRef.markForCheck();
+                                        });
+        
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                });
+        
+        
+                            } else if (i === this.thumbnailIndex) { // this mean thumbnail index change, diffent from backend
+                                // update the image (only thumbnail)
+                                let updateItemIndex = item;
+                                updateItemIndex.isThumbnail = true;
+        
+                                this._inventoryService.updateProductAssets(this.selectedProduct.id, updateItemIndex, item.id)
+                                    .pipe(takeUntil(this._unsubscribeAll))
+                                    .subscribe((response)=>{
+                                        // Mark for check
+                                        this._changeDetectorRef.markForCheck();
+                                    });
+                            } else {
+                                
+                            }
+                        } else {
+        
+                            // -----------------
+                            // create a new one
+                            // ----------------
+        
+                            iteration = iteration + 1;
+        
+                            let formData = new FormData();
+                            formData.append('file',this.imagesFile[i]);
+        
+                            this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false }, i)
+                                .pipe(takeUntil(this._unsubscribeAll))
+                                .subscribe((addResponse)=>{
+        
+                                    // update the deleted product assets
+                                    // let _updatedProduct = this.selectedProductForm.get('productAssets').value;
+                                    // _updatedProduct[i + iteration -1] = addResponse;
+        
+                                    // if (this.selectedProductForm.get('productAssets').value.length > 0 ){
+                                    //     // patch the value if have existing value 
+                                        this.selectedProductForm.get('productAssets').value[i] = addResponse;
+                                    // } else {
+                                        // patch the value if empty 
+                                        // this.selectedProductForm.get('productAssets').patchValue(_updatedProduct);
+                                    // }
+        
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                });
+                        }
+                    })
+                } else {
+                    for (let i = 0; i < this.imagesFile.length; i++) {
+                        // create a new one
+                        let formData = new FormData();
+                        formData.append('file',this.imagesFile[i]);
+                        this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
+                            .pipe(takeUntil(this._unsubscribeAll))
+                            .subscribe((response)=>{
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
+                            });
+                    }
                 }
             }
-            
-            // Create variant available in bulk
-            this._inventoryService.createVariantAvailableBulk(variantsAvailableInBulk, this.selectedProduct.id)
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((response) => { 
-                // Add the variant to the product
-                // this.addVariantAvailableToVariant(response,this.selectedProductVariants.id);
+            // Show a success message
+            this.showFlashMessage('success');
+        });
 
-                // reset current filteredProductVariantAvailable
-                // this.filteredProductVariantAvailable = this.productVariantAvailable$;
-            });
+        
+        
+        // else {
+        //     // Update the inventory product on the server
+        //     let _productInventories = {
+        //         productId: this.selectedProduct.id,
+        //         itemCode: this.selectedProduct.productInventories[0].itemCode,
+        //         price: this.displayPrice,
+        //         compareAtprice: 0,
+        //         quantity: this.displayQuantity,
+        //         sku: this.displaySku,
+        //         status: "AVAILABLE"
+        //     } 
+        //     this._inventoryService.updateInventoryToProduct(this.selectedProduct.id, this.selectedProduct.productInventories[0].itemCode, _productInventories).subscribe(() => {
+        //         // Show a success message
+        //         this.showFlashMessage('success');
+        //     });
+        // }
 
-            // HANDLE VARIANT AVAILABLE
-
-            // this.newProductVariantAvailable$
-
-            // let k = 0;
-            // let productVariantAvailableIds = [];
-
-            // for (let i = 0; i < this.filteredProductVariants.length; i++) {
-            //   productVariantAvailableIds.push([]);
-            //   // no id means new
-            //   if (!this.filteredProductVariants[i].id) {
-            //     const values = (String(this.variantComboItems[i].values)).split(",");
-            //     console.log('values from handle variant available', values);
-                
-            //     for (let j = 0; j < values.length; j++) {
-            //     //   let data: any = await this.apiCalls.addVariantValues(this.product.id, { productVariantId: variantIds[k], value: values[j], sequenceNumber: k })
-            //     //   productVariantAvailableIds.push({ productVariantAvailableId: data.data.id, value: data.data.value })
-            //     }
-            //     k = k + 1;
-            //     // this.options[i].new = false;
-            //   }
-      
-            // }
-            // var promise = new Promise(async (resolve, reject) => {
-
-            //     resolve(productVariantAvailableIds)
-            //   });
-            //   return promise;
-
-
-        }
-
-        // else means no variants
-        else {
-            // Update the inventory product on the server (backend kena enable update)
-            let _productInventories = {
-                productId: this.selectedProduct.id,
-                itemCode: this.selectedProduct.productInventories[0].itemCode,
-                price: this.displayPrice,
-                compareAtprice: 0,
-                quantity: this.displayQuantity,
-                sku: this.displaySku,
-                status: "AVAILABLE"
-            } 
-            this._inventoryService.updateInventoryToProduct(this.selectedProduct.id, this.selectedProduct.productInventories[0].itemCode, _productInventories).subscribe(() => {
-                // Show a success message
-                this.showFlashMessage('success');
+        // DELETE VARIANT IMAGES
+        for (let i = 0; i < this.variantImagesToBeDeleted.length; i++) {
+            await this._inventoryService.deleteProductAssets(this.selectedProduct.id, this.variantImagesToBeDeleted[i]).toPromise().then(data => {
+                this._changeDetectorRef.markForCheck();
             });
         }
 
-        return;
+        this.variantImagesToBeDeleted = [];
+
+        // CREATE VARIANT IMAGES
+        for (let i = 0; i < this.variantimages.length; i++) {
+            if (this.variantimages[i]) {
+              if (this.variantimages[i].new) {
+                const formdata = new FormData();
+                formdata.append("file", this.variantimages[i].file);
+                await this._inventoryService.addProductAssets(this.selectedProduct.id, formdata, { itemCode: this.selectedProduct.id + i, isThumbnail: false }, i).toPromise().then(data => {
+                    this._changeDetectorRef.markForCheck();
+                });
+              }
+            }
+          }
+
+        // return;
 
         //old
         // if (this.selectedProduct.productInventories.length === 1) {
@@ -999,109 +1109,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         // }
 
         // Update the assets product on the server (backend kena enable update)
-        if (product.productAssets) {
-            let expression = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
-            let regex = new RegExp(expression);
-            let iteration = 0;// this iteration used by new product added to existing old product (not update tau)
-            this.selectedProductForm.get('productAssets').value.forEach((item, i) => {
-                let assetIndex = product.productAssets.findIndex(element => element.id === item.id)
-                let _thumbnailIndex = product.productAssets.findIndex(element => element.isThumbnail === true)
-                if (assetIndex > -1) {
-                    if (!item.url.match(regex)) { // if url is not valid, it mean the data is new data
-
-                        // -----------------
-                        // delete old one
-                        // -----------------
-
-                        this._inventoryService.deleteProductAssets(this.selectedProduct.id, item.id)
-                        .pipe(takeUntil(this._unsubscribeAll))
-                        .subscribe((deleteResponse)=>{
-
-                            // -----------------
-                            // create a new one
-                            // ----------------
-
-                            let formData = new FormData();
-                            formData.append('file',this.imagesFile[i]);
-                            this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false }, i)
-                                .pipe(takeUntil(this._unsubscribeAll))
-                                .subscribe((addResponse)=>{
-
-                                    // update the deleted product assets
-                                    let _updatedProduct = product.productAssets;
-                                    _updatedProduct[assetIndex] = addResponse;
-
-                                    // patch the value
-                                    this.selectedProductForm.get('productAssets').patchValue(_updatedProduct);
-
-                                    // Mark for check
-                                    this._changeDetectorRef.markForCheck();
-                                });
-
-                            // Mark for check
-                            this._changeDetectorRef.markForCheck();
-                        });
-
-
-                    } else if (i === this.thumbnailIndex) { // this mean thumbnail index change, diffent from backend
-                        // update the image (only thumbnail)
-                        let updateItemIndex = item;
-                        updateItemIndex.isThumbnail = true;
-
-                        this._inventoryService.updateProductAssets(this.selectedProduct.id, updateItemIndex, item.id)
-                            .pipe(takeUntil(this._unsubscribeAll))
-                            .subscribe((response)=>{
-                                // Mark for check
-                                this._changeDetectorRef.markForCheck();
-                            });
-                    } else {
-                        
-                    }
-                } else {
-
-                    // -----------------
-                    // create a new one
-                    // ----------------
-
-                    iteration = iteration + 1;
-
-                    let formData = new FormData();
-                    formData.append('file',this.imagesFile[i]);
-
-                    this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false }, i)
-                        .pipe(takeUntil(this._unsubscribeAll))
-                        .subscribe((addResponse)=>{
-
-                            // update the deleted product assets
-                            // let _updatedProduct = this.selectedProductForm.get('productAssets').value;
-                            // _updatedProduct[i + iteration -1] = addResponse;
-
-                            // if (this.selectedProductForm.get('productAssets').value.length > 0 ){
-                            //     // patch the value if have existing value 
-                                this.selectedProductForm.get('productAssets').value[i] = addResponse;
-                            // } else {
-                                // patch the value if empty 
-                                // this.selectedProductForm.get('productAssets').patchValue(_updatedProduct);
-                            // }
-
-                            // Mark for check
-                            this._changeDetectorRef.markForCheck();
-                        });
-                }
-            })
-        } else {
-            for (let i = 0; i < this.imagesFile.length; i++) {
-                // create a new one
-                let formData = new FormData();
-                formData.append('file',this.imagesFile[i]);
-                this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
-                    .pipe(takeUntil(this._unsubscribeAll))
-                    .subscribe((response)=>{
-                        // Mark for check
-                        this._changeDetectorRef.markForCheck();
-                    });
-            }
-        }
+        
         
         // this._inventoryService.updateInventoryToProduct(product.id, productInventories).subscribe(() => {
         //     // Show a success message
@@ -1109,6 +1117,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         // });
     }
 
+    /**
+     * Create variant
+     */
     async createVariantInBE() {
         
 
@@ -1126,112 +1137,87 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 }
                 
 
-                let response = await this._inventoryService.createVariantPromise(variantBody, this.selectedProduct.id)
+                let response = await this._inventoryService.createVariant(variantBody, this.selectedProduct.id).toPromise();
 
                 console.log('response after create variant', response);
 
-                // variantIds.push({variantId : response.id, idx : m})
                 variantIds.push(response)
             }
             m++;
         }
-
-        // this.filteredProductVariants.forEach(variant => {
-
-        //     // if variant.id is null, means it is new, so, call POST method
-        //     if(!variant.id) {
-
-        //         let variantBody = {
-        //             name : variant.name,
-        //             sequenceNumber : m
-        //         }
-                
-
-        //         this._inventoryService.createVariant(variantBody, this.selectedProduct.id)
-        //             .pipe(takeUntil(this._unsubscribeAll))
-        //             .subscribe((response) => {
-
-        //                 console.log('response after create variant', response);
-
-        //                 // variantIds.push({variantId : response.id, idx : m})
-        //                 variantIds.push(response)
-                        
-                        
-        //             });
-        //         m++;
-        //     }
-            
-        // })
         return variantIds;
 
     }
 
+    /**
+     * Create variant availables
+     * 
+     * @param variantIds
+     */
     async createVariantAvailableInBE(newVariant: any[]) {
 
         let bodies = [];
-        let index = 0
+        let variantAvailablesCreated = [];
 
+        // loop the newly created variant ids
         for (let i = 0; i < newVariant.length; i++){
 
-            for (let j = 0; j < this.filteredProductVariants.length; j++){
+            // loop the list of variant availables that need to be created to BE
+            for (let j = 0; j < this.variantAvailableToBeCreated.length; j++){
 
-                if (newVariant[i].name ===  this.filteredProductVariants[j].name){
+                // if name is same..
+                if (newVariant[i].name ===  this.variantAvailableToBeCreated[j].variantName){
 
-                    this.filteredProductVariants[j].id = newVariant[i].id;
-
-                    console.log('jumpa');
+                    // .. set the variant id to the new variant available
+                    this.variantAvailableToBeCreated[j].productVariantId = newVariant[i].id;
                     
                 }
-
+                
             }
         }
 
-        console.log('new this.filteredProductVariants', this.filteredProductVariants);
+        // loop the list of variant availables that need to be created to BE
+        this.variantAvailableToBeCreated.forEach(options => {
+
+            // then push into bodies
+            bodies.push(
+                {
+                    productId : options.productId,
+                    productVariantId : options.productVariantId,
+                    value : options.value,
+                    sequenceNumber : options.sequenceNumber
+                })
+        })
         
+        // call api
+        await this._inventoryService.createVariantAvailableBulk(bodies, this.selectedProduct.id)
+            .toPromise()
+            .then((response) => { 
 
+                console.log('response after create variant available', response['data']);
 
-        // this.filteredProductVariants.forEach(variant => {
+                variantAvailablesCreated = response['data'];
+                
+                
+                // Add the variant to the product
+                // this.addVariantAvailableToVariant(response,this.selectedProductVariants.id);
 
-        //     if (!variant.id){
-
-        //         // variant.productVariantsAvailable.forEach(option => {
-        //         //     option.productId = ids[]
-        //         // })
-
-        //         variant.id = ids
-
-        //         bodies.push(variant[index].productVariantsAvailable)
-        //     }
-
-        //     if (variant.id){
-
-        //         bodies.push(variant[index].productVariantsAvailable)
-        //     }
-
-
-        //     index++;
-        // })
-
-        // ids.forEach(id => {
-
-        //     bodies.push(this.filteredProductVariants[id.idx].productVariantsAvailable);
-
-        // })
-
-        
-
-        // this._inventoryService.createVariantAvailableBulk(bodies, this.selectedProduct.id)
-        //     .pipe(takeUntil(this._unsubscribeAll))
-        //     .subscribe((response) => { 
-        //         // Add the variant to the product
-        //         // this.addVariantAvailableToVariant(response,this.selectedProductVariants.id);
-
-        //         // reset current filteredProductVariantAvailable
-        //         // this.filteredProductVariantAvailable = this.productVariantAvailable$;
-        //     });
-
-
+                // reset current filteredProductVariantAvailable
+                // this.filteredProductVariantAvailable = this.productVariantAvailable$;
+            });
+            
+            return variantAvailablesCreated;
     }
+
+    /**
+     * Delete the variant images
+     */
+    // async deleteVariantImages() {
+    //     for (var i = 0; i < this.variantImagesToBeDeleted.length; i++) {
+    //       await this._inventoryService.deleteProductAssets(this.selectedProduct.id, this.variantImagesToBeDeleted[i]);
+    //     }
+    //     this.variantImagesToBeDeleted = [];
+    //   }
  
     /**
      * Delete the selected product using the form data
@@ -1611,11 +1597,16 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     // --------------------------------------
 
     generateVariantCombo(){
-        // reset selectedVariantCombos to empty 
-        this.selectedVariantCombos = [];
 
         //set variantImages to null
         this.variantimages = [];
+
+        // set to null
+        this.variantAvailableToBeCreated = [];
+        this.variantAvailableToBeDeleted = [];
+        this.variantToBeCreated = []; 
+        this.variantToBeDeleted = []; 
+        this.selectedVariantCombos = [];
 
         // initialise empty variantItems
         // this variantItems only for front end use to display variant combination
@@ -1636,7 +1627,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 // this.options.push({ name: element.name, id: element.id })
 
                 // push empty values array and ids array for each productVariantsAvailable
-                variantOptions.push({ name: element.name, id: element.id })
+                // variantOptions.push({ name: element.name, id: element.id })
+                variantOptions.push(element)
                 variantItems.push({ values: [], ids: [] })
 
                 // push productVariantsAvailable.value and productVariantsAvailable.id to the 
@@ -1650,6 +1642,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         
         this.variantComboItems = variantItems
         this.variantComboOptions = variantOptions
+        this.filteredProductVariants = this.variantComboOptions
         console.log('this.variantComboItems', this.variantComboItems);
         console.log('this.variantComboOptions', this.variantComboOptions);
         
@@ -1714,10 +1707,10 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         
     }
 
-    deleteEntireInventory() {
+    async deleteEntireInventory() {
         var promise = new Promise(async (resolve, reject) => {
           for (var j = 0; j < this.productInventories$.length; j++) {
-            await this._inventoryService.deleteInventoryToProduct(this.selectedProduct.id, this.productInventories$[j].itemCode)
+            await this._inventoryService.deleteInventoryToProduct(this.selectedProduct.id, this.productInventories$[j].itemCode).toPromise();
           }
           this.productInventories$ = [];
           resolve("done")
@@ -1725,51 +1718,62 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         return promise;
     }
 
-    
-  addInventoryItem(productVariantAvailableIds) {
-    var promise = new Promise(async (resolve, reject) => {
-      var k = 0;
-      for (var i = 0; i < this.selectedVariantCombos.length; i++) {
-        const combosSplitted = this.selectedVariantCombos[i].variant.split("/");
-        for (var j = 0; j < combosSplitted.length; j++) {
-          const productAvailableId = await this.getVariantAvailableByValue(combosSplitted[j], productVariantAvailableIds)
 
-          if (productAvailableId == null) {
-            continue;
-          }
-          try {
-            const test = await this._inventoryService.addInventoryToProduct(this.selectedProduct, {
-              itemCode: this.selectedProduct.id + i,
-              productVariantAvailableId: productAvailableId,
-              productId: this.selectedProduct.id,
-              sequenceNumber: 0
-            })
-            if (test["status"] == 200) {
-              k = k + 1;
-            }
-          } catch (Ex) {
+    async joinVariantAvailables(variantAvailables) {
 
-          }
-
+        const data: any = await this._inventoryService.getVariantAvailable(this.selectedProduct.id);
+        console.log('data dalam joinVariantAvailables', data);
+        
+        for (var i = 0; i < data.length; i++) {
+        variantAvailables.push({ productVariantAvailableId: data[i].id, value: data[i].value })
         }
-
+        return variantAvailables;
+    
       }
-      resolve("")
-    });
-    return promise;
+
+    
+  async addInventoryItem(productVariantAvailableIds) {
+
+    console.log('masuk', productVariantAvailableIds);
+
+    var k = 0;
+    for (let i = 0; i < this.selectedVariantCombos.length; i++) {
+        const combosSplitted = this.selectedVariantCombos[i].variant.split("/");
+        console.log('combosSplitted', combosSplitted);
+    
+        for (let j = 0; j < combosSplitted.length; j++) {
+            // const productAvailableId = await this.getVariantAvailableByValue(combosSplitted[j], productVariantAvailableIds)
+            console.log('masuk2', combosSplitted[j].trim());
+            
+            for (let m = 0; m < productVariantAvailableIds.length; m++){
+                
+                console.log('productVariantAvailableIds[m].value', productVariantAvailableIds[m].value);
+                
+                if (combosSplitted[j].trim() == productVariantAvailableIds[m].value.trim()){
+                    
+                    await this._inventoryService.addInventoryItemToProduct(this.selectedProduct, {
+                        itemCode: this.selectedProduct.id + i,
+                        productVariantAvailableId: productVariantAvailableIds[m].id,
+                        productId: this.selectedProduct.id,
+                        sequenceNumber: 0
+                    })
+                }
+            }
+
+        
+        }
+    }
   }
 
-  getVariantAvailableByValue(value, productAvailableIds) {
-    var promise = new Promise(async (resolve, reject) => {
+  async getVariantAvailableByValue(value, productAvailableIds) {
+      let optionsId;
       for (var i = 0; i < productAvailableIds.length; i++) {
         if (productAvailableIds[i].value == value.trim()) {
-          resolve(productAvailableIds[i].productVariantAvailableId);
+            optionsId = productAvailableIds[i].productVariantAvailableId;
           break;
         }
       }
-      resolve(null);
-    });
-    return promise;
+    return optionsId;
   }
 
     getVariantCombosName(variantCombosArr){
@@ -1789,6 +1793,11 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         return variantCombosName.slice(0,-1);
     }
 
+    /**
+     * Generate variant combinations
+     * 
+     * @param this.variantComboItems
+     */
     getallCombinations(combos, itemCode = "", nameComboOutput = "", n = 0) {
         var nameCombo = "";
         if (n == combos.length) {
@@ -1823,12 +1832,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
         
         this.selectedVariantCombos = resArr;
-        console.log("AFTER DO THE COMBINATION", this.selectedVariantCombos);
-        
-    }
-
-
-    setVariants() {
         
     }
 
@@ -1865,8 +1868,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         const value = event.target.value.toLowerCase();
 
         // Filter the variants
-        // this.filteredProductVariants = this.productVariants$.filter(variant => variant.name.toLowerCase().includes(value));
-       this.filteredProductVariants=this.productVariants.value.filter(variant => variant.name.toLowerCase().includes(value));
+        // this.filteredProductVariants = this.productVariants.value.filter(variant => variant.name.toLowerCase().includes(value));
+        this.filteredProductVariants = this.variantComboOptions.filter(variant => variant.name.toLowerCase().includes(value));
+
 
     }
 
@@ -1883,7 +1887,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             return;
         }
 
-        // If there is no variant available...
+        // If there is no variant...
         if ( this.filteredProductVariants.length === 0 )
         {
             // Create the variant
@@ -1891,6 +1895,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
             // Clear the input
             event.target.value = '';
+
+            console.log(event);
+            
 
             // Return
             return;
@@ -1929,9 +1936,16 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             productVariantsAvailable:this._formBuilder.array([]),
         });
 
+        let item = {
+            id:null,
+            name: name,
+            productVariantsAvailable: [],
+        };
+
         this.variantToBeCreated.push(_item)
         this.productVariants.push(_item);
-        this.filteredProductVariants= this.productVariants.value;
+        this.variantComboOptions.push(item);
+        this.filteredProductVariants= this.variantComboOptions;
 
         // add new empty array for variantComboItems
         this.variantComboItems.push({ values: [], ids: [] })
@@ -1970,6 +1984,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             }
         });
 
+
         // Subscribe to the confirmation dialog closed action
         confirmation.afterClosed().subscribe((result) => {
 
@@ -1977,18 +1992,27 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             if ( result === 'confirmed' )
             {
 
-                // Use to delete on BE
-                this.variantToBeDeleted.push(variant)
+                // only add to the variantToBeDeleted array if id is null; which means variant is not in BE
+                if (variant.id){
+                    // Use to delete on BE
+                    this.variantToBeDeleted.push(variant)
+                }
 
                 // Remove from array to be created
                 this.variantToBeCreated.splice(variantIdx, 1);
 
                  // Delete the variant from formArray - formArray cannot use splice. Need to use removeAt
                  this.productVariants.removeAt(variantIdx);
-                 this.filteredProductVariants = this.productVariants.value;
-  
-                 // Delete the variant from variantComboItems
-                 this.variantComboItems.splice(variantIdx, 1);
+                //  this.variantComboOptions = this.productVariants.value;
+                
+                // Delete the variant from variantComboItems
+                this.variantComboItems.splice(variantIdx, 1);
+                this.variantComboOptions.splice(variantIdx, 1);
+                
+                this.filteredProductVariants = this.variantComboOptions;
+                this.selectedVariantCombos = []
+             
+                this.getallCombinations(this.variantComboItems)
 
                 //  this.variantComboOptions.splice(variantIdx, 1)
  
@@ -1996,19 +2020,16 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
                      // to remove combinations with deleted options
                      this.selectedVariantCombos = this.selectedVariantCombos.filter(y => !y.variant.includes(x.value));
-                 })
 
-                 
- 
-                
-                // // Delete the variant from the server
-                // this._inventoryService.deleteVariant(this.selectedProduct.id, variant.id , variant)
-                //     .pipe(takeUntil(this._unsubscribeAll))
-                //     .subscribe((response)=>{
-                //         this.removeVariantFromProduct(response)
-                //     });
+                    })
+                // remove variant available to be created, if not, api will return error    
+                this.variantAvailableToBeCreated = this.variantAvailableToBeCreated.filter(y => !y.variantName.includes(variant.name));
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
             }
         });
+
     }
 
     /**
@@ -2082,8 +2103,11 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      */
     shouldShowCreateVariantButton(inputValue: string): boolean
     {
+        
         // return !!!(inputValue === '' || this.productVariants$.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
-        return !!!(inputValue === '' || this.productVariants.value.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
+        // return !!!(inputValue === '' || this.productVariants.value.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
+        return !!!(inputValue === '' || this.variantComboOptions.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
+
     }
 
     /**
@@ -2174,6 +2198,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 templatePortal.detach();
             }
         });
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
 
     /**
@@ -2205,6 +2232,12 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
                     });
                 });
+
+                // set the variant combinations array to empty
+                this.selectedVariantCombos = [];
+                this.variantComboItems = [];
+                this.variantComboOptions = [];
+
             } else {
                 // Update the selected product form
                 this.selectedProductForm.get('isVariants').patchValue(true);
@@ -2331,7 +2364,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      */
     createVariantAvailable(value: string, variantIdx: number): void
     {
-        this.filteredProductVariants= this.productVariants.value;//check balik yg ni      
+        // this.filteredProductVariants= this.productVariants.value;//check balik yg ni      
         
         // push new variant option (available) value to variant items array 
         this.variantComboItems[variantIdx].values.push(value);
@@ -2341,15 +2374,20 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             value,
             productId: this.selectedProduct.id,
             productVariantId: this.selectedProductVariants.id !== null ? this.selectedProductVariants.id : '',
-            sequenceNumber: this.variantComboItems[variantIdx].values.length - 1
+            sequenceNumber: this.variantComboItems[variantIdx].values.length - 1,
+            variantName: this.selectedProductVariants.name
         }; 
 
         this.productVariantAvailable$.push(variant);
 
         //--- CAN USE THIS TO CREATE NEW VARIANT AVAILABLE TO BE
-        this.newProductVariantAvailable$.push(variant);
+        this.variantAvailableToBeCreated.push(variant);
 
         this.filteredProductVariantAvailable= this.productVariantAvailable$;        
+
+        if (variantIdx > 0){
+            this.selectedVariantCombos = []
+        }
 
         // to generate the combinations
         this.getallCombinations(this.variantComboItems)
@@ -2411,6 +2449,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         // this.productInventories$.forEach(item => {
         //     this.productInventories.push(this._formBuilder.group(item));
         // });
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
  
     editVariantAvailableTitle(variantsAvailable: ProductVariantAvailable, event){
@@ -2444,13 +2485,28 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 }
             }
         });
-
+        
         // Subscribe to the confirmation dialog closed action
         confirmation.afterClosed().subscribe((result) => {
 
             // If the confirm button pressed...
             if ( result === 'confirmed' )
             {
+
+                // only add to the variantAvailableToBeDeleted array if id is null; which means variant avail is not in BE
+                if (variantAvailable.id){
+                    // Use to delete on BE
+                    this.variantAvailableToBeDeleted.push(variantAvailable)
+                }
+
+                // Find the index of the deleted variant available for variantAvailableToBeCreated
+                const indexToBeCreated = this.variantAvailableToBeCreated.indexOf(variantAvailable);
+
+                // Delete the variant available from variantAvailableToBeCreated
+                if (indexToBeCreated > -1) {
+                    this.variantAvailableToBeCreated.splice(indexToBeCreated, 1);
+                }
+
 
                 // Find the index of the deleted variant available for productVariantAvailable$
                 const index = this.productVariantAvailable$.indexOf(variantAvailable);
@@ -2479,8 +2535,11 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 //     });
 
 
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
             }
         });
+
     }
  
      /**
@@ -2932,6 +2991,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         console.log('this.variantimages after upload', this.variantimages);
         console.log('this.variantImagesToBeDeleted after upload', this.variantImagesToBeDeleted);
 
+        this._changeDetectorRef.markForCheck();
+
     }
 
     previewImage(file) {
@@ -2942,7 +3003,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             resolve(reader.result)
           }
         });
+        this._changeDetectorRef.markForCheck();
         return promise;
+
       }
     
     /**
@@ -3155,8 +3218,13 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         console.log('UPDATE -> selectedVariantCombos object', this.selectedVariantCombos);
         console.log('this.filteredProductVariants', this.filteredProductVariants);
         console.log('this.variantToBeDeleted', this.variantToBeDeleted);
-        console.log('this.newProductVariantAvailable$', this.newProductVariantAvailable$);
-        console.log('productVariants.value', this.productVariants.value);
+        console.log('this.variantAvailableToBeCreated', this.variantAvailableToBeCreated);
+        console.log('this.variantAvailableToBeDeleted', this.variantAvailableToBeDeleted);
+        console.log('this.variantComboItems', this.variantComboItems);
+        console.log('this.variantComboOptions', this.variantComboOptions);
+        console.log('this.variantImagesToBeDeleted', this.variantImagesToBeDeleted);
+        
+        
         
         
         
