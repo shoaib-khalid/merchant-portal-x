@@ -287,7 +287,8 @@
                                             </div>
 
                                             <!-- Add New Image -->
-                                            <div class="flex items-center mt-2 whitespace-nowrap">
+                                            <!-- ngIf- if no variant, show the buttons -->
+                                            <div class="flex items-center mt-2 whitespace-nowrap" *ngIf="this.selectedProductForm.get('isVariants').value === false">
                                                 <div>
                                                     <input
                                                         id="image-add-input"
@@ -1160,12 +1161,12 @@
                                                                                             <label
                                                                                                 class="flex items-center justify-center w-6 h-6 rounded-full cursor-pointer hover:bg-hover"
                                                                                                 [ngClass]="imagesEditMode ? 'cursor-not-allowed' : 'cursor-pointer'"
-                                                                                                matTooltip="Add image"
+                                                                                                [matTooltip]="variantimages[i]?.preview ? 'Change image' : 'Add image'"
                                                                                                 [for]="'image-add-input-variant' + variantCombo.variant"
                                                                                                 matRipple>
                                                                                                 <mat-icon
                                                                                                     class="icon-size-3"
-                                                                                                    [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                                                                                                    [svgIcon]="variantimages[i]?.preview ? 'heroicons_solid:pencil-alt' : 'heroicons_outline:plus-circle'"></mat-icon>
                                                                                             </label>
                                                                                         </div>
                                                                                         <!-- Remove Image -->
@@ -1184,6 +1185,24 @@
                                                                                                 <mat-icon
                                                                                                     class="icon-size-3"
                                                                                                     [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                                                                            </label>
+                                                                                        </div>
+                                                                                        <!-- Set Thumbnail -->
+                                                                                        <div *ngIf="variantimages[i]?.preview">
+                                                                                            <input
+                                                                                                [id]="'new-set-thumbnail-button'+ variantCombo.variant"
+                                                                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                                                type="button"
+                                                                                                (click)="setThumbnail(i)"
+                                                                                                mat-icon-button>
+                                                                                            <label 
+                                                                                                class="flex items-center justify-center w-6 h-6 rounded-full cursor-pointer hover:bg-hover"
+                                                                                                [for]="'new-set-thumbnail-button'+ variantCombo.variant"
+                                                                                                [matTooltip]="i !== thumbnailIndex ? 'Set thumbnail' : ''"
+                                                                                                matRipple>
+                                                                                                <mat-icon
+                                                                                                    class="icon-size-3"
+                                                                                                    [svgIcon]="i === thumbnailIndex ? 'heroicons_solid:star' : 'heroicons_outline:star'"></mat-icon>
                                                                                             </label>
                                                                                         </div>
                                                                                         <!-- Toggle Image Edit -->
@@ -1611,12 +1630,12 @@
                                                     </ng-template>
                                                 </div>
                                             </div>
-                                            <button
+                                            <!-- <button
                                             mat-flat-button
                                             [color]="'primary'"
                                             (click)="createVariantCombinationsToBE()">
                                             Preview Variant
-                                        </button>
+                                        </button> -->
                                         </div>
                                     </div>
                                     <div class="flex items-center justify-between w-full border-t px-8 py-4 mt-4">

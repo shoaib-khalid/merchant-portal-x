@@ -270,7 +270,7 @@ export class InventoryService
                     // Update the products
                     this._products.next(products);
 
-                    console.log('1');
+                    // console.log('1');
                     // Return the updated product
                     return updatedProduct["data"];
                 }),
@@ -279,7 +279,7 @@ export class InventoryService
                     filter(item => item && item.id === id),
                     tap(() => {
 
-                        console.log('2');
+                        // console.log('2');
                         
 
                         // Update the product if it's selected
@@ -627,10 +627,6 @@ export class InventoryService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
 
-        // console.log("update inventory dalam service -> productId:", productId, "productInventoriesId:", productInventoriesId, "productInventories",productInventories);
-        
-        // return of();
-
         return this._products.pipe(
             take(1),
             // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
@@ -918,8 +914,6 @@ export class InventoryService
         const now = new Date();
         const date = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate() + " " + now.getHours() + ":" + now.getMinutes()  + ":" + now.getSeconds();
 
-        console.log('variantAvailable in bulk inside service', variantAvailable);
-        // return of()
         return this.products$.pipe(
             take(1),
             // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
