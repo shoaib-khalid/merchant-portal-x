@@ -119,7 +119,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
     // product variant available
     productVariantAvailable: FormArray;
-    productVariantAvailable$: ProductVariantAvailable[] = [];
+    productVariantAvailable$: ProductVariantAvailable[] = []; // used in html
 
     variantAvailableToBeCreated: any = []; // use for creating on BE 
     variantAvailableToBeDeleted: any = []; // use for deleting on BE 
@@ -1966,6 +1966,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                      this.selectedVariantCombos = this.selectedVariantCombos.filter(y => !y.variant.includes(x.value));
 
                     })
+
                 // remove variant available to be created, if not, api will return error    
                 this.variantAvailableToBeCreated = this.variantAvailableToBeCreated.filter(y => !y.variantName.includes(variant.name));
 
@@ -2434,12 +2435,19 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             // If the confirm button pressed...
             if ( result === 'confirmed' )
             {
+                //----------------------------
+                // variantAvailableToBeDeleted
+                //----------------------------
 
                 // only add to the variantAvailableToBeDeleted array if id is null; which means variant avail is not in BE
                 if (variantAvailable.id){
                     // Use to delete on BE
                     this.variantAvailableToBeDeleted.push(variantAvailable)
                 }
+
+                //----------------------------
+                // variantAvailableToBeCreated
+                //----------------------------
 
                 // Find the index of the deleted variant available for variantAvailableToBeCreated
                 const indexToBeCreated = this.variantAvailableToBeCreated.indexOf(variantAvailable);
@@ -2449,6 +2457,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                     this.variantAvailableToBeCreated.splice(indexToBeCreated, 1);
                 }
 
+                //----------------------------
+                // productVariantAvailable$
+                //----------------------------
 
                 // Find the index of the deleted variant available for productVariantAvailable$
                 const index = this.productVariantAvailable$.indexOf(variantAvailable);
@@ -2458,6 +2469,10 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                     this.productVariantAvailable$.splice(index, 1);
                 }
 
+                //----------------------------
+                // variantComboItems
+                //----------------------------
+
                 // Find the index of the deleted variant available for variantComboItems
                 const indexVariantItems = this.variantComboItems[variantIdx].values.indexOf(variantAvailable.value);
 
@@ -2466,17 +2481,13 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                     this.variantComboItems[variantIdx].values.splice(indexVariantItems, 1);
                 }
 
+                //----------------------------
+                // selectedVariantCombos
+                //----------------------------
+
                 // to remove combinations with deleted options
                 this.selectedVariantCombos = this.selectedVariantCombos.filter(x => !x.variant.includes(variantAvailable.value));
-
-                // Delete the variant from the server
-                // this._inventoryService.deleteVariantAvailable(variantAvailable, this.selectedProduct.id)
-                //     .pipe(takeUntil(this._unsubscribeAll))
-                //     .subscribe((response)=>{
-                //         this.removeVariantAvailableFromProduct(response)
-                //     });
-
-
+                
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             }
