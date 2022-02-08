@@ -53,6 +53,7 @@ export interface ProductInventory
     productId: string;
     productInventoryItems?: ProductInventoryItem[];
     sku: string;
+    status: string;
 }
 
 
