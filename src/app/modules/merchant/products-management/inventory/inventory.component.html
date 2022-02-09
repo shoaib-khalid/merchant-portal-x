@@ -1161,16 +1161,16 @@
                                                                                             <label
                                                                                                 class="flex items-center justify-center w-6 h-6 rounded-full cursor-pointer hover:bg-hover"
                                                                                                 [ngClass]="imagesEditMode ? 'cursor-not-allowed' : 'cursor-pointer'"
-                                                                                                [matTooltip]="variantimages[i]?.preview ? 'Change image' : 'Add image'"
+                                                                                                [matTooltip]="variantCombo.preview ? 'Change image' : 'Add image'"
                                                                                                 [for]="'image-add-input-variant' + variantCombo.variant"
                                                                                                 matRipple>
                                                                                                 <mat-icon
                                                                                                     class="icon-size-3"
-                                                                                                    [svgIcon]="variantimages[i]?.preview ? 'heroicons_solid:pencil-alt' : 'heroicons_outline:plus-circle'"></mat-icon>
+                                                                                                    [svgIcon]="variantCombo.preview ? 'heroicons_solid:pencil-alt' : 'heroicons_outline:plus-circle'"></mat-icon>
                                                                                             </label>
                                                                                         </div>
                                                                                         <!-- Remove Image -->
-                                                                                        <div *ngIf="variantimages[i]?.preview">
+                                                                                        <div *ngIf="variantCombo.preview">
                                                                                             <input
                                                                                                 [id]="'image-remove-button-variant'+ variantCombo.variant"
                                                                                                 class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -1188,7 +1188,7 @@
                                                                                             </label>
                                                                                         </div>
                                                                                         <!-- Set Thumbnail -->
-                                                                                        <div *ngIf="variantimages[i]?.preview">
+                                                                                        <div *ngIf="variantCombo.preview">
                                                                                             <input
                                                                                                 [id]="'new-set-thumbnail-button'+ variantCombo.variant"
                                                                                                 class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -1269,10 +1269,10 @@
                                                                                     </div> -->
                                                                                 </div>
                                                                                 <div class="relative flex flex-0 items-center justify-center w-12 h-12 rounded overflow-hidden border">
-                                                                                    <ng-container *ngIf="variantimages[i]?.preview; else noImage">
+                                                                                    <ng-container *ngIf="variantCombo.preview; else noImage">
                                                                                         <img
                                                                                             class="w-full h-full object-cover" 
-                                                                                            [src]="variantimages[i]?.preview">
+                                                                                            [src]="variantCombo.preview">
                                                                                     </ng-container>
                                                                                     <ng-template #noImage>
                                                                                         <div

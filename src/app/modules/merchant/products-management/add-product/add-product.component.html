@@ -325,10 +325,10 @@
                                                 </span>
                                             </mat-select-trigger>
                                             <div>
-                                                <mat-option [value]="'S'">Small</mat-option>
-                                                <mat-option [value]="'M'">Medium</mat-option>
-                                                <mat-option [value]="'L'">Large</mat-option>
-                                                <mat-option [value]="'XL'">Xtra Large</mat-option>
+                                                <mat-option [value]="'S'">Small (below 0.5KG)</mat-option>
+                                                <mat-option [value]="'M'">Medium (0.5 - 1.0KG)</mat-option>
+                                                <mat-option [value]="'L'">Large (1.0 - 2.0KG)</mat-option>
+                                                <mat-option [value]="'XL'">Extra Large (above 2.0KG)</mat-option>
                                             </div>
                                         </mat-select>
                                         <mat-error *ngIf="addProductForm.get('packingSize').hasError('required')">
