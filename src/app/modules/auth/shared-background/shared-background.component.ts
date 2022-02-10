@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
+import { StoresService } from 'app/core/store/store.service';
 
 @Component({
     selector     : 'app-shared-background',
@@ -13,7 +14,7 @@ import { AuthService } from 'app/core/auth/auth.service';
 })
 export class SharedBackgroundComponent implements OnInit
 {
-    
+    image: any[]=[]
 
     /**
      * Constructor
@@ -21,7 +22,8 @@ export class SharedBackgroundComponent implements OnInit
     constructor(
         private _authService: AuthService,
         private _formBuilder: FormBuilder,
-        private _router: Router
+        private _router: Router,
+        private _storesService:StoresService,
     )
     {
     }
@@ -35,6 +37,15 @@ export class SharedBackgroundComponent implements OnInit
      */
     ngOnInit(): void
     {
+        //need to call service for get the latest merchant registered
+
+        //temporary only
+        // this._storesService.getStores().subscribe((response)=>
+        // {
+        //     console.log("Checking RESPONSE:::",response);
+            
+        // });
+
     
     }
 
