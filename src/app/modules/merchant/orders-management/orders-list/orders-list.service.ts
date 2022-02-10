@@ -218,7 +218,29 @@ export class OrdersListService
         );
     }
 
-    updateCompletion(orderId, nextCompletionStatus)
+    updateOrderBulk(completionBody): Observable<any>
+    {
+        
+        let orderService = this._apiServer.settings.apiServer.orderService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.put<Order>(orderService + '/orders/completion-statuses/bulk', completionBody , header).pipe(
+            map((updatedOrder) => {
+
+                this._logging.debug("Response from ProductsService (updateOrderBulk)",updatedOrder);
+
+                // Return the updated product
+                return updatedOrder["data"];
+            })
+        );
+    }
+
+    getCompletionStatus(orderId, nextCompletionStatus)
     {
 
         let orderService = this._apiServer.settings.apiServer.orderService;
@@ -234,7 +256,7 @@ export class OrdersListService
             switchMap(orders => this._httpClient.get<Order>(orderService + '/orders/details/' + orderId, header).pipe(
                 map((response) => {
 
-                    this._logging.debug("Response from OrdersService (updateCompletion) - Get Details By OrderId",response);
+                    this._logging.debug("Response from OrdersService (getCompletionStatus) - Get Details By OrderId",response);
 
                     // Find the index of the updated product
                     const index = orders.findIndex(item => item.order.id === orderId);
@@ -267,7 +289,7 @@ export class OrdersListService
         // });
     }
 
-    getDeliveryProviderDetails(deliveryProviderId): Observable<DeliveryProviderDetails>
+    getDeliveryProviderDetails(deliveryProviderId, quantity: number): Observable<DeliveryProviderDetails>
     {
         let deliveryService = this._apiServer.settings.apiServer.deliveryService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -277,7 +299,7 @@ export class OrdersListService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
         
-        return this._httpClient.get<any>(deliveryService + '/orders/getDeliveryProviderDetails/' + deliveryProviderId , header)
+        return this._httpClient.get<any>(deliveryService + '/orders/getDeliveryProviderDetails/' + deliveryProviderId + '/' + quantity , header)
             .pipe(
                 map((response) => {
                     this._logging.debug("Response from OrdersService (getDeliveryProviderDetails)",response);

@@ -16,6 +16,8 @@ import { Store } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
 import { formatDate } from '@angular/common';
 import { OrderDetailsComponent } from '../order-details/order-details.component';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 
 @Component({
     selector       : 'orders-list',
@@ -85,13 +87,19 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
 
     range: any;
 
-    recentTransactionsDataSource: MatTableDataSource<any> = new MatTableDataSource();
-    recentTransactionsTableColumns: string[] = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'pickup', 'action'];
+    orders: MatTableDataSource<any> = new MatTableDataSource();
+    bulkOrders: Order[] = [];
+    
+    orderSubmitted: any = [];
+    bulkOrderSubmitted: boolean = false;
+
+    recentTransactionsTableColumns: string[] = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'deliveryType', 'deliveryProvider', 'pickup', 'action'];
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     loading: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-    submitted: any = []
     errorMessage: string;
+
+    currentScreenSize: string[] = [];
 
     /**
      * Constructor
@@ -101,6 +109,8 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
         private _orderslistService: OrdersListService,
         private _storesService: StoresService,
         public _dialog: MatDialog,
+        private _fuseConfirmationService: FuseConfirmationService,
+        private _fuseMediaWatcherService: FuseMediaWatcherService,
         private _router: Router,
         )
     {
@@ -132,7 +142,8 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
             .subscribe((data) => {
 
                 // Store the table data
-                this.recentTransactionsDataSource.data = data;
+                this.orders.data = data;
+                this.orders.data.map(obj => Object.assign(obj, { selected: false }));
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -192,99 +203,110 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
         })
 
         this.filterCustNameControl.valueChanges
-        .pipe(
-            takeUntil(this._unsubscribeAll),
-            debounceTime(300),
-            switchMap((query) => {
-                this.isLoading = true;
-                this.filterCustNameControlValue = query;
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((query) => {
+                    this.isLoading = true;
+                    this.filterCustNameControlValue = query;
 
-                return this._orderslistService.getOrders(0, 10, 'created', 'desc', query, '', '', '', this.tabControl.value);
-            }),
-            map(() => {
-                this.isLoading = false;
-            })
-        )
-        .subscribe();
+                    return this._orderslistService.getOrders(0, 10, 'created', 'desc', query, '', '', '', this.tabControl.value);
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
 
         
         this.filterTrxIdControl.valueChanges
-        .pipe(
-            takeUntil(this._unsubscribeAll),
-            debounceTime(300),
-            switchMap((query) => {
-                this.isLoading = true;
-                this.filterTrxIdControlValue = query;
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((query) => {
+                    this.isLoading = true;
+                    this.filterTrxIdControlValue = query;
 
-                return this._orderslistService.getOrders(0, 10, 'created', 'desc', '', '', '', '', this.tabControl.value, query);
-            }),
-            map(() => {
-                this.isLoading = false;
-            })
-        )
-        .subscribe();
+                    return this._orderslistService.getOrders(0, 10, 'created', 'desc', '', '', '', '', this.tabControl.value, query);
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
 
         this.filterDateInputStartControl.valueChanges
-        .pipe(
-            takeUntil(this._unsubscribeAll),
-            debounceTime(300),
-            switchMap((query) => {
-                this.isLoading = true;
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((query) => {
+                    this.isLoading = true;
 
-                // reformat date 
-                const format = 'yyyy-MM-dd';
-                const myDate = query;
-                const locale = 'en-MY';
-                const formattedDate = formatDate(myDate, format, locale);
-                
-                this.filterDateRange.start = formattedDate;
+                    // reformat date 
+                    const format = 'yyyy-MM-dd';
+                    const myDate = query;
+                    const locale = 'en-MY';
+                    const formattedDate = formatDate(myDate, format, locale);
                     
-                // do nothing
-                return of(true);
-            }),
-            map(() => {
-                this.isLoading = false;
-            })
-        )
-        .subscribe();
+                    this.filterDateRange.start = formattedDate;
+                        
+                    // do nothing
+                    return of(true);
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
 
         this.filterDateInputEndControl.valueChanges
-        .pipe(
-            takeUntil(this._unsubscribeAll),
-            debounceTime(300),
-            switchMap((query) => {
-                this.isLoading = true;
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((query) => {
+                    this.isLoading = true;
 
-                // reformat date 
-                const format = 'yyyy-MM-dd';
-                const myDate = query;
-                const locale = 'en-MY';
-                const formattedDate = formatDate(myDate, format, locale);
-                
-                this.filterDateRange.end = formattedDate;
+                    // reformat date 
+                    const format = 'yyyy-MM-dd';
+                    const myDate = query;
+                    const locale = 'en-MY';
+                    const formattedDate = formatDate(myDate, format, locale);
                     
-                return this._orderslistService.getOrders(0, 10, 'created', 'desc', '', '', this.filterDateRange.start, this.filterDateRange.end, this.tabControl.value);
-            }),
-            map(() => {
-                this.isLoading = false;
-            })
-        )
-        .subscribe();
+                    this.filterDateRange.end = formattedDate;
+                        
+                    return this._orderslistService.getOrders(0, 10, 'created', 'desc', '', '', this.filterDateRange.start, this.filterDateRange.end, this.tabControl.value);
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
 
         this.tabControl.valueChanges
-        .pipe(
-            takeUntil(this._unsubscribeAll),
-            debounceTime(300),
-            switchMap((query) => {
-                this.isLoading = true;
-                //kena ubah
-                return this._orderslistService.getOrders(0, 10, 'created', 'desc', '', '', '', '', query);
-            }),
-            map(() => {
-                this.isLoading = false;
-            })
-        )
-        .subscribe();
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((query) => {
+                    this.isLoading = true;
+                    //kena ubah
+                    return this._orderslistService.getOrders(0, 10, 'created', 'desc', '', '', '', '', query);
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
+
+        this._fuseMediaWatcherService.onMediaChange$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(({matchingAliases}) => {               
+
+                this.currentScreenSize = matchingAliases;                
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+
     }
 
     /**
@@ -375,9 +397,11 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
         this.openTab = displayStatuses;
 
         let currentOpenTab = displayStatuses;
-        if (displayStatuses !== "HISTORY") {
-            this.recentTransactionsTableColumns = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'pickup', 'action'];
-        } else {
+        if (displayStatuses === "PROCESS") {
+            this.recentTransactionsTableColumns = ['bulkId', 'invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'deliveryType', 'deliveryProvider', 'pickup', 'action'];
+        } else if (displayStatuses !== "HISTORY") {
+            this.recentTransactionsTableColumns = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'deliveryType', 'deliveryProvider', 'pickup', 'action'];
+        }  else {
             this.recentTransactionsTableColumns = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'completionStatus', 'pickup', 'action'];
         }
 
@@ -397,23 +421,22 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
         this._filter.open();
     }
 
-    updateStatus(order: Order, nextCompletionStatus){
+    updateStatus(order: Order, nextCompletionStatus) {
 
-        this.submitted[order.id] = true;
+        this.orderSubmitted[order.id] = true;
         
         let completionBody = {
             nextCompletionStatus: nextCompletionStatus
         };
-        
 
         // First check the order delivery type => Only scheduled to allow choose time
         if (order.deliveryType === "SCHEDULED" && nextCompletionStatus === "AWAITING_PICKUP") {
-            this._orderslistService.getDeliveryProviderDetails(order.orderShipmentDetail.deliveryProviderId)
+            this._orderslistService.getDeliveryProviderDetails(order.orderShipmentDetail.deliveryProviderId, 1)
                 .subscribe(response => {
                     const dialogRef = this._dialog.open(ChooseProviderDateTimeComponent, { disableClose: true, data: response });
                     dialogRef.afterClosed().subscribe(result => {
                         if (result === "cancelled" || !result.date || !result.time){
-                            this.submitted[order.id] = false;
+                            this.orderSubmitted[order.id] = false;
                             console.warn("Process cancelled");
 
                             // Mark for check
@@ -422,11 +445,14 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                             completionBody["date"] = result.date;
                             completionBody["time"] = result.time;
 
-                            this._orderslistService.updateOrder(order.id, completionBody).pipe(finalize(() => {
-                                this.submitted[order.id] = false;
+                            // update the order
+                            this._orderslistService.updateOrder(order.id, completionBody)
+                                .pipe(finalize(() => {
+                                    this.orderSubmitted[order.id] = false;
                                 }))
-                                .subscribe((response) => {                    
-                                    this._orderslistService.updateCompletion(order.id, nextCompletionStatus).subscribe(() => {
+                                .subscribe((response) => {                
+                                    // re-fetch the completion status    
+                                    this._orderslistService.getCompletionStatus(order.id, nextCompletionStatus).subscribe(() => {
                                     });
 
                                     // Mark for check
@@ -437,17 +463,170 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                     });
                 });
         } else {
+            // update the order
             this._orderslistService.updateOrder(order.id, completionBody).pipe(finalize(() => {
-                this.submitted[order.id] = false;
+                this.orderSubmitted[order.id] = false;
                 }))
                 .subscribe((response) => {
-    
-                    this._orderslistService.updateCompletion(order.id, nextCompletionStatus).subscribe(() => {
+                    // re-fetch the completion status  
+                    this._orderslistService.getCompletionStatus(order.id, nextCompletionStatus).subscribe(() => {
                     });
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
                 });
         }
+    }
+
+    updateStatusBulk(nextCompletionStatus) {
+        
+        this.bulkOrderSubmitted = true;        
+
+        let findNextCompletionStatusIndex = this.bulkOrders.findIndex(item => item["nextCompletionStatus"] !== "AWAITING_PICKUP");
+        let findDeliveryTypeIndex = this.bulkOrders.findIndex(item => item["order"].deliveryType !== "SCHEDULED");
+        let findStorePickupIndex = this.bulkOrders.findIndex(item => item["order"].orderShipmentDetail.storePickup === true);
+        let findGroupedDeliveryProvider = [...new Set(this.bulkOrders.map(item => { return item["order"].orderShipmentDetail.deliveryProviderId}))];
+
+        if (findDeliveryTypeIndex > -1) {
+            // Open the confirmation dialog
+            const confirmation = this._fuseConfirmationService.open({
+                title  : 'Unable to place bulk order',
+                message: 'One or more of selected orders contain "Instant Delivery". Please unselect "Instant Delivery" orders from the selected bulk order.',
+                actions: {
+                    confirm: {
+                        label: 'OK'
+                    }
+                }
+            });
+
+            return;
+        }
+        
+        if (findNextCompletionStatusIndex > -1) {
+            const confirmation = this._fuseConfirmationService.open({
+                title  : 'Unable to place bulk order',
+                message: 'Wrong Completion Status',
+                actions: {
+                    confirm: {
+                        label: 'OK'
+                    }
+                }
+            });
+
+            console.error("Update Status Bulk only available for AWAITING_PICKUP")
+            return;
+        } 
+
+        if (findStorePickupIndex > -1) {
+            const confirmation = this._fuseConfirmationService.open({
+                title  : 'Unable to place bulk order',
+                message: 'Cannot place bulk order with store pickup order. You need to remove store pickup order from the bulk order',
+                actions: {
+                    confirm: {
+                        label: 'OK'
+                    }
+                }
+            });
+
+            return;
+        }
+
+        if (findGroupedDeliveryProvider.length > 1) {
+            const confirmation = this._fuseConfirmationService.open({
+                title  : 'Unable to place bulk order',
+                message: 'Cannot place bulk order with different delivery provider. You need to choose same type of delivery provider to continue',
+                actions: {
+                    confirm: {
+                        label: 'OK'
+                    }
+                }
+            });
+
+            console.error("Update Status Bulk only available for AWAITING_PICKUP")
+            return;
+        } 
+
+        let completionBody = this.bulkOrders.map(item => {
+            return {
+                orderId : item["order"].id,
+                status  : nextCompletionStatus
+            }
+        });
+        
+        // First check the order delivery type => Only scheduled to allow choose time
+        this._orderslistService.getDeliveryProviderDetails(findGroupedDeliveryProvider[0], this.bulkOrders.length)
+            .subscribe(response => {
+                const dialogRef = this._dialog.open(ChooseProviderDateTimeComponent, { disableClose: true, data: response });
+                dialogRef.afterClosed().subscribe(result => {
+                    if (result === "cancelled") {
+                        this.bulkOrderSubmitted = false;
+                        console.warn("Process cancelled");
+
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    } else {
+                        completionBody["date"] = result.date;
+                        completionBody["time"] = result.time;
+
+                        // update the order
+                        this._orderslistService.updateOrderBulk(completionBody)
+                            .pipe(finalize(() => {
+                                this.bulkOrderSubmitted = false;
+                                this.bulkOrders = [];
+                            }))
+                            .subscribe((response) => {                
+                                // re-fetch the completion status    
+                                completionBody.forEach(item => {
+                                    this._orderslistService.getCompletionStatus(item.orderId, item.status).subscribe(() => {
+                                    });
+
+                                    let index = this.orders.data.findIndex(element => element.order.id === item.orderId);
+                                    if (index > -1) {                                        
+                                        this.orders.data[index].selected = null;                                        
+                                    }
+
+                                });                                
+
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
+                            });
+                    }
+                });
+            });
+    }
+
+    selectOrder(event, order: Order = null, selectType: string = null) {
+        if (selectType === 'all') {
+            if (event.checked === true){
+                this.orders.data.map(obj => obj.selected = true);
+                // set bulk item action to true
+                this.bulkOrders = [...this.orders.data];
+            }
+            else {
+                this.orders.data.map(obj => obj.selected = false);
+                // set bulk item action to true
+                this.bulkOrders = [];
+            }
+        } else {
+            let index = this.orders.data.findIndex(item => item.order.id === order.id);
+            if (index > -1) {                
+                if (event.checked === true){
+                    this.bulkOrders.push(this.orders.data[index]);
+                    this.orders.data[index].selected = true;
+                }
+                else {
+                    // find index of bulkOrder from this.orders.data
+                    let bulkOrderIndex = this.bulkOrders.findIndex(item => item["order"].id === this.orders.data[index].order.id);
+
+                    if (bulkOrderIndex > -1) {
+                        this.bulkOrders.splice(bulkOrderIndex,1);
+                        this.orders.data[index].selected = false;
+                    }
+                }
+            }
+        }        
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
 
     viewDetails(orderId){
@@ -467,6 +646,16 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
         dialogRef.afterClosed()
                  .subscribe((result) => {
                  });
+    }
+
+    getOrderCountSummaryName(completionStatus: string) {
+        let index = this._orderCountSummary.findIndex(item => item.completionStatus.includes(completionStatus));
+
+        if (index > -1) {
+            return this._orderCountSummary[index].label;
+        } else {
+            return false;
+        }
     }
 
 }

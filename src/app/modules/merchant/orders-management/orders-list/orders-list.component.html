@@ -55,12 +55,14 @@
                 <!-- Recent transactions table -->
                 <div class="xl:col-span-2 flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden">
                     <div class="flex flex-col sm:flex-row p-6 sm:justify-between">
+                        <!-- Recent transactions -->
                         <div class="flex w-full">
                             <div class="flex-0">
                                 <div class="mr-4 text-lg font-medium tracking-tight leading-6 truncate">Recent transactions</div>
                                 <!-- <div class="text-secondary font-medium">1 pending, 4 completed</div> -->
                             </div>
                         </div>
+                        <!-- Search & Filter -->
                         <div class="flex w-full sm:w-auto mt-4 sm:mt-0">
                             <div class="flex items-center justify-center pr-2">
                                 <mat-select
@@ -184,7 +186,7 @@
                             </mat-form-field>
                         </div>
                     </div>
-                    
+                    <!-- Order Status Tabs -->
                     <ul class="flex mb-0 list-none flex-wrap pb-4 px-4 flex-row">
                         <ng-container *ngFor="let orderStatus of _orderCountSummary">
                             <li class="-mb-px mr-2 pb-2 last:mr-0 flex-auto text-center">
@@ -203,30 +205,77 @@
                             </a>
                         </li> -->
                     </ul>
-                    <div>
+                    <!-- Table -->
+                    <div class="flex flex-col w-full">
+                        <!-- Bulk Pickup Button -->
+                        <div *ngIf="bulkOrders.length > 0" class="flex flex-row w-full justify-end px-6">
+                            <input
+                                [id]="'action-bulk-order'"
+                                type="button"
+                                (click)="updateStatusBulk('AWAITING_PICKUP')"
+                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                mat-button>
+                            <label 
+                                class="flex items-center justify-center w-auto p-2 rounded-full border border-primary border-solid group bg-primary hover:bg-hover cursor-pointer"
+                                [for]="'action-bulk-order'"
+                                matRipple>
+                                <span class="font-medium group-hover:text-primary text-sm text-white whitespace-nowrap">
+                                    Bulk Pickup
+                                </span>
+                            </label>
+                        </div>
+                        <!-- Table -->
                         <div class="overflow-x-auto mx-6">
                             <table
-                                class="w-full bg-transparent"
+                                class="w-full bg-transparent table-fixed"
                                 mat-table
                                 matSort
                                 matSortDisableClear
-                                [dataSource]="recentTransactionsDataSource"
+                                [dataSource]="orders"
                                 [trackBy]="trackByFn"
                                 #recentTransactionsTable>
     
+                                <!-- Bulk select action -->
+                                <ng-container matColumnDef="bulkId">
+                                    <th
+                                        class="w-10 p-0"
+                                        mat-header-cell
+                                        *matHeaderCellDef>
+                                        <mat-checkbox
+                                            (change)="selectOrder($event, null, 'all')"
+                                            [color]="'primary'"
+                                        >
+                                        </mat-checkbox>
+                                    </th>
+                                    <td
+                                        class="w-10 p-0 cell-style"
+                                        mat-cell
+                                        *matCellDef="let transaction">
+                                        <mat-checkbox
+                                            [ngClass]="transaction.selected !== null ? 'block' : 'hidden'"
+                                            (change)="selectOrder($event, transaction.order)"
+                                            [color]="'primary'"
+                                            [checked]="transaction.selected"
+                                            [value]="transaction.selected"
+                                        >
+                                        </mat-checkbox>
+                                    </td>
+                                </ng-container>
+
                                 <!-- Transaction ID -->
                                 <ng-container matColumnDef="invoiceId">
                                     <th
+                                        class="w-26 p-0"
                                         mat-header-cell
                                         mat-sort-header
                                         *matHeaderCellDef>
                                         Transaction ID
                                     </th>
                                     <td
-                                        class="cell-style"
+                                        class="w-26 p-0"
                                         mat-cell
                                         *matCellDef="let transaction">
-                                        <span class="pr-6 font-medium text-sm text-secondary whitespace-nowrap">
+                                        <span class="font-medium text-sm text-secondary">
                                             {{transaction.order.invoiceId}}
                                         </span>
                                     </td>
@@ -235,13 +284,14 @@
                                 <!-- Date -->
                                 <ng-container matColumnDef="created">
                                     <th
+                                        class="w-28 p-0"
                                         mat-header-cell
                                         mat-sort-header
                                         *matHeaderCellDef>
                                         Date
                                     </th>
                                     <td
-                                        class="cell-style"
+                                        class="w-28 p-0 cell-style"
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span class="pr-6 whitespace-nowrap">
@@ -253,16 +303,17 @@
                                 <!-- Name -->
                                 <ng-container matColumnDef="orderPaymentDetail.accountName">
                                     <th
+                                        class="w-36 lg:w-auto p-0 mr-4"
                                         mat-header-cell
                                         mat-sort-header
                                         *matHeaderCellDef>
                                         Customer Name
                                     </th>
                                     <td
-                                        class="truncate-cell"
+                                        class="w-36 lg:w-auto p-0 mr-4 truncate-cell"
                                         mat-cell
                                         *matCellDef="let transaction">
-                                        <span class="pr-6 whitespace-nowrap">
+                                        <span class="whitespace-nowrap">
                                             {{transaction.order.orderPaymentDetail.accountName | titlecase }}
                                         </span>
                                     </td>
@@ -271,6 +322,7 @@
                                 <!-- Amount -->
                                 <ng-container matColumnDef="total">
                                     <th
+                                        class="w-22 p-0"
                                         mat-header-cell
                                         mat-sort-header
                                         *matHeaderCellDef>
@@ -280,22 +332,23 @@
                                         class="cell-style-small"
                                         mat-cell
                                         *matCellDef="let transaction">
-                                        <span class="font-medium whitespace-nowrap">
+                                        <span *ngIf="store" class="font-medium whitespace-nowrap">
                                             {{ transaction.order.total | currency: store.regionCountry.currencySymbol }}
                                         </span>
                                     </td>
                                 </ng-container>
-    
+
                                 <!-- Status -->
                                 <ng-container matColumnDef="completionStatus" *ngIf="openTab === 'HISTORY'">
                                     <th
+                                        class="w-28 text-center"
                                         mat-header-cell
                                         mat-sort-header
                                         *matHeaderCellDef>
                                         Status
                                     </th>
                                     <td
-                                        class="cell-style"
+                                        class="w-28 p-0 cell-style"
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span
@@ -306,16 +359,60 @@
                                                         'bg-purple-200 text-purple-800 dark:bg-purple-600 dark:text-purple-50': transaction.order.completionStatus === 'BEING_DELIVERED',
                                                         'bg-red-200 text-red-800 dark:bg-red-600 dark:text-red-50': transaction.order.completionStatus === 'CANCELED_BY_MERCHANT',
                                                         'bg-blue-200 text-blue-800 dark:bg-blue-600 dark:text-blue-50': transaction.order.completionStatus === 'DELIVERED_TO_CUSTOMER'}">
-                                            <span class="leading-relaxed whitespace-nowrap">{{transaction.order.completionStatus}}</span>
+                                            <span class="leading-relaxed whitespace-nowrap">{{ getOrderCountSummaryName(transaction.order.completionStatus) ? getOrderCountSummaryName(transaction.order.completionStatus) : transaction.order.completionStatus }}</span>
+                                        </span>
+                                    </td>
+                                </ng-container>
+                                
+                                <!-- Delivery Type -->
+                                <ng-container matColumnDef="deliveryType">
+                                    <th
+                                        class="w-22 p-0"
+                                        mat-header-cell
+                                        mat-sort-header
+                                        *matHeaderCellDef>
+                                        Delivery Type
+                                    </th>
+                                    <td
+                                        class="cell-style-small"
+                                        mat-cell
+                                        *matCellDef="let transaction">
+                                        <span *ngIf="store" 
+                                              class="inline-flex items-center font-bold text-xs px-2.5 py-0.5 rounded-full tracking-wide uppercase"
+                                              [ngClass]="{'bg-green-200 text-green-800 dark:bg-green-600 dark:text-green-50': transaction.order.deliveryType === 'SCHEDULED',
+                                                          'bg-blue-200 text-blue-800 dark:bg-blue-600 dark:text-blue-50': transaction.order.deliveryType === 'ADHOC'}">
+                                            {{ transaction.order.deliveryType }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+                                
+                                <!-- Delivery Provider -->
+                                <ng-container matColumnDef="deliveryProvider">
+                                    <th
+                                        class="w-22 p-0"
+                                        mat-header-cell
+                                        mat-sort-header
+                                        *matHeaderCellDef>
+                                        Delivery Provider
+                                    </th>
+                                    <td
+                                        class="cell-style-small"
+                                        mat-cell
+                                        *matCellDef="let transaction">
+                                        <span *ngIf="store && transaction.order.orderShipmentDetail.deliveryServiceProvider" 
+                                            class="inline-flex items-center font-bold text-xs px-2.5 py-0.5 rounded-full tracking-wide uppercase"
+                                            [ngClass]="{ 'bg-orange-200 text-orange-800 dark:bg-orange-600 dark:text-orange-50': transaction.order.orderShipmentDetail.deliveryServiceProvider.id === '3',
+                                                         'bg-red-200 text-red-800 dark:bg-red-600 dark:text-red-50': transaction.order.orderShipmentDetail.deliveryServiceProvider.id === '5'}"
+                                            >
+                                            {{ transaction.order.orderShipmentDetail.deliveryServiceProvider ? transaction.order.orderShipmentDetail.deliveryServiceProvider.name : '' }}
                                         </span>
                                     </td>
                                 </ng-container>
 
-                                
                                 <!-- Pickup -->
                                 <ng-container matColumnDef="pickup">
                                     <th
-                                        class="mat-cell-break-word"
+                                        class="w-20 p-0"
                                         mat-header-cell
                                         *matHeaderCellDef>
                                         Store Pickup
@@ -327,32 +424,31 @@
                                         <div class="flex items-start items-center">
 
                                             <mat-icon
-                                            *ngIf="transaction.order.orderShipmentDetail.storePickup"
-                                            class="text-green-400 icon-size-5"
-                                            [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                                                *ngIf="transaction.order.orderShipmentDetail.storePickup"
+                                                class="text-green-400 icon-size-5"
+                                                [svgIcon]="'heroicons_outline:check'"></mat-icon>
 
                                             <!-- <input 
-                                            class="bg-gray-50 border-gray-300 focus:ring-0 focus:ring-blue-300 h-6 w-6 rounded-full" 
-                                            type="checkbox" 
-                                            [checked]="transaction.order.orderShipmentDetail.storePickup"
-                                            onclick="return false;"
-                                            > -->
+                                                class="bg-gray-50 border-gray-300 focus:ring-0 focus:ring-blue-300 h-6 w-6 rounded-full" 
+                                                type="checkbox" 
+                                                [checked]="transaction.order.orderShipmentDetail.storePickup"
+                                                onclick="return false;"
+                                                > -->
                                       </div>
                                     </td>
                                 </ng-container>
-                                
 
                                 <!-- Action -->
                                 <ng-container matColumnDef="action">
                                     <th
-                                        class="pl-2"
+                                        class="w-48 text-center"
                                         mat-header-cell
                                         *matHeaderCellDef>
                                         Action
                                     </th>
                                     <td
                                         mat-cell
-                                        class="px-2"
+                                        class="w-48 px-2"
                                         *matCellDef="let transaction"
                                     >
                                         <div class="flex flex-row items-center">
@@ -371,22 +467,27 @@
                                                     class="text-white group-hover:text-primary icon-size-4"
                                                     >receipt</mat-icon>
                                             </label>
+                                            <!-- Action Button -->
                                             <ng-container *ngIf= "transaction.currentCompletionStatus != 'PAYMENT_CONFIRMED' && transaction.currentCompletionStatus != 'RECEIVED_AT_STORE'; else cancelTemplate">
-                                                <!-- Action Button -->
-                                                <mat-select *ngIf= "transaction.nextActionText ; else onlyButton"
-                                                    [id]="'action-select-' + transaction.order.id"
-                                                    class="flex placeholder-black items-center justify-center w-3/5 py-2 px-1 rounded-full border border-primary border-solid group hover:bg-primary"
-                                                    [placeholder]="'&nbsp; &nbsp; &nbsp;' + transaction.nextActionText"
-                                                    [disabled]="submitted[transaction.order.id]"
-                                                    [ngClass]="submitted[transaction.order.id] ? 'cursor-wait' : 'cursor-pointer' "
+                                                <!-- Action Dropdown -->
+                                                <ng-container>
+                                                    <mat-select *ngIf="transaction.nextActionText ; else onlyButton"
+                                                        [id]="'action-select-' + transaction.order.id"
+                                                        class="w-3/5 py-2 px-1 rounded-full border border-solid"
+                                                        [ngClass]="orderSubmitted[transaction.order.id] ? 'cursor-wait' : 'cursor-pointer'"
+                                                        [ngClass]="bulkOrders.length > 0 ? 'cursor-not-allowed border-gray-300 bg-gray-200' : 'cursor-pointer border-primary hover:bg-primary'"
+                                                        [placeholder]="'&nbsp; &nbsp;' + transaction.nextActionText"
+                                                        [disabled]="orderSubmitted[transaction.order.id] || bulkOrders.length > 0"
                                                     >
-                                                    <ng-container>
-                                                        <mat-option *ngIf="transaction.nextActionText" (click)="updateStatus(transaction.order, transaction.nextCompletionStatus)">{{ transaction.nextActionText }}</mat-option>
-                                                        <mat-option (click)="openDetailsDialog(transaction.order.id)">Details</mat-option>
-                                                    </ng-container>
-                                                </mat-select>
+                                                        <ng-container>
+                                                            <mat-option *ngIf="transaction.nextActionText" (click)="updateStatus(transaction.order, transaction.nextCompletionStatus)">{{ transaction.nextActionText }}</mat-option>
+                                                            <mat-option (click)="openDetailsDialog(transaction.order.id)">Details</mat-option>
+                                                        </ng-container>
+                                                    </mat-select>
+                                                </ng-container>
+                                                <!-- Action Button  -->
                                                 <ng-template #onlyButton>
-                                                        <input
+                                                    <input
                                                         [id]="'action-' + transaction.order.id"
                                                         type="button"
                                                         (click)="openDetailsDialog(transaction.order.id)"
@@ -394,7 +495,7 @@
                                                         mat-button>
                                                     <label 
                                                         class="flex items-center justify-center w-3/5 py-2 px-1 rounded-full border border-primary border-solid group hover:bg-primary"
-                                                        [ngClass]="submitted[transaction.order.id] ? 'cursor-wait' : 'cursor-pointer'"   
+                                                        [ngClass]="orderSubmitted[transaction.order.id] ? 'cursor-wait' : 'cursor-pointer'"   
                                                         [for]="'action-' + transaction.order.id"
                                                         matRipple>
                                                         <span class="font-medium group-hover:text-white text-sm text-primary whitespace-nowrap">
@@ -406,14 +507,14 @@
                                                 <!-- <input
                                                     [id]="'action-' + transaction.order.id"
                                                     type="button"
-                                                    [disabled]="submitted[transaction.order.id]"
+                                                    [disabled]="orderSubmitted[transaction.order.id]"
                                                     (click)="updateStatus(transaction.order, transaction.nextCompletionStatus)"
                                                     class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                     mat-button>
                                                 <label 
                                                     *ngIf="transaction.nextActionText" 
                                                     class="flex items-center justify-center w-2/3 py-2 px-1 rounded-full border border-primary border-solid group hover:bg-primary"
-                                                    [ngClass]="submitted[transaction.order.id] ? 'cursor-wait' : 'cursor-pointer'"   
+                                                    [ngClass]="orderSubmitted[transaction.order.id] ? 'cursor-wait' : 'cursor-pointer'"   
                                                     [for]="'action-' + transaction.order.id"
                                                     matRipple>
                                                     <span class="font-medium group-hover:text-white text-sm text-primary whitespace-nowrap">
@@ -422,17 +523,17 @@
                                                 </label> -->
 
                                             </ng-container>
-                                            <!-- <label *ngIf="submitted">Hello
+                                            <!-- <label *ngIf="orderSubmitted">Hello
 
                                             </label> -->
                                             
                                             <ng-template #cancelTemplate>
                                                 <mat-select
-                                                    [id]="'action-select-' + transaction.order.id"
+                                                    [id]="'action-cancel-' + transaction.order.id"
                                                     class="flex placeholder-black items-center justify-center w-3/5 py-2 px-1 rounded-full border border-primary border-solid group hover:bg-primary"
                                                     [placeholder]="'&nbsp; &nbsp; &nbsp;' + transaction.nextActionText"
-                                                    [disabled]="submitted[transaction.order.id]"
-                                                    [ngClass]="submitted[transaction.order.id] ? 'cursor-wait' : 'cursor-pointer' "
+                                                    [disabled]="orderSubmitted[transaction.order.id]"
+                                                    [ngClass]="orderSubmitted[transaction.order.id] ? 'cursor-wait' : 'cursor-pointer' "
                                                     >
                                                     <ng-container>
                                                         <mat-option (click)="updateStatus(transaction.order, transaction.nextCompletionStatus)">{{ transaction.nextActionText }}</mat-option>
@@ -454,19 +555,18 @@
                                         colspan="6">
                                     </td>
                                 </ng-container>
-
                                 
                                 <tr
-                                mat-header-row
-                                *matHeaderRowDef="recentTransactionsTableColumns"></tr>
+                                    mat-header-row
+                                    *matHeaderRowDef="recentTransactionsTableColumns"></tr>
                                 <tr
-                                class="order-row h-16"
-                                mat-row
-                                *matRowDef="let row; columns: recentTransactionsTableColumns;"></tr>
+                                    class="order-row h-16"
+                                    mat-row
+                                    *matRowDef="let row; columns: recentTransactionsTableColumns;"></tr>
                                 <!-- <tr
-                                class="h-16 border-0"
-                                mat-footer-row
-                                *matFooterRowDef="['recentOrdersTableFooter']"></tr> -->
+                                    class="h-16 border-0"
+                                    mat-footer-row
+                                    *matFooterRowDef="['recentOrdersTableFooter']"></tr> -->
                             </table>
                         </div>
                     </div>
@@ -484,4 +584,5 @@
     [pageIndex]="pagination.page"
     [pageSize]="pagination.size"
     [pageSizeOptions]="[5, 10, 25, 100]"
-    [showFirstLastButtons]="true"></mat-paginator>
+    [showFirstLastButtons]="true"
+    [hidePageSize]="currentScreenSize.includes('sm') ? false : true"></mat-paginator>
