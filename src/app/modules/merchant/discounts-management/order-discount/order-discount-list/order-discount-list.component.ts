@@ -10,6 +10,8 @@ import { Discount, DiscountPagination, StoreDiscountTierList } from 'app/modules
 import { DiscountsService } from 'app/modules/merchant/discounts-management/order-discount/order-discount-list/order-discount-list.service';
 import { CreateOrderDiscountDialogComponent } from '../create-order-discount/create-order-discount.component';
 import { MatDialog } from '@angular/material/dialog';
+import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
+
 
 @Component({
     selector       : 'order-discount-list.',
@@ -66,6 +68,9 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     discountName: string;
 
+    currentScreenSize: string[] = [];
+
+
     /**
      * Constructor
      */
@@ -75,6 +80,8 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
         private _formBuilder: FormBuilder,
         private _discountService: DiscountsService,
         public _dialog: MatDialog,
+        private _fuseMediaWatcherService: FuseMediaWatcherService,
+
     )
     {
     }
@@ -148,6 +155,16 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
                 })
             )
             .subscribe();
+
+            this._fuseMediaWatcherService.onMediaChange$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(({matchingAliases}) => {               
+
+                this.currentScreenSize = matchingAliases;                
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
 
         // Mark for check
         this._changeDetectorRef.markForCheck();

@@ -17,6 +17,7 @@ import { DiscountsProductService } from './product-discount-list.service';
 import { ApiResponseModel, StoreDiscountProduct } from './product-discount-list.types';
 import { ProductListDialogComponent } from '../product-list-dialog/product-list-dialog.component';
 import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dialog/dialog.component';
+import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 
 @Component({
     selector       : 'product-discount-list',
@@ -99,6 +100,9 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
     checkdate = false;
     message: string = "";
 
+    currentScreenSize: string[] = [];
+
+
     /**
      * Constructor
      */
@@ -110,6 +114,8 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
         private _inventoryService: InventoryService ,
         private _discountProductService:DiscountsProductService ,
         public _dialog: MatDialog,
+        private _fuseMediaWatcherService: FuseMediaWatcherService,
+
     )
     {
     }
@@ -216,6 +222,16 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
         
                 this._changeDetectorRef.markForCheck();
     
+            });
+
+            this._fuseMediaWatcherService.onMediaChange$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(({matchingAliases}) => {               
+
+                this.currentScreenSize = matchingAliases;                
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
             });
 
         // Mark for check
