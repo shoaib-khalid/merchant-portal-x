@@ -733,7 +733,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
         newProductBody["categoryId"] = categoryId;
         newProductBody["seoName"] = newProductBody.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
-        newProductBody["seoUrl"] = storeFrontURL + "/products/name/" + newProductBody.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
+        newProductBody["seoUrl"] = storeFrontURL + "/product/" + newProductBody.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
         newProductBody["storeId"] = this.store$.id;
         newProductBody["minQuantityForAlarm"] = newProductBody.minQuantityForAlarm === false ? -1 : newProductBody.minQuantityForAlarm;
         newProductBody["packingSize"] = newProductBody.packagingSize ? newProductBody.packagingSize : "S";
@@ -816,7 +816,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         const { sku, price, quantity, ...product} = this.selectedProductForm.getRawValue();
         
         product.seoName = product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
-        product.seoUrl = storeFrontURL + '/products/name/' + product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
+        product.seoUrl = storeFrontURL + '/product/' + product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
 
         // Get the product object for updating the product
         const { productAssets, productInventories, productReviews, productVariants, ...productToUpdate} = product;
