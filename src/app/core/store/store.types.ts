@@ -40,6 +40,7 @@ export interface Store
     completed?: number;
     currentStep?: number;
     storeAsset?: StoreAssets;
+    storeAssets?: StoreAsset[];
     regionCountry?: {
         currency?: string;
         currencyCode: string;
@@ -149,6 +150,16 @@ export interface StoreAssets
     bannerUrl?: string;
     logoUrl?: string;
     storeId?: string;
+}
+
+export interface StoreAsset
+{
+    assetDescription: string;
+    assetFile: string;
+    assetType: string;
+    assetUrl: string;
+    id: string;
+    storeId: string;
 }
 
 export interface StorePagination

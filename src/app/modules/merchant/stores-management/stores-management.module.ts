@@ -30,6 +30,8 @@ import { storesManagementRoutes } from 'app/modules/merchant/stores-management/s
 import { EditStoreModule } from './edit-store/edit-store.module';
 import { MatStepperModule } from '@angular/material/stepper';
 import { TimeSelectorInputModule } from 'app/layout/common/time-selector/timeselector.module';
+import { NgxGalleryModule } from 'ngx-gallery-9';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 
 @NgModule({
@@ -62,7 +64,9 @@ import { TimeSelectorInputModule } from 'app/layout/common/time-selector/timesel
         FuseCardModule,
         MatStepperModule,
         EditStoreModule,
-        TimeSelectorInputModule
+        TimeSelectorInputModule,
+        NgxGalleryModule,
+        FontAwesomeModule
     ],
     providers: [
         // GraphHelper

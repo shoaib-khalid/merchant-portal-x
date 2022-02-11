@@ -1,9 +1,14 @@
 import { HttpResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { StoresService } from 'app/core/store/store.service';
+import { StoreAsset } from 'app/core/store/store.types';
+
+import { NgxGalleryOptions, NgxGalleryImage, NgxGalleryAnimation } from 'ngx-gallery-9';
+import { Observable, Subject } from 'rxjs';
 
 @Component({
     selector       : 'store-asset',
@@ -14,6 +19,12 @@ import { StoresService } from 'app/core/store/store.service';
 export class StoreAssetComponent implements OnInit
 {
     storeId: string;
+
+    storeBannerMobile: any = [];
+
+    imageCollection:any = [];
+    galleryOptions: NgxGalleryOptions[] = [];
+    galleryOptionsBannerMobile: NgxGalleryOptions[] = [];
 
     storeAssetForm: FormGroup;
     plans: any[];
@@ -29,7 +40,7 @@ export class StoreAssetComponent implements OnInit
         private _route: ActivatedRoute,
         private _storesService: StoresService,
         private _fuseConfirmationService: FuseConfirmationService,
-
+        private _domSanitizer: DomSanitizer
     )
     {
     }
@@ -42,11 +53,13 @@ export class StoreAssetComponent implements OnInit
      * On init
      */
     ngOnInit(): void
-    {
+    {        
         // Logo & Banner
         this.files = [
             { 
-                type: "logo", 
+                description: "Logo",
+                type: "LogoUrl",
+                assetId: null, 
                 fileSource: null,
                 selectedFileName: "", 
                 selectedFiles: null, 
@@ -54,21 +67,30 @@ export class StoreAssetComponent implements OnInit
                 recommendedImageHeight: "500", 
                 selectedImageWidth: "", 
                 selectedImageHeight: "",
-                toDelete: false
+                toDelete: false,
+                isMultiple: false,
+                galleryImages: [] 
             },
             { 
-                type: "banner", 
+                description: "BannerDesktop",
+                type: "BannerDesktopUrl",
+                assetId: null, 
                 fileSource: null,
                 selectedFileName: "", 
                 selectedFiles: null, 
                 recommendedImageWidth: "1110", 
                 recommendedImageHeight: "250", 
-                selectedImageWidth: "", 
-                selectedImageHeight: "",
-                toDelete: false
+                selectedImageWidth: [], 
+                selectedImageHeight: [],
+                toDelete: [],
+                toAdd:[],
+                isMultiple: true,
+                galleryImages: []
             },
             { 
-                type: "bannerMobile", 
+                description: "BannerMobile",
+                type: "BannerMobileUrl",
+                assetId: null, 
                 fileSource: null,
                 selectedFileName: "", 
                 selectedFiles: null, 
@@ -76,35 +98,178 @@ export class StoreAssetComponent implements OnInit
                 recommendedImageHeight: "260", 
                 selectedImageWidth: "", 
                 selectedImageHeight: "",
-                toDelete: false
+                toDelete: [],
+                toAdd:[],
+                isMultiple: true,
+                galleryImages: []
+            },
+            { 
+                description: "Favicon",
+                type: "FaviconUrl", 
+                assetId: null,
+                fileSource: null,
+                selectedFileName: "", 
+                selectedFiles: null, 
+                recommendedImageWidth: "950", 
+                recommendedImageHeight: "260", 
+                selectedImageWidth: "", 
+                selectedImageHeight: "",
+                toDelete: false,
+                isMultiple: false,
+                galleryImages: []
             },
         ];
 
-        this.storeId = this._route.snapshot.paramMap.get('storeid');
+        // initialise gallery
+        // set galleryOptions
+        this.galleryOptions = [
+            {
+                width: '350px',
+                height: '350px',
+                thumbnailsColumns: 3,
+                imageAnimation: NgxGalleryAnimation.Slide,
+                thumbnailsArrows: true,
+                // previewDownload: true,
+                imageArrowsAutoHide: true, 
+                thumbnailsArrowsAutoHide: true,
+                thumbnailsAutoHide: false,
+                thumbnailActions: [
+                    {
+                        icon: 'fa fa-times-circle',
+                        onClick: (event, index) => {
+                            
+                            this.deleteBannerDesktop(event, index)
+                        },
+                    }
+                ],
+                // "imageSize": "contain",
+                "previewCloseOnClick": true, 
+                "previewCloseOnEsc": true,
+                // "thumbnailsRemainingCount": true
+            },
+            // max-width 767 Mobile configuration
+            {
+                breakpoint: 767,
+                thumbnailsColumns: 2,
+                thumbnailsAutoHide: false,
+                width: '350px',
+                height: '350px',
+                imagePercent: 100,
+                thumbnailsPercent: 30,
+                thumbnailsMargin: 10,
+                thumbnailMargin: 5,
+                thumbnailActions: [
+                    {
+                        icon: 'fa fa-times-circle',
+                        onClick: () => {},
+                    }
+                ]
+            }
+        ];
 
+        this.galleryOptionsBannerMobile = [
+            {
+                width: '350px',
+                height: '350px',
+                thumbnailsColumns: 3,
+                imageAnimation: NgxGalleryAnimation.Slide,
+                thumbnailsArrows: true,
+                // previewDownload: true,
+                imageArrowsAutoHide: true, 
+                thumbnailsArrowsAutoHide: true,
+                thumbnailsAutoHide: false,
+                thumbnailActions: [
+                    {
+                        icon: 'fa fa-times-circle',
+                        onClick: (event, index) => {
+                            
+                            this.deleteBannerMobile(event, index)
+                        },
+                    }
+                ],
+                // "imageSize": "contain",
+                "previewCloseOnClick": true, 
+                "previewCloseOnEsc": true,
+                // "thumbnailsRemainingCount": true
+            },
+            // max-width 767 Mobile configuration
+            {
+                breakpoint: 767,
+                thumbnailsColumns: 3,
+                thumbnailsAutoHide: true,
+                width: '350px',
+                height: '350px',
+                imagePercent: 100,
+                thumbnailsPercent: 30,
+                thumbnailsMargin: 10,
+                thumbnailMargin: 5,
+                thumbnailActions: [
+                    {
+                        icon: 'fa fa-times-circle',
+                        onClick: () => {},
+                    }
+                ]
+            }
+        ];
+
+        this.storeId = this._route.snapshot.paramMap.get('storeid');
+        
         // ----------------------
         // Get Store Details by Id
         // ----------------------
 
         this._storesService.getStoreById(this.storeId).subscribe(
-            (response) => {             
+            (response) => { 
+
                 // set store to current store
                 this._storesService.store = response;
                 this._storesService.storeId = this.storeId;
                 
-                // ---------------
+                // ----------------
                 // set assets image
-                // ---------------
+                // ----------------
+                
+                response.storeAssets.forEach(item => {
+                    
+                    if(item.assetType === "LogoUrl") {
+                        this.files[0].fileSource = item.assetUrl;
+                        this.files[0].assetId = item.id;
+                        
+                    } else if (item.assetType === "BannerDesktopUrl") {
+                        this.files[1].galleryImages.push({
+                            small       : '' + item.assetUrl,
+                            medium      : '' + item.assetUrl,
+                            big         : '' + item.assetUrl,
+                            assetId     : item.id
+                        }); 
+                        
+                    } else if (item.assetType === "BannerMobileUrl") {
+                        this.files[2].fileSource = item.assetUrl
+                        
+                        this.files[2].galleryImages.push({
+                            small   : '' + item.assetUrl,
+                            medium  : '' + item.assetUrl,
+                            big     : '' + item.assetUrl,
+                            assetId : item.id
+                        });
 
-                this.files[0].fileSource = response.storeAsset.logoUrl;
-                this.files[1].fileSource = response.storeAsset.bannerUrl;
-                this.files[2].fileSource = response.storeAsset.bannerMobileUrl;
+                    } else if (item.assetType === "FaviconUrl") {
+                        this.files[3].fileSource = item.assetUrl;
+                        this.files[3].assetId = item.id;
+                    } 
+
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+
+                });
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             } 
-         );
+        );
     }
+
+    
 
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
@@ -127,16 +292,18 @@ export class StoreAssetComponent implements OnInit
     */
     selectFiles(fileType,event: any): void {
 
-    // find index of object this.files
-    let index = this.files.findIndex(preview => preview.type === fileType);
-
-    // set each of the attributes
-    this.files[index].fileSource = null;
-    this.files[index].selectedFileName = "";
-    this.files[index].selectedFiles = event.target.files;
+        // find index of object this.files
+        let index = this.files.findIndex(preview => preview.type === fileType);
+        
+        // set each of the attributes        
+        if (event.target.files.length > 0) {
+            this.files[index].fileSource = null;
+            this.files[index].selectedFileName = "";
+            this.files[index].selectedFiles = event.target.files;
+        }
         
         let maxSize = 2600000;
-        if (this.files[index].selectedFiles[0].size > maxSize ){
+        if (this.files[index].fileSource && this.files[index].selectedFiles[0].size > maxSize ){
             // Show a success message (it can also be an error message)
             const confirmation = this._fuseConfirmationService.open({
                 title  : 'Image size limit',
@@ -165,22 +332,70 @@ export class StoreAssetComponent implements OnInit
             const reader = new FileReader();
             
             reader.onload = (e: any) => {
+                if (this.files[index].isMultiple) {
+                    if (index === 1) {
+                        this.files[1].fileSource = e.target.result;
+                        this.files[1].toAdd.push(event.target.files);
+                        
+                        if(this.files[1].galleryImages.length < 3){
+                            
+                            this.files[1].galleryImages.unshift({
+                                small           : '' + e.target.result,
+                                medium          : '' + e.target.result,
+                                big             : '' + e.target.result
+                            });
+
+                            var image = new Image();
+                            image.src = e.target.result;
+            
+                            image.onload = (imageInfo: any) => {
+                                this.files[1].selectedImageWidth = imageInfo.path[0].width;
+                                this.files[1].selectedImageHeight = imageInfo.path[0].height;
+            
+                                this._changeDetectorRef.markForCheck();
+                            };
+                        }
+                        this._changeDetectorRef.markForCheck();
+
+                    } else if (index === 2) {
+                        this.files[2].fileSource = e.target.result;
+                        this.files[2].toAdd.push(event.target.files);
+
+                        if(this.files[2].galleryImages.length < 3){
+
+                            this.files[2].galleryImages.unshift({
+                                small   : '' + e.target.result,
+                                medium  : '' + e.target.result,
+                                big     : '' + e.target.result,
+
+                            });
+
+                            var image = new Image;
+                            image.src = e.target.result;
+            
+                            image.onload = (imageInfo: any) => {
+                                this.files[2].selectedImageWidth = imageInfo.path[0].width;
+                                this.files[2].selectedImageHeight = imageInfo.path[0].height;
+            
+                                this._changeDetectorRef.markForCheck();
+                            };
+                        }
+                        this._changeDetectorRef.markForCheck();
+                    }
+                } else {
+                    this.files[index].fileSource = e.target.result;
+
+                    var image = new Image();
+                    image.src = e.target.result;
+    
+                    image.onload = (imageInfo: any) => {
+                        this.files[index].selectedImageWidth = imageInfo.path[0].width;
+                        this.files[index].selectedImageHeight = imageInfo.path[0].height;
+    
+                        this._changeDetectorRef.markForCheck();
+                    };
+                }
                 
-                // set this.files[index].delete to false 
-                this.files[index].toDelete = true;
-
-                this.files[index].fileSource = e.target.result;
-
-                var image = new Image();
-                image.src = e.target.result;
-
-                image.onload = (imageInfo: any) => {
-                    this.files[index].selectedImageWidth = imageInfo.path[0].width;
-                    this.files[index].selectedImageHeight = imageInfo.path[0].height;
-
-                    this._changeDetectorRef.markForCheck();
-                };
-
                 this._changeDetectorRef.markForCheck();                
             };
             // console.log("this.files["+index+"].selectedFiles["+i+"]",this.files[index].selectedFiles[i])
@@ -189,13 +404,38 @@ export class StoreAssetComponent implements OnInit
             }
         }
         this._changeDetectorRef.markForCheck();
-    } 
+    }
 
-    deletefiles(index: number) { 
+    createImageFromBlob(image: Blob) {
+        let reader = new FileReader(); //you need file reader for read blob data to base64 image data.
+        return  reader.readAsDataURL(image);
+    }
+
+    deleteBannerDesktop(e, index){
         
-        this.files[index].toDelete = true;
-        this.files[index].fileSource = '';
+        let assetId = this.files[1].galleryImages[index].assetId;
+        this.files[1].toDelete.push(assetId);
 
+        this.files[1].galleryImages.splice(index,1);
+        if(this.files[1].galleryImages.length < 1){
+            this.files[1].fileSource = null
+        }
+    }
+
+    deleteBannerMobile(e, index){
+        let assetId = this.files[2].galleryImages[index].assetId;
+
+        this.files[2].toDelete.push(assetId);
+        this.files[2].galleryImages.splice(index,1)
+        if(this.files[2].galleryImages.length < 1){
+            this.files[2].fileSource = null
+        }
+    }
+    
+    deletefiles(i) { 
+        
+        this.files[i].toDelete = true;        
+        this.files[i].fileSource = '';
         this._changeDetectorRef.markForCheck();
     }
 
@@ -204,72 +444,183 @@ export class StoreAssetComponent implements OnInit
         // ---------------------------
         // Update Store Assets
         // ---------------------------
-
-        this.files.forEach(item =>{
+        
+        this.files.forEach((item) =>{
             
-            let formData = new FormData();
+            //Logo update using item.selected files
+            if (item.type === 'LogoUrl'){
 
-            if (item.selectedFiles !== null){
-                formData.append(item.type,item.selectedFiles[0])
-            }
+                let formData = new FormData();
 
-            let storeAssetFiles = item.fileSource;
+                if (item.selectedFiles && item.selectedFiles !== null){
+                    formData.append('assetFile',item.selectedFiles[0]);
+                    formData.append('assetType',item.type);
+                    formData.append('assetDescription',item.description);
+                }
 
-            if (item.toDelete === true && item.type === 'logo'){
-                this._storesService.deleteAssetsLogo(this.storeId).subscribe(() => {
-                    console.log("storeAssetFiles: ", "'"+storeAssetFiles+"'")
-                    if (storeAssetFiles && storeAssetFiles !== "") {
-                        this._storesService.postAssets(this.storeId, formData, "logo", storeAssetFiles).subscribe(
-                            (event: any) => {
-                            if (event instanceof HttpResponse) {
-                                console.log('Uploaded the file successfully');
+                if (this.files[0].assetId !== null && item.toDelete === false) {
+                    
+                    // console.log("storeAssetFiles: ", "'"+storeAssetFiles+"'")
+                    this._storesService.putAssets(this.storeId, this.files[0].assetId, formData, "LogoUrl")
+                        .subscribe(response => {
+                            console.info('Uploaded the file successfully');
 
-                                // Mark for check
-                                this._changeDetectorRef.markForCheck();
-                            }
+                            // Mark for check
+                            this._changeDetectorRef.markForCheck();
+                        }, (err: any) => {
+                                console.error('Could not upload the file');
+                        });
+                } else if (item.toDelete === true && this.files[0].assetId !== null) {
+                    this._storesService.deleteAssets(this.storeId, this.files[0].assetId)
+                        .subscribe(response => {
+                            console.info('Uploaded the file successfully');
+
+                            // Mark for check
+                            this._changeDetectorRef.markForCheck();
                             },
                             (err: any) => {
                                 console.error('Could not upload the file');
                             });
-                    }
+                } else {
+                    this._storesService.postAssets(this.storeId, "LogoUrl", formData,"Logo")
+                        .subscribe(response => {
+                            console.info('Uploaded the file successfully');
+
+                            this.files[3].assetId = event["id"];
+
+                            // Mark for check
+                            this._changeDetectorRef.markForCheck();
+                        },
+                        (err: any) => {
+                            console.error('Could not upload the file');
+                        });
+                }
+            }
+
+            // Favicon update using item.selectedFiles
+            if (item.type === 'FaviconUrl'){
+
+                let formData = new FormData();
+
+                if (item.selectedFiles && item.selectedFiles !== null){
+                    formData.append('assetFile',item.selectedFiles[0]);
+                    formData.append('assetType',item.type);
+                    formData.append('assetDescription',item.description);
+                }
+
+                if (this.files[3].assetId !== null && item.toDelete === false) {
+                    // console.log("storeAssetFiles: ", "'"+storeAssetFiles+"'")
+                    this._storesService.putAssets(this.storeId, this.files[3].assetId, formData)
+                        .subscribe(response => {
+                                console.info('Uploaded the file successfully');
+
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
+                            },
+                            (err: any) => {
+                                console.error('Could not upload the file');
+                            });
+                } else if (item.toDelete === true && this.files[3].assetId !== null) {
+                    this._storesService.deleteAssets(this.storeId, this.files[3].assetId)
+                        .subscribe(response => {
+                            console.info('Uploaded the file successfully');
+
+                            // Mark for check
+                            this._changeDetectorRef.markForCheck();
+                        },
+                        (err: any) => {
+                            console.error('Could not upload the file');
+                        });
+                } else {
+                    this._storesService.postAssets(this.storeId, "FaviconUrl", formData,"Favicon")
+                        .subscribe(response => {
+                            console.info('Uploaded the file successfully');
+
+
+                            this.files[3].assetId = event["id"];
+
+                            // Mark for check
+                            this._changeDetectorRef.markForCheck();
+                        },
+                        (err: any) => {
+                            console.error('Could not upload the file');
+                        });
+                }
+
+            }
+            // BannerDesktop update using loop for each for delete and post 
+            if(item.type === 'BannerDesktopUrl') {
+                // toDelete
+                item.toDelete.forEach(assetId => {
+                    this._storesService.deleteAssets(this.storeId, assetId)
+                    .subscribe(response => {
+                            console.info('Uploaded the file successfully');
+    
+                            // Mark for check
+                            this._changeDetectorRef.markForCheck();
+                        },
+                        (err: any) => {
+                            console.error('Could not upload the file');
+                    });
                 });
-            }
-            if (item.toDelete === true && item.type === 'banner'){
-                this._storesService.deleteAssetsBanner(this.storeId).subscribe(() => {
-                    console.log("storeAssetFiles 1: ", "'"+storeAssetFiles+"'")
-                    if (storeAssetFiles && storeAssetFiles !== ""){
-                        this._storesService.postAssets(this.storeId, formData, "banner", storeAssetFiles).subscribe(
-                            (event: any) => {
-                            if (event instanceof HttpResponse) {
-                                console.log('Uploaded the file successfully');
+                // toAdd
+                item.toAdd.forEach(selectedFiles => {
 
-                                // Mark for check
-                                this._changeDetectorRef.markForCheck();
-                            }
-                            },
-                            (err: any) => {
-                                console.error('Could not upload the file');
-                            });
-                    }
+                    let formData = new FormData();
+                    formData.append('assetFile',selectedFiles[0]);
+                    formData.append('assetType',item.type);
+                    formData.append('assetDescription',item.description);
+
+                    this._storesService.postAssets(this.storeId, "BannerDesktopUrl", formData,"BannerDesktop")
+                        .subscribe(response => {
+                            console.info('Uploaded the file successfully');
+    
+                            this.files[1].assetId = event["id"];
+    
+                            // Mark for check
+                            this._changeDetectorRef.markForCheck();
+                        },
+                        (err: any) => {
+                            console.error('Could not upload the file');
+                        });
                 });
+                
             }
-            if (item.toDelete === true && item.type === 'bannerMobile'){
-                this._storesService.deleteAssetsBannerMobile(this.storeId).subscribe(() => {
-                    console.log("storeAssetFiles 2: ", "'"+storeAssetFiles+"'")
-                    if (storeAssetFiles && storeAssetFiles !== ""){
-                        this._storesService.postAssets(this.storeId, formData, "bannerMobile", storeAssetFiles).subscribe(
-                            (event: any) => {
-                            if (event instanceof HttpResponse) {
-                                console.log('Uploaded the file successfully');
+            // BannerMobile update using loop for each for delete and post 
+            if(item.type === 'BannerMobileUrl') {
+                // toDelete
+                item.toDelete.forEach(assetId => {
+                    this._storesService.deleteAssets(this.storeId, assetId)
+                        .subscribe(response => {
+                            console.info('Uploaded the file successfully');
+    
+                            // Mark for check
+                            this._changeDetectorRef.markForCheck();
+                        },
+                        (err: any) => {
+                            console.error('Could not upload the file');
+                    });
+                });
+                // toAdd
+                item.toAdd.forEach(selectedFiles => {
 
-                                // Mark for check
-                                this._changeDetectorRef.markForCheck();
-                            }
-                            },
-                            (err: any) => {
-                                console.error('Could not upload the file');
-                            });
-                    }
+                    let formData = new FormData();
+                    formData.append('assetFile',selectedFiles[0]);
+                    formData.append('assetType',item.type);
+                    formData.append('assetDescription',item.description);
+
+                    this._storesService.postAssets(this.storeId, "BannerMobileUrl", formData,"BannerMobile")
+                        .subscribe(response => {
+                            console.info('Uploaded the file successfully');
+    
+                            this.files[1].assetId = event["id"];
+    
+                            // Mark for check
+                            this._changeDetectorRef.markForCheck();
+                        },
+                        (err: any) => {
+                            console.error('Could not upload the file');
+                        });
                 });
             }
         });

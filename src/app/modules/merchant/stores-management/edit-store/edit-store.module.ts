@@ -21,6 +21,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { TimeSelectorInputModule } from 'app/layout/common/time-selector/timeselector.module';
+import { NgxGalleryModule } from 'ngx-gallery-9';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
     declarations: [
@@ -46,7 +48,9 @@ import { TimeSelectorInputModule } from 'app/layout/common/time-selector/timesel
         MatCheckboxModule,
         MatTooltipModule,
 
-        TimeSelectorInputModule
+        TimeSelectorInputModule,
+        NgxGalleryModule,
+        FontAwesomeModule
 
     ],
     exports     : [
