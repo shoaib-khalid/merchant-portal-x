@@ -11,16 +11,17 @@
         <div class="flex items-center flex-auto min-w-0">
             <mat-icon
                 class="w-10"
+                [ngClass]="data['remarks'] ? 'invisible' : 'visible'"
                 [svgIcon]="'heroicons_solid:clock'"></mat-icon>
-            <span class="pl-4 text-2xl font-bold text-primary">Please Choose Pickup Datetime</span> <br>
+            <span class="pl-4 text-2xl font-bold text-primary">{{ data['remarks'] ? data['remarks'].title : 'Please Choose Pickup Datetime'}}</span> <br>
         </div>
         <div class="flex items-center flex-auto min-w-0 mb-8">
-            <span class="pl-14 text-lg">For scheduled delivery, we require date/time for delivery provider to pickup your item. 
-                Please input your prefered date/time to continue
+            <span class="pl-14 text-lg">
+                {{ data['remarks'] ? data['remarks'].message : 'For scheduled delivery, we require date/time for delivery provider to pickup your item. Please input your prefered date/time to continue'}}  
             </span>
         </div>
 
-        <mat-form-field appearance="fill">
+        <mat-form-field *ngIf="data['scheduleDate'] === true" appearance="fill">
             <mat-label>Pick a date</mat-label>
             <input 
                 matInput 
@@ -30,7 +31,7 @@
                 [min]="mindate"
             >
         </mat-form-field>
-        <mat-form-field appearance="fill">
+        <mat-form-field *ngIf="data['scheduleDate'] === true" appearance="fill">
             <mat-label>Pick a time</mat-label>
             <input 
                 matInput type="time" 
@@ -53,7 +54,7 @@
                 <span>&nbsp;&nbsp;</span>
                 <button
                     mat-flat-button
-                    *ngIf="showButton" (click)="setPickupDateTime()"
+                    *ngIf="showButton || data['scheduleDate'] === false" (click)="setPickupDateTime()"
                     [color]="'primary'">
                     Ok
                 </button>

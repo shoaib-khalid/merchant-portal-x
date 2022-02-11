@@ -53,9 +53,15 @@ export class AuthInterceptor implements HttpInterceptor
             catchError((error) => {
                 // Catch "401 Unauthorized, 400, 404 Not Found" responses
                 // Ignore intercept for login () clients/authenticate
-                let regex = new RegExp(/^40/);
-                if ( error instanceof HttpErrorResponse && regex.test("" + error.status) && newReq.url.indexOf("clients/authenticate") < 0 )
-                {
+                const errorCode = [401,400,404];
+                const paths = ['/confirmation-required','/forgot-password','/reset-password','/sign-in','/sign-up'];                
+
+                if ( error instanceof HttpErrorResponse && 
+                     (errorCode.includes(error.status) || error.status === 0) && 
+                     newReq.url.indexOf("clients/") > -1 && 
+                     !paths.includes(location.pathname)
+                   )
+                {   
                     // Sign out
                     this._authService.signOut();
 

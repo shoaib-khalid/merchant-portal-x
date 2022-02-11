@@ -1,0 +1,68 @@
+affinity: {}
+autoscaling:
+  enabled: false
+  maxReplicas: 100
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 80
+configProdJson:
+  configmap:
+    config.prod.json: |
+      {
+          "env": {
+              "name": "dev"
+          },
+          "apiServer": {
+              "flowBuilderService"  : "https://api.symplified.it/flow-builder/v1",
+              "userService"         : "https://api.symplified.it/user-service/v1",
+              "productService"      : "https://api.symplified.it/product-service/v1",
+              "orderService"        : "https://api.symplified.it/order-service/v1",
+              "reportService"       : "https://api.symplified.it/report-service/v1",
+              "deliveryService"     : "https://api.symplified.it/delivery-service/v1",
+              "paymentService"      : "https://api.symplified.it/payment-service/v1"
+          },
+          "storeFrontDomain"        : ".symplified.ai",
+          "logging": 0
+      }
+  volumeMount:
+  - mountPath: /usr/local/apache2/htdocs/assets/config/config.prod.json
+    name: merchant-portal-x-vol
+    subPath: config.prod.json
+  volumes:
+  - configMap:
+      name: merchant-portal-x-cm
+    name: merchant-portal-x-vol
+fullnameOverride: ""
+image:
+  pullPolicy: Always
+  repository: kalsym/merchant-portal-x
+  tag: 0.0.18
+imagePullSecrets:
+- name: kalsym-docker-hub
+ingress:
+  annotations: {}
+  className: ""
+  enabled: true
+  hosts:
+  - host: merchant.symplified.it
+    paths:
+    - path: /
+      pathType: ImplementationSpecific
+  tls:
+  - hosts:
+    - merchant.symplified.it
+    secretName: secret-tls-it
+nameOverride: ""
+nodeSelector: {}
+podAnnotations: {}
+podSecurityContext: {}
+replicaCount: 1
+resources: {}
+securityContext: {}
+service:
+  port: 80
+  type: ClusterIP
+serviceAccount:
+  annotations: {}
+  create: false
+  name: ""
+tolerations: []

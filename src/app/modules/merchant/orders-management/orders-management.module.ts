@@ -11,6 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SharedModule } from 'app/shared/shared.module';
 import { OrdersListComponent } from 'app/modules/merchant/orders-management/orders-list/orders-list.component';
 import { OrderInvoiceComponent } from 'app/modules/merchant/orders-management/order-invoice/order-invoice.component';
@@ -43,6 +44,7 @@ import { OrderDetailsComponent } from './order-details/order-details.component';
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
+        MatCheckboxModule,
         MatDatepickerModule,
         MatNativeDateModule
     ]
