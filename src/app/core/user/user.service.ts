@@ -186,11 +186,61 @@ export class UserService
             })
         );
     }
+    /**
+     * Get client by ID by calling API
+     * 
+     * @param productId 
+     * @returns 
+     */
+    getClientById():Observable<Client>
+    {
+        let id = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        let userService = this._apiServer.settings.apiServer.userService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.get<Client>(userService +'/clients/' + clientId, header).pipe(
+            tap((response) => {
+
+                this._logging.debug("Response from UserService (getClientById)", response);
+
+                let updateResponse = response;
+
+                let symplifiedRegion: string;
+                let symplifiedCountryId: string;
+                if (response['data'].regionCountry.id == 'MYS') {
+                    symplifiedCountryId = "MYS";
+                    symplifiedRegion = "SEA";
+                } else if (response['data'].regionCountry.id == 'PK'){
+                    symplifiedCountryId = "PAK";
+                    symplifiedRegion = "SA";
+                } else {
+                    symplifiedCountryId = null;
+                    symplifiedRegion = null;
+                }
+
+                if (response['data'].regionCountry.id) {
+                    updateResponse["symplifiedCountryId"] = symplifiedCountryId;
+                    updateResponse["symplifiedRegion"] = symplifiedRegion;
+                    updateResponse["countryCode"] = response['data'].regionCountry.id ;
+                }
+
+                return this._client.next(response);
+
+            })
+        );
+
+    }
 
     /**
      * Get the current logged in client data
      */
-     getClientPaymentDetails(page: number = 0, size: number = 10, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', category: string = ''): 
+    getClientPaymentDetails(page: number = 0, size: number = 10, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', category: string = ''): 
         Observable<ClientPaymentDetails>
     {
 

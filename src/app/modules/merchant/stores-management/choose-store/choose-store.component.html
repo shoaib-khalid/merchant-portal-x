@@ -259,4 +259,5 @@
     [pageIndex]="pagination.page"
     [pageSize]="pagination.size"
     [pageSizeOptions]="[5, 10, 25, 100]"
-    [showFirstLastButtons]="true"></mat-paginator>
+    [showFirstLastButtons]="true"
+    [hidePageSize]="currentScreenSize.includes('sm') ? false : true"></mat-paginator>

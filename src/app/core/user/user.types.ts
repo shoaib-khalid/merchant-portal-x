@@ -5,15 +5,24 @@ export interface Client
     id: string;
     username: string;
     name: string;
+    regionCountry?: RegionCountry;
     email: string;
     avatar?: string;
     status?: string;
     role: UserRole
     locked: string;
     deactivated: string;
+    countryId?: string;
     created: string;
     updated: string;
     roleId: string;
+}
+
+export interface RegionCountry
+{
+    id?: string;
+    name?: string;
+    region?: string;
 }
 
 export interface ClientPaymentDetails
