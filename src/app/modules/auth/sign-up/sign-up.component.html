@@ -99,6 +99,28 @@
                     </mat-error>
                 </mat-form-field>
 
+                <mat-form-field *ngIf="!displayCountryField" class="w-full">
+                    <mat-label class="font-medium">Country</mat-label>
+                    <mat-select
+                        [formControlName]="'countryId'"     
+                        [placeholder]="'Select Country'"
+                        (selectionChange)="signUpForm.get('countryId').patchValue($event.value)"
+                        #countrytSelector="matSelect"
+                        >
+                        <mat-select-trigger>
+                            <span class="flex items-center">
+                                <span>{{ countrytSelector.triggerValue }}</span>
+                            </span>
+                        </mat-select-trigger>
+                        <div *ngFor="let country of countriesList">
+                            <mat-option [value]="country.id">{{country.name}}</mat-option>
+                        </div>
+                    </mat-select>
+                    <mat-error *ngIf="signUpForm.get('countryId').hasError('required')">
+                        Required
+                    </mat-error>
+                </mat-form-field>
+
                 <!-- ToS and PP -->
                 <div class="inline-flex items-end w-full mt-1.5">
                     <mat-checkbox

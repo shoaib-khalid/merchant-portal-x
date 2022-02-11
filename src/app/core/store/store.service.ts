@@ -423,7 +423,9 @@ export class StoresService
     getStoreRegionCountries(): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        // let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this.accessToken === ''?'accessToken':this._jwt.getJwtPayload(this.accessToken).act;
+
 
         const header = {  
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
