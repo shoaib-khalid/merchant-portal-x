@@ -165,7 +165,7 @@ export class InventoryService
     /**
      * Get product by ID without calling API
      */
-    getProductById(id: string): Observable<Product>
+    getProductsById(id: string): Observable<Product>
     {
         return this._products.pipe(
             take(1),
@@ -199,7 +199,7 @@ export class InventoryService
      * @param productId 
      * @returns 
      */
-    getProductByIdApi(productId:string):Observable<Product>
+    getProductById(productId:string):Observable<Product>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -211,7 +211,7 @@ export class InventoryService
         return this._httpClient.get<Product>(productService +'/stores/'+this.storeId$+'/products/'+productId, header).pipe(
             tap((response) => {
 
-                this._logging.debug("Response from ProductsService (getProductByIdApi)", response);
+                this._logging.debug("Response from ProductsService (getProductById)", response);
 
                 // Update the product
                 this._product.next(response["data"]);

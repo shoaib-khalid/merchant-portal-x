@@ -114,7 +114,7 @@
 
                                     <!-- SKU -->
                                     <div class="hidden md:block truncate">
-                                        {{ product.productInventories ? product.productInventories[0].sku : ''  }}
+                                        {{ product.productInventories.length > 0 ? product.productInventories[0].sku : ''  }}
                                     </div>
 
                                     <!-- Name -->
@@ -124,28 +124,28 @@
 
                                     <!-- Price -->
                                     <div class="hidden sm:block">
-                                        {{ product.productInventories ? (product.productInventories[0].price | currency:store$.regionCountry.currencySymbol:'symbol':'1.2-2') : '' }}
+                                        {{ product.productInventories.length > 0 ? (product.productInventories[0].price | currency:store$.regionCountry.currencySymbol:'symbol':'1.2-2') : '' }}
                                     </div>
 
                                     <!-- Stock -->
                                     <div class="hidden lg:flex items-center">
-                                        <div class="min-w-4">{{ product.productInventories ? product.productInventories[0].quantity : ''}}</div>
+                                        <div class="min-w-4">{{ product.productInventories.length > 0 ? product.productInventories[0].quantity : ''}}</div>
                                         <!-- Low stock -->
                                         <div
                                             class="flex items-end ml-2 w-1 h-4 bg-red-200 rounded overflow-hidden"
-                                            *ngIf="product.productInventories && product.productInventories[0].quantity < 20">
+                                            *ngIf="product.productInventories.length > 0 && product.productInventories[0].quantity < 20">
                                             <div class="flex w-full h-1/3 bg-red-600"></div>
                                         </div>
                                         <!-- Medium stock -->
                                         <div
                                             class="flex items-end ml-2 w-1 h-4 bg-orange-200 rounded overflow-hidden"
-                                            *ngIf="product.productInventories && product.productInventories[0].quantity >= 20 && product.productInventories[0].quantity < 30">
+                                            *ngIf="product.productInventories.length > 0 && product.productInventories[0].quantity >= 20 && product.productInventories[0].quantity < 30">
                                             <div class="flex w-full h-2/4 bg-orange-400"></div>
                                         </div>
                                         <!-- High stock -->
                                         <div
                                             class="flex items-end ml-2 w-1 h-4 bg-green-100 rounded overflow-hidden"
-                                            *ngIf="product.productInventories && product.productInventories[0].quantity >= 30">
+                                            *ngIf="product.productInventories.length > 0 && product.productInventories[0].quantity >= 30">
                                             <div class="flex w-full h-full bg-green-400"></div>
                                         </div>
                                     </div>
@@ -571,7 +571,7 @@
                                                                 <mat-checkbox
                                                                     class="flex items-center h-10 min-h-10 px-4"
                                                                     [color]="'primary'"
-                                                                    [checked]="selectedProduct.categoryId.includes(category.id)"
+                                                                    [checked]="selectedProduct.categoryId ? selectedProduct.categoryId.includes(category.id) : false"
                                                                     (change)="toggleProductCategory(category, $event)">
                                                                     {{category.name}}
                                                                 </mat-checkbox>
