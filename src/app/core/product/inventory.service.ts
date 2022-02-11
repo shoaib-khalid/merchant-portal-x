@@ -163,7 +163,7 @@ export class InventoryService
     }
 
     /**
-     * Get product by id
+     * Get product by ID without calling API
      */
     getProductById(id: string): Observable<Product>
     {
@@ -193,6 +193,34 @@ export class InventoryService
             })
         );
     }
+    /**
+     * Get product by ID by calling API
+     * 
+     * @param productId 
+     * @returns 
+     */
+    getProductByIdApi(productId:string):Observable<Product>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.get<Product>(productService +'/stores/'+this.storeId$+'/products/'+productId, header).pipe(
+            tap((response) => {
+
+                this._logging.debug("Response from ProductsService (getProductByIdApi)", response);
+
+                // Update the product
+                this._product.next(response["data"]);
+
+            })
+        );
+
+    }
+
 
     /**
      * Create product
@@ -271,6 +299,7 @@ export class InventoryService
                     this._products.next(products);
 
                     // console.log('1');
+                    
                     // Return the updated product
                     return updatedProduct["data"];
                 }),
@@ -280,7 +309,6 @@ export class InventoryService
                     tap(() => {
 
                         // console.log('2');
-                        
 
                         // Update the product if it's selected
                         this._product.next(updatedProduct["data"]);
@@ -524,7 +552,7 @@ export class InventoryService
             "itemCode": productInventory.itemCode,
             "price": productInventory.price,
             "compareAtprice": 0,
-            "quantity": productInventory.availableStock,
+            "quantity": productInventory.quantity,
             "sku": productInventory.sku,
             // "status": "AVAILABLE"
             "status": productInventory.status? productInventory.status : "NOTAVAILABLE"
