@@ -296,7 +296,7 @@
                                                         type="file"
                                                         [multiple]="false"
                                                         [accept]="'image/jpeg, image/png'"
-                                                        [attr.disabled]="imagesEditMode"
+                                                        [disabled]="imagesEditMode"
                                                         (change)="uploadImages(imageFileInput.files, []);"
                                                         #imageFileInput>
                                                     <label
@@ -475,7 +475,7 @@
                                                 <mat-label>SKU</mat-label>
                                                 <input
                                                     matInput
-                                                    [attr.disabled]="product.productVariants.length > 0"
+                                                    [disabled]="product.productVariants.length > 0"
                                                     (change)="displaySku = $event.target.value"
                                                     [value]="displaySku">
                                             </mat-form-field>
@@ -488,7 +488,7 @@
                                                     matInput
                                                     type="number"
                                                     (change)="displayPrice = $event.target.value"
-                                                    [attr.disabled]="product.productVariants.length > 0"
+                                                    [disabled]="product.productVariants.length > 0"
                                                     [value]="displayPrice">
                                             </mat-form-field>
 
@@ -671,7 +671,7 @@
                                                 <input
                                                     type="number"
                                                     matInput
-                                                    [attr.disabled]="product.productVariants.length > 0"
+                                                    [disabled]="product.productVariants.length > 0"
                                                     (input)="displayQuantity = $event.target.value"
                                                     (input)="(displayQuantity > 0 && selectedProductForm.get('status').value === 'OUT_OF_STOCK') ? selectedProductForm.get('status').patchValue('ACTIVE') : ''"
                                                     [value]="displayQuantity">
@@ -707,7 +707,7 @@
                                             </span>
                                             <div class="mt-0 sm:mt-3 flex items-center -my-px w-full">
                                                 <mat-slide-toggle
-                                                    [attr.disabled]="selectedProductForm.get('trackQuantity').value === false"
+                                                    [disabled]="selectedProductForm.get('trackQuantity').value === false"
                                                     [formControlName]="'allowOutOfStockPurchases'"
                                                     [color]="'primary'">
                                                     {{selectedProductForm.get('allowOutOfStockPurchases').value === true ? 'Yes' : 'No'}}
@@ -726,7 +726,7 @@
                                             <div *ngIf="selectedProductForm.get('minQuantityForAlarm').value < 0" class="mt-0 sm:mt-3 flex items-center -my-px w-full">
                                                 <mat-slide-toggle
                                                     [color]="'primary'"
-                                                    [attr.disabled]="selectedProductForm.get('trackQuantity').value === false"
+                                                    [disabled]="selectedProductForm.get('trackQuantity').value === false"
                                                     (click)="selectedProductForm.get('minQuantityForAlarm').value = 0"
                                                     >
                                                     {{selectedProductForm.get('minQuantityForAlarm').value >= 0 ? 'Active' : 'Disabled'}}
@@ -1155,7 +1155,7 @@
                                                                                                 type="file"
                                                                                                 [multiple]="false"
                                                                                                 [accept]="'image/jpeg, image/png'"
-                                                                                                [attr.disabled]="imagesEditMode"
+                                                                                                [disabled]="imagesEditMode"
                                                                                                 (change)="uploadVariantImages(imageFileInput.files, [], i);"
                                                                                                 #imageFileInput>
                                                                                             <label
