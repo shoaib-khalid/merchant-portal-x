@@ -141,7 +141,7 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
                     this.closeDetails();
                     this.isLoading = true;
                     this.discountName = query;
-                    return this._discountService.getDiscounts(0, 10, 'startDate', 'asc', query, '');
+                    return this._discountService.getByQueryDiscounts(0, 10, 'startDate', 'asc', query, '','SHIPPING, TOTALSALES');
                 }),
                 map(() => {
                     this.isLoading = false;
@@ -188,9 +188,10 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
                         this.closeDetails();
                         this.isLoading = true;
                         if (this.discountName != null)
-                            return this._discountService.getDiscounts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, this.discountName, '');
+                            return this._discountService.getByQueryDiscounts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, this.discountName, '','SHIPPING, TOTALSALES');
+
                         else    
-                            return this._discountService.getDiscounts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, '', '');
+                            return this._discountService.getByQueryDiscounts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, '','','SHIPPING, TOTALSALES');
 
                     }),
                     map(() => {

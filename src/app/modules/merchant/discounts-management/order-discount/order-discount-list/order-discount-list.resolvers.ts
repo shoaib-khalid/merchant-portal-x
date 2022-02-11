@@ -31,7 +31,8 @@ export class DiscountsResolver implements Resolve<any>
      */
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<{ pagination: DiscountPagination; discounts: Discount[] }>
     {
-        return this._discountService.getDiscounts();
+        // return this._discountService.getDiscounts();
+        return this._discountService.getByQueryDiscounts(0, 20, 'startDate', 'asc', '','','SHIPPING, TOTALSALES');
     }
 }
 
