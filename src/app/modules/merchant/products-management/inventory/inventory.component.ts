@@ -498,181 +498,207 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
 
         // Get the product by id
-        this._inventoryService.getProductByIdApi(productId)
+        this._inventoryService.getProductById(productId)
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((response) => {
 
                 let product = response["data"];
-
-                // Set the selected product
-                this.selectedProduct = product;
-
-                // Fill the form
-                this.selectedProductForm.patchValue(product);
-
-                // Fill the form for SKU , Price & Quantity productInventories[0]
-                // this because SKU , Price & Quantity migh have variants
-                // this is only for display, so we display the productInventories[0] 
-                this.displaySku = product.productInventories[0].sku;
-                this.displayPrice = product.productInventories[0].price;
-                this.displayQuantity = product.productInventories[0].quantity;
-
-                // ---------------------
-                // IsVariant Toogle 
-                // ---------------------
-
-                // set isVariants = true is productInventories.length > 0
-                product.productVariants.length > 0 ? this.selectedProductForm.get('isVariants').patchValue(true) : this.selectedProductForm.get('isVariants').patchValue(false);
-
-                // ---------------------
-                // Images
-                // ---------------------
-
-                // Sort productAssets and place itemCode null in front, after that variants image
-                let imagesObjSorted = product.productAssets.sort(this.dynamicSort("itemCode"));
-                let imageArr = imagesObjSorted.map(item => item.url);
-
-                this.images = imageArr;
                 
-                // get thumbnail index
-                let _thumbnailIndex = null;
-
-                // if has variants
-                if (this.selectedProductForm.get('isVariants').value === true){
-
-                    let m = 0;
-
-                    for (let i = 0; i < imagesObjSorted.length; i++){
-
-                        // if no itemCode, continue the loop, and increase m by one
-                        if (imagesObjSorted[i].itemCode == null){
-                            m++;
-                            continue;
-                        }
-                        // if thumbnail is true, take i and minus with m. This is to offset the index of assets with itemcode
-                        if (imagesObjSorted[i].isThumbnail === true){
-                            _thumbnailIndex = i - m;
-                        }
-                    }
-                }
-                // if no variant
-                else {
-
-                    _thumbnailIndex = imagesObjSorted.findIndex(item => item.isThumbnail === true)
-                }
-
-                this.thumbnailIndex = _thumbnailIndex === -1 ? 0 : _thumbnailIndex;
-                
-                // ---------------------
-                // Product Assets
-                // ---------------------
-
-                this.productAssets$ = product.productAssets;
-
-                this.productAssets = this.selectedProductForm.get('productAssets') as FormArray;
-                // this.productAssets.clear();
-          
-
-                this.imagesFile = [];
-                
-                this.productAssets$.forEach(item => {
-                    this.productAssets.push(this._formBuilder.group(item));
-                    this.imagesFile.push(null) // push imagesFile with null to defined now many array in imagesFile
-                });
-
-                // ---------------------
-                // Product Inventories
-                // ---------------------
-                    
-                this.productInventories$ = product.productInventories;
-                
-                this.productInventories = this.selectedProductForm.get('productInventories') as FormArray;
-                // this.productInventories.clear();
-
-                this.productInventories$.forEach(item => {
-                    this.productInventories.push(this._formBuilder.group(item));
-                });
-
-                // ---------------------
-                // Variants
-                // ---------------------
-
-                // Set to this productVariants 
-                this.productVariants$ = product.productVariants;
-    
-                this.productVariants = this.selectedProductForm.get('productVariants') as FormArray;
-                // this.productVariants.clear();
-
-                this.productVariants$.forEach(item => {
-                    let _item = this._formBuilder.group({
-                        id: item.id,
-                        name: item.name,
-                        productVariantsAvailable: [item.productVariantsAvailable] // idk why, but this is the only workable way to archive array in this._formBuilder.group
-                    });
-
-                    this.productVariants.push(_item);
-                });
-
-                // this.filteredProductVariants = this.productVariants.value;
-                
-                
-                // Generate variants combination
-
-                this.generateVariantCombo();
-
-                // ---------------------
-                // Category
-                // ---------------------
-
-                // Add the category
-                this.selectedProduct.categoryId = product.categoryId;
-        
-                // Update the selected product form
-                this.selectedProductForm.get('categoryId').patchValue(this.selectedProduct.categoryId);
-
-                // Sort the filtered categories, put selected category on top
-                // First get selected array index by using this.selectedProduct.categoryId
-
-                let selectedProductCategoryIndex = this.filteredProductCategories.findIndex(item => item.id === this.selectedProduct.categoryId);
-                // if selectedProductCategoryIndex < -1 // category not selected
-                // if selectedProductCategoryIndex = 0 // category selected already in first element
-                if (selectedProductCategoryIndex > 0) {
-                    // if index exists get the object of selectedProductCategory
-                    this.selectedProductCategory = this.filteredProductCategories[selectedProductCategoryIndex];
-                    // remove the object from this.filteredProductCategories
-                    this.filteredProductCategories.splice(selectedProductCategoryIndex,1);
-                    // re add this.selectedProductCategory in front
-                    this.filteredProductCategories.unshift(this.selectedProductCategory);
-                }
-
-                // ---------------------
-                // Inventory Alarm
-                // ---------------------
-
-                this.selectedProduct.minQuantityForAlarm = product.minQuantityForAlarm;
-
-                // Update minQuantityForAlarm
-                this.selectedProductForm.get('minQuantityForAlarm').patchValue(this.selectedProduct.minQuantityForAlarm);
-
-                // Update the selected product form
-                this.selectedProductForm.get('minQuantityForAlarm').patchValue(this.selectedProduct.minQuantityForAlarm);
-
-                // ---------------------
-                // Product Combo Package
-                // ---------------------
-
-                // get product combo list
-                if (this.selectedProduct.isPackage === true) {
-                    this._inventoryService.getProductPackageOptions(productId)
-                        .pipe(takeUntil(this._unsubscribeAll))
+                // check for product that does not have product inventories, and add them
+                if (product.productInventories.length < 1) {
+                    // tempSku is generated automatically since there are no product inventory
+                    let tempSku = product.name.substring(1).toLowerCase().replace(" / ", "-");
+                    // Add Inventory to product
+                    this._inventoryService.addInventoryToProduct(product, { sku: tempSku, quantity: 0, price: 0, itemCode: productId + "aa" } )
                         .subscribe((response)=>{
-                            this.productsCombos$ = response["data"];
+
+                            // update product
+                            product.productInventories = [response];
+
+                            // update sku, price, quantity display since it's not part of product but product inventory
+                            this.displayPrice = response.price;
+                            this.displayQuantity = response.quantity;
+                            this.displaySku = response.sku;
+
+                            this.loadProductDetails(product);
                         });
-                }
+                } else {
+                    this.loadProductDetails(product);
+                }    
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
+    }
+
+    // Extension of toggleDetails()
+    loadProductDetails (product: Product) {
+
+        // Set the selected product
+        this.selectedProduct = product;
+
+        // Fill the form
+        this.selectedProductForm.patchValue(product);
+
+        // Fill the form for SKU , Price & Quantity productInventories[0]
+        // this because SKU , Price & Quantity migh have variants
+        // this is only for display, so we display the productInventories[0] 
+        this.displaySku = product.productInventories[0].sku;
+        this.displayPrice = product.productInventories[0].price;
+        this.displayQuantity = product.productInventories[0].quantity;
+
+        // ---------------------
+        // IsVariant Toogle 
+        // ---------------------
+
+        // set isVariants = true is productInventories.length > 0
+        product.productVariants.length > 0 ? this.selectedProductForm.get('isVariants').patchValue(true) : this.selectedProductForm.get('isVariants').patchValue(false);
+
+        // ---------------------
+        // Images
+        // ---------------------
+
+        // Sort productAssets and place itemCode null in front, after that variants image
+        let imagesObjSorted = product.productAssets.sort(this.dynamicSort("itemCode"));
+        let imageArr = imagesObjSorted.map(item => item.url);
+
+        this.images = imageArr;
+
+        // get thumbnail index
+        let _thumbnailIndex = null;
+
+        // if has variants
+        if (this.selectedProductForm.get('isVariants').value === true){
+
+            let m = 0;
+
+            for (let i = 0; i < imagesObjSorted.length; i++){
+
+                // if no itemCode, continue the loop, and increase m by one
+                if (imagesObjSorted[i].itemCode == null){
+                    m++;
+                    continue;
+                }
+                // if thumbnail is true, take i and minus with m. This is to offset the index of assets with itemcode
+                if (imagesObjSorted[i].isThumbnail === true){
+                    _thumbnailIndex = i - m;
+                }
+            }
+        }
+        // if no variant
+        else {
+
+            _thumbnailIndex = imagesObjSorted.findIndex(item => item.isThumbnail === true)
+        }
+
+        this.thumbnailIndex = _thumbnailIndex === -1 ? 0 : _thumbnailIndex;
+
+        // ---------------------
+        // Product Assets
+        // ---------------------
+
+        this.productAssets$ = product.productAssets;
+
+        this.productAssets = this.selectedProductForm.get('productAssets') as FormArray;
+        // this.productAssets.clear();
+
+
+        this.imagesFile = [];
+
+        this.productAssets$.forEach(item => {
+            this.productAssets.push(this._formBuilder.group(item));
+            this.imagesFile.push(null) // push imagesFile with null to defined now many array in imagesFile
+        });
+
+        // ---------------------
+        // Product Inventories
+        // ---------------------
+            
+        this.productInventories$ = product.productInventories;
+
+        this.productInventories = this.selectedProductForm.get('productInventories') as FormArray;
+        // this.productInventories.clear();
+
+        this.productInventories$.forEach(item => {
+            this.productInventories.push(this._formBuilder.group(item));
+        });
+
+        // ---------------------
+        // Variants
+        // ---------------------
+
+        // Set to this productVariants 
+        this.productVariants$ = product.productVariants;
+
+        this.productVariants = this.selectedProductForm.get('productVariants') as FormArray;
+        // this.productVariants.clear();
+
+        this.productVariants$.forEach(item => {
+            let _item = this._formBuilder.group({
+                id: item.id,
+                name: item.name,
+                productVariantsAvailable: [item.productVariantsAvailable] // idk why, but this is the only workable way to archive array in this._formBuilder.group
+            });
+
+            this.productVariants.push(_item);
+        });
+
+        // this.filteredProductVariants = this.productVariants.value;
+
+
+        // Generate variants combination
+
+        this.generateVariantCombo();
+
+        // ---------------------
+        // Category
+        // ---------------------
+
+        // Add the category
+        this.selectedProduct.categoryId = product.categoryId;
+
+        // Update the selected product form
+        this.selectedProductForm.get('categoryId').patchValue(this.selectedProduct.categoryId);
+
+        // Sort the filtered categories, put selected category on top
+        // First get selected array index by using this.selectedProduct.categoryId
+
+        let selectedProductCategoryIndex = this.filteredProductCategories.findIndex(item => item.id === this.selectedProduct.categoryId);
+        // if selectedProductCategoryIndex < -1 // category not selected
+        // if selectedProductCategoryIndex = 0 // category selected already in first element
+        if (selectedProductCategoryIndex > 0) {
+            // if index exists get the object of selectedProductCategory
+            this.selectedProductCategory = this.filteredProductCategories[selectedProductCategoryIndex];
+            // remove the object from this.filteredProductCategories
+            this.filteredProductCategories.splice(selectedProductCategoryIndex,1);
+            // re add this.selectedProductCategory in front
+            this.filteredProductCategories.unshift(this.selectedProductCategory);
+        }
+
+        // ---------------------
+        // Inventory Alarm
+        // ---------------------
+
+        this.selectedProduct.minQuantityForAlarm = product.minQuantityForAlarm;
+
+        // Update minQuantityForAlarm
+        this.selectedProductForm.get('minQuantityForAlarm').patchValue(this.selectedProduct.minQuantityForAlarm);
+
+        // Update the selected product form
+        this.selectedProductForm.get('minQuantityForAlarm').patchValue(this.selectedProduct.minQuantityForAlarm);
+
+        // ---------------------
+        // Product Combo Package
+        // ---------------------
+
+        // get product combo list
+        if (this.selectedProduct.isPackage === true) {
+            this._inventoryService.getProductPackageOptions(product.id)
+                .pipe(takeUntil(this._unsubscribeAll))
+                .subscribe((response)=>{
+                    this.productsCombos$ = response["data"];
+                });
+        }
     }
     
     /**
