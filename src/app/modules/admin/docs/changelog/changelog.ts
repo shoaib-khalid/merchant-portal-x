@@ -9,6 +9,28 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 export class ChangelogComponent
 {
     changelog: any[] = [
+        // v0.0.18
+        {
+            version    : 'v0.0.18',
+            releaseDate: 'Feb 09, 2022',
+            changes    : [
+                {
+                    type: 'Added',
+                    list: [
+                        '(SignUp) Auto detect and store country on store creation',
+                        '(OrderManagement) Create bulk order for delivery provider pickup',
+                        '(StoreCreateAndEdit) Add favicon, banners and logo from new backend endpoint'
+                    ]
+                },
+                {
+                    type: 'Fix',
+                    list: [
+                        '(ProductVariant) Fix where main product input fields can be edited even it has variants',
+                        '(OrderDiscount) Remove product discount from order'
+                    ]
+                }
+            ]
+        },
         // v0.0.17
         {
             version    : 'v0.0.17',
