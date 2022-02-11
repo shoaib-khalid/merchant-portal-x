@@ -340,7 +340,7 @@
                                 <!-- Logo and Banner -->
                                 <div class="grid sm:grid-cols-8 gap-6 w-full mt-8">
                                     <!-- Logo -->
-                                    <div class="sm:col-span-8">
+                                    <div class="sm:col-span-4">
                                         <mat-form-field class="w-full fuse-mat-emphasized-affix">
                                             <mat-label class="font-medium">Store Logo</mat-label>
                                             <mat-toolbar>
@@ -348,10 +348,10 @@
                                             </mat-toolbar>
                                             <input
                                                 type="file"
-                                                id="logo"
-                                                name="logo"
+                                                id="Logo"
+                                                name="Logo"
                                                 accept="image/*" multiple 
-                                                (change)="selectFiles('logo',$event)"
+                                                (change)="selectFiles('LogoUrl',$event)"
                                             />
                                             <mat-icon
                                                 matPrefix
@@ -370,7 +370,45 @@
                                                         <mat-icon
                                                             class="top-0 right-0 cursor-pointer"
                                                             (click)="deletefiles(0);"
-                                                            [svgIcon]="'heroicons_solid:x'">
+                                                            [svgIcon]="'heroicons_solid:x-circle'">
+                                                        </mat-icon>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Favicon -->
+                                    <div class="sm:col-span-4">
+                                        <mat-form-field class="w-full fuse-mat-emphasized-affix">
+                                            <mat-label class="font-medium">Favicon</mat-label>
+                                            <mat-toolbar>
+                                                <input class="text-sm" matInput type="text" readonly [value]="files[3].selectedFileNames ? files[3].selectedFileNames : 'Select Images'" />
+                                            </mat-toolbar>
+                                            <input
+                                                type="file"
+                                                id="Favicon"
+                                                name="Favicon"
+                                                accept="image/*" multiple 
+                                                (change)="selectFiles('FaviconUrl',$event)"
+                                            />
+                                            <mat-icon
+                                                matPrefix
+                                                [svgIcon]="'mat_solid:image'">
+                                            </mat-icon>
+                                        </mat-form-field>
+                                        <div class="w-full">
+                                            <mat-label class="font-medium">Preview</mat-label>
+                                            <div class="my-2"></div>
+                                            <div class="p-8 border border-gray-300 rounded h-96">
+                                                <div *ngIf="this.files[3].fileSource">
+                                                    <span class="block"><b>Image Size</b> : {{ this.files[3].selectedImageWidth }} x {{ this.files[3].selectedImageHeight }} pixel</span>
+                                                    <span class="block"><b>Recommended Size</b> : {{ this.files[3].recommendedImageWidth }} x {{ this.files[3].recommendedImageHeight }} pixel</span>
+                                                    <div class="flex w-full flex-auto">
+                                                        <img [src]="this.files[3].fileSource" class="object-scale-down h-52" />
+                                                        <mat-icon
+                                                            class="top-0 right-0 cursor-pointer"
+                                                            (click)="deletefiles(3);"
+                                                            [svgIcon]="'heroicons_solid:x-circle'">
                                                         </mat-icon>
                                                     </div>
                                                 </div>
@@ -390,10 +428,10 @@
                                                     </mat-toolbar>
                                                     <input
                                                         type="file"
-                                                        id="banner"
-                                                        name="banner"
+                                                        id="BannerDesktopUrl"
+                                                        name="BannerDesktop"
                                                         accept="image/*" multiple 
-                                                        (change)="selectFiles('banner',$event)"
+                                                        (change)="selectFiles('BannerDesktopUrl',$event)"
                                                     />
                                                     <mat-icon
                                                         matPrefix
@@ -410,10 +448,10 @@
                                                     </mat-toolbar>
                                                     <input
                                                         type="file"
-                                                        id="bannerMobile"
-                                                        name="bannerMobile"
+                                                        id="BannerMobileUrl"
+                                                        name="BannerMobile"
                                                         accept="image/*" multiple 
-                                                        (change)="selectFiles('bannerMobile',$event)"
+                                                        (change)="selectFiles('BannerMobileUrl',$event)"
                                                     />
                                                     <mat-icon
                                                         matPrefix
@@ -422,34 +460,33 @@
                                                 </mat-form-field>
                                             </div>
                                         </div>
-                                        <div class="w-full">
+                                        <div class="w-full ">
                                             <mat-label class="font-medium">Preview</mat-label>
                                             <div class="my-2"></div>
-                                            <div class="flex flex-wrap content-center border border-gray-300 rounded h-96">
-                                                <div class="py-2 px-8" *ngIf="this.files[1].fileSource">
+                                            <div class="grid grid-cols-4 gap-6 w-full border border-gray-300 rounded h-96">
+                                                <div class="col-span-4 sm:col-span-2 p-5" *ngIf="this.files[1].fileSource">
                                                     <span class="block">Banner for <b>Desktop</b> View </span> 
-                                                    <span class="block"><b>Image Size</b> : {{ this.files[1].selectedImageWidth }} x {{ this.files[1].selectedImageHeight }} pixel</span>
+                                                    <span *ngIf="this.files[1].selectedImageWidth && this.files[1].selectedImageHeight" class="block"><b>Image Size</b> : {{ this.files[1].selectedImageWidth }} x {{ this.files[1].selectedImageHeight }} pixel</span>
                                                     <span class="block"><b>Recommended Size</b> : {{ this.files[1].recommendedImageWidth }} x {{ this.files[1].recommendedImageHeight }} pixel</span> 
-                                                    <div class="flex w-full flex-auto">
-                                                        <img [src]="this.files[1].fileSource" class="object-scale-down h-24" />
-                                                        <mat-icon
-                                                            class="top-0 right-0 cursor-pointer"
-                                                            (click)="deletefiles(1);"
-                                                            [svgIcon]="'heroicons_solid:x'">
-                                                        </mat-icon>
+                                                    <div class="flex justify-center w-full">
+                                                        <ngx-gallery id="BannerDesktop-NgxGallery" [options]="galleryOptionsBannerDesktop" [images]="this.files[1].galleryImages"></ngx-gallery>
                                                     </div>
                                                 </div>
-                                                <div class="py-2 px-8" *ngIf="this.files[2].fileSource">
+                                                <!-- <div class="p-8 border border-gray-300 rounded h-auto">
+                                                    <ng-container *ngIf="this.files[1].fileSource">
+                                                        <span *ngIf="this.files[1].selectedImageWidth && this.files[1].selectedImageHeight" class="block"><b>Uploaded Image Size</b>: {{ this.files[1].selectedImageWidth }} x {{ this.files[1].selectedImageHeight }} pixel </span>
+                                                        <span class="block"><b>Recommended Size</b>: {{ this.files[1].recommendedImageWidth }} x {{ this.files[1].recommendedImageHeight }} pixel </span>
+                                                    </ng-container>
+                                                    <div class="flex justify-center w-full">
+                                                        <ngx-gallery id="taik1" [options]="galleryOptionsBannerDesktop" [images]="this.files[1].galleryImages"></ngx-gallery>
+                                                    </div>
+                                                </div>  -->
+                                                <div class="col-span-4 sm:col-span-2 p-5" *ngIf="this.files[2].fileSource">
                                                     <span>Banner for <b>Mobile</b> View </span> 
-                                                    <span class="block"><b>Image Size</b> : {{ this.files[2].selectedImageWidth }} x {{ this.files[2].selectedImageHeight }} pixel</span>
+                                                    <span *ngIf="this.files[2].selectedImageWidth && this.files[2].selectedImageHeight" class="block"><b>Image Size</b> : {{ this.files[2].selectedImageWidth }} x {{ this.files[2].selectedImageHeight }} pixel</span>
                                                     <span class="block"><b>Recommended Size</b> : {{ this.files[2].recommendedImageWidth }} x {{ this.files[2].recommendedImageHeight }} pixel</span>  
-                                                    <div class="flex w-full flex-auto">
-                                                        <img [src]="this.files[2].fileSource" class="object-scale-down h-24" />
-                                                        <mat-icon
-                                                            class="top-0 right-0 cursor-pointer"
-                                                            (click)="deletefiles(2);"
-                                                            [svgIcon]="'heroicons_solid:x'">
-                                                        </mat-icon>
+                                                    <div class="flex justify-center w-full">
+                                                        <ngx-gallery id="BannerMobile-NgxGallery" [options]="galleryOptionsBannerMobile" [images]="this.files[2].galleryImages"></ngx-gallery>
                                                     </div>
                                                 </div>
                                                 &nbsp;

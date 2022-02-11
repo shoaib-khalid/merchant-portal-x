@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, ReplaySubject, Subject, throwError } from 'rxjs';
 import { switchMap, take, map, tap, catchError, filter } from 'rxjs/operators';
-import { Store, StoreRegionCountries, StoreTiming, StorePagination, StoreAssets, CreateStore, StoreDeliveryDetails, StoreSelfDeliveryStateCharges, StoreDeliveryProvider } from 'app/core/store/store.types';
+import { Store, StoreRegionCountries, StoreTiming, StorePagination, StoreAssets, CreateStore, StoreDeliveryDetails, StoreSelfDeliveryStateCharges, StoreDeliveryProvider, StoreAsset } from 'app/core/store/store.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { takeUntil } from 'rxjs/operators';
@@ -16,6 +16,8 @@ export class StoresService
 {
     private _store: BehaviorSubject<Store | null> = new BehaviorSubject(null);
     private _stores: BehaviorSubject<Store[] | null> = new BehaviorSubject(null);
+    private _storeAsset: BehaviorSubject<StoreAsset | null> = new BehaviorSubject(null);
+    private _storeAssets: BehaviorSubject<StoreAsset[] | null> = new BehaviorSubject(null);
     private _pagination: BehaviorSubject<StorePagination | null> = new BehaviorSubject(null);
     private _storeRegionCountries: ReplaySubject<StoreRegionCountries[]> = new ReplaySubject<StoreRegionCountries[]>(1);
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -49,7 +51,7 @@ export class StoresService
     }
 
     /**
-     * Setter for stores
+     * Setter for store
      *
      * @param value
      */
@@ -123,6 +125,45 @@ export class StoresService
         return this._pagination.asObservable();
     }
 
+    /**
+     * Getter for asset
+     *
+    */
+    get storeAsset$(): Observable<StoreAsset>
+    {
+        return this._storeAsset.asObservable();
+    }
+
+    /**
+     * Setter for store
+     *
+     * @param value
+     */
+    set storesAsset(value: StoreAsset)
+    {
+        // Store the value
+        this._storeAsset.next(value);
+    }
+    /**
+    * Getter for assets
+    *
+    */
+    get storeAssets$(): Observable<StoreAsset[]>
+    {
+        return this._storeAssets.asObservable();
+    }
+
+    /**
+     * Setter for assets
+     *
+     * @param value
+     */
+    set storeAssets(value: StoreAsset[])
+    {
+        // Store the value
+        this._storeAssets.next(value);
+    }
+
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
@@ -133,9 +174,9 @@ export class StoresService
     // ---------------------------
 
     /**
-     * Get the current logged in store data
-     */
-     getStores(id: string = "", page: number = 0, size: number = 10, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', category: string = ''): 
+    * Get the current logged in store data
+    */
+    getStores(id: string = "", page: number = 0, size: number = 10, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', category: string = ''): 
         Observable<{ pagination: StorePagination; stores: Store[] }>
     {
         let productService = this._apiServer.settings.apiServer.productService;
@@ -584,7 +625,30 @@ export class StoresService
         return response.data;
     }
 
-    postAssets(storeId: string, storeAssets, storeAssetType = null , storeAssetFiles = null): Observable<any>
+    getStoreAssetsById(storeId: string = ""): 
+    Observable<{ stores: Store[] }>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.get<{ stores: Store[] }>(productService + '/stores/' + storeId + '/storeassets', header)
+        .pipe(
+            tap((response) => {
+                
+                this._logging.debug("Response from StoresService (Before getStoreAssets)",response);
+
+                this._stores.next(this._currentStores);
+            })
+        );
+    }
+    
+
+    postAssets(storeId: string, storeAssetType = null , storeAssets, storeAssetDescription = null): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -595,54 +659,109 @@ export class StoresService
 
         return this.stores$.pipe(
             take(1),
-            switchMap(stores => this._httpClient.post<any>(productService + '/stores/' + storeId + '/assets', storeAssets , header ).pipe(
+            switchMap(stores => this._httpClient.post<any>(productService + '/stores/' + storeId + '/storeassets', storeAssets , header ).pipe(
                 map((response) => {
 
                     this._logging.debug("Response from StoresService stores (postAssets - "+storeAssetType+")",response);
 
-                    // --------------
-                    // Update Stores
-                    // --------------
-
-                    // Find the index of the updated product
-                    const index = stores.findIndex(item => item.id === storeId);
-
-                    let updateResponse = Object.assign(stores[index],{ 
-                        storeAsset: { 
-                            logoUrl: stores[index].storeAsset && stores[index].storeAsset.logoUrl ? stores[index].storeAsset.logoUrl : null, 
-                            bannerUrl: stores[index].storeAsset && stores[index].storeAsset.bannerUrl ? stores[index].storeAsset.bannerUrl : null,
-                            bannerMobileUrl: stores[index].storeAsset && stores[index].storeAsset.bannerMobileUrl ? stores[index].storeAsset.bannerMobileUrl : null
+                    if (storeAssetType === "LogoUrl") {
+                        // --------------
+                        // Add Store Logo
+                        // --------------                    
+    
+                        // Find the index of the updated product
+                        const storeIndex = stores.findIndex(item => item.id === storeId);
+                        
+                        if (!stores[storeIndex].storeAssets) {
+                            Object.assign(stores[storeIndex],{ 
+                                storeAssets: [response.data]
+                            });
                         }
-                    });
+    
+                        // Update the products
+                        this._stores.next(stores);                    
+    
+                        // ---------------
+                        // Update Store
+                        // ---------------
 
-                    console.log("updateResponse", updateResponse);
-                    
-                    updateResponse.storeAsset.logoUrl = response.data.logoUrl;
-                    updateResponse.storeAsset.bannerUrl = response.data.bannerUrl;
-                    updateResponse.storeAsset.bannerMobileUrl = response.data.bannerMobileUrl;
-                    
-                    console.log("resbown",response.data.logoUrl);
-                    
-                    // Update the product
-                    stores[index] = { ...stores[index], ...updateResponse};
-
-                    // Update the products
-                    this._stores.next(stores);
-
-                    // ---------------
-                    // Update Store
-                    // ---------------
-                    this._store.next(stores[index]);
-
-                    // set this
-                    if (storeAssetType === "logo") {
-                        this.storeControl.setValue(stores[index]);
+                        this._store.next(stores[storeIndex]);
+    
+                        this.storeControl.setValue(stores[storeIndex]);
                     }
 
                     // return value
                     return response["data"];
                 })
             ))
+        );
+    }
+
+    putAssets(storeId: string, assetsId: string, storeAssets, storeAssetType = null): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this.stores$.pipe(
+            take(1),
+            switchMap(stores => this._httpClient.put<any>(productService + '/stores/' + storeId + '/storeassets/' + assetsId ,storeAssets, header ).pipe(
+                map((response) => {
+                    this._logging.debug("Response from StoresService (putAssets)",response);
+
+                    // set this
+                    if (storeAssetType === "LogoUrl") {
+
+                        // --------------
+                        // Update Store Logo
+                        // --------------
+
+                        // Find the index of the updated product
+                        const storeIndex = stores.findIndex(item => item.id === storeId);
+                        const assetIndex = stores[storeIndex].storeAssets.findIndex(item => item.assetType === 'LogoUrl')
+                                   
+                        let updateResponse = stores[storeIndex];
+
+                        if (assetIndex > -1) {
+                            // since url is stay the same, we need to randomise hash
+                            updateResponse.storeAssets[assetIndex].assetUrl = response.data.assetUrl + "?hash=" + (Math.random() + 1).toString(36).substring(7);
+                        }                        
+
+                        // Update the product
+                        stores[storeIndex] = { ...stores[storeIndex], ...updateResponse};
+
+                        // Update the products
+                        this._stores.next(stores);
+
+                        // ---------------
+                        // Update Store
+                        // ---------------
+                        this._store.next(stores[storeIndex]);
+
+                        this.storeControl.setValue(stores[storeIndex]);
+                    }
+                        
+                })
+            ))
+        );    
+    }
+
+    deleteAssets(storeId: string, assetsId: string): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.delete<any>(productService + '/stores/' + storeId + '/storeassets/' + assetsId , header ).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (deleteAssets)",response);
+            })
         );
     }
 

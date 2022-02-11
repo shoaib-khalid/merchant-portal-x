@@ -52,7 +52,8 @@
                             "src/styles/vendors.scss",
                             "src/@fuse/styles/main.scss",
                             "src/styles/styles.scss",
-                            "src/styles/tailwind.scss"
+                            "src/styles/tailwind.scss",
+                            "./node_modules/font-awesome/css/font-awesome.css"
                         ],
                         "scripts": [
                             "src/assets/js/mxgraph.conf.js",
@@ -126,7 +127,8 @@
                             "src/assets"
                         ],
                         "styles": [
-                            "src/styles/styles.scss"
+                            "src/styles/styles.scss",
+                            "./node_modules/font-awesome/css/font-awesome.css"
                         ],
                         "scripts": [
                             "src/assets/js/mxgraph.conf.js",

@@ -15,6 +15,8 @@ import { ChooseVerticalService } from '../choose-vertical/choose-vertical.servic
 import { FuseAlertType } from '@fuse/components/alert';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { TimeSelector } from 'app/layout/common/time-selector/timeselector.component';
+import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
+import { NgxGalleryOptions, NgxGalleryImage, NgxGalleryAnimation } from 'ngx-gallery-9';
 
 @Component({
     selector     : 'register-store-page',
@@ -62,14 +64,16 @@ export class RegisterStoreComponent implements OnInit
     _storeTiming: any;
     storeTiming: FormArray;
 
-    // Image part
-    
+    // Image part  
     progressInfos: any[] = [];
     message: string[] = [];
     
     files: any;
     timeAlert: any = [];
     disableForm: boolean = false;
+
+    galleryOptionsBannerDesktop: NgxGalleryOptions[] = [];
+    galleryOptionsBannerMobile: NgxGalleryOptions[] = [];
 
     verticalStepperForm: FormGroup;
 
@@ -93,6 +97,7 @@ export class RegisterStoreComponent implements OnInit
         private _router: Router,
         private _route: ActivatedRoute,
         private _fuseConfirmationService: FuseConfirmationService,
+        private _domSanitizer: DomSanitizer
     )
     {
         this.checkExistingURL = debounce(this.checkExistingURL, 300);
@@ -420,10 +425,11 @@ export class RegisterStoreComponent implements OnInit
         // -------------------------------------
         // Logo and banner
         // -------------------------------------
-
+        
         this.files = [
             { 
-                type: "logo",
+                description: "Logo",
+                type: "LogoUrl",
                 fileSource: null,
                 selectedFileName: "", 
                 selectedFiles: null, 
@@ -431,10 +437,14 @@ export class RegisterStoreComponent implements OnInit
                 recommendedImageHeight: "500", 
                 selectedImageWidth: "", 
                 selectedImageHeight: "",
-                toDelete: false
+                toDelete: [],
+                toAdd:[],
+                isMultiple: false,
+                galleryImages: []
             },
             { 
-                type: "banner", 
+                description: "BannerDesktop",
+                type: "BannerDesktopUrl", 
                 fileSource: null,
                 selectedFileName: "", 
                 selectedFiles: null, 
@@ -442,10 +452,14 @@ export class RegisterStoreComponent implements OnInit
                 recommendedImageHeight: "250", 
                 selectedImageWidth: "", 
                 selectedImageHeight: "",
-                toDelete: false
+                toDelete: [],
+                toAdd:[],
+                isMultiple: true,
+                galleryImages: []
             },
             { 
-                type: "bannerMobile",
+                description: "BannerMobile",
+                type: "BannerMobileUrl",
                 fileSource: null, 
                 selectedFileName: "", 
                 selectedFiles: null, 
@@ -453,9 +467,120 @@ export class RegisterStoreComponent implements OnInit
                 recommendedImageHeight: "260", 
                 selectedImageWidth: "", 
                 selectedImageHeight: "",
-                toDelete: false
+                toDelete: [],
+                toAdd:[],
+                isMultiple: true,
+                galleryImages: []
+            },
+            { 
+                description: "Favicon",
+                type: "FaviconUrl",
+                fileSource: null, 
+                selectedFileName: "", 
+                selectedFiles: null, 
+                recommendedImageWidth: "950", 
+                recommendedImageHeight: "260", 
+                selectedImageWidth: "", 
+                selectedImageHeight: "",
+                toDelete: [],
+                toAdd:[],
+                isMultiple: false,
+                galleryImages: []
             },
         ];
+        
+        // initialise gallery
+        // set galleryOptions
+        this.galleryOptionsBannerDesktop = [
+            {
+                width: '290px',
+                height: '290px',
+                thumbnailsColumns: 3,
+                imageAnimation: NgxGalleryAnimation.Slide,
+                thumbnailsArrows: true,
+                // previewDownload: true,
+                imageArrowsAutoHide: true, 
+                thumbnailsArrowsAutoHide: true,
+                thumbnailsAutoHide: false,
+                thumbnailActions: [
+                    {
+                        icon: 'fa fa-times-circle',
+                        onClick: (event, index) => {
+                            
+                            this.deleteBannerDesktop(event, index)
+                        },
+                    }
+                ],
+                // "imageSize": "contain",
+                "previewCloseOnClick": true, 
+                "previewCloseOnEsc": true,
+                // "thumbnailsRemainingCount": true
+            },
+            // max-width 767 Mobile configuration
+            {
+                breakpoint: 767,
+                thumbnailsColumns: 2,
+                thumbnailsAutoHide: false,
+                width: '290px',
+                height: '290px',
+                imagePercent: 100,
+                thumbnailsPercent: 30,
+                thumbnailsMargin: 10,
+                thumbnailMargin: 5,
+                thumbnailActions: [
+                    {
+                        icon: 'fa fa-times-circle',
+                        onClick: () => {},
+                    }
+                ]
+            }
+        ];
+
+        this.galleryOptionsBannerMobile = [
+            {
+                width: '290px',
+                height: '290px',
+                thumbnailsColumns: 3,
+                imageAnimation: NgxGalleryAnimation.Slide,
+                thumbnailsArrows: true,
+                // previewDownload: true,
+                imageArrowsAutoHide: true, 
+                thumbnailsArrowsAutoHide: true,
+                thumbnailsAutoHide: false,
+                thumbnailActions: [
+                    {
+                        icon: 'fa fa-times-circle',
+                        onClick: (event, index) => {
+                            
+                            this.deleteBannerMobile(event, index)
+                        },
+                    }
+                ],
+                // "imageSize": "contain",
+                "previewCloseOnClick": true, 
+                "previewCloseOnEsc": true,
+                // "thumbnailsRemainingCount": true
+            },
+            // max-width 767 Mobile configuration
+            {
+                breakpoint: 767,
+                thumbnailsColumns: 3,
+                thumbnailsAutoHide: true,
+                width: '290px',
+                height: '290px',
+                imagePercent: 100,
+                thumbnailsPercent: 30,
+                thumbnailsMargin: 10,
+                thumbnailMargin: 5,
+                thumbnailActions: [
+                    {
+                        icon: 'fa fa-times-circle',
+                        onClick: () => {},
+                    }
+                ]
+            }
+        ];
+        
 
         // Get allowed store countries 
         // this only to get list of country in symplified backend
@@ -478,32 +603,7 @@ export class RegisterStoreComponent implements OnInit
      * Send the form
      */
     sendForm(): void
-    {     
-        
-        // Do nothing if the form is invalid
-        // let BreakException = {};
-        // try {
-        //     Object.keys(this.createStoreForm.controls).forEach(key => {
-        //         const controlErrors: ValidationErrors = this.createStoreForm.get(key).errors;
-        //         if (controlErrors != null) {
-        //             Object.keys(controlErrors).forEach(keyError => {
-        //                 this.alert = {
-        //                     type   : 'error',
-        //                     message: 'Field ' + key + ' error: ' + keyError
-        //                 }
-        //                 this.isDisplayStatus = true;
-        //                 throw BreakException;
-        //             });
-        //         }
-        //     });
-        // } catch (error) {
-        //     return;
-        // }
-    
-        // if (this.isDisplayStatus === true){
-        //   return;
-        // }
-
+    {   
         // Hide the alert
         this.isDisplayStatus = false;
 
@@ -525,9 +625,9 @@ export class RegisterStoreComponent implements OnInit
         // Disable the form
         this.createStoreForm.disable();
 
-        // ---------------------------
-        // Register Store Section
-        // ---------------------------
+        // -------------------------------------
+        //        Register Store Section
+        // -------------------------------------
 
         this._storesService.post(createStoreBody)
             .subscribe((response) => {
@@ -535,7 +635,7 @@ export class RegisterStoreComponent implements OnInit
                 this.storeId = response.data.id;
                                   
                 // ---------------------------
-                // Create Store Timing
+                //    Create Store Timing
                 // ---------------------------                
                 
                 storeTimingBody.forEach(item => {
@@ -616,79 +716,144 @@ export class RegisterStoreComponent implements OnInit
                 });
 
                 // ---------------------------
-                // Create Store Assets
+                //    Create Store Assets
                 // ---------------------------
 
                 this.files.forEach(item =>{
                     
-                    let formData = new FormData();
-                    if (item.selectedFiles !== null){
-                        formData.append(item.type,item.selectedFiles[0])
-                    }
+                    //Logo update using item.selected files
+                    if (item.type === 'LogoUrl' && item.selectedFiles){
 
-                    let storeAssetFiles = item.fileSource;
+                        let formData = new FormData();
+                        formData.append('assetFile', item.selectedFiles[0]);
+                        formData.append('assetType',item.type);
+                        formData.append('assetDescription',item.description);
 
-                    if (item.toDelete === true && item.type === 'logo'){
-                        this._storesService.deleteAssetsLogo(this.storeId).subscribe(() => {
-                            // console.log("storeAssetFiles: ", "'"+storeAssetFiles+"'")
-                            if (storeAssetFiles && storeAssetFiles !== "") {
-                                this._storesService.postAssets(this.storeId, formData, "logo", storeAssetFiles).subscribe(
-                                    (event: any) => {
-                                    if (event instanceof HttpResponse) {
-                                        console.log('Uploaded the file successfully');
-        
-                                        // Mark for check
-                                        this._changeDetectorRef.markForCheck();
-                                    }
-                                    },
-                                    (err: any) => {
-                                        console.error('Could not upload the logo file');
-                                    });
+                        this._storesService.postAssets(this.storeId, "LogoUrl", formData,"Logo").subscribe(
+                            (event: any) => {
+                            if (event instanceof HttpResponse) {
+                                console.info('Uploaded the file successfully');
+
+                                this.files[3].assetId = event["id"];
+
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
                             }
-                        });
+                            },
+                            (err: any) => {
+                                console.error('Could not upload the file');
+                            });
                     }
-                    if (item.toDelete === true && item.type === 'banner'){  
-                        this._storesService.deleteAssetsBanner(this.storeId).subscribe(() => {
-                            // console.log("storeAssetFiles 1: ", "'"+storeAssetFiles+"'")
-                            if (storeAssetFiles && storeAssetFiles !== ""){
-                                this._storesService.postAssets(this.storeId, formData, "banner", storeAssetFiles).subscribe(
-                                    (event: any) => {
-                                    if (event instanceof HttpResponse) {
-                                        console.log('Uploaded the file successfully');
-        
-                                        // Mark for check
-                                        this._changeDetectorRef.markForCheck();
-                                    }
+
+                    // Favicon update using item.selectedFiles
+                    if (item.type === 'FaviconUrl' && item.selectedFiles){
+                        
+                        let formData = new FormData();
+                        formData.append('assetFile',item.selectedFiles[0]);
+                        formData.append('assetType',item.type);
+                        formData.append('assetDescription',item.description);
+
+                        this._storesService.postAssets(this.storeId, "FaviconUrl", formData,"Favicon").subscribe(
+                            (event: any) => {
+                            if (event instanceof HttpResponse) {
+                                console.info('Uploaded the file successfully');
+
+
+                                this.files[3].assetId = event["id"];
+
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
+                            }
+                            },
+                            (err: any) => {
+                                console.error('Could not upload the file');
+                            });
+                    }
+                    if(item.type === 'BannerDesktopUrl') {
+                        // toDelete
+                        item.toDelete.forEach(assetId => {
+                            this._storesService.deleteAssets(this.storeId, assetId).subscribe(
+                                (event: any) => {
+                                if (event instanceof HttpResponse) {
+                                    console.info('Uploaded the file successfully');
+            
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                }
                                 },
                                 (err: any) => {
-                                        console.error('Could not upload the banner file');
-                                    });
-                            }
+                                    console.error('Could not upload the file');
+                            });
                         });
-                    }
-                    if (item.toDelete === true && item.type === 'bannerMobile'){
-                        this._storesService.deleteAssetsBannerMobile(this.storeId).subscribe(() => {
-                            // console.log("storeAssetFiles 2: ", "'"+storeAssetFiles+"'")
-                            if (storeAssetFiles && storeAssetFiles !== ""){
-                                this._storesService.postAssets(this.storeId, formData, "bannerMobile", storeAssetFiles).subscribe(
-                                    (event: any) => {
-                                    if (event instanceof HttpResponse) {
-                                        console.log('Uploaded the file successfully');
+                        // toAdd
+                        item.toAdd.forEach(selectedFiles => {
         
-                                        // Mark for check
-                                        this._changeDetectorRef.markForCheck();
-                                    }
-                                    },
-                                    (err: any) => {
-                                        console.error('Could not upload the bannerMobile file');
-                                    });
-                            }
+                            let formData = new FormData();
+                            formData.append('assetFile',selectedFiles[0]);
+                            formData.append('assetType',item.type);
+                            formData.append('assetDescription',item.description);
+        
+                            this._storesService.postAssets(this.storeId, "BannerDesktopUrl", formData,"BannerDesktop").subscribe(
+                                (event: any) => {
+                                if (event instanceof HttpResponse) {
+                                    console.info('Uploaded the file successfully');
+            
+                                    this.files[1].assetId = event["id"];
+            
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                }
+                                },
+                                (err: any) => {
+                                    console.error('Could not upload the file');
+                                });
+                        });
+                        
+                    }
+                    if(item.type === 'BannerMobileUrl') {
+                        // toDelete
+                        item.toDelete.forEach(assetId => {
+                            this._storesService.deleteAssets(this.storeId, assetId).subscribe(
+                                (event: any) => {
+                                if (event instanceof HttpResponse) {
+                                    console.info('Uploaded the file successfully');
+            
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                }
+                                },
+                                (err: any) => {
+                                    console.error('Could not upload the file');
+                            });
+                        });
+                        // toAdd
+                        item.toAdd.forEach(selectedFiles => {
+        
+                            let formData = new FormData();
+                            formData.append('assetFile',selectedFiles[0]);
+                            formData.append('assetType',item.type);
+                            formData.append('assetDescription',item.description);
+        
+                            this._storesService.postAssets(this.storeId, "BannerMobileUrl", formData,"BannerMobile").subscribe(
+                                (event: any) => {
+                                if (event instanceof HttpResponse) {
+                                    console.info('Uploaded the file successfully');
+            
+                                    this.files[1].assetId = event["id"];
+            
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                }
+                                },
+                                (err: any) => {
+                                    console.error('Could not upload the file');
+                                });
                         });
                     }
                 });
 
                 // ---------------------------
-                // Create Store Provider
+                //    Create Store Provider
                 // ---------------------------
 
                 let _itemType;
@@ -796,20 +961,6 @@ export class RegisterStoreComponent implements OnInit
         }, 1000);
     }
 
-    updateStates(countryId: string){
-
-        // reset current regionCountryStateId
-        this.createStoreForm.get('step1').get('regionCountryStateId').patchValue("");
-
-        // Get states by country (using symplified backend)
-        this._storesService.getStoreRegionCountryState(countryId).subscribe((response)=>{
-            this.statesByCountry = response.data.content;
-        });
-
-        // Mark for check
-        this._changeDetectorRef.markForCheck();
-    }
-
     async checkExistingURL(subdomain: string){
         let url = subdomain + this.domainName;
         let status = await this._storesService.getExistingURL(url);
@@ -824,6 +975,23 @@ export class RegisterStoreComponent implements OnInit
             this.createStoreForm.get('step1').get('name').setErrors({storeNameAlreadyTaken: true});
         }
 
+    }
+    // ------------------------------------------------------------------------------
+    //                            Delivery Public Method
+    // ------------------------------------------------------------------------------
+    
+    updateStates(countryId: string){
+
+        // reset current regionCountryStateId
+        this.createStoreForm.get('step1').get('regionCountryStateId').patchValue("");
+
+        // Get states by country (using symplified backend)
+        this._storesService.getStoreRegionCountryState(countryId).subscribe((response)=>{
+            this.statesByCountry = response.data.content;
+        });
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
 
     addSelfDeliveryState(){
@@ -883,27 +1051,61 @@ export class RegisterStoreComponent implements OnInit
         return (index > -1) ? true : false; 
     }
 
-    /**
-     * tahu la
-     * @param event 
-     */
+    checkDeliveryPartner(){
+        // on every change set error to false first (reset state)
+        if (this.createStoreForm.get('step3').get('deliveryType').errors || this.createStoreForm.get('step3').get('deliveryPartner').errors){
+            this.createStoreForm.get('step3').get('deliveryPartner').setErrors(null);
+        }
 
+        // ------------------------------------------------------------
+        // reset allowedSelfDeliveryStates if user change delivery type
+        // ------------------------------------------------------------
+
+        if (this.createStoreForm.get('step3').get('deliveryType').value === "SELF") {
+
+            // push to allowedSelfDeliveryStates (form)
+            this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
+            // since backend give full discount tier list .. (not the only one that have been created only)
+            this.allowedSelfDeliveryStates.clear();
+            
+            // re populate items
+            this._allowedSelfDeliveryStates.forEach(item => {
+                this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
+            });
+        }
+
+        // then check it again and set if there's an error
+        if (this.deliveryPartners.length < 1 && this.createStoreForm.get('step3').get('deliveryType').value !== "SELF"){
+            this.createStoreForm.get('step3').get('deliveryType').setErrors({noDeliveryPartners: true})
+        }
+    }
+    
+    // ------------------------------------------------------------------------------
+    //                              Assets Public Method
+    // ------------------------------------------------------------------------------
+
+   /**
+    * 
+    * @param event 
+    */
     selectFiles(fileType,event: any): void {
 
-    // find index of object this.files
-    let index = this.files.findIndex(preview => preview.type === fileType);
-
-    // set each of the attributes
-    this.files[index].fileSource = null;
-    this.files[index].selectedFileName = "";
-    this.files[index].selectedFiles = event.target.files;    
+        // find index of object this.files
+        let index = this.files.findIndex(preview => preview.type === fileType);
+        
+        if (event.target.files.length > 0) {
+            // set each of the attributes
+            this.files[index].fileSource = null;
+            this.files[index].selectedFileName = "";
+            this.files[index].selectedFiles = event.target.files;
+        }
         
         let maxSize = 2600000;
-        if (this.files[index].selectedFiles[0].size > maxSize ){
+        if (this.files[index].fileSource && this.files[index].selectedFiles[0].size > maxSize ){
             // Show a success message (it can also be an error message)
             const confirmation = this._fuseConfirmationService.open({
                 title  : 'Image size limit',
-                message: 'Your uploaded image is exceeds the maximum size of ' + maxSize + ' bytes ! Please choose image with size below of ' + maxSize + ' bytes',
+                message: 'Your uploaded image is exceeds the maximum size of ' + maxSize + ' bytes !',
                 icon: {
                     show: true,
                     name: "heroicons_outline:exclamation",
@@ -927,73 +1129,101 @@ export class RegisterStoreComponent implements OnInit
             for (let i = 0; i < numberOfFiles; i++) {
             const reader = new FileReader();
             
-            reader.onload = (e: any) => {
+            reader.onload = (e: any) => { 
+
+                if (this.files[index].isMultiple) {
+                    if (index === 1) {
+                        this.files[1].fileSource = e.target.result;
+                        this.files[1].toAdd.push(event.target.files);
+                        
+                        if(this.files[1].galleryImages.length < 3){
+                            
+                            this.files[1].galleryImages.unshift({
+                                small           : '' + e.target.result,
+                                medium          : '' + e.target.result,
+                                big             : '' + e.target.result
+                            });
+                        }
+                        this._changeDetectorRef.markForCheck();
+
+                    } else if (index === 2) {
+                        this.files[2].fileSource = e.target.result;
+                        this.files[2].toAdd.push(event.target.files);
+
+                        if(this.files[2].galleryImages.length < 3){
+
+                            this.files[2].galleryImages.unshift({
+                                small   : '' + e.target.result,
+                                medium  : '' + e.target.result,
+                                big     : '' + e.target.result,
+
+                            });
+                        }
+                        this._changeDetectorRef.markForCheck();
+
+                    }
+                } else {
+                    this.files[index].fileSource = e.target.result;
+
+                    var image = new Image();
+                    image.src = e.target.result;
+    
+                    image.onload = (imageInfo: any) => {
+                        this.files[index].selectedImageWidth = imageInfo.path[0].width;
+                        this.files[index].selectedImageHeight = imageInfo.path[0].height;
+    
+                        this._changeDetectorRef.markForCheck();
+                    };
+                }
                 
-                // set this.files[index].delete to false 
-                this.files[index].toDelete = true;
-
-                this.files[index].fileSource = e.target.result;
-
-                var image = new Image();
-                image.src = e.target.result;
-
-                image.onload = (imageInfo: any) => {
-                    this.files[index].selectedImageWidth = imageInfo.path[0].width;
-                    this.files[index].selectedImageHeight = imageInfo.path[0].height;
-
-                    this._changeDetectorRef.markForCheck();
-                };
-
                 this._changeDetectorRef.markForCheck();                
             };
-
+            // console.log("this.files["+index+"].selectedFiles["+i+"]",this.files[index].selectedFiles[i])
             reader.readAsDataURL(this.files[index].selectedFiles[i]);
             this.files[index].selectedFileName = this.files[index].selectedFiles[i].name;
             }
         }
         this._changeDetectorRef.markForCheck();
+    }
 
-    } 
+
+    createImageFromBlob(image: Blob) {
+        let reader = new FileReader(); //you need file reader for read blob data to base64 image data.
+        return  reader.readAsDataURL(image);
+    }
+
+    deleteBannerDesktop(e, index){
+        let assetId = this.files[1].galleryImages[index].assetId;
+
+        this.files[1].toDelete.push(assetId);
+        this.files[1].galleryImages.splice(index,1);
+        if(this.files[1].galleryImages.length < 1){
+            this.files[1].fileSource = null
+        }
+    }
+
+    deleteBannerMobile(e, index){
+        let assetId = this.files[2].galleryImages[index].assetId;
+
+        this.files[2].toDelete.push(assetId);
+        this.files[2].galleryImages.splice(index,1)
+        if(this.files[2].galleryImages.length < 1){
+            this.files[2].fileSource = null
+        }
+    }
 
     deletefiles(index: number) { 
         this.files[index].toDelete = true;
         this.files[index].fileSource = '';
+        this.files[index].selectedFiles = '';
 
         this._changeDetectorRef.markForCheck();
     }
 
-    checkDeliveryPartner(){
-        // on every change set error to false first (reset state)
-        if (this.createStoreForm.get('step3').get('deliveryType').errors || this.createStoreForm.get('step3').get('deliveryPartner').errors){
-            this.createStoreForm.get('step3').get('deliveryPartner').setErrors(null);
-        }
+    // ------------------------------------------------------------------------------
+    //                     Store Timing Public Method Section
+    // ------------------------------------------------------------------------------
 
-        // -----------------------------------
-        // reset allowedSelfDeliveryStates if user change delivery type
-        // -----------------------------------
-
-        if (this.createStoreForm.get('step3').get('deliveryType').value === "SELF") {
-
-            // push to allowedSelfDeliveryStates (form)
-            this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
-            // since backend give full discount tier list .. (not the only one that have been created only)
-            this.allowedSelfDeliveryStates.clear();
-            
-            // re populate items
-            this._allowedSelfDeliveryStates.forEach(item => {
-                this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
-            });
-        }
-
-        // then check it again and set if there's an error
-        if (this.deliveryPartners.length < 1 && this.createStoreForm.get('step3').get('deliveryType').value !== "SELF"){
-            this.createStoreForm.get('step3').get('deliveryType').setErrors({noDeliveryPartners: true})
-        }
-    }
-
-    //---------------------------------
-    //     Store Timing Section
-    //---------------------------------
 
     updateStoreOpening(day: string){
         let index = this._storeTiming.findIndex(dayList => dayList.day === day);

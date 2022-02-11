@@ -11,6 +11,7 @@ import { InventoryService } from 'app/core/product/inventory.service'
 import { StoresService } from 'app/core/store/store.service';
 import { MatSort } from '@angular/material/sort';
 import { FormControl } from '@angular/forms';
+import { items } from 'app/mock-api/apps/file-manager/data';
 
 @Component({
     selector       : 'choose-store',
@@ -38,6 +39,7 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
 
     categoryFilterControl: FormControl = new FormControl();
     filteredCategory: string = "";
+    storeLogo: string ;
 
     /**
      * Constructor
@@ -94,7 +96,7 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
         // Get the stores
         this._storesService.stores$
             .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((stores: Store[]) => {
+            .subscribe((stores: Store[]) => {                
                 this.filteredStores = stores;
 
                 // Mark for check
@@ -299,5 +301,18 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
             }
          });
      }
+
+    displayStoreLogo(store: Store) {
+        if (store.storeAssets) {
+            let index = store.storeAssets.findIndex(item =>item.assetType === 'LogoUrl')
+            if(index > -1) {
+                return store.storeAssets[index].assetUrl
+            } else {
+                return false
+            }
+        } else {
+            return false;
+        }
+    }
     
 }
