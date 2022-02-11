@@ -552,7 +552,7 @@ export class InventoryService
             "itemCode": productInventory.itemCode,
             "price": productInventory.price,
             "compareAtprice": 0,
-            "quantity": productInventory.availableStock,
+            "quantity": productInventory.quantity,
             "sku": productInventory.sku,
             // "status": "AVAILABLE"
             "status": productInventory.status? productInventory.status : "NOTAVAILABLE"

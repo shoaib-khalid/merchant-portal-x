@@ -719,7 +719,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             .subscribe(async (newProduct) => {
 
                 // Add Inventory to product
-                this._inventoryService.addInventoryToProduct(newProduct["data"], { sku: sku, availableStock: availableStock, price:price, itemCode:newProduct["data"].id + "aa" } )
+                this._inventoryService.addInventoryToProduct(newProduct["data"], { sku: sku, quantity: availableStock, price:price, itemCode:newProduct["data"].id + "aa" } )
                     .subscribe((response)=>{
                         // update sku, price, quantity display since it's not part of product but product inventory
                         this.displayPrice = response.price;
@@ -816,7 +816,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                             itemCode: this.selectedProduct.id + i,
                             price: this.selectedVariantCombos[i].price,
                             compareAtPrice: 0,
-                            availableStock: this.selectedVariantCombos[i].quantity,
+                            quantity: this.selectedVariantCombos[i].quantity,
                             sku: this.selectedVariantCombos[i].sku,
                             status: this.selectedVariantCombos[i].status
                         }
@@ -891,9 +891,10 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                     sku: this.displaySku,
                     status: "AVAILABLE"
                 } 
+                
                 await this._inventoryService.addInventoryToProduct(this.selectedProduct, _productInventories).toPromise().then(() => {
                     // Show a success message
-                    this.showFlashMessage('success');
+                    // this.showFlashMessage('success');
                 });
     
     
