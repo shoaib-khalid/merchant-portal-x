@@ -12,6 +12,7 @@ import { StoresService } from 'app/core/store/store.service';
 import { MatSort } from '@angular/material/sort';
 import { FormControl } from '@angular/forms';
 import { items } from 'app/mock-api/apps/file-manager/data';
+import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 
 @Component({
     selector       : 'choose-store',
@@ -41,6 +42,8 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
     filteredCategory: string = "";
     storeLogo: string ;
 
+    currentScreenSize: string[] = [];
+
     /**
      * Constructor
      */
@@ -51,7 +54,8 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
         private _router: Router,
         private _chooseStoreService: ChooseStoreService,
         private _inventoryService: InventoryService,
-        private _storesService: StoresService
+        private _storesService: StoresService,
+        private _fuseMediaWatcherService: FuseMediaWatcherService,
 
     )
     {
@@ -107,7 +111,6 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
         this._storesService.store$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((store: Store) => {
-                // console.log("cini: ",store)
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
@@ -123,6 +126,16 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
+
+        this._fuseMediaWatcherService.onMediaChange$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe(({matchingAliases}) => {               
+
+            this.currentScreenSize = matchingAliases;                
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
 
         this.filterControl.valueChanges
             .pipe(

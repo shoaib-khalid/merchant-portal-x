@@ -17,6 +17,8 @@ import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { TimeSelector } from 'app/layout/common/time-selector/timeselector.component';
 import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
 import { NgxGalleryOptions, NgxGalleryImage, NgxGalleryAnimation } from 'ngx-gallery-9';
+import { UserService } from 'app/core/user/user.service';
+import { Client } from 'app/core/user/user.types';
 
 @Component({
     selector     : 'register-store-page',
@@ -93,6 +95,7 @@ export class RegisterStoreComponent implements OnInit
         private _jwt: JwtService,
         private _changeDetectorRef: ChangeDetectorRef,
         private _localeService: LocaleService,
+        private _userService: UserService,
         private _chooseVerticalService: ChooseVerticalService,
         private _router: Router,
         private _route: ActivatedRoute,
@@ -160,19 +163,19 @@ export class RegisterStoreComponent implements OnInit
             verticalCode            : [''],
             isBranch                : [false],
         });
-
+                
         // Reason why we put everyting under get vertical code by paramMap is because
         // we need the verticalCode before we need to query getStoreDeliveryProvider which require verticalCode
-
+        
         // -------------------------
         // Get vertical code by paramMap
         // -------------------------
-
+        
         this._route.paramMap.subscribe( paramMap => {
-
+            
             let _verticalCode = paramMap.get('vertical-code');
             this.createStoreForm.get('verticalCode').patchValue(_verticalCode);
-
+            
             // -------------------------
             // Choose Vertical service
             // -------------------------      
@@ -182,17 +185,17 @@ export class RegisterStoreComponent implements OnInit
                 });
 
             // -------------------------
-            // Locale service
+            // User service
             // -------------------------
-    
-            // get locale info from (locale service)
-            // this is to get the current location by using 3rd party api service
-            this._localeService.locale$.subscribe((response: Locale)=>{
-                
-                let symplifiedCountryId = response.symplifiedCountryId;
 
-                // check if vertical selected is valid for selected country
-                if ((_verticalCode === "ECommerce_PK" || _verticalCode === "FnB_PK") && symplifiedCountryId === "PAK") {
+            // get client info from (user service)
+            // this is to get the current location by using 3rd party api service
+
+            this._userService.client$.subscribe((response: Client)=> {
+                let symplifiedCountryId = response['data'].regionCountry.id;
+
+                 // check if vertical selected is valid for selected country
+                 if ((_verticalCode === "ECommerce_PK" || _verticalCode === "FnB_PK") && symplifiedCountryId === "PAK") {
                     this.createStoreCondition.error = null;
                 } else if ((_verticalCode === 'E-Commerce' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'FnB') && symplifiedCountryId === "MYS") {
                     this.createStoreCondition.error = null;
@@ -203,7 +206,6 @@ export class RegisterStoreComponent implements OnInit
                     let message = symplifiedCountryId ? "Vertical code: " + _verticalCode + " is not available for " + symplifiedCountryId + " country" : "Missing region country id";
                     console.error(message)
                 }
-                
                 // state (using component variable)
                 // INITIALLY (refer below section updateStates(); for changes), get states from symplified backed by using the 3rd party api
                 
@@ -218,8 +220,8 @@ export class RegisterStoreComponent implements OnInit
     
                 // country (using form builder variable)
                 this.createStoreForm.get('step1').get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
-        
-                // -------------------------------------
+
+                 // -------------------------------------
                 // Delivery Partner
                 // -------------------------------------
     
@@ -236,6 +238,7 @@ export class RegisterStoreComponent implements OnInit
 
                 this._storesService.getStoreDeliveryProvider({deliveryType: _deliveryType, regionCountryId: _regionCountryId}).subscribe(
                     (response: StoreDeliveryProvider[]) => {
+                        
                         // reset this.deliveryPartners first to initial state
                         this.deliveryPartners = [];
                         // push the data into array

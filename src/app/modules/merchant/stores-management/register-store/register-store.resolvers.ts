@@ -6,6 +6,7 @@ import { Vertical } from 'app/modules/merchant/stores-management/choose-vertical
 import { ChooseVerticalService } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.service';
 import { StoresService } from 'app/core/store/store.service';
 import { LocaleService } from 'app/core/locale/locale.service';
+import { UserService } from 'app/core/user/user.service';
 
 @Injectable({
     providedIn: 'root'
@@ -113,7 +114,8 @@ export class LocaleResolver implements Resolve<any>
      */
     constructor(
         private _router: Router,
-        private _localeService: LocaleService
+        private _localeService: LocaleService,
+        private _userService: UserService
     )
     {
     }
@@ -130,6 +132,6 @@ export class LocaleResolver implements Resolve<any>
      */
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
     {
-        return this._localeService.get();
+        return this._userService.getClientById();
     }
 }

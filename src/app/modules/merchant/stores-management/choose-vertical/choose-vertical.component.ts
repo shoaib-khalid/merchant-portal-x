@@ -8,6 +8,8 @@ import { Locale } from 'app/core/locale/locale.types';
 import { MatDialog } from '@angular/material/dialog';
 // import { ChooseCountryComponent } from 'app/layout/common/countries/choose-country/choose-country.component'
 import { StoresService } from 'app/core/store/store.service';
+import { UserService } from 'app/core/user/user.service';
+import { Client, RegionCountry } from 'app/core/user/user.types';
 
 @Component({
     selector       : 'choose-vertical-page',
@@ -38,7 +40,8 @@ export class ChooseVerticalComponent
         private _chooseVerticalService: ChooseVerticalService,
         private _localeService: LocaleService,
         // private _matDialog: MatDialog,
-        private _storesService: StoresService
+        private _storesService: StoresService,
+        private _userService: UserService
     )
     {
     }
@@ -56,10 +59,11 @@ export class ChooseVerticalComponent
         this._chooseVerticalService.verticals$
         .pipe(takeUntil(this._unsubscribeAll))
         .subscribe((verticals: Vertical[]) => {
-            this._localeService.locale$.subscribe((response: Locale)=>{
 
-                let regionId = response.symplifiedRegion;
-                if (!response.symplifiedRegion) {
+            this._userService.client$.subscribe((response: Client)=>{
+                
+                let regionId = response['data'].regionCountry.region;
+                if (!response['data'].regionCountry.region) {
                     console.error("Empty symplifiedRegion")
                 }
                 
@@ -73,6 +77,7 @@ export class ChooseVerticalComponent
         // check total of stores this account have
         this._storesService.stores$.subscribe((response)=>{
             if (response.length && response.length > 4) {
+                
                 this.createStoreCondition.error = "MAX-STORES";
                 this.createStoreCondition.errorTitle = "Maximum store creation has been reached";
                 this.createStoreCondition.errorDesc = "You have reached the maximum allowed store creation";
@@ -96,6 +101,7 @@ export class ChooseVerticalComponent
 
     getVerticalByRegionId(verticals: Vertical[], regionId: string){
         return verticals.filter(function (el) {
+            
             return el.regionId === regionId;
         });
     }
