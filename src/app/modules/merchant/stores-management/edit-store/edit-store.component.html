@@ -53,27 +53,27 @@
         <mat-drawer-content class="flex flex-col">
 
             <!-- Main -->
-            <div class="flex-auto px-6 pt-9 pb-12 md:p-8 md:pb-12 lg:p-12">
+            <div class="flex-auto px-2 sm:px-6 sm:pt-9 sm:pb-12 md:p-8 md:pb-12 lg:p-12">
 
                 <!-- Panel header -->
                 <div class="flex items-center">
 
                     <!-- Drawer toggle -->
                     <button
-                        class="lg:hidden -ml-2"
+                        class="lg:hidden m-2 pt-6"
                         mat-icon-button
                         (click)="drawer.toggle()">
                         <mat-icon [svgIcon]="'heroicons_outline:menu'"></mat-icon>
                     </button>
 
                     <!-- Panel title -->
-                    <div class="ml-2 lg:ml-0 text-3xl font-bold tracking-tight leading-none">
+                    <div class="pt-6 sm:pt-0 lg:ml-0 text-3xl font-bold tracking-tight leading-none">
                         {{getPanelInfo(selectedPanel).title}}
                     </div>
                 </div>
 
                 <!-- Load settings panel -->
-                <div class="mt-8">
+                <div class="mt-8 sm:mt-8">
                     <ng-container [ngSwitch]="selectedPanel">
                         <!-- Account -->
                         <ng-container *ngSwitchCase="'account'">

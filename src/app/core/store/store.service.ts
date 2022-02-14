@@ -671,10 +671,11 @@ export class StoresService
     
                         // Find the index of the updated product
                         const storeIndex = stores.findIndex(item => item.id === storeId);
-                        
+                        const assetIndex = response.data.findIndex(item => item.assetType === 'LogoUrl')
+
                         if (!stores[storeIndex].storeAssets) {
                             Object.assign(stores[storeIndex],{ 
-                                storeAssets: [response.data]
+                                storeAssets: [response.data[assetIndex]]
                             });
                         }
     

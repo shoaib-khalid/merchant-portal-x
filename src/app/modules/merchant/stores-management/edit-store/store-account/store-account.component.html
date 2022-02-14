@@ -1,6 +1,6 @@
 <ng-container>
-    <div class="shadow rounded-2xl bg-card">
-        <div class="flex flex-col flex-auto items-center m-5 p-6 sm:p-10">
+    <div class="shadow rounded-lg sm:rounded-2xl px-2 pt-6 sm:px-0 sm:pt-0 bg-card">
+        <div class="flex flex-col flex-auto items-center m-1 sm:m-5 p-1 sm:p-10">
             <div class="w-full">
                 <!-- Form -->
                 <form [formGroup]="storeAccountForm">
@@ -9,7 +9,7 @@
                         <div class="text-xl">Profile</div>
                         <div class="text-secondary">Following information is about your store details</div>
                     </div>
-                    <div class="grid sm:grid-cols-4 gap-6 w-full mt-8">
+                    <div class="sm:grid sm:grid-cols-4 gap-6 w-full mt-8">
                         <!-- Store Name -->
                         <div class="sm:col-span-4">
                             <mat-form-field class="fuse-mat-no-subscript fuse-mat-emphasized-affix w-full" floatLabel="always">
@@ -34,7 +34,7 @@
                             </mat-form-field>
                         </div>
                         <!-- Store Url -->
-                        <div class="sm:col-span-4">
+                        <div class="sm:col-span-4 pt-8 sm:pt-0">
                             <mat-form-field class="fuse-mat-no-subscript fuse-mat-emphasized-affix w-full" floatLabel="always">
                                 <mat-label>Store URL</mat-label>
                                 <span>https://</span> 
@@ -99,7 +99,7 @@
                         </div> -->
                        
                         <!-- Store Description -->
-                        <div class="sm:col-span-4">
+                        <div class="sm:col-span-4 pt-8 sm:pt-0">
                             <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full" floatLabel="always">
                                 <mat-label>Store Description</mat-label>
                                 <textarea
@@ -317,7 +317,7 @@
                     <div class="mt-11 mb-10 border-t"></div>
             
                     <!-- Actions -->
-                    <div class="flex items-center justify-end">
+                    <div class="pb-8 sm:pb-0 flex items-center justify-end">
                         <button
                             class="ml-4"
                             mat-flat-button
