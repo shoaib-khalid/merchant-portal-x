@@ -10,6 +10,7 @@ import { FuseAlertModule } from '@fuse/components/alert';
 import { SharedModule } from 'app/shared/shared.module';
 import { AuthUnlockSessionComponent } from 'app/modules/auth/unlock-session/unlock-session.component';
 import { authUnlockSessionRoutes } from 'app/modules/auth/unlock-session/unlock-session.routing';
+import { SharedBackgroundModule } from '../shared-background/shared-background.module';
 
 @NgModule({
     declarations: [
@@ -24,7 +25,8 @@ import { authUnlockSessionRoutes } from 'app/modules/auth/unlock-session/unlock-
         MatProgressSpinnerModule,
         FuseCardModule,
         FuseAlertModule,
-        SharedModule
+        SharedModule,
+        SharedBackgroundModule
     ]
 })
 export class AuthUnlockSessionModule

@@ -10,6 +10,7 @@ import { FuseAlertModule } from '@fuse/components/alert';
 import { SharedModule } from 'app/shared/shared.module';
 import { AuthResetPasswordComponent } from 'app/modules/auth/reset-password/reset-password.component';
 import { authResetPasswordRoutes } from 'app/modules/auth/reset-password/reset-password.routing';
+import { SharedBackgroundModule } from '../shared-background/shared-background.module';
 
 @NgModule({
     declarations: [
@@ -24,7 +25,8 @@ import { authResetPasswordRoutes } from 'app/modules/auth/reset-password/reset-p
         MatProgressSpinnerModule,
         FuseCardModule,
         FuseAlertModule,
-        SharedModule
+        SharedModule,
+        SharedBackgroundModule
     ]
 })
 export class AuthResetPasswordModule

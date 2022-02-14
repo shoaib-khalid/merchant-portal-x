@@ -1138,4 +1138,25 @@ export class StoresService
         // if exists status = 409, if not exists status = 200
         return response.status;
     }
+
+    getStoreTop(countryCode:string): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this.accessToken === ''?'accessToken':this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                countryId: countryCode,
+            }
+        };
+
+        return this._httpClient.get<any>(productService + '/stores/top', header).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (getStoreTop)",response);
+
+                return response.data;
+            })
+        );
+    }
 }
