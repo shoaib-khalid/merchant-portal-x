@@ -1120,14 +1120,16 @@ export class RegisterStoreComponent implements OnInit
         }
         
         let maxSize = 2600000;
+        var maxSizeInMB = (maxSize / (1024*1024)).toFixed(2);
+
         if (this.files[index].fileSource && this.files[index].selectedFiles[0].size > maxSize ){
             // Show a success message (it can also be an error message)
             const confirmation = this._fuseConfirmationService.open({
                 title  : 'Image size limit',
-                message: 'Your uploaded image is exceeds the maximum size of ' + maxSize + ' bytes !',
+                message: 'Your uploaded image is exceeds the maximum size of ' + maxSizeInMB + ' MB !',
                 icon: {
                     show: true,
-                    name: "heroicons_outline:exclamation",
+                    name: "image_not_supported",
                     color: "warn"
                 },
                 actions: {
@@ -1197,7 +1199,6 @@ export class RegisterStoreComponent implements OnInit
                 
                 this._changeDetectorRef.markForCheck();                
             };
-            // console.log("this.files["+index+"].selectedFiles["+i+"]",this.files[index].selectedFiles[i])
             reader.readAsDataURL(this.files[index].selectedFiles[i]);
             this.files[index].selectedFileName = this.files[index].selectedFiles[i].name;
             }
