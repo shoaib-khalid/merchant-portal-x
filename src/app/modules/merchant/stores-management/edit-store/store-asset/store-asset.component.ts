@@ -385,6 +385,7 @@ export class StoreAssetComponent implements OnInit
                         this._changeDetectorRef.markForCheck();
                     }
                 } else {
+                    
                     this.files[index].fileSource = e.target.result;
 
                     var image = new Image();
@@ -400,7 +401,7 @@ export class StoreAssetComponent implements OnInit
                 
                 this._changeDetectorRef.markForCheck();                
             };
-            // console.log("this.files["+index+"].selectedFiles["+i+"]",this.files[index].selectedFiles[i])
+            
             reader.readAsDataURL(this.files[index].selectedFiles[i]);
             this.files[index].selectedFileName = this.files[index].selectedFiles[i].name;
             }
@@ -434,13 +435,25 @@ export class StoreAssetComponent implements OnInit
             this.files[2].fileSource = null
         }
     }
-    
-    deletefiles(i) { 
-        
-        this.files[i].toDelete = true;        
-        this.files[i].fileSource = '';
+
+    deleteLogo() {
+        this.files[0].toDelete = true;        
+        this.files[0].fileSource = '';
         this._changeDetectorRef.markForCheck();
     }
+
+    deleteFavicon(){
+        this.files[3].toDelete = true;        
+        this.files[3].fileSource = '';
+        this._changeDetectorRef.markForCheck();
+    }
+    
+    // deletefiles(i) { 
+        
+    //     this.files[i].toDelete = true;        
+    //     this.files[i].fileSource = '';
+    //     this._changeDetectorRef.markForCheck();
+    // }
 
     updateStoreAsset(): void
     {
@@ -452,7 +465,7 @@ export class StoreAssetComponent implements OnInit
             
             //Logo update using item.selected files
             if (item.type === 'LogoUrl'){
-
+                
                 let formData = new FormData();
 
                 if (item.selectedFiles && item.selectedFiles !== null){
@@ -461,9 +474,7 @@ export class StoreAssetComponent implements OnInit
                     formData.append('assetDescription',item.description);
                 }
 
-                if (this.files[0].assetId !== null && item.toDelete === false) {
-                    
-                    // console.log("storeAssetFiles: ", "'"+storeAssetFiles+"'")
+                if (item.selectedFiles && this.files[0].assetId !== null && this.files[0].toDelete === false) {                   
                     this._storesService.putAssets(this.storeId, this.files[0].assetId, formData, "LogoUrl")
                         .subscribe(response => {
                             console.info('Uploaded the file successfully');
@@ -473,7 +484,7 @@ export class StoreAssetComponent implements OnInit
                         }, (err: any) => {
                                 console.error('Could not upload the file');
                         });
-                } else if (item.toDelete === true && this.files[0].assetId !== null) {
+                } else if (this.files[0].toDelete === true && this.files[0].assetId !== null) {
                     this._storesService.deleteAssets(this.storeId, this.files[0].assetId)
                         .subscribe(response => {
                             console.info('Uploaded the file successfully');
@@ -485,18 +496,20 @@ export class StoreAssetComponent implements OnInit
                                 console.error('Could not upload the file');
                             });
                 } else {
-                    this._storesService.postAssets(this.storeId, "LogoUrl", formData,"Logo")
-                        .subscribe(response => {
-                            console.info('Uploaded the file successfully');
-
-                            this.files[3].assetId = event["id"];
-
-                            // Mark for check
-                            this._changeDetectorRef.markForCheck();
-                        },
-                        (err: any) => {
-                            console.error('Could not upload the file');
-                        });
+                    if (item.selectedFiles && item.selectedFiles !== null) {
+                        this._storesService.postAssets(this.storeId, "LogoUrl", formData,"Logo")
+                            .subscribe(response => {
+                                console.info('Uploaded the file successfully');
+    
+                                this.files[3].assetId = event["id"];
+    
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
+                            },
+                            (err: any) => {
+                                console.error('Could not upload the file');
+                            });
+                    }
                 }
             }
 
@@ -511,8 +524,7 @@ export class StoreAssetComponent implements OnInit
                     formData.append('assetDescription',item.description);
                 }
 
-                if (this.files[3].assetId !== null && item.toDelete === false) {
-                    // console.log("storeAssetFiles: ", "'"+storeAssetFiles+"'")
+                if (item.selectedFiles && this.files[3].assetId !== null && this.files[3].toDelete === false) {
                     this._storesService.putAssets(this.storeId, this.files[3].assetId, formData)
                         .subscribe(response => {
                                 console.info('Uploaded the file successfully');
@@ -523,7 +535,7 @@ export class StoreAssetComponent implements OnInit
                             (err: any) => {
                                 console.error('Could not upload the file');
                             });
-                } else if (item.toDelete === true && this.files[3].assetId !== null) {
+                } else if (this.files[3].toDelete === true && this.files[3].assetId !== null) {
                     this._storesService.deleteAssets(this.storeId, this.files[3].assetId)
                         .subscribe(response => {
                             console.info('Uploaded the file successfully');
@@ -535,19 +547,21 @@ export class StoreAssetComponent implements OnInit
                             console.error('Could not upload the file');
                         });
                 } else {
-                    this._storesService.postAssets(this.storeId, "FaviconUrl", formData,"Favicon")
-                        .subscribe(response => {
-                            console.info('Uploaded the file successfully');
-
-
-                            this.files[3].assetId = event["id"];
-
-                            // Mark for check
-                            this._changeDetectorRef.markForCheck();
-                        },
-                        (err: any) => {
-                            console.error('Could not upload the file');
-                        });
+                    if (item.selectedFiles && item.selectedFiles !== null) {
+                        this._storesService.postAssets(this.storeId, "FaviconUrl", formData,"Favicon")
+                            .subscribe(response => {
+                                console.info('Uploaded the file successfully');
+    
+    
+                                this.files[3].assetId = event["id"];
+    
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
+                            },
+                            (err: any) => {
+                                console.error('Could not upload the file');
+                            });
+                    }
                 }
 
             }
