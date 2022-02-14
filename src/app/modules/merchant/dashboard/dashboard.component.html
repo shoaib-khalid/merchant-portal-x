@@ -310,6 +310,7 @@
                                         [pageSize]="summarySalesPagination.size"
                                         [pageSizeOptions]="[5, 10, 25, 100]"
                                         [showFirstLastButtons]="true"
+                                        [hidePageSize]="currentScreenSize.includes('sm') ? false : true"
                                         #summarySalesPaginator>
                                     </mat-paginator>
                                     <button
@@ -525,6 +526,7 @@
                                         [pageSize]="detailedDailySalesPagination.size"
                                         [pageSizeOptions]="[5, 10, 25, 100]"
                                         [showFirstLastButtons]="true"
+                                        [hidePageSize]="currentScreenSize.includes('sm') ? false : true"
                                         #detailedDailySalesPaginator>
                                     </mat-paginator>
                                     <button
@@ -645,6 +647,7 @@
                                         [pageSize]="dailyTopProductsPagination.size"
                                         [pageSizeOptions]="[5, 10, 25, 100]"
                                         [showFirstLastButtons]="true"
+                                        [hidePageSize]="currentScreenSize.includes('sm') ? false : true"
                                         #dailyTopProductsPaginator>
                                     </mat-paginator>
                                     <button
@@ -823,6 +826,7 @@
                                         [pageSize]="settlementPagination.size"
                                         [pageSizeOptions]="[5, 10, 25, 100]"
                                         [showFirstLastButtons]="true"
+                                        [hidePageSize]="currentScreenSize.includes('sm') ? false : true"
                                         #settlementPaginator>
                                     </mat-paginator>
                                     <button

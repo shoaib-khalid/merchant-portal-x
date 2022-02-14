@@ -11,6 +11,7 @@ import { DailyTopProducts, DailyTopProductsPagination, DetailedDailySales, Detai
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { formatDate } from '@angular/common';
 import * as XLSX from 'xlsx';
+import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 
 @Component({
     selector       : 'dashboard',
@@ -194,6 +195,7 @@ export class DashboardComponent implements OnInit, OnDestroy
     detailedDailySalesPageSize: number = 10;
     dailyTopProductsPageSize: number = 10;
     settlementPageSize: number = 10;
+    currentScreenSize: any;
 
     /**
      * Constructor
@@ -202,7 +204,9 @@ export class DashboardComponent implements OnInit, OnDestroy
         private _dashboardService: DashboardService,
         private _changeDetectorRef: ChangeDetectorRef,
         private _storesService: StoresService,
-        private _router: Router
+        private _router: Router,
+        private _fuseMediaWatcherService: FuseMediaWatcherService,
+
     )
     {
     }
@@ -228,7 +232,19 @@ export class DashboardComponent implements OnInit, OnDestroy
      * On init
      */
     ngOnInit(): void
-    {        
+    {   
+        
+        this._fuseMediaWatcherService.onMediaChange$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe(({matchingAliases}) => {               
+
+            this.currentScreenSize = matchingAliases;                
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
+
+        
         this._storesService.store$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((store: Store)=>{
