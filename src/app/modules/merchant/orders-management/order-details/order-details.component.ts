@@ -303,27 +303,33 @@ export class OrderDetailsComponent implements OnInit
       this._matDialogRef.close()
     }
 
-    
-    inputEditQuantity(id,event){
-
-      let patchValuePayload =this.payloadEditOrder.filter(x=> x.id ===id);
-      patchValuePayload[0].quantity=event.target.value;//assign the value after filter    
-      patchValuePayload[0].edit = true; //if user input value then we assign it to true     
- 
-     }
- 
-     updateOrder(){
+    updateOrder(){
        //filter edit key value that has true then we wil; send to backend
        let sendPayload =this.payloadEditOrder.filter(x=> x.edit ===true);
        let newsendPayload = sendPayload.map(({ edit, ...rest }) => rest);//it will remove edit key properties
- 
        this._ordersService.reviseOrderItems(this.orderId,newsendPayload).subscribe((response) => {                   
        });
        this._matDialogRef.close();
  
       
-     }
+    }
+
+    uponSelectQuantity(value:number,originalQuantity:number,itemId:string){
+
+      //we will ignore if the value input same with original quantity
+      if(value !== originalQuantity){
+        let patchValuePayload =this.payloadEditOrder.filter(x=> x.id ===itemId);
+        patchValuePayload[0].quantity=value;//assign the value after filter    
+        patchValuePayload[0].edit = true; //if user input value then we assign it to true  
+      }else if(value === originalQuantity){
+        let patchValuePayload =this.payloadEditOrder.filter(x=> x.id ===itemId);
+        patchValuePayload[0].quantity=value;
+        patchValuePayload[0].edit = false; //we set edit to false  
+
+      }
+
+
+    }
   
-   
   
 }
