@@ -16,6 +16,7 @@ import { StoresService } from 'app/core/store/store.service';
 import { MatDialog } from '@angular/material/dialog';
 import { AddProductComponent } from '../add-product/add-product.component';
 import {v4 as uuidv4} from 'uuid';
+import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 
 
 @Component({
@@ -45,20 +46,22 @@ import {v4 as uuidv4} from 'uuid';
             }
 
             .variant-grid {
-                grid-template-columns: 68px auto 40px;
+                // grid-template-columns: 68px auto 40px;
+                grid-template-columns: 68px 120px auto 128px 84px 96px;
 
-                @screen sm {
-                    grid-template-columns: 68px auto 128px;
-                }
+                // @screen sm {
+                //     grid-template-columns: 68px auto auto 128px 84px 96px;
+                // }
 
-                @screen md {
-                    grid-template-columns: 68px auto 128px 128px;
-                }
+                // @screen md {
+                //     grid-template-columns: 68px auto auto 128px 84px 96px;
+                // }
 
-                @screen lg {
-                    grid-template-columns: 68px auto 128px 128px 84px 96px;
-                }
+                // @screen lg {
+                //     grid-template-columns: 68px auto 128px 128px 84px 96px;
+                // }
             }
+            
 
         `
     ],
@@ -206,6 +209,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         ]
     };
     variantIndex: number = 0;
+    
+    currentScreenSize: string[];
 
     /**
      * Constructor
@@ -220,6 +225,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         private _renderer2: Renderer2,
         private _viewContainerRef: ViewContainerRef,
         public _dialog: MatDialog,
+        private _fuseMediaWatcherService: FuseMediaWatcherService,
+
     )
     {
     }
@@ -399,6 +406,16 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 })
             )
             .subscribe();
+
+        this._fuseMediaWatcherService.onMediaChange$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe(({matchingAliases}) => {               
+
+            this.currentScreenSize = matchingAliases;                
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -3155,16 +3172,16 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         this.selectedVariantCombos[i].price = event.target.value;
     }
 
-    // // this is when click update button in variant page
+    // this is when click update button in variant page
     // createVariantCombinationsToBE(){
     //     console.log('UPDATE -> selectedVariantCombos object', this.selectedVariantCombos);
     //     console.log('this.filteredProductVariants', this.filteredProductVariants);
-    //     console.log('this.variantToBeDeleted', this.variantToBeDeleted);
-    //     console.log('this.variantAvailableToBeCreated', this.variantAvailableToBeCreated);
-    //     console.log('this.variantAvailableToBeDeleted', this.variantAvailableToBeDeleted);
-    //     console.log('this.variantComboItems', this.variantComboItems);
-    //     console.log('this.variantComboOptions', this.variantComboOptions);
-    //     console.log('this.variantImagesToBeDeleted', this.variantImagesToBeDeleted);
+    //     // console.log('this.variantToBeDeleted', this.variantToBeDeleted);
+    //     // console.log('this.variantAvailableToBeCreated', this.variantAvailableToBeCreated);
+    //     // console.log('this.variantAvailableToBeDeleted', this.variantAvailableToBeDeleted);
+    //     // console.log('this.variantComboItems', this.variantComboItems);
+    //     // console.log('this.variantComboOptions', this.variantComboOptions);
+    //     // console.log('this.variantImagesToBeDeleted', this.variantImagesToBeDeleted);
     //     // console.log('variantimages', this.variantimages);
     //     console.log('this.products$', this.products$);
     // }
