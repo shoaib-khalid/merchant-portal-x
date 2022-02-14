@@ -8,18 +8,11 @@
     </div>
     <div class="flex items-center mt-8">
         <div class="flex flex-0 items-center -space-x-1.5">
+            <div *ngFor="let imageAsset of image">
             <img
                 class="flex-0 w-10 h-10 rounded-full ring-4 ring-offset-1 ring-gray-800 ring-offset-gray-800 object-cover"
-                src="https://symplified.it/store-assets/2d47f2ad-4e0b-4b84-8324-37c3a2edbe57-logo">
-            <img
-                class="flex-0 w-10 h-10 rounded-full ring-4 ring-offset-1 ring-gray-800 ring-offset-gray-800 object-cover"
-                src="https://symplified.it/store-assets/0eb42105-3db3-42e2-b1af-03155d2d461a-logo">
-            <img
-                class="flex-0 w-10 h-10 rounded-full ring-4 ring-offset-1 ring-gray-800 ring-offset-gray-800 object-cover"
-                src="https://symplified.it/store-assets/8913d06f-a63f-4a16-8059-2a30a517663a-logo">
-            <img
-                class="flex-0 w-10 h-10 rounded-full ring-4 ring-offset-1 ring-gray-800 ring-offset-gray-800 object-cover"
-                src="https://symplified.it/store-assets/f1b73c03-2e92-4922-b6e8-6b1c79331786-logo">
+                [src]="imageAsset.assetUrl">
+            </div>
         </div>
         <div class="ml-4 font-medium tracking-tight text-gray-400">Many sellers has joined. Its your turn.</div>
     </div>

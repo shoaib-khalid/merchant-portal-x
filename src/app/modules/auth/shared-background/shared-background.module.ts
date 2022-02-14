@@ -1,3 +1,4 @@
+import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
 import { SharedBackgroundComponent } from "./shared-background.component";
 
@@ -8,7 +9,7 @@ import { SharedBackgroundComponent } from "./shared-background.component";
   
     ],
     imports     : [
-  
+        CommonModule 
     ],
     exports: [
         SharedBackgroundComponent
