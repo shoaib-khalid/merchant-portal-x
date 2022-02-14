@@ -472,7 +472,9 @@
                             </div>
                         </div>
 
-                        <div class="flex flex-col sm:flex-row pb-4 border-t pt-4 px-8">
+                        <div 
+                        *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'"
+                        class="flex flex-col sm:flex-row pb-4 border-t pt-4 px-8">
                             <div class="flex flex-auto flex-wrap">
                                 <!-- Available stock row -->
                                 <div class="flex flex-col w-full sm:w-1/5 sm:pr-2 sm:border-r py-2 sm:py-0">
