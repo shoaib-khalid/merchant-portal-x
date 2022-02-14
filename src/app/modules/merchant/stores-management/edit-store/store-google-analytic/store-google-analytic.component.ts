@@ -50,8 +50,6 @@ export class StoreGoogleAnalyticComponent implements OnInit
         this._storesService.getStoreById(this.storeId).subscribe(
             (response) => {
 
-                console.log("siiisss", response['googleAnalyticId']);
-
                 // set store to current store
                 this._storesService.store = response;
                 this._storesService.storeId = this.storeId;
@@ -77,8 +75,6 @@ export class StoreGoogleAnalyticComponent implements OnInit
 
         this._storesService.update(this.storeId, GoogleAnalyticbody)
         .subscribe((response) => {
-
-            console.log("herebis", response);
 
             let storeId = response.id;
 

@@ -305,14 +305,15 @@ export class StoreAssetComponent implements OnInit
         }
         
         let maxSize = 2600000;
-        if (this.files[index].fileSource && this.files[index].selectedFiles[0].size > maxSize ){
+        var maxSizeInMB = (maxSize / (1024*1024)).toFixed(2);
+        if (this.files[index].selectedFiles[0].size > maxSize ){
             // Show a success message (it can also be an error message)
             const confirmation = this._fuseConfirmationService.open({
                 title  : 'Image size limit',
-                message: 'Your uploaded image is exceeds the maximum size of ' + maxSize + ' bytes !',
+                message: 'Your uploaded image is exceeds the maximum size of ' + maxSizeInMB + ' MB !',
                 icon: {
                     show: true,
-                    name: "heroicons_outline:exclamation",
+                    name: "image_not_supported",
                     color: "warn"
                 },
                 actions: {

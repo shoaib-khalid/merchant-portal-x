@@ -51,9 +51,11 @@
                                 <mat-label class="font-medium">Preview</mat-label>
                                 <div class="my-2"></div>
                                 <div class="p-8 border border-gray-300 rounded h-96">
-                                    <div *ngIf="this.files[0].fileSource">
+                                    <div *ngIf="this.files[0].selectedFiles">
                                         <span *ngIf="this.files[0].selectedImageWidth && this.files[0].selectedImageHeight" class="block"><b>Uploaded Image Size</b>: {{ this.files[0].selectedImageWidth }} x {{ this.files[0].selectedImageHeight }} pixel </span>
                                         <span class="block"><b>Recommended Size</b>: {{ this.files[0].recommendedImageWidth }} x {{ this.files[0].recommendedImageHeight }} pixel </span>
+                                    </div>
+                                    <div *ngIf="this.files[0].fileSource">
                                         <!-- <div class="flex justify-center w-full">
                                             <ngx-gallery [options]="galleryOptions" [images]="galleryFaviconImages"></ngx-gallery>
                                         </div> -->
@@ -91,9 +93,11 @@
                                 <mat-label class="font-medium">Preview</mat-label>
                                 <div class="my-2"></div>
                                 <div class="p-8 border border-gray-300 rounded h-96">
-                                    <div *ngIf="this.files[3].fileSource">
+                                    <div *ngIf="this.files[3].selectedFiles">
                                         <span *ngIf="this.files[3].selectedImageWidth && this.files[3].selectedImageHeight" class="block"><b>Uploaded Image Size</b>: {{ this.files[3].selectedImageWidth }} x {{ this.files[3].selectedImageHeight }} pixel </span>
                                         <span class="block"><b>Recommended Size</b>: {{ this.files[3].recommendedImageWidth }} x {{ this.files[3].recommendedImageHeight }} pixel </span>
+                                    </div>
+                                    <div *ngIf="this.files[3].fileSource">
                                         <!-- <div class="flex justify-center w-full">
                                             <ngx-gallery [options]="galleryOptions" [images]="galleryFaviconImages"></ngx-gallery>
                                         </div> -->
