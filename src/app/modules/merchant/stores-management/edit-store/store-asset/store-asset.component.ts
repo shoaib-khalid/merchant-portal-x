@@ -236,6 +236,8 @@ export class StoreAssetComponent implements OnInit
                         this.files[0].assetId = item.id;
                         
                     } else if (item.assetType === "BannerDesktopUrl") {
+                        // this.files[1].fileSource = item.assetUrl
+
                         this.files[1].galleryImages.push({
                             small       : '' + item.assetUrl,
                             medium      : '' + item.assetUrl,
@@ -244,7 +246,7 @@ export class StoreAssetComponent implements OnInit
                         }); 
                         
                     } else if (item.assetType === "BannerMobileUrl") {
-                        this.files[2].fileSource = item.assetUrl
+                        // this.files[2].fileSource = item.assetUrl
                         
                         this.files[2].galleryImages.push({
                             small   : '' + item.assetUrl,
@@ -412,11 +414,11 @@ export class StoreAssetComponent implements OnInit
     }
 
     deleteBannerDesktop(e, index){
-        
         let assetId = this.files[1].galleryImages[index].assetId;
-        this.files[1].toDelete.push(assetId);
 
+        this.files[1].toDelete.push(assetId);
         this.files[1].galleryImages.splice(index,1);
+
         if(this.files[1].galleryImages.length < 1){
             this.files[1].fileSource = null
         }
@@ -427,6 +429,7 @@ export class StoreAssetComponent implements OnInit
 
         this.files[2].toDelete.push(assetId);
         this.files[2].galleryImages.splice(index,1)
+
         if(this.files[2].galleryImages.length < 1){
             this.files[2].fileSource = null
         }

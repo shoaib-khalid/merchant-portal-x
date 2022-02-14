@@ -26,11 +26,11 @@
     </div>
 
     <!-- Main -->
-    <div class="flex flex-col flex-auto items-center p-6 sm:p-10">
+    <div class="flex flex-col flex-auto items-center p-0 sm:p-10">
         <div class="flex flex-col w-full">
             <!-- Form -->
             <ng-container *ngIf="createStoreCondition.error === null; else errorCard">
-                <div class="mt-8 sm:mt-12 p-6 pb-7 sm:p-10 sm:pb-7 shadow rounded-2xl bg-card">
+                <div class="mt-0 sm:mt-12 p-0 pb-7 sm:p-10 sm:pb-7 shadow rounded-2xl bg-card">
                     <form
                         class="space-y-3 flex flex-col w-full"
                         [formGroup]="createStoreForm">
@@ -74,7 +74,7 @@
                                             <!-- Store URL -->
                                             <mat-form-field class="w-full fuse-mat-emphasized-affix">
                                                 <mat-label>Store URL</mat-label>
-                                                <span>https://</span> 
+                                                <span class="sm:flex sm:flex-col">https://</span> 
                                                 <input
                                                     matInput
                                                     minlength="4"
@@ -86,7 +86,7 @@
                                                         matPrefix
                                                         [svgIcon]="'heroicons_outline:globe-alt'">
                                                     </mat-icon>
-                                                <span matSuffix>{{ domainName }}</span>
+                                                <span *ngIf="currentScreenSize.includes('sm')" matSuffix>{{ domainName }}</span>
                                                 <mat-error *ngIf="createStoreForm.get('step1').get('subdomain').hasError('required')">
                                                     Required
                                                 </mat-error>

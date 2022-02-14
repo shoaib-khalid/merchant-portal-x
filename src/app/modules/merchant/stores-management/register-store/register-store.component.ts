@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnInit, ViewChild, ViewEncapsulation } fr
 import { FormArray, FormBuilder, FormGroup, NgForm, ValidationErrors, Validators } from '@angular/forms';
 import { fuseAnimations } from '@fuse/animations';
 import { RegisterStoreValidationService } from 'app/modules/merchant/stores-management/register-store/register-store.validation.service';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { LocaleService } from 'app/core/locale/locale.service';
 import { Locale } from 'app/core/locale/locale.types';
 import { StoresService } from 'app/core/store/store.service';
@@ -19,6 +19,8 @@ import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browse
 import { NgxGalleryOptions, NgxGalleryImage, NgxGalleryAnimation } from 'ngx-gallery-9';
 import { UserService } from 'app/core/user/user.service';
 import { Client } from 'app/core/user/user.types';
+import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
     selector     : 'register-store-page',
@@ -85,6 +87,10 @@ export class RegisterStoreComponent implements OnInit
         message: ''
     };
     isDisplayStatus: boolean = false;
+
+    currentScreenSize: string[] = [];
+
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
     
     /**
      * Constructor
@@ -100,7 +106,8 @@ export class RegisterStoreComponent implements OnInit
         private _router: Router,
         private _route: ActivatedRoute,
         private _fuseConfirmationService: FuseConfirmationService,
-        private _domSanitizer: DomSanitizer
+        private _domSanitizer: DomSanitizer,
+        private _fuseMediaWatcherService: FuseMediaWatcherService,
     )
     {
         this.checkExistingURL = debounce(this.checkExistingURL, 300);
@@ -583,7 +590,16 @@ export class RegisterStoreComponent implements OnInit
                 ]
             }
         ];
-        
+
+        this._fuseMediaWatcherService.onMediaChange$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(({matchingAliases}) => {               
+
+                this.currentScreenSize = matchingAliases;                
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
 
         // Get allowed store countries 
         // this only to get list of country in symplified backend

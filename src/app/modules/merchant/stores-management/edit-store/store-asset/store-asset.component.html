@@ -1,11 +1,11 @@
 <ng-container>
-    <div class="shadow rounded-2xl bg-card">
-        <div class="flex flex-col flex-auto items-center m-5 p-6 sm:p-10">
-            <div class="w-full">
+    <div class="shadow rounded-lg sm:rounded-2xl bg-card">
+        <div class="flex flex-col flex-auto items-center m-1 p-1 sm:p-10">
+            <div class="w-full px-2 sm:px-0">
                 <!-- Form -->
                 <form>
                     <!-- Section -->
-                    <div class="w-full">
+                    <div class="w-full pt-8 sm:pt-0">
                         <div class="text-xl">Manage your store view</div>
                         <div class="text-secondary">Simply manage you own store logo and banners.</div>
                     </div>
@@ -20,7 +20,7 @@
                         </div>
                     </div> -->
             
-                    <div class="grid grid-cols-4 gap-6 w-full mt-8">
+                    <div class="sm:grid sm:grid-cols-4 gap-6 w-full mt-8">
                         <div class="col-span-4 sm:col-span-2">
                             <!-- Store Logo -->
                             <div class="w-full">
@@ -137,7 +137,7 @@
                                         <span class="block"><b>Recommended Size</b>: {{ this.files[1].recommendedImageWidth }} x {{ this.files[1].recommendedImageHeight }} pixel </span>
                                     </ng-container>
                                     <div class="flex justify-center w-full">
-                                        <ngx-gallery id="taik1" [options]="galleryOptions" [images]="this.files[1].galleryImages"></ngx-gallery>
+                                        <ngx-gallery [options]="galleryOptions" [images]="this.files[1].galleryImages"></ngx-gallery>
                                     </div>
                                 </div> 
                             </div>
@@ -169,14 +169,14 @@
                                         <span class="block"><b>Recommended Size</b>: {{ this.files[2].recommendedImageWidth }} x {{ this.files[2].recommendedImageHeight }} pixel </span>
                                     </ng-container>
                                     <div class="flex justify-center w-full">
-                                        <ngx-gallery id="taik2" [options]="galleryOptionsBannerMobile" [images]="this.files[2].galleryImages"></ngx-gallery>
+                                        <ngx-gallery [options]="galleryOptionsBannerMobile" [images]="this.files[2].galleryImages"></ngx-gallery>
                                     </div>
                                 </div> 
                             </div>
                         </div>
                     </div>
                     <!-- Actions -->
-                    <div class="mt-6 flex items-center justify-end">
+                    <div class="mt-6 pb-8 sm:pb-0 flex items-center justify-end">
                         <button
                             class="ml-4"
                             mat-flat-button
