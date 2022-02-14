@@ -243,7 +243,15 @@
                                 </div>
                             </div>
                             <div class="col-span-2 self-center text-right">{{ item.productPrice | currency: store$.regionCountry.currencySymbol }}</div>
-                            <div class="self-center text-right">x {{ item.quantity }}</div>
+                            <div class="self-center text-right">
+                                <input
+                                type="number"
+                                [value]="item.quantity"
+                                (input)="inputEditQuantity(item.id,$event)"
+                                min="0"
+                                style="border: 1px solid rgba(0, 0, 0, 0.200);font-size: 12px;width: 50px; height:25px;"
+                                >
+                            </div>
                             <div class="col-span-2 self-center text-right pr-2">{{ (item.productPrice * item.quantity) | currency: store$.regionCountry.currencySymbol }}</div>
                         </ng-container>
                     </div>
@@ -335,7 +343,13 @@
             
     
                 </div>
-            <div class="flex items-center justify-end mt-4 print:hidden">
+            <div class="flex items-center justify-between mt-4 print:hidden">
+                <button
+                (click)="updateOrder()"
+                mat-flat-button
+                [color]="'primary'">
+                Update
+                </button>
                 <button
                     (click)="close()"
                     mat-stroked-button>

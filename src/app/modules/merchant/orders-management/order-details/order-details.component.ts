@@ -29,6 +29,8 @@ export class OrderDetailsComponent implements OnInit
     dateUpdated: Date;
     deliveryDiscountDescription: any;
     appliedDiscountDescription: any;
+
+    payloadEditOrder : any=[];
     
     constructor(
       private _changeDetectorRef: ChangeDetectorRef,
@@ -255,6 +257,15 @@ export class OrderDetailsComponent implements OnInit
                 (this.detailsForm.get('items') as FormArray).push(itemFormGroup)
                 
               })
+
+              //initilaize the payload for edit order
+              this.payloadEditOrder =this.detailsForm.get('items').value
+              .map((x) => ({
+                          id: x.id,
+                          itemCode: x.itemCode,
+                          quantity:x.quantity,
+                          edit:false
+                })); 
   
   
           });
@@ -291,6 +302,27 @@ export class OrderDetailsComponent implements OnInit
     close(){
       this._matDialogRef.close()
     }
+
+    
+    inputEditQuantity(id,event){
+
+      let patchValuePayload =this.payloadEditOrder.filter(x=> x.id ===id);
+      patchValuePayload[0].quantity=event.target.value;//assign the value after filter    
+      patchValuePayload[0].edit = true; //if user input value then we assign it to true     
+ 
+     }
+ 
+     updateOrder(){
+       //filter edit key value that has true then we wil; send to backend
+       let sendPayload =this.payloadEditOrder.filter(x=> x.edit ===true);
+       let newsendPayload = sendPayload.map(({ edit, ...rest }) => rest);//it will remove edit key properties
+ 
+       this._ordersService.reviseOrderItems(this.orderId,newsendPayload).subscribe((response) => {                   
+       });
+       this._matDialogRef.close();
+ 
+      
+     }
   
    
   
