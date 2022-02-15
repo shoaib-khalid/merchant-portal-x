@@ -193,7 +193,7 @@
                                 <a class="text-xs font-bold uppercase px-5 py-3 border cursor-pointer	shadow-lg rounded block leading-normal" 
                                     (click)="toggleTabs(orderStatus.id)" 
                                     [ngClass]="{'text-primary-600 bg-white': openTab !== orderStatus.id, 'text-white bg-primary-600': openTab === orderStatus.id}">
-                                    <i class="fas fa-space-shuttle text-base mr-1"></i> {{orderStatus.label}} ({{orderStatus.count}}) 
+                                    <i class="text-base mr-1"></i> {{orderStatus.label}} ({{orderStatus.count}}) 
                                 </a>
                             </li>
                         </ng-container>
