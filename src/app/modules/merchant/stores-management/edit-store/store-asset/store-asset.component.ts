@@ -150,7 +150,7 @@ export class StoreAssetComponent implements OnInit
             // max-width 767 Mobile configuration
             {
                 breakpoint: 767,
-                thumbnailsColumns: 2,
+                thumbnailsColumns: 3,
                 thumbnailsAutoHide: false,
                 width: '350px',
                 height: '350px',
