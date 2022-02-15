@@ -351,4 +351,29 @@ export class OrdersListService
                 })
             );
     }
+
+    
+    reviseOrderItems(orderId,payload){
+
+     
+        let orderService = this._apiServer.settings.apiServer.orderService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+     
+
+        return this._httpClient.put<OrderItem>(orderService + '/orders/reviseitem/' + orderId, payload , header).pipe(
+            map((updatedReviseOrder) => {
+
+                this._logging.debug("Response from reviseOrderItems (reviseOrderItems)",updatedReviseOrder);
+
+                // Return the updated product
+                // return updatedReviseOrder["data"];
+            })
+        );
+
+    }
 }

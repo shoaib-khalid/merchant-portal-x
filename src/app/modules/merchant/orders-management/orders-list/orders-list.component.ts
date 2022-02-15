@@ -640,12 +640,36 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     }
 
     openDetailsDialog(orderId){
-        // Open the dialog
-        const dialogRef = this._dialog.open(OrderDetailsComponent, { data: orderId});
+        
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title  : 'Edit Order',
+            message: 'Have you contacted the buyer to change order? In case of any dispute, the amount will be refunded to the customer.',
+            actions: {
+                confirm: {
+                    label: 'Yes'
+                },
+                cancel:{
+                    label:'No'
+                }
+            }
+        });
 
-        dialogRef.afterClosed()
-                 .subscribe((result) => {
-                 });
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+
+            // If the confirm button pressed...
+            if ( result === 'confirmed' ){
+            // Open the dialog
+            const dialogRef = this._dialog.open(OrderDetailsComponent, { data: orderId});
+
+            dialogRef.afterClosed()
+                        .subscribe((result) => {
+                        });
+            }
+    
+        });
+
     }
 
     getOrderCountSummaryName(completionStatus: string) {
@@ -657,5 +681,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
             return false;
         }
     }
+
+
 
 }
