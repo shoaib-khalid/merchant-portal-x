@@ -31,8 +31,6 @@ export class OrderDetailsComponent implements OnInit
     dateUpdated: Date;
     deliveryDiscountDescription: any;
     appliedDiscountDescription: any;
-
-    payloadEditOrder : any=[];
     
     constructor(
       private _changeDetectorRef: ChangeDetectorRef,
@@ -260,16 +258,7 @@ export class OrderDetailsComponent implements OnInit
                 (this.detailsForm.get('items') as FormArray).push(itemFormGroup)
                 
               })
-
-              //initilaize the payload for edit order
-              this.payloadEditOrder =this.detailsForm.get('items').value
-              .map((x) => ({
-                          id: x.id,
-                          itemCode: x.itemCode,
-                          quantity:x.quantity,
-                          edit:false
-                })); 
-  
+ 
   
           });
   
@@ -305,93 +294,5 @@ export class OrderDetailsComponent implements OnInit
     close(){
       this._matDialogRef.close()
     }
-
-    updateOrder(){
-       //filter edit key value that has true then we wil; send to backend
-       let sendPayload =this.payloadEditOrder.filter(x=> x.edit ===true);
-       let newsendPayload = sendPayload.map(({ edit, ...rest }) => rest);//it will remove edit key properties
-
-        // Open the confirmation dialog
-        const confirmation = this.displayMessage('Update Order','Confirm to proceed with the changes made? Once confirmed, it cannot be undone.','Yes','No',true);
-
-
-        // Subscribe to the confirmation dialog closed action
-        confirmation.afterClosed().subscribe((result) => {
-
-          // If the confirm button pressed...
-          if ( result === 'confirmed' ){
-            // send payload
-            this._ordersService.reviseOrderItems(this.orderId,newsendPayload).subscribe((response) => {  
-              
-              //after that we get the amount of refund by calling OrdersService (getOrderById)
-              this._ordersService.getOrderById(this.orderId).subscribe((response=>{
-                console.log('CECHECKIND',response.data.orderRefund[0].refundAmount);
-
-                const displayRefund = this.displayMessage('Order Updated','The refund will be in the place. Refund Amount :'+response.data.orderRefund[0].refundAmount,'Ok','No',false,false);
-                displayRefund.afterClosed().subscribe((result) => {
-                   console.log("check result ::",result);
-                   
-                  if(result === 'confirmed' ){
-                      this.close();                    
-                    }
-                });
-
-              }
-              ))
-            },error=>{
-              this.close();
-            });
-          }
-          else{
-            this.close();
-          }
-    
-        });
-
-       //this._matDialogRef.close();
- 
-      
-    }
-
-    uponSelectQuantity(value:number,originalQuantity:number,itemId:string){
-
-      //we will ignore if the value input same with original quantity
-      if(value !== originalQuantity){
-        let patchValuePayload =this.payloadEditOrder.filter(x=> x.id ===itemId);
-        patchValuePayload[0].quantity=value;//assign the value after filter    
-        patchValuePayload[0].edit = true; //if user input value then we assign it to true  
-      }else if(value === originalQuantity){
-        let patchValuePayload =this.payloadEditOrder.filter(x=> x.id ===itemId);
-        patchValuePayload[0].quantity=value;
-        patchValuePayload[0].edit = false; //we set edit to false  
-
-      }
-
-
-    }
-
-    displayMessage(getTitle:string,getMessage:string,getLabelConfirm:string,getLabelCancel?:string,showLabelCancel?:boolean,getShowIcon?:boolean):MatDialogRef<FuseConfirmationDialogComponent,any>{
-
-      const confirmation = this._fuseConfirmationService.open({
-          title  : getTitle,
-          message: getMessage,
-          icon       : {
-            show : getShowIcon,
-          },
-          actions: {
-              confirm: {
-                  label: getLabelConfirm
-              },
-              cancel : {
-                label:getLabelCancel,
-                show:showLabelCancel
-              }
-          }
-      });
-
-      return confirmation;
-
-    }
-  
   
 }
