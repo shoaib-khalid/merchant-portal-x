@@ -243,7 +243,22 @@
                                 </div>
                             </div>
                             <div class="col-span-2 self-center text-right">{{ item.productPrice | currency: store$.regionCountry.currencySymbol }}</div>
-                            <div class="self-center text-right">x {{ item.quantity }}</div>
+                            <div class="self-center text-right">
+                                <mat-select
+                                [value]="item.quantity"
+                                style="border: 1px solid rgba(0, 0, 0, 0.200);font-size: 12px;width: 50px; height:25px;"
+                                (selectionChange)="uponSelectQuantity($event.value,item.quantity,item.id)"
+                                #quantitySelector>
+                                <mat-select-trigger>
+                                    <span class="flex items-center">
+                                        <span>{{ quantitySelector.triggerValue }}</span>
+                                    </span>
+                                </mat-select-trigger>
+                                <div *ngFor="let quantity of [].constructor(item.quantity+1); let i = index">
+                                    <mat-option [value]="i">{{i}}</mat-option>
+                                </div>
+                                </mat-select>
+                            </div>
                             <div class="col-span-2 self-center text-right pr-2">{{ (item.productPrice * item.quantity) | currency: store$.regionCountry.currencySymbol }}</div>
                         </ng-container>
                     </div>
@@ -335,7 +350,13 @@
             
     
                 </div>
-            <div class="flex items-center justify-end mt-4 print:hidden">
+            <div class="flex items-center justify-between mt-4 print:hidden">
+                <button
+                (click)="updateOrder()"
+                mat-flat-button
+                [color]="'primary'">
+                Update
+                </button>
                 <button
                     (click)="close()"
                     mat-stroked-button>

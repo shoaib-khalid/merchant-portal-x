@@ -537,7 +537,7 @@
                                                     >
                                                     <ng-container>
                                                         <mat-option (click)="updateStatus(transaction.order, transaction.nextCompletionStatus)">{{ transaction.nextActionText }}</mat-option>
-                                                        <mat-option (click)="openDetailsDialog(transaction.order.id)">Edit Order</mat-option>
+                                                        <mat-option (click)="openEditDialog(transaction.order.id)">Edit Order</mat-option>
                                                         <mat-option class="bg-red-600 text-white" (click)="updateStatus(transaction.order, 'CANCELED_BY_MERCHANT')">Cancel Order</mat-option>
                                                     </ng-container>
                                                 </mat-select>
