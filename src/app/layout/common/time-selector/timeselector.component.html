@@ -4,7 +4,7 @@
     [formGroup]="timeSelection"
     [attr.aria-labelledby]="_formField?.getLabelId()">
     <input class="justify-between w-0 h-0 invisible" type="text" readonly="true"/>
-    <div class="lg:w-full flex flex-wrap justify justify-around">
+    <div class="w-full sm:w-auto flex flex-row justify justify-around">
         <select 
             class="p-2 border border-gray-300 rounded example-tel-input-element" 
             [ngClass]="timeHour.value === '--' ? 'bg-gray-100 text-gray-500' : ''"
