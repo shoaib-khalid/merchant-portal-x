@@ -33,11 +33,11 @@
         </mat-form-field>
         <mat-form-field *ngIf="data['scheduleDate'] === true" appearance="fill">
             <mat-label>Pick a time</mat-label>
-            <input 
-                matInput type="time" 
-                [(ngModel)]="time"
-                (change)="checkTime()"
-            >
+            <time-selector
+            matInput
+            type="time"
+            [(ngModel)]="time"
+            (change)="checkTime()"></time-selector>
         </mat-form-field>
 
         <!-- Actions -->

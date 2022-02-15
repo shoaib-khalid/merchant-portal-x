@@ -21,6 +21,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { OrderDetailsComponent } from './order-details/order-details.component';
+import { TimeSelectorInputModule } from 'app/layout/common/time-selector/timeselector.module';
 
 @NgModule({
     declarations: [
@@ -46,7 +47,9 @@ import { OrderDetailsComponent } from './order-details/order-details.component';
         MatSelectModule,
         MatCheckboxModule,
         MatDatepickerModule,
-        MatNativeDateModule
+        MatNativeDateModule,
+        TimeSelectorInputModule, 
+
     ]
 })
 export class OrdersManagementModule
