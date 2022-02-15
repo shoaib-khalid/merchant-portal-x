@@ -529,7 +529,7 @@ export class RegisterStoreComponent implements OnInit
             // max-width 767 Mobile configuration
             {
                 breakpoint: 767,
-                thumbnailsColumns: 2,
+                thumbnailsColumns: 3,
                 thumbnailsAutoHide: false,
                 width: '290px',
                 height: '290px',
@@ -1119,7 +1119,7 @@ export class RegisterStoreComponent implements OnInit
             this.files[index].selectedFiles = event.target.files;
         }
         
-        let maxSize = 2600000;
+        let maxSize = 2097152;
         var maxSizeInMB = (maxSize / (1024*1024)).toFixed(2);
 
         if (this.files[index].fileSource && this.files[index].selectedFiles[0].size > maxSize ){
