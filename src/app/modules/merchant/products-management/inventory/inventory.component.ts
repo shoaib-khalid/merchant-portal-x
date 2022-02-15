@@ -775,7 +775,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         newProductBody["minQuantityForAlarm"] = newProductBody.minQuantityForAlarm === false ? -1 : newProductBody.minQuantityForAlarm;
         newProductBody["packingSize"] = newProductBody.packagingSize ? newProductBody.packagingSize : "S";
         newProductBody["isPackage"] = (productType === "combo") ? true : false;
-        newProductBody["allowOutOfStockPurchases"] = (this.store$.verticalCode === "FnB" || this.store$.verticalCode === "FnB_PK") ? true : false;
+        newProductBody["allowOutOfStockPurchases"] = ((this.store$.verticalCode === "FnB" || this.store$.verticalCode === "FnB_PK") && (newProductBody.status !== "OUTOFSTOCK")) ? true : false;
 
         // Create the product
         this._inventoryService.createProduct(newProductBody)

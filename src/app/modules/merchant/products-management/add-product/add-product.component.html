@@ -207,7 +207,7 @@
                                             placeholder="Select one option"
                                             [formControlName]="'status'"
                                             (selectionChange)="addProductForm.get('status').patchValue(statusSelector.value)"
-                                            (selectionChange)="statusSelector.value === 'OUT_OF_STOCK' ? addProductForm.get('availableStock').patchValue(0) : ''"
+                                            (selectionChange)="statusSelector.value === 'OUTOFSTOCK' ? addProductForm.get('availableStock').patchValue(0) : ''"
                                             #statusSelector="matSelect"
                                             >
                                             <mat-select-trigger>
@@ -218,7 +218,7 @@
                                             <div>
                                                 <mat-option [value]="'ACTIVE'">Active</mat-option>
                                                 <mat-option [value]="'INACTIVE'">Inactive</mat-option>
-                                                <mat-option [value]="'OUT_OF_STOCK'">Out of Stock</mat-option>
+                                                <mat-option [value]="'OUTOFSTOCK'">Out of Stock</mat-option>
                                             </div>
                                         </mat-select>
                                         <!-- <mat-slide-toggle
@@ -473,8 +473,8 @@
                         </div>
 
                         <div 
-                        *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'"
-                        class="flex flex-col sm:flex-row pb-4 border-t pt-4 px-8">
+                            *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'"
+                            class="flex flex-col sm:flex-row pb-4 border-t pt-4 px-8">
                             <div class="flex flex-auto flex-wrap">
                                 <!-- Available stock row -->
                                 <div class="flex flex-col w-full sm:w-1/5 sm:pr-2 sm:border-r py-2 sm:py-0">
@@ -490,7 +490,7 @@
                                         appearance="fill" floatLabel="always"
                                     >
                                         <input
-                                            (input)="(addProductForm.get('availableStock').value > 0 && addProductForm.get('status').value === 'OUT_OF_STOCK') ? addProductForm.get('status').patchValue('ACTIVE') : ''"
+                                            (input)="(addProductForm.get('availableStock').value > 0 && addProductForm.get('status').value === 'OUTOFSTOCK') ? addProductForm.get('status').patchValue('ACTIVE') : ''"
                                             placeholder="Insert current stock"
                                             [formControlName]="'availableStock'"
                                             type="number"
@@ -586,7 +586,7 @@
                                     [color]="'primary'"
                                     (click)="addNewProduct()"
                                 >
-                                    Ok
+                                    Create
                                 </button>
                             </div>
                         </div>

@@ -415,7 +415,9 @@
                                                 [formControlName]="'status'"
                                                 [value]="'status'"
                                                 (selectionChange)="selectedProductForm.get('status').value = $event.value"
-                                                (selectionChange)="statusSelector.value === 'OUT_OF_STOCK' ? displayQuantity = 0 : ''"
+                                                (selectionChange)="statusSelector.value === 'OUTOFSTOCK' ? displayQuantity = 0 : ''"
+                                                (selectionChange)="( statusSelector.value === 'OUTOFSTOCK' && (store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK')) ? 
+                                                                        selectedProductForm.get('allowOutOfStockPurchases').value = false : selectedProductForm.get('allowOutOfStockPurchases').value = true"
                                                 #statusSelector="matSelect"
                                                 >
                                                 <mat-select-trigger>
@@ -426,7 +428,7 @@
                                                 <div>
                                                     <mat-option [value]="'ACTIVE'">Active</mat-option>
                                                     <mat-option [value]="'INACTIVE'">Inactive</mat-option>
-                                                    <mat-option [value]="'OUT_OF_STOCK'">Out of Stock</mat-option>
+                                                    <mat-option [value]="'OUTOFSTOCK'">Out of Stock</mat-option>
                                                 </div>
                                             </mat-select>
                                             <!-- <mat-slide-toggle
@@ -687,8 +689,8 @@
                                 </div>
 
                                 <div 
-                                    class="flex flex-col sm:flex-row pb-4 border-t pt-4 px-8"
                                     *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'"
+                                    class="flex flex-col sm:flex-row pb-4 border-t pt-4 px-8"
 
                                     >
                                     <div class="flex flex-auto flex-wrap">
@@ -709,7 +711,7 @@
                                                         matInput
                                                         [disabled]="product.productVariants.length > 0"
                                                         (input)="displayQuantity = $event.target.value"
-                                                        (input)="(displayQuantity > 0 && selectedProductForm.get('status').value === 'OUT_OF_STOCK') ? selectedProductForm.get('status').patchValue('ACTIVE') : ''"
+                                                        (input)="(displayQuantity > 0 && selectedProductForm.get('status').value === 'OUTOFSTOCK') ? selectedProductForm.get('status').patchValue('ACTIVE') : ''"
                                                         [value]="displayQuantity">
                                                 </mat-form-field>
                                             </div>
@@ -819,7 +821,7 @@
                                             class="flex flex-col w-full sm:w-1/5 sm:pl-2 py-2 sm:py-0">
                                             <span class="mb-2 sm:mb-4 font-medium leading-tight">Combo 
                                                 <mat-icon
-                                                    matTooltip="Does this product has combo?"
+                                                    matTooltip="Does this product have combo?"
                                                     class="transform scale-75"
                                                     [svgIcon]="'heroicons_solid:question-mark-circle'">
                                                 </mat-icon>
