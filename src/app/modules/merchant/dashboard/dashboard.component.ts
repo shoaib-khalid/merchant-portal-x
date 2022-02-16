@@ -235,22 +235,29 @@ export class DashboardComponent implements OnInit, OnDestroy
     {   
         
         this._fuseMediaWatcherService.onMediaChange$
-        .pipe(takeUntil(this._unsubscribeAll))
-        .subscribe(({matchingAliases}) => {               
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(({matchingAliases}) => {               
 
-            this.currentScreenSize = matchingAliases;                
+                this.currentScreenSize = matchingAliases;                
 
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
-        });
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
 
         
         this._storesService.store$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((store: Store)=>{
-                this.storeName = store.name;
-                this.currencySymbol = store.regionCountry.currencySymbol;
-            });            
+
+                if (store) {                    
+                    this.storeName = store.name;
+                    this.currencySymbol = store.regionCountry.currencySymbol;
+                }
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+
         this._storesService.storeControl.valueChanges
             .pipe(
                 debounceTime(100),
