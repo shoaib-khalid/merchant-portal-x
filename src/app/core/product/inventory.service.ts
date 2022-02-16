@@ -164,6 +164,30 @@ export class InventoryService
     }
 
     /**
+     * Get all products for product list in combo section
+     * 
+     * @returns 
+     */
+    getAllProducts():Observable<{products: Product[]}>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.get<{products: Product[]}>(productService +'/stores/'+this.storeId$+'/products', header).pipe(
+            tap((response) => {
+
+                this._logging.debug("Response from ProductsService (getAllProducts)", response);
+
+                // this._products.next(response.data);
+            })
+        );
+    }
+
+    /**
      * Get product by ID without calling API
      */
     getProductsById(id: string): Observable<Product>
