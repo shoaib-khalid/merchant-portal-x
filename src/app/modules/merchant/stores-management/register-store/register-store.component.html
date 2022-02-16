@@ -349,7 +349,7 @@
                                                         <span class="text-xs text-gray-400 p-0 m-0">Image Size : Max 2MB,</span>
                                                         <span class="text-xs text-gray-400 p-0 m-0">Resolution: 500 x 500 px</span>
                                                     </div>
-                                                    <div *ngIf="this.files[0].fileSource !== ''">
+                                                    <div *ngIf="this.files[0].fileSource !== '' && this.files[0].selectedFiles === null">
                                                         <input
                                                             id="add-logo-btn"
                                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -367,7 +367,7 @@
                                                                 [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
                                                         </label>    
                                                     </div>
-                                                    <div *ngIf="this.files[0].fileSource === ''">
+                                                    <div *ngIf="this.files[0].fileSource !== null && this.files[0].selectedFiles !== null">
                                                         <input
                                                             id="edit-logo-btn"
                                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -409,7 +409,7 @@
                                                         <img [src]="this.files[0].fileSource" class="object-scale-down h-52" />
                                                         <mat-icon
                                                             class="top-0 right-0 cursor-pointer"
-                                                            (click)="deletefiles(0);"
+                                                            (click)="deleteLogo();"
                                                             [svgIcon]="'heroicons_solid:x-circle'">
                                                         </mat-icon>
                                                     </div>
@@ -427,7 +427,7 @@
                                                         <span class="text-xs text-gray-400 p-0 m-0">Image Size : Max 2MB,</span>
                                                         <span class="text-xs text-gray-400 p-0 m-0">Resolution: 500 x 500 px</span>
                                                     </div>
-                                                    <div *ngIf="this.files[3].fileSource !== ''">
+                                                    <div *ngIf="this.files[3].fileSource !== '' && this.files[3].selectedFiles === null">
                                                         <input
                                                             id="add-favicon-btn"
                                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -445,7 +445,7 @@
                                                                 [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
                                                         </label>    
                                                     </div>
-                                                    <div *ngIf="this.files[3].fileSource === ''">
+                                                    <div *ngIf="this.files[3].fileSource !== null && this.files[3].selectedFiles !== null">
                                                         <input
                                                             id="edit-favicon-btn"
                                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -487,7 +487,7 @@
                                                         <img [src]="this.files[3].fileSource" class="object-scale-down h-52" />
                                                         <mat-icon
                                                             class="top-0 right-0 cursor-pointer"
-                                                            (click)="deleteFavicon(3);"
+                                                            (click)="deleteFavicon();"
                                                             [svgIcon]="'heroicons_solid:x-circle'">
                                                         </mat-icon>
                                                     </div>
@@ -509,7 +509,7 @@
                                                             <span class="text-xs text-gray-400 p-0 m-0">Image Size : Max 2MB,</span>
                                                             <span class="text-xs text-gray-400 p-0 m-0">Resolution: 500 x 500 px</span>
                                                         </div>
-                                                        <div *ngIf="this.files[2].galleryImages.length < 1">
+                                                        <div *ngIf="this.files[1].galleryImages.length < 1">
                                                             <input
                                                                 id="add-BannerDesktop-btn"
                                                                 class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -527,9 +527,9 @@
                                                                     [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
                                                             </label>    
                                                         </div>
-                                                        <div *ngIf="this.files[1].galleryImages.length > 1">
+                                                        <div *ngIf="this.files[1].galleryImages.length > 0">
                                                             <input
-                                                                id="edit-favicon-btn"
+                                                                id="edit-BannerDesktop-btn"
                                                                 class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                                 type="file"
                                                                 accept="image/*" multiple 
@@ -538,7 +538,7 @@
                                                                 >
                                                             <label
                                                                 class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
-                                                                for="edit-favicon-btn"
+                                                                for="edit-BannerDesktop-btn"
                                                                 matRipple>
                                                                 <mat-icon
                                                                     class="icon-size-5"
@@ -583,7 +583,7 @@
                                                                     [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
                                                             </label>    
                                                         </div>
-                                                        <div *ngIf="this.files[2].galleryImages.length > 1">
+                                                        <div *ngIf="this.files[2].galleryImages.length > 0">
                                                             <input
                                                                 id="edit-BannerMobile-btn"
                                                                 class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"

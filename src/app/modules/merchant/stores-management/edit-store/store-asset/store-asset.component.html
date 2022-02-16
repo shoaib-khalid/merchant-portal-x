@@ -87,8 +87,8 @@
                                 <div class="my-2"></div>
                                 <div class="p-8 border border-gray-300 rounded h-96">
                                     <div *ngIf="this.files[0].selectedFiles">
-                                        <span *ngIf="this.files[0].selectedImageWidth && this.files[0].selectedImageHeight" class="block"><b>Uploaded Image Size</b>: {{ this.files[0].selectedImageWidth }} x {{ this.files[0].selectedImageHeight }} pixel </span>
-                                        <span class="block"><b>Recommended Size</b>: {{ this.files[0].recommendedImageWidth }} x {{ this.files[0].recommendedImageHeight }} pixel </span>
+                                        <span *ngIf="this.files[0].selectedImageWidth && this.files[0].selectedImageHeight" class="block text-sm"><b>Uploaded Image Size</b>: {{ this.files[0].selectedImageWidth }} x {{ this.files[0].selectedImageHeight }} pixel </span>
+                                        <span class="block text-sm"><b>Recommended Size</b>: {{ this.files[0].recommendedImageWidth }} x {{ this.files[0].recommendedImageHeight }} pixel </span>
                                     </div>
                                     <div *ngIf="this.files[0].fileSource">
                                         <!-- <div class="flex justify-center w-full">
@@ -170,8 +170,8 @@
                                 <div class="my-2"></div>
                                 <div class="p-8 border border-gray-300 rounded h-96">
                                     <div *ngIf="this.files[3].selectedFiles">
-                                        <span *ngIf="this.files[3].selectedImageWidth && this.files[3].selectedImageHeight" class="block"><b>Uploaded Image Size</b>: {{ this.files[3].selectedImageWidth }} x {{ this.files[3].selectedImageHeight }} pixel </span>
-                                        <span class="block"><b>Recommended Size</b>: {{ this.files[3].recommendedImageWidth }} x {{ this.files[3].recommendedImageHeight }} pixel </span>
+                                        <span *ngIf="this.files[3].selectedImageWidth && this.files[3].selectedImageHeight" class="block text-sm"><b>Uploaded Image Size</b>: {{ this.files[3].selectedImageWidth }} x {{ this.files[3].selectedImageHeight }} pixel </span>
+                                        <span class="block text-sm"><b>Recommended Size</b>: {{ this.files[3].recommendedImageWidth }} x {{ this.files[3].recommendedImageHeight }} pixel </span>
                                     </div>
                                     <div *ngIf="this.files[3].fileSource">
                                         <!-- <div class="flex justify-center w-full">
@@ -199,7 +199,7 @@
                                         <span class="text-xs text-gray-400 p-0 m-0">Image Size : Max 2MB,</span>
                                         <span class="text-xs text-gray-400 p-0 m-0">Resolution: 500 x 500 px</span>
                                     </div>
-                                    <div *ngIf="this.files[2].galleryImages.length < 1">
+                                    <div *ngIf="this.files[1].galleryImages.length < 1">
                                         <input
                                             id="add-BannerDesktop-btn"
                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -217,9 +217,9 @@
                                                 [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
                                         </label>    
                                     </div>
-                                    <div *ngIf="this.files[1].galleryImages.length > 1">
+                                    <div *ngIf="this.files[1].galleryImages.length > 0">
                                         <input
-                                            id="edit-favicon-btn"
+                                            id="edit-BannerDesktop-btn"
                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                             type="file"
                                             accept="image/*" multiple 
@@ -228,7 +228,7 @@
                                             >
                                         <label
                                             class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
-                                            for="edit-favicon-btn"
+                                            for="edit-BannerDesktop-btn"
                                             matRipple>
                                             <mat-icon
                                                 class="icon-size-5"
@@ -249,8 +249,8 @@
                                 <div class="my-2"></div>
                                 <div class="p-8 border border-gray-300 rounded h-auto">
                                     <ng-container *ngIf="this.files[1].fileSource">
-                                        <span *ngIf="this.files[1].selectedImageWidth && this.files[1].selectedImageHeight" class="block"><b>Uploaded Image Size</b>: {{ this.files[1].selectedImageWidth }} x {{ this.files[1].selectedImageHeight }} pixel </span>
-                                        <span class="block"><b>Recommended Size</b>: {{ this.files[1].recommendedImageWidth }} x {{ this.files[1].recommendedImageHeight }} pixel </span>
+                                        <span *ngIf="this.files[1].selectedImageWidth && this.files[1].selectedImageHeight" class="block text-sm"><b>Uploaded Image Size</b>: {{ this.files[1].selectedImageWidth }} x {{ this.files[1].selectedImageHeight }} pixel </span>
+                                        <span class="block text-sm"><b>Recommended Size</b>: {{ this.files[1].recommendedImageWidth }} x {{ this.files[1].recommendedImageHeight }} pixel </span>
                                     </ng-container>
                                     <div class="flex justify-center w-full">
                                         <ngx-gallery [options]="galleryOptions" [images]="this.files[1].galleryImages"></ngx-gallery>
@@ -286,7 +286,7 @@
                                                 [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
                                         </label>    
                                     </div>
-                                    <div *ngIf="this.files[2].galleryImages.length > 1">
+                                    <div *ngIf="this.files[2].galleryImages.length > 0">
                                         <input
                                             id="edit-BannerMobile-btn"
                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -318,8 +318,8 @@
                                 <div class="my-2"></div>
                                 <div class="p-8 border border-gray-300 rounded h-auto">
                                     <ng-container *ngIf="this.files[2].fileSource">
-                                        <span *ngIf="this.files[2].selectedImageWidth && this.files[2].selectedImageHeight" class="block"><b>Uploaded Image Size</b>: {{ this.files[2].selectedImageWidth }} x {{ this.files[2].selectedImageHeight }} pixel </span>
-                                        <span class="block"><b>Recommended Size</b>: {{ this.files[2].recommendedImageWidth }} x {{ this.files[2].recommendedImageHeight }} pixel </span>
+                                        <span *ngIf="this.files[2].selectedImageWidth && this.files[2].selectedImageHeight" class="block text-sm"><b>Uploaded Image Size</b>: {{ this.files[2].selectedImageWidth }} x {{ this.files[2].selectedImageHeight }} pixel </span>
+                                        <span class="block text-sm"><b>Recommended Size</b>: {{ this.files[2].recommendedImageWidth }} x {{ this.files[2].recommendedImageHeight }} pixel </span>
                                     </ng-container>
                                     <div class="flex justify-center w-full">
                                         <ngx-gallery [options]="galleryOptionsBannerMobile" [images]="this.files[2].galleryImages"></ngx-gallery>

@@ -1232,13 +1232,27 @@ export class RegisterStoreComponent implements OnInit
         }
     }
 
-    deletefiles(index: number) { 
-        this.files[index].toDelete = true;
-        this.files[index].fileSource = '';
-        this.files[index].selectedFiles = '';
-
+    deleteLogo() {
+        this.files[0].toDelete = true;        
+        this.files[0].fileSource = '';
+        this.files[0].selectedFiles = '';
         this._changeDetectorRef.markForCheck();
     }
+
+    deleteFavicon(){
+        this.files[3].toDelete = true;        
+        this.files[3].fileSource = '';
+        this.files[3].selectedFiles = '';
+        this._changeDetectorRef.markForCheck();
+    }
+
+    // deletefiles(index: number) { 
+    //     this.files[index].toDelete = true;
+    //     this.files[index].fileSource = '';
+    //     this.files[index].selectedFiles = '';
+
+    //     this._changeDetectorRef.markForCheck();
+    // }
 
     // ------------------------------------------------------------------------------
     //                     Store Timing Public Method Section
