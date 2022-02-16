@@ -706,7 +706,7 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
         const changePickStartTime = new Date();
         changePickStartTime.setHours(_pickStartTime,(<any>pickStartTime).timeMinute,0);
         
-        this.changeStartTime= changePickStartTime.getHours()+':'+String(changePickStartTime.getMinutes()).padStart(2, "0");    
+        this.changeStartTime= String(changePickStartTime.getHours()).padStart(2, "0")+':'+String(changePickStartTime.getMinutes()).padStart(2, "0");    
         
         //==============End time===================
         let pickEndTime = this.selectedDiscountForm.get('endTime').value;
@@ -720,7 +720,7 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
         const changePickEndTime = new Date();
         changePickEndTime.setHours(_pickEndTime,(<any>pickEndTime).timeMinute,0);
         
-        this.changeEndTime= changePickEndTime.getHours()+':'+String(changePickEndTime.getMinutes()).padStart(2, "0");  
+        this.changeEndTime= String(changePickEndTime.getHours()).padStart(2, "0")+':'+String(changePickEndTime.getMinutes()).padStart(2, "0");  
         
         return;
       
