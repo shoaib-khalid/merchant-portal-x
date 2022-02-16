@@ -6,7 +6,7 @@ import { MatSort } from '@angular/material/sort';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { merge, Observable, of, Subject } from 'rxjs';
-import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
+import { debounceTime, map, switchMap, take, takeUntil } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, ProductCategory, ProductPagination, ProductPackageOption, ProductAssets } from 'app/core/product/inventory.types';
@@ -113,12 +113,14 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     showCombosSection: boolean = false;
     
     // product combo package
-    _products: Product[];
-    filteredProductsOptions: Product[] = [];
+    _products: Product[]; // use in combo section -> 'Add product' --before filter
+    filteredProductsOptions: Product[] = []; // use in listing html
     selectedProductsOptions: Product[] = [];
     selectedProductsOption: ProductPackageOption = null;
     _selectedProductsOption = {};
     optionChecked = [];
+    _filteredProductsOptions: Product[] = []; // use in combo section -> 'Add product' --after filter
+
 
     // -----------------------
     // product variant
@@ -174,6 +176,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
     categoryFilterControl: FormControl = new FormControl();
     filterByCatId: string = "";
+
+    localCategoryFilterControl: FormControl = new FormControl();
+    localFilterByCatId: string = "";
 
     // ------------------
     // product assets
@@ -234,6 +239,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     variantIndex: number = 0;
     
     currentScreenSize: string[];
+    
 
     /**
      * Constructor
@@ -371,20 +377,21 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
+            
     
         // Get the products
         this.products$ = this._inventoryService.products$;
-
-        // Assign to local products
-        this.products$
+        
+        // Get all products for combo section
+        this._inventoryService.getAllProducts()
             .pipe(takeUntil(this._unsubscribeAll))    
             .subscribe((response)=>{
-                this._products = response;
 
-                // remove object for array of object where item.isPackage !== true
-                let _filteredProductsOptions = response.filter(item => item.isPackage !== true );
+                this._products = response["data"].content
+                
+                // filter the product
+                this.filterProductOptionsMethod(this._products);
 
-                this.filteredProductsOptions = _filteredProductsOptions;
             });
         
         // Get the pagination
@@ -440,6 +447,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             this._changeDetectorRef.markForCheck();
         });
 
+        // Filter by category dropdown in product list
         this.categoryFilterControl.valueChanges
             .pipe(
                 takeUntil(this._unsubscribeAll),
@@ -451,6 +459,34 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                     this.isLoading = true;
                     
                     return this._inventoryService.getProducts(0, 10, 'name', 'asc', '', 'ACTIVE,INACTIVE', this.filterByCatId);
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
+
+        // Filter by category dropdown in combo section
+        this.localCategoryFilterControl.valueChanges
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((catId) => {
+                    
+                    if (catId == ''){
+                        this.filteredProductsOptions = this._filteredProductsOptions
+                    }
+                    else {
+                        this.filteredProductsOptions = this._filteredProductsOptions.filter(item => item.categoryId === catId );
+                    }
+
+
+                    this.isLoading = true;
+
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+
+                    return of(true)
                 }),
                 map(() => {
                     this.isLoading = false;
@@ -529,6 +565,21 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     // --------------------------------------
     // Product Section
     // --------------------------------------
+
+    /**
+     * Filter products to be used in product list in combo section
+     * 
+     * @param products 
+     */
+    filterProductOptionsMethod(products)
+    {
+
+        // remove object for array of object where item.isPackage !== true
+        this._filteredProductsOptions = products.filter(item => item.isPackage !== true );
+        
+        this.filteredProductsOptions = this._filteredProductsOptions;
+
+    }
 
     /**
      * Toggle product details
@@ -803,6 +854,14 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(async (newProduct) => {
 
+                this.products$
+                    .pipe(take(1)) 
+                    .subscribe(products => {
+
+                        // filter after update
+                        this.filterProductOptionsMethod(products);
+                    })
+
                 // Add Inventory to product
                 this._inventoryService.addInventoryToProduct(newProduct["data"], { sku: sku, quantity: availableStock, price:price, itemCode:newProduct["data"].id + "aa" } )
                     .subscribe((response)=>{
@@ -810,6 +869,18 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                         this.displayPrice = response.price;
                         this.displayQuantity = response.quantity;
                         this.displaySku = response.sku;
+
+                        // if type is combo..
+                        if (productType === "combo"){
+
+                            // open the details window..
+                            this.toggleDetails(newProduct["data"].id);
+
+                            // then, open the combo section
+                            // this.showCombosSection = true;
+            
+                        }
+
                     });
 
                 // Update the assets product on the server (backend kena enable update)
@@ -838,7 +909,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 }
 
                 // Go to new product
-                this.selectedProduct = newProduct["data"];
+                // this.selectedProduct = newProduct["data"];
                                         
                 // Update current form with new product data
                 this.selectedProductForm.patchValue(newProduct["data"]);
@@ -855,8 +926,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 // // Set selectedProduct variants to empty array
                 // this.selectedProduct.variants = [];
 
-                // close the details window
-                this.toggleDetails(newProduct["data"].id)
+
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -884,7 +954,15 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         await this._inventoryService.updateProduct(this.selectedProduct.id, productToUpdate)
         .pipe(takeUntil(this._unsubscribeAll))
         .subscribe(async () => {
-            
+
+            this.products$
+            .pipe(take(1)) 
+            .subscribe(products => {
+
+                // filter after update
+                this.filterProductOptionsMethod(products);
+            })
+
             // DELETE ENTIRE INVENTORY
             await this.deleteEntireInventory()
 
@@ -1297,6 +1375,14 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 // Delete the product on the server
                 this._inventoryService.deleteProduct(this.selectedProduct.id).subscribe(() => {
 
+                    this.products$
+                        .pipe(take(1)) 
+                        .subscribe(products => {
+
+                            // filter after delete
+                            this.filterProductOptionsMethod(products);
+                        })
+
                     // Close the details
                     this.closeDetails();
                 });
@@ -1337,7 +1423,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         const value = event.target.value.toLowerCase();
 
         // Filter the categories
-        this.filteredProductsOptions = this._products.filter(product => product.name.toLowerCase().includes(value));
+        this.filteredProductsOptions = this._filteredProductsOptions.filter(product => product.name.toLowerCase().includes(value));
     }
 
     filterProductsInputKeyDown(event): void
@@ -1635,9 +1721,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         return (index > -1) ? true : false;
     }
 
-    displayCombos(){
-        this.showCombosSection = !this.showCombosSection;
-    }
+    // displayCombos(){
+    //     this.showCombosSection = !this.showCombosSection;
+    // }
 
     // --------------------------------------
     // Product Variant Section
