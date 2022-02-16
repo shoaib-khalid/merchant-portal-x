@@ -9,6 +9,28 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 export class ChangelogComponent
 {
     changelog: any[] = [
+        // v0.0.22
+        {
+            version    : 'v0.0.22',
+            releaseDate: 'Feb 16, 2022',
+            changes    : [
+                {
+                    type: 'Fix',
+                    list: [
+                        '(ProductManagement) Allow variant and combo on both FnB and Ecommerce',
+                        '(CustomTimeSelector) Fix UI for time selection',
+                        '(ProductManagement) Remove stock on FnB',
+                    ]
+                },
+                {
+                    type: 'Added',
+                    list: [
+                        '(ProductManagement) Allow variant and combo on both FnB and Ecommerce',
+                        '(ProductManagement) Add catagory filter on product and product combo',
+                    ]
+                }
+            ]
+        },
         // v0.0.21
         {
             version    : 'v0.0.21',
