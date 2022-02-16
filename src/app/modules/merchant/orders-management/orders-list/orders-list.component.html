@@ -193,7 +193,7 @@
                                 <a class="text-xs font-bold uppercase px-5 py-3 border cursor-pointer	shadow-lg rounded block leading-normal" 
                                     (click)="toggleTabs(orderStatus.id)" 
                                     [ngClass]="{'text-primary-600 bg-white': openTab !== orderStatus.id, 'text-white bg-primary-600': openTab === orderStatus.id}">
-                                    <i class="fas fa-space-shuttle text-base mr-1"></i> {{orderStatus.label}} ({{orderStatus.count}}) 
+                                    <i class="text-base mr-1"></i> {{orderStatus.label}} ({{orderStatus.count}}) 
                                 </a>
                             </li>
                         </ng-container>
@@ -537,7 +537,7 @@
                                                     >
                                                     <ng-container>
                                                         <mat-option (click)="updateStatus(transaction.order, transaction.nextCompletionStatus)">{{ transaction.nextActionText }}</mat-option>
-                                                        <mat-option (click)="openDetailsDialog(transaction.order.id)">Edit Order</mat-option>
+                                                        <mat-option (click)="openEditDialog(transaction.order.id)">Edit Order</mat-option>
                                                         <mat-option class="bg-red-600 text-white" (click)="updateStatus(transaction.order, 'CANCELED_BY_MERCHANT')">Cancel Order</mat-option>
                                                     </ng-container>
                                                 </mat-select>

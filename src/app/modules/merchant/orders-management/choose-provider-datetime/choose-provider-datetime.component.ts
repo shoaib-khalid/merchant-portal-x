@@ -1,6 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { DialogData } from '../../social-media/flow-builder/components/action-dialog/action-dialog.component';
+import { TimeSelector } from 'app/layout/common/time-selector/timeselector.component';
 
 @Component({
   selector: 'app-choose-provider-datetime',
@@ -14,6 +15,7 @@ export class ChooseProviderDateTimeComponent implements OnInit {
   mindate: string;
   time: string;
   mintime: string;
+  changeTimePickup:any;
 
   constructor(
     public dialogRef: MatDialogRef<ChooseProviderDateTimeComponent>,
@@ -31,10 +33,12 @@ export class ChooseProviderDateTimeComponent implements OnInit {
       src: this.data["providerImage"],
       atl: this.data["name"]
     };
+    // new TimeSelector ('00','00','AM')
   }
 
   setPickupDateTime() {
-    this.dialogRef.close({ date: this.date, time: this.time});
+    this.changeTime();    
+    this.dialogRef.close({ date: this.date, time: this.changeTimePickup});
   }
 
   cancelPickupDateTime(){
@@ -55,5 +59,22 @@ export class ChooseProviderDateTimeComponent implements OnInit {
     } else {
       this.showButton = true;
     }
+  }
+
+  changeTime(){
+    //Pickup Time
+    let pickTime = this.time;
+    let _pickTime;
+
+    if ((<any>pickTime).timeAmPm === "PM") {
+        _pickTime = parseInt((<any>pickTime).timeHour) + 12;
+    } else {
+        _pickTime = (<any>pickTime).timeHour;
+    }
+    const pickUpTime = new Date();
+    pickUpTime.setHours(_pickTime,(<any>pickTime).timeMinute,0);
+    this.changeTimePickup= pickUpTime.getHours()+':'+pickUpTime.getMinutes();    
+    return this.changeTimePickup;
+  
   }
 }

@@ -18,6 +18,7 @@ import { formatDate } from '@angular/common';
 import { OrderDetailsComponent } from '../order-details/order-details.component';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
+import { EditOrderComponent } from '../edit-order/edit-order.component';
 
 @Component({
     selector       : 'orders-list',
@@ -639,7 +640,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
         
     }
 
-    openDetailsDialog(orderId){
+    openEditDialog(orderId){
         
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
@@ -661,7 +662,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
             // If the confirm button pressed...
             if ( result === 'confirmed' ){
             // Open the dialog
-            const dialogRef = this._dialog.open(OrderDetailsComponent, { data: orderId});
+            const dialogRef = this._dialog.open(EditOrderComponent, { data: orderId});
 
             dialogRef.afterClosed()
                         .subscribe((result) => {
@@ -671,6 +672,16 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
         });
 
     }
+
+    openDetailsDialog(orderId){
+        
+            // Open the dialog
+            const dialogRef = this._dialog.open(OrderDetailsComponent, { data: orderId});
+            
+            dialogRef.afterClosed()
+            .subscribe((result) => {
+            });
+    }  
 
     getOrderCountSummaryName(completionStatus: string) {
         let index = this._orderCountSummary.findIndex(item => item.completionStatus.includes(completionStatus));
