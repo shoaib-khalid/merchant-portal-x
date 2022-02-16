@@ -529,7 +529,7 @@ export class RegisterStoreComponent implements OnInit
             // max-width 767 Mobile configuration
             {
                 breakpoint: 767,
-                thumbnailsColumns: 2,
+                thumbnailsColumns: 3,
                 thumbnailsAutoHide: false,
                 width: '290px',
                 height: '290px',
@@ -1119,7 +1119,7 @@ export class RegisterStoreComponent implements OnInit
             this.files[index].selectedFiles = event.target.files;
         }
         
-        let maxSize = 2600000;
+        let maxSize = 2097152;
         var maxSizeInMB = (maxSize / (1024*1024)).toFixed(2);
 
         if (this.files[index].fileSource && this.files[index].selectedFiles[0].size > maxSize ){
@@ -1232,13 +1232,27 @@ export class RegisterStoreComponent implements OnInit
         }
     }
 
-    deletefiles(index: number) { 
-        this.files[index].toDelete = true;
-        this.files[index].fileSource = '';
-        this.files[index].selectedFiles = '';
-
+    deleteLogo() {
+        this.files[0].toDelete = true;        
+        this.files[0].fileSource = '';
+        this.files[0].selectedFiles = '';
         this._changeDetectorRef.markForCheck();
     }
+
+    deleteFavicon(){
+        this.files[3].toDelete = true;        
+        this.files[3].fileSource = '';
+        this.files[3].selectedFiles = '';
+        this._changeDetectorRef.markForCheck();
+    }
+
+    // deletefiles(index: number) { 
+    //     this.files[index].toDelete = true;
+    //     this.files[index].fileSource = '';
+    //     this.files[index].selectedFiles = '';
+
+    //     this._changeDetectorRef.markForCheck();
+    // }
 
     // ------------------------------------------------------------------------------
     //                     Store Timing Public Method Section
