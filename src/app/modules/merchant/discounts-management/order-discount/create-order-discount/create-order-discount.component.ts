@@ -63,18 +63,22 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
 
   addNewDiscount() {
     this.changeTime();
-    this.dialogRef.close({ 
-        status: true ,
-        discountName: this.discountName,
-        discountOn: this.discountType,
-        startDate: this.startDate,
-        startTime: this.changeStartTime,
-        endDate: this.endDate,
-        endTime: this.changeEndTime,
-        isActive :this.isActive,
-        maxDiscountAmount :this.maxDiscountAmount,
-        normalPriceItemOnly : this.normalPriceItemOnly
-    });
+    console.log('this.changeStartTime',this.changeStartTime);
+    console.log('this.changeEndTime',this.changeEndTime);
+
+    
+    // this.dialogRef.close({ 
+    //     status: true ,
+    //     discountName: this.discountName,
+    //     discountOn: this.discountType,
+    //     startDate: this.startDate,
+    //     startTime: this.changeStartTime,
+    //     endDate: this.endDate,
+    //     endTime: this.changeEndTime,
+    //     isActive :this.isActive,
+    //     maxDiscountAmount :this.maxDiscountAmount,
+    //     normalPriceItemOnly : this.normalPriceItemOnly
+    // });
   }
 
   cancelPickupDateTime(){
@@ -172,7 +176,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
     const changePickStartTime = new Date();
     changePickStartTime.setHours(_pickStartTime,(<any>pickStartTime).timeMinute,0);
     
-    this.changeStartTime= changePickStartTime.getHours()+':'+changePickStartTime.getMinutes();    
+    this.changeStartTime= changePickStartTime.getHours()+':'+String(changePickStartTime.getMinutes()).padStart(2, "0");    
     
     //==============End time===================
     let pickEndTime = this.endTime;
@@ -186,7 +190,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
     const changePickEndTime = new Date();
     changePickEndTime.setHours(_pickEndTime,(<any>pickEndTime).timeMinute,0);
     
-    this.changeEndTime= changePickEndTime.getHours()+':'+changePickEndTime.getMinutes();  
+    this.changeEndTime= changePickEndTime.getHours()+':'+String(changePickEndTime.getMinutes()).padStart(2, "0");  
     
     return;
   
