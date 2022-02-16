@@ -63,22 +63,19 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
 
   addNewDiscount() {
     this.changeTime();
-    console.log('this.changeStartTime',this.changeStartTime);
-    console.log('this.changeEndTime',this.changeEndTime);
-
-    
-    // this.dialogRef.close({ 
-    //     status: true ,
-    //     discountName: this.discountName,
-    //     discountOn: this.discountType,
-    //     startDate: this.startDate,
-    //     startTime: this.changeStartTime,
-    //     endDate: this.endDate,
-    //     endTime: this.changeEndTime,
-    //     isActive :this.isActive,
-    //     maxDiscountAmount :this.maxDiscountAmount,
-    //     normalPriceItemOnly : this.normalPriceItemOnly
-    // });
+  
+    this.dialogRef.close({ 
+        status: true ,
+        discountName: this.discountName,
+        discountOn: this.discountType,
+        startDate: this.startDate,
+        startTime: this.changeStartTime,
+        endDate: this.endDate,
+        endTime: this.changeEndTime,
+        isActive :this.isActive,
+        maxDiscountAmount :this.maxDiscountAmount,
+        normalPriceItemOnly : this.normalPriceItemOnly
+    });
   }
 
   cancelPickupDateTime(){
