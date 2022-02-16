@@ -100,12 +100,12 @@
             <mat-form-field 
                 class="w-1/2 pl-2" 
                 appearance="fill">
-                <input 
-                    matInput type="time" 
-                    [(ngModel)]="startTime"
-                    (change)="checkDateTime();checkForm()"
-                    [min]="minStartTime"
-                >
+                <time-selector
+                matInput
+                type="time"
+                [(ngModel)]="startTime"
+                (change)="checkDateTime();checkForm()"
+                ></time-selector>
             </mat-form-field>
         </div>
 
@@ -126,12 +126,13 @@
             <mat-form-field 
                 class="w-1/2 pl-2" 
                 appearance="fill">
-                <input 
-                    matInput type="time" 
-                    [disabled]="isDisabledStartDateTime"
-                    [(ngModel)]="endTime"
-                    (change)="checkDateTime();checkForm()"
-                >
+                <time-selector
+                matInput
+                type="time"                    
+                [disabled]="isDisabledStartDateTime"
+                [(ngModel)]="endTime"
+                (change)="checkDateTime();checkForm()"
+                ></time-selector>
             </mat-form-field>
 
             <mat-slide-toggle

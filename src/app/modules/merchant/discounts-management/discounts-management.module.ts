@@ -23,6 +23,7 @@ import { CreateOrderDiscountDialogComponent } from './order-discount/create-orde
 import { ProductDiscountListComponent } from './product-discount/product-discount-list/product-discount-list.component';
 import { CreateProductDiscountDialogComponent } from './product-discount/create-product-discount/create-product-discount.component';
 import { ProductListDialogComponent } from './product-discount/product-list-dialog/product-list-dialog.component';
+import { TimeSelectorInputModule } from 'app/layout/common/time-selector/timeselector.module';
 
 @NgModule({
     declarations: [
@@ -51,7 +52,9 @@ import { ProductListDialogComponent } from './product-discount/product-list-dial
         MatTableModule,
         MatSlideToggleModule,
         MatTooltipModule,
-        SharedModule
+        SharedModule,
+        TimeSelectorInputModule, 
+
     ]
 })
 export class DiscountsManagementModule
