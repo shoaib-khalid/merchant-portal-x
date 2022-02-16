@@ -33,11 +33,27 @@ import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
                 }
 
                 @screen md {
-                    grid-template-columns: 48px 112px auto 112px 72px;
+                    grid-template-columns: 48px 128px auto 112px 72px;
                 }
 
                 @screen lg {
-                    grid-template-columns: 48px 112px auto 112px 96px 96px 72px;
+                    grid-template-columns: 48px 128px auto 112px 96px 96px 72px;
+                }
+            }
+
+            .inventory-grid-fnb {
+                grid-template-columns: 48px auto 40px;
+
+                @screen sm {
+                    grid-template-columns: 48px auto 112px 72px;
+                }
+
+                @screen md {
+                    grid-template-columns: 48px 128px auto 112px 72px;
+                }
+
+                @screen lg {
+                    grid-template-columns: 48px 128px auto 112px 96px 72px;
                 }
             }
 
@@ -47,11 +63,15 @@ import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 
             .variant-grid {
                 // grid-template-columns: 68px auto 40px;
-                grid-template-columns: 68px 120px auto 128px 84px 96px;
+                grid-template-columns: 68px 120px 120px 128px 80px 96px;
 
                 // @screen sm {
                 //     grid-template-columns: 68px auto auto 128px 84px 96px;
                 // }
+
+                @screen md {
+                    grid-template-columns: 68px 120px auto 128px 80px 96px;
+                }
 
                 // @screen md {
                 //     grid-template-columns: 68px auto auto 128px 84px 96px;
@@ -755,6 +775,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         newProductBody["minQuantityForAlarm"] = newProductBody.minQuantityForAlarm === false ? -1 : newProductBody.minQuantityForAlarm;
         newProductBody["packingSize"] = newProductBody.packagingSize ? newProductBody.packagingSize : "S";
         newProductBody["isPackage"] = (productType === "combo") ? true : false;
+        newProductBody["allowOutOfStockPurchases"] = ((this.store$.verticalCode === "FnB" || this.store$.verticalCode === "FnB_PK") && (newProductBody.status !== "OUTOFSTOCK")) ? true : false;
 
         // Create the product
         this._inventoryService.createProduct(newProductBody)

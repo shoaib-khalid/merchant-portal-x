@@ -34,7 +34,6 @@
                 >
                     <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
                     <span class="hidden sm:block ml-2 mr-1">Add</span>
-                    <!-- <span class="ml-2 mr-1">Add</span> -->
                 </button>
             </ng-container>
             <ng-container *ngIf="store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK'">
@@ -45,7 +44,7 @@
                     [color]="'primary'"
                 >
                     <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
-                    <span class="ml-2 mr-1">Add</span>
+                    <span class="hidden sm:block ml-2 mr-1">Add</span>
                 </button>
                 <mat-menu #addProductMenu="matMenu">
                     <button mat-menu-item (click)="initCreateProduct('normal')">Product</button>
@@ -66,6 +65,7 @@
                         <!-- Header -->
                         <div
                             class="inventory-grid z-10 sticky top-0 grid gap-4 py-4 px-6 md:px-8 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                            [ngClass]="(store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c') ? 'inventory-grid' : 'inventory-grid-fnb'"
                             matSort
                             matSortDisableClear>
                             <div></div>
@@ -81,6 +81,7 @@
                                 Price
                             </div>
                             <div
+                                *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'"
                                 class="hidden lg:block"
                                 [mat-sort-header]="'quantity'">
                                 Stock
@@ -95,7 +96,11 @@
                         <!-- Rows -->
                         <ng-container *ngIf="(products$ | async) as products">
                             <ng-container *ngFor="let product of products; trackBy: trackByFn">
-                                <div class="inventory-grid grid items-center gap-4 py-3 px-6 md:px-8 border-b">
+                                <div 
+                                    class="inventory-grid grid items-center gap-4 py-3 px-6 md:px-8 border-b"
+                                    [ngClass]="(store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c') ? 'inventory-grid' : 'inventory-grid-fnb'"
+
+                                >
 
                                     <!-- Image -->
                                     <div class="flex items-center">
@@ -129,7 +134,9 @@
                                     </div>
 
                                     <!-- Stock -->
-                                    <div class="hidden lg:flex items-center">
+                                    <div 
+                                        *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'"
+                                        class="hidden lg:flex items-center">
                                         <div class="min-w-4">{{ product.productInventories.length > 0 ? product.productInventories[0].quantity : ''}}</div>
                                         <!-- Low stock -->
                                         <div
@@ -408,7 +415,9 @@
                                                 [formControlName]="'status'"
                                                 [value]="'status'"
                                                 (selectionChange)="selectedProductForm.get('status').value = $event.value"
-                                                (selectionChange)="statusSelector.value === 'OUT_OF_STOCK' ? displayQuantity = 0 : ''"
+                                                (selectionChange)="statusSelector.value === 'OUTOFSTOCK' ? displayQuantity = 0 : ''"
+                                                (selectionChange)="( statusSelector.value === 'OUTOFSTOCK' && (store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK')) ? 
+                                                                        selectedProductForm.get('allowOutOfStockPurchases').value = false : selectedProductForm.get('allowOutOfStockPurchases').value = true"
                                                 #statusSelector="matSelect"
                                                 >
                                                 <mat-select-trigger>
@@ -419,7 +428,7 @@
                                                 <div>
                                                     <mat-option [value]="'ACTIVE'">Active</mat-option>
                                                     <mat-option [value]="'INACTIVE'">Inactive</mat-option>
-                                                    <mat-option [value]="'OUT_OF_STOCK'">Out of Stock</mat-option>
+                                                    <mat-option [value]="'OUTOFSTOCK'">Out of Stock</mat-option>
                                                 </div>
                                             </mat-select>
                                             <!-- <mat-slide-toggle
@@ -445,7 +454,7 @@
 
                                     <!-- Name, Description, SKU -->
                                     <div class="flex flex-auto flex-wrap">
-                                        <div class="flex flex-col w-full lg:w-2/4 sm:pl-8">
+                                        <div class="flex flex-col w-full lg:w-2/4 sm:pl-8 mt-4 sm:mt-0">
 
                                             <!-- Name -->
                                             <mat-form-field class="w-full">
@@ -526,7 +535,7 @@
                                         <!-- Category -->
                                         <div class="flex flex-col w-full lg:w-1/4 sm:pl-8">
                                             <!-- Category -->
-                                            <div class="w-full">
+                                            <div class="w-full pb-3">
                                                 <span class="mb-px font-medium leading-tight">Category</span>
                                                 <div class="mt-0.5 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden">
                                                     <!-- Header -->
@@ -654,94 +663,123 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <!-- Combo -->
+                                            <div 
+                                                *ngIf="(store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK') && this.selectedProductForm.get('isPackage').value === true" 
+                                                class="w-full">
+                                                <span class="mb-2 sm:mb-4 font-medium leading-tight">Combo 
+                                                    <mat-icon
+                                                        matTooltip="Does this product have combo?"
+                                                        class="transform scale-75"
+                                                        [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                                    </mat-icon>
+                                                </span>
+                                                <div class="mt-2 flex items-center justify-between -my-px w-full">
+                                                    <button
+                                                        mat-flat-button
+                                                        class="text-sm"
+                                                        [color]="'primary'"
+                                                        (click)="displayCombos()">
+                                                        Go to combo section
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="flex flex-col sm:flex-row pb-4 border-t pt-4 px-8">
+                                <div 
+                                    *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'"
+                                    class="flex flex-col sm:flex-row pb-4 border-t pt-4 px-8"
+
+                                    >
                                     <div class="flex flex-auto flex-wrap">
-                                        <!-- Available stock row -->
-                                        <div class="flex flex-col w-full sm:w-1/5 sm:pr-2 sm:border-r py-2 sm:py-0">
-                                            <span class="mb-2 font-medium leading-tight">Available Stock
-                                                <mat-icon
-                                                    matTooltip="Current available stock"
-                                                    class="transform scale-75"
-                                                    [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                                </mat-icon>
-                                            </span>
-                                            <mat-form-field class="mt-0 sm:mt-1 flex items-center -my-px w-full">
-                                                <input
-                                                    type="number"
-                                                    matInput
-                                                    [disabled]="product.productVariants.length > 0"
-                                                    (input)="displayQuantity = $event.target.value"
-                                                    (input)="(displayQuantity > 0 && selectedProductForm.get('status').value === 'OUT_OF_STOCK') ? selectedProductForm.get('status').patchValue('ACTIVE') : ''"
-                                                    [value]="displayQuantity">
-                                            </mat-form-field>
-                                        </div>
-                                        <!-- Track Stock Level -->
-                                        <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
-                                            <span class="mb-2 sm:mb-4 font-medium leading-tight">Track Stock Level
-                                                <mat-icon
-                                                    matTooltip="Keep track the quantity of the stock"
-                                                    class="transform scale-75"
-                                                    [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                                </mat-icon>
-                                            </span>
-                                            <div class="mt-0 flex items-center -my-px w-full">
-                                                <mat-slide-toggle
-                                                    [formControlName]="'trackQuantity'"
-                                                    [color]="'primary'"
-                                                    (change)="disabledTrackStock($event.checked)"
-                                                    >
-                                                    {{selectedProductForm.get('trackQuantity').value === true ? 'Active' : 'Disabled'}}
-                                                </mat-slide-toggle>
+                                        <ng-container 
+                                            >
+                                            <!-- Available stock row -->
+                                            <div class="flex flex-col w-full sm:w-1/5 sm:pr-2 sm:border-r py-2 sm:py-0">
+                                                <span class="mb-2 font-medium leading-tight">Available Stock
+                                                    <mat-icon
+                                                        matTooltip="Current available stock"
+                                                        class="transform scale-75"
+                                                        [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                                    </mat-icon>
+                                                </span>
+                                                <mat-form-field class="mt-0 sm:mt-1 flex items-center -my-px w-full">
+                                                    <input
+                                                        type="number"
+                                                        matInput
+                                                        [disabled]="product.productVariants.length > 0"
+                                                        (input)="displayQuantity = $event.target.value"
+                                                        (input)="(displayQuantity > 0 && selectedProductForm.get('status').value === 'OUTOFSTOCK') ? selectedProductForm.get('status').patchValue('ACTIVE') : ''"
+                                                        [value]="displayQuantity">
+                                                </mat-form-field>
                                             </div>
-                                        </div>
-                                        <!-- Out of Stock Selling -->
-                                        <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
-                                            <span class="mb-2 font-medium leading-tight">Out of Stock Selling
-                                                <mat-icon
-                                                    matTooltip="Continue selling even when out of stock"
-                                                    class="transform scale-75"
-                                                    [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                                </mat-icon>
-                                            </span>
-                                            <div class="mt-0 sm:mt-3 flex items-center -my-px w-full">
-                                                <mat-slide-toggle
-                                                    [disabled]="selectedProductForm.get('trackQuantity').value === false"
-                                                    [formControlName]="'allowOutOfStockPurchases'"
-                                                    [color]="'primary'">
-                                                    {{selectedProductForm.get('allowOutOfStockPurchases').value === true ? 'Yes' : 'No'}}
-                                                </mat-slide-toggle>
+                                            <!-- Track Stock Level -->
+                                            <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
+                                                <span class="mb-2 sm:mb-4 font-medium leading-tight">Track Stock Level
+                                                    <mat-icon
+                                                        matTooltip="Keep track the quantity of the stock"
+                                                        class="transform scale-75"
+                                                        [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                                    </mat-icon>
+                                                </span>
+                                                <div class="mt-0 flex items-center -my-px w-full">
+                                                    <mat-slide-toggle
+                                                        [formControlName]="'trackQuantity'"
+                                                        [color]="'primary'"
+                                                        (change)="disabledTrackStock($event.checked)"
+                                                        >
+                                                        {{selectedProductForm.get('trackQuantity').value === true ? 'Active' : 'Disabled'}}
+                                                    </mat-slide-toggle>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <!-- Low Stock Alarm -->
-                                        <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
-                                            <span class="mb-2 font-medium leading-tight">Low Stock Alarm
-                                                <mat-icon
-                                                    matTooltip="Minimum 0 value to activate the alarm. Input negative value to disable the alarm"
-                                                    class="transform scale-75"
-                                                    [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                                </mat-icon>
-                                            </span>
-                                            <div *ngIf="selectedProductForm.get('minQuantityForAlarm').value < 0" class="mt-0 sm:mt-3 flex items-center -my-px w-full">
-                                                <mat-slide-toggle
-                                                    [color]="'primary'"
-                                                    [disabled]="selectedProductForm.get('trackQuantity').value === false"
-                                                    (click)="selectedProductForm.get('minQuantityForAlarm').value = 0"
-                                                    >
-                                                    {{selectedProductForm.get('minQuantityForAlarm').value >= 0 ? 'Active' : 'Disabled'}}
-                                                </mat-slide-toggle>
+                                            <!-- Out of Stock Selling -->
+                                            <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
+                                                <span class="mb-2 font-medium leading-tight">Out of Stock Selling
+                                                    <mat-icon
+                                                        matTooltip="Continue selling even when out of stock"
+                                                        class="transform scale-75"
+                                                        [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                                    </mat-icon>
+                                                </span>
+                                                <div class="mt-0 sm:mt-3 flex items-center -my-px w-full">
+                                                    <mat-slide-toggle
+                                                        [disabled]="selectedProductForm.get('trackQuantity').value === false"
+                                                        [formControlName]="'allowOutOfStockPurchases'"
+                                                        [color]="'primary'">
+                                                        {{selectedProductForm.get('allowOutOfStockPurchases').value === true ? 'Yes' : 'No'}}
+                                                    </mat-slide-toggle>
+                                                </div>
                                             </div>
-                                            <mat-form-field *ngIf="selectedProductForm.get('minQuantityForAlarm').value >= 0" class="mt-0 sm:mt-1 flex items-center -my-px w-full">
-                                                <input
-                                                    type="number"
-                                                    [value]="selectedProductForm.get('minQuantityForAlarm').value"
-                                                    matInput
-                                                    [formControlName]="'minQuantityForAlarm'">
-                                            </mat-form-field>
-                                        </div>
+                                            <!-- Low Stock Alarm -->
+                                            <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
+                                                <span class="mb-2 font-medium leading-tight">Low Stock Alarm
+                                                    <mat-icon
+                                                        matTooltip="Minimum 0 value to activate the alarm. Input negative value to disable the alarm"
+                                                        class="transform scale-75"
+                                                        [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                                    </mat-icon>
+                                                </span>
+                                                <div *ngIf="selectedProductForm.get('minQuantityForAlarm').value < 0" class="mt-0 sm:mt-3 flex items-center -my-px w-full">
+                                                    <mat-slide-toggle
+                                                        [color]="'primary'"
+                                                        [disabled]="selectedProductForm.get('trackQuantity').value === false"
+                                                        (click)="selectedProductForm.get('minQuantityForAlarm').value = 0"
+                                                        >
+                                                        {{selectedProductForm.get('minQuantityForAlarm').value >= 0 ? 'Active' : 'Disabled'}}
+                                                    </mat-slide-toggle>
+                                                </div>
+                                                <mat-form-field *ngIf="selectedProductForm.get('minQuantityForAlarm').value >= 0" class="mt-0 sm:mt-1 flex items-center -my-px w-full">
+                                                    <input
+                                                        type="number"
+                                                        [value]="selectedProductForm.get('minQuantityForAlarm').value"
+                                                        matInput
+                                                        [formControlName]="'minQuantityForAlarm'">
+                                                </mat-form-field>
+                                            </div>
+                                        </ng-container>
+                                        
                                         <div *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'e-commerce-b2b2c' || store$.verticalCode === 'ECommerce_PK'" class="flex flex-col w-full sm:w-1/5 sm:pl-2 py-2 sm:py-0">
                                             <span class="mb-2 sm:mb-4 font-medium leading-tight">Variants 
                                                 <mat-icon
@@ -776,10 +814,14 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div *ngIf="(store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK') && this.selectedProductForm.get('isPackage').value === true" class="flex flex-col w-full sm:w-1/5 sm:pl-2 py-2 sm:py-0">
+
+                                        <!-- Combo -->
+                                        <div 
+                                            *ngIf="(store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK') && this.selectedProductForm.get('isPackage').value === true" 
+                                            class="flex flex-col w-full sm:w-1/5 sm:pl-2 py-2 sm:py-0">
                                             <span class="mb-2 sm:mb-4 font-medium leading-tight">Combo 
                                                 <mat-icon
-                                                    matTooltip="This product have variants ?"
+                                                    matTooltip="Does this product have combo?"
                                                     class="transform scale-75"
                                                     [svgIcon]="'heroicons_solid:question-mark-circle'">
                                                 </mat-icon>
@@ -1115,7 +1157,7 @@
                                                             <div class="grid overflow-x-auto">
                                                                 <!-- Header -->
                                                                 <div
-                                                                    class="variant-grid z-9 sticky top-0 grid gap-4 py-4 px-6 md:px-5 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                                                                    class="variant-grid z-9 sticky top-0 grid gap-4 py-4 px-3 md:px-3 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
                                                                     matSort
                                                                     matSortDisableClear>
                                                                     <div>
@@ -1150,7 +1192,7 @@
                                                                 <ng-container *ngIf="selectedVariantCombos">
                                                                     <ng-container *ngFor="let variantCombo of selectedVariantCombos; let i = index; trackBy: trackByFn">
                                                                         <!-- Variant Header -->
-                                                                        <div class="variant-grid grid items-center gap-4 py-3 px-6 md:px-5 border-b">      
+                                                                        <div class="variant-grid grid items-center gap-4 py-3 px-3 md:px-3 border-b">      
                                                                             <!-- Image -->
                                                                             <div  class="flex items-center">
                                                                                 <div>
