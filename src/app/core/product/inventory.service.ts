@@ -125,7 +125,7 @@ export class InventoryService
      * @param order
      * @param search
      */
-    getProducts(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', status: string = 'ACTIVE,INACTIVE'):
+    getProducts(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', status: string = 'ACTIVE,INACTIVE', categoryId: string = ''):
         Observable<{ pagination: ProductPagination; products: Product[] }>
     {
         let productService = this._apiServer.settings.apiServer.productService;
@@ -139,7 +139,8 @@ export class InventoryService
                 sortByCol   : '' + sort,
                 sortingOrder: '' + order.toUpperCase(),
                 name        : '' + search,
-                status      : '' + status
+                status      : '' + status,
+                categoryId  : '' + categoryId
             }
         };
 
@@ -298,8 +299,6 @@ export class InventoryService
                     // Update the products
                     this._products.next(products);
 
-                    // console.log('1');
-                    
                     // Return the updated product
                     return updatedProduct["data"];
                 }),
@@ -307,8 +306,6 @@ export class InventoryService
                     take(1),
                     filter(item => item && item.id === id),
                     tap(() => {
-
-                        // console.log('2');
 
                         // Update the product if it's selected
                         this._product.next(updatedProduct["data"]);
