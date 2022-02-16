@@ -5,7 +5,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { merge, Observable, Subject } from 'rxjs';
+import { merge, Observable, of, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
@@ -171,6 +171,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     
     productCategoriesEditMode: boolean = false;
     productCategoriesValueEditMode:any = [];
+
+    categoryFilterControl: FormControl = new FormControl();
+    filterByCatId: string = "";
 
     // ------------------
     // product assets
@@ -419,7 +422,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 switchMap((query) => {
                     this.closeDetails();
                     this.isLoading = true;
-                    return this._inventoryService.getProducts(0, 10, 'name', 'asc', query);
+                    return this._inventoryService.getProducts(0, 10, 'name', 'asc', query, 'ACTIVE,INACTIVE' , this.filterByCatId);
                 }),
                 map(() => {
                     this.isLoading = false;
@@ -436,6 +439,24 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             // Mark for check
             this._changeDetectorRef.markForCheck();
         });
+
+        this.categoryFilterControl.valueChanges
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((catId) => {
+
+                    this.closeDetails();
+                    this.filterByCatId = catId
+                    this.isLoading = true;
+                    
+                    return this._inventoryService.getProducts(0, 10, 'name', 'asc', '', 'ACTIVE,INACTIVE', this.filterByCatId);
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -475,7 +496,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                     switchMap(() => {
                         this.closeDetails();
                         this.isLoading = true;
-                        return this._inventoryService.getProducts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction);
+                        return this._inventoryService.getProducts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, '', 'ACTIVE,INACTIVE', this.filterByCatId);
                     }),
                     map(() => {
                         this.isLoading = false;
