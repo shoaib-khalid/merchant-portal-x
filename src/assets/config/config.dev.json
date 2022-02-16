@@ -3,12 +3,12 @@
         "name": "dev"
     },
     "apiServer": {
-        "flowBuilderService": "https://api.symplified.it/flow-builder/v1",
-        "userService": "https://api.symplified.it/user-service/v1",
-        "productService": "https://api.symplified.it/product-service/v1",
-        "orderService": "https://api.symplified.it/order-service/v1",
-        "reportService": "https://api.symplified.it/report-service/v1",
-        "deliveryService": "https://api.symplified.it/delivery-service/v1"
+        "flowBuilderService"    : "https://api.symplified.it/flow-builder/v1",
+        "userService"           : "https://api.symplified.it/user-service/v1",
+        "productService"        : "https://api.symplified.it/product-service/v1",
+        "orderService"          : "https://api.symplified.it/order-service/v1",
+        "reportService"         : "https://api.symplified.it/report-service/v1",
+        "deliveryService"       : "https://api.symplified.it/delivery-service/v1"
     },
     "storeFrontDomain": ".symplified.ai",
     "logging": 0

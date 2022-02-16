@@ -57,12 +57,9 @@ export class EditAccountComponent implements OnInit
     // ----------------------
 
     this._userService.client$.subscribe(
-        (response) => {
-            console.log("shinal",response);
-            
+        (response) => {            
             // Fill the form
             this.accountForm.patchValue(response);
-            
         } 
     );
 
