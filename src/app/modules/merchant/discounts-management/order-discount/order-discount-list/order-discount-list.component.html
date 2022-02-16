@@ -281,11 +281,12 @@
                                                     class="w-full lg:w-4/12 pr-2"
                                                     >
                                                     <mat-label>Start time</mat-label>
-                                                    <input 
-                                                        matInput
-                                                        [formControlName]="'startTime'"
-                                                        type="time" required
-                                                    >
+                                                    <time-selector
+                                                    matInput
+                                                    type="time"
+                                                    [formControlName]="'startTime'"
+                                                    required
+                                                    ></time-selector>
                                                 </mat-form-field>
                                      
                                           
@@ -315,11 +316,12 @@
                                         class="w-full lg:w-4/12 pr-2"
                                         >
                                             <mat-label>End time</mat-label>
-                                            <input 
-                                                matInput 
-                                                [formControlName]="'endTime'"
-                                                type="time" step="900" required
-                                            >
+                                            <time-selector
+                                            matInput
+                                            type="time"
+                                            [formControlName]="'endTime'"
+                                            required
+                                            ></time-selector>
                                         </mat-form-field>
 
                                         <!-- Discount On (type) -->

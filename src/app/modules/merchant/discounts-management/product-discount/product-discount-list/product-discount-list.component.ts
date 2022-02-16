@@ -18,6 +18,7 @@ import { ApiResponseModel, StoreDiscountProduct } from './product-discount-list.
 import { ProductListDialogComponent } from '../product-list-dialog/product-list-dialog.component';
 import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dialog/dialog.component';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
+import { TimeSelector } from 'app/layout/common/time-selector/timeselector.component';
 
 @Component({
     selector       : 'product-discount-list',
@@ -101,7 +102,8 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
     message: string = "";
 
     currentScreenSize: string[] = [];
-
+    changeStartTime:string;
+    changeEndTime:string;
 
     /**
      * Constructor
@@ -333,6 +335,42 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
 
                 // Fill the form
                 this.selectedDiscountForm.patchValue(discount);
+
+                //=====================START TIME =====================
+                let _pickStartTimeHour = discount.startTime.split(":")[0];
+                let _pickStartTimeMinute = discount.startTime.split(":")[1];
+
+                let _pickStartTimeAMPM : 'AM' | 'PM';
+                if ((<any>_pickStartTimeHour) > 12) {
+                    _pickStartTimeAMPM = "PM";
+                    (<any>_pickStartTimeHour) = (<any>_pickStartTimeHour) - 12;
+                    (<any>_pickStartTimeHour) = (((<any>_pickStartTimeHour) < 10) ? '0' : '') + _pickStartTimeHour;    
+
+                } else {
+                    _pickStartTimeAMPM = "AM";
+                }
+                
+                this.selectedDiscountForm.get('startTime').setValue(new TimeSelector(_pickStartTimeHour,_pickStartTimeMinute, _pickStartTimeAMPM));
+                
+                //=====================/ START TIME =====================
+
+                //=====================END TIME =====================
+
+                let _pickEndTimeHour = discount.endTime.split(":")[0];
+                let _pickEndTimeMinute = discount.endTime.split(":")[1];
+
+                let _pickEndTimeAMPM : 'AM' | 'PM';
+                if (<any>_pickEndTimeHour > 12) {
+                    _pickEndTimeAMPM = "PM";
+                    (<any>_pickEndTimeHour) = (<any>_pickEndTimeHour) - 12;
+                    (<any>_pickEndTimeHour) = (((<any>_pickEndTimeHour) < 10) ? '0' : '') + _pickEndTimeHour;    
+
+                } else {
+                    _pickEndTimeAMPM = "AM";
+                }
+                
+                this.selectedDiscountForm.get('endTime').setValue(new TimeSelector(_pickEndTimeHour,_pickEndTimeMinute, _pickEndTimeAMPM));
+                //===================== / END TIME =====================
             
                 // clear discount tier form array
                 (this.selectedDiscountForm.get('storeDiscountTierList') as FormArray).clear();
@@ -429,10 +467,30 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
     updateSelectedDiscount(): void
     {
         this.checkDate();
+        this.changeTime();
+        let sendPayload = [this.selectedDiscountForm.value];
+        let toBeSendPayload=sendPayload.
+        map((x)=>(
+            {
+                startTime:this.changeStartTime,
+                endTime:this.changeEndTime,
+                discountName: x.discountName,
+                discountType:x.discountType,
+                endDate: x.endDate,
+                id: x.id,
+                isActive: x.isActive,
+                maxDiscountAmount: x.maxDiscountAmount,
+                normalPriceItemOnly: x.normalPriceItemOnly,
+                startDate: x.startDate,
+                storeDiscountTierList: x.storeDiscountTierList,
+                storeId: x.storeId,
+            }
+            ));
+
         if(this.checkdate === true) {
 
             // Update the  main discount on the server
-            this._discountService.updateDiscount(this.selectedDiscountForm.value.id, this.selectedDiscountForm.value)
+            this._discountService.updateDiscount(this.selectedDiscountForm.value.id, toBeSendPayload[0])
                 .subscribe(() => {
                     // Show a success message
                     this.showFlashMessage('success');
@@ -570,5 +628,38 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
         });
        return confirmation;
     }
+
+    changeTime(){
+        //===========Start Time==================
+        let pickStartTime =this.selectedDiscountForm.get('startTime').value;
+        let _pickStartTime;
+    
+        if ((<any>pickStartTime).timeAmPm === "PM") {
+            _pickStartTime = parseInt((<any>pickStartTime).timeHour) + 12;
+        } else {
+            _pickStartTime = (<any>pickStartTime).timeHour;
+        }
+        const changePickStartTime = new Date();
+        changePickStartTime.setHours(_pickStartTime,(<any>pickStartTime).timeMinute,0);
+        
+        this.changeStartTime= String(changePickStartTime.getHours()).padStart(2, "0")+':'+String(changePickStartTime.getMinutes()).padStart(2, "0");    
+        
+        //==============End time===================
+        let pickEndTime = this.selectedDiscountForm.get('endTime').value;
+        let _pickEndTime;
+    
+        if ((<any>pickEndTime).timeAmPm === "PM") {
+            _pickEndTime = parseInt((<any>pickEndTime).timeHour) + 12;
+        } else {
+            _pickEndTime = (<any>pickEndTime).timeHour;
+        }
+        const changePickEndTime = new Date();
+        changePickEndTime.setHours(_pickEndTime,(<any>pickEndTime).timeMinute,0);
+        
+        this.changeEndTime= String(changePickEndTime.getHours()).padStart(2, "0")+':'+String(changePickEndTime.getMinutes()).padStart(2, "0");  
+        
+        return;
+      
+      }
 
 }

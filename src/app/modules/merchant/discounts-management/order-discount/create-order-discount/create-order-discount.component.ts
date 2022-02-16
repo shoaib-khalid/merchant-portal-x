@@ -37,6 +37,10 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
   maxEndDate: string;
   maxEndTime: string;
 
+  changeStartTime:string;
+  changeEndTime:string;
+
+
   message: string = "";
 
   constructor(
@@ -58,14 +62,16 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
   }
 
   addNewDiscount() {
+    this.changeTime();
+  
     this.dialogRef.close({ 
         status: true ,
         discountName: this.discountName,
         discountOn: this.discountType,
         startDate: this.startDate,
-        startTime: this.startTime,
+        startTime: this.changeStartTime,
         endDate: this.endDate,
-        endTime: this.endTime,
+        endTime: this.changeEndTime,
         isActive :this.isActive,
         maxDiscountAmount :this.maxDiscountAmount,
         normalPriceItemOnly : this.normalPriceItemOnly
@@ -152,5 +158,38 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
         this.disabledProceed = true;
     }
     
+  }
+
+  changeTime(){
+    //===========Start Time==================
+    let pickStartTime = this.startTime;
+    let _pickStartTime;
+
+    if ((<any>pickStartTime).timeAmPm === "PM") {
+        _pickStartTime = parseInt((<any>pickStartTime).timeHour) + 12;
+    } else {
+        _pickStartTime = (<any>pickStartTime).timeHour;
+    }
+    const changePickStartTime = new Date();
+    changePickStartTime.setHours(_pickStartTime,(<any>pickStartTime).timeMinute,0);
+    
+    this.changeStartTime= String(changePickStartTime.getHours()).padStart(2, "0")+':'+String(changePickStartTime.getMinutes()).padStart(2, "0");    
+    
+    //==============End time===================
+    let pickEndTime = this.endTime;
+    let _pickEndTime;
+
+    if ((<any>pickEndTime).timeAmPm === "PM") {
+        _pickEndTime = parseInt((<any>pickEndTime).timeHour) + 12;
+    } else {
+        _pickEndTime = (<any>pickEndTime).timeHour;
+    }
+    const changePickEndTime = new Date();
+    changePickEndTime.setHours(_pickEndTime,(<any>pickEndTime).timeMinute,0);
+    
+    this.changeEndTime= String(changePickEndTime.getHours()).padStart(2, "0")+':'+String(changePickEndTime.getMinutes()).padStart(2, "0");  
+    
+    return;
+  
   }
 }
