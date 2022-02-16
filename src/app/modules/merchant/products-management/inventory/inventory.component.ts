@@ -869,6 +869,18 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                         this.displayPrice = response.price;
                         this.displayQuantity = response.quantity;
                         this.displaySku = response.sku;
+
+                        // if type is combo..
+                        if (productType === "combo"){
+
+                            // open the details window..
+                            this.toggleDetails(newProduct["data"].id);
+
+                            // then, open the combo section
+                            // this.showCombosSection = true;
+            
+                        }
+
                     });
 
                 // Update the assets product on the server (backend kena enable update)
@@ -897,7 +909,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 }
 
                 // Go to new product
-                this.selectedProduct = newProduct["data"];
+                // this.selectedProduct = newProduct["data"];
                                         
                 // Update current form with new product data
                 this.selectedProductForm.patchValue(newProduct["data"]);
@@ -914,8 +926,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 // // Set selectedProduct variants to empty array
                 // this.selectedProduct.variants = [];
 
-                // close the details window
-                this.toggleDetails(newProduct["data"].id)
+
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -1710,9 +1721,9 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         return (index > -1) ? true : false;
     }
 
-    displayCombos(){
-        this.showCombosSection = !this.showCombosSection;
-    }
+    // displayCombos(){
+    //     this.showCombosSection = !this.showCombosSection;
+    // }
 
     // --------------------------------------
     // Product Variant Section
