@@ -74,7 +74,7 @@ export class ChooseProviderDateTimeComponent implements OnInit {
     const pickUpTime = new Date();
     pickUpTime.setHours(_pickTime,(<any>pickTime).timeMinute,0);
 
-    this.changeTimePickup= pickUpTime.getHours()+':'+String(pickUpTime.getMinutes()).padStart(2, "0");    
+    this.changeTimePickup=String(pickUpTime.getHours()).padStart(2, "0")+':'+String(pickUpTime.getMinutes()).padStart(2, "0");    
     return this.changeTimePickup;
   
   }
