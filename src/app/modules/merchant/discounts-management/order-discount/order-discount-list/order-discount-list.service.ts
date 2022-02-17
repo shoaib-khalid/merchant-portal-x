@@ -382,45 +382,21 @@ export class DiscountsService
     /**
      * Get discounts tier
      *
-     * @param page
-     * @param size
-     * @param sort
-     * @param order
-     * @param search
      */
-    getDiscountsTier(discountId: string, page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', status: string = 'ACTIVE,INACTIVE'):
-         Observable<{ pagination: DiscountPagination; discountTierList: StoreDiscountTierList[] }>
+    getDiscountsTier(discountId: string):Observable<ApiResponseModel<StoreDiscountTierList[]>>
      {
          let productService = this._apiServer.settings.apiServer.productService;
          let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
  
          const header = {
              headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
-            //  params: {
-            //      page: '' + page,
-            //      pageSize: '' + size,
-            //      sortByCol: '' + sort,
-            //      sortingOrder: '' + order.toUpperCase(),
-            //      name: '' + search,
-            //      status: '' + status
-            //  }
+  
          };
  
          return this._httpClient.get<any>(productService +'/stores/'+this.storeId$+'/discount/'+discountId+'/tier', header).pipe(
              tap((response) => {
  
                  this._logging.debug("Response from DiscountsService (getDiscountsTier)",response);
- 
-                 // let _pagination = {
-                 //     length: response.data.totalElements,
-                 //     size: response.data.size,
-                 //     page: response.data.number,
-                 //     lastPage: response.data.totalPages,
-                 //     startIndex: response.data.pageable.offset,
-                 //     endIndex: response.data.pageable.offset + response.data.numberOfElements - 1
-                 // }
-                //  let _pagination = { length: 0, size: 0, page: 0, lastPage: 0, startIndex: 0, endIndex: 0 };
-                //  this._pagination.next(_pagination);
                  this._discountTierList.next(response.data);
              })
          );
@@ -471,15 +447,6 @@ export class DiscountsService
                  take(1),
                  switchMap(discountTier => this._httpClient.delete(productService +'/stores/'+this.storeId$+'/discount/'+ discountId +'/tier/'+discountTierId, header).pipe(
                      map((response) => {
-     
-                         // Find the index of the deleted discount
-                         const index = discountTier.findIndex(item => item.id === discountTierId);
-     
-                         // Delete the discount
-                         discountTier.splice(index, 1);
-     
-                         // Update the discounts
-                         this._discountTierList.next(discountTier);
      
                          let isDeleted:boolean = false;
                          if (response["status"] === 200) {
