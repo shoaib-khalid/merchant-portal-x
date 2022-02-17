@@ -6,7 +6,7 @@ import { merge, Observable, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { Discount, DiscountPagination, StoreDiscountTierList } from 'app/modules/merchant/discounts-management/order-discount/order-discount-list/order-discount-list.types';
+import { ApiResponseModel, Discount, DiscountPagination, StoreDiscountTierList } from 'app/modules/merchant/discounts-management/order-discount/order-discount-list/order-discount-list.types';
 import { DiscountsService } from 'app/modules/merchant/discounts-management/order-discount/order-discount-list/order-discount-list.service';
 import { CreateOrderDiscountDialogComponent } from '../create-order-discount/create-order-discount.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -73,6 +73,8 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
 
     changeStartTime:string;
     changeEndTime:string;
+
+    isDisplayAddTier : boolean = false;
 
 
     /**
@@ -253,64 +255,27 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
         }
 
         // Get the discount by id
-        this._discountService.getDiscountById(discountId)
-            .subscribe((discount) => {
+        this._discountService.getDiscountByGuid(discountId)
+            .subscribe((response:ApiResponseModel<Discount>) => {
 
-                // Set the selected discount
-                this.selectedDiscount = discount;
+                //Set the selected discount
+                this.selectedDiscount = response.data;
 
                 // Fill the form
-                this.selectedDiscountForm.patchValue(discount);
+                this.selectedDiscountForm.patchValue(response.data);
 
-                //=====================START TIME =====================
-                let _pickStartTimeHour = discount.startTime.split(":")[0];
-                let _pickStartTimeMinute = discount.startTime.split(":")[1];
-
-                let _pickStartTimeAMPM : 'AM' | 'PM';
-                if ((<any>_pickStartTimeHour) > 12) {
-                    _pickStartTimeAMPM = "PM";
-                    (<any>_pickStartTimeHour) = (<any>_pickStartTimeHour) - 12;
-                    (<any>_pickStartTimeHour) = (((<any>_pickStartTimeHour) < 10) ? '0' : '') + _pickStartTimeHour;    
-
-                } else {
-                    _pickStartTimeAMPM = "AM";
-                }
-                
-                this.selectedDiscountForm.get('startTime').setValue(new TimeSelector(_pickStartTimeHour,_pickStartTimeMinute, _pickStartTimeAMPM));
-                
-                //=====================/ START TIME =====================
-
-                //=====================END TIME =====================
-
-                let _pickEndTimeHour = discount.endTime.split(":")[0];
-                let _pickEndTimeMinute = discount.endTime.split(":")[1];
-
-                let _pickEndTimeAMPM : 'AM' | 'PM';
-                if (<any>_pickEndTimeHour > 12) {
-                    _pickEndTimeAMPM = "PM";
-                    (<any>_pickEndTimeHour) = (<any>_pickEndTimeHour) - 12;
-                    (<any>_pickEndTimeHour) = (((<any>_pickEndTimeHour) < 10) ? '0' : '') + _pickEndTimeHour;    
-
-                } else {
-                    _pickEndTimeAMPM = "AM";
-                }
-                
-                this.selectedDiscountForm.get('endTime').setValue(new TimeSelector(_pickEndTimeHour,_pickEndTimeMinute, _pickEndTimeAMPM));
-                //===================== / END TIME =====================
+                //set value for time in tieme selector
+                this.setValueToTimeSelector(response.data);
 
                 // clear discount tier form array
                 (this.selectedDiscountForm.get('storeDiscountTierList') as FormArray).clear();
-
+                
                 // load discount tier form array with data frombackend
-                discount.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
+                response.data.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
                     this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
                     this.storeDiscountTierList.push(this._formBuilder.group(item));
                 });
                 
-                this._discountService.getDiscountsTier(discountId)
-                    .subscribe((response) => {
-
-                    });
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -363,6 +328,14 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
     
                     // Update current form with new discount data
                     this.selectedDiscountForm.patchValue(newDiscount["data"]);
+
+                    //set value of time with time selector
+                    this.setValueToTimeSelector(newDiscount["data"]);
+
+                    // clear discount tier form array
+                    (this.selectedDiscountForm.get('storeDiscountTierList') as FormArray).clear();
+                    //disabled button add tier
+                    this.isDisplayAddTier = false;
     
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
@@ -480,7 +453,6 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
     insertTierToDiscount(){
 
         // check condition first before pass to backend
-
         if(this.calculationType === 'PERCENT' && this.discountAmount>100){
 
             const confirmation = this._fuseConfirmationService.open({
@@ -517,6 +489,8 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
                 response["data"].forEach(item => {
                     this.storeDiscountTierList.push(this._formBuilder.group(item));
                 });
+
+                this.isDisplayAddTier=false;
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -639,6 +613,15 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
         if (type === 'calculationType') {
             this.calculationType = value;
         }
+
+        if(<any>this.startTotalSalesAmount === "" || <any>this.discountAmount === "" ){
+            this.isDisplayAddTier = false;
+        }
+        else if(this.startTotalSalesAmount !== undefined && this.discountAmount!==undefined && this.calculationType!==undefined){
+            this.isDisplayAddTier = true;
+        }
+
+
     }
 
     /**
@@ -724,6 +707,46 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
         
         return;
       
-      }
+    }
+
+    setValueToTimeSelector(discount){
+
+        //=====================START TIME =====================
+        let _pickStartTimeHour = discount.startTime.split(":")[0];
+        let _pickStartTimeMinute = discount.startTime.split(":")[1];
+
+        let _pickStartTimeAMPM : 'AM' | 'PM';
+        if ((<any>_pickStartTimeHour) > 12) {
+            _pickStartTimeAMPM = "PM";
+            (<any>_pickStartTimeHour) = (<any>_pickStartTimeHour) - 12;
+            (<any>_pickStartTimeHour) = (((<any>_pickStartTimeHour) < 10) ? '0' : '') + _pickStartTimeHour;    
+
+        } else {
+            _pickStartTimeAMPM = "AM";
+        }
+        
+        this.selectedDiscountForm.get('startTime').setValue(new TimeSelector(_pickStartTimeHour,_pickStartTimeMinute, _pickStartTimeAMPM));
+        
+        //=====================/ START TIME =====================
+
+        //=====================END TIME =====================
+
+        let _pickEndTimeHour = discount.endTime.split(":")[0];
+        let _pickEndTimeMinute = discount.endTime.split(":")[1];
+
+        let _pickEndTimeAMPM : 'AM' | 'PM';
+        if (<any>_pickEndTimeHour > 12) {
+            _pickEndTimeAMPM = "PM";
+            (<any>_pickEndTimeHour) = (<any>_pickEndTimeHour) - 12;
+            (<any>_pickEndTimeHour) = (((<any>_pickEndTimeHour) < 10) ? '0' : '') + _pickEndTimeHour;    
+
+        } else {
+            _pickEndTimeAMPM = "AM";
+        }
+        
+        this.selectedDiscountForm.get('endTime').setValue(new TimeSelector(_pickEndTimeHour,_pickEndTimeMinute, _pickEndTimeAMPM));
+        //===================== / END TIME =====================
+        return;
+    }
 
 }

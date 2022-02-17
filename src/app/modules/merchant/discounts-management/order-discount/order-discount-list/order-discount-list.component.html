@@ -9,7 +9,7 @@
             <mat-progress-bar [mode]="'indeterminate'"></mat-progress-bar>
         </div>
         <!-- Title -->
-        <div class="text-2xl sm:text-4xl font-extrabold tracking-tight">Discounts Management</div>
+        <div class="text-2xl sm:text-4xl font-extrabold tracking-tight">Order Discounts Management</div>
         <!-- Actions -->
         <div class="flex flex-shrink-0 items-center mt-6 sm:mt-0 sm:ml-4">
             <!-- Search -->
@@ -455,20 +455,17 @@
                                 <!-- Dbuttons Insert Discount Tier-->
                                 <div class="flex flex-wrap w-1/1/2 lg:w-1/12 items-center justify-center">
                                     <div class="items-center justify-center flex flex-row w-full"> 
-                                        <input
-                                            id="create-discount-tier-btn"
-                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                            type="button"
-                                            (click)="insertTierToDiscount()"
-                                        >
-                                        <label
-                                            for="create-discount-tier-btn"
-                                            class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-primary hover:bg-on-primary-50 mr-3"
-                                            matRipple>
-                                            <mat-icon
-                                            class="text-white icon-size-5"
-                                            [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
-                                        </label>
+                                        <button
+                                        class="hover:bg-primary-500 border border-primary-500 ml-2 w-2 h-2"
+                                        mat-flat-button
+                                        [disabled]="!isDisplayAddTier"
+                                        (click)="insertTierToDiscount()"
+                                        [color]="'primary'">
+                                        <mat-icon
+                                        class="text-white icon-size-5"
+                                        [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                                        </button>
+                               
                                     </div>
                                 </div>
                                 </div>

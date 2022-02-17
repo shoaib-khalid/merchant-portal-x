@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
-import { Discount, DiscountPagination, StoreDiscountTierList } from 'app/modules/merchant/discounts-management/order-discount/order-discount-list/order-discount-list.types';
+import { ApiResponseModel, Discount, DiscountPagination, StoreDiscountTierList } from 'app/modules/merchant/discounts-management/order-discount/order-discount-list/order-discount-list.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service';
@@ -230,6 +230,23 @@ export class DiscountsService
             })
         );
     }
+
+    getDiscountByGuid(discountId: string) : Observable<ApiResponseModel<Discount>>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+   
+        };
+
+        let response = this._httpClient.get<ApiResponseModel<Discount>>(productService +'/stores/'+this.storeId$+'/discount/'+discountId,header);
+        this._logging.debug("Response from ProductDiscountsService (getStoreDiscountProduct)", response);
+
+        return response;
+    }
+
 
     /**
      * Create discount
