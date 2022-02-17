@@ -690,6 +690,47 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <!-- Variants Toggle -->
+                                            <div 
+                                                *ngIf="this.selectedProductForm.get('isPackage').value !== true && (store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK')"
+                                                class="flex flex-col w-full sm:pl-2 py-2 sm:py-0"
+                                            >
+                                                <span class="pb-1 font-medium leading-tight">Variants 
+                                                    <mat-icon
+                                                        matTooltip="Does this product have variants?"
+                                                        class="transform scale-75"
+                                                        [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                                    </mat-icon>
+                                                </span>
+                                                <div class="mt-0 flex items-center -my-px w-full">
+                                                    <mat-slide-toggle
+                                                        class="pr-4"
+                                                        [formControlName]="'isVariants'"
+                                                        [color]="'primary'"
+                                                        (change)="(selectedProductForm.get('isVariants').value === false) ? deleteAllVariantsConfirmation() : return"
+                                                        >
+                                                        {{selectedProductForm.get('isVariants').value === true ? 'Yes' : 'No'}}
+                                                    </mat-slide-toggle>
+                                                    <div 
+                                                        [ngClass]="selectedProductForm.get('isVariants').value === true ? 'visible ' : 'invisible '"
+                                                        >
+                                                        <input
+                                                            id="goto-variant-button"
+                                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                            type="button"
+                                                            (click)="displayVariants()"
+                                                            mat-icon-button>
+                                                        <label 
+                                                            class="flex items-center justify-center h-10 w-10 rounded-full cursor-pointer bg-gray-200 hover:bg-gray-300 text-white"
+                                                            for="goto-variant-button"
+                                                            matRipple>
+                                                            <mat-icon
+                                                                class="p-0.5"
+                                                                [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <!-- Combo button -->
                                             <!-- <div 
                                                 *ngIf="(store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK') && this.selectedProductForm.get('isPackage').value === true" 
@@ -714,8 +755,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <!-- *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'" -->
                                 <div 
+                                    *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'"
                                     class="flex flex-col sm:flex-row pb-4 border-t pt-4 px-8"
 
                                     >
@@ -744,14 +785,14 @@
                                             </div>
                                             <!-- Track Stock Level -->
                                             <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
-                                                <span class="mb-2 sm:mb-4 font-medium leading-tight">Track Stock Level
+                                                <span class="mb-2 font-medium leading-tight">Track Stock Level
                                                     <mat-icon
                                                         matTooltip="Keep track the quantity of the stock"
                                                         class="transform scale-75"
                                                         [svgIcon]="'heroicons_solid:question-mark-circle'">
                                                     </mat-icon>
                                                 </span>
-                                                <div class="mt-0 flex items-center -my-px w-full">
+                                                <div class="mt-0 sm:mt-3 flex items-center -my-px w-full">
                                                     <mat-slide-toggle
                                                         [disabled]="store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK'"
                                                         [formControlName]="'trackQuantity'"
@@ -807,12 +848,12 @@
                                                 </mat-form-field>
                                             </div>
                                         </ng-container>
-                                        
+                                        <!-- Variants Toggle -->
                                         <div 
                                             *ngIf="this.selectedProductForm.get('isPackage').value !== true"
                                             class="flex flex-col w-full sm:w-1/5 sm:pl-2 py-2 sm:py-0"
                                         >
-                                            <span class="mb-2 sm:mb-4 font-medium leading-tight">Variants 
+                                            <span class="mb-0 sm:mb-3 font-medium leading-tight">Variants 
                                                 <mat-icon
                                                     matTooltip="Does this product have variants?"
                                                     class="transform scale-75"
@@ -827,7 +868,9 @@
                                                     >
                                                     {{selectedProductForm.get('isVariants').value === true ? 'Yes' : 'No'}}
                                                 </mat-slide-toggle>
-                                                <div *ngIf="selectedProductForm.get('isVariants').value === true">
+                                                <!-- *ngIf="selectedProductForm.get('isVariants').value === true" -->
+                                                <div 
+                                                    [ngClass]="selectedProductForm.get('isVariants').value === true ? 'visible ' : 'invisible '">
                                                     <input
                                                         id="goto-variant-button"
                                                         class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"

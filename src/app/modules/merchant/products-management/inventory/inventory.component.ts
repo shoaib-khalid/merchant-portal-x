@@ -81,6 +81,10 @@ import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
                 //     grid-template-columns: 68px auto 128px 128px 84px 96px;
                 // }
             }
+            /* to remove visible container when window dialog is opened  */
+            // .mat-dialog-container {
+            // padding: 0 !important;
+            // }
             
 
         `

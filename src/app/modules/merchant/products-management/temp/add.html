@@ -1,29 +1,162 @@
 <div class="flex flex-col max-w-240 md:min-w-160 -m-6">
 
     <!-- Compose form -->
-    <!-- <div class="flex flex-col flex-auto p-1 sm:p-2 max-h-140 ">
+    <div class="flex flex-col flex-auto p-1 sm:p-1">
+        <div class="mb-4"></div>
 
-    </div> -->
-    <div class="flex">
-        <!-- Selected product form -->
-        <form
-            class="flex flex-col w-full"
-            [formGroup]="addProductForm">
-            <mat-horizontal-stepper
-            [linear]="true"
-            #horizontalStepper>
-                <!-- Basic info section -->
-                <mat-step
-                    [formGroupName]="'step1'"
-                    [stepControl]="addProductForm.get('step1')"
-                    #horizontalStepperStep1>
-                    <ng-template matStepLabel>Basic information</ng-template>
-                    <!-- <p class="my-6 font-medium">
-                        Fill in your basic information to let us know your preferences
-                    </p> -->
-                    <div class="content">
+            <div class="flex">
+                <!-- Selected product form -->
+                <form
+                    class="flex flex-col w-full"
+                    [formGroup]="addProductForm">
+                    <mat-horizontal-stepper
+                    [linear]="true"
+                    #horizontalStepper>
+                        <mat-step
+                            [formGroupName]="'step1'"
+                            [stepControl]="addProductForm.get('step1')"
+                            #horizontalStepperStep1>
+                            <ng-template matStepLabel>Basic information</ng-template>
+                            <p class="my-6 font-medium">
+                                Fill in your basic information to let us know your preferences
+                            </p>
+                            <div class="flex">
+                                <mat-form-field class="flex-auto">
+                                    <input
+                                        matInput
+                                        [formControlName]="'email'"
+                                        [placeholder]="'Email Address'"
+                                        required>
+                                    <mat-icon
+                                        class="icon-size-5"
+                                        matPrefix
+                                        [svgIcon]="'heroicons_solid:mail'"></mat-icon>
+                                </mat-form-field>
+                            </div>
+                            <div class="flex flex-col gt-xs:flex-row">
+                                <mat-form-field class="flex-auto gt-xs:pr-3">
+                                    <mat-select
+                                        [formControlName]="'country'"
+                                        [placeholder]="'Country / Region'"
+                                        required>
+                                        <mat-option value="country-1">Country 1</mat-option>
+                                        <mat-option value="country-2">Country 2</mat-option>
+                                        <mat-option value="country-3">Country 3</mat-option>
+                                    </mat-select>
+                                    <mat-icon
+                                        class="icon-size-5"
+                                        matPrefix
+                                        [svgIcon]="'heroicons_solid:location-marker'"></mat-icon>
+                                </mat-form-field>
+                                <mat-form-field class="flex-auto gt-xs:pl-3">
+                                    <mat-select
+                                        [formControlName]="'language'"
+                                        [placeholder]="'Language'"
+                                        required>
+                                        <mat-option value="language-1">Language 1</mat-option>
+                                        <mat-option value="language-2">Language 2</mat-option>
+                                        <mat-option value="language-3">Language 3</mat-option>
+                                    </mat-select>
+                                    <mat-icon
+                                        class="icon-size-5"
+                                        matPrefix
+                                        [svgIcon]="'heroicons_solid:translate'"></mat-icon>
+                                </mat-form-field>
+                            </div>
+                            <div class="flex justify-end">
+                                <button
+                                    class="px-8"
+                                    mat-flat-button
+                                    [color]="'primary'"
+                                    [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
+                                    type="button"
+                                    matStepperNext>
+                                    Next
+                                </button>
+                            </div>
+                        </mat-step>
 
-                        <div class="flex pt-5 px-2">
+                        <mat-step
+                            [formGroupName]="'step2'"
+                            [stepControl]="addProductForm.get('step2')"
+                            #horizontalStepperStep2>
+                            <ng-template matStepLabel>Profile</ng-template>
+                            <p class="my-6 font-medium">
+                                People here will get to know you with this information
+                            </p>
+                            <div class="flex flex-col gt-xs:flex-row">
+                                <mat-form-field class="flex-auto gt-xs:pr-3">
+                                    <input
+                                        matInput
+                                        [formControlName]="'firstName'"
+                                        [placeholder]="'First name'"
+                                        required>
+                                    <mat-icon
+                                        class="icon-size-5"
+                                        matPrefix
+                                        [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
+                                </mat-form-field>
+                                <mat-form-field class="flex-auto gt-xs:pl-3">
+                                    <input
+                                        matInput
+                                        [formControlName]="'lastName'"
+                                        [placeholder]="'Last name'"
+                                        required>
+                                    <mat-icon
+                                        class="icon-size-5"
+                                        matPrefix
+                                        [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
+                                </mat-form-field>
+                            </div>
+                            <div class="flex">
+                                <mat-form-field class="flex-auto">
+                                    <input
+                                        matInput
+                                        [formControlName]="'userName'"
+                                        [placeholder]="'Username'"
+                                        required>
+                                    <span matPrefix>www.example.com/</span>
+                                </mat-form-field>
+                            </div>
+                            <div class="flex">
+                                <mat-form-field class="fuse-mat-textarea flex-auto">
+                                    <textarea
+                                        matInput
+                                        [formControlName]="'about'"
+                                        [placeholder]="'About'"
+                                        [rows]="3"></textarea>
+                                    <mat-icon
+                                        class="icon-size-5"
+                                        matPrefix
+                                        [svgIcon]="'heroicons_solid:menu-alt-2'"></mat-icon>
+                                </mat-form-field>
+                            </div>
+                            <div class="flex justify-end">
+                                <button
+                                    class="px-8 mr-2"
+                                    mat-flat-button
+                                    [color]="'accent'"
+                                    type="button"
+                                    matStepperPrevious>
+                                    Back
+                                </button>
+                                <button
+                                    class="px-8"
+                                    mat-flat-button
+                                    [color]="'primary'"
+                                    [disabled]="horizontalStepperStep2.stepControl.pristine || horizontalStepperStep2.stepControl.invalid"
+                                    type="button"
+                                    matStepperNext>
+                                    Next
+                                </button>
+                            </div>
+                        </mat-step>
+
+                    </mat-horizontal-stepper>
+
+                    <!-- Normal Section -->
+                    <div class="max-h-90vh">
+                        <div class="flex flex-col w-full lg:flex-row px-8 pt-8 pb-4">
                             <!-- Product images and status -->
                             <div class="flex flex-col items-center lg:w-2/12 sm:items-start">
                                 <div class="flex flex-col items-center w-full">
@@ -217,8 +350,8 @@
                                             floatLabel="always"
                                             placeholder="Select one option"
                                             [formControlName]="'status'"
-                                            (selectionChange)="addProductForm.get('step1').get('status').patchValue(statusSelector.value)"
-                                            (selectionChange)="statusSelector.value === 'OUTOFSTOCK' ? addProductForm.get('step1').get('availableStock').patchValue(0) : ''"
+                                            (selectionChange)="addProductForm.get('status').patchValue(statusSelector.value)"
+                                            (selectionChange)="statusSelector.value === 'OUTOFSTOCK' ? addProductForm.get('availableStock').patchValue(0) : ''"
                                             #statusSelector="matSelect"
                                             >
                                             <mat-select-trigger>
@@ -235,11 +368,11 @@
                                         <!-- <mat-slide-toggle
                                             [formControlName]="'status'"
                                             [color]="'primary'">
-                                            {{addProductForm.get('step1').get('status').value === "ACTIVE" ? true : false}}
+                                            {{addProductForm.get('status').value === "ACTIVE" ? true : false}}
                                         </mat-slide-toggle> -->
-                                        <!-- <mat-error *ngIf="addProductForm.get('step1').get('status').hasError('required')">
+                                        <mat-error *ngIf="addProductForm.get('status').hasError('required')">
                                             Required
-                                        </mat-error> -->
+                                        </mat-error>
                                     </mat-form-field>
                                 </div>
                             </div>
@@ -258,7 +391,7 @@
                                             [formControlName]="'name'"
                                             (change)="generateSku()"
                                         >
-                                        <mat-error *ngIf="addProductForm.get('step1').get('name').hasError('required')">
+                                        <mat-error *ngIf="addProductForm.get('name').hasError('required')">
                                             Required
                                         </mat-error>
                                     </mat-form-field>
@@ -268,23 +401,18 @@
                                         <span class="font-medium leading-tight">Description *</span>
                                         <div class="mt-1.5 flex items-center -my-px w-full">
                                             <quill-editor
-                                                required
                                                 class="w-full"
-                                                [ngClass]="addProductForm.get('step1').get('description').hasError('required') === true ? 'rounded-md border border-red-600' : ''"
                                                 [formControlName]="'description'"
                                                 [modules]="quillModules"></quill-editor>
                                             <!-- use (onContentChanged)="textChanged($event)" for limiting quil editor -->
                                         </div>
-                                        <mat-error 
-                                            class="text-sm font-medium"
-                                            [ngClass]="addProductForm.get('step1').get('description').hasError('required') === true ? 'visible' : 'invisible'"
-                                            >
+                                        <!-- <mat-error *ngIf="addProductForm.get('description').hasError('required')">
                                             Required
-                                        </mat-error>
+                                        </mat-error> -->
                                     </div>
                                 </div>
                                 
-                                <!-- SKU, Price, Packing Size-->
+                                <!-- SKU, Price, Packing Size, Category-->
                                 <div class="flex flex-col w-full lg:w-1/3 lg:pl-8">
                                     <!-- SKU -->
                                     <mat-form-field class="w-full pr-2" appearance="fill" floatLabel="always">
@@ -295,7 +423,7 @@
                                             [formControlName]="'sku'"
                                             placeholder="Insert SKU"
                                         >
-                                        <mat-error *ngIf="addProductForm.get('step1').get('sku').hasError('required')">
+                                        <mat-error *ngIf="addProductForm.get('sku').hasError('required')">
                                             Required
                                         </mat-error>
                                     </mat-form-field>
@@ -314,7 +442,7 @@
                                             placeholder="Insert price"
                                             type="number"
                                         >
-                                        <mat-error *ngIf="addProductForm.get('step1').get('price').hasError('required')">
+                                        <mat-error *ngIf="addProductForm.get('price').hasError('required')">
                                             Required
                                         </mat-error>
                                     </mat-form-field>
@@ -332,7 +460,7 @@
                                             [formControlName]="'packingSize'"
                                             [value]="packingSize"
                                             placeholder="Select one option"
-                                            (selectionChange)="addProductForm.get('step1').get('packingSize').patchValue(packingSizeSelector.value)"
+                                            (selectionChange)="addProductForm.get('packingSize').patchValue(packingSizeSelector.value)"
                                             #packingSizeSelector="matSelect"
                                             >
                                             <mat-select-trigger>
@@ -347,7 +475,7 @@
                                                 <mat-option [value]="'XL'">Extra Large (above 2.0KG)</mat-option>
                                             </div>
                                         </mat-select>
-                                        <mat-error *ngIf="addProductForm.get('step1').get('packingSize').hasError('required')">
+                                        <mat-error *ngIf="addProductForm.get('packingSize').hasError('required')">
                                             Required
                                         </mat-error>
                                     </mat-form-field>
@@ -359,10 +487,8 @@
                             <div class="flex flex-col w-full lg:w-3/12 lg:pl-8">
                                 <!-- Category -->
                                 <div class="w-full">
-                                    <span class="mb-px font-medium leading-tight">Category *</span>
-                                    <div 
-                                        [ngClass]="addProductForm.get('step1').get('categoryId').hasError('required') === true ? 'rounded-md border border-red-600' : ''"
-                                        class="mt-0.5 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden">
+                                    <span class="mb-px font-medium leading-tight">Category</span>
+                                    <div class="mt-0.5 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden">
                                         <!-- Header -->
                                         <div class="flex items-center -my-px py-2 px-3">
                                             <div class="flex items-center flex-auto min-w-0">
@@ -406,9 +532,8 @@
                                                 <ng-container *ngFor="let category of filteredProductCategories; trackBy: trackByFn;">
                                                     <mat-checkbox
                                                         class="flex items-center h-10 min-h-10 px-4"
-                                                        required
                                                         [color]="'primary'"
-                                                        [checked]="addProductForm.get('step1').get('categoryId').value.includes(category.id)"
+                                                        [checked]="addProductForm.get('categoryId').value.includes(category.id)"
                                                         (change)="toggleProductCategory(category, $event);"
                                                     >
                                                         {{category.name}}
@@ -487,16 +612,14 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <mat-error class="text-sm font-medium" *ngIf="addProductForm.get('step1').get('categoryId').hasError('required')">
-                                        Required
-                                    </mat-error>
                                 </div>
                             </div>
                         </div>
+
                         <!-- Available stock -->
                         <div 
                             *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'"
-                            class="flex flex-col sm:flex-row pb-4 border-t pt-4 px-2">
+                            class="flex flex-col sm:flex-row pb-4 border-t pt-4 px-8">
                             <div class="flex flex-auto flex-wrap">
                                 <!-- Available stock row -->
                                 <div class="flex flex-col w-full sm:w-1/5 sm:pr-2 sm:border-r py-2 sm:py-0">
@@ -512,13 +635,13 @@
                                         appearance="fill" floatLabel="always"
                                     >
                                         <input
-                                            (input)="(addProductForm.get('step1').get('availableStock').value > 0 && addProductForm.get('step1').get('status').value === 'OUTOFSTOCK') ? addProductForm.get('step1').get('status').patchValue('ACTIVE') : ''"
+                                            (input)="(addProductForm.get('availableStock').value > 0 && addProductForm.get('status').value === 'OUTOFSTOCK') ? addProductForm.get('status').patchValue('ACTIVE') : ''"
                                             placeholder="Insert current stock"
                                             [formControlName]="'availableStock'"
                                             type="number"
                                             matInput
                                         >
-                                        <mat-error *ngIf="addProductForm.get('step1').get('availableStock').hasError('required')">
+                                        <mat-error *ngIf="addProductForm.get('availableStock').hasError('required')">
                                             Required
                                         </mat-error>
                                     </mat-form-field>
@@ -538,270 +661,82 @@
                                             [color]="'primary'"
                                             (change)="disabledTrackStock($event.checked)"
                                             >
-                                            {{addProductForm.get('step1').get('trackQuantity').value === true ? 'Active' : 'Disabled'}}
+                                            {{addProductForm.get('trackQuantity').value === true ? 'Active' : 'Disabled'}}
                                         </mat-slide-toggle>
                                     </div>
                                 </div>
                                 <!-- Out of Stock Selling -->
                                 <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
-                                    <span class="flex mb-2 font-medium leading-tight">Out-of-stock Selling
+                                    <span class="mb-2 font-medium leading-tight">Out of Stock Selling
                                         <mat-icon
                                             matTooltip="Continue selling even when out of stock"
-                                            class="transform scale-75 mr-4"
+                                            class="transform scale-75"
                                             [svgIcon]="'heroicons_solid:question-mark-circle'">
                                         </mat-icon>
                                     </span>
-                                    <div class="mt-0 sm:mt-0 flex items-center -my-px w-full">
+                                    <div class="mt-0 sm:mt-3 flex items-center -my-px w-full">
                                         <mat-slide-toggle
-                                            [disabled]="addProductForm.get('step1').get('trackQuantity').value === false"
+                                            [disabled]="addProductForm.get('trackQuantity').value === false"
                                             [formControlName]="'allowOutOfStockPurchases'"
                                             [color]="'primary'">
-                                            {{addProductForm.get('step1').get('allowOutOfStockPurchases').value === true ? 'Yes' : 'No'}}
+                                            {{addProductForm.get('allowOutOfStockPurchases').value === true ? 'Yes' : 'No'}}
                                         </mat-slide-toggle>
                                     </div>
                                 </div>
                                 <!-- Low Stock Alarm -->
                                 <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
-                                    <span class="mb-2 sm:mb-4 font-medium leading-tight">Low Stock Alarm
+                                    <span class="mb-2 font-medium leading-tight">Low Stock Alarm
                                         <mat-icon
                                             matTooltip="Minimum 0 value to activate the alarm. Input negative value to disable the alarm"
                                             class="transform scale-75"
                                             [svgIcon]="'heroicons_solid:question-mark-circle'">
                                         </mat-icon>
                                     </span>
-                                    <div *ngIf="addProductForm.get('step1').get('minQuantityForAlarm').value < 0" class="mt-0 sm:mt-0 flex items-center -my-px w-full">
+                                    <div *ngIf="addProductForm.get('minQuantityForAlarm').value < 0" class="mt-0 sm:mt-3 flex items-center -my-px w-full">
                                         <mat-slide-toggle
                                             [color]="'primary'"
-                                            [disabled]="addProductForm.get('step1').get('trackQuantity').value === false"
-                                            (click)="addProductForm.get('step1').get('minQuantityForAlarm').value = 0"
+                                            [disabled]="addProductForm.get('trackQuantity').value === false"
+                                            (click)="addProductForm.get('minQuantityForAlarm').value = 0"
                                             >
-                                            {{addProductForm.get('step1').get('minQuantityForAlarm').value >= 0 ? 'Active' : 'Disabled'}}
+                                            {{addProductForm.get('minQuantityForAlarm').value >= 0 ? 'Active' : 'Disabled'}}
                                         </mat-slide-toggle>
                                     </div>
-                                    <mat-form-field *ngIf="addProductForm.get('step1').get('minQuantityForAlarm').value >= 0" class="mt-0 sm:mt-1 flex items-center -my-px w-full">
+                                    <mat-form-field *ngIf="addProductForm.get('minQuantityForAlarm').value >= 0" class="mt-0 sm:mt-1 flex items-center -my-px w-full">
                                         <input
                                             type="number"
                                             matInput
                                             [formControlName]="'minQuantityForAlarm'">
                                     </mat-form-field>
                                 </div>
-                                <!-- Variants Toggle -->
-                                <div 
-                                    *ngIf="productType === 'normal'"
-                                    class="flex flex-col w-full sm:w-1/5 sm:pl-2 py-2 sm:py-0"
-                                >
-                                    <span class="mb-0 sm:mb-3 font-medium leading-tight">Variants 
-                                        <mat-icon
-                                            matTooltip="Does this product have variants?"
-                                            class="transform scale-75"
-                                            [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                        </mat-icon>
-                                    </span>
-                                    <div class="mt-0 flex items-center justify-between -my-px w-full">
-                                        <mat-slide-toggle
-                                            [formControlName]="'isVariants'"
-                                            [color]="'primary'"
-                                            (change)="(addProductForm.get('step1').get('isVariants').value === false) ? deleteAllVariantsConfirmation() : return"
-                                            >
-                                            {{addProductForm.get('step1').get('isVariants').value === true ? 'Yes' : 'No'}}
-                                        </mat-slide-toggle>
-                                        <!-- *ngIf="selectedProductForm.get('isVariants').value === true" -->
-                                    </div>
-                                </div>
                             </div>
                         </div>
-                        <!-- <div class="flex flex-col gt-xs:flex-row">
-                            <mat-form-field class="flex-auto gt-xs:pr-3">
-                                <mat-select
-                                    [formControlName]="'country'"
-                                    [placeholder]="'Country / Region'"
-                                    required>
-                                    <mat-option value="country-1">Country 1</mat-option>
-                                    <mat-option value="country-2">Country 2</mat-option>
-                                    <mat-option value="country-3">Country 3</mat-option>
-                                </mat-select>
-                                <mat-icon
-                                    class="icon-size-5"
-                                    matPrefix
-                                    [svgIcon]="'heroicons_solid:location-marker'"></mat-icon>
-                            </mat-form-field>
-                            <mat-form-field class="flex-auto gt-xs:pl-3">
-                                <mat-select
-                                    [formControlName]="'language'"
-                                    [placeholder]="'Language'"
-                                    required>
-                                    <mat-option value="language-1">Language 1</mat-option>
-                                    <mat-option value="language-2">Language 2</mat-option>
-                                    <mat-option value="language-3">Language 3</mat-option>
-                                </mat-select>
-                                <mat-icon
-                                    class="icon-size-5"
-                                    matPrefix
-                                    [svgIcon]="'heroicons_solid:translate'"></mat-icon>
-                            </mat-form-field>
-                        </div> -->
+    
+                        <!-- Delete and cancel button -->
+                        <div class="flex items-center justify-end border-t px-8 py-4">
+                            <div *ngIf="message !== ''" class="mr-3 text-warn">
+                                {{message}}
+                            </div>
+                            <div class="flex items-center">
+                                <button
+                                    mat-flat-button
+                                    class="bg-gray-300 hover:bg-gray-500 border border-gray-500"
+                                    [color]="'gray'"
+                                    (click)="cancelAddProduct()"
+                                    >
+                                    Cancel
+                                </button>
+                                <button
+                                    mat-flat-button
+                                    class="ml-2"
+                                    [color]="'primary'"
+                                    (click)="addNewProduct()"
+                                >
+                                    Create
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <!-- Cancel, Next button -->
-                    <div class="flex justify-end mt-3">
-                        <!-- Cancel button -->
-                        <button
-                            mat-flat-button
-                            class="w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
-                            [color]="'gray'"
-                            (click)="cancelAddProduct()"
-                            >
-                            Cancel
-                        </button>
-                        
-                        <!-- <div 
-                            [ngClass]="addProductForm.get('step1').get('isVariants').value === true ? 'visible ' : 'invisible '">
-                            <input
-                                id="goto-variant-button"
-                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                type="button"
-                                (click)="displayVariants()"
-                                mat-icon-button>
-                            <label 
-                                class="flex items-center justify-center h-10 w-10 rounded-full cursor-pointer bg-gray-200 hover:bg-gray-300 text-white"
-                                for="goto-variant-button"
-                                matRipple>
-                                <mat-icon
-                                    class="p-0.5"
-                                    [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
-                                </label>
-                        </div> -->
-                            
-                        <!-- Next button -->
-                        <button
-                            *ngIf="addProductForm.get('step1').get('isVariants').value === true"
-                            class="w-24"
-                            mat-flat-button
-                            [color]="'primary'"
-                            [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
-                            type="button"
-                            matStepperNext>
-                            Next
-                        </button>
-                        <!-- Create button -->
-                        <button
-                            *ngIf="addProductForm.get('step1').get('isVariants').value === false"
-                            class="w-24"
-                            mat-flat-button
-                            [color]="'primary'"
-                            [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
-                            type="button"
-                            matStepperNext>
-                            Create
-                        </button>
-                    </div>
-                </mat-step>
-
-                <!-- Variant section -->
-                <mat-step
-                    *ngIf="addProductForm.get('step1').get('isVariants').value === true"
-                    [formGroupName]="'variantsSection'"
-                    [stepControl]="addProductForm.get('variantsSection')"
-                    #horizontalStepperVariantStep>
-                    <ng-template 
-                        matStepLabel>Variants</ng-template>
-                    <p class="my-6 font-medium">
-                        People here will get to know you with this information
-                    </p>
-                    <div class="flex flex-col gt-xs:flex-row">
-                        <mat-form-field class="flex-auto gt-xs:pr-3">
-                            <input
-                                matInput
-                                [formControlName]="'firstName'"
-                                [placeholder]="'First name'"
-                                required>
-                            <mat-icon
-                                class="icon-size-5"
-                                matPrefix
-                                [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
-                        </mat-form-field>
-                        <mat-form-field class="flex-auto gt-xs:pl-3">
-                            <input
-                                matInput
-                                [formControlName]="'lastName'"
-                                [placeholder]="'Last name'"
-                                required>
-                            <mat-icon
-                                class="icon-size-5"
-                                matPrefix
-                                [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
-                        </mat-form-field>
-                    </div>
-                    <div class="flex">
-                        <mat-form-field class="flex-auto">
-                            <input
-                                matInput
-                                [formControlName]="'userName'"
-                                [placeholder]="'Username'"
-                                required>
-                            <span matPrefix>www.example.com/</span>
-                        </mat-form-field>
-                    </div>
-                    <div class="flex">
-                        <mat-form-field class="fuse-mat-textarea flex-auto">
-                            <textarea
-                                matInput
-                                [formControlName]="'about'"
-                                [placeholder]="'About'"
-                                [rows]="3"></textarea>
-                            <mat-icon
-                                class="icon-size-5"
-                                matPrefix
-                                [svgIcon]="'heroicons_solid:menu-alt-2'"></mat-icon>
-                        </mat-form-field>
-                    </div>
-                    <div class="flex justify-end">
-                        <button
-                            class="px-8 mr-2"
-                            mat-flat-button
-                            [color]="'accent'"
-                            type="button"
-                            matStepperPrevious>
-                            Back
-                        </button>
-                        <button
-                            class="px-8"
-                            mat-flat-button
-                            [color]="'primary'"
-                            [disabled]="horizontalStepperVariantStep.stepControl.pristine || horizontalStepperVariantStep.stepControl.invalid"
-                            type="button"
-                            matStepperNext>
-                            Next
-                        </button>
-                    </div>
-                </mat-step>
-
-            </mat-horizontal-stepper>
-
-            
-            <!-- Delete and cancel button -->
-            <!-- <div class="flex items-center justify-end border-t px-8 py-4">
-                <div *ngIf="message !== ''" class="mr-3 text-warn">
-                    {{message}}
-                </div>
-                <div class="flex items-center">
-                    <button
-                        mat-flat-button
-                        class="bg-gray-300 hover:bg-gray-500 border border-gray-500"
-                        [color]="'gray'"
-                        (click)="cancelAddProduct()"
-                        >
-                        Cancel
-                    </button>
-                    <button
-                        mat-flat-button
-                        class="ml-2"
-                        [color]="'primary'"
-                        (click)="addNewProduct()"
-                    >
-                        Create
-                    </button>
-                </div>
-            </div> -->
-        </form>
+                </form>
+            </div>
     </div>
 </div>

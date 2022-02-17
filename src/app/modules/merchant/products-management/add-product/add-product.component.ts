@@ -12,9 +12,35 @@ import { Store } from 'app/core/store/store.types';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { StoresService } from 'app/core/store/store.service';
 
+
+
 @Component({
     selector: 'dialog-add-product',
-    templateUrl: './add-product.component.html'
+    templateUrl: './add-product.component.html',
+    styles         : [
+        /* language=SCSS */
+        `
+            /* Hide scrollbar for Chrome, Safari and Opera */
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            
+            /* Hide scrollbar for IE, Edge and Firefox */
+            .no-scrollbar {
+                -ms-overflow-style: none;  /* IE and Edge */
+                scrollbar-width: none;  /* Firefox */
+            }
+            :host ::ng-deep .mat-horizontal-content-container {
+                max-height: 85vh;
+                // overflow-y: auto;
+            }
+            .content {
+                max-height: 70vh;
+                overflow-y: auto;
+            }
+
+        `
+    ],
   })
   
 export class AddProductComponent implements OnInit, OnDestroy
@@ -73,6 +99,7 @@ export class AddProductComponent implements OnInit, OnDestroy
             ['blockquote','clean']
         ]
     };
+    productType: string;
 
     /**
      * Constructor
@@ -85,7 +112,7 @@ export class AddProductComponent implements OnInit, OnDestroy
         private _storesService: StoresService,
         public _dialog: MatDialog,
         public dialogRef: MatDialogRef<AddProductComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: MatDialog
+        @Inject(MAT_DIALOG_DATA) public data: any
     )
     {
     }
@@ -112,26 +139,60 @@ export class AddProductComponent implements OnInit, OnDestroy
      */
     ngOnInit(): void
     {
-        // Create the selected product form
+        // Horizontol stepper
         this.addProductForm = this._formBuilder.group({
-            name             : ['', [Validators.required]],
-            description      : ['', [Validators.required]],
-            categoryId       : ['', [Validators.required]],
-            status           : ['ACTIVE', [Validators.required]],
-            trackQuantity    : [false],
-            allowOutOfStockPurchases: [false],
-            minQuantityForAlarm: [-1],
-            packingSize      : ['', [Validators.required]],
-            availableStock   : [1, [Validators.required]],
-            sku              : ['', [Validators.required]],
-            price            : ['', [Validators.required]],
-            images           : [[]],
-            imagefiles       : [[]],
-            thumbnailIndex   : [0],
-
-            // form completion
-            valid            : [false]
+            step1: this._formBuilder.group({
+                name             : ['', [Validators.required]],
+                description      : ['', [Validators.required]],
+                categoryId       : ['', [Validators.required]],
+                status           : ['ACTIVE', [Validators.required]],
+                trackQuantity    : [false],
+                allowOutOfStockPurchases: [false],
+                minQuantityForAlarm: [-1],
+                packingSize      : ['', [Validators.required]],
+                availableStock   : [1, [Validators.required]],
+                sku              : ['', [Validators.required]],
+                price            : ['', [Validators.required]],
+                images           : [[]],
+                imagefiles       : [[]],
+                thumbnailIndex   : [0],
+                isVariants       : [false],
+    
+                // form completion
+                valid            : [false]
+            }),
+            variantsSection: this._formBuilder.group({
+                firstName: ['', Validators.required],
+                lastName : ['', Validators.required],
+                userName : ['', Validators.required],
+                about    : ['']
+            })
         });
+
+        // get the product type
+        this.productType = this.data.productType;
+        
+
+        // Create the selected product form
+        // this.addProductForm = this._formBuilder.group({
+        //     name             : ['', [Validators.required]],
+        //     description      : ['', [Validators.required]],
+        //     categoryId       : ['', [Validators.required]],
+        //     status           : ['ACTIVE', [Validators.required]],
+        //     trackQuantity    : [false],
+        //     allowOutOfStockPurchases: [false],
+        //     minQuantityForAlarm: [-1],
+        //     packingSize      : ['', [Validators.required]],
+        //     availableStock   : [1, [Validators.required]],
+        //     sku              : ['', [Validators.required]],
+        //     price            : ['', [Validators.required]],
+        //     images           : [[]],
+        //     imagefiles       : [[]],
+        //     thumbnailIndex   : [0],
+
+        //     // form completion
+        //     valid            : [false]
+        // });
             
         // Get the stores
         this._storesService.store$
@@ -143,7 +204,7 @@ export class AddProductComponent implements OnInit, OnDestroy
 
                 // set packingSize to S if verticalCode FnB
                 if (this.store$.verticalCode === "FnB" || this.store$.verticalCode === "FnB_PK"){
-                    this.addProductForm.get('packingSize').patchValue('S');
+                    this.addProductForm.get('step1').get('packingSize').patchValue('S');
                     this.checkinput.packingSize = true;
                 }
 
@@ -203,10 +264,10 @@ export class AddProductComponent implements OnInit, OnDestroy
     // --------------------------------------
 
     generateSku(){
-        if ((this.addProductForm.get('name').value && !this.addProductForm.get('sku').value) ||
-            (this.addProductForm.get('name').value.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '') === this.addProductForm.get('sku').value) 
+        if ((this.addProductForm.get('step1').get('name').value && !this.addProductForm.get('step1').get('sku').value) ||
+            (this.addProductForm.get('step1').get('name').value.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '') === this.addProductForm.get('sku').value) 
         ){
-            this.addProductForm.get('sku').patchValue(this.addProductForm.get('name').value.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''));
+            this.addProductForm.get('step1').get('sku').patchValue(this.addProductForm.get('step1').get('name').value.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''));
             this.checkinput.sku = true;
         }
     }
@@ -265,7 +326,7 @@ export class AddProductComponent implements OnInit, OnDestroy
 
         // If there is a category...
         const category = this.filteredProductCategories[0];
-        const isCategoryApplied = this.addProductForm.get('categoryId').value;
+        const isCategoryApplied = this.addProductForm.get('step1').get('categoryId').value;
 
         // If the found category is already applied to the product...
         if ( isCategoryApplied )
@@ -366,7 +427,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     {
 
         // Update the selected product form
-        this.addProductForm.get('categoryId').patchValue(category.id);
+        this.addProductForm.get('step1').get('categoryId').patchValue(category.id);
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -381,7 +442,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     {
 
         // Update the selected product form
-        this.addProductForm.get('categoryId').patchValue("");
+        this.addProductForm.get('step1').get('categoryId').patchValue("");
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -404,7 +465,7 @@ export class AddProductComponent implements OnInit, OnDestroy
 
             // Sort the filtered categories, put selected category on top
             // First get selected array index by using this.selectedProduct.categoryId
-            let selectedProductCategoryIndex = this.filteredProductCategories.findIndex(item => item.id === this.addProductForm.get('categoryId').value);
+            let selectedProductCategoryIndex = this.filteredProductCategories.findIndex(item => item.id === this.addProductForm.get('step1').get('categoryId').value);
             // if selectedProductCategoryIndex < -1 // category not selected
             // if selectedProductCategoryIndex = 0 // category selected already in first element
             if (selectedProductCategoryIndex > 0) {
@@ -551,13 +612,13 @@ export class AddProductComponent implements OnInit, OnDestroy
         let BreakException = {};
         try {
             Object.keys(this.addProductForm.controls).forEach(key => {
-                const controlErrors: ValidationErrors = this.addProductForm.get(key).errors;
+                const controlErrors: ValidationErrors = this.addProductForm.get('step1').get(key).errors;
                 if (controlErrors != null) {
                     Object.keys(controlErrors).forEach(keyError => {
                         this.message = 'Field "' + key + '" error: ' + keyError;                        
                         throw BreakException;
                     });
-                    this.addProductForm.get('valid').patchValue(false);
+                    this.addProductForm.get('step1').get('valid').patchValue(false);
                 }
             });
         } catch (error) {
@@ -568,11 +629,11 @@ export class AddProductComponent implements OnInit, OnDestroy
         // Process
         // --------------------
         
-        this.addProductForm.get('valid').patchValue(true);
+        this.addProductForm.get('step1').get('valid').patchValue(true);
 
-        this.addProductForm.get('images').patchValue(this.images);
-        this.addProductForm.get('imagefiles').patchValue(this.imagesFile);
-        this.addProductForm.get('thumbnailIndex').patchValue(this.thumbnailIndex);
+        this.addProductForm.get('step1').get('images').patchValue(this.images);
+        this.addProductForm.get('step1').get('imagefiles').patchValue(this.imagesFile);
+        this.addProductForm.get('step1').get('thumbnailIndex').patchValue(this.thumbnailIndex);
         this.dialogRef.close(this.addProductForm.value);
     }
     
@@ -582,7 +643,7 @@ export class AddProductComponent implements OnInit, OnDestroy
 
     checkInput(input, event = null){
         // check input
-        if ((this.addProductForm.get(input) && this.addProductForm.get(input).value) || 
+        if ((this.addProductForm.get('step1').get(input) && this.addProductForm.get('step1').get(input).value) || 
             (input === 'category' && event.target.checked)
             ) {
             this.checkinput[input] = true;
@@ -593,12 +654,21 @@ export class AddProductComponent implements OnInit, OnDestroy
 
     disabledTrackStock(isTrackStock: boolean) {
         if (isTrackStock === false){
-            this.addProductForm.get('allowOutOfStockPurchases').patchValue(false);
-            this.addProductForm.get('minQuantityForAlarm').patchValue(-1);
+            this.addProductForm.get('step1').get('allowOutOfStockPurchases').patchValue(false);
+            this.addProductForm.get('step1').get('minQuantityForAlarm').patchValue(-1);
         }
     }
 
     setThumbnail(currentImageIndex: number){
         this.thumbnailIndex = currentImageIndex;
+    }
+
+    displayVariants(){
+        console.log('display variants');
+        
+    }
+    deleteAllVariantsConfirmation(){
+        console.log('delete variants');
+        
     }
 }
