@@ -377,7 +377,8 @@
                                                 type="number"
                                                 placeholder="Insert Mininum Subtotal"
                                                 matInput
-                                                (value)="startTotalSalesAmount"
+                                                [(ngModel)]="startTotalSalesAmount"
+                                                [ngModelOptions]="{standalone: true}"
                                                 (change)="validateDiscountTier('startTotalSalesAmount',$event.target.value)">
                                             <mat-icon
                                                 matPrefix
@@ -414,7 +415,8 @@
                                             type="number"
                                             placeholder="Insert Discount Amount"
                                             matInput
-                                            (value)="discountAmount"
+                                            [(ngModel)]="discountAmount"
+                                            [ngModelOptions]="{standalone: true}"
                                             (change)="validateDiscountTier('discountAmount',$event.target.value)">
                                         <mat-icon
                                             matPrefix
@@ -437,7 +439,8 @@
                                         <mat-select
                                             class="w-full"
                                             placeholder="Choose Calculation Type"
-                                            (value)="calculationType"
+                                            [(ngModel)]="calculationType"
+                                            [ngModelOptions]="{standalone: true}"
                                             (selectionChange)="validateDiscountTier('calculationType' ,$event.value)">
                                             <div>
                                                 <mat-option [value]="'PERCENT'">Percentage</mat-option>

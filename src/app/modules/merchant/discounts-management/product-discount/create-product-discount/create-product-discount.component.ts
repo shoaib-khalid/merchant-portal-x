@@ -61,12 +61,6 @@ export class CreateProductDiscountDialogComponent implements OnInit {
 
   addNewDiscount() {
     this.changeTime();
-    console.log('this.changeStartTime',this.changeStartTime);
-    console.log('this.changeEndTime',this.changeEndTime);
-
-
-    return;
-
     this.dialogRef.close({ 
         status: true ,
         discountName: this.discountName,

@@ -490,7 +490,12 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
                     this.storeDiscountTierList.push(this._formBuilder.group(item));
                 });
 
+                //disable button add
                 this.isDisplayAddTier=false;
+                //clear the input
+                (<any>this.startTotalSalesAmount)='';
+                (<any>this.discountAmount)='';
+                this.calculationType='';
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
