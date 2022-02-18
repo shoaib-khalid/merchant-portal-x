@@ -78,19 +78,6 @@ export class AddCategoryComponent implements OnInit {
   addNewCategory() {
     this.addCategoryForm.get('thumbnailUrl').patchValue(this.thumbnailUrl);
     this.addCategoryForm.get('imagefiles').patchValue(this.imagesFile);
-    console.log('this.addCategoryForm.value::',this.addCategoryForm.value);
-
-    // console.log('checkform',this.addCategoryForm.value);
-    //      this._inventoryService.createCategory(this.addCategoryForm.value)
-    //             .pipe(takeUntil(this._unsubscribeAll))
-    //             .subscribe((response) => {
-    //                 response["data"];
-    //                 console.log('response["data"]',response["data"]);
-    
-                    
-    //             }); 
-    
-
 
     this.dialogRef.close(this.addCategoryForm.value);
   }

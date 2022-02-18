@@ -61,10 +61,6 @@ export class AuthResetPasswordComponent implements OnInit
             this.clientId = params['id'];
             this.code = params['code'];
         });
-
-        console.log("clientId: ", this.clientId)
-
-        console.log("code: ", this.code)
     }
 
     // -----------------------------------------------------------------------------------------------------

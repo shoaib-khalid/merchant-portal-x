@@ -24,8 +24,6 @@ export class CreateAgentComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    //   console.log("disini pula", this.data)
-
       this.name = this.data["name"];
       this.username = this.data["username"];
       this.email = this.data["email"];

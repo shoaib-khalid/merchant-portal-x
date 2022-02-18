@@ -203,9 +203,7 @@ export class ManageAgentService
              clientId,
              status: '' +  nextCompletionStatus
          };
- 
-         console.log(body);
- 
+  
          return this._httpClient.put(userService + '/clients/' + clientsId , body , header);
      }
 

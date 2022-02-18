@@ -56,7 +56,6 @@ export class CountriesComponent implements OnInit, OnDestroy
     {
         // get current url path location
         this.currentURLPath = this._router.url;
-        console.log("this.currentURLPath ", this.currentURLPath )
 
         // disable this as we dont want locale service to define the allowed countries
         // this.availableCountries = this._localeService.getAvailableCountries();

@@ -348,7 +348,6 @@ export class EditProfileComponent implements OnInit
 
                 this._changeDetectorRef.markForCheck();                
             };
-            // console.log("this.files["+index+"].selectedFiles["+i+"]",this.files[index].selectedFiles[i])
             reader.readAsDataURL(this.files[index].selectedFiles[i]);
             this.files[index].selectedFileName = this.files[index].selectedFiles[i].name;
             }

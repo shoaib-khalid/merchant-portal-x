@@ -325,12 +325,8 @@ export class EditOrderComponent implements OnInit
               
               //after that we get the amount of refund by calling OrdersService (getOrderById)
               this._ordersService.getOrderById(this.orderId).subscribe((response=>{
-                console.log('CECHECKIND',response.data.orderRefund[0].refundAmount);
-
                 const displayRefund = this.displayMessage('Order Updated','The refund will be in the place. Refund Amount :'+response.data.orderRefund[0].refundAmount,'Ok','No',false,false);
-                displayRefund.afterClosed().subscribe((result) => {
-                   console.log("check result ::",result);
-                   
+                displayRefund.afterClosed().subscribe((result) => {                   
                   if(result === 'confirmed' ){
                       this.close();                    
                     }

@@ -128,7 +128,6 @@ export class ChooseStoreService
                             currentStep: 3
                         }
                     );
-                        console.log("element", element);
                 });
         
                 this._stores.next(_stores);

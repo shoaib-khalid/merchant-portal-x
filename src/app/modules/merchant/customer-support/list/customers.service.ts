@@ -223,16 +223,11 @@ export class CustomersService
             switchMap(customers => this._httpClient.put<Customer>(productService + '/stores/' + this.storeId$ + '/customers/' + id, customer , header).pipe(
                 map((updatedCustomer) => {
 
-                    console.log("customers: ",customers);
-                    console.log("updatedCustomer: ",updatedCustomer);
-
                     // Find the index of the updated customer
                     const index = customers.findIndex(item => item.id === id);
 
                     // Update the customer
                     customers[index] = { ...customers[index], ...updatedCustomer["data"]};
-
-                    console.log("customers[index]", customers[index])
 
                     // Update the customers
                     this._customers.next(customers);

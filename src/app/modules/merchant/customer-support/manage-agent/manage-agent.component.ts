@@ -196,7 +196,6 @@ export class ManageAgentComponent implements OnInit, AfterViewInit, OnDestroy
              takeUntil(this._unsubscribeAll),
              debounceTime(300),
              switchMap((query) => {
-                 console.log("Query filter: ",query)
                  this.isLoading = true;
                  return this._manageAgentService.getAgent(0, 10, 'name', 'asc', query, '', '', '', this.tabControl.value);
              }),
@@ -211,7 +210,6 @@ export class ManageAgentComponent implements OnInit, AfterViewInit, OnDestroy
              takeUntil(this._unsubscribeAll),
              debounceTime(300),
              switchMap((query) => {
-                 console.log("Query tab: ",query)
                  this.isLoading = true;
                  //kena ubah
                  return this._manageAgentService.getAgent(0, 10, 'name', 'asc', '', '', '', '', query);
@@ -362,9 +360,6 @@ export class ManageAgentComponent implements OnInit, AfterViewInit, OnDestroy
     }
 
     editAgent(agent) {
-
-        console.log("agent",agent)
-
         const dialogRef = this._dialog.open(CreateAgentComponent, { disableClose: true, data: agent });
         dialogRef.afterClosed().subscribe(result => {
           
