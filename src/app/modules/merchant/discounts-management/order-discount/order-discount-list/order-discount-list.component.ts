@@ -12,6 +12,7 @@ import { CreateOrderDiscountDialogComponent } from '../create-order-discount/cre
 import { MatDialog } from '@angular/material/dialog';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { TimeSelector } from 'app/layout/common/time-selector/timeselector.component';
+import { EditOrderDiscountDialogComponent } from '../edit-order-discount/edit-order-discount.component';
 
 
 @Component({
@@ -752,6 +753,78 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
         this.selectedDiscountForm.get('endTime').setValue(new TimeSelector(_pickEndTimeHour,_pickEndTimeMinute, _pickEndTimeAMPM));
         //===================== / END TIME =====================
         return;
+    }
+
+    openEditPopUp(discountId)    {
+        const dialogRef = this._dialog.open(
+            EditOrderDiscountDialogComponent, {
+                width: '90vw',
+                maxWidth: '90vw',  
+                height: '100vh',
+                maxHeight: '100vh',
+                disableClose: true,
+                data:{discountId:discountId} 
+                });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result.status === true) {
+
+                // this will remove the item from the object
+                const createDiscountBody  = {
+                    discountName: result.discountName,
+                    discountType: result.discountOn,
+                    startDate: result.startDate,
+                    startTime: result.startTime,
+                    endDate: result.endDate,
+                    endTime: result.endTime,
+                    isActive: result.isActive,
+                    maxDiscountAmount: result.maxDiscountAmount,
+                    normalPriceItemOnly: result.normalPriceItemOnly,
+                    storeId: this.storeId$
+                };
+
+                return;
+        
+                // Create the discount
+                this._discountService.createDiscount(createDiscountBody).subscribe(async (newDiscount) => {
+                    
+                    // Go to new discount
+                    this.selectedDiscount = newDiscount["data"];
+    
+                    // Update current form with new discount data
+                    this.selectedDiscountForm.patchValue(newDiscount["data"]);
+
+                    //set value of time with time selector
+                    this.setValueToTimeSelector(newDiscount["data"]);
+
+                    // clear discount tier form array
+                    (this.selectedDiscountForm.get('storeDiscountTierList') as FormArray).clear();
+                    //disabled button add tier
+                    this.isDisplayAddTier = false;
+    
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+
+                }, (error) => {
+                    console.error(error);
+                    if (error.status === 417) {
+                        // Open the confirmation dialog
+                        const confirmation = this._fuseConfirmationService.open({
+                            title  : 'Discount date overlap',
+                            message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
+                            actions: {
+                                confirm: {
+                                    label: 'Ok'
+                                },
+                                cancel : {
+                                    show : false,
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        });
     }
 
 }
