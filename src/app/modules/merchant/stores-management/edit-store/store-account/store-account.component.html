@@ -43,6 +43,7 @@
                                     [svgIcon]="'heroicons_outline:globe-alt'">
                                 </mat-icon>
                                 <div
+                                    *ngIf="currentScreenSize.includes('sm')"
                                     class="text-secondary"
                                     matSuffix>
                                     {{domainName}}
@@ -70,53 +71,23 @@
                                     The subdomain name entered is already taken
                                 </mat-error>
                             </mat-form-field>
+                            <div *ngIf="!currentScreenSize.includes('sm')" class="w-full text-gray-500 pr-2 text-right">
+                                {{domainName}}
+                            </div>
                         </div>
-                        <!-- Title -->
-                        <!-- <div class="sm:col-span-2">
-                            <mat-form-field class="fuse-mat-no-subscript w-full">
-                                <mat-label>Title</mat-label>
-                                <mat-icon
-                                    class="icon-size-5"
-                                    [svgIcon]="'heroicons_solid:briefcase'"
-                                    matPrefix></mat-icon>
-                                <input
-                                    [formControlName]="'title'"
-                                    matInput>
-                            </mat-form-field>
-                        </div> -->
-                        <!-- Company -->
-                        <!-- <div class="sm:col-span-2">
-                            <mat-form-field class="fuse-mat-no-subscript w-full">
-                                <mat-label>Company</mat-label>
-                                <mat-icon
-                                    class="icon-size-5"
-                                    [svgIcon]="'heroicons_solid:office-building'"
-                                    matPrefix></mat-icon>
-                                <input
-                                    [formControlName]="'company'"
-                                    matInput>
-                            </mat-form-field>
-                        </div> -->
                        
                         <!-- Store Description -->
                         <div class="sm:col-span-4 pt-8 sm:pt-0">
-                            <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full" floatLabel="always">
-                                <mat-label>Store Description</mat-label>
-                                <textarea
-                                    matInput
-                                    [required]="true"
-                                    [rows]="5"
-                                    maxlength="100"
-                                    placeholder="Describe to us about your store"
+                            <span class="font-medium leading-tight">Description</span>
+                            <div class="mt-1.5 flex items-center w-full">
+                                <quill-editor
+                                    class="w-full"
                                     [formControlName]="'storeDescription'"
-                                    cdkTextareaAutosize
-                                    [cdkAutosizeMinRows]="5"></textarea>
-                                <mat-error *ngIf="storeAccountForm.get('storeDescription').hasError('required')">
-                                    Required
-                                </mat-error>
-                            </mat-form-field>
-                            <div class="mt-1 text-md text-hint">Brief description for your profile.</div>
+                                    [modules]="quillModules"
+                                    (onContentChanged)="textChanged($event)"></quill-editor>
+                            </div>
                         </div>
+
                     </div>
             
                     <!-- Divider -->
@@ -179,103 +150,10 @@
                                     matInput
                                     placeholder="Your customer will be looking for your store, add your store address now !"
                                     maxlength="500"
-                                    [required]="true"
                                     [rows]="5"
-                                    [formControlName]="'address'"
+                                    [formControlName]="'displayAddress'"
                                     cdkTextareaAutosize
                                     [cdkAutosizeMinRows]="5"></textarea>
-                                <mat-error *ngIf="storeAccountForm.get('address').hasError('required')">
-                                    Required
-                                </mat-error>
-                            </mat-form-field>
-                        </div>
-                        <!-- City -->
-                        <div class="sm:col-span-2">
-                            <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
-                                <mat-label>City</mat-label>
-                                <input
-                                    maxlength="100"
-                                    [required]="true"
-                                    [formControlName]="'city'"
-                                    matInput>
-                                <mat-error *ngIf="storeAccountForm.get('city').hasError('required')">
-                                    Required
-                                </mat-error>
-                            </mat-form-field>
-                        </div>
-                        <!-- Postcode -->
-                        <div class="sm:col-span-2">
-                            <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
-                                <mat-label>Postcode</mat-label>
-                                <input
-                                    [formControlName]="'postcode'"
-                                    minlength="5"
-                                    maxlength="10"
-                                    [required]="true"
-                                    matInput>
-                                <mat-error *ngIf="storeAccountForm.get('postcode').hasError('required')">
-                                    Required
-                                </mat-error>
-                                <mat-error *ngIf="storeAccountForm.get('postcode').hasError('invalidPostcode')">
-                                    Invalid postcode
-                                </mat-error>
-                                <mat-error *ngIf="storeAccountForm.get('postcode').hasError('minlength')">
-                                    Minimum length of postcode not meet
-                                </mat-error>
-                                <mat-error *ngIf="storeAccountForm.get('postcode').hasError('maxlength')">
-                                    Exceed maximum length of postcode
-                                </mat-error>
-                            </mat-form-field>
-                        </div>
-                        <!-- State -->
-                        <div class="sm:col-span-2">
-                            <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
-                                <mat-label>State</mat-label>
-                                <mat-select 
-                                    [formControlName]="'regionCountryStateId'"
-                                    [required]="true"
-                                    [value]="'regionCountryStateId'"
-                                    [placeholder]="'Select State'"
-                                    (selectionChange)="storeAccountForm.get('regionCountryStateId').patchValue($event.value);"
-                                    #stateSelector="matSelect">
-                                    <mat-select-trigger>
-                                        <span class="flex items-center">
-                                            <span>{{ stateSelector.triggerValue }}</span>
-                                        </span>
-                                    </mat-select-trigger>
-                                    <div *ngFor="let state of statesByCountry">
-                                        <mat-option [value]="state.id">{{state.name}}</mat-option>
-                                    </div>
-                                </mat-select>
-                                <mat-error *ngIf="storeAccountForm.get('regionCountryStateId').hasError('required')">
-                                    Required
-                                </mat-error>
-                            </mat-form-field>
-                        </div>
-                        <!-- Country -->
-                        <div class="sm:col-span-2">
-                            <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
-                                <mat-label>Country</mat-label>
-                                <mat-select 
-                                    [formControlName]="'regionCountryId'"
-                                    [required]="true"
-                                    [value]="'regionCountryId'"
-                                    [placeholder]="'Select Country'"
-                                    (selectionChange)="storeAccountForm.get('regionCountryId').patchValue($event.value);updateStates(countrySelector.value)"
-                                    #countrySelector="matSelect"
-                                    >
-                                    <mat-select-trigger>
-                                        <span class="flex items-center">
-                                            <span>{{ countrySelector.triggerValue }}</span>
-                                        </span>
-                                    </mat-select-trigger>
-                                    <div *ngFor="let country of countriesList">
-                                        <mat-option [value]="country.id">{{country.name}}</mat-option>
-                                    </div>
-                                </mat-select>
-                                <mat-error *ngIf="storeAccountForm.get('regionCountryId').hasError('required')">
-                                    Required
-                                </mat-error>
                             </mat-form-field>
                         </div>
                     </div>

@@ -6,11 +6,155 @@
                 <form [formGroup]="storeDeliveryForm">
                     <!-- Section -->
                     <div class="w-full pt-8 sm:pt-0">
-                        <div class="text-xl">Payment Details</div>
+                        <div class="text-xl">Pickup Address</div>
                         <div class="text-secondary">Choose your type of delivery types to provide to the customer of delivery details.</div>
                     </div>
-                    <div class="grid grid-cols-4 gap-6 w-full mt-8">
-                        <!-- Card holder -->
+                    <div class="grid grid-cols-4 gap-6 w-full mt-4">
+                        <!-- Pickup Address -->
+                        <div class="col-span-4">
+                            <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full" floatLabel="always">
+                                <mat-label>Address</mat-label>
+                                <textarea
+                                    matInput
+                                    placeholder="Your customer will be looking for your store, add your store address now !"
+                                    maxlength="500"
+                                    [required]="true"
+                                    [rows]="5"
+                                    [formControlName]="'address'"
+                                    cdkTextareaAutosize
+                                    [cdkAutosizeMinRows]="5"></textarea>
+                                <mat-error *ngIf="storeDeliveryForm.get('address').hasError('required')">
+                                    Required
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <!-- City -->
+                        <div class="col-span-2">
+                            <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
+                                <mat-label>City</mat-label>
+                                <input
+                                    maxlength="100"
+                                    [required]="true"
+                                    [formControlName]="'city'"
+                                    matInput>
+                                <mat-error *ngIf="storeDeliveryForm.get('city').hasError('required')">
+                                    Required
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <!-- Postcode -->
+                        <div class="col-span-2">
+                            <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
+                                <mat-label>Postcode</mat-label>
+                                <input
+                                    [formControlName]="'postcode'"
+                                    minlength="5"
+                                    maxlength="10"
+                                    [required]="true"
+                                    matInput>
+                                <mat-error *ngIf="storeDeliveryForm.get('postcode').hasError('required')">
+                                    Required
+                                </mat-error>
+                                <mat-error *ngIf="storeDeliveryForm.get('postcode').hasError('invalidPostcode')">
+                                    Invalid postcode
+                                </mat-error>
+                                <mat-error *ngIf="storeDeliveryForm.get('postcode').hasError('minlength')">
+                                    Minimum length of postcode not meet
+                                </mat-error>
+                                <mat-error *ngIf="storeDeliveryForm.get('postcode').hasError('maxlength')">
+                                    Exceed maximum length of postcode
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <!-- State -->
+                        <div class="col-span-2">
+                            <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
+                                <mat-label>State</mat-label>
+                                <mat-select 
+                                    [formControlName]="'regionCountryStateId'"
+                                    [required]="true"
+                                    [value]="'regionCountryStateId'"
+                                    [placeholder]="'Select State'"
+                                    (selectionChange)="storeDeliveryForm.get('regionCountryStateId').patchValue($event.value);"
+                                    #stateSelector="matSelect">
+                                    <mat-select-trigger>
+                                        <span class="flex items-center">
+                                            <span>{{ stateSelector.triggerValue }}</span>
+                                        </span>
+                                    </mat-select-trigger>
+                                    <div *ngFor="let state of storeStates">
+                                        <mat-option [value]="state.id">{{state.name}}</mat-option>
+                                    </div>
+                                </mat-select>
+                                <mat-error *ngIf="storeDeliveryForm.get('regionCountryStateId').hasError('required')">
+                                    Required
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <!-- Country -->
+                        <div class="col-span-2">
+                            <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
+                                <mat-label>Country</mat-label>
+                                <mat-select 
+                                    [formControlName]="'regionCountryId'"
+                                    [required]="true"
+                                    [value]="'regionCountryId'"
+                                    [placeholder]="'Select Country'"
+                                    (selectionChange)="storeDeliveryForm.get('regionCountryId').patchValue($event.value);updateStates(countrySelector.value)"
+                                    #countrySelector="matSelect"
+                                    >
+                                    <mat-select-trigger>
+                                        <span class="flex items-center">
+                                            <span>{{ countrySelector.triggerValue }}</span>
+                                        </span>
+                                    </mat-select-trigger>
+                                    <div *ngFor="let country of storeCountries">
+                                        <mat-option [value]="country.id">{{country.name}}</mat-option>
+                                    </div>
+                                </mat-select>
+                                <mat-error *ngIf="storeDeliveryForm.get('regionCountryId').hasError('required')">
+                                    Required
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Store Fullfillment -->
+                        <div class="col-span-4">
+                            <div class="flex flex-col w-full">
+                                <mat-label class="font-medium">Store Fulfillment</mat-label>
+                                <div class="flex flex-col sm:flex-row">
+                                    <!-- <div class="flex w-full lg:w-2/4">
+                                        <mat-checkbox class="" [formControlName]="'allowScheduledDelivery'" [checked]="deliveryFullfilment[2].selected">{{deliveryFullfilment[2].label}}</mat-checkbox>
+                                        <mat-icon
+                                            [matTooltip]="deliveryFullfilment[2].tooltip"
+                                            class="flex flex-wrap transform scale-75"
+                                            [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                        </mat-icon>
+                                    </div> -->
+                                    <div class="flex w-full lg:w-2/4">
+                                        <mat-checkbox class="" [formControlName]="'allowStorePickup'" [checked]="deliveryFullfilment[3].selected">{{deliveryFullfilment[3].label}}</mat-checkbox>
+                                        <mat-icon
+                                            [matTooltip]="deliveryFullfilment[3].tooltip"
+                                            class="flex flex-wrap transform scale-75"
+                                            [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                        </mat-icon>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="my-10 border-t"></div>
+            
+                    <!-- Section -->
+                    <div class="w-full">
+                        <div class="text-xl">Delivery Details</div>
+                        <div class="text-secondary">Communication and information details in case customer want to connect with you.</div>
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-6 w-full mt-4">
+                        <!-- Delivery Type -->
                         <div class="col-span-4">
                             <mat-form-field class="fuse-mat-no-subscript w-full">
                                 <mat-label>Delivery Type</mat-label>
@@ -50,36 +194,12 @@
                                 </mat-icon>
                             </mat-form-field>
                         </div>
-                        <!-- Delivery Fullfillment -->
-                        <div class="col-span-4 mb-3">
-                            <div class="flex flex-col w-full">
-                                <mat-label class="font-medium">Delivery Fulfillment *</mat-label>
-                                <div class="flex flex-col sm:flex-row">
-                                    <!-- <div class="flex w-full lg:w-2/4">
-                                        <mat-checkbox class="" [formControlName]="'allowScheduledDelivery'" [checked]="deliveryFullfilment[2].selected">{{deliveryFullfilment[2].label}}</mat-checkbox>
-                                        <mat-icon
-                                            [matTooltip]="deliveryFullfilment[2].tooltip"
-                                            class="flex flex-wrap transform scale-75"
-                                            [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                        </mat-icon>
-                                    </div> -->
-                                    <div class="flex w-full lg:w-2/4">
-                                        <mat-checkbox class="" [formControlName]="'allowStorePickup'" [checked]="deliveryFullfilment[3].selected">{{deliveryFullfilment[3].label}}</mat-checkbox>
-                                        <mat-icon
-                                            [matTooltip]="deliveryFullfilment[3].tooltip"
-                                            class="flex flex-wrap transform scale-75"
-                                            [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                        </mat-icon>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         <!-- Delivery Partner, Self Delivery -->
                         <div class="col-span-4">
                             <!-- Delivery Partner -->
                             <div *ngIf="storeDeliveryForm.get('deliveryType').value === 'SCHEDULED' || storeDeliveryForm.get('deliveryType').value === 'ADHOC'" class="flex flex-col w-full">
-                                <div class="col-span-4">
-                                    <mat-label class="flex flex-col font-medium">Delivery Partner *</mat-label>
+                                <div class="col-span-4 w-full flex flex-row">
+                                    <mat-label class="flex flex-col font-medium">Delivery Partner</mat-label>
                                     <mat-icon
                                         matTooltip="Below delivery partner will be provided to the customer to choose when purchasing from this store."
                                         class="flex flex-wrap transform scale-75"
@@ -144,45 +264,45 @@
                                     <div class="flex flex-auto flex-wrap p-2">
                                         <ng-container formArrayName="allowedSelfDeliveryStates" *ngFor="let allowedSelfDeliveryState of storeDeliveryForm.get('allowedSelfDeliveryStates')['controls']; let i = index;">
                                             <ng-container [formGroupName]="i">
-                                                <!-- Select Field -->
-                                                <div class="flex flex-col w-full lg:w-2/4 lg:pr-2">
-                                                    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
-                                                        <mat-select
-                                                            placeholder="Select State"
-                                                            [required]="true"
-                                                            [formControlName]="'deliveryStates'"
-                                                            [value]="allowedSelfDeliveryState.deliveryStates"
-                                                            (selectionChange)="editSelfDeliveryState('deliveryStates', i, deliveryStatesSelector.value)"
-                                                            #deliveryStatesSelector="matSelect"
-                                                            >
-                                                            <mat-select-trigger>
-                                                                <span class="flex items-center">
-                                                                    <span>{{ deliveryStatesSelector.triggerValue }}</span>
-                                                                </span>
-                                                            </mat-select-trigger>
-                                                            <div>
-                                                                <ng-container *ngFor="let state of statesByCountry">
-                                                                    <mat-option [disabled]="checkCurrDeliveryStates(state.id)" [value]="state.id">{{ state.name }}</mat-option>
-                                                                </ng-container>
-                                                            </div>
-                                                        </mat-select>
-                                                    </mat-form-field>
-                                                </div>
-                                                <!-- Input Field -->
-                                                <div class="flex flex-col w-full lg:w-2/4">
-                                                    <div class="flex flex-col sm:flex-row">
-                                                        <!-- Input -->
-                                                        <mat-form-field class="flex flex-col w-full sm:w-5/6">
-                                                            <span matSuffix>$</span>
-                                                            <input
-                                                                matInput
-                                                                type="number"
-                                                                placeholder="Delivery Charges"
-                                                                [formControlName]="'deliveryCharges'"
-                                                                [required]="true"
-                                                                (change)="editSelfDeliveryState('deliveryCharges', i, $event.target.value)">
-                                                        </mat-form-field>
-                                                        <div class="flex flex-col w-full sm:w-1/6 sm:py-1 sm:px-2">
+                                                <div class="flex flex-col w-full">
+                                                    <div class="flex flex-row w-full">
+                                                        <div class="flex flex-col flex-wrap w-full">
+                                                            <!-- Select States -->
+                                                            <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+                                                                <mat-select
+                                                                    placeholder="Select State"
+                                                                    [required]="true"
+                                                                    [formControlName]="'deliveryStates'"
+                                                                    [value]="allowedSelfDeliveryState.deliveryStates"
+                                                                    (selectionChange)="editSelfDeliveryState('deliveryStates', i, deliveryStatesSelector.value)"
+                                                                    #deliveryStatesSelector="matSelect"
+                                                                    >
+                                                                    <mat-select-trigger>
+                                                                        <span class="flex items-center">
+                                                                            <span>{{ deliveryStatesSelector.triggerValue }}</span>
+                                                                        </span>
+                                                                    </mat-select-trigger>
+                                                                    <div>
+                                                                        <ng-container *ngFor="let state of storeStates">
+                                                                            <mat-option [disabled]="checkCurrDeliveryStates(state.id)" [value]="state.id">{{ state.name }}</mat-option>
+                                                                        </ng-container>
+                                                                    </div>
+                                                                </mat-select>
+                                                            </mat-form-field>
+                                                            <!-- Input Charges -->
+                                                            <mat-form-field class="w-full">
+                                                                <span matSuffix>$</span>
+                                                                <input
+                                                                    matInput
+                                                                    type="number"
+                                                                    placeholder="Delivery Charges"
+                                                                    [formControlName]="'deliveryCharges'"
+                                                                    [required]="true"
+                                                                    (change)="editSelfDeliveryState('deliveryCharges', i, $event.target.value)">
+                                                            </mat-form-field>
+                                                        </div>
+                                                        <div class="flex flex-col pl-2 pb-4 justify-between">
+                                                            <!-- Add State Button -->
                                                             <input
                                                                 [id]="'state-add-button' + i"
                                                                 class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -190,13 +310,14 @@
                                                                 (click)="addSelfDeliveryState()"
                                                                 mat-icon-button>
                                                             <label 
-                                                                class="flex items-center justify-center sm:w-5 sm:h-5 rounded-full cursor-pointer hover:bg-hover"
+                                                                class="flex order-last sm:order-first items-center justify-center w-12 h-12 rounded bg-primary cursor-pointer hover:bg-priamry-500"
                                                                 [for]="'state-add-button'+i"
                                                                 matRipple>
                                                                 <mat-icon
-                                                                    class="text-gray transform scale-75"
+                                                                    class="text-white transform scale-75"
                                                                     [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
                                                             </label>
+                                                            <!-- Remove State Button -->
                                                             <input
                                                                 [id]="'state-remove-button'+i"
                                                                 class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -204,15 +325,17 @@
                                                                 (click)="removeSelfDeliveryState(i)"
                                                                 mat-icon-button>
                                                             <label 
-                                                                class="flex items-center justify-center sm:w-5 sm:h-5 rounded-full cursor-pointer hover:bg-hover"
+                                                                class="flex order-first sm:order-last items-center justify-center w-12 h-12 rounded bg-warn cursor-pointer hover:bg-warn-500"
                                                                 [for]="'state-remove-button'+i"
                                                                 matRipple>
                                                                 <mat-icon
-                                                                    class="text-gray transform scale-75"
+                                                                    class="text-white transform scale-75"
                                                                     [svgIcon]="'heroicons_outline:trash'"></mat-icon>
                                                             </label>
                                                         </div>
                                                     </div>
+                                                    <!-- Divider -->
+                                                    <div *ngIf="i < storeDeliveryForm.get('allowedSelfDeliveryStates')['controls'].length - 1" class="mb-4 border-t"></div>
                                                 </div>
                                             </ng-container>
                                         </ng-container>
