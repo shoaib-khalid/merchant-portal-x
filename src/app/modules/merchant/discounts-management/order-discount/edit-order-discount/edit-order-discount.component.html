@@ -1,5 +1,5 @@
 <div class="flex flex-col">
-
+    <div *ngIf="loadDetails">
     <!-- Compose form -->
     <div class="flex flex-col flex-auto overflow-y-auto">
         <form
@@ -25,6 +25,7 @@
                         [formControlName]="'discountName'"        
                     >
                     </mat-form-field>
+
                     <div class="w-full">
                         <!-- Max Discount Amount -->
                         <mat-form-field 
@@ -87,13 +88,13 @@
                             >
                         </mat-form-field>
                         <mat-form-field 
-                            class="w-1/2 pl-2" 
-                            appearance="fill">
-                            <time-selector
-                            matInput
-                            type="time"
-                            [formControlName]="'startTime'"
-                            ></time-selector>
+                        class="w-1/2 pl-2" 
+                        appearance="fill">
+                        <time-selector
+                        matInput
+                        type="time" 
+                        [formControlName]="'startTime'"                   
+                        ></time-selector>
                         </mat-form-field>
                     </div>
             
@@ -113,8 +114,8 @@
                             appearance="fill">
                             <time-selector
                             matInput
-                            type="time"                    
-                            [formControlName]="'endTime'"
+                            type="time" 
+                            [formControlName]="'endTime'"                   
                             ></time-selector>
                         </mat-form-field>
             
@@ -125,7 +126,21 @@
                             Normal Price
                         </mat-slide-toggle>
                     </div>
-                    <div class="flex justify-end">
+                    <div class="flex justify-end p-2">
+                        <button
+                        class="bg-gray-300 hover:bg-gray-500 border border-gray-500 mr-2"
+                        mat-flat-button
+                        (click)="cancel()"
+                        [color]="'gray'">
+                        Cancel
+                        </button>
+                        <button
+                        class="bg-gray-300 hover:bg-gray-500 border border-gray-500 mr-2"
+                        mat-flat-button
+                        (click)="checkButton()"
+                        [color]="'gray'">
+                        Check
+                        </button>
                         <button
                             class="px-8"
                             mat-flat-button
@@ -143,56 +158,101 @@
                     [stepControl]="horizontalStepperForm.get('step2')"
                     #horizontalStepperStep2>
                     <ng-template matStepLabel>Tier</ng-template>
-                    <p class="my-6 font-medium">
-                        People here will get to know you with this information
-                    </p>
-                    <div class="flex flex-col gt-xs:flex-row">
-                        <mat-form-field class="flex-auto gt-xs:pr-3">
-                            <input
-                                matInput
-                                [formControlName]="'firstName'"
-                                [placeholder]="'First name'"
-                                required>
-                            <mat-icon
-                                class="icon-size-5"
-                                matPrefix
-                                [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
-                        </mat-form-field>
-                        <mat-form-field class="flex-auto gt-xs:pl-3">
-                            <input
-                                matInput
-                                [formControlName]="'lastName'"
-                                [placeholder]="'Last name'"
-                                required>
-                            <mat-icon
-                                class="icon-size-5"
-                                matPrefix
-                                [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
-                        </mat-form-field>
-                    </div>
-                    <div class="flex">
-                        <mat-form-field class="flex-auto">
-                            <input
-                                matInput
-                                [formControlName]="'userName'"
-                                [placeholder]="'Username'"
-                                required>
-                            <span matPrefix>www.example.com/</span>
-                        </mat-form-field>
-                    </div>
-                    <div class="flex">
-                        <mat-form-field class="fuse-mat-textarea flex-auto">
-                            <textarea
-                                matInput
-                                [formControlName]="'about'"
-                                [placeholder]="'About'"
-                                [rows]="3"></textarea>
-                            <mat-icon
-                                class="icon-size-5"
-                                matPrefix
-                                [svgIcon]="'heroicons_solid:menu-alt-2'"></mat-icon>
-                        </mat-form-field>
-                    </div>
+                    <!-- <p class="my-6 font-medium">
+                       Insert Tier List
+                    </p> -->
+                    <fieldset class="border border-solid border-gray-300 rounded my-1 mx-5">
+                        <legend class="text font-bold ml-2 px-2">Add Discount Tier</legend>
+                        <!-- Insert discount tier -->
+                        <div class="flex flex-col sm:flex-row px-8 pt-5">
+    
+                            <!-- Min Sub Total -->
+                            <div class="w-full lg:w-4/12 pr-4">
+                                <div class="flex flex-wrap w-full">
+                                    <mat-label class="flex flex-wrap">Min Order Amount</mat-label>
+                                    <mat-icon
+                                        matTooltip="Setting a wholesale minimum order subtotal ensures that wholesale order at the minimum amount required in order to activate wholesale pricing."
+                                        class="flex flex-wrap items-center transform scale-75"
+                                        [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                    </mat-icon>
+                                </div>
+                                <mat-form-field appearance="fill" class="flex flex-col w-full fuse-mat-emphasized-affix">
+                                    <input
+                                        type="number"
+                                        placeholder="Insert Mininum Subtotal"
+                                        matInput
+                                    >
+                                    <mat-icon
+                                        matPrefix
+                                        [svgIcon]="'heroicons_outline:currency-dollar'">
+                                    </mat-icon>
+                                </mat-form-field>
+                            </div>
+                      
+                            <div class="flex flex-wrap w-full lg:w-4/12 ">
+                                <div class="flex flex-wrap w-full">
+                                    <mat-label class="flex flex-wrap">Discount Amount</mat-label>
+                                    <mat-icon
+                                        matTooltip="Discount amount is to be key in"
+                                        class="flex flex-wrap items-center transform scale-75"
+                                        [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                    </mat-icon>
+                                </div>
+                                <mat-form-field appearance="fill" class="w-full pr-4 fuse-mat-emphasized-affix">
+                                    <input
+                                        type="number"
+                                        placeholder="Insert Discount Amount"
+                                        matInput>
+                                    <mat-icon
+                                        matPrefix
+                                        [svgIcon]="'mat_solid:confirmation_number'">
+                                    </mat-icon>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- calculation type -->
+                            <div class="flex flex-wrap w-full lg:w-3/12 ">
+                                <div class="flex flex-wrap w-full">
+                                    <mat-label class="flex flex-wrap">Type</mat-label>
+                                    <mat-icon
+                                        matTooltip="Claculation type selection is to choose what type of discount calculation type need to be applied"
+                                        class="flex flex-wrap items-center transform scale-75"
+                                        [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                    </mat-icon>
+                                </div>
+                                <mat-form-field appearance="fill" class="w-full pr-4 fuse-mat-emphasized-affix">
+                                    <mat-select
+                                        class="w-full"
+                                        placeholder="Choose Calculation Type">
+                                        <div>
+                                            <mat-option [value]="'PERCENT'">Percentage</mat-option>
+                                            <mat-option [value]="'FIX'">Fix</mat-option>
+                                        </div>
+                                    </mat-select>
+                                    <mat-icon
+                                        matPrefix
+                                        [svgIcon]="'list'">
+                                    </mat-icon>
+                                </mat-form-field>
+                            </div>
+                            
+
+                            <!-- Dbuttons Insert Discount Tier-->
+                            <div class="flex flex-wrap w-1/1/2 lg:w-1/12 items-center justify-center">
+                                <div class="items-center justify-center flex flex-row w-full"> 
+                                    <button
+                                    class="hover:bg-primary-500 border border-primary-500 ml-2 w-2 h-2"
+                                    mat-flat-button
+                                    [color]="'primary'">
+                                    <mat-icon
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                                    </button>
+                        
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset> 
                     <div class="flex justify-end">
                         <button
                             class="px-8 mr-2"
@@ -232,5 +292,6 @@
                 </mat-step>
             </mat-horizontal-stepper>
         </form>
+    </div>
     </div>
 </div>
