@@ -134,6 +134,9 @@ export class StoreDeliveryComponent implements OnInit
                             });
                         // check changes
                         this.checkDeliveryPartner();
+
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
                     });
 
                 // ----------------------
@@ -147,6 +150,9 @@ export class StoreDeliveryComponent implements OnInit
                         
                         let _deliverySpId = response.length > 0 ? response[0].deliverySpId : "";
                         this.storeDeliveryForm.get('deliveryPartner').patchValue(_deliverySpId);
+
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
                     });
 
                 // -------------------------------------
@@ -161,6 +167,9 @@ export class StoreDeliveryComponent implements OnInit
 
                         this.storeDeliveryForm.get('deliveryType').patchValue(_deliveryType);
                         this.storeDeliveryForm.get('allowStorePickup').patchValue(_allowsStorePickup);
+
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
                     }
                 );
 
@@ -189,6 +198,9 @@ export class StoreDeliveryComponent implements OnInit
                             this.allowedSelfDeliveryStates = this.storeDeliveryForm.get('allowedSelfDeliveryStates') as FormArray;
                             this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
                         });
+
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
                     });
 
                 // Get allowed store countries 
@@ -197,6 +209,9 @@ export class StoreDeliveryComponent implements OnInit
                     .subscribe((response: StoreRegionCountries[])=>{
                         response.forEach((country: StoreRegionCountries) => {
                             this.storeCountries.push(country);
+
+                            // Mark for check
+                            this._changeDetectorRef.markForCheck();
                         });
                     });
                     
