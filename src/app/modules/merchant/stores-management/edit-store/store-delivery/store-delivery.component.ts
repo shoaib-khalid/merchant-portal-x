@@ -20,6 +20,7 @@ export class StoreDeliveryComponent implements OnInit
 {
     storeDeliveryForm: FormGroup;
     
+    store: Store;
     storeId: string;
     storeName: string;
 
@@ -90,6 +91,8 @@ export class StoreDeliveryComponent implements OnInit
 
         this._storesService.getStoreById(this.storeId)
             .subscribe((storeResponse) => {
+
+                this.store = storeResponse;
 
                 // set store to current store
                 this._storesService.store = storeResponse;

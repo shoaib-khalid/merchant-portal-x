@@ -98,6 +98,7 @@
                                 <mat-select 
                                     [formControlName]="'regionCountryId'"
                                     [required]="true"
+                                    disabled="true"
                                     [value]="'regionCountryId'"
                                     [placeholder]="'Select Country'"
                                     (selectionChange)="storeDeliveryForm.get('regionCountryId').patchValue($event.value);updateStates(countrySelector.value)"
@@ -291,7 +292,7 @@
                                                             </mat-form-field>
                                                             <!-- Input Charges -->
                                                             <mat-form-field class="w-full">
-                                                                <span matSuffix>$</span>
+                                                                <span matSuffix>{{ store.regionCountry.currencySymbol  }}</span>
                                                                 <input
                                                                     matInput
                                                                     type="number"
