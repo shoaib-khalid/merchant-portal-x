@@ -20,6 +20,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 import { FuseCardModule } from '@fuse/components/card';
 import { FuseDateRangeComponent } from '@fuse/components/date-range/date-range.component';
+import { QuillModule } from 'ngx-quill';
 
 import { ChooseVerticalComponent } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.component';
 import { RegisterStoreComponent } from 'app/modules/merchant/stores-management/register-store/register-store.component';
@@ -65,6 +66,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
         MatStepperModule,
         EditStoreModule,
         TimeSelectorInputModule,
+        QuillModule,
         NgxGalleryModule,
         FontAwesomeModule
     ],

@@ -61,13 +61,14 @@ export class ChooseVerticalComponent
         .subscribe((verticals: Vertical[]) => {
 
             this._userService.client$.subscribe((response: Client)=>{
-                
-                let regionId = response['data'].regionCountry.region;
-                if (!response['data'].regionCountry.region) {
-                    console.error("Empty symplifiedRegion")
+                if (response['data'].regionCountry) {
+                    let regionId = response['data'].regionCountry.region;
+                    if (!response['data'].regionCountry.region) {
+                        console.error("Empty symplifiedRegion")
+                    }
+                    
+                    this.verticals = this.getVerticalByRegionId(verticals,regionId);
                 }
-                
-                this.verticals = this.getVerticalByRegionId(verticals,regionId);
     
                 // Mark for check
                 this._changeDetectorRef.markForCheck();

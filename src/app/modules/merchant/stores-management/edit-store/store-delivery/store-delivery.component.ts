@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Locale } from 'app/core/locale/locale.types';
 import { LocaleService } from 'app/core/locale/locale.service';
 import { StoresService } from 'app/core/store/store.service';
+import { RegisterStoreValidationService } from 'app/modules/merchant/stores-management/register-store/register-store.validation.service';
 import { Store, StoreRegionCountries, CreateStore, StoreAssets, StoreSelfDeliveryStateCharges, StoreDeliveryDetails, StoreDeliveryProvider } from 'app/core/store/store.types';
 import { ChooseVerticalService } from '../../choose-vertical/choose-vertical.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
@@ -17,11 +18,11 @@ import { FuseConfirmationService } from '@fuse/services/confirmation';
 })
 export class StoreDeliveryComponent implements OnInit
 {
+    storeDeliveryForm: FormGroup;
+    
+    store: Store;
     storeId: string;
     storeName: string;
-
-    storeDeliveryForm: FormGroup;
-    plans: any[];
 
     deliveryFullfilment: any;
     deliveryPartners: any = [];
@@ -32,14 +33,8 @@ export class StoreDeliveryComponent implements OnInit
     _allowedSelfDeliveryStates: any = [];
     allowedSelfDeliveryStates: FormArray;
 
-    statesList: any;
-
-    statesByCountry: string;
-    /** for selected state refer form builder */ 
-    regionsList: any;
-    /** for selected country refer form builder */ 
-    countriesList: any = [];
-    /** for selected country refer form builder */ 
+    storeStates: string[] = [];
+    storeCountries: StoreRegionCountries[] = [];
 
     /**
      * Constructor
@@ -69,7 +64,6 @@ export class StoreDeliveryComponent implements OnInit
         this.storeDeliveryForm = this._formBuilder.group({
             serviceChargesPercentage    : [0],
             verticalCode                : [''],
-            regionCountryId             : ['', Validators.required],
             // Allowed Self Delivery States
             allowedSelfDeliveryStates   : this._formBuilder.array([]),
             // Delivery Provider
@@ -79,30 +73,12 @@ export class StoreDeliveryComponent implements OnInit
             // Else
             allowScheduledDelivery      : [false],
             allowStorePickup            : [false],
+            address                     : ['', Validators.required],
+            city                        : ['', Validators.required],
+            postcode                    : ['', [Validators.required, Validators.minLength(5), Validators.maxLength(10), RegisterStoreValidationService.postcodeValidator]],
+            regionCountryStateId        : ['', Validators.required],
+            regionCountryId             : ['', Validators.required],
         });
-
-        // Setup the plans
-        this.plans = [
-            {
-                value  : 'basic',
-                label  : 'BASIC',
-                details: 'Starter plan for individuals.',
-                price  : '10'
-            },
-            {
-                value  : 'team',
-                label  : 'TEAM',
-                details: 'Collaborate up to 10 people.',
-                price  : '20'
-            },
-            {
-                value  : 'enterprise',
-                label  : 'ENTERPRISE',
-                details: 'For bigger businesses.',
-                price  : '40'
-            }
-        ];
-
         
         this.deliveryFullfilment = [
             { selected: false, option: "INSTANT_DELIVERY", label: "Instant Delivery", tooltip: "This store support instant delivery. (Provided by store own logistic or delivery partners)" }, 
@@ -111,22 +87,12 @@ export class StoreDeliveryComponent implements OnInit
             { selected: false, option: "STORE_PICKUP", label: "Allow Store Pickup", tooltip: "This store allow customer to pick up item from store" }
         ];
 
-        // get states service
-        this.statesList = [
-            { countryId: "MYS", states: ["Johor","Kedah","Kelantan","Kuala Lumpur","Malacca","Negeri Sembilan", "Pahang", "Pulau Pinang", "Perak", "Perlis", "Sabah", "Serawak", "Selangor"] },
-            { countryId: "PAK", states: ["Balochistan","Federal","Khyber Pakhtunkhwa", "Punjab", "Sindh"] }
-        ];
-
-        // get regions service
-        this.regionsList = [
-            { regionCode: "SEA", name: "South East Asia", countries: ["MY"] },
-            { regionCode: "SE", name: "South East", countries: ["PK"] }
-        ];
-
         this.storeId = this._route.snapshot.paramMap.get('storeid');
 
         this._storesService.getStoreById(this.storeId)
             .subscribe((storeResponse) => {
+
+                this.store = storeResponse;
 
                 // set store to current store
                 this._storesService.store = storeResponse;
@@ -171,6 +137,9 @@ export class StoreDeliveryComponent implements OnInit
                             });
                         // check changes
                         this.checkDeliveryPartner();
+
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
                     });
 
                 // ----------------------
@@ -184,6 +153,9 @@ export class StoreDeliveryComponent implements OnInit
                         
                         let _deliverySpId = response.length > 0 ? response[0].deliverySpId : "";
                         this.storeDeliveryForm.get('deliveryPartner').patchValue(_deliverySpId);
+
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
                     });
 
                 // -------------------------------------
@@ -198,6 +170,9 @@ export class StoreDeliveryComponent implements OnInit
 
                         this.storeDeliveryForm.get('deliveryType').patchValue(_deliveryType);
                         this.storeDeliveryForm.get('allowStorePickup').patchValue(_allowsStorePickup);
+
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
                     }
                 );
 
@@ -226,6 +201,9 @@ export class StoreDeliveryComponent implements OnInit
                             this.allowedSelfDeliveryStates = this.storeDeliveryForm.get('allowedSelfDeliveryStates') as FormArray;
                             this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
                         });
+
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
                     });
 
                 // Get allowed store countries 
@@ -233,35 +211,32 @@ export class StoreDeliveryComponent implements OnInit
                 this._storesService.storeRegionCountries$
                     .subscribe((response: StoreRegionCountries[])=>{
                         response.forEach((country: StoreRegionCountries) => {
-                            this.countriesList.push(country);
-                        });
-                    });
-                    
-
-                // get locale info from (locale service)
-                // this is to get the current location by using 3rd party api service
-                this._localeService.locale$
-                    .subscribe((response: Locale)=>{
-
-                        let symplifiedCountryId = this.storeDeliveryForm.get('regionCountryId').value;
-                        
-                        // state (using component variable)
-                        // INITIALLY (refer below section updateStates(); for changes), get states from symplified backed by using the 3rd party api
-                        
-                        // Get states by country Z(using symplified backend)
-                        this._storesService.getStoreRegionCountryState(symplifiedCountryId).subscribe((response)=>{
-                            this.statesByCountry = response.data.content; 
+                            this.storeCountries.push(country);
 
                             // Mark for check
                             this._changeDetectorRef.markForCheck();
                         });
-
-                        // country (using form builder variable)
-                        // this.editStoreForm.get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
-                        
-                        // Mark for check
-                        this._changeDetectorRef.markForCheck();
                     });
+                    
+                let symplifiedCountryId = this.storeDeliveryForm.get('regionCountryId').value;
+                    
+                // state (using component variable)
+                // INITIALLY (refer below section updateStates(); for changes), get states from symplified backed by using the 3rd party api
+                
+                // Get states by country Z(using symplified backend)
+                this._storesService.getStoreRegionCountryState(symplifiedCountryId).subscribe((response)=>{
+                    
+                    this.storeStates = response.data.content; 
+
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                });
+
+                // country (using form builder variable)
+                // this.editStoreForm.get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
+                
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
 
             });
     }
@@ -510,5 +485,19 @@ export class StoreDeliveryComponent implements OnInit
     trackByFn(index: number, item: any): any
     {
         return item.id || index;
+    }
+
+    updateStates(countryId: string){
+
+        // reset current regionCountryStateId
+        this.storeDeliveryForm.get('regionCountryStateId').patchValue("");
+
+        // Get states by country (using symplified backend)
+        this._storesService.getStoreRegionCountryState(countryId).subscribe((response)=>{
+            this.storeStates = response.data.content;
+        });
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
 }

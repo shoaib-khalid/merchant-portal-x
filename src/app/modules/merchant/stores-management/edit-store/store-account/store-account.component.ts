@@ -9,6 +9,9 @@ import { LocaleService } from 'app/core/locale/locale.service';
 import { Locale } from 'app/core/locale/locale.types';
 import { debounce } from 'lodash';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
+import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 @Component({
     selector       : 'store-account',
@@ -18,25 +21,38 @@ import { FuseConfirmationService } from '@fuse/services/confirmation';
 })
 export class StoreAccountComponent implements OnInit
 {
-    storeId: string;
-
     storeAccountForm: FormGroup;
+    
+    storeId: string;
+    storeName: string;
 
+    /** Domain details */
     fullDomain: string;
     domainName:string;
     subDomainName: string;
-
-    storeName: string;
-
-    statesList: any;
-    statesByCountry: string;
-    /** for selected state refer form builder */ 
     
-    countriesList: any = [];
-    /** for selected country refer form builder */ 
-    
-    regionsList: any;
-    /** for selected country refer form builder */ 
+    // Fuse Media Watcher
+    currentScreenSize: string[] = [];
+
+    /** Quil Modules */
+    quillModules: any = {
+        toolbar: [
+            ['bold', 'italic', 'underline'],
+            [{align: []}, {list: 'ordered'}, {list: 'bullet'}],
+            [{link: function(value) {
+                    if (value) {
+                      var href = prompt('Enter the URL');
+                      this.quill.format('link', href);
+                    } else {
+                      this.quill.format('link', false);
+                    }
+                  }
+            }],
+            ['blockquote','clean']
+        ]
+    };
+
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     /**
      * Constructor
@@ -46,22 +62,14 @@ export class StoreAccountComponent implements OnInit
         private _route: ActivatedRoute,
         private _storesService: StoresService,
         private _chooseVerticalService: ChooseVerticalService,
-        private _localeService: LocaleService,
         private _changeDetectorRef: ChangeDetectorRef,
         private _fuseConfirmationService: FuseConfirmationService,
+        private _fuseMediaWatcherService: FuseMediaWatcherService
     )
     {
         this.checkExistingURL = debounce(this.checkExistingURL, 300);
         this.checkExistingName = debounce(this.checkExistingName,300);
     }
-    /**
-    * Getter for access token
-    */
-
-        get accessToken(): string
-        {
-            return localStorage.getItem('accessToken') ?? '';
-        } 
 
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
@@ -79,25 +87,9 @@ export class StoreAccountComponent implements OnInit
             storeDescription    : ['', [Validators.required, Validators.maxLength(100)]],
             email               : ['', [Validators.required, Validators.email]],
             phoneNumber         : ['', RegisterStoreValidationService.phonenumberValidator],
-            address             : ['', Validators.required],
-            city                : ['', Validators.required],
-            postcode            : ['', [Validators.required, Validators.minLength(5), Validators.maxLength(10), RegisterStoreValidationService.postcodeValidator]],
-            regionCountryStateId: ['', Validators.required],
-            regionCountryId     : ['', Validators.required],
+            displayAddress      : [''],
             paymentType        : ['', Validators.required],
         });
-
-        // get states service
-        this.statesList = [
-            { countryId: "MYS", states: ["Johor","Kedah","Kelantan","Kuala Lumpur","Malacca","Negeri Sembilan", "Pahang", "Pulau Pinang", "Perak", "Perlis", "Sabah", "Serawak", "Selangor"] },
-            { countryId: "PAK", states: ["Balochistan","Federal","Khyber Pakhtunkhwa", "Punjab", "Sindh"] }
-        ];
-
-        // get regions service
-        this.regionsList = [
-            { regionCode: "SEA", name: "South East Asia", countries: ["MY"] },
-            { regionCode: "SE", name: "South East", countries: ["PK"] }
-        ];
 
         this.storeId = this._route.snapshot.paramMap.get('storeid');
 
@@ -140,46 +132,23 @@ export class StoreAccountComponent implements OnInit
 
                 this.storeAccountForm.get('subdomain').patchValue(this.subDomainName);
 
-                this.storeName = storeResponse.name
+                this.storeName = storeResponse.name;
 
-                // -------------------------
-                // Get country location
-                // -------------------------
-
-                // Get allowed store countries 
-                // this only to get list of country in symplified backend
-                this._storesService.storeRegionCountries$.subscribe((response: StoreRegionCountries[])=>{
-                    response.forEach((country: StoreRegionCountries) => {
-                        this.countriesList.push(country);
-                    });
-                });
-                
-
-                // get locale info from (locale service)
-                // this is to get the current location by using 3rd party api service
-                this._localeService.locale$.subscribe((response: Locale)=>{
-                    
-                    let symplifiedCountryId = this.storeAccountForm.get('regionCountryId').value;
-                    
-                    // state (using component variable)
-                    // INITIALLY (refer below section updateStates(); for changes), get states from symplified backed by using the 3rd party api
-                    
-                    // Get states by country Z(using symplified backend)
-                    this._storesService.getStoreRegionCountryState(symplifiedCountryId).subscribe((response)=>{
-                        this.statesByCountry = response.data.content;
-
-                        // Repatch
-                        this.storeAccountForm.get('regionCountryStateId').patchValue(storeResponse.regionCountryStateId);
-                    });
-
-                    // country (using form builder variable)
-                    // this.editStoreForm.get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
-                    
-                    // Mark for check
-                    this._changeDetectorRef.markForCheck();
-                });
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
             } 
         );
+
+        // Fuse Media Watcher Service
+        this._fuseMediaWatcherService.onMediaChange$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(({matchingAliases}) => {               
+
+                this.currentScreenSize = matchingAliases;                
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -204,20 +173,6 @@ export class StoreAccountComponent implements OnInit
             this.storeAccountForm.get('name').setErrors({storeNameAlreadyTaken: true});
         }
 
-    }
-
-    updateStates(countryId: string){
-
-        // reset current regionCountryStateId
-        this.storeAccountForm.get('regionCountryStateId').patchValue("");
-
-        // Get states by country (using symplified backend)
-        this._storesService.getStoreRegionCountryState(countryId).subscribe((response)=>{
-            this.statesByCountry = response.data.content;
-        });
-
-        // Mark for check
-        this._changeDetectorRef.markForCheck();
     }
 
     updateStoreAccount(){
@@ -257,6 +212,14 @@ export class StoreAccountComponent implements OnInit
 
         // Enable the form
         this.storeAccountForm.enable();
+    }
+
+    // Quil editor text limit
+    textChanged($event) {
+        const MAX_LENGTH = 500;
+        if ($event.editor.getLength() > MAX_LENGTH) {
+           $event.editor.deleteText(MAX_LENGTH, $event.editor.getLength());
+        }
     }
 
 }

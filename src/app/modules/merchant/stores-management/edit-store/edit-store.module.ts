@@ -19,6 +19,7 @@ import { editStoreRoutes } from './edit-store.routing';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { QuillModule } from 'ngx-quill';
 
 import { TimeSelectorInputModule } from 'app/layout/common/time-selector/timeselector.module';
 import { NgxGalleryModule } from 'ngx-gallery-9';
@@ -47,7 +48,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
         MatToolbarModule,
         MatCheckboxModule,
         MatTooltipModule,
-
+        QuillModule,
         TimeSelectorInputModule,
         NgxGalleryModule,
         FontAwesomeModule
