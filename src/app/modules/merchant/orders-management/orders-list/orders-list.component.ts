@@ -8,7 +8,7 @@ import { Order, OrdersCountSummary, OrdersListPagination } from 'app/modules/mer
 import { MatPaginator } from '@angular/material/paginator';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
-import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { OrderInvoiceComponent } from 'app/modules/merchant/orders-management/order-invoice/order-invoice.component';
 import { ChooseProviderDateTimeComponent } from 'app/modules/merchant/orders-management/choose-provider-datetime/choose-provider-datetime.component';
 import { Router } from '@angular/router';
@@ -19,6 +19,7 @@ import { OrderDetailsComponent } from '../order-details/order-details.component'
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { EditOrderComponent } from '../edit-order/edit-order.component';
+import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dialog/dialog.component';
 
 @Component({
     selector       : 'orders-list',
@@ -101,6 +102,8 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     errorMessage: string;
 
     currentScreenSize: string[] = [];
+
+    isRevised:any;
 
     /**
      * Constructor
@@ -642,34 +645,42 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
 
     openEditDialog(orderId){
         
-        // Open the confirmation dialog
-        const confirmation = this._fuseConfirmationService.open({
-            title  : 'Edit Order',
-            message: 'Have you contacted the buyer to change order? In case of any dispute, the amount will be refunded to the customer.',
-            actions: {
-                confirm: {
-                    label: 'Yes'
-                },
-                cancel:{
-                    label:'No'
-                }
+        this._orderslistService.getOrderById(orderId)
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe((order: Order) => {
+  
+            this.isRevised = order["data"].isRevised;
+
+            if(this.isRevised ===true){
+
+                //show pop up cannot be edit
+                this.displayMessage('Cannot be edit','Order has been previously updated, you can only revise the order once.','Ok','Close',false);
+
             }
-        });
+            else{
+              
+                // Open the confirmation dialog
+                const confirmation =  this.displayMessage('Edit Order','Have you contacted the buyer to change order? In case of any dispute, the amount will be refunded to the customer.','Yes','No',true);
 
-        // Subscribe to the confirmation dialog closed action
-        confirmation.afterClosed().subscribe((result) => {
+                // Subscribe to the confirmation dialog closed action
+                confirmation.afterClosed().subscribe((result) => {
 
-            // If the confirm button pressed...
-            if ( result === 'confirmed' ){
-            // Open the dialog
-            const dialogRef = this._dialog.open(EditOrderComponent, { data: orderId});
+                    // If the confirm button pressed...
+                    if ( result === 'confirmed' ){
+                    // Open the dialog
+                    const dialogRef = this._dialog.open(EditOrderComponent, { data: orderId});
 
-            dialogRef.afterClosed()
-                        .subscribe((result) => {
-                        });
+                    dialogRef.afterClosed()
+                                .subscribe((result) => {
+                                });
+                    }
+            
+                });
+                
             }
-    
+     
         });
+        
 
     }
 
@@ -692,6 +703,30 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
             return false;
         }
     }
+
+    
+    displayMessage(getTitle:string,getMessage:string,getLabelConfirm:string,getLabelCancel?:string,showLabelCancel?:boolean,getShowIcon?:boolean):MatDialogRef<FuseConfirmationDialogComponent,any>{
+
+        const confirmation = this._fuseConfirmationService.open({
+            title  : getTitle,
+            message: getMessage,
+            icon       : {
+              show : getShowIcon,
+            },
+            actions: {
+                confirm: {
+                    label: getLabelConfirm
+                },
+                cancel : {
+                  label:getLabelCancel,
+                  show:showLabelCancel
+                }
+            }
+        });
+  
+        return confirmation;
+  
+      }
 
 
 
