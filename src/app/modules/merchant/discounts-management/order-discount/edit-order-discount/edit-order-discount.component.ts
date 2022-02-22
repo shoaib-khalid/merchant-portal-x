@@ -1,10 +1,10 @@
 import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { TimeSelector } from 'app/layout/common/time-selector/timeselector.component';
 import { Subject } from 'rxjs';
 import { DiscountsService } from '../order-discount-list/order-discount-list.service';
-import { ApiResponseModel, Discount } from '../order-discount-list/order-discount-list.types';
+import { ApiResponseModel, Discount, StoreDiscountTierList } from '../order-discount-list/order-discount-list.types';
 
 @Component({
   selector: 'app-edit-order-discount',
@@ -18,6 +18,8 @@ export class EditOrderDiscountDialogComponent implements OnInit {
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     loadDetails:boolean=false;
+    storeDiscountTierList: FormArray;
+
 
 
 
@@ -38,34 +40,19 @@ export class EditOrderDiscountDialogComponent implements OnInit {
     this.horizontalStepperForm = this._formBuilder.group({
         //Main Discount
         step1: this._formBuilder.group({
-            discountName   : ['', [Validators.required]],
-            discountType : ['', Validators.required],
-            startDate : ['', Validators.required],
-            endDate : ['', Validators.required],
-            // startTime:this._formBuilder.group({
-            //     timeHour: [null, [Validators.required, Validators.minLength(2), Validators.maxLength(2)]],
-            //     timeMinute: [null, [Validators.required, Validators.minLength(2), Validators.maxLength(2)]],
-            //     timeAmPm: [null, [Validators.required, Validators.minLength(2), Validators.maxLength(2)]],
-            //   }),
-            // startTime:new FormControl('', [Validators.required]),
+            discountName   : [''],
+            discountType : [''],
+            startDate : [''],
+            endDate : [''],
             startTime : [''],
             endTime : [''],
-            // endTime:this._formBuilder.group({
-            //     //     timeHour: [null, [Validators.required, Validators.minLength(2), Validators.maxLength(2)]],
-            //     //     timeMinute: [null, [Validators.required, Validators.minLength(2), Validators.maxLength(2)]],
-            //     //     timeAmPm: [null, [Validators.required, Validators.minLength(2), Validators.maxLength(2)]],
-            //  }),
-            isActive : ['', Validators.required],
-            maxDiscountAmount : ['', Validators.required],
+            isActive : [''],
+            maxDiscountAmount : [''],
             normalPriceItemOnly : [''],     
         }),
         //Tier List
         step2: this._formBuilder.array([
-            this._formBuilder.group({
-                calculationType : [''],
-                discountAmount : [''], 
-                startTotalSalesAmount:[''],
-            }),
+        
         ]),
     });
 
@@ -76,30 +63,24 @@ export class EditOrderDiscountDialogComponent implements OnInit {
         //Set the selected discount
         this.selectedDiscount = response.data;
 
-        // Fill the form
+        // Fill the form step 1
         this.horizontalStepperForm.get('step1').patchValue(response.data);
-
-        console.log('checking sebelum',this.horizontalStepperForm.get('step1').value);
-
-        console.log("iman nak check certain value je,",this.horizontalStepperForm.get('step1').get('startTime').value);
 
         //set value for time in tieme selector
         this.setValueToTimeSelector(response.data);
 
+        //after we set the form with custom field time selector then we display the details
         this.loadDetails =true;
 
-        console.log('checcckkk form selepas:::',this.horizontalStepperForm.get('step1').value);
-
         // clear discount tier form array
-        //(this.selectedDiscountForm.get('storeDiscountTierList') as FormArray).clear();
+        (this.horizontalStepperForm.get('step2') as FormArray).clear();
         
         // load discount tier form array with data frombackend
-        // response.data.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
-        //     this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
-        //     this.storeDiscountTierList.push(this._formBuilder.group(item));
-        // });
+        response.data.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
+            this.storeDiscountTierList = this.horizontalStepperForm.get('step2') as FormArray;
+            this.storeDiscountTierList.push(this._formBuilder.group(item));
+        });
         
-
         // Mark for check
         this._changeDetectorRef.markForCheck();
     });
@@ -110,8 +91,8 @@ export class EditOrderDiscountDialogComponent implements OnInit {
   }
 
   checkButton(){
-    console.log('this.horizontalStepperForm ',this.horizontalStepperForm.value.step1);
-
+    console.log('this.horizontalStepperForm ',this.horizontalStepperForm.value);
+    console.log('form array',this.horizontalStepperForm.get('step2')['controls']);
   }
 
   setValueToTimeSelector(discount){
@@ -153,14 +134,14 @@ export class EditOrderDiscountDialogComponent implements OnInit {
 
     //===================== / END TIME =====================
     return;
-}
+  }
 
-ngOnDestroy(): void
-{
-    // Unsubscribe from all subscriptions
-    this._unsubscribeAll.next();
-    this._unsubscribeAll.complete();
-}
+  ngOnDestroy(): void
+  {
+      // Unsubscribe from all subscriptions
+      this._unsubscribeAll.next();
+      this._unsubscribeAll.complete();
+  }
 
 
 }

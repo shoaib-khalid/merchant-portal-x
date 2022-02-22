@@ -7,6 +7,8 @@
             <mat-horizontal-stepper
                 [linear]="true"
                 #horizontalStepper>
+
+                <!-- SECTION FOR ORDER DISCOUNT -->
                 <mat-step
                     [formGroupName]="'step1'"
                     [stepControl]="horizontalStepperForm.get('step1')"
@@ -145,7 +147,6 @@
                             class="px-8"
                             mat-flat-button
                             [color]="'primary'"
-                            [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
                             type="button"
                             matStepperNext>
                             Next
@@ -153,8 +154,9 @@
                     </div>
                 </mat-step>
 
+                <!-- SECTION FOR TIER -->
                 <mat-step
-                    [formGroupName]="'step2'"
+                    formArrayName="step2"
                     [stepControl]="horizontalStepperForm.get('step2')"
                     #horizontalStepperStep2>
                     <ng-template matStepLabel>Tier</ng-template>
@@ -253,6 +255,63 @@
                             </div>
                         </div>
                     </fieldset> 
+                    <fieldset class="border border-solid border-gray-300 rounded my-1 mx-5">
+                        <legend class="text font-bold ml-2 px-2">Discount Tier List</legend>
+
+                        <div>
+                            <table class="table-auto my-4 mr-2 w-full sm:flex-row">
+                                <tr>
+                                    <th>Min Order Amount</th>
+                                    <th>Discount Amount</th>
+                                    <th>Type</th>
+                              
+                              
+                            
+                                </tr>
+                                <tr *ngFor="let discountTier of horizontalStepperForm.get('step2')['controls']; let i = index;" [formGroupName]="i">
+                                    <td class="border-t border-gray-300 pt-2 pl-2"> 
+                                        <div>
+                                            <mat-form-field class="w-full pr-4">
+                                                <input
+                                                    type="number"
+                                                    matInput
+                                                    [formControlName]="'startTotalSalesAmount'"
+                                                >
+                                            </mat-form-field>
+                                        </div>
+                                    </td>
+                                    <td class="border-t border-gray-300 pt-2 pl-2">
+                                        <div>
+                                            <mat-form-field class="w-full pr-4">
+                                                <input
+                                                    type="number"
+                                                    matInput
+                                                    [formControlName]="'discountAmount'"
+                                                >
+                                            </mat-form-field>
+                                        </div>
+                                    </td>
+                                    <td class="border-t border-gray-300 pt-2 pl-2">
+                                        <div>
+                                            <mat-form-field class="w-full pr-4">
+                                                <mat-select
+                                                    class="w-full"
+                                                    [formControlName]="'calculationType'"
+                                                    >
+                                                    
+                                                    <div>
+                                                        <mat-option [value]="'PERCENT'">Percentage</mat-option>
+                                                        <mat-option [value]="'FIX'">Fix</mat-option>
+                                                    </div>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+                                    </td>
+                               
+                                </tr>
+                            </table>
+                        </div>
+                    </fieldset>
                     <div class="flex justify-end">
                         <button
                             class="px-8 mr-2"
@@ -274,22 +333,6 @@
                     </div>
                 </mat-step>
 
-                <mat-step>
-                    <ng-template matStepLabel>Done</ng-template>
-                    <p class="my-6 font-medium">
-                        Thank you for completing our form!
-                    </p>
-                    <div class="flex justify-end mt-8">
-                        <button
-                            class="px-8 mr-2"
-                            mat-flat-button
-                            [color]="'accent'"
-                            type="button"
-                            matStepperPrevious>
-                            Back
-                        </button>
-                    </div>
-                </mat-step>
             </mat-horizontal-stepper>
         </form>
     </div>
