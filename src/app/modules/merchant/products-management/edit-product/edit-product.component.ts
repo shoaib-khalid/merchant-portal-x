@@ -1,12 +1,12 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef, Inject } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { merge, Observable, of, Subject } from 'rxjs';
 import { debounceTime, delay, finalize, map, switchMap, take, takeUntil } from 'rxjs/operators';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, ProductCategory, ProductPagination, ProductPackageOption } from 'app/core/product/inventory.types';
+import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, ProductCategory, ProductPagination, ProductPackageOption, ProductAssets } from 'app/core/product/inventory.types';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { Store } from 'app/core/store/store.types';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -15,8 +15,8 @@ import { StoresService } from 'app/core/store/store.service';
 
 
 @Component({
-    selector: 'dialog-add-product',
-    templateUrl: './add-product.component.html',
+    selector: 'dialog-edit-product',
+    templateUrl: './edit-product.component.html',
     styles         : [
         /* language=SCSS */
         `
@@ -51,9 +51,9 @@ import { StoresService } from 'app/core/store/store.service';
             // height: 60% !important;
             // }
             :host ::ng-deep .ql-container .ql-editor {
-                min-height: 132px;
-                max-height: 132px;
-                height: 132px;
+                min-height: 139px;
+                max-height: 139px;
+                height: 139px;
             }
             .variant-details-grid {
                 max-height: 63vh;
@@ -66,7 +66,7 @@ import { StoresService } from 'app/core/store/store.service';
     ],
   })
   
-export class AddProductComponent implements OnInit, OnDestroy
+export class EditProductComponent implements OnInit, OnDestroy
 {
     @ViewChild('variantsPanelOrigin') private _variantsPanelOrigin: ElementRef;
     @ViewChild('variantsPanel') private _variantsPanel: TemplateRef<any>;
@@ -98,6 +98,11 @@ export class AddProductComponent implements OnInit, OnDestroy
     creatingProduct: boolean; // use to disable next button until product is created
 
 
+    // inventories
+    productInventoriesFA: FormArray;
+    productInventories$: ProductInventory[] = [];
+
+
     // product combo package
     _products: Product[]; // use in combo section -> 'Add product' --before filter
     filteredProductsOptions: Product[] = []; // use in listing html
@@ -124,6 +129,10 @@ export class AddProductComponent implements OnInit, OnDestroy
     thumbnailIndex: number = 0;
     currentImageIndex: number = 0;
     imagesEditMode: boolean = false;
+    productAssets$: ProductAssets[] = [];
+    variantimages: any = [];
+    productAssetsFA: FormArray;
+
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     private _variantsPanelOverlayRef: OverlayRef;
@@ -150,9 +159,13 @@ export class AddProductComponent implements OnInit, OnDestroy
     filteredProductVariants: any[] = []; // used in html to loop variant
     productVariants: any[] = []; // (variantComboOptions)
     variantToBeCreated: any[] = []; // use for creating on BE 
+    variantToBeDeleted: any[] = []; // use for deleting on BE 
     selectedVariantCombos: any = []; // this is the list of combinations generated
     selectedProductVariant: ProductVariant;
-    // variantImagesToBeDeleted: any = []; // image to be deleted from BE
+    variantImagesToBeDeleted: any = []; // image to be deleted from BE
+    productVariantsFA: FormArray;
+    productVariants$: ProductVariant[] = [];
+
 
     variantIndex: number = 0; // set index when open overlay panel in variant available section
 
@@ -162,7 +175,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     filteredProductVariantAvailable: any[] = []; // used in html to loop variant available
     productVariantAvailable: ProductVariantAvailable[] = []; 
     variantAvailableToBeCreated: any = []; // use for creating on BE 
-    // variantAvailableToBeDeleted: any = []; // use for deleting on BE 
+    variantAvailableToBeDeleted: any = []; // use for deleting on BE 
     productVariantAvailableEditMode: boolean = false;
     productVariantAvailableValueEditMode:any = [];
 
@@ -173,6 +186,12 @@ export class AddProductComponent implements OnInit, OnDestroy
     flashMessage: 'success' | 'error' | null = null;
     isLoading: boolean = false;
 
+    // sku, price & quantity 
+    // reason these 3 not in formbuilder is because it's not part of product but 
+    // it's part of product inventory (it's here for display only)
+    displaySku: string = "";
+    displayPrice: number = 0;
+    displayQuantity: number = 0;
 
 
 
@@ -190,7 +209,7 @@ export class AddProductComponent implements OnInit, OnDestroy
         private _overlay: Overlay,
         private _renderer2: Renderer2,
         private _viewContainerRef: ViewContainerRef,
-        public dialogRef: MatDialogRef<AddProductComponent>,
+        public dialogRef: MatDialogRef<EditProductComponent>,
         @Inject(MAT_DIALOG_DATA) public data: any
     )
     {
@@ -237,7 +256,9 @@ export class AddProductComponent implements OnInit, OnDestroy
                 thumbnailIndex   : [0],
                 isVariants       : [false],
                 isPackage        : [false], // combo
-    
+                productAssets    : this._formBuilder.array([]),
+                productInventories: this._formBuilder.array([]),
+                productVariants  : this._formBuilder.array([]),
                 // form completion
                 valid            : [false]
             }),
@@ -257,8 +278,12 @@ export class AddProductComponent implements OnInit, OnDestroy
 
         this.createdProductForm = this._formBuilder.group({});
 
-        // get the product type
-        this.productType = this.data.productType;
+        // // get the product type
+        // this.productType = this.data.productType;
+
+        // get the product id
+
+        this.setDetails(this.data.productId);
         
 
         // Create the selected product form
@@ -393,6 +418,392 @@ export class AddProductComponent implements OnInit, OnDestroy
     // --------------------------------------
     // Product Section
     // --------------------------------------
+    /**
+     * Set product details
+     *
+     * @param productId
+     */
+    setDetails(productId: string): void
+    {
+
+
+        // If the product is already selected...
+        if ( this.selectedProduct && this.selectedProduct.id === productId )
+        {
+            // Close the details
+        //  this.closeDetails();
+            return;
+        }
+
+        //set the details
+        // this.closeDetails();
+
+        // set showVariantsSection , showCombosSection to false
+    //  this.showVariantsSection = false;
+    //  this.showCombosSection = false;
+
+
+        // Get the product by id
+        this._inventoryService.getProductById(productId)
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((response) => {
+
+                let product = response["data"];
+                
+                // check for product that does not have product inventories, and add them
+                if (product.productInventories.length < 1) {
+                    // tempSku is generated automatically since there are no product inventory
+                    let tempSku = product.name.substring(1).toLowerCase().replace(" / ", "-");
+                    // Add Inventory to product
+                    this._inventoryService.addInventoryToProduct(product, { sku: tempSku, quantity: 0, price: 0, itemCode: productId + "aa" } )
+                        .subscribe((response)=>{
+
+                            // update product
+                            product.productInventories = [response];
+
+                            // update sku, price, quantity display since it's not part of product but product inventory
+                            //  this.displayPrice = response.price;
+                            //  this.displayQuantity = response.quantity;
+                            //  this.displaySku = response.sku;
+
+                            this.addProductForm.get('step1').get('sku').setValue(response.sku);
+                            this.addProductForm.get('step1').get('price').setValue(response.price);
+                            this.addProductForm.get('step1').get('availableStock').setValue(response.quantity);
+
+                            this.loadProductDetails(product);
+                        });
+                } else {
+                    this.loadProductDetails(product);
+                }    
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+    }
+ 
+    // Extension of toggleDetails()
+    loadProductDetails (product: Product) {
+
+        // Set the selected product
+        this.selectedProduct = product;
+
+        // Fill the form
+        this.addProductForm.get('step1').patchValue(product);
+
+        // Fill the form for SKU , Price & Quantity productInventories[0]
+        // this because SKU , Price & Quantity migh have variants
+        // this is only for display, so we display the productInventories[0] 
+        // this.displaySku = product.productInventories[0].sku;
+        // this.displayPrice = product.productInventories[0].price;
+        // this.displayQuantity = product.productInventories[0].quantity;
+
+        this.addProductForm.get('step1').get('sku').setValue(product.productInventories[0].sku);
+        this.addProductForm.get('step1').get('price').setValue(product.productInventories[0].price);
+        this.addProductForm.get('step1').get('availableStock').setValue(product.productInventories[0].quantity);
+
+        // disable the input if product has variants
+        if (product.productVariants.length > 0) {
+            this.addProductForm.get('step1').get('sku').disable();
+            this.addProductForm.get('step1').get('price').disable();    
+            this.addProductForm.get('step1').get('availableStock').disable();    
+        }
+
+        // ---------------------
+        // IsVariant Toogle 
+        // ---------------------
+
+        // set isVariants = true is productInventories.length > 0
+        product.productVariants.length > 0 ? this.addProductForm.get('step1').get('isVariants').patchValue(true) : this.addProductForm.get('step1').get('isVariants').patchValue(false);
+
+        // ---------------------
+        // Images
+        // ---------------------
+
+        // Sort productAssets and place itemCode null in front, after that variants image
+        let imagesObjSorted = product.productAssets.sort(this.dynamicSort("itemCode"));
+        let imageArr = imagesObjSorted.map(item => item.url);
+
+        this.images = imageArr;
+
+        // get thumbnail index
+        let _thumbnailIndex = null;
+
+        // if has variants
+        if (this.addProductForm.get('step1').get('isVariants').value === true){
+
+            let m = 0;
+
+            for (let i = 0; i < imagesObjSorted.length; i++){
+
+                // if no itemCode, continue the loop, and increase m by one
+                if (imagesObjSorted[i].itemCode == null){
+                    m++;
+                    continue;
+                }
+                // if thumbnail is true, take i and minus with m. This is to offset the index of assets with itemcode
+                if (imagesObjSorted[i].isThumbnail === true){
+                    _thumbnailIndex = i - m;
+                }
+            }
+        }
+        // if no variant
+        else {
+
+            _thumbnailIndex = imagesObjSorted.findIndex(item => item.isThumbnail === true)
+        }
+
+        this.thumbnailIndex = _thumbnailIndex === -1 ? 0 : _thumbnailIndex;
+
+        // ---------------------
+        // Product Assets
+        // ---------------------
+
+        this.productAssets$ = product.productAssets;
+
+        this.productAssetsFA = this.addProductForm.get('step1').get('productAssets') as FormArray;
+        // this.productAssets.clear();
+
+
+        this.imagesFile = [];
+
+        this.productAssets$.forEach(item => {
+            this.productAssetsFA.push(this._formBuilder.group(item));
+            this.imagesFile.push(null) // push imagesFile with null to defined now many array in imagesFile
+        });
+
+        // ---------------------
+        // Product Inventories
+        // ---------------------
+            
+        this.productInventories$ = product.productInventories;
+        this.productInventoriesFA = this.addProductForm.get('step1').get('productInventories') as FormArray;
+        // this.productInventories.clear();
+
+        this.productInventories$.forEach(item => {
+            this.productInventoriesFA.push(this._formBuilder.group(item));
+        });
+
+        // ---------------------
+        // Variants
+        // ---------------------
+
+        // Set to this productVariants 
+        this.productVariants$ = product.productVariants;
+        
+        this.productVariantsFA = this.addProductForm.get('step1').get('productVariants') as FormArray;
+        // this.productVariants.clear();
+
+        this.productVariants$.forEach(item => {
+            let _item = this._formBuilder.group({
+                id: item.id,
+                name: item.name,
+                productVariantsAvailable: [item.productVariantsAvailable] // idk why, but this is the only workable way to archive array in this._formBuilder.group
+            });
+
+            this.productVariantsFA.push(_item);
+        });
+
+        // this.filteredProductVariants = this.productVariants.value;
+
+
+        // Generate variants combination
+
+        this.generateVariantCombo();
+
+        // ---------------------
+        // Category
+        // ---------------------
+
+        // Add the category
+        this.selectedProduct.categoryId = product.categoryId;
+
+        // Update the selected product form
+        this.addProductForm.get('step1').get('categoryId').patchValue(this.selectedProduct.categoryId);
+
+        // Sort the filtered categories, put selected category on top
+        // First get selected array index by using this.selectedProduct.categoryId
+
+        let selectedProductCategoryIndex = this.filteredProductCategories.findIndex(item => item.id === this.selectedProduct.categoryId);
+        // if selectedProductCategoryIndex < -1 // category not selected
+        // if selectedProductCategoryIndex = 0 // category selected already in first element
+        if (selectedProductCategoryIndex > 0) {
+            // if index exists get the object of selectedProductCategory
+            this.selectedProductCategory = this.filteredProductCategories[selectedProductCategoryIndex];
+            // remove the object from this.filteredProductCategories
+            this.filteredProductCategories.splice(selectedProductCategoryIndex,1);
+            // re add this.selectedProductCategory in front
+            this.filteredProductCategories.unshift(this.selectedProductCategory);
+        }
+
+        // ---------------------
+        // Inventory Alarm
+        // ---------------------
+
+        this.selectedProduct.minQuantityForAlarm = product.minQuantityForAlarm;
+
+        // Update minQuantityForAlarm
+        this.addProductForm.get('step1').get('minQuantityForAlarm').patchValue(this.selectedProduct.minQuantityForAlarm);
+
+        // Update the selected product form
+        this.addProductForm.get('step1').get('minQuantityForAlarm').patchValue(this.selectedProduct.minQuantityForAlarm);
+
+        // ---------------------
+        // Product Combo Package
+        // ---------------------
+
+        // get product combo list
+        if (this.selectedProduct.isPackage === true) {
+            this._inventoryService.getProductPackageOptions(product.id)
+                .pipe(takeUntil(this._unsubscribeAll))
+                .subscribe((response)=>{
+                    this.productsCombos$ = response["data"];
+                });
+        }
+        
+        this.selectedProduct
+    }
+
+    generateVariantCombo(){
+
+        //set variantImages to null
+        this.variantimages = [];
+
+        // set to null
+        this.variantAvailableToBeCreated = [];
+        this.variantAvailableToBeDeleted = [];
+        this.variantToBeCreated = []; 
+        this.variantToBeDeleted = []; 
+        this.selectedVariantCombos = [];
+
+        // initialise empty variantItems
+        // this variantItems only for front end use to display variant combination
+        let variantItems:any = [];
+        let variantOptions:any = [];
+
+        // set a new variant object to display @ front end
+        // sort object if there is more than 1 variants
+        if (this.selectedProduct.productVariants.length > 0) {
+            // sort this selected productVariants
+            this.sortObjects(this.selectedProduct.productVariants)
+            // this.variantChecked = true;
+            // this.toggleDefaultInventory(true)
+            
+            // next sort this.selectedProduct.productVariantsAvailable
+            this.selectedProduct.productVariants.forEach((element: ProductVariant, index) => {
+                this.sortObjects(element.productVariantsAvailable)
+                // this.options.push({ name: element.name, id: element.id })
+
+                // push empty values array and ids array for each productVariantsAvailable
+                // variantOptions.push({ name: element.name, id: element.id })
+                variantOptions.push(element)
+                variantItems.push({ values: [], ids: [] })
+
+                // push productVariantsAvailable.value and productVariantsAvailable.id to the 
+                // created items above
+                element.productVariantsAvailable.forEach(item => {
+                    variantItems[index].values.push(item.value);
+                    variantItems[index].ids.push(item.id);
+                });
+            });
+        }
+        
+        this.variantComboItems = variantItems
+        this.variantComboOptions = variantOptions
+        this.filteredProductVariants = this.variantComboOptions        
+
+        //old
+        // this.getallCombinations(variantItems)
+
+        this.getallCombinations(this.variantComboItems)
+
+        
+        //set inventory
+        const productIdLength = this.selectedProduct.id.length;
+        (this.selectedProduct.productInventories).forEach((item: ProductInventory, index) => {
+
+            if (item.itemCode.slice(-1) != "a") {
+                const index = parseInt(item.itemCode.substring(productIdLength)); 
+
+                if (this.selectedVariantCombos[index]) {
+                    this.selectedVariantCombos[index].itemCode = item.itemCode;
+                    this.selectedVariantCombos[index].price = item.price;
+                    this.selectedVariantCombos[index].sku = item.sku;
+                    this.selectedVariantCombos[index].quantity = item.quantity;
+                    this.selectedVariantCombos[index].status = item.status;
+                    this.selectedVariantCombos[index].preview = '';
+                    this.selectedVariantCombos[index].newAsset = false;
+                    this.selectedVariantCombos[index].isThumbnail = false;
+                    this.selectedVariantCombos[index].file = '';
+                }                
+            }
+        });
+
+        
+        const pIdLen = this.selectedProduct.id.length;
+        
+        this.selectedProduct.productAssets.forEach(element => {
+            if (element.itemCode) {
+                this.variantimages[parseInt(element.itemCode.substring(pIdLen))] = ({ itemCode: element.itemCode, preview: element.url, assetId: element.id, isThumbnail: element.isThumbnail })
+                
+            }
+        });
+        
+
+        // get selectedVariantCombos
+        const arr1 = this.selectedVariantCombos;
+
+        // remove images that does not have itemCode 
+        // so this means arr2 will contains images that related to variants only 
+        // const arr2 = (this.selectedProduct.productAssets).filter((item) => 
+        //     item.itemCode !== null
+        // );
+        const arr2 = this.variantimages;
+
+        const map = new Map();
+        arr1.forEach(item => map.set(item.itemCode, item));
+        arr2.forEach(item => map.set(item.itemCode, {...map.get(item.itemCode), ...item}));
+        const mergedArr = Array.from(map.values());
+
+        // remove empty object if any
+        let clean = mergedArr.filter(element => {
+            if (Object.keys(element).length !== 0) {
+                return true;
+              }
+            
+              return false;
+        })
+        
+        this.selectedVariantCombos = clean;
+
+    }
+
+
+    // This fuction used to sort object
+    dynamicSort(property) {
+        var sortOrder = 1;
+        if(property[0] === "-") {
+            sortOrder = -1;
+            property = property.substr(1);
+        }
+        return function (a,b) {
+            /* next line works with strings and numbers, 
+            * and you may want to customize it to your needs
+            */
+
+            let aProp = a[property] ? a[property] : '';
+            let bProp = b[property] ? b[property] : '';
+
+            var result = ( aProp.toLowerCase() < bProp.toLowerCase()) ? -1 : (aProp.toLowerCase() > bProp.toLowerCase()) ? 1 : 0;
+            return (result * sortOrder);
+        }
+    }
+
+    sortObjects(array) {
+        array.sort(function (a, b) {
+        return a.sequenceNumber - b.sequenceNumber;
+        });
+    }
+
 
     generateSku(){
         if ((this.addProductForm.get('step1').get('name').value && !this.addProductForm.get('step1').get('sku').value) ||
@@ -818,16 +1229,6 @@ export class AddProductComponent implements OnInit, OnDestroy
                         // this.displayQuantity = response.quantity;
                         // this.displaySku = response.sku;
 
-                        // if type is combo..
-                        if (this.productType === "combo"){
-
-                            // open the details window..
-                            // this.toggleDetails(newProduct["data"].id);
-
-                            // then, open the combo section
-                            // this.showCombosSection = true;
-            
-                        }
 
                     });
 
@@ -882,7 +1283,7 @@ export class AddProductComponent implements OnInit, OnDestroy
                     setTimeout(() => {
 
                         // close the window
-                        this.dialogRef.close({ valid: false });
+                        this.cancelAddProduct()
             
                         // Mark for check
                         this._changeDetectorRef.markForCheck();
@@ -902,6 +1303,302 @@ export class AddProductComponent implements OnInit, OnDestroy
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
+    }
+
+    /**
+     * Update the selected product using the form data
+     */
+    async updateProductMethod(): Promise<void>
+    {
+        // Get store domain
+        let storeFrontURL = 'https://' + this.store$.domain;
+
+        const step1FormGroup = this.addProductForm.get('step1') as FormGroup;
+        
+        // Get the product object
+        const { sku, price, quantity, ...product} = step1FormGroup.getRawValue();
+        
+        
+        product.seoName = product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
+        product.seoUrl = storeFrontURL + '/product/' + product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
+
+        // Get the product object for updating the product
+        const { productAssets, productInventories, productReviews, productVariants, ...productToUpdate} = product;
+        
+        // return;
+        // Update the product on the server
+        await this._inventoryService.updateProduct(this.selectedProduct.id, productToUpdate)
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe(async () => {
+
+            this.products$
+            .pipe(take(1)) 
+            .subscribe(products => {
+
+                // filter after update
+                this.filterProductOptionsMethod(products);
+            })
+
+            // DELETE ENTIRE INVENTORY
+            await this.deleteEntireInventory()
+
+            // if got variants
+            if (this.addProductForm.get('step1').get('isVariants').value === true) {
+                
+                // INVENTORY
+                if (this.selectedVariantCombos.length > 0){
+                    for (var i = 0; i < this.selectedVariantCombos.length; i++) {
+                
+                        // }
+                        const body = {
+                            // itemCode: this.selectedProduct.id + "-" + i,
+                            itemCode: this.selectedProduct.id + i,
+                            price: this.selectedVariantCombos[i].price,
+                            compareAtPrice: 0,
+                            quantity: this.selectedVariantCombos[i].quantity,
+                            sku: this.selectedVariantCombos[i].sku,
+                            status: this.selectedVariantCombos[i].status
+                        }
+    
+                        await this._inventoryService.addInventoryToProduct(this.selectedProduct, body).toPromise()
+                        .then((response)=>{
+    
+                        });
+                    }
+                    
+                }
+        
+                // VARIANT
+                // Delete the variant from the BE
+                if (this.variantToBeDeleted.length > 0){
+    
+                    this.variantToBeDeleted.forEach(variant => {
+                        this._inventoryService.deleteVariant(this.selectedProduct.id, variant.id , variant)
+                            .pipe(takeUntil(this._unsubscribeAll))
+                            .subscribe((response)=>{
+                                // this.removeVariantFromProduct(response)
+                            });
+                    })
+                }
+    
+                // create new variants
+                const variantIds = await this.createVariantInBE()
+    
+                // Delete the variant available from the BE
+                if (this.variantAvailableToBeDeleted.length > 0){
+                    
+                    this.variantAvailableToBeDeleted.forEach(options => {
+                        this._inventoryService.deleteVariantAvailable(options, this.selectedProduct.id)
+                            .pipe(takeUntil(this._unsubscribeAll))
+                            .subscribe((response)=>{
+                                
+                            });
+    
+                    })
+                }
+                let variantAvailablesCreated = [];
+                // if got new variant availables, pass the variantIds from the createVariant endpoint
+                if (this.variantAvailableToBeCreated.length > 0){
+                    
+                    variantAvailablesCreated = await this.createVariantAvailableInBE(variantIds);
+
+                    
+                }
+                else {
+
+                    await this._inventoryService.getVariantAvailable(this.selectedProduct.id).then((response) => {
+
+                        variantAvailablesCreated = response;
+                        
+                    })
+
+                }
+
+                await this.addInventoryItem(variantAvailablesCreated);
+    
+            }
+    
+            // else means no variants
+            else {
+                // Update the inventory product on the server
+                let _productInventories = {
+                    // productId: this.selectedProduct.id,
+                    itemCode: this.selectedProduct.id + "aa",
+                    // price: this.displayPrice,
+                    price: step1FormGroup.value.price,
+                    compareAtprice: 0,
+                    // quantity: this.displayQuantity,
+                    quantity: step1FormGroup.value.availableStock,
+                    // sku: this.displaySku,
+                    sku: step1FormGroup.value.sku,
+                    status: "AVAILABLE"
+                } 
+                
+                await this._inventoryService.addInventoryToProduct(this.selectedProduct, _productInventories).toPromise().then(() => {
+                    // Show a success message
+                    // this.showFlashMessage('success');
+                });
+    
+    
+                
+                // If got product assets
+                if (product.productAssets) {
+                    let expression = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+                    let regex = new RegExp(expression);
+                    let iteration = 0;// this iteration used by new product added to existing old product (not update tau)
+                    this.addProductForm.get('step1').get('productAssets').value.forEach((item, i) => {
+                        let assetIndex = product.productAssets.findIndex(element => element.id === item.id)                        
+                        
+                        let _thumbnailIndex = product.productAssets.findIndex(element => element.isThumbnail === true)
+                        if (assetIndex > -1) {
+                            if (!item.url.match(regex)) { // if url is not valid, it mean the data is new data
+        
+                                // -----------------
+                                // delete old one
+                                // -----------------
+        
+                                this._inventoryService.deleteProductAssets(this.selectedProduct.id, item.id)
+                                .pipe(takeUntil(this._unsubscribeAll))
+                                .subscribe((deleteResponse)=>{
+        
+                                    // -----------------
+                                    // create a new one
+                                    // ----------------
+        
+                                    let formData = new FormData();
+                                    formData.append('file',this.imagesFile[i]);
+                                    this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false }, i)
+                                        .pipe(takeUntil(this._unsubscribeAll))
+                                        .subscribe((addResponse)=>{
+        
+                                            // update the deleted product assets
+                                            let _updatedProduct = product.productAssets;
+                                            _updatedProduct[assetIndex] = addResponse;
+        
+                                            // patch the value
+                                            this.addProductForm.get('step1').get('productAssets').patchValue(_updatedProduct);
+        
+                                            // Mark for check
+                                            this._changeDetectorRef.markForCheck();
+                                        });
+        
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                });
+        
+        
+                            } else if (i === this.thumbnailIndex) { // this mean thumbnail index change, diffent from backend
+                                // update the image (only thumbnail)
+                                let updateItemIndex = item;
+                                updateItemIndex.isThumbnail = true;
+        
+                                this._inventoryService.updateProductAssets(this.selectedProduct.id, updateItemIndex, item.id)
+                                    .pipe(takeUntil(this._unsubscribeAll))
+                                    .subscribe((response)=>{
+                                        // Mark for check
+                                        this._changeDetectorRef.markForCheck();
+                                    });
+                            } else {
+                                
+                            }
+                        } else {
+        
+                            // -----------------
+                            // create a new one
+                            // ----------------
+        
+                            iteration = iteration + 1;
+        
+                            let formData = new FormData();
+                            formData.append('file',this.imagesFile[i]);
+        
+                            this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false }, i)
+                                .pipe(takeUntil(this._unsubscribeAll))
+                                .subscribe((addResponse)=>{
+        
+                                    // update the deleted product assets
+                                    // let _updatedProduct = this.selectedProductForm.get('productAssets').value;
+                                    // _updatedProduct[i + iteration -1] = addResponse;
+        
+                                    // if (this.selectedProductForm.get('productAssets').value.length > 0 ){
+                                    //     // patch the value if have existing value 
+                                        this.addProductForm.get('step1').get('productAssets').value[i] = addResponse;
+                                    // } else {
+                                        // patch the value if empty 
+                                        // this.selectedProductForm.get('productAssets').patchValue(_updatedProduct);
+                                    // }
+        
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                });
+                        }
+                    })
+                } else {
+                    for (let i = 0; i < this.imagesFile.length; i++) {
+                        // create a new one
+                        let formData = new FormData();
+                        formData.append('file',this.imagesFile[i]);
+                        this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
+                            .pipe(takeUntil(this._unsubscribeAll))
+                            .subscribe((response)=>{
+
+                                this.addProductForm.get('step1').get('productAssets').value[i] = response;
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
+                            });
+                    }
+                }
+            }
+            // Show a success message
+            this.showFlashMessage('success');
+
+            // Set delay before closing the details window
+            setTimeout(() => {
+
+                // close the window
+                this.cancelAddProduct()
+    
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            }, 1000);
+
+        });
+
+
+        // DELETE VARIANT IMAGES
+        for (let i = 0; i < this.variantImagesToBeDeleted.length; i++) {
+            await this._inventoryService.deleteProductAssets(this.selectedProduct.id, this.variantImagesToBeDeleted[i]).toPromise().then(data => {
+                this._changeDetectorRef.markForCheck();
+            });
+        }
+
+        // set the array to null
+        this.variantImagesToBeDeleted = [];
+
+
+        // CREATE VARIANT IMAGES
+        for (let i = 0; i < this.selectedVariantCombos.length; i++) {
+                
+            // if new, create new asset
+            if (this.selectedVariantCombos[i].newAsset == true) {
+            
+                let formdata = new FormData();
+                formdata.append("file", this.selectedVariantCombos[i].file);
+                await this._inventoryService.addProductAssets(this.selectedProduct.id, formdata, (i === this.thumbnailIndex) ? { isThumbnail: true , itemCode: this.selectedProduct.id + i } : { isThumbnail: false, itemCode: this.selectedProduct.id + i }, i)
+                .toPromise().then(data => {
+                    this._changeDetectorRef.markForCheck();
+                });
+            }
+            // if it is an old one, update it (update thumbnail)
+            else if (i === this.thumbnailIndex && this.selectedVariantCombos[i].newAsset == false && this.selectedVariantCombos[i].assetId) {
+                await this._inventoryService.updateProductAssets(this.selectedProduct.id, { isThumbnail: true , itemCode: this.selectedProduct.id + i }, this.selectedVariantCombos[i].assetId)
+                .toPromise().then(data => {
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+            }
+        }
+        
     }
 
 
@@ -936,34 +1633,10 @@ export class AddProductComponent implements OnInit, OnDestroy
                 
             }
     
-            // VARIANT
-            // Delete the variant from the BE
-            // if (this.variantToBeDeleted.length > 0){
-    
-            //     this.variantToBeDeleted.forEach(variant => {
-            //         this._inventoryService.deleteVariant(this.selectedProduct.id, variant.id , variant)
-            //             .pipe(takeUntil(this._unsubscribeAll))
-            //             .subscribe((response)=>{
-            //                 // this.removeVariantFromProduct(response)
-            //             });
-            //     })
-            // }
     
             // create new variants
             const variantIds = await this.createVariantInBE()
     
-            // Delete the variant available from the BE
-            // if (this.variantAvailableToBeDeleted.length > 0){
-                
-            //     this.variantAvailableToBeDeleted.forEach(options => {
-            //         this._inventoryService.deleteVariantAvailable(options, this.selectedProduct.id)
-            //             .pipe(takeUntil(this._unsubscribeAll))
-            //             .subscribe((response)=>{
-                            
-            //             });
-    
-            //     })
-            // }
             let variantAvailablesCreated = [];
             // if got new variant availables, pass the variantIds from the createVariant endpoint
             if (this.variantAvailableToBeCreated.length > 0){
@@ -1001,7 +1674,7 @@ export class AddProductComponent implements OnInit, OnDestroy
                         setTimeout(() => {
 
                             // close the window
-                            this.dialogRef.close({ valid: false });
+                            this.cancelAddProduct()
                 
                             // Mark for check
                             this._changeDetectorRef.markForCheck();
@@ -1018,18 +1691,6 @@ export class AddProductComponent implements OnInit, OnDestroy
                     });
                 }
             }
-
-            // Show a success message
-            this.showFlashMessage('success');
-            // Set delay before closing the window
-            setTimeout(() => {
-    
-                // close the window
-                this.dialogRef.close({ valid: false });
-    
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            }, 1000);
     
         }
         // else means combo
@@ -1040,7 +1701,7 @@ export class AddProductComponent implements OnInit, OnDestroy
             setTimeout(() => {
     
                 // close the window
-                this.dialogRef.close({ valid: false });
+                this.cancelAddProduct()
     
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -1182,8 +1843,12 @@ export class AddProductComponent implements OnInit, OnDestroy
     }
     
     cancelAddProduct(){
-        
+        this.selectedProduct = null;
+        (this.addProductForm.get('step1').get('productInventories') as FormArray).clear();
+        (this.addProductForm.get('step1').get('productVariants') as FormArray).clear();
+        (this.addProductForm.get('step1').get('productAssets') as FormArray).clear();
         this.dialogRef.close({ valid: false });
+     
     }
 
     /**
@@ -1346,7 +2011,58 @@ export class AddProductComponent implements OnInit, OnDestroy
         
     // }
     deleteAllVariantsConfirmation(){
-        console.log('delete variants');
+
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title  : 'Delete variants',
+            message: 'Are you sure you want to disable this variants? Current variants of this product will be removed permenantly!',
+            actions: {
+                confirm: {
+                    label: 'Delete'
+                }
+            }
+        });
+
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+
+            // If the confirm button pressed...
+            if ( result === 'confirmed' )
+            {
+                // go through all the variants, and delete it
+                this.selectedProduct.productVariants.forEach(item => {
+                    this._inventoryService.deleteVariant(this.selectedProduct.id, item.id, item).subscribe(response => {
+
+                    });
+                });
+
+                // go through the assets and delete them
+                this.selectedVariantCombos.forEach(asset => {
+                    // if have itemCode means it is for variants
+                    if (asset.itemCode){
+                        this._inventoryService.deleteProductAssets(this.selectedProduct.id, asset.assetId).toPromise().then(data => {
+                            this._changeDetectorRef.markForCheck();
+                        });
+
+                    }
+                })
+                // set the variant combinations array to empty
+                this.selectedVariantCombos = [];
+                this.variantComboItems = [];
+                this.variantComboOptions = [];
+
+                this.addProductForm.get('step1').get('sku').enable();
+                this.addProductForm.get('step1').get('price').enable();    
+                this.addProductForm.get('step1').get('availableStock').enable();   
+
+            } else {
+                // Update the selected product form
+                this.addProductForm.get('step1').get('isVariants').patchValue(true);
+                
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            }
+        });
         
     }
 
@@ -1383,7 +2099,7 @@ export class AddProductComponent implements OnInit, OnDestroy
 
     testMethod(){
 
-        console.log('this.productVariants', this.productVariants);
+        console.log('this.variantImagesToBeDeleted', this.variantImagesToBeDeleted);
         console.log('this.variantToBeCreated', this.variantToBeCreated);
         console.log('this.variantComboItems', this.variantComboItems);
         console.log('this.variantComboOptions', this.variantComboOptions);
@@ -1458,10 +2174,10 @@ export class AddProductComponent implements OnInit, OnDestroy
             {
 
                 // only add to the variantToBeDeleted array if id is null; which means variant is not in BE
-                // if (variant.id){
-                //     // Use to delete on BE
-                //     this.variantToBeDeleted.push(variant)
-                // }
+                if (variant.id){
+                    // Use to delete on BE
+                    this.variantToBeDeleted.push(variant)
+                }
 
                 // Remove from array to be created
                 this.variantToBeCreated.splice(variantIdx, 1);
@@ -1577,7 +2293,7 @@ export class AddProductComponent implements OnInit, OnDestroy
                 // only add to the variantAvailableToBeDeleted array if id is null; which means variant avail is not in BE
                 if (variantAvailable.id){
                     // Use to delete on BE
-                    // this.variantAvailableToBeDeleted.push(variantAvailable)
+                    this.variantAvailableToBeDeleted.push(variantAvailable)
                 }
 
                 //----------------------------
@@ -1679,7 +2395,7 @@ export class AddProductComponent implements OnInit, OnDestroy
 
         // get the image id if any, then push into variantImagesToBeDeleted to be deleted BE
         if (this.selectedVariantCombos[idx]?.assetId) {
-            // this.variantImagesToBeDeleted.push(this.selectedVariantCombos[idx].assetId)
+            this.variantImagesToBeDeleted.push(this.selectedVariantCombos[idx].assetId)
         }
 
         // if (this.variantimages[idx].id) {
@@ -1741,7 +2457,7 @@ export class AddProductComponent implements OnInit, OnDestroy
 
                     // get the image id if any, then push into variantImagesToBeDeleted to be deleted BE
                     if (this.selectedVariantCombos[imageIdx]?.assetId) {
-                        // this.variantImagesToBeDeleted.push(this.selectedVariantCombos[imageIdx].assetId)
+                        this.variantImagesToBeDeleted.push(this.selectedVariantCombos[imageIdx].assetId)
                     }
                     
                     // // get the image id if any, then push into variantImagesToBeDeleted to be deleted BE
@@ -2212,6 +2928,62 @@ export class AddProductComponent implements OnInit, OnDestroy
         
         this._selectedProductsOption["totalAllow"] = value;
     }
+
+    variantSkuChanged(event, i) {
+        this.selectedVariantCombos[i].sku = event.target.value;
+    
+    }
+
+    variantStockChanged(event, i) {
+        this.selectedVariantCombos[i].quantity = event.target.value;
+    
+    }
+
+    variantPriceChanged(event, i) {
+        this.selectedVariantCombos[i].price = event.target.value;
+    }
+
+    /**
+     * Delete the selected product using the form data
+     */
+     deleteSelectedProduct(): void
+     {
+         // Open the confirmation dialog
+         const confirmation = this._fuseConfirmationService.open({
+             title  : 'Delete product',
+             message: 'Are you sure you want to delete this product? This action cannot be undone!',
+             actions: {
+                 confirm: {
+                     label: 'Delete'
+                 }
+             }
+         });
+ 
+         // Subscribe to the confirmation dialog closed action
+         confirmation.afterClosed().subscribe((result) => {
+ 
+             // If the confirm button pressed...
+             if ( result === 'confirmed' )
+             {
+ 
+                 // Delete the product on the server
+                 this._inventoryService.deleteProduct(this.selectedProduct.id).subscribe(() => {
+ 
+                     this.products$
+                         .pipe(take(1)) 
+                         .subscribe(products => {
+ 
+                             // filter after delete
+                             this.filterProductOptionsMethod(products);
+                         })
+ 
+                     // Close the details
+                     this.cancelAddProduct();
+                 });
+             }
+         });
+     }
+ 
 
     
 }

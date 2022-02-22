@@ -22,6 +22,7 @@ import { AddProductComponent } from './add-product/add-product.component';
 import { CategoriesComponent } from './categories/categories.component';
 import { AddCategoryComponent } from './add-category/add-category.component';
 import { MatStepperModule } from '@angular/material/stepper';
+import { EditProductComponent } from './edit-product/edit-product.component';
 
 @NgModule({
     declarations: [
@@ -29,6 +30,7 @@ import { MatStepperModule } from '@angular/material/stepper';
         AddProductComponent,
         CategoriesComponent,
         AddCategoryComponent,
+        EditProductComponent
     ],
     imports     : [
         RouterModule.forChild(productsManagementRoutes),

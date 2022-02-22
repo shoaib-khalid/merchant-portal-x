@@ -17,6 +17,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { AddProductComponent } from '../add-product/add-product.component';
 import {v4 as uuidv4} from 'uuid';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
+import { EditProductComponent } from '../edit-product/edit-product.component';
 
 
 @Component({
@@ -830,6 +831,18 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             const {valid, ...productBody} = result;
 
             this.createProduct(result.categoryId, productType, productBody);
+        });
+    }
+
+    editProduct(productId: string){
+        
+        const dialogRef = this._dialog.open(EditProductComponent, { disableClose: true, data: { productId: productId } });
+        dialogRef.afterClosed().subscribe(result => {
+
+            if (result.valid === false) {
+                return;
+            }
+
         });
     }
 
@@ -3305,16 +3318,18 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     }
 
     // this is when click update button in variant page
-    // createVariantCombinationsToBE(){
-    //     console.log('UPDATE -> selectedVariantCombos object', this.selectedVariantCombos);
-    //     console.log('this.filteredProductVariants', this.filteredProductVariants);
-    //     // console.log('this.variantToBeDeleted', this.variantToBeDeleted);
-    //     // console.log('this.variantAvailableToBeCreated', this.variantAvailableToBeCreated);
-    //     // console.log('this.variantAvailableToBeDeleted', this.variantAvailableToBeDeleted);
-    //     // console.log('this.variantComboItems', this.variantComboItems);
-    //     // console.log('this.variantComboOptions', this.variantComboOptions);
-    //     // console.log('this.variantImagesToBeDeleted', this.variantImagesToBeDeleted);
-    //     // console.log('variantimages', this.variantimages);
-    //     console.log('this.products$', this.products$);
-    // }
+    createVariantCombinationsToBE(){
+        console.log('UPDATE -> selectedVariantCombos object', this.selectedVariantCombos);
+        console.log('this.filteredProductVariants', this.filteredProductVariants);
+        console.log('this.variantToBeDeleted', this.variantToBeDeleted);
+        console.log('this.variantAvailableToBeCreated', this.variantAvailableToBeCreated);
+        console.log('this.variantAvailableToBeDeleted', this.variantAvailableToBeDeleted);
+        console.log('this.variantComboItems', this.variantComboItems);
+        console.log('this.variantComboOptions', this.variantComboOptions);
+        console.log('this.variantImagesToBeDeleted', this.variantImagesToBeDeleted);
+        console.log('variantimages', this.variantimages);
+        console.log('this.filteredProductVariantAvailable', this.filteredProductVariantAvailable);
+        
+        // console.log('this.products$', this.products$);
+    }
 }

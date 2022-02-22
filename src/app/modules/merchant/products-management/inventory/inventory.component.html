@@ -201,10 +201,11 @@
 
                                     <!-- Details button -->
                                     <div>
+                                        <!-- (click)="toggleDetails(product.id);resetCycleImages()"> -->
                                         <button
                                             class="min-w-10 min-h-7 h-7 px-2 leading-6"
                                             mat-stroked-button
-                                            (click)="toggleDetails(product.id);resetCycleImages()">
+                                            (click)="editProduct(product.id);resetCycleImages()">
                                             <mat-icon
                                                 class="icon-size-5"
                                                 [svgIcon]="selectedProduct?.id === product.id ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'"></mat-icon>
@@ -1200,9 +1201,11 @@
                             <!-- Variant Section -->
                             <div class="flex flex-col sm:flex-row px-8 py-4" [style.visibility]="(!showVariantsSection) ? 'hidden' : 'visible'" [style.max-height]="(!showVariantsSection) ? '0' : ''">
                                 <div class="flex flex-auto flex-wrap">
+                                    <!-- Variant Header and Back Button -->
                                     <div class="flex w-full border-b mb-4">
                                         <div class="flex w-full mb-4 items-center justify-between">
                                             <span class="font-medium text-3xl leading-tight">Variant Preview</span>
+                                            <!-- Back button -->
                                             <div>
                                                 <input
                                                     id="variant-back-button"
@@ -1222,8 +1225,9 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <!-- Variant Control and Table -->
                                     <div class="flex flex-auto flex-wrap w-full">
-                                        <!-- Variants -->
+                                        <!-- Variants Control-->
                                         <div class="flex flex-col w-full sm:w-1/4">
                                             <!-- Variant View -->
                                             <div class="w-full mb-4">
@@ -1454,7 +1458,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <!-- Matrix Table -->
+                                        <!-- Variant Details Table -->
                                         <div class="flex flex-col w-full sm:w-3/4 sm:pl-8 py-4 sm:py-0">
                                             <div class="font-medium tracking-tight mb-1 truncate">Variant Details</div>
                                             <div class="flex flex-auto overflow-hidden">
@@ -1675,14 +1679,15 @@
                                                     </ng-template>
                                                 </div>
                                             </div>
-                                            <!-- <button
+                                            <button
                                             mat-flat-button
                                             [color]="'primary'"
                                             (click)="createVariantCombinationsToBE()">
                                             Preview Variant
-                                        </button> -->
+                                        </button>
                                         </div>
                                     </div>
+                                    <!-- Delete and Update Button -->
                                     <div class="flex items-center justify-between w-full border-t px-8 py-4 mt-4">
                                         <input
                                             id="product-remove-button"
