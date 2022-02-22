@@ -67,8 +67,15 @@ export class RedirectComponent implements OnInit, OnDestroy
             if (this._merchantSetup.productSetup === true){
                 // console.info("GOING TO Dashboard")
                 this.goToDashboard();
+            } else if (this._merchantSetup.categorySetup === true) {
+                // if there is 1 store, have category, but no product, go to Add Products
+                // at this point, storeId still not saved in local storage (due to response of get store is in array of object), 
+                // due to nature of add product (for product service) - backend
+                // need to have store service object[0] to be saved in local storage
+                await this._storesService.setFirstStoreId();
+                this.goToAddCategories();
             } else {
-                // if there is 1 store but no product, go to Add Products
+                // if there is 1 store but , no categoty, no product, go to Add Products
                 // at this point, storeId still not saved in local storage (due to response of get store is in array of object), 
                 // due to nature of add product (for product service) - backend
                 // need to have store service object[0] to be saved in local storage
@@ -135,6 +142,11 @@ export class RedirectComponent implements OnInit, OnDestroy
     goToAddProducts(): void
     {
         this._router.navigate(['/products']);
+    }
+
+    goToAddCategories(): void
+    {
+        this._router.navigate(['/products/categories']);
     }
 
     /**
