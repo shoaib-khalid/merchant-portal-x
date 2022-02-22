@@ -76,6 +76,24 @@ export class RegisterStoreComponent implements OnInit
     timeAlert: any = [];
     disableForm: boolean = false;
 
+    /** Quil Modules */
+    quillModules: any = {
+        toolbar: [
+            ['bold', 'italic', 'underline'],
+            [{align: []}, {list: 'ordered'}, {list: 'bullet'}],
+            [{link: function(value) {
+                    if (value) {
+                      var href = prompt('Enter the URL');
+                      this.quill.format('link', href);
+                    } else {
+                      this.quill.format('link', false);
+                    }
+                  }
+            }],
+            ['blockquote','clean']
+        ]
+    };
+
     galleryOptionsBannerDesktop: NgxGalleryOptions[] = [];
     galleryOptionsBannerMobile: NgxGalleryOptions[] = [];
 
@@ -137,17 +155,20 @@ export class RegisterStoreComponent implements OnInit
             step1: this._formBuilder.group({
                 name                : ['', Validators.required],
                 subdomain           : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
-                address             : ['', Validators.required],
                 storeDescription    : ['', [Validators.required, Validators.maxLength(100)]],
-                city                : ['', Validators.required],
-                regionCountryStateId: ['', Validators.required],
+                displayAddress      : [''],
                 email               : ['', [Validators.required, Validators.email]],
                 phoneNumber         : ['', RegisterStoreValidationService.phonenumberValidator],
-                postcode            : ['', [Validators.required, Validators.minLength(5), Validators.maxLength(10), RegisterStoreValidationService.postcodeValidator]],
-                regionCountryId     : ['', Validators.required],
                 paymentType         : ['', Validators.required],
             }),
             step3: this._formBuilder.group({
+
+                address             : ['', Validators.required],
+                city                : ['', Validators.required],
+                regionCountryId     : ['', Validators.required],
+                postcode            : ['', [Validators.required, Validators.minLength(5), Validators.maxLength(10), RegisterStoreValidationService.postcodeValidator]],
+                regionCountryStateId: ['', Validators.required],
+
                 // Delivery Provider
                 deliveryType             : ['', Validators.required],
                 // Delivery Partner
@@ -199,69 +220,73 @@ export class RegisterStoreComponent implements OnInit
             // this is to get the current location by using 3rd party api service
 
             this._userService.client$.subscribe((response: Client)=> {
-                let symplifiedCountryId = response['data'].regionCountry.id;
 
-                 // check if vertical selected is valid for selected country
-                 if ((_verticalCode === "ECommerce_PK" || _verticalCode === "FnB_PK") && symplifiedCountryId === "PAK") {
-                    this.createStoreCondition.error = null;
-                } else if ((_verticalCode === 'E-Commerce' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'FnB') && symplifiedCountryId === "MYS") {
-                    this.createStoreCondition.error = null;
-                } else {
-                    this.createStoreCondition.error = "VERTICAL-ERROR";
-                    this.createStoreCondition.errorTitle = "Vertical Error";
-                    this.createStoreCondition.errorDesc = "This vertical is not available at your country, please choose another vertical";
-                    let message = symplifiedCountryId ? "Vertical code: " + _verticalCode + " is not available for " + symplifiedCountryId + " country" : "Missing region country id";
-                    console.error(message)
-                }
-                // state (using component variable)
-                // INITIALLY (refer below section updateStates(); for changes), get states from symplified backed by using the 3rd party api
-                
-                // -------------------------
-                // States By Country
-                // -------------------------
+                if (response['data'].regionCountry) {
+
+                    let symplifiedCountryId = response['data'].regionCountry.id;
     
-                // Get states by country (using symplified backend)
-                this._storesService.getStoreRegionCountryState(symplifiedCountryId).subscribe((response)=>{
-                    this.statesByCountry = response.data.content;
-                });
-    
-                // country (using form builder variable)
-                this.createStoreForm.get('step1').get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
-
-                 // -------------------------------------
-                // Delivery Partner
-                // -------------------------------------
-    
-                let _regionCountryId = symplifiedCountryId.toUpperCase();
-                let _deliveryType;
-
-                if (_verticalCode === "FnB" || _verticalCode === "FnB_PK") {
-                    _deliveryType = "ADHOC";
-                } else if (_verticalCode === 'E-Commerce' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'ECommerce_PK') {
-                    _deliveryType = "SCHEDULED";
-                } else {
-                    console.error("Invalid vertical code: ", _verticalCode)
-                }
-
-                this._storesService.getStoreDeliveryProvider({deliveryType: _deliveryType, regionCountryId: _regionCountryId}).subscribe(
-                    (response: StoreDeliveryProvider[]) => {
-                        
-                        // reset this.deliveryPartners first to initial state
-                        this.deliveryPartners = [];
-                        // push the data into array
-                        response.forEach(item => {
-                            this.deliveryPartners.push({
-                                id: item.id,
-                                name: item.name,
-                                providerImage: item.providerImage,
-                                label: item.name,
-                                selected: false
-                            });
-                        });
-                        // check changes
-                        this.checkDeliveryPartner();
+                    // check if vertical selected is valid for selected country
+                    if ((_verticalCode === "ECommerce_PK" || _verticalCode === "FnB_PK") && symplifiedCountryId === "PAK") {
+                        this.createStoreCondition.error = null;
+                    } else if ((_verticalCode === 'E-Commerce' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'FnB') && symplifiedCountryId === "MYS") {
+                        this.createStoreCondition.error = null;
+                    } else {
+                        this.createStoreCondition.error = "VERTICAL-ERROR";
+                        this.createStoreCondition.errorTitle = "Vertical Error";
+                        this.createStoreCondition.errorDesc = "This vertical is not available at your country, please choose another vertical";
+                        let message = symplifiedCountryId ? "Vertical code: " + _verticalCode + " is not available for " + symplifiedCountryId + " country" : "Missing region country id";
+                        console.error(message)
                     }
-                );
+                    // state (using component variable)
+                    // INITIALLY (refer below section updateStates(); for changes), get states from symplified backed by using the 3rd party api
+                    
+                    // -------------------------
+                    // States By Country
+                    // -------------------------
+        
+                    // Get states by country (using symplified backend)
+                    this._storesService.getStoreRegionCountryState(symplifiedCountryId).subscribe((response)=>{
+                        this.statesByCountry = response.data.content;
+                    });
+        
+                    // country (using form builder variable)
+                    this.createStoreForm.get('step3').get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
+    
+                     // -------------------------------------
+                    // Delivery Partner
+                    // -------------------------------------
+        
+                    let _regionCountryId = symplifiedCountryId.toUpperCase();
+                    let _deliveryType;
+    
+                    if (_verticalCode === "FnB" || _verticalCode === "FnB_PK") {
+                        _deliveryType = "ADHOC";
+                    } else if (_verticalCode === 'E-Commerce' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'ECommerce_PK') {
+                        _deliveryType = "SCHEDULED";
+                    } else {
+                        console.error("Invalid vertical code: ", _verticalCode)
+                    }
+    
+                    this._storesService.getStoreDeliveryProvider({deliveryType: _deliveryType, regionCountryId: _regionCountryId}).subscribe(
+                        (response: StoreDeliveryProvider[]) => {
+                            
+                            // reset this.deliveryPartners first to initial state
+                            this.deliveryPartners = [];
+                            // push the data into array
+                            response.forEach(item => {
+                                this.deliveryPartners.push({
+                                    id: item.id,
+                                    name: item.name,
+                                    providerImage: item.providerImage,
+                                    label: item.name,
+                                    selected: false
+                                });
+                            });
+                            // check changes
+                            this.checkDeliveryPartner();
+                        }
+                    );
+                }
                 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -640,7 +665,13 @@ export class RegisterStoreComponent implements OnInit
         createStoreBody["isSnooze"] = this.createStoreForm.get('step4').get('isSnooze').value;
         createStoreBody["serviceChargesPercentage"] = this.createStoreForm.get('serviceChargesPercentage').value;
         createStoreBody["verticalCode"] = this.createStoreForm.get('verticalCode').value;
-            
+        
+        createStoreBody["address"] = this.createStoreForm.get('step3').get('address').value;
+        createStoreBody["city"] = this.createStoreForm.get('step3').get('city').value;
+        createStoreBody["regionCountryId"] = this.createStoreForm.get('step3').get('regionCountryId').value;
+        createStoreBody["postcode"] = this.createStoreForm.get('step3').get('postcode').value;
+        createStoreBody["regionCountryStateId"] = this.createStoreForm.get('step3').get('regionCountryStateId').value;
+
         // Disable the form
         this.createStoreForm.disable();
 
@@ -1002,7 +1033,7 @@ export class RegisterStoreComponent implements OnInit
     updateStates(countryId: string){
 
         // reset current regionCountryStateId
-        this.createStoreForm.get('step1').get('regionCountryStateId').patchValue("");
+        this.createStoreForm.get('step3').get('regionCountryStateId').patchValue("");
 
         // Get states by country (using symplified backend)
         this._storesService.getStoreRegionCountryState(countryId).subscribe((response)=>{
@@ -1080,7 +1111,7 @@ export class RegisterStoreComponent implements OnInit
         // reset allowedSelfDeliveryStates if user change delivery type
         // ------------------------------------------------------------
 
-        if (this.createStoreForm.get('step3').get('deliveryType').value === "SELF") {
+        if (this.createStoreForm.get('step3').get('deliveryType').value !== "SELF") {
 
             // push to allowedSelfDeliveryStates (form)
             this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
@@ -1091,7 +1122,22 @@ export class RegisterStoreComponent implements OnInit
             this._allowedSelfDeliveryStates.forEach(item => {
                 this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
             });
+        } else {
+            // push to allowedSelfDeliveryStates (form)
+            this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
+            // since backend give full discount tier list .. (not the only one that have been created only)
+            this.allowedSelfDeliveryStates.clear();
+
+            this._allowedSelfDeliveryStates = [
+                { deliveryStates: "", deliveryCharges:"" }
+            ];
+            
+            this._allowedSelfDeliveryStates.forEach(item => {
+                this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
+                this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
+            });
         }
+        
 
         // then check it again and set if there's an error
         if (this.deliveryPartners.length < 1 && this.createStoreForm.get('step3').get('deliveryType').value !== "SELF"){
@@ -1422,5 +1468,13 @@ export class RegisterStoreComponent implements OnInit
         }else{
             this.timeAlert[i] = " " ;
         }      
+    }
+
+    // Quil editor text limit
+    textChanged($event) {
+        const MAX_LENGTH = 500;
+        if ($event.editor.getLength() > MAX_LENGTH) {
+           $event.editor.deleteText(MAX_LENGTH, $event.editor.getLength());
+        }
     }
 }
