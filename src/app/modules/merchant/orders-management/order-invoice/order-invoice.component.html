@@ -51,18 +51,18 @@
     
                 <div class="grid grid-cols-12 gap-x-1 mt-16">
                     <!-- Columns -->
-                    <div class="col-span-6 font-medium text-md text-secondary">ITEMS</div>
+                    <div class="col-span-5 font-medium text-md text-secondary">ITEMS</div>
                     <div class="font-medium text-md text-right text-secondary">RATE</div>
-                    <div class="col-span-2 font-medium text-md text-right text-secondary">ORI QTY</div>
-                    <div class="font-medium text-md text-right text-secondary">QTY</div>
-                    <div class="col-span-2 font-medium text-md text-right text-secondary">TOTAL</div>
+                    <div class="col-span-3 font-medium text-md text-right text-secondary">ORIGINAL QUANTITY</div>
+                    <div class="col-span-2 font-medium text-md text-right text-secondary">QUANTITY</div>
+                    <div class="font-medium text-md text-right text-secondary">TOTAL</div>
     
                     <ng-container *ngFor="let item of invoiceForm.get('items').value">
                         <!-- Divider -->
                         <div class="col-span-12 my-4 border-b"></div>
         
                         <!-- Item -->
-                        <div class="col-span-6">
+                        <div class="col-span-5">
                             <div class="mb-1 text-lg font-medium">{{ item.productName }}</div>
                             <div class="flex flex-wrap text-secondary" *ngIf="item.productVariant">
                                 <span class="mr-1 mb-1" *ngFor="let variant of item.productVariant">
@@ -88,9 +88,9 @@
                             </div>
                         </div>
                         <div class="self-center text-right">{{ item.productPrice | currency: store$.regionCountry.currencySymbol }}</div>
-                        <div class="col-span-2 self-center text-right">{{ item.originalQuantity }}</div>
-                        <div class="self-center text-right">{{ item.quantity }}</div>
-                        <div class="col-span-2 self-center text-right">{{ (item.productPrice * item.quantity) | currency: store$.regionCountry.currencySymbol }}</div>
+                        <div class="col-span-3 self-center text-center">{{ item.originalQuantity===null?item.quantity:item.originalQuantity }}</div>
+                        <div class="col-span-2 self-center text-center">{{ item.quantity }}</div>
+                        <div class="self-center text-right">{{ (item.productPrice * item.quantity) | currency: store$.regionCountry.currencySymbol }}</div>
                     </ng-container>
     
                     <!-- Spacer -->

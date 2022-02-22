@@ -195,16 +195,16 @@
 
                 <div class="bg-white shadow overflow-hidden sm:rounded-lg">
                     <div class="py-1.5 grid grid-cols-10">
-                    <h3 class="px-4 text-base leading-6 font-medium text-gray-900 col-span-8">
+                    <h3 class="px-4 text-sm leading-6 font-medium text-gray-900 col-span-5">
                         Items
                     </h3>
-                    <!-- <h3 class="text-base leading-6 font-medium text-gray-900 text-right">
-                        Rate
-                    </h3>-->
-                    <!-- <h3 class="px-4 text-base leading-6 font-medium text-gray-900 col-span-1">
-                        Qty
-                    </h3>  -->
-                    <h3 class="px-4 text-base leading-6 font-medium text-gray-900 col-span-2 text-right">
+                    <h3 class="text-sm leading-6 font-medium text-gray-900 col-span-2 text-right ">
+                        Original Quantity
+                    </h3>
+                    <h3 class="px-4 text-sm leading-6 font-medium text-gray-900 col-span-1 text-right">
+                        Quantity
+                    </h3> 
+                    <h3 class="px-4 text-sm leading-6 font-medium text-gray-900 col-span-2 text-right">
                         Total
                     </h3>
                     </div>
@@ -217,7 +217,7 @@
                         <ng-container *ngFor="let item of detailsForm.get('items').value">
 
                             <!-- Item -->
-                            <div class="col-span-5 px-4 py-1.5">
+                            <div class="col-span-3 px-4 py-1.5">
                                 <div class="mb-1 font-medium ">{{ item.productName }}</div>
                                 <div class="flex flex-wrap text-secondary" *ngIf="item.productVariant">
                                     <span class="mr-1 mb-1" *ngFor="let variant of item.productVariant">
@@ -243,7 +243,8 @@
                                 </div>
                             </div>
                             <div class="col-span-2 self-center text-right">{{ item.productPrice | currency: store$.regionCountry.currencySymbol }}</div>
-                            <div class="self-center text-right">x {{ item.quantity }}</div>
+                            <div class="col-span-2 self-center text-center">{{ item.originalQuantity===null?item.quantity:item.originalQuantity }}</div>
+                            <div class="self-center text-right">{{ item.quantity }}</div>
                             <div class="col-span-2 self-center text-right pr-2">{{ (item.productPrice * item.quantity) | currency: store$.regionCountry.currencySymbol }}</div>
                         </ng-container>
                     </div>
