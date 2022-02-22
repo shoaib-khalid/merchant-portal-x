@@ -202,7 +202,7 @@
                         Rate
                     </h3>-->
                     <h3 class="px-4 text-base leading-6 font-medium text-gray-900 col-span-1">
-                        Qty
+                        Quantity
                     </h3> 
                     <h3 class="px-4 text-base leading-6 font-medium text-gray-900 col-span-2 text-right">
                         Total
@@ -242,7 +242,7 @@
                                     </span>
                                 </div>
                             </div>
-                            <div class="col-span-2 self-center text-right">{{ item.productPrice | currency: store$.regionCountry.currencySymbol }}</div>
+                            <div class="col-span-2 self-center text-left">{{ item.productPrice | currency: store$.regionCountry.currencySymbol }}</div>
                             <div class="self-center text-right">
                                 <mat-select
                                 [value]="item.quantity"
