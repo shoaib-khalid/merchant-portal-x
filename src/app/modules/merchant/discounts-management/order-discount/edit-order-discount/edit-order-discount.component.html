@@ -183,6 +183,9 @@
                                         type="number"
                                         placeholder="Insert Mininum Subtotal"
                                         matInput
+                                        [(ngModel)]="startTotalSalesAmount"
+                                        [ngModelOptions]="{standalone: true}"
+                                        (change)="validateDiscountTier('startTotalSalesAmount',$event.target.value)"
                                     >
                                     <mat-icon
                                         matPrefix
@@ -204,7 +207,11 @@
                                     <input
                                         type="number"
                                         placeholder="Insert Discount Amount"
-                                        matInput>
+                                        matInput
+                                        [(ngModel)]="discountAmount"
+                                        [ngModelOptions]="{standalone: true}"
+                                        (change)="validateDiscountTier('discountAmount',$event.target.value)"
+                                        >
                                     <mat-icon
                                         matPrefix
                                         [svgIcon]="'mat_solid:confirmation_number'">
@@ -225,7 +232,11 @@
                                 <mat-form-field appearance="fill" class="w-full pr-4 fuse-mat-emphasized-affix">
                                     <mat-select
                                         class="w-full"
-                                        placeholder="Choose Calculation Type">
+                                        placeholder="Choose Calculation Type"
+                                        [(ngModel)]="calculationType"
+                                        [ngModelOptions]="{standalone: true}"
+                                        (selectionChange)="validateDiscountTier('calculationType' ,$event.value)"
+                                        >
                                         <div>
                                             <mat-option [value]="'PERCENT'">Percentage</mat-option>
                                             <mat-option [value]="'FIX'">Fix</mat-option>
@@ -245,6 +256,8 @@
                                     <button
                                     class="hover:bg-primary-500 border border-primary-500 ml-2 w-2 h-2"
                                     mat-flat-button
+                                    [disabled]="!isDisplayAddTier"
+                                    (click)="insertTierToDiscount()"
                                     [color]="'primary'">
                                     <mat-icon
                                     class="text-white icon-size-5"
@@ -264,8 +277,7 @@
                                     <th>Min Order Amount</th>
                                     <th>Discount Amount</th>
                                     <th>Type</th>
-                              
-                              
+                                    <th>Action</th>                   
                             
                                 </tr>
                                 <tr *ngFor="let discountTier of horizontalStepperForm.get('step2')['controls']; let i = index;" [formGroupName]="i">
@@ -276,6 +288,7 @@
                                                     type="number"
                                                     matInput
                                                     [formControlName]="'startTotalSalesAmount'"
+                                                    [readonly]="!storeDiscountTierListValueEditMode[i]"
                                                 >
                                             </mat-form-field>
                                         </div>
@@ -287,6 +300,7 @@
                                                     type="number"
                                                     matInput
                                                     [formControlName]="'discountAmount'"
+                                                    [readonly]="!storeDiscountTierListValueEditMode[i]"
                                                 >
                                             </mat-form-field>
                                         </div>
@@ -297,6 +311,7 @@
                                                 <mat-select
                                                     class="w-full"
                                                     [formControlName]="'calculationType'"
+                                                    [readonly]="!storeDiscountTierListValueEditMode[i]"
                                                     >
                                                     
                                                     <div>
@@ -307,12 +322,71 @@
                                             </mat-form-field>
                                         </div>
                                     </td>
+
+                                    <td class="border-t border-gray-300 pt-2 pl-2">
+                                        <div class="flex flex-wrap items-center justify-center ">
+                                            <div class="flex flex-row w-full items-center justify-center">
+                                            
+                                                <input
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="button"
+                                                    [id]="'edit-discount-tier-btn' + discountTier.value.id"
+                                                    (click)="storeDiscountTierListValueEditMode[i] = !storeDiscountTierListValueEditMode[i]"
+                                                >
+                                                <label
+                                                    *ngIf="!storeDiscountTierListValueEditMode[i]"
+                                                    class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
+                                                    [for]="'edit-discount-tier-btn' + discountTier.value.id"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="text-white icon-size-5"
+                                                        [svgIcon]="'heroicons_outline:pencil-alt'">
+                                                    </mat-icon>
+                                                </label>
+
+                                                <input
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="button"
+                                                    [id]="'update-discount-tier-btn' + discountTier.value.id"
+                                                    (click)="storeDiscountTierListValueEditMode[i] = !storeDiscountTierListValueEditMode[i]"
+                                                    (click)="updateSelectedDiscountTier(discountTier)"
+                                                >
+                                                <label
+                                                    *ngIf="storeDiscountTierListValueEditMode[i]"
+                                                    class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
+                                                    [for]="'update-discount-tier-btn' + discountTier.value.id"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="text-white icon-size-5"
+                                                        [svgIcon]="'heroicons_outline:check'">
+                                                    </mat-icon>
+                                                </label>
+
+                                        
+                                                <input
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="button"
+                                                    [id]="'delete-discount-tier-btn' + discountTier.value.id"
+                                                    (click)="deleteSelectedDiscountTier(discountTier.value.id)"
+                                                >
+                                                <label
+                                                    class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-warn hover:bg-warn-700 mb-3"
+                                                    [for]="'delete-discount-tier-btn' + discountTier.value.id"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="text-white icon-size-5"
+                                                        [svgIcon]="'heroicons_outline:trash'">
+                                                    </mat-icon>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </td>
                                
                                 </tr>
                             </table>
                         </div>
                     </fieldset>
-                    <div class="flex justify-end">
+                    <div class="flex justify-end p-2">
                         <button
                             class="px-8 mr-2"
                             mat-flat-button
@@ -322,13 +396,13 @@
                             Back
                         </button>
                         <button
-                            class="px-8"
-                            mat-flat-button
-                            [color]="'primary'"
-                            [disabled]="horizontalStepperStep2.stepControl.pristine || horizontalStepperStep2.stepControl.invalid"
-                            type="button"
-                            matStepperNext>
-                            Next
+                        class="px-8"
+                        mat-flat-button
+                        [color]="'primary'"
+                        type="button"
+                        (click)="updateSelectedDiscount()"
+                        >
+                        Update
                         </button>
                     </div>
                 </mat-step>
