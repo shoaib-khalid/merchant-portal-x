@@ -4,8 +4,8 @@ import { ActivatedRoute } from '@angular/router';
 import { Locale } from 'app/core/locale/locale.types';
 import { LocaleService } from 'app/core/locale/locale.service';
 import { StoresService } from 'app/core/store/store.service';
-import { RegisterStoreValidationService } from 'app/modules/merchant/stores-management/register-store/register-store.validation.service';
-import { Store, StoreRegionCountries, CreateStore, StoreAssets, StoreSelfDeliveryStateCharges, StoreDeliveryDetails, StoreDeliveryProvider } from 'app/core/store/store.types';
+import { EditStoreValidationService } from 'app/modules/merchant/stores-management/edit-store/edit-store.validation.service';
+import { Store, StoreRegionCountries, CreateStore, StoreAssets, StoreSelfDeliveryStateCharges, StoreDeliveryDetails, StoreDeliveryProvider, StoreDeliveryPeriod } from 'app/core/store/store.types';
 import { ChooseVerticalService } from '../../choose-vertical/choose-vertical.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 
@@ -23,6 +23,9 @@ export class StoreDeliveryComponent implements OnInit
     store: Store;
     storeId: string;
     storeName: string;
+
+    _deliveryPeriods: StoreDeliveryPeriod[] = [];
+    deliveryPeriods: FormArray;
 
     deliveryFullfilment: any;
     deliveryPartners: any = [];
@@ -64,18 +67,15 @@ export class StoreDeliveryComponent implements OnInit
         this.storeDeliveryForm = this._formBuilder.group({
             serviceChargesPercentage    : [0],
             verticalCode                : [''],
-            // Allowed Self Delivery States
-            allowedSelfDeliveryStates   : this._formBuilder.array([]),
-            // Delivery Provider
-            deliveryType                : ['', Validators.required],
-            // Delivery Partner
-            deliveryPartner             : ['', Validators.required],
+            allowedSelfDeliveryStates   : this._formBuilder.array([]), // Allowed Self Delivery States
+            deliveryType                : ['', Validators.required], // Delivery Provider
+            deliveryPartner             : ['', Validators.required], // Delivery Partner
+            deliveryPeriods             : this._formBuilder.array([]),
             // Else
-            allowScheduledDelivery      : [false],
             allowStorePickup            : [false],
             address                     : ['', Validators.required],
             city                        : ['', Validators.required],
-            postcode                    : ['', [Validators.required, Validators.minLength(5), Validators.maxLength(10), RegisterStoreValidationService.postcodeValidator]],
+            postcode                    : ['', [Validators.required, Validators.minLength(5), Validators.maxLength(10), EditStoreValidationService.postcodeValidator]],
             regionCountryStateId        : ['', Validators.required],
             regionCountryId             : ['', Validators.required],
         });
@@ -200,7 +200,7 @@ export class StoreDeliveryComponent implements OnInit
                         this._allowedSelfDeliveryStates.forEach(item => {
                             this.allowedSelfDeliveryStates = this.storeDeliveryForm.get('allowedSelfDeliveryStates') as FormArray;
                             this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
-                        });
+                        });                        
 
                         // Mark for check
                         this._changeDetectorRef.markForCheck();
@@ -224,16 +224,33 @@ export class StoreDeliveryComponent implements OnInit
                 // INITIALLY (refer below section updateStates(); for changes), get states from symplified backed by using the 3rd party api
                 
                 // Get states by country Z(using symplified backend)
-                this._storesService.getStoreRegionCountryState(symplifiedCountryId).subscribe((response)=>{
-                    
-                    this.storeStates = response.data.content; 
+                this._storesService.getStoreRegionCountryState(symplifiedCountryId)
+                    .subscribe((response)=>{
+                        this.storeStates = response.data.content; 
 
-                    // Mark for check
-                    this._changeDetectorRef.markForCheck();
-                });
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    });
 
                 // country (using form builder variable)
                 // this.editStoreForm.get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
+
+                // -------------------------------------
+                // store delivery period
+                // -------------------------------------
+
+                this._storesService.getDeliveryPeriod(this.storeId)
+                    .subscribe((response: StoreDeliveryPeriod[]) => {
+                        this._deliveryPeriods = response;
+
+                        this._deliveryPeriods.forEach(item => {
+                            this.deliveryPeriods = this.storeDeliveryForm.get('deliveryPeriods') as FormArray;
+                            this.deliveryPeriods.push(this._formBuilder.group(item));
+                        });
+                        
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    })
                 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -277,7 +294,7 @@ export class StoreDeliveryComponent implements OnInit
         
         // then check it again and set if there's an error
         if (this.deliveryPartners.length < 1 && this.storeDeliveryForm.get('deliveryType').value !== "SELF"){
-            this.storeDeliveryForm.get('deliveryType').setErrors({noDeliveryPartners: true})
+            this.storeDeliveryForm.get('deliveryType').setErrors({noDeliveryPartners: true});
         }
     }
 
@@ -348,7 +365,7 @@ export class StoreDeliveryComponent implements OnInit
         }
 
         // this will remove the item from the object
-        const { allowedSelfDeliveryStates, allowScheduledDelivery, allowStorePickup, 
+        const { allowedSelfDeliveryStates, allowStorePickup, deliveryPeriods,
             deliveryType, deliveryPartner, storeTiming, ...storeDeliveryBody } = this.storeDeliveryForm.value;
   
         // this.editStoreForm.disable();
@@ -398,31 +415,25 @@ export class StoreDeliveryComponent implements OnInit
         };
 
         if (this.storeDeliveryForm.get('deliveryType').value !== "") {
-            this._storesService.putStoreDeliveryDetails(this.storeId, deliveryDetailBody).subscribe(
-                (response) => {
+            this._storesService.putStoreDeliveryDetails(this.storeId, deliveryDetailBody)
+                .subscribe((response) => { 
 
-                }
-            );
+                });
         } else {
-            this._storesService.postStoreDeliveryDetails(this.storeId, deliveryDetailBody).subscribe(
-                (response) => {
-
-                }
-            );
-        }
-
-        if (this.storeDeliveryForm.get('deliveryType').value === "SELF") {
-
-            // ---------------------------
-            // Delete All State Delivery Charges
-            // ---------------------------
-
-            this._storesService.deleteAllSelfDeliveryStateCharges(this.storeId)
+            this._storesService.postStoreDeliveryDetails(this.storeId, deliveryDetailBody)
                 .subscribe((response) => {
 
-                    // ---------------------------
-                    // Create State Delivery Charges
-                    // ---------------------------
+                });
+        }
+
+        // ---------------------------
+        // Provision SELF 
+        // ---------------------------
+
+        if (this.storeDeliveryForm.get('deliveryType').value === "SELF") {
+            // Delete All State Delivery Charges
+            this._storesService.deleteAllSelfDeliveryStateCharges(this.storeId)
+                .subscribe((response) => {
 
                     let allowedSelfDeliveryStatesBody = allowedSelfDeliveryStates.map(item => {
                         return {
@@ -430,25 +441,36 @@ export class StoreDeliveryComponent implements OnInit
                             delivery_charges: item.deliveryCharges
                         }
                     });
-
+                    
+                    // Create State Delivery Charges
                     this._storesService.postBulkSelfDeliveryStateCharges(this.storeId, allowedSelfDeliveryStatesBody)
                         .subscribe((response) => {
                         });
                 });
         }
 
+        // ---------------------------
+        // Provision ADHOC 
+        // ---------------------------
+
         if (this.storeDeliveryForm.get('deliveryType').value === "ADHOC") {
+            this._storesService.deleteStoreRegionCountryDeliveryProviderAll(this.storeId)
+                .subscribe(() => {
+                    this._storesService.postStoreRegionCountryDeliveryProvider(this.storeId, this.storeDeliveryForm.get('deliveryPartner').value)
+                        .subscribe((response) => {
+                        });
+                });
+        }
 
-            // ---------------------------
-            // Provision ADHOC Delivery Provider
-            // ---------------------------
+        // ---------------------------
+        // Provision SCHEDULED
+        // ---------------------------
 
-            this._storesService.deleteStoreRegionCountryDeliveryProviderAll(this.storeId).subscribe(() => {
-                this._storesService.postStoreRegionCountryDeliveryProvider(this.storeId, this.storeDeliveryForm.get('deliveryPartner').value)
-                    .subscribe((response) => {
-                        
-                    });
-            })
+        if (this.storeDeliveryForm.get('deliveryType').value === "SCHEDULED") {
+            this._storesService.postDeliveryPeriod(this.storeId, deliveryPeriods)
+                .subscribe(()=>{
+
+                });
         }
 
         // Show a success message (it can also be an error message)
@@ -499,5 +521,16 @@ export class StoreDeliveryComponent implements OnInit
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
+    }
+
+    checkDeliveryPeriodsFullfilment() {
+
+        let index = this.deliveryPeriods.value.findIndex(item => item.enabled === true);        
+
+        if (index > -1) {
+            this.storeDeliveryForm.get('deliveryPeriods').setErrors(null)
+        } else {
+            this.storeDeliveryForm.get('deliveryPeriods').setErrors({requiredAtLeastOne: true})
+        }
     }
 }

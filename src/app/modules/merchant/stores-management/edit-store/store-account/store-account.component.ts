@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { StoresService } from 'app/core/store/store.service';
 import { ChooseVerticalService } from '../../choose-vertical/choose-vertical.service';
-import { RegisterStoreValidationService } from 'app/modules/merchant/stores-management/register-store/register-store.validation.service';
+import { EditStoreValidationService } from 'app/modules/merchant/stores-management/edit-store/edit-store.validation.service';
 import { StoreRegionCountries } from 'app/core/store/store.types';
 import { LocaleService } from 'app/core/locale/locale.service';
 import { Locale } from 'app/core/locale/locale.types';
@@ -83,10 +83,10 @@ export class StoreAccountComponent implements OnInit
         // Create the form
         this.storeAccountForm = this._formBuilder.group({
             name                : ['', Validators.required],
-            subdomain           : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
+            subdomain           : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), EditStoreValidationService.domainValidator]],
             storeDescription    : ['', [Validators.required, Validators.maxLength(100)]],
             email               : ['', [Validators.required, Validators.email]],
-            phoneNumber         : ['', RegisterStoreValidationService.phonenumberValidator],
+            phoneNumber         : ['', EditStoreValidationService.phonenumberValidator],
             displayAddress      : [''],
             paymentType        : ['', Validators.required],
         });

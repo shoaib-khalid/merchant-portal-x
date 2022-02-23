@@ -6,7 +6,7 @@ import { Observable, Subject } from 'rxjs';
 import { LocaleService } from 'app/core/locale/locale.service';
 import { Locale } from 'app/core/locale/locale.types';
 import { StoresService } from 'app/core/store/store.service';
-import { Store, StoreRegionCountries, CreateStore, StoreAssets, StoreDeliveryProvider } from 'app/core/store/store.types';
+import { Store, StoreRegionCountries, CreateStore, StoreAssets, StoreDeliveryProvider, StoreDeliveryPeriod } from 'app/core/store/store.types';
 import { ActivatedRoute, Router } from '@angular/router';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { debounce } from 'lodash';
@@ -63,6 +63,10 @@ export class RegisterStoreComponent implements OnInit
     // Allowed Self Delivery States
     _allowedSelfDeliveryStates: any;
     allowedSelfDeliveryStates: FormArray;
+
+    // Delivery Periods Fullfilment
+    _deliveryPeriods: StoreDeliveryPeriod[] = [];
+    deliveryPeriods: FormArray;
 
     // Store Timing
     _storeTiming: any;
@@ -175,6 +179,11 @@ export class RegisterStoreComponent implements OnInit
                 deliveryPartner          : ['', Validators.required],
                 // Allowed Self Delivery States
                 allowedSelfDeliveryStates: this._formBuilder.array([]),
+                // Delivery Periods
+                deliveryPeriods          : this._formBuilder.group({ 
+                        values      : this._formBuilder.array([]),
+                        validation  : ['', RegisterStoreValidationService.requiredAtLeastOneValidator]
+                }),
                 // Else
                 allowScheduledDelivery   : [false],
                 allowStorePickup         : [false],
@@ -456,6 +465,23 @@ export class RegisterStoreComponent implements OnInit
             { selected: false, option: "SCHEDULED_DELIVERY", label: "Scheduled Delivery", tooltip: "This store allow scheduled delivery request from customer" },
             { selected: false, option: "STORE_PICKUP", label: "Allow Store Pickup", tooltip: "This store allow customer to pick up item from store" }
         ];
+
+        // -------------------------------------
+        // delivery period fulfillment
+        // -------------------------------------
+
+        this._storesService.getDeliveryPeriod(null)
+            .subscribe((response: StoreDeliveryPeriod[]) => {
+                this._deliveryPeriods = response;
+                
+                this._deliveryPeriods.forEach(item => {
+                    this.deliveryPeriods = this.createStoreForm.get('step3').get('deliveryPeriods').get('values') as FormArray;                    
+                    this.deliveryPeriods.push(this._formBuilder.group(item));
+                });
+                
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
 
         // -------------------------------------
         // Logo and banner
@@ -947,12 +973,12 @@ export class RegisterStoreComponent implements OnInit
                     }
                 );
 
-                if (deliveryType === "SELF") {
+                // ---------------------------
+                // Provision SELF 
+                // ---------------------------
 
-                    // ---------------------------
-                    // Create State Delivery Charges
-                    // ---------------------------
-    
+                if (deliveryType === "SELF") {
+                    // Create State Delivery Charges    
                     for(let i = 0; i < allowedSelfDeliveryStates.length; i++) {
     
                         let selfDeliveryStateBody = {
@@ -968,15 +994,31 @@ export class RegisterStoreComponent implements OnInit
                     }
                 } 
 
+                // ---------------------------
+                // Provision ADHOC 
+                // ---------------------------
+
                 if (deliveryType === "ADHOC") {
-
-                    // ---------------------------
-                    // Provision ADHOC Delivery Provider
-                    // ---------------------------
-
                     this._storesService.postStoreRegionCountryDeliveryProvider(this.storeId, deliveryPartner)
                         .subscribe((response) => {
                             
+                        });
+                }
+
+                // ---------------------------
+                // Provision SCHEDULED
+                // ---------------------------
+
+                if (deliveryType === "SCHEDULED") {
+
+                    let deliveryPeriodBody = this.createStoreForm.get('step3').get('deliveryPeriods').get('values').value;
+                    deliveryPeriodBody.map(item => {
+                        item.storeId = this.storeId;
+                    });
+
+                    this._storesService.postDeliveryPeriod(this.storeId, deliveryPeriodBody)
+                        .subscribe(()=>{
+
                         });
                 }
 
@@ -1110,8 +1152,8 @@ export class RegisterStoreComponent implements OnInit
         // ------------------------------------------------------------
         // reset allowedSelfDeliveryStates if user change delivery type
         // ------------------------------------------------------------
-
-        if (this.createStoreForm.get('step3').get('deliveryType').value !== "SELF") {
+        // ADHOC || SCHEDULED
+        if (this.createStoreForm.get('step3').get('deliveryType').value === "ADHOC" || this.createStoreForm.get('step3').get('deliveryType').value === "SCHEDULED") {
 
             // push to allowedSelfDeliveryStates (form)
             this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
@@ -1122,7 +1164,15 @@ export class RegisterStoreComponent implements OnInit
             this._allowedSelfDeliveryStates.forEach(item => {
                 this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
             });
+
+            if (this.createStoreForm.get('step3').get('deliveryType').value === "SCHEDULED") {
+                // Set validation of deliveryPeriods to some null to initially set required value
+                this.createStoreForm.get('step3').get('deliveryPeriods').get('validation').patchValue("");
+            }
+
         } else {
+
+            // SELF
             // push to allowedSelfDeliveryStates (form)
             this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
             // since backend give full discount tier list .. (not the only one that have been created only)
@@ -1136,13 +1186,18 @@ export class RegisterStoreComponent implements OnInit
                 this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
                 this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
             });
-        }
-        
 
+            // Set validation of deliveryPeriods to some value to disable required value
+            this.createStoreForm.get('step3').get('deliveryPeriods').get('validation').patchValue("not required");
+        }
+                
         // then check it again and set if there's an error
         if (this.deliveryPartners.length < 1 && this.createStoreForm.get('step3').get('deliveryType').value !== "SELF"){
-            this.createStoreForm.get('step3').get('deliveryType').setErrors({noDeliveryPartners: true})
+            this.createStoreForm.get('step3').get('deliveryType').setErrors({noDeliveryPartners: true});            
         }
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
     
     // ------------------------------------------------------------------------------
@@ -1475,6 +1530,19 @@ export class RegisterStoreComponent implements OnInit
         const MAX_LENGTH = 500;
         if ($event.editor.getLength() > MAX_LENGTH) {
            $event.editor.deleteText(MAX_LENGTH, $event.editor.getLength());
+        }
+    }
+
+    checkDeliveryPeriodsFullfilment() {
+
+        let index = this.deliveryPeriods.value.findIndex(item => item.enabled === true);
+
+        if (index > -1) {            
+            // this.createStoreForm.get('step3').get('deliveryPeriods').get('validation').setErrors(null);
+            this.createStoreForm.get('step3').get('deliveryPeriods').get('validation').patchValue("validated");
+        } else {            
+            // this.createStoreForm.get('step3').get('deliveryPeriods').get('validation').setErrors({requiredAtLeastOne: true});
+            this.createStoreForm.get('step3').get('deliveryPeriods').get('validation').patchValue(null);
         }
     }
 }

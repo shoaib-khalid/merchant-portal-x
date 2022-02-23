@@ -13,4 +13,8 @@ export class AppComponent
     constructor()
     {
     }
+
+    ngOnInit() {
+        console.log("navigator.userAgent", navigator.userAgent);
+    }
 }

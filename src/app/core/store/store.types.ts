@@ -171,3 +171,11 @@ export interface StorePagination
     startIndex: number;
     endIndex: number;
 }
+
+export interface StoreDeliveryPeriod
+{
+    id: string;
+    deliveryPeriod: string;
+    storeId: string;
+    enabled: boolean;
+}

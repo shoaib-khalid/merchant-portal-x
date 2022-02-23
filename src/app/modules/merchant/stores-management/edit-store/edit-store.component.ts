@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, NgForm, ValidationErrors, Validators } from '@angular/forms';
 import { fuseAnimations } from '@fuse/animations';
-import { RegisterStoreValidationService } from 'app/modules/merchant/stores-management/register-store/register-store.validation.service';
+import { EditStoreValidationService } from 'app/modules/merchant/stores-management/edit-store/edit-store.validation.service';
 import { Observable, Subject } from 'rxjs';
 import { LocaleService } from 'app/core/locale/locale.service';
 import { Locale } from 'app/core/locale/locale.types';
@@ -128,14 +128,14 @@ export class EditStoreComponent implements OnInit
             name               : ['', Validators.required],
             city               : ['', Validators.required],
             address            : ['', Validators.required],
-            postcode           : ['', [Validators.required, Validators.minLength(5), Validators.maxLength(10), RegisterStoreValidationService.postcodeValidator]],
+            postcode           : ['', [Validators.required, Validators.minLength(5), Validators.maxLength(10), EditStoreValidationService.postcodeValidator]],
             storeDescription   : ['', [Validators.required, Validators.maxLength(100)]],
             email              : ['', [Validators.required, Validators.email]],
             clientId           : [''],
-            subdomain          : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
+            subdomain          : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), EditStoreValidationService.domainValidator]],
             regionCountryId    : ['', Validators.required],
             regionCountryStateId: ['', Validators.required],
-            phoneNumber        : ['', RegisterStoreValidationService.phonenumberValidator],
+            phoneNumber        : ['', EditStoreValidationService.phonenumberValidator],
             serviceChargesPercentage: [0],
             verticalCode       : [''],
             paymentType        : ['', Validators.required],

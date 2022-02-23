@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, ReplaySubject, Subject, throwError } from 'rxjs';
 import { switchMap, take, map, tap, catchError, filter } from 'rxjs/operators';
-import { Store, StoreRegionCountries, StoreTiming, StorePagination, StoreAssets, CreateStore, StoreDeliveryDetails, StoreSelfDeliveryStateCharges, StoreDeliveryProvider, StoreAsset } from 'app/core/store/store.types';
+import { Store, StoreRegionCountries, StoreTiming, StorePagination, StoreAssets, CreateStore, StoreDeliveryDetails, StoreSelfDeliveryStateCharges, StoreDeliveryProvider, StoreAsset, StoreDeliveryPeriod } from 'app/core/store/store.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { takeUntil } from 'rxjs/operators';
@@ -484,7 +484,7 @@ export class StoresService
     getStoreRegionCountryState(regionCountryId: string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = (this.accessToken === '' || this.accessToken === null) ? 'accessToken' : this._jwt.getJwtPayload(this.accessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -1142,7 +1142,7 @@ export class StoresService
     getStoreTop(countryCode:string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this.accessToken === ''?'accessToken':this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = (this.accessToken === '' || this.accessToken === null) ? 'accessToken' : this._jwt.getJwtPayload(this.accessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -1154,6 +1154,42 @@ export class StoresService
         return this._httpClient.get<any>(productService + '/stores/top', header).pipe(
             map((response) => {
                 this._logging.debug("Response from StoresService (getStoreTop)",response);
+
+                return response.data;
+            })
+        );
+    }
+
+    getDeliveryPeriod(storeId: string): Observable<StoreDeliveryPeriod[]>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this.accessToken === this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.get<any>(productService + '/stores/' + storeId + '/deliveryperiods', header).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (getDeliveryPeriod)",response);
+
+                return response.data;
+            })
+        );
+    }
+
+    postDeliveryPeriod(storeId: string, deliveryPeriodBody: StoreDeliveryPeriod[]): Observable<StoreDeliveryPeriod[]>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this.accessToken === this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.post<any>(productService + '/stores/'+ storeId + '/deliveryperiods', deliveryPeriodBody, header).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (postDeliveryPeriod)",response);
 
                 return response.data;
             })

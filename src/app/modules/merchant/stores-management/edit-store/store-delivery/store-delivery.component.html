@@ -124,14 +124,6 @@
                             <div class="flex flex-col w-full">
                                 <mat-label class="font-medium">Store Fulfillment</mat-label>
                                 <div class="flex flex-col sm:flex-row">
-                                    <!-- <div class="flex w-full lg:w-2/4">
-                                        <mat-checkbox class="" [formControlName]="'allowScheduledDelivery'" [checked]="deliveryFullfilment[2].selected">{{deliveryFullfilment[2].label}}</mat-checkbox>
-                                        <mat-icon
-                                            [matTooltip]="deliveryFullfilment[2].tooltip"
-                                            class="flex flex-wrap transform scale-75"
-                                            [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                        </mat-icon>
-                                    </div> -->
                                     <div class="flex w-full lg:w-2/4">
                                         <mat-checkbox class="" [formControlName]="'allowStorePickup'" [checked]="deliveryFullfilment[3].selected">{{deliveryFullfilment[3].label}}</mat-checkbox>
                                         <mat-icon
@@ -194,6 +186,33 @@
                                     [svgIcon]="'mat_solid:delivery_dining'">
                                 </mat-icon>
                             </mat-form-field>
+                        </div>
+                        <!-- Delivery Period -->
+                        <div class="col-span-4" *ngIf="storeDeliveryForm.get('deliveryType').value === 'SCHEDULED'">
+                            <div class="flex flex-col w-full">
+                                <mat-label class="font-medium">
+                                    <span>Delivery Periods</span> &nbsp;
+                                    <span class="text-xs">(required at least 1)</span>
+                                </mat-label>
+                                <div class="flex flex-col sm:flex-row">
+                                    <ng-container formArrayName="deliveryPeriods" *ngFor="let deliveryPeriod of storeDeliveryForm.get('deliveryPeriods')['controls']; let i = index;">
+                                        <ng-container [formGroupName]="i">
+                                            <div class="flex w-full py-0.5 sm:py-0">
+                                                <mat-checkbox (change)="checkDeliveryPeriodsFullfilment()" [formControlName]="'enabled'" [checked]="deliveryPeriod.value.enabled">{{deliveryPeriod.value.deliveryPeriod}}</mat-checkbox>
+                                                <mat-icon
+                                                    *ngIf="deliveryPeriod.value.description"
+                                                    [matTooltip]="deliveryPeriod.value.description"
+                                                    class="flex flex-wrap transform scale-75"
+                                                    [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                                </mat-icon>
+                                            </div>
+                                        </ng-container>
+                                    </ng-container>
+                                </div>
+                                <mat-error *ngIf="storeDeliveryForm.get('deliveryPeriods').hasError('requiredAtLeastOne')">
+                                    Required at least 1
+                                </mat-error>
+                            </div>
                         </div>
                         <!-- Delivery Partner, Self Delivery -->
                         <div class="col-span-4">
