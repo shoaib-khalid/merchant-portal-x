@@ -20,46 +20,53 @@ import { StoresService } from 'app/core/store/store.service';
     styles         : [
         /* language=SCSS */
         `
-            /* Hide scrollbar for Chrome, Safari and Opera */
-            .no-scrollbar::-webkit-scrollbar {
-                display: none;
-            }
-            
-            /* Hide scrollbar for IE, Edge and Firefox */
-            .no-scrollbar {
-                -ms-overflow-style: none;  /* IE and Edge */
-                scrollbar-width: none;  /* Firefox */
-            }
-            :host ::ng-deep .mat-horizontal-content-container {
-                max-height: 90vh;
-                padding: 0 0px 20px 0px;
-                // overflow-y: auto;
+            .custom-add-product-dialog {
+
+                :host ::ng-deep .mat-horizontal-content-container {
+                    // max-height: 90vh;
+                    padding: 0 0px 20px 0px;
+                    // overflow-y: auto;
+                }
+                :host ::ng-deep .mat-horizontal-stepper-header-container {
+                    height: 60px;
+                }
+                :host ::ng-deep .mat-horizontal-stepper-header {
+                    height: 60px;
+                    padding-left: 8px;
+                    padding-right: 8px;
+                }
             }
             .content {
-                max-height: 76vh;
+                height: 496px;
                 // overflow-y: auto;
             }
-            :host ::ng-deep .mat-horizontal-stepper-header-container {
-                height: 60px;
-            }
-            :host ::ng-deep .mat-horizontal-stepper-header {
-                height: 60px;
-                padding-left: 8px;
-                padding-right: 8px;
-            }
-            // .ql-container {
-            // height: 60% !important;
+            // :host ::ng-deep .ql-container .ql-editor {
+            //     min-height: 132px;
+            //     max-height: 132px;
+            //     height: 132px;
             // }
-            :host ::ng-deep .ql-container .ql-editor {
-                min-height: 132px;
-                max-height: 132px;
-                height: 132px;
-            }
             .variant-details-grid {
-                max-height: 63vh;
+                height: 400px;
             }
             .add-product-list {
-                max-height: 27vh;
+                max-height: 200px;
+            }
+            .option-grid {
+                grid-template-columns: 120px 112px auto 112px;
+            }
+
+            .variant-grid {
+                // grid-template-columns: 68px auto 40px;
+                grid-template-columns: 68px 120px 120px 128px 80px 96px;
+
+                // @screen sm {
+                //     grid-template-columns: 68px auto auto 128px 84px 96px;
+                // }
+
+                @screen md {
+                    grid-template-columns: 68px 120px auto 128px 80px 96px;
+                }
+
             }
 
         `
@@ -2211,6 +2218,22 @@ export class AddProductComponent implements OnInit, OnDestroy
         }
         
         this._selectedProductsOption["totalAllow"] = value;
+    }
+
+    
+    trackVariantAvailable(index: number, item: any)
+    {
+        return item ? item.id : undefined;
+    }
+
+    trackVariant(index: number, item: any)
+    {
+        
+        return item ? item.id : undefined;
+    }
+
+    openProductPreview(){
+        // window.open(this.selectedProductForm.get('seoUrl').value, '_blank');
     }
 
     

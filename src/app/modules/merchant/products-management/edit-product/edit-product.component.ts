@@ -20,46 +20,57 @@ import { StoresService } from 'app/core/store/store.service';
     styles         : [
         /* language=SCSS */
         `
-            /* Hide scrollbar for Chrome, Safari and Opera */
-            .no-scrollbar::-webkit-scrollbar {
-                display: none;
-            }
-            
-            /* Hide scrollbar for IE, Edge and Firefox */
-            .no-scrollbar {
-                -ms-overflow-style: none;  /* IE and Edge */
-                scrollbar-width: none;  /* Firefox */
-            }
-            :host ::ng-deep .mat-horizontal-content-container {
-                max-height: 90vh;
-                padding: 0 0px 20px 0px;
-                // overflow-y: auto;
+
+            .custom-edit-product-dialog {
+
+                :host ::ng-deep .mat-horizontal-content-container {
+                    // max-height: 90vh;
+                    padding: 0 0px 20px 0px;
+                    // overflow-y: auto;
+                }
+                :host ::ng-deep .mat-horizontal-stepper-header-container {
+                    height: 60px;
+                }
+                :host ::ng-deep .mat-horizontal-stepper-header {
+                    height: 60px;
+                    padding-left: 8px;
+                    padding-right: 8px;
+                }
             }
             .content {
-                max-height: 76vh;
+                height: 496px;
                 // overflow-y: auto;
-            }
-            :host ::ng-deep .mat-horizontal-stepper-header-container {
-                height: 60px;
-            }
-            :host ::ng-deep .mat-horizontal-stepper-header {
-                height: 60px;
-                padding-left: 8px;
-                padding-right: 8px;
             }
             // .ql-container {
             // height: 60% !important;
             // }
-            :host ::ng-deep .ql-container .ql-editor {
-                min-height: 139px;
-                max-height: 139px;
-                height: 139px;
-            }
+            // :host ::ng-deep .ql-container .ql-editor {
+            //     min-height: 139px;
+            //     max-height: 139px;
+            //     height: 139px;
+            // }
             .variant-details-grid {
-                max-height: 63vh;
+                height: 400px;
             }
             .add-product-list {
-                max-height: 27vh;
+                max-height: 200px;
+            }
+            .option-grid {
+                grid-template-columns: 120px 112px auto 112px;
+            }
+
+            .variant-grid {
+                // grid-template-columns: 68px auto 40px;
+                grid-template-columns: 68px 120px 120px 128px 80px 96px;
+
+                // @screen sm {
+                //     grid-template-columns: 68px auto auto 128px 84px 96px;
+                // }
+
+                @screen md {
+                    grid-template-columns: 68px 120px auto 128px 80px 96px;
+                }
+
             }
 
         `
@@ -92,7 +103,6 @@ export class EditProductComponent implements OnInit, OnDestroy
     selectedProduct: Product | null = null;
     addProductForm: FormGroup;
     products$: Observable<Product[]>;
-    createdProductForm: FormGroup;
     productType: string;
     newProductId: string = null; // product id after it is created
     creatingProduct: boolean; // use to disable next button until product is created
@@ -210,7 +220,7 @@ export class EditProductComponent implements OnInit, OnDestroy
         private _renderer2: Renderer2,
         private _viewContainerRef: ViewContainerRef,
         public dialogRef: MatDialogRef<EditProductComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: any
+        @Inject(MAT_DIALOG_DATA) public data: MatDialog
     )
     {
     }
@@ -276,36 +286,13 @@ export class EditProductComponent implements OnInit, OnDestroy
             })
         });
 
-        this.createdProductForm = this._formBuilder.group({});
 
         // // get the product type
         // this.productType = this.data.productType;
 
         // get the product id
 
-        this.setDetails(this.data.productId);
-        
-
-        // Create the selected product form
-        // this.addProductForm = this._formBuilder.group({
-        //     name             : ['', [Validators.required]],
-        //     description      : ['', [Validators.required]],
-        //     categoryId       : ['', [Validators.required]],
-        //     status           : ['ACTIVE', [Validators.required]],
-        //     trackQuantity    : [false],
-        //     allowOutOfStockPurchases: [false],
-        //     minQuantityForAlarm: [-1],
-        //     packingSize      : ['', [Validators.required]],
-        //     availableStock   : [1, [Validators.required]],
-        //     sku              : ['', [Validators.required]],
-        //     price            : ['', [Validators.required]],
-        //     images           : [[]],
-        //     imagefiles       : [[]],
-        //     thumbnailIndex   : [0],
-
-        //     // form completion
-        //     valid            : [false]
-        // });
+        this.setDetails(this.data['productId']);
 
         // Get the products
         this.products$ = this._inventoryService.products$;
@@ -434,14 +421,6 @@ export class EditProductComponent implements OnInit, OnDestroy
         //  this.closeDetails();
             return;
         }
-
-        //set the details
-        // this.closeDetails();
-
-        // set showVariantsSection , showCombosSection to false
-    //  this.showVariantsSection = false;
-    //  this.showCombosSection = false;
-
 
         // Get the product by id
         this._inventoryService.getProductById(productId)
@@ -2983,7 +2962,22 @@ export class EditProductComponent implements OnInit, OnDestroy
              }
          });
      }
- 
+
+
+    trackVariantAvailable(index: number, item: any)
+    {
+        return item ? item.id : undefined;
+    }
+
+    trackVariant(index: number, item: any)
+    {
+        
+        return item ? item.id : undefined;
+    }
+
+    openProductPreview(){
+        // window.open(this.selectedProductForm.get('seoUrl').value, '_blank');
+    }
 
     
 }

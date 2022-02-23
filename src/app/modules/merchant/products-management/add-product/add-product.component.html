@@ -211,7 +211,7 @@
                                     </div>
                                 </div>
                                 <!-- Product status -->
-                                <div class="flex flex-col mt-2 w-full">
+                                <div class="flex flex-col mt-7 w-full">
                                     <mat-form-field class="w-full" floatLabel="always">
                                         <mat-label class="font-medium">Product status</mat-label>
                                         <mat-select
@@ -256,7 +256,7 @@
                                         <input
                                             matInput
                                             required
-                                            [placeholder]="'Insert product ' + ((data['productType'] === 'combo') ? 'combo ' : '') + 'name'"
+                                            [placeholder]="'Insert product ' + ((data['productType'] === 'combo') ? 'combo' : '') + 'name'"
                                             [formControlName]="'name'"
                                             (change)="generateSku()"
                                         >
@@ -495,7 +495,7 @@
                                 </div>
                                 <!-- Variants Toggle -->
                                 <div 
-                                    *ngIf="(store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK') && (productType ==='combo)"
+                                    *ngIf="(store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK') && (productType ==='combo')"
                                     class="flex flex-col w-full py-2 sm:pt-2"
                                 >
                                     <span class="pb-1 font-medium leading-tight">Variants 
@@ -1505,8 +1505,8 @@
                                                         <div [mat-sort-header]="'optionAction'">Action</div>
                                                     </div>
                                                     <!-- Rows -->
-                                                    <ng-container>
-                                                        <ng-container *ngFor="let combos of productsCombos$; trackBy: trackByFn">
+                                                    <div class="h-100 overflow-y-auto">
+                                                        <div *ngFor="let combos of productsCombos$; trackBy: trackByFn">
                                                             <div class="option-grid grid items-center gap-4 py-3 px-6 md:px-8 border-b">                                       
                                                                 <!-- Option Name -->
                                                                 <div class="hidden sm:block truncate">
@@ -1562,8 +1562,8 @@
                                                                 </div>
                             
                                                             </div>
-                                                        </ng-container>
-                                                    </ng-container>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </ng-container>
                                         </ng-container>
