@@ -38,17 +38,17 @@ export const defaultNavigation: FuseNavigationItem[] = [
         icon : 'heroicons_outline:cube',
         children: [
             {
-                id   : 'app.manage-product',
-                title: 'Manage Product',
-                type : 'basic',
-                link : '/products/inventory',
-                exactMatch: true
-            },
-            {
                 id   : 'app.manage-category',
                 title: 'Manage Category',
                 type : 'basic',
                 link : '/products/categories',
+                exactMatch: true
+            },
+            {
+                id   : 'app.manage-product',
+                title: 'Manage Product',
+                type : 'basic',
+                link : '/products/inventory',
                 exactMatch: true
             }
         ],

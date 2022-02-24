@@ -6,7 +6,7 @@ import { Observable, Subject } from 'rxjs';
 import { LocaleService } from 'app/core/locale/locale.service';
 import { Locale } from 'app/core/locale/locale.types';
 import { StoresService } from 'app/core/store/store.service';
-import { Store, StoreRegionCountries, CreateStore, StoreAssets, StoreDeliveryProvider } from 'app/core/store/store.types';
+import { Store, StoreRegionCountries, CreateStore, StoreAssets, StoreDeliveryProvider, StoreDeliveryPeriod } from 'app/core/store/store.types';
 import { ActivatedRoute, Router } from '@angular/router';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { debounce } from 'lodash';
@@ -57,12 +57,17 @@ export class RegisterStoreComponent implements OnInit
     regionsList: any;
     /** for selected country refer form builder */ 
 
-    deliveryFullfilment: any;
-    deliveryPartners: any = [];
+    deliveryFulfilment: any;
+    deliveryPartners: StoreDeliveryProvider[] = [];
+    deliveryPartnerTypes: any = [];
 
     // Allowed Self Delivery States
     _allowedSelfDeliveryStates: any;
     allowedSelfDeliveryStates: FormArray;
+
+    // Delivery Periods Fulfilment
+    _deliveryPeriods: StoreDeliveryPeriod[] = [];
+    deliveryPeriods: FormArray;
 
     // Store Timing
     _storeTiming: any;
@@ -75,6 +80,24 @@ export class RegisterStoreComponent implements OnInit
     files: any;
     timeAlert: any = [];
     disableForm: boolean = false;
+
+    /** Quil Modules */
+    quillModules: any = {
+        toolbar: [
+            ['bold', 'italic', 'underline'],
+            [{align: []}, {list: 'ordered'}, {list: 'bullet'}],
+            [{link: function(value) {
+                    if (value) {
+                      var href = prompt('Enter the URL');
+                      this.quill.format('link', href);
+                    } else {
+                      this.quill.format('link', false);
+                    }
+                  }
+            }],
+            ['blockquote','clean']
+        ]
+    };
 
     galleryOptionsBannerDesktop: NgxGalleryOptions[] = [];
     galleryOptionsBannerMobile: NgxGalleryOptions[] = [];
@@ -137,23 +160,31 @@ export class RegisterStoreComponent implements OnInit
             step1: this._formBuilder.group({
                 name                : ['', Validators.required],
                 subdomain           : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
-                address             : ['', Validators.required],
                 storeDescription    : ['', [Validators.required, Validators.maxLength(100)]],
-                city                : ['', Validators.required],
-                regionCountryStateId: ['', Validators.required],
+                displayAddress      : [''],
                 email               : ['', [Validators.required, Validators.email]],
                 phoneNumber         : ['', RegisterStoreValidationService.phonenumberValidator],
-                postcode            : ['', [Validators.required, Validators.minLength(5), Validators.maxLength(10), RegisterStoreValidationService.postcodeValidator]],
-                regionCountryId     : ['', Validators.required],
                 paymentType         : ['', Validators.required],
             }),
             step3: this._formBuilder.group({
+
+                address             : ['', Validators.required],
+                city                : ['', Validators.required],
+                regionCountryId     : ['', Validators.required],
+                postcode            : ['', [Validators.required, Validators.minLength(5), Validators.maxLength(10), RegisterStoreValidationService.postcodeValidator]],
+                regionCountryStateId: ['', Validators.required],
+
                 // Delivery Provider
                 deliveryType             : ['', Validators.required],
                 // Delivery Partner
                 deliveryPartner          : ['', Validators.required],
                 // Allowed Self Delivery States
                 allowedSelfDeliveryStates: this._formBuilder.array([]),
+                // Delivery Periods
+                deliveryPeriods          : this._formBuilder.group({ 
+                        values      : this._formBuilder.array([]),
+                        validation  : ['', RegisterStoreValidationService.requiredAtLeastOneValidator]
+                }),
                 // Else
                 allowScheduledDelivery   : [false],
                 allowStorePickup         : [false],
@@ -199,69 +230,112 @@ export class RegisterStoreComponent implements OnInit
             // this is to get the current location by using 3rd party api service
 
             this._userService.client$.subscribe((response: Client)=> {
-                let symplifiedCountryId = response['data'].regionCountry.id;
 
-                 // check if vertical selected is valid for selected country
-                 if ((_verticalCode === "ECommerce_PK" || _verticalCode === "FnB_PK") && symplifiedCountryId === "PAK") {
-                    this.createStoreCondition.error = null;
-                } else if ((_verticalCode === 'E-Commerce' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'FnB') && symplifiedCountryId === "MYS") {
-                    this.createStoreCondition.error = null;
-                } else {
-                    this.createStoreCondition.error = "VERTICAL-ERROR";
-                    this.createStoreCondition.errorTitle = "Vertical Error";
-                    this.createStoreCondition.errorDesc = "This vertical is not available at your country, please choose another vertical";
-                    let message = symplifiedCountryId ? "Vertical code: " + _verticalCode + " is not available for " + symplifiedCountryId + " country" : "Missing region country id";
-                    console.error(message)
-                }
-                // state (using component variable)
-                // INITIALLY (refer below section updateStates(); for changes), get states from symplified backed by using the 3rd party api
-                
-                // -------------------------
-                // States By Country
-                // -------------------------
+                if (response['data'].regionCountry) {
+
+                    let symplifiedCountryId = response['data'].regionCountry.id;
     
-                // Get states by country (using symplified backend)
-                this._storesService.getStoreRegionCountryState(symplifiedCountryId).subscribe((response)=>{
-                    this.statesByCountry = response.data.content;
-                });
-    
-                // country (using form builder variable)
-                this.createStoreForm.get('step1').get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
-
-                 // -------------------------------------
-                // Delivery Partner
-                // -------------------------------------
-    
-                let _regionCountryId = symplifiedCountryId.toUpperCase();
-                let _deliveryType;
-
-                if (_verticalCode === "FnB" || _verticalCode === "FnB_PK") {
-                    _deliveryType = "ADHOC";
-                } else if (_verticalCode === 'E-Commerce' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'ECommerce_PK') {
-                    _deliveryType = "SCHEDULED";
-                } else {
-                    console.error("Invalid vertical code: ", _verticalCode)
-                }
-
-                this._storesService.getStoreDeliveryProvider({deliveryType: _deliveryType, regionCountryId: _regionCountryId}).subscribe(
-                    (response: StoreDeliveryProvider[]) => {
-                        
-                        // reset this.deliveryPartners first to initial state
-                        this.deliveryPartners = [];
-                        // push the data into array
-                        response.forEach(item => {
-                            this.deliveryPartners.push({
-                                id: item.id,
-                                name: item.name,
-                                providerImage: item.providerImage,
-                                label: item.name,
-                                selected: false
-                            });
-                        });
-                        // check changes
-                        this.checkDeliveryPartner();
+                    // check if vertical selected is valid for selected country
+                    if ((_verticalCode === "ECommerce_PK" || _verticalCode === "FnB_PK") && symplifiedCountryId === "PAK") {
+                        this.createStoreCondition.error = null;
+                    } else if ((_verticalCode === 'E-Commerce' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'FnB') && symplifiedCountryId === "MYS") {
+                        this.createStoreCondition.error = null;
+                    } else {
+                        this.createStoreCondition.error = "VERTICAL-ERROR";
+                        this.createStoreCondition.errorTitle = "Vertical Error";
+                        this.createStoreCondition.errorDesc = "This vertical is not available at your country, please choose another vertical";
+                        let message = symplifiedCountryId ? "Vertical code: " + _verticalCode + " is not available for " + symplifiedCountryId + " country" : "Missing region country id";
+                        console.error(message)
                     }
-                );
+                    // state (using component variable)
+                    // INITIALLY (refer below section updateStates(); for changes), get states from symplified backed by using the 3rd party api
+                    
+                    // -------------------------
+                    // States By Country
+                    // -------------------------
+        
+                    // Get states by country (using symplified backend)
+                    this._storesService.getStoreRegionCountryState(symplifiedCountryId).subscribe((response)=>{
+                        this.statesByCountry = response.data.content;
+                    });
+        
+                    // country (using form builder variable)
+                    this.createStoreForm.get('step3').get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
+    
+                     // -------------------------------------
+                    // Delivery Partner
+                    // -------------------------------------
+        
+                    let _regionCountryId = symplifiedCountryId.toUpperCase();
+                    let _deliveryType;
+    
+                    if (_verticalCode === "FnB" || _verticalCode === "FnB_PK") {
+                        _deliveryType = "ADHOC";
+                    } else if (_verticalCode === 'E-Commerce' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'ECommerce_PK') {
+                        _deliveryType = "SCHEDULED";
+                    } else {
+                        console.error("Invalid vertical code: ", _verticalCode)
+                    }
+
+                    // ----------------------
+                    // Get All Available Store Delivery Provider
+                    // ----------------------
+    
+                    this._storesService.getStoreDeliveryProvider({deliveryType: _deliveryType, regionCountryId: _regionCountryId}).subscribe(
+                        (response: StoreDeliveryProvider[]) => {
+                            // reset this.deliveryPartners first to initial state
+                            this.deliveryPartners = [];
+                            this.deliveryPartners = response;
+
+                            // filter delivery fulfilment aka delivery period
+                            this.deliveryPartnerTypes = [ ...new Set(this.deliveryPartners.map(item => item.fulfilment))];
+
+                            // check changes
+                            this.checkDeliveryPartner();
+
+                            // -------------------------------------
+                            // delivery period fulfilment
+                            // -------------------------------------
+
+                            this._storesService.getDeliveryPeriod(null)
+                            .subscribe((response: StoreDeliveryPeriod[]) => {
+                                this._deliveryPeriods = response;
+                                
+                                
+                                this._deliveryPeriods.forEach(item => {
+
+                                    // find delivery provider for each delviery period
+                                    let deliveryPartners = this.deliveryPartners.map(element => { 
+                                        if (element.fulfilment === item.deliveryPeriod) {
+                                            return element;
+                                        } else {
+                                            return null;
+                                        }
+                                    });
+
+                                    // remove undefined
+                                    // deliveryPartners.filter(n => n);
+                                    
+                                    let _deliveryProviders = this._formBuilder.array(deliveryPartners.filter(n => n));
+                     
+                                    // set empty array for each delivery period of deliveryProviders
+                                    Object.assign(item, { deliveryProviders: _deliveryProviders });
+
+                                    this.deliveryPeriods = this.createStoreForm.get('step3').get('deliveryPeriods').get('values') as FormArray;
+                                    
+                                    // attacted delivery provider to delivery period
+                                    this.deliveryPeriods.push(this._formBuilder.group(item));
+                                });
+                                
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
+                            });
+
+                            // Mark for check
+                            this._changeDetectorRef.markForCheck();
+                        }
+                    );
+                }
                 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -422,10 +496,10 @@ export class RegisterStoreComponent implements OnInit
         });
         
         // -------------------------------------
-        // delivery fulfillment
+        // delivery fulfilment
         // -------------------------------------
 
-        this.deliveryFullfilment = [
+        this.deliveryFulfilment = [
             { selected: false, option: "INSTANT_DELIVERY", label: "Instant Delivery", tooltip: "This store support instant delivery. (Provided by store own logistic or delivery partners)" }, 
             { selected: false, option: "REGULAR_DELIVERY", label: "Regular Delivery", tooltip: "This store support regular delivery. (Provided by store own logistic or delivery partners)" },
             { selected: false, option: "SCHEDULED_DELIVERY", label: "Scheduled Delivery", tooltip: "This store allow scheduled delivery request from customer" },
@@ -640,7 +714,13 @@ export class RegisterStoreComponent implements OnInit
         createStoreBody["isSnooze"] = this.createStoreForm.get('step4').get('isSnooze').value;
         createStoreBody["serviceChargesPercentage"] = this.createStoreForm.get('serviceChargesPercentage').value;
         createStoreBody["verticalCode"] = this.createStoreForm.get('verticalCode').value;
-            
+        
+        createStoreBody["address"] = this.createStoreForm.get('step3').get('address').value;
+        createStoreBody["city"] = this.createStoreForm.get('step3').get('city').value;
+        createStoreBody["regionCountryId"] = this.createStoreForm.get('step3').get('regionCountryId').value;
+        createStoreBody["postcode"] = this.createStoreForm.get('step3').get('postcode').value;
+        createStoreBody["regionCountryStateId"] = this.createStoreForm.get('step3').get('regionCountryStateId').value;
+
         // Disable the form
         this.createStoreForm.disable();
 
@@ -916,12 +996,12 @@ export class RegisterStoreComponent implements OnInit
                     }
                 );
 
-                if (deliveryType === "SELF") {
+                // ---------------------------
+                // Provision SELF 
+                // ---------------------------
 
-                    // ---------------------------
-                    // Create State Delivery Charges
-                    // ---------------------------
-    
+                if (deliveryType === "SELF") {
+                    // Create State Delivery Charges    
                     for(let i = 0; i < allowedSelfDeliveryStates.length; i++) {
     
                         let selfDeliveryStateBody = {
@@ -937,15 +1017,38 @@ export class RegisterStoreComponent implements OnInit
                     }
                 } 
 
+                // ---------------------------
+                // Provision ADHOC 
+                // ---------------------------
+
                 if (deliveryType === "ADHOC") {
 
-                    // ---------------------------
-                    // Provision ADHOC Delivery Provider
-                    // ---------------------------
+                    let index = this.deliveryPartners.findIndex(item => item.id === deliveryPartner);
 
-                    this._storesService.postStoreRegionCountryDeliveryProvider(this.storeId, deliveryPartner)
-                        .subscribe((response) => {
-                            
+                    if (index > -1){
+                        this._storesService.postStoreRegionCountryDeliveryProvider(this.storeId, this.deliveryPartners[index].deliverySpId, this.deliveryPartners[index].fulfilment)
+                            .subscribe((response) => {
+                                
+                            });
+                    } else {
+                        console.error("Provision ADHOC delivery failed")
+                    }
+                }
+
+                // ---------------------------
+                // Provision SCHEDULED
+                // ---------------------------
+
+                if (deliveryType === "SCHEDULED") {
+
+                    let deliveryPeriodBody = this.createStoreForm.get('step3').get('deliveryPeriods').get('values').value;
+                    deliveryPeriodBody.map(item => {
+                        item.storeId = this.storeId;
+                    });
+
+                    this._storesService.postDeliveryPeriod(this.storeId, deliveryPeriodBody)
+                        .subscribe(()=>{
+
                         });
                 }
 
@@ -1002,7 +1105,7 @@ export class RegisterStoreComponent implements OnInit
     updateStates(countryId: string){
 
         // reset current regionCountryStateId
-        this.createStoreForm.get('step1').get('regionCountryStateId').patchValue("");
+        this.createStoreForm.get('step3').get('regionCountryStateId').patchValue("");
 
         // Get states by country (using symplified backend)
         this._storesService.getStoreRegionCountryState(countryId).subscribe((response)=>{
@@ -1079,8 +1182,8 @@ export class RegisterStoreComponent implements OnInit
         // ------------------------------------------------------------
         // reset allowedSelfDeliveryStates if user change delivery type
         // ------------------------------------------------------------
-
-        if (this.createStoreForm.get('step3').get('deliveryType').value === "SELF") {
+        // ADHOC || SCHEDULED
+        if (this.createStoreForm.get('step3').get('deliveryType').value === "ADHOC" || this.createStoreForm.get('step3').get('deliveryType').value === "SCHEDULED") {
 
             // push to allowedSelfDeliveryStates (form)
             this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
@@ -1091,12 +1194,40 @@ export class RegisterStoreComponent implements OnInit
             this._allowedSelfDeliveryStates.forEach(item => {
                 this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
             });
-        }
 
+            if (this.createStoreForm.get('step3').get('deliveryType').value === "SCHEDULED") {
+                // Set validation of deliveryPeriods to some null to initially set required value
+                this.createStoreForm.get('step3').get('deliveryPeriods').get('validation').patchValue("");
+            }
+
+        } else {
+
+            // SELF
+            // push to allowedSelfDeliveryStates (form)
+            this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
+            // since backend give full discount tier list .. (not the only one that have been created only)
+            this.allowedSelfDeliveryStates.clear();
+
+            this._allowedSelfDeliveryStates = [
+                { deliveryStates: "", deliveryCharges:"" }
+            ];
+            
+            this._allowedSelfDeliveryStates.forEach(item => {
+                this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
+                this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
+            });
+
+            // Set validation of deliveryPeriods to some value to disable required value
+            this.createStoreForm.get('step3').get('deliveryPeriods').get('validation').patchValue("not required");
+        }
+                
         // then check it again and set if there's an error
         if (this.deliveryPartners.length < 1 && this.createStoreForm.get('step3').get('deliveryType').value !== "SELF"){
-            this.createStoreForm.get('step3').get('deliveryType').setErrors({noDeliveryPartners: true})
+            this.createStoreForm.get('step3').get('deliveryType').setErrors({noDeliveryPartners: true});            
         }
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
     
     // ------------------------------------------------------------------------------
@@ -1422,5 +1553,30 @@ export class RegisterStoreComponent implements OnInit
         }else{
             this.timeAlert[i] = " " ;
         }      
+    }
+
+    // Quil editor text limit
+    textChanged($event) {
+        const MAX_LENGTH = 500;
+        if ($event.editor.getLength() > MAX_LENGTH) {
+           $event.editor.deleteText(MAX_LENGTH, $event.editor.getLength());
+        }
+    }
+
+    checkDeliveryPeriodsFulfilment() {
+
+        let index = this.deliveryPeriods.value.findIndex(item => item.enabled === true);
+
+        if (index > -1) {            
+            if (this.deliveryPeriods.value[index].deliveryProviders.length > 0) {
+                // this.createStoreForm.get('step3').get('deliveryPeriods').get('validation').setErrors(null);
+                this.createStoreForm.get('step3').get('deliveryPeriods').get('validation').patchValue("validated");
+            } else {
+                this.createStoreForm.get('step3').get('deliveryPeriods').get('validation').patchValue("noDeliveryPeriod");
+            }
+        } else {            
+            // this.createStoreForm.get('step3').get('deliveryPeriods').get('validation').setErrors({requiredAtLeastOne: true});
+            this.createStoreForm.get('step3').get('deliveryPeriods').get('validation').patchValue(null);
+        }
     }
 }

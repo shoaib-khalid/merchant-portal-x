@@ -86,6 +86,11 @@ export class MerchantSetupService
                 } else {
                     storeCount = content.length;
                 }
+
+                // not ready yet
+                if (storeCount === 1){
+                    
+                }
                 
                 return this._merchantSetup.next({ storeSetup: storeCount });
             })

@@ -26,6 +26,8 @@ export class RegisterStoreValidationService {
         storeNameAlreadytaken:'Sorry, the selected name is already taken',
         invalidPhonenumber: 'Invalid phonenumber',
         invalidPostcode: 'Invalid postcode',
+        requiredAtLeastOne: 'Required at leat one',
+        noDeliveryPartners: 'No delivery partner available',
         minlength: `Minimum length ${validatorValue.requiredLength}`
       };
   
@@ -126,6 +128,18 @@ export class RegisterStoreValidationService {
     static requiredValidator(control){
       if (control.value) {
         return true;
+      } else {
+        return false;
+      }
+    }
+
+    static requiredAtLeastOneValidator(control) {
+      if (control.value === "") {
+        return true;
+      } else if (control.value === null)  {
+        return { requiredAtLeastOne: true };
+      } else if (control.value === "noDeliveryPeriod")  {
+        return { noDeliveryPartners: true };
       } else {
         return false;
       }

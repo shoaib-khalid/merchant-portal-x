@@ -318,7 +318,7 @@ export class ChangelogComponent
                         '(DashboardManagementPage) Fix wrong amount showed in This Week chart',
                         '(ProductCategoryPage) Fix issue total in product category pagination when visiting the page , before clicking the items per page',
                         '(OrderManagementPage) Fix sorting, remove export button, fixed where list is blank when search or do sorting',
-                        '(StoreManagementPage) Remove schedule delivery fullfilment from store registry and store creation',
+                        '(StoreManagementPage) Remove schedule delivery fulfilment from store registry and store creation',
                         '(ChooseStorePage) Send pakistan vertical when filtering for store'
                     ]
                 }

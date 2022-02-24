@@ -60,15 +60,22 @@ export class RedirectComponent implements OnInit, OnDestroy
             
         if (this._merchantSetup.storeSetup == 0){
             // if no store Go to Choose Vertical
-            console.log("GOING TO ChooseVertical")
+            // console.info("GOING TO ChooseVertical")
             this.goToChooseVertical();
         } else if (this._merchantSetup.storeSetup == 1){
             // if there is 1 store and already have product, go to Dashboard
             if (this._merchantSetup.productSetup === true){
-                console.log("GOING TO Dashboard")
+                // console.info("GOING TO Dashboard")
                 this.goToDashboard();
+            } else if (this._merchantSetup.categorySetup === true) {
+                // if there is 1 store, have category, but no product, go to Add Products
+                // at this point, storeId still not saved in local storage (due to response of get store is in array of object), 
+                // due to nature of add product (for product service) - backend
+                // need to have store service object[0] to be saved in local storage
+                await this._storesService.setFirstStoreId();
+                this.goToAddCategories();
             } else {
-                // if there is 1 store but no product, go to Add Products
+                // if there is 1 store but , no categoty, no product, go to Add Products
                 // at this point, storeId still not saved in local storage (due to response of get store is in array of object), 
                 // due to nature of add product (for product service) - backend
                 // need to have store service object[0] to be saved in local storage
@@ -79,7 +86,7 @@ export class RedirectComponent implements OnInit, OnDestroy
             // if there is more than 1 store
             // in goToChooseStore() there will be another checking and redirect to product OR dashboard 
             // depend on the store, whether if have product or not 
-            console.log("GOING TO ChooseStore")
+            // console.info("GOING TO ChooseStore")
             this.goToChooseStore();
         }
     }
@@ -135,6 +142,11 @@ export class RedirectComponent implements OnInit, OnDestroy
     goToAddProducts(): void
     {
         this._router.navigate(['/products']);
+    }
+
+    goToAddCategories(): void
+    {
+        this._router.navigate(['/products/categories']);
     }
 
     /**
