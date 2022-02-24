@@ -236,74 +236,19 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
         this._unsubscribeAll.complete();
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
-
-    /**
-     * Toggle discount details
-     *
-     * @param discountId
-     */
-    toggleDetails(discountId: string): void
-    {
-        // If the discount is already selected...
-        if ( this.selectedDiscount && this.selectedDiscount.id === discountId )
-        {
-            // Close the details
-            this.closeDetails();
-            return;
-        }
-
-        // Get the discount by id
-        this._discountService.getDiscountByGuid(discountId)
-            .subscribe((response:ApiResponseModel<Discount>) => {
-
-                //Set the selected discount
-                this.selectedDiscount = response.data;
-
-                // Fill the form
-                this.selectedDiscountForm.patchValue(response.data);
-
-                //set value for time in tieme selector
-                this.setValueToTimeSelector(response.data);
-
-                // clear discount tier form array
-                (this.selectedDiscountForm.get('storeDiscountTierList') as FormArray).clear();
-                
-                // load discount tier form array with data frombackend
-                response.data.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
-                    this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
-                    this.storeDiscountTierList.push(this._formBuilder.group(item));
-                });
-                
-
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            });
-    }
-
-    /**
-     * Close the details
-     */
     closeDetails(): void
     {
         this.selectedDiscount = null;
     }
 
-    /**
-     * 
-     *  DISCOUNTS
-     * 
-     */ 
-
-
-    /**
-     * Create discount
-     */
     createDiscount(): void
-    {
-        const dialogRef = this._dialog.open(CreateOrderDiscountDialogComponent, { disableClose: true });
+    {   const dialogRef = this._dialog.open(
+        CreateOrderDiscountDialogComponent, {
+            width: '1030px',
+            height: '520px',
+            disableClose: true,
+            });
+
         dialogRef.afterClosed().subscribe(result => {
             if (result.status === true) {
 
@@ -364,58 +309,6 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
     }
 
     /**
-     * Update the selected discount using the form data
-     */
-    updateSelectedDiscount(): void
-    {
-        this.changeTime();
-        let sendPayload = [this.selectedDiscountForm.value];
-        let toBeSendPayload=sendPayload.
-        map((x)=>(
-            {
-                startTime:this.changeStartTime,
-                endTime:this.changeEndTime,
-                discountName: x.discountName,
-                discountType:x.discountType,
-                endDate: x.endDate,
-                id: x.id,
-                isActive: x.isActive,
-                maxDiscountAmount: x.maxDiscountAmount,
-                normalPriceItemOnly: x.normalPriceItemOnly,
-                startDate: x.startDate,
-                storeDiscountTierList: x.storeDiscountTierList,
-                storeId: x.storeId,
-            }
-            ));
-
-        // Update the discount on the server
-        this._discountService.updateDiscount(this.selectedDiscountForm.value.id, toBeSendPayload[0])
-            .subscribe(() => {
-                // Show a success message
-                this.showFlashMessage('success');
-            }, error => {
-                console.error(error);
-
-                    if (error.status === 417) {
-                        // Open the confirmation dialog
-                        const confirmation = this._fuseConfirmationService.open({
-                            title  : 'Discount date overlap',
-                            message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
-                            actions: {
-                                confirm: {
-                                    label: 'Ok'
-                                },
-                                cancel : {
-                                    show : false,
-                                }
-                            }
-                        });
-                    }
-                }
-            );
-    }
-
-    /**
      * Delete the selected discount using the form data
      */
     deleteSelectedDiscount(): void
@@ -449,185 +342,6 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
                 });
             }
         });
-    }
-
-    insertTierToDiscount(){
-
-        // check condition first before pass to backend
-        if(this.calculationType === 'PERCENT' && this.discountAmount>100){
-
-            const confirmation = this._fuseConfirmationService.open({
-                title  : 'Exceed maximum amount discount percentage',
-                message: 'Please change your discount amount for percentage calculation type',
-                actions: {
-                    confirm: {
-                        label: 'Ok'
-                    },
-                    cancel : {
-                        show : false,
-                    }
-                }
-            });
-
-            return;
-        }
-
-        let discountTier: StoreDiscountTierList = {
-            calculationType: this.calculationType,
-            discountAmount: this.discountAmount,
-            startTotalSalesAmount: this.startTotalSalesAmount,
-        }
-
-        // Create the discount
-        this._discountService.createDiscountTier(this.selectedDiscount.id,discountTier)
-            .subscribe((response) => {
-                
-                this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
-
-                // since backend give full discount tier list .. (not the only one that have been created only)
-                this.storeDiscountTierList.clear();
-
-                response["data"].forEach(item => {
-                    this.storeDiscountTierList.push(this._formBuilder.group(item));
-                });
-
-                //disable button add
-                this.isDisplayAddTier=false;
-                //clear the input
-                (<any>this.startTotalSalesAmount)='';
-                (<any>this.discountAmount)='';
-                this.calculationType='';
-
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            }, (error) => {
-                console.error(error);
-                if (error.status === 417) {
-                    // Open the confirmation dialog
-                    const confirmation = this._fuseConfirmationService.open({
-                        title  : 'Minimum subtotal overlap',
-                        message: 'Your minimum subtotal entered overlapping with existing amount! Please change your minimum subtotal',
-                        actions: {
-                            confirm: {
-                                label: 'Ok'
-                            },
-                            cancel : {
-                                show : false,
-                            }
-                        }
-                    });
-                }
-            });
-    }
-
-    deleteSelectedDiscountTier(discountTierId: string): void
-    {
-        // Open the confirmation dialog
-        const confirmation = this._fuseConfirmationService.open({
-            title  : 'Delete discount tier',
-            message: 'Are you sure you want to remove this discount tier? This action cannot be undone!',
-            actions: {
-                confirm: {
-                    label: 'Delete'
-                }
-            }
-        });
-
-        // Subscribe to the confirmation dialog closed action
-        confirmation.afterClosed().subscribe((result) => {
-
-            // If the confirm button pressed...
-            if ( result === 'confirmed' )
-            {
-
-                // Delete the discount on the server
-                this._discountService.deleteDiscountTier(this.selectedDiscount.id, discountTierId).subscribe(() => {
-                    this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
-
-                    let index = (this.storeDiscountTierList.value.findIndex(x => x.id === discountTierId));
-
-                    // remove from discount tier list
-                    if (index > -1) {
-                        this.storeDiscountTierList.removeAt(index);
-                    }
-
-                    // Mark for check
-                    this._changeDetectorRef.markForCheck();
-                });
-            }
-        });
-    }
-
-
-    updateSelectedDiscountTier(discountTier){
-
-        // check condition first before pass to backend
-
-        if(discountTier.value.calculationType === 'PERCENT' && discountTier.value.discountAmount>100){
-
-            const confirmation = this._fuseConfirmationService.open({
-                title  : 'Exceed maximum amount discount percentage',
-                message: 'Please change your discount amount for percentage calculation type',
-                actions: {
-                    confirm: {
-                        label: 'Ok'
-                    },
-                    cancel : {
-                        show : false,
-                    }
-                }
-            });
-            this.storeDiscountTierListValueEditMode = [true];
-
-            return;
-        }
-
-        // Update the discount on the server
-        this._discountService.updateDiscountTier(discountTier.value.storeDiscountId, discountTier.value).subscribe(() => {
-            // Show a success message
-            this.showFlashMessage('success');
-        }, error => {
-            console.error(error);
-            if (error.status === 417) {
-                // Open the confirmation dialog
-                const confirmation = this._fuseConfirmationService.open({
-                    title  : 'Minimum subtotal overlap',
-                    message: 'Your minimum subtotal entered overlapping with existing amount! Please change your minimum subtotal',
-                    actions: {
-                        confirm: {
-                            label: 'Ok'
-                        },
-                        cancel : {
-                            show : false,
-                        }
-                    }
-                });
-            }
-        });
-    }
-    
-    validateDiscountTier(type, value){
-        if (type === 'startTotalSalesAmount') {
-            this.startTotalSalesAmount = value;
-        }
-        // if (type === 'endTotalSalesAmount') {
-        //     this.endTotalSalesAmount = value;
-        // }
-        if (type === 'discountAmount') {
-            this.discountAmount = value;
-        }
-        if (type === 'calculationType') {
-            this.calculationType = value;
-        }
-
-        if(<any>this.startTotalSalesAmount === "" || <any>this.discountAmount === "" ){
-            this.isDisplayAddTier = false;
-        }
-        else if(this.startTotalSalesAmount !== undefined && this.discountAmount!==undefined && this.calculationType!==undefined){
-            this.isDisplayAddTier = true;
-        }
-
-
     }
 
     /**
@@ -682,38 +396,6 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
         }
     }
 
-    changeTime(){
-        //===========Start Time==================
-        let pickStartTime =this.selectedDiscountForm.get('startTime').value;
-        let _pickStartTime;
-    
-        if ((<any>pickStartTime).timeAmPm === "PM") {
-            _pickStartTime = parseInt((<any>pickStartTime).timeHour) + 12;
-        } else {
-            _pickStartTime = (<any>pickStartTime).timeHour;
-        }
-        const changePickStartTime = new Date();
-        changePickStartTime.setHours(_pickStartTime,(<any>pickStartTime).timeMinute,0);
-        
-        this.changeStartTime= String(changePickStartTime.getHours()).padStart(2, "0")+':'+String(changePickStartTime.getMinutes()).padStart(2, "0");    
-        
-        //==============End time===================
-        let pickEndTime = this.selectedDiscountForm.get('endTime').value;
-        let _pickEndTime;
-    
-        if ((<any>pickEndTime).timeAmPm === "PM") {
-            _pickEndTime = parseInt((<any>pickEndTime).timeHour) + 12;
-        } else {
-            _pickEndTime = (<any>pickEndTime).timeHour;
-        }
-        const changePickEndTime = new Date();
-        changePickEndTime.setHours(_pickEndTime,(<any>pickEndTime).timeMinute,0);
-        
-        this.changeEndTime= String(changePickEndTime.getHours()).padStart(2, "0")+':'+String(changePickEndTime.getMinutes()).padStart(2, "0");  
-        
-        return;
-      
-    }
 
     setValueToTimeSelector(discount){
 
@@ -755,75 +437,19 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
         return;
     }
 
-    openEditPopUp(discountId)    {
+    openEditPopUp(discountId?:string)    {
         const dialogRef = this._dialog.open(
             EditOrderDiscountDialogComponent, {
-                width: '90vw',
-                maxWidth: '90vw',  
-                height: '100vh',
-                maxHeight: '100vh',
+                width: '1030px',
+                // maxWidth: '90vw',  
+                height: '520px',
+                // maxHeight: '95vh',
                 disableClose: true,
                 data:{discountId:discountId} 
                 });
 
         dialogRef.afterClosed().subscribe(result => {
-            if (result.status === true) {
-
-                // this will remove the item from the object
-                const createDiscountBody  = {
-                    discountName: result.discountName,
-                    discountType: result.discountOn,
-                    startDate: result.startDate,
-                    startTime: result.startTime,
-                    endDate: result.endDate,
-                    endTime: result.endTime,
-                    isActive: result.isActive,
-                    maxDiscountAmount: result.maxDiscountAmount,
-                    normalPriceItemOnly: result.normalPriceItemOnly,
-                    storeId: this.storeId$
-                };
-
-                return;
-        
-                // Create the discount
-                this._discountService.createDiscount(createDiscountBody).subscribe(async (newDiscount) => {
-                    
-                    // Go to new discount
-                    this.selectedDiscount = newDiscount["data"];
-    
-                    // Update current form with new discount data
-                    this.selectedDiscountForm.patchValue(newDiscount["data"]);
-
-                    //set value of time with time selector
-                    this.setValueToTimeSelector(newDiscount["data"]);
-
-                    // clear discount tier form array
-                    (this.selectedDiscountForm.get('storeDiscountTierList') as FormArray).clear();
-                    //disabled button add tier
-                    this.isDisplayAddTier = false;
-    
-                    // Mark for check
-                    this._changeDetectorRef.markForCheck();
-
-                }, (error) => {
-                    console.error(error);
-                    if (error.status === 417) {
-                        // Open the confirmation dialog
-                        const confirmation = this._fuseConfirmationService.open({
-                            title  : 'Discount date overlap',
-                            message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
-                            actions: {
-                                confirm: {
-                                    label: 'Ok'
-                                },
-                                cancel : {
-                                    show : false,
-                                }
-                            }
-                        });
-                    }
-                });
-            }
+      
         });
     }
 

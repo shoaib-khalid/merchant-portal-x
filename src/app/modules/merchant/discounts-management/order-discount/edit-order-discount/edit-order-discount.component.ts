@@ -9,7 +9,26 @@ import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 @Component({
   selector: 'app-edit-order-discount',
-  templateUrl: './edit-order-discount.component.html'
+  templateUrl: './edit-order-discount.component.html',
+  styles    :   [`
+    /** language=SCSS */
+    :host ::ng-deep .mat-horizontal-content-container {
+        // max-height: 90vh;
+        padding: 0 0px 20px 0px;
+        // overflow-y: auto;
+    }
+    :host ::ng-deep .mat-horizontal-stepper-header-container {
+        height: 60px;
+    }
+    :host ::ng-deep .mat-horizontal-stepper-header {
+        height: 60px;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+    .content{
+        height:400px;
+    }
+  `]
 })
 export class EditOrderDiscountDialogComponent implements OnInit {
 
@@ -44,6 +63,7 @@ export class EditOrderDiscountDialogComponent implements OnInit {
     private _formBuilder: FormBuilder,
     private _discountService: DiscountsService,
     private _fuseConfirmationService: FuseConfirmationService,
+    // private createOrderDiscount:CreateOrderDiscount,
     @Inject(MAT_DIALOG_DATA) public data: MatDialog
   ) { }
 
@@ -51,7 +71,7 @@ export class EditOrderDiscountDialogComponent implements OnInit {
 
     //get value when open matdialot
     this.discountId = this.data['discountId'];
-
+    
     // Horizontal stepper form
     this.horizontalStepperForm = this._formBuilder.group({
         //Main Discount
@@ -75,44 +95,50 @@ export class EditOrderDiscountDialogComponent implements OnInit {
         ]),
     });
 
-    // Get the discount by id
-    this._discountService.getDiscountByGuid(this.discountId)
-    .subscribe((response:ApiResponseModel<Discount>) => {
+    // if id is exist so it is edit mode, Get the discount by id
+    // if(this.discountId){
+        this._discountService.getDiscountByGuid(this.discountId)
+        .subscribe((response:ApiResponseModel<Discount>) => {
 
-        //Set the selected discount
-        this.selectedDiscount = response.data;
+            //Set the selected discount
+            this.selectedDiscount = response.data;
 
-        // Fill the form step 1
-        this.horizontalStepperForm.get('step1').patchValue(response.data);
+            // Fill the form step 1
+            this.horizontalStepperForm.get('step1').patchValue(response.data);
 
-        //set value for time in tieme selector
-        this.setValueToTimeSelector(response.data);
+            //set value for time in tieme selector
+            this.setValueToTimeSelector(response.data);
 
-        //after we set the form with custom field time selector then we display the details
-        this.loadDetails =true;
+            //after we set the form with custom field time selector then we display the details form
+            this.loadDetails =true;
 
-        // clear discount tier form array
-        (this.horizontalStepperForm.get('step2') as FormArray).clear();
-        
-        // load discount tier form array with data frombackend
-        response.data.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
-            this.storeDiscountTierList = this.horizontalStepperForm.get('step2') as FormArray;
-            this.storeDiscountTierList.push(this._formBuilder.group(item));
+            // clear discount tier form array
+            (this.horizontalStepperForm.get('step2') as FormArray).clear();
+            
+            // load discount tier form array with data frombackend
+            response.data.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
+                this.storeDiscountTierList = this.horizontalStepperForm.get('step2') as FormArray;
+                this.storeDiscountTierList.push(this._formBuilder.group(item));
+            });
+            
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
         });
-        
-        // Mark for check
-        this._changeDetectorRef.markForCheck();
-    });
+    // }
+    // //for create mode
+    // else{
+    //     this.loadDetails =true;
+    // }
+
   }
 
   cancel(){
-    this.dialogRef.close({ status: false });
+    this.dialogRef.close();
   }
 
   updateSelectedDiscount(): void
   {
       this.changeTime();
-      console.log('checking form',this.horizontalStepperForm.get('step1').value);
       let sendPayload = [this.horizontalStepperForm.get('step1').value];
       let toBeSendPayload=sendPayload.
       map((x)=>(
@@ -134,9 +160,8 @@ export class EditOrderDiscountDialogComponent implements OnInit {
 
       // Update the discount on the server
       this._discountService.updateDiscount(this.discountId, toBeSendPayload[0])
-          .subscribe(() => {
-              // Show a success message
-              this.showFlashMessage('success');
+          .subscribe((resp) => {
+         
           }, error => {
               console.error(error);
 
@@ -157,6 +182,8 @@ export class EditOrderDiscountDialogComponent implements OnInit {
                   }
               }
           );
+
+          this.cancel();
   }
 
   checkButton(){
@@ -440,7 +467,11 @@ export class EditOrderDiscountDialogComponent implements OnInit {
     
     return;
   
-}
+  }
+
+  createButton(){
+    // this.createOrderDiscount.displayMessage();
+  }
 
 
 }
