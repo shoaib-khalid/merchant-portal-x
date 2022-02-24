@@ -291,18 +291,8 @@ export class EditProductComponent implements OnInit, OnDestroy
                 // form completion
                 valid            : [false]
             }),
-            variantsSection: this._formBuilder.group({
-                firstName: ['', Validators.required],
-                lastName : ['', Validators.required],
-                userName : ['', Validators.required],
-                about    : ['']
-            }),
-            comboSection: this._formBuilder.group({
-                firstName: ['', Validators.required],
-                lastName : ['', Validators.required],
-                userName : ['', Validators.required],
-                about    : ['']
-            })
+            variantsSection     : this._formBuilder.array([]),
+            comboSection        : this._formBuilder.array([])
         });
 
 
@@ -815,11 +805,13 @@ export class EditProductComponent implements OnInit, OnDestroy
 
 
     generateSku(){
-        if ((this.addProductForm.get('step1').get('name').value && !this.addProductForm.get('step1').get('sku').value) ||
-            (this.addProductForm.get('step1').get('name').value.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '') === this.addProductForm.get('sku').value) 
-        ){
-            this.addProductForm.get('step1').get('sku').patchValue(this.addProductForm.get('step1').get('name').value.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''));
-            this.checkinput.sku = true;
+        if (this.addProductForm.get('step1').get('isVariants').value === true) {
+            if ((this.addProductForm.get('step1').get('name').value && !this.addProductForm.get('step1').get('sku').value) ||
+                (this.addProductForm.get('step1').get('name').value.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '') === this.addProductForm.get('sku').value) 
+            ){
+                this.addProductForm.get('step1').get('sku').patchValue(this.addProductForm.get('step1').get('name').value.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''));
+                this.checkinput.sku = true;
+            }
         }
     }
 
@@ -1319,6 +1311,10 @@ export class EditProductComponent implements OnInit, OnDestroy
      */
     async updateProductMethod(): Promise<void>
     {
+
+        // Set loading to true
+        this.isLoading = true;
+
         // Get store domain
         let storeFrontURL = 'https://' + this.store$.domain;
 
@@ -1563,6 +1559,9 @@ export class EditProductComponent implements OnInit, OnDestroy
 
             // Set delay before closing the details window
             setTimeout(() => {
+
+                // Set loading to false
+                this.isLoading = false;
 
                 // close the window
                 this.cancelAddProduct()
