@@ -1,0 +1,200 @@
+<div class="flex flex-col max-w-260 md:min-w-160 -m-6">
+    <ng-container *ngIf="loadDetails">
+        <!-- Compose form -->
+        <div class="flex px-4">
+            <form
+            class="flex flex-col w-full"
+            [formGroup]="productDiscountStepperForm">
+                <mat-horizontal-stepper
+                    [linear]="true"
+                    #horizontalStepper>
+
+                    <!-- SECTION FOR ORDER DISCOUNT -->
+                    <mat-step
+                        [formGroupName]="'step1'"
+                        [stepControl]="productDiscountStepperForm.get('step1')"
+                        #horizontalStepperStep1>
+                        <ng-template matStepLabel>Product Discount</ng-template>
+                        <!-- <p class="my-6 font-medium">
+                            Fill in order discount period.
+                        </p> -->
+                        <div class="content overflow-y-auto">
+                            <!-- discount name -->
+                            <mat-form-field 
+                                appearance="fill"
+                                class="w-full">
+                                <mat-label>Discount Name</mat-label>
+                                <input 
+                                    matInput
+                                    placeholder="Enter discount name"
+                                    [formControlName]="'discountName'"        
+                                >
+                            </mat-form-field>
+                        
+                            <!-- start date/time -->
+                            <div class="w-full flex flex-col">
+                                <div class="font-semibold mb-2 w-full">Start date/time</div>
+                                <div class="w-full flex flex-col sm:flex-row">
+                                    <mat-form-field 
+                                        class="w-full sm:w-1/2 sm:pr-2"
+                                        appearance="fill">
+                                        <input 
+                                            matInput 
+                                            type="date" 
+                                            [formControlName]="'startDate'"
+                                        >
+                                    </mat-form-field>
+                                    <mat-form-field 
+                                        class="w-full sm:w-1/2 sm:pl-2" 
+                                        appearance="fill">
+                                        <time-selector
+                                            class="w-full"
+                                            matInput
+                                            type="time" 
+                                            [formControlName]="'startTime'"                   
+                                        ></time-selector>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                    
+                            <!-- End date /time -->
+                            <div class="w-full flex flex-col">
+                                <div class="font-semibold mb-2 w-full">End date/time</div>
+                                <div class="w-full flex flex-col sm:flex-row">
+                                    <mat-form-field 
+                                        class="w-full sm:w-1/2 sm:pr-2"
+                                        appearance="fill">
+                                        <input 
+                                            matInput 
+                                            type="date" 
+                                            [formControlName]="'endDate'"
+                                        >
+                                    </mat-form-field>
+                                    <mat-form-field 
+                                        class="w-full sm:w-1/2 sm:pl-2" 
+                                        appearance="fill">
+                                        <time-selector
+                                            class="w-full"
+                                            matInput
+                                            type="time" 
+                                            [formControlName]="'endTime'"                   
+                                        ></time-selector>
+                                    </mat-form-field>
+                        
+                                </div>
+                            </div>
+
+                            <!-- status -->
+                            <div class="w-full">
+                                <!-- status -->
+                                <mat-form-field 
+                                    appearance="fill"
+                                    class="w-full sm:w-1/2 sm:pr-2">
+                                    <mat-label>Status</mat-label>
+                                    <mat-select
+                                        class="w-full"
+                                        placeholder="Select status"
+                                        [formControlName]="'isActive'"
+                                        >
+                                        <div>
+                                            <mat-option [value]="true">Active</mat-option>
+                                            <mat-option [value]="false">Inactive</mat-option>
+                                            
+                                        </div>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                        </div>
+
+                        <!-- Cancel, Next button -->
+                        <div class="flex justify-end">
+                            <!-- Flash message -->
+                            <!-- <div
+                                class="flex items-center mr-4"
+                                *ngIf="flashMessage">
+                                <ng-container *ngIf="flashMessage === 'success'">
+                                    <mat-icon
+                                        class="text-green-500"
+                                        [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                                    <span class="ml-2">Product created</span>
+                                </ng-container>
+                                <ng-container *ngIf="flashMessage === 'error'">
+                                    <mat-icon
+                                        class="text-red-500"
+                                        [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                                    <span class="ml-2">An error occurred, try again!</span>
+                                </ng-container>
+                            </div> -->
+                            <!-- Cancel button -->
+                            <button
+                                mat-flat-button
+                                class="w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
+                                [color]="'gray'"
+                                (click)="cancel()"
+                                >
+                                Cancel
+                            </button>
+                            <!-- Next variant button -->
+                            <button
+                                class="w-24"
+                                mat-flat-button
+                                [color]="'primary'"
+                                type="button"
+                                matStepperNext>
+                                Next
+                            </button>
+                            <!--[disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid" -->
+                            <!-- Create button -->
+                            <!-- <button
+                                *ngIf="addProductForm.get('step1').get('isVariants').value === false && productType != 'combo'"
+                                class="w-24"
+                                mat-flat-button
+                                [color]="'primary'"
+                                [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
+                                type="button"
+                                (click)="addNewProductMethod()"
+                                matStepperNext>
+                                Create
+                            </button> -->
+                        </div>
+                    </mat-step>
+
+                    <!-- SECTION FOR View Product -->
+                    <mat-step
+                        formArrayName="step2"
+                        [stepControl]="productDiscountStepperForm.get('step2')"
+                        #horizontalStepperStep2>
+                        <ng-template matStepLabel>View Product</ng-template>
+                        <!-- <p class="my-6 font-medium">
+                        Product List
+                        </p> -->
+                        <div class="content overflow-y-auto">
+
+                        </div>
+                        <div class="flex justify-end">
+                            <button
+                                class="px-8 mr-2"
+                                mat-flat-button
+                                [color]="'accent'"
+                                type="button"
+                                matStepperPrevious>
+                                Back
+                            </button>
+                            <button 
+                            class="px-8"
+                            mat-flat-button
+                            [color]="'primary'"
+                            type="button"
+                            (click)="updateSelectedDiscount()"
+                            >
+                            Update
+                            </button>
+                        </div>
+                    </mat-step>
+
+                </mat-horizontal-stepper>
+            </form>
+        </div>
+    </ng-container>
+</div>

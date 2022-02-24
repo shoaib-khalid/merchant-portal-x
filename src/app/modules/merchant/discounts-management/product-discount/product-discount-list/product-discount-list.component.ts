@@ -19,6 +19,7 @@ import { ProductListDialogComponent } from '../product-list-dialog/product-list-
 import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dialog/dialog.component';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { TimeSelector } from 'app/layout/common/time-selector/timeselector.component';
+import { EditProductDiscountDialogComponent } from '../edit-product-discount/edit-product-discount.component';
 
 @Component({
     selector       : 'product-discount-list',
@@ -670,6 +671,22 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
         this.selectedDiscountForm.get('endTime').setValue(new TimeSelector(_pickEndTimeHour,_pickEndTimeMinute, _pickEndTimeAMPM));
         //===================== / END TIME =====================
         return;
+    }
+
+    openEditPopUp(discountId?:string)    {
+        const dialogRef = this._dialog.open(
+            EditProductDiscountDialogComponent, {
+                width: '1030px',
+                // maxWidth: '90vw',  
+                height: '520px',
+                // maxHeight: '95vh',
+                disableClose: true,
+                data:{discountId:discountId} 
+                });
+
+        dialogRef.afterClosed().subscribe(result => {
+      
+        });
     }
 
 }

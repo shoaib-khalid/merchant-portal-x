@@ -26,6 +26,7 @@ import { ProductListDialogComponent } from './product-discount/product-list-dial
 import { TimeSelectorInputModule } from 'app/layout/common/time-selector/timeselector.module';
 import { EditOrderDiscountDialogComponent } from './order-discount/edit-order-discount/edit-order-discount.component';
 import { MatStepperModule } from '@angular/material/stepper';
+import { EditProductDiscountDialogComponent } from './product-discount/edit-product-discount/edit-product-discount.component';
 
 @NgModule({
     declarations: [
@@ -34,7 +35,8 @@ import { MatStepperModule } from '@angular/material/stepper';
         ProductDiscountListComponent,
         CreateProductDiscountDialogComponent,
         ProductListDialogComponent,
-        EditOrderDiscountDialogComponent
+        EditOrderDiscountDialogComponent,
+        EditProductDiscountDialogComponent
     ],
     imports     : [
         RouterModule.forChild(discountsManagementRoutes),
