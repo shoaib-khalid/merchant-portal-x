@@ -737,7 +737,7 @@
                             class="sm:w-24"
                             mat-flat-button
                             [color]="'primary'"
-                            [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
+                            [disabled]="isLoading || horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
                             type="button"
                             (click)="addNewProductMethod()"
                             matStepperNext>
@@ -1615,6 +1615,8 @@
                         <button
                             class="sm:px-8"
                             mat-flat-button
+                            [ngClass]="isLoading ? 'cursor-wait' : 'cursor-pointer'"
+                            [disabled]="isLoading"
                             [color]="'primary'"
                             type="button"
                             (click)="postVariantMethod()"

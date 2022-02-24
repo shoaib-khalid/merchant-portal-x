@@ -739,7 +739,7 @@
                                 class="sm:w-24"
                                 mat-flat-button
                                 [color]="'primary'"
-                                [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
+                                [disabled]="horizontalStepperStep1.stepControl.invalid"
                                 type="button"
                                 matStepperNext>
                                 <mat-icon
@@ -757,7 +757,7 @@
                                 class="sm:w-24"
                                 mat-flat-button
                                 [color]="'primary'"
-                                [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
+                                [disabled]="horizontalStepperStep1.stepControl.invalid"
                                 type="button"
                                 matStepperNext>
                                 <mat-icon
@@ -773,9 +773,10 @@
                             <button
                                 *ngIf="addProductForm.get('step1').get('isVariants').value === false && addProductForm.get('step1').get('isPackage').value === false"
                                 class="sm:w-24"
+                                [ngClass]="isLoading ? 'cursor-wait' : 'cursor-pointer'"
                                 mat-flat-button
                                 [color]="'primary'"
-                                [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
+                                [disabled]="isLoading || horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
                                 type="button"
                                 (click)="updateProductMethod()"
                                 matStepperNext>
@@ -1351,9 +1352,11 @@
                             <!-- Update button -->
                             <button
                                 class="sm:px-8"
+                                [ngClass]="isLoading ? 'cursor-wait' : 'cursor-pointer'"
                                 mat-flat-button
                                 [color]="'primary'"
                                 type="button"
+                                [disabled]="isLoading || horizontalStepperStep1.stepControl.invalid"
                                 (click)="updateProductMethod()"
                                 matStepperNext>
                                 <mat-icon
