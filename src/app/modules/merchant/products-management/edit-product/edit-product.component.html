@@ -24,7 +24,6 @@
 
                     <!-- Content -->
                     <div class="content flex flex-col overflow-y-auto lg:overflow-hidden">
-
                         <!-- Main  -->
                         <div class="flex px-2 flex-col md:flex-row w-full">
                             <!-- Product images and status -->
@@ -48,7 +47,7 @@
                                     
                                     <!-- Edit Image Frame -->
                                     <div *ngIf="imagesEditMode" class="flex flex-col items-center sm:items-start mb-8 sm:mb-0">
-                                        <div class="relative flex items-center justify-center w-32 h-40 border rounded overflow-hidden ring-4 ring-bg-card">
+                                        <div class="relative flex items-center justify-center w-32 h-40 rborder rounded overflow-hidden ring-4 ring-bg-card">
                                             <!-- Upload / Remove Image to Overide Image -->
                                             <div class="absolute inset-0 bg-black bg-opacity-50 z-10"></div>
                                             <div class="absolute inset-0 flex items-center justify-center z-20">
@@ -172,7 +171,8 @@
                                     <!-- Image Cycle -->
                                     <div
                                         class="flex items-center mt-0 whitespace-nowrap"
-                                        [ngClass]="images.length ? 'visible' : 'invisible'">
+                                        [ngClass]="images.length ? 'visible' : 'invisible'"
+                                        >
                                         
                                         <input
                                             id="image-cycle-left"
@@ -257,7 +257,7 @@
                                         <input
                                             matInput
                                             required
-                                            [placeholder]="'Insert product ' + ((data['productType'] === 'combo') ? 'combo' : '') + 'name'"
+                                            [placeholder]="'Insert product ' + ((data['productType'] === 'combo') ? 'combo ' : '') + 'name'"
                                             [formControlName]="'name'"
                                             (change)="generateSku()"
                                         >
@@ -298,10 +298,18 @@
                                             [formControlName]="'sku'"
                                             placeholder="Insert SKU"
                                         >
-                                        <!-- <mat-error *ngIf="addProductForm.get('step1').get('sku').hasError('required')">
+                                        <mat-error *ngIf="addProductForm.get('step1').get('sku').hasError('required')">
                                             Required
-                                        </mat-error> -->
+                                        </mat-error>
                                     </mat-form-field>
+                                    <!-- <mat-form-field class="w-full pr-2">
+                                        <mat-label>SKU</mat-label>
+                                        <input
+                                            matInput
+                                            [disabled]="addProductForm.get('step1').get('productVariants').value.length > 0"
+                                            (change)="displaySku = $event.target.value"
+                                            [value]="displaySku">
+                                    </mat-form-field> -->
 
                                     <!-- Price -->
                                     <mat-form-field 
@@ -317,10 +325,20 @@
                                             placeholder="Insert price"
                                             type="number"
                                         >
-                                        <!-- <mat-error *ngIf="addProductForm.get('step1').get('price').hasError('required')">
+                                        <mat-error *ngIf="addProductForm.get('step1').get('price').hasError('required')">
                                             Required
-                                        </mat-error> -->
+                                        </mat-error>
                                     </mat-form-field>
+                                    <!-- <mat-form-field class="w-full pr-2">
+                                        <mat-label>Price</mat-label>
+                                        <span matSuffix>{{store$.regionCountry.currencySymbol}}</span>
+                                        <input
+                                            matInput
+                                            type="number"
+                                            (change)="displayPrice = $event.target.value"
+                                            [disabled]="addProductForm.get('step1').get('productVariants').value.length > 0"
+                                            [value]="displayPrice">
+                                    </mat-form-field> -->
 
                                     <!-- Packing Size -->
                                     <mat-form-field 
@@ -494,30 +512,6 @@
                                         Required
                                     </mat-error> -->
                                 </div>
-                                <!-- Variants Toggle -->
-                                <div 
-                                    *ngIf="(store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK') && (productType !=='combo')"
-                                    class="flex flex-col w-full py-2 sm:pt-2"
-                                >
-                                    <span class="pb-1 font-medium leading-tight">Variants 
-                                        <mat-icon
-                                            matTooltip="Does this product have variants?"
-                                            class="transform scale-75"
-                                            [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                        </mat-icon>
-                                    </span>
-                                    <div class="mt-0 flex items-center -my-px w-full">
-                                        <mat-slide-toggle
-                                            class="pr-4"
-                                            [formControlName]="'isVariants'"
-                                            [color]="'primary'"
-                                            (change)="(addProductForm.get('step1').get('isVariants').value === false) ? deleteAllVariantsConfirmation() : return"
-                                            >
-                                            {{addProductForm.get('step1').get('isVariants').value === true ? 'Yes' : 'No'}}
-                                        </mat-slide-toggle>
-                                        
-                                    </div>
-                                </div>
                             </div>
                         </div>
                         <!-- Available stock -->
@@ -549,6 +543,16 @@
                                             Required
                                         </mat-error>
                                     </mat-form-field>
+                                    <!-- <mat-form-field class="mt-0 sm:mt-1 flex items-center -my-px w-full">
+                                        <input
+                                            type="number"
+                                            matInput
+                                            [disabled]="addProductForm.get('step1').get('productVariants').value.length > 0"
+                                            [disabled]="store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK'"
+                                            (input)="displayQuantity = $event.target.value"
+                                            (input)="(displayQuantity > 0 && addProductForm.get('step1').get('status').value === 'OUTOFSTOCK') ? addProductForm.get('step1').get('status').patchValue('ACTIVE') : ''"
+                                            [value]="displayQuantity">
+                                    </mat-form-field> -->
                                 </div>
                                 <!-- Track Stock Level -->
                                 <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
@@ -571,7 +575,7 @@
                                 </div>
                                 <!-- Out of Stock Selling -->
                                 <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
-                                    <span class="mb-2 sm:mb-4  font-medium leading-tight">Out-of-stock Sales
+                                    <span class="mb-2 sm:mb-4 font-medium leading-tight">Out-of-stock Sales
                                         <mat-icon
                                             matTooltip="Continue selling even when out of stock"
                                             class="transform scale-75 mr-4"
@@ -614,7 +618,7 @@
                                 </div>
                                 <!-- Variants Toggle -->
                                 <div 
-                                    *ngIf="productType === 'normal'"
+                                    *ngIf="this.addProductForm.get('step1').get('isPackage').value !== true && (store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c')"
                                     class="flex flex-col w-full sm:w-1/5 sm:pl-2 py-2 sm:py-0"
                                 >
                                     <span class="mb-0 sm:mb-3 font-medium leading-tight">Variants 
@@ -637,7 +641,7 @@
                                 </div>
                                 <!-- Combo Toggle -->
                                 <!-- <div 
-                                    *ngIf="productType === 'combo'"
+                                    *ngIf="addProductForm.get('step1').get('isPackage').value === true"
                                     class="flex flex-col w-full sm:w-1/5 sm:pl-2 py-2 sm:py-0"
                                 >
                                     <span class="mb-0 sm:mb-3 font-medium leading-tight">Combo 
@@ -659,103 +663,154 @@
                                 </div> -->
                             </div>
                         </div>
-                        
+                        <!-- <div class="flex flex-col gt-xs:flex-row">
+                            <mat-form-field class="flex-auto gt-xs:pr-3">
+                                <mat-select
+                                    [formControlName]="'country'"
+                                    [placeholder]="'Country / Region'"
+                                    required>
+                                    <mat-option value="country-1">Country 1</mat-option>
+                                    <mat-option value="country-2">Country 2</mat-option>
+                                    <mat-option value="country-3">Country 3</mat-option>
+                                </mat-select>
+                                <mat-icon
+                                    class="icon-size-5"
+                                    matPrefix
+                                    [svgIcon]="'heroicons_solid:location-marker'"></mat-icon>
+                            </mat-form-field>
+                            <mat-form-field class="flex-auto gt-xs:pl-3">
+                                <mat-select
+                                    [formControlName]="'language'"
+                                    [placeholder]="'Language'"
+                                    required>
+                                    <mat-option value="language-1">Language 1</mat-option>
+                                    <mat-option value="language-2">Language 2</mat-option>
+                                    <mat-option value="language-3">Language 3</mat-option>
+                                </mat-select>
+                                <mat-icon
+                                    class="icon-size-5"
+                                    matPrefix
+                                    [svgIcon]="'heroicons_solid:translate'"></mat-icon>
+                            </mat-form-field>
+                        </div> -->
                     </div>
-                    <!-- Cancel, Next button -->
-                    <div class="flex justify-end mt-3">
-                        <!-- Flash message -->
-                        <div
-                            class="flex items-center mr-4"
-                            *ngIf="flashMessage">
-                            <ng-container *ngIf="flashMessage === 'success'">
+                    <!-- Delete, Cancel, Back, Next buttons container -->
+                    <div class="grid grid-cols-4 mt-3">
+                        <!-- Delete button  -->
+                        <div class="justify-self-start pl-2">
+                            <!-- Delete button -->
+                            <input
+                                id="product-remove-button"
+                                type="button"
+                                (click)="deleteSelectedProduct()"
+                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                mat-button>
+                            <label 
+                                class="flex items-center justify-center h-10 px-4 border rounded border-red-300 dark:border-red-500 cursor-pointer hover:bg-hover"
+                                for="product-remove-button"
+                                matRipple>
+                                <span class="hidden sm:block justify-center">Delete</span>
                                 <mat-icon
-                                    class="text-green-500"
-                                    [svgIcon]="'heroicons_outline:check'"></mat-icon>
-                                <span class="ml-2">Product created</span>
-                            </ng-container>
-                            <ng-container *ngIf="flashMessage === 'error'">
-                                <mat-icon
-                                    class="text-red-500"
-                                    [svgIcon]="'heroicons_outline:x'"></mat-icon>
-                                <span class="ml-2">An error occurred, try again!</span>
-                            </ng-container>
+                                    class="sm:ml-1"
+                                    [color]="'warn'"
+                                    [svgIcon]="'heroicons_outline:trash'">
+                                </mat-icon>
+                            </label>
+
                         </div>
-                        <!-- Cancel button -->
-                        <button
-                            mat-flat-button
-                            class="sm:w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
-                            [color]="'gray'"
-                            (click)="cancelAddProduct()"
-                            >
-                            <mat-icon
+                        <!-- Cancel, Next, Update buttons -->
+                        <div class="justify-self-end flex col-span-3">
+                            <!-- Flash message -->
+                            <div
+                                class="flex items-center mr-4"
+                                [ngClass]="flashMessage ? 'visible' : 'invisible'"
+                                >
+                                <ng-container *ngIf="flashMessage === 'success'">
+                                    <mat-icon
+                                        class="text-green-500"
+                                        [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                                    <span class="ml-2">Product updated</span>
+                                </ng-container>
+                                <ng-container *ngIf="flashMessage === 'error'">
+                                    <mat-icon
+                                        class="text-red-500"
+                                        [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                                    <span class="ml-2">An error occurred, try again!</span>
+                                </ng-container>
+                            </div>
+                            <!-- Cancel button -->
+                            <button
+                                mat-flat-button
+                                class="sm:w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
+                                [color]="'gray'"
+                                (click)="cancelAddProduct()"
+                                >
+                                <mat-icon
                                     *ngIf="!currentScreenSize.includes('sm')"
                                     class="text-white icon-size-5"
                                     [svgIcon]="'heroicons_outline:x'">
-                            </mat-icon>
-                            <span class="hidden sm:block justify-center">
-                                Cancel
-                            </span>
-                        </button>
-                        
-                            
-                        <!-- Next variant button -->
-                        <button
-                            *ngIf="addProductForm.get('step1').get('isVariants').value === true"
-                            class="sm:w-24"
-                            mat-flat-button
-                            [color]="'primary'"
-                            [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
-                            type="button"
-                            (click)="!newProductId && addNewProductMethod()"
-                            matStepperNext>
-                            <mat-icon
+                                </mat-icon>
+                                <span class="hidden sm:block justify-center">
+                                    Cancel
+                                </span>
+                            </button>
+                            <!-- Next variant button -->
+                            <button
+                                *ngIf="addProductForm.get('step1').get('isVariants').value === true"
+                                class="sm:w-24"
+                                mat-flat-button
+                                [color]="'primary'"
+                                type="button"
+                                matStepperNext>
+                                <mat-icon
                                     *ngIf="!currentScreenSize.includes('sm')"
                                     class="text-white icon-size-5"
                                     [svgIcon]="'heroicons_outline:chevron-right'">
-                            </mat-icon>
-                            <span class="hidden sm:block justify-center">
-                                Next
-                            </span>
-                        </button>
-                        <!-- Next combo button -->
-                        <button
-                            *ngIf="productType === 'combo'"
-                            class="sm:w-24"
-                            mat-flat-button
-                            [color]="'primary'"
-                            [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
-                            type="button"
-                            (click)="!newProductId && addNewProductMethod()"
-                            matStepperNext>
-                            <mat-icon
+                                </mat-icon>
+                                <span class="hidden sm:block justify-center">
+                                    Next
+                                </span>
+                            </button>
+                            <!-- Next combo button -->
+                            <button
+                                *ngIf="addProductForm.get('step1').get('isPackage').value === true"
+                                class="sm:w-24"
+                                mat-flat-button
+                                [color]="'primary'"
+                                type="button"
+                                matStepperNext>
+                                <mat-icon
                                     *ngIf="!currentScreenSize.includes('sm')"
                                     class="text-white icon-size-5"
                                     [svgIcon]="'heroicons_outline:chevron-right'">
-                            </mat-icon>
-                            <span class="hidden sm:block justify-center">
-                                Next
-                            </span>
-                        </button>
-                        <!-- Create button -->
-                        <button
-                            *ngIf="addProductForm.get('step1').get('isVariants').value === false && productType != 'combo'"
-                            class="sm:w-24"
-                            mat-flat-button
-                            [color]="'primary'"
-                            [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
-                            type="button"
-                            (click)="addNewProductMethod()"
-                            matStepperNext>
-                            <mat-icon
+                                </mat-icon>
+                                <span class="hidden sm:block justify-center">
+                                    Next
+                                </span>
+                            </button>
+                            <!-- Update button -->
+                            <button
+                                *ngIf="addProductForm.get('step1').get('isVariants').value === false && addProductForm.get('step1').get('isPackage').value === false"
+                                class="sm:w-24"
+                                mat-flat-button
+                                [color]="'primary'"
+                                [disabled]="horizontalStepperStep1.stepControl.pristine"
+                                type="button"
+                                (click)="updateProductMethod()"
+                                matStepperNext>
+                                <mat-icon
                                     *ngIf="!currentScreenSize.includes('sm')"
                                     class="text-white icon-size-5"
                                     [svgIcon]="'heroicons_outline:check'">
-                            </mat-icon>
-                            <span class="hidden sm:block justify-center">
-                                Update
-                            </span>
-                        </button>
+                                </mat-icon>
+                                <span class="hidden sm:block justify-center">
+                                    Update
+                                </span>
+                            </button>
+
+                        </div>
                     </div>
+                    
                 </mat-step>
 
                 <!-- Variant section -->
@@ -1236,72 +1291,108 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Back, Next button -->
-                    <div class="flex justify-end mt-3">
-                        <!-- Flash message -->
-                        <div
-                            class="flex items-center mr-4"
-                            *ngIf="flashMessage">
-                            <ng-container *ngIf="flashMessage === 'success'">
+                    <!-- Delete, Cancel, Back, Next buttons container -->
+                    <div class="grid grid-cols-4 mt-3">
+                        <!-- Delete button  -->
+                        <div class="justify-self-start pl-2">
+                            <!-- Delete button -->
+                            <input
+                                id="product-remove-button"
+                                type="button"
+                                (click)="deleteSelectedProduct()"
+                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                mat-button>
+                            <label 
+                                class="flex items-center justify-center h-10 px-4 border rounded border-red-300 dark:border-red-500 cursor-pointer hover:bg-hover"
+                                for="product-remove-button"
+                                matRipple>
+                                <span class="hidden sm:block justify-center">Delete</span>
                                 <mat-icon
-                                    class="text-green-500"
-                                    [svgIcon]="'heroicons_outline:check'"></mat-icon>
-                                <span class="ml-2">Product created</span>
-                            </ng-container>
-                            <ng-container *ngIf="flashMessage === 'error'">
-                                <mat-icon
-                                    class="text-red-500"
-                                    [svgIcon]="'heroicons_outline:x'"></mat-icon>
-                                <span class="ml-2">An error occurred, try again!</span>
-                            </ng-container>
+                                    class="sm:ml-1"
+                                    [color]="'warn'"
+                                    [svgIcon]="'heroicons_outline:trash'">
+                                </mat-icon>
+                            </label>
+
                         </div>
-                        <!-- <button
-                            class="px-8 mr-2"
-                            mat-flat-button
-                            [color]="'accent'"
-                            type="button"
-                            (click)="testMethod()">
-                            Test
-                        </button> -->
-                        <!-- Back button  -->
-                        <button
-                            class="sm:px-8 mr-2"
-                            mat-flat-button
-                            [color]="'accent'"
-                            type="button"
-                            matStepperPrevious>
-                            <mat-icon
+                        <!-- Cancel, Back, Update buttons -->
+                        <div class="justify-self-end flex col-span-3">
+                            <!-- Flash message -->
+                            <div
+                                class="flex items-center mr-4"
+                                [ngClass]="flashMessage ? 'visible' : 'invisible'"
+                                >
+                                <ng-container *ngIf="flashMessage === 'success'">
+                                    <mat-icon
+                                        class="text-green-500"
+                                        [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                                    <span class="ml-2">Product updated</span>
+                                </ng-container>
+                                <ng-container *ngIf="flashMessage === 'error'">
+                                    <mat-icon
+                                        class="text-red-500"
+                                        [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                                    <span class="ml-2">An error occurred, try again!</span>
+                                </ng-container>
+                            </div>
+                            <!-- Cancel button -->
+                            <button
+                                mat-flat-button
+                                class="sm:w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
+                                [color]="'gray'"
+                                (click)="cancelAddProduct()"
+                                >
+                                <mat-icon
+                                    *ngIf="!currentScreenSize.includes('sm')"
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:x'">
+                                </mat-icon>
+                                <span class="hidden sm:block justify-center">
+                                    Cancel
+                                </span>
+                            </button>
+                            <!-- Back button  -->
+                            <button
+                                class="sm:px-8 mr-2"
+                                mat-flat-button
+                                [color]="'accent'"
+                                type="button"
+                                matStepperPrevious>
+                                <mat-icon
                                     *ngIf="!currentScreenSize.includes('sm')"
                                     class="text-white icon-size-5"
                                     [svgIcon]="'heroicons_outline:chevron-left'">
-                            </mat-icon>
-                            <span class="hidden sm:block justify-center">
-                                Back
-                            </span>
-                        </button>
-                        <!-- Create button -->
-                        <button
-                            class="sm:px-8"
-                            mat-flat-button
-                            [color]="'primary'"
-                            type="button"
-                            (click)="postVariantMethod()"
-                            matStepperNext>
-                            <mat-icon
+                                </mat-icon>
+                                <span class="hidden sm:block justify-center">
+                                    Back
+                                </span>
+                            </button>
+                            <!-- Update button -->
+                            <button
+                                class="sm:px-8"
+                                mat-flat-button
+                                [color]="'primary'"
+                                type="button"
+                                (click)="updateProductMethod()"
+                                matStepperNext>
+                                <mat-icon
                                     *ngIf="!currentScreenSize.includes('sm')"
                                     class="text-white icon-size-5"
                                     [svgIcon]="'heroicons_outline:check'">
-                            </mat-icon>
-                            <span class="hidden sm:block justify-center">
-                                Create
-                            </span>
-                        </button>
+                                </mat-icon>
+                                <span class="hidden sm:block justify-center">
+                                    Update
+                                </span>
+                            </button>
+
+                        </div>
                     </div>
+                    
                 </mat-step>
 
                 <!-- Combo section -->
                 <mat-step
-                    *ngIf="productType === 'combo'"
+                    *ngIf="addProductForm.get('step1').get('isPackage').value === true"
                     [formGroupName]="'comboSection'"
                     [stepControl]="addProductForm.get('comboSection')"
                     #horizontalStepperComboStep>
@@ -1312,7 +1403,7 @@
                     </p> -->
                     <!-- Content -->
                     <div class="content overflow-y-auto sm:overflow-hidden mx-2 flex flex-auto flex-wrap">
-                        <!-- Variant Control and Table -->
+                        <!-- Combo Control and Table -->
                         <div class="flex flex-auto flex-wrap w-full">
                             <!-- Combo Control-->
                             <div class="flex flex-col w-full sm:w-1/4">
@@ -1573,66 +1664,101 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Back, Next button -->
-                    <div class="flex justify-end mt-3">
-                        <!-- Flash message -->
-                        <div
-                            class="flex items-center mr-4"
-                            *ngIf="flashMessage">
-                            <ng-container *ngIf="flashMessage === 'success'">
+                    <!-- Delete, Cancel, Back, Next buttons container -->
+                    <div class="grid grid-cols-4 mt-3">
+                        <!-- Delete button  -->
+                        <div class="justify-self-start pl-2">
+                            <!-- Delete button -->
+                            <input
+                                id="product-remove-button"
+                                type="button"
+                                (click)="deleteSelectedProduct()"
+                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                mat-button>
+                            <label 
+                                class="flex items-center justify-center h-10 px-4 border rounded border-red-300 dark:border-red-500 cursor-pointer hover:bg-hover"
+                                for="product-remove-button"
+                                matRipple>
+                                <span class="hidden sm:block justify-center">Delete</span>
                                 <mat-icon
-                                    class="text-green-500"
-                                    [svgIcon]="'heroicons_outline:check'"></mat-icon>
-                                <span class="ml-2">Product created</span>
-                            </ng-container>
-                            <ng-container *ngIf="flashMessage === 'error'">
-                                <mat-icon
-                                    class="text-red-500"
-                                    [svgIcon]="'heroicons_outline:x'"></mat-icon>
-                                <span class="ml-2">An error occurred, try again!</span>
-                            </ng-container>
+                                    class="sm:ml-1"
+                                    [color]="'warn'"
+                                    [svgIcon]="'heroicons_outline:trash'">
+                                </mat-icon>
+                            </label>
+
                         </div>
-                        <!-- <button
-                            class="px-8 mr-2"
-                            mat-flat-button
-                            [color]="'accent'"
-                            type="button"
-                            (click)="testMethod()">
-                            Test
-                        </button> -->
-                        <!-- Back button  -->
-                        <button
-                            class="sm:px-8 mr-2"
-                            mat-flat-button
-                            [color]="'accent'"
-                            type="button"
-                            matStepperPrevious>
-                            <mat-icon
+                        <!-- Cancel, Back, Update buttons -->
+                        <div class="justify-self-end flex col-span-3">
+                            <!-- Flash message -->
+                            <div
+                                class="items-center flex mr-4"
+                                [ngClass]="flashMessage ? 'visible' : 'invisible'"
+                                >
+                                <ng-container *ngIf="flashMessage === 'success'">
+                                    <mat-icon
+                                        class="text-green-500"
+                                        [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                                    <span class="ml-2">Product updated</span>
+                                </ng-container>
+                                <ng-container *ngIf="flashMessage === 'error'">
+                                    <mat-icon
+                                        class="text-red-500"
+                                        [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                                    <span class="ml-2">An error occurred, try again!</span>
+                                </ng-container>
+                            </div>
+                            <!-- Cancel button -->
+                            <button
+                                mat-flat-button
+                                class="sm:w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
+                                [color]="'gray'"
+                                (click)="cancelAddProduct()"
+                                >
+                                <mat-icon
+                                    *ngIf="!currentScreenSize.includes('sm')"
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:x'">
+                                </mat-icon>
+                                <span class="hidden sm:block justify-center">
+                                    Cancel
+                                </span>
+                            </button>
+                            <!-- Back button  -->
+                            <button
+                                class="sm:px-8 mr-2"
+                                mat-flat-button
+                                [color]="'accent'"
+                                type="button"
+                                matStepperPrevious>
+                                <mat-icon
                                     *ngIf="!currentScreenSize.includes('sm')"
                                     class="text-white icon-size-5"
                                     [svgIcon]="'heroicons_outline:chevron-left'">
-                            </mat-icon>
-                            <span class="hidden sm:block justify-center">
-                                Back
-                            </span>
-                        </button>
-                        <!-- Create button -->
-                        <button
-                            class="sm:px-8"
-                            mat-flat-button
-                            [color]="'primary'"
-                            type="button"
-                            (click)="postVariantMethod()"
-                            matStepperNext>
-                            <mat-icon
+                                </mat-icon>
+                                <span class="hidden sm:block justify-center">
+                                    Back
+                                </span>
+                            </button>
+                            <!-- Create button -->
+                            <button
+                                class="sm:px-8"
+                                mat-flat-button
+                                [color]="'primary'"
+                                type="button"
+                                (click)="updateProductMethod()"
+                                matStepperNext>
+                                <mat-icon
                                     *ngIf="!currentScreenSize.includes('sm')"
                                     class="text-white icon-size-5"
                                     [svgIcon]="'heroicons_outline:check'">
-                            </mat-icon>
-                            <span class="hidden sm:block justify-center">
-                                Create
-                            </span>
-                        </button>
+                                </mat-icon>
+                                <span class="hidden sm:block justify-center">
+                                    Update
+                                </span>
+                            </button>
+
+                        </div>
                     </div>
                 </mat-step>
 

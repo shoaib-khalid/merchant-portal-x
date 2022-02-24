@@ -21,6 +21,8 @@ import { productsManagementRoutes } from 'app/modules/merchant/products-manageme
 import { AddProductComponent } from './add-product/add-product.component';
 import { CategoriesComponent } from './categories/categories.component';
 import { AddCategoryComponent } from './add-category/add-category.component';
+import { MatStepperModule } from '@angular/material/stepper';
+import { EditProductComponent } from './edit-product/edit-product.component';
 
 @NgModule({
     declarations: [
@@ -28,6 +30,7 @@ import { AddCategoryComponent } from './add-category/add-category.component';
         AddProductComponent,
         CategoriesComponent,
         AddCategoryComponent,
+        EditProductComponent
     ],
     imports     : [
         RouterModule.forChild(productsManagementRoutes),
@@ -46,7 +49,8 @@ import { AddCategoryComponent } from './add-category/add-category.component';
         MatTableModule,
         MatSlideToggleModule,
         MatTooltipModule,
-        SharedModule
+        SharedModule,
+        MatStepperModule
     ]
 })
 export class ECommerceModule
