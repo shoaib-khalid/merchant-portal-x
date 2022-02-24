@@ -11,6 +11,7 @@ import { InventoryService } from 'app/core/product/inventory.service';
 import { Store } from 'app/core/store/store.types';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { StoresService } from 'app/core/store/store.service';
+import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 
 
 
@@ -37,19 +38,33 @@ import { StoresService } from 'app/core/store/store.service';
                 }
             }
             .content {
-                height: 496px;
+                max-height: 455px;
+                height: 75vh
                 // overflow-y: auto;
             }
-            // :host ::ng-deep .ql-container .ql-editor {
-            //     min-height: 132px;
-            //     max-height: 132px;
-            //     height: 132px;
-            // }
-            .variant-details-grid {
-                height: 400px;
+            :host ::ng-deep .ql-container .ql-editor {
+                min-height: 131px;
+                max-height: 131px;
+                height: 131px;
             }
+
+            // variant section
+
+            .variant-details-grid {
+                height: 62vh;
+                max-height: 350px;
+            }
+
+            // combo section
+            
             .add-product-list {
-                max-height: 200px;
+                height: 25vh;
+                max-height: 175px;
+            }
+
+            .combo-details-grid {
+                height: 60vh;
+                max-height: 370px;
             }
             .option-grid {
                 grid-template-columns: 120px 112px auto 112px;
@@ -179,7 +194,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     variantComboOptions: any = []; //
     flashMessage: 'success' | 'error' | null = null;
     isLoading: boolean = false;
-
+    currentScreenSize: string[];
 
 
 
@@ -198,7 +213,8 @@ export class AddProductComponent implements OnInit, OnDestroy
         private _renderer2: Renderer2,
         private _viewContainerRef: ViewContainerRef,
         public dialogRef: MatDialogRef<AddProductComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: any
+        @Inject(MAT_DIALOG_DATA) public data: MatDialog,
+        private _fuseMediaWatcherService: FuseMediaWatcherService
     )
     {
     }
@@ -265,7 +281,7 @@ export class AddProductComponent implements OnInit, OnDestroy
         this.createdProductForm = this._formBuilder.group({});
 
         // get the product type
-        this.productType = this.data.productType;
+        this.productType = this.data['productType'];
         
 
         // Create the selected product form
@@ -373,6 +389,16 @@ export class AddProductComponent implements OnInit, OnDestroy
             )
             .subscribe();
 
+            
+        this._fuseMediaWatcherService.onMediaChange$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe(({matchingAliases}) => {               
+
+            this.currentScreenSize = matchingAliases;                
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });       
         // Mark for check
         this._changeDetectorRef.markForCheck();
     }
@@ -1388,19 +1414,6 @@ export class AddProductComponent implements OnInit, OnDestroy
 
     }
 
-    testMethod(){
-
-        console.log('this.productVariants', this.productVariants);
-        console.log('this.variantToBeCreated', this.variantToBeCreated);
-        console.log('this.variantComboItems', this.variantComboItems);
-        console.log('this.variantComboOptions', this.variantComboOptions);
-        console.log('this.selectedProductVariant', this.selectedProductVariant);
-        console.log('this.productVariantAvailable', this.productVariantAvailable);
-        console.log('this.selectedVariantCombos', this.selectedVariantCombos);
-        
-        
-        
-    }
 
     /**
      * Create a new variant

@@ -540,7 +540,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             panelClass: 'custom-add-product-dialog',
             width: '1030px',
             // maxWidth:'70vw',
-            height: '630px',
+            // height: '70vh',
             // maxHeight: '70vh',
             disableClose: true, 
             data: { productType: productType } 
@@ -560,7 +560,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             panelClass: 'custom-edit-product-dialog',
             width: '1030px',
             // maxWidth:'70vw',
-            height: '630px',
+            // height: '90vh',
             // maxHeight: '70vh',
             disableClose: true, 
             data: { productId: productId } 

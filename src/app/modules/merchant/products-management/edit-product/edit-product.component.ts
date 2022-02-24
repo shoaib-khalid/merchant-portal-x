@@ -11,6 +11,7 @@ import { InventoryService } from 'app/core/product/inventory.service';
 import { Store } from 'app/core/store/store.types';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { StoresService } from 'app/core/store/store.service';
+import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 
 
 
@@ -29,7 +30,7 @@ import { StoresService } from 'app/core/store/store.service';
                     // overflow-y: auto;
                 }
                 :host ::ng-deep .mat-horizontal-stepper-header-container {
-                    height: 60px;
+                    // height: 60px;
                 }
                 :host ::ng-deep .mat-horizontal-stepper-header {
                     height: 60px;
@@ -38,23 +39,38 @@ import { StoresService } from 'app/core/store/store.service';
                 }
             }
             .content {
-                height: 496px;
+                max-height: 455px;
+                height: 75vh
                 // overflow-y: auto;
             }
             // .ql-container {
             // height: 60% !important;
             // }
-            // :host ::ng-deep .ql-container .ql-editor {
-            //     min-height: 139px;
-            //     max-height: 139px;
-            //     height: 139px;
-            // }
+            :host ::ng-deep .ql-container .ql-editor {
+                min-height: 131px;
+                max-height: 131px;
+                height: 131px;
+            }
+
+            // variant section
+
             .variant-details-grid {
-                height: 400px;
+                height: 62vh;
+                max-height: 350px;
             }
+
+            // combo section
+            
             .add-product-list {
-                max-height: 200px;
+                height: 25vh;
+                max-height: 175px;
             }
+
+            .combo-details-grid {
+                height: 60vh;
+                max-height: 370px;
+            }
+
             .option-grid {
                 grid-template-columns: 120px 112px auto 112px;
             }
@@ -202,6 +218,7 @@ export class EditProductComponent implements OnInit, OnDestroy
     displaySku: string = "";
     displayPrice: number = 0;
     displayQuantity: number = 0;
+    currentScreenSize: string[];
 
 
 
@@ -220,7 +237,9 @@ export class EditProductComponent implements OnInit, OnDestroy
         private _renderer2: Renderer2,
         private _viewContainerRef: ViewContainerRef,
         public dialogRef: MatDialogRef<EditProductComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: MatDialog
+        @Inject(MAT_DIALOG_DATA) public data: MatDialog,
+        private _fuseMediaWatcherService: FuseMediaWatcherService
+
     )
     {
     }
@@ -377,6 +396,17 @@ export class EditProductComponent implements OnInit, OnDestroy
                 })
             )
             .subscribe();
+
+
+        this._fuseMediaWatcherService.onMediaChange$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe(({matchingAliases}) => {               
+
+            this.currentScreenSize = matchingAliases;                
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });    
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -2076,19 +2106,6 @@ export class EditProductComponent implements OnInit, OnDestroy
 
     }
 
-    testMethod(){
-
-        console.log('this.variantImagesToBeDeleted', this.variantImagesToBeDeleted);
-        console.log('this.variantToBeCreated', this.variantToBeCreated);
-        console.log('this.variantComboItems', this.variantComboItems);
-        console.log('this.variantComboOptions', this.variantComboOptions);
-        console.log('this.selectedProductVariant', this.selectedProductVariant);
-        console.log('this.productVariantAvailable', this.productVariantAvailable);
-        console.log('this.selectedVariantCombos', this.selectedVariantCombos);
-        
-        
-        
-    }
 
     /**
      * Create a new variant

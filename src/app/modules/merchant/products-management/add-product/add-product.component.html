@@ -23,14 +23,15 @@
                     </p> -->
 
                     <!-- Content -->
-                    <div class="content">
+                    <div class="content flex flex-col overflow-y-auto lg:overflow-hidden">
 
-                        <div class="flex px-2">
+                        <!-- Main  -->
+                        <div class="flex px-2 flex-col md:flex-row w-full">
                             <!-- Product images and status -->
-                            <div class="flex flex-col items-center lg:w-2/12 sm:items-start">
+                            <div class="flex flex-col items-center md:pr-4 lg:pr-0 lg:w-2/12 sm:items-start">
                                 <div class="flex flex-col items-center w-full">
                                     <!-- Image Frame -->
-                                    <div *ngIf="!imagesEditMode" class="w-32 h-44 border rounded overflow-hidden">
+                                    <div *ngIf="!imagesEditMode" class="w-32 h-40 border rounded overflow-hidden">
                                         <ng-container *ngIf="images.length; else noImage">
                                             <img
                                                 class="w-full h-full object-cover"
@@ -47,7 +48,7 @@
                                     
                                     <!-- Edit Image Frame -->
                                     <div *ngIf="imagesEditMode" class="flex flex-col items-center sm:items-start mb-8 sm:mb-0">
-                                        <div class="relative flex items-center justify-center w-32 h-44 rborder rounded overflow-hidden ring-4 ring-bg-card">
+                                        <div class="relative flex items-center justify-center w-32 h-40 border rounded overflow-hidden ring-4 ring-bg-card">
                                             <!-- Upload / Remove Image to Overide Image -->
                                             <div class="absolute inset-0 bg-black bg-opacity-50 z-10"></div>
                                             <div class="absolute inset-0 flex items-center justify-center z-20">
@@ -62,7 +63,7 @@
                                                         (change)="uploadImages(imageFileInput.files, images, $event);"
                                                         #imageFileInput>
                                                     <label
-                                                        class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                        class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
                                                         for="new-image-file-input"
                                                         matRipple>
                                                         <mat-icon
@@ -79,7 +80,7 @@
                                                         (click)="removeImage();resetCycleImages()"
                                                         mat-icon-button>
                                                     <label 
-                                                        class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                        class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
                                                         for="new-image-remove-button"
                                                         matRipple>
                                                         <mat-icon
@@ -114,7 +115,7 @@
                                                 (change)="uploadImages(imageFileInput.files, []);"
                                                 #imageFileInput>
                                             <label
-                                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
                                                 for="new-image-file-input"
                                                 matTooltip="Add image"
                                                 matRipple>
@@ -133,7 +134,7 @@
                                                 mat-icon-button
                                             >
                                             <label 
-                                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
                                                 for="new-image-edit-button"
                                                 matTooltip="Edit image"
                                                 matRipple>
@@ -157,7 +158,7 @@
                                                     (click)="setThumbnail(currentImageIndex)"
                                                     mat-icon-button>
                                                 <label 
-                                                    class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                                    class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
                                                     for="new-set-thumbnail-button"
                                                     [matTooltip]="currentImageIndex !== thumbnailIndex ? 'Set thumbnail' : ''"
                                                     matRipple>
@@ -170,8 +171,8 @@
                                     </div>
                                     <!-- Image Cycle -->
                                     <div
-                                        class="flex items-center mt-2 whitespace-nowrap"
-                                        *ngIf="images.length">
+                                        class="flex items-center mt-0 whitespace-nowrap"
+                                        [ngClass]="images.length ? 'visible' : 'invisible'">
                                         
                                         <input
                                             id="image-cycle-left"
@@ -181,7 +182,7 @@
                                             mat-icon-button>
                                     
                                         <label 
-                                            class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                            class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
                                             for="image-cycle-left"
                                             matRipple>
                                             <mat-icon
@@ -201,7 +202,7 @@
                                             mat-icon-button>
                                     
                                         <label 
-                                            class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                            class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
                                             for="image-cycle-right"
                                             matRipple>
                                             <mat-icon
@@ -211,7 +212,7 @@
                                     </div>
                                 </div>
                                 <!-- Product status -->
-                                <div class="flex flex-col mt-7 w-full">
+                                <div class="flex flex-col mt-0 w-full">
                                     <mat-form-field class="w-full" floatLabel="always">
                                         <mat-label class="font-medium">Product status</mat-label>
                                         <mat-select
@@ -247,7 +248,7 @@
                             </div>
 
                             <!-- Name, Description, SKU -->
-                            <div class="flex flex-auto flex-wrap w-full lg:w-7/12 mt-3 lg:mt-0">
+                            <div class="flex flex-auto flex-wrap w-full md:pr-4 lg:pr-0 lg:w-7/12 mt-3 md:mt-0">
                                 <div class="flex flex-col w-full lg:w-2/3 lg:pl-8">
 
                                     <!-- Name -->
@@ -358,7 +359,7 @@
                             </div>
 
                             <!-- Category -->
-                            <div class="flex flex-col w-full lg:w-3/12 lg:pl-8">
+                            <div class="flex flex-col w-full md:pr-4 lg:pr-0 lg:w-3/12 lg:pl-8">
                                 <!-- Category -->
                                 <div class="w-full">
                                     <span class="mb-px font-medium leading-tight">Category *</span>
@@ -495,7 +496,7 @@
                                 </div>
                                 <!-- Variants Toggle -->
                                 <div 
-                                    *ngIf="(store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK') && (productType ==='combo')"
+                                    *ngIf="(store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK') && (productType !=='combo')"
                                     class="flex flex-col w-full py-2 sm:pt-2"
                                 >
                                     <span class="pb-1 font-medium leading-tight">Variants 
@@ -522,7 +523,7 @@
                         <!-- Available stock -->
                         <div 
                             *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'"
-                            class="flex flex-col sm:flex-row py-1 border-t px-2">
+                            class="flex flex-col sm:flex-row flex-wrap py-1 border-t px-2">
                             <div class="flex flex-auto flex-wrap">
                                 <!-- Available stock row -->
                                 <div class="flex flex-col w-full sm:w-1/5 sm:pr-2 sm:border-r py-2 sm:py-0">
@@ -658,36 +659,7 @@
                                 </div> -->
                             </div>
                         </div>
-                        <!-- <div class="flex flex-col gt-xs:flex-row">
-                            <mat-form-field class="flex-auto gt-xs:pr-3">
-                                <mat-select
-                                    [formControlName]="'country'"
-                                    [placeholder]="'Country / Region'"
-                                    required>
-                                    <mat-option value="country-1">Country 1</mat-option>
-                                    <mat-option value="country-2">Country 2</mat-option>
-                                    <mat-option value="country-3">Country 3</mat-option>
-                                </mat-select>
-                                <mat-icon
-                                    class="icon-size-5"
-                                    matPrefix
-                                    [svgIcon]="'heroicons_solid:location-marker'"></mat-icon>
-                            </mat-form-field>
-                            <mat-form-field class="flex-auto gt-xs:pl-3">
-                                <mat-select
-                                    [formControlName]="'language'"
-                                    [placeholder]="'Language'"
-                                    required>
-                                    <mat-option value="language-1">Language 1</mat-option>
-                                    <mat-option value="language-2">Language 2</mat-option>
-                                    <mat-option value="language-3">Language 3</mat-option>
-                                </mat-select>
-                                <mat-icon
-                                    class="icon-size-5"
-                                    matPrefix
-                                    [svgIcon]="'heroicons_solid:translate'"></mat-icon>
-                            </mat-form-field>
-                        </div> -->
+                        
                     </div>
                     <!-- Cancel, Next button -->
                     <div class="flex justify-end mt-3">
@@ -711,66 +683,77 @@
                         <!-- Cancel button -->
                         <button
                             mat-flat-button
-                            class="w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
+                            class="sm:w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
                             [color]="'gray'"
                             (click)="cancelAddProduct()"
                             >
-                            Cancel
+                            <mat-icon
+                                    *ngIf="!currentScreenSize.includes('sm')"
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:x'">
+                            </mat-icon>
+                            <span class="hidden sm:block justify-center">
+                                Cancel
+                            </span>
                         </button>
                         
-                        <!-- <div 
-                            [ngClass]="addProductForm.get('step1').get('isVariants').value === true ? 'visible ' : 'invisible '">
-                            <input
-                                id="goto-variant-button"
-                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                type="button"
-                                (click)="displayVariants()"
-                                mat-icon-button>
-                            <label 
-                                class="flex items-center justify-center h-10 w-10 rounded-full cursor-pointer bg-gray-200 hover:bg-gray-300 text-white"
-                                for="goto-variant-button"
-                                matRipple>
-                                <mat-icon
-                                    class="p-0.5"
-                                    [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
-                                </label>
-                        </div> -->
                             
                         <!-- Next variant button -->
                         <button
                             *ngIf="addProductForm.get('step1').get('isVariants').value === true"
-                            class="w-24"
+                            class="sm:w-24"
                             mat-flat-button
                             [color]="'primary'"
                             [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
                             type="button"
                             (click)="!newProductId && addNewProductMethod()"
                             matStepperNext>
-                            Next
+                            <mat-icon
+                                    *ngIf="!currentScreenSize.includes('sm')"
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:chevron-right'">
+                            </mat-icon>
+                            <span class="hidden sm:block justify-center">
+                                Next
+                            </span>
                         </button>
                         <!-- Next combo button -->
                         <button
                             *ngIf="productType === 'combo'"
-                            class="w-24"
+                            class="sm:w-24"
                             mat-flat-button
                             [color]="'primary'"
                             [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
                             type="button"
                             (click)="!newProductId && addNewProductMethod()"
                             matStepperNext>
-                            Next
+                            <mat-icon
+                                    *ngIf="!currentScreenSize.includes('sm')"
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:chevron-right'">
+                            </mat-icon>
+                            <span class="hidden sm:block justify-center">
+                                Next
+                            </span>
                         </button>
                         <!-- Create button -->
                         <button
                             *ngIf="addProductForm.get('step1').get('isVariants').value === false && productType != 'combo'"
-                            class="w-24"
+                            class="sm:w-24"
                             mat-flat-button
                             [color]="'primary'"
                             [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
                             type="button"
                             (click)="addNewProductMethod()"
                             matStepperNext>
-                            Create
+                            <mat-icon
+                                    *ngIf="!currentScreenSize.includes('sm')"
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:check'">
+                            </mat-icon>
+                            <span class="hidden sm:block justify-center">
+                                Update
+                            </span>
                         </button>
                     </div>
                 </mat-step>
@@ -787,7 +770,7 @@
                         Please add variants for this product
                     </p> -->
                     <!-- Content -->
-                    <div class="content mx-2 flex flex-auto flex-wrap">
+                    <div class="content overflow-y-auto sm:overflow-hidden mx-2 flex flex-auto flex-wrap">
                         <!-- Variant Control and Table -->
                         <div class="flex flex-auto flex-wrap w-full">
                             <!-- Variants/Options Control-->
@@ -813,7 +796,7 @@
                                             </div>
                                         </div>
                                         <!-- List of variants -->
-                                        <div class="h-44 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
+                                        <div class="h-42 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
                                             <!-- Variants -->
                                             <ng-container>
                                                 <div class="flex flex-col p-4 min-h-34 h-34 mb-2 space-y-2">
@@ -884,7 +867,7 @@
                                 <!-- Variant Options -->
                                 <div class="w-full max-w-2xl">
                                     <span class="mt-2 mb-px font-medium leading-tight">Variant Options</span>
-                                    <div class="w-full mt-2 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-auto">
+                                    <div class="w-full mt-1 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-auto">
                                         <!-- Variants Available -->
                                         <div class="h-30 m-2 leading-none overflow-y-auto border-gray-300 dark:border-gray-500">
                                             <div *ngIf="filteredProductVariants.length > 0">
@@ -1282,22 +1265,36 @@
                         </button> -->
                         <!-- Back button  -->
                         <button
-                            class="px-8 mr-2"
+                            class="sm:px-8 mr-2"
                             mat-flat-button
                             [color]="'accent'"
                             type="button"
                             matStepperPrevious>
-                            Back
+                            <mat-icon
+                                    *ngIf="!currentScreenSize.includes('sm')"
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:chevron-left'">
+                            </mat-icon>
+                            <span class="hidden sm:block justify-center">
+                                Back
+                            </span>
                         </button>
                         <!-- Create button -->
                         <button
-                            class="px-8"
+                            class="sm:px-8"
                             mat-flat-button
                             [color]="'primary'"
                             type="button"
                             (click)="postVariantMethod()"
                             matStepperNext>
-                            Create
+                            <mat-icon
+                                    *ngIf="!currentScreenSize.includes('sm')"
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:check'">
+                            </mat-icon>
+                            <span class="hidden sm:block justify-center">
+                                Create
+                            </span>
                         </button>
                     </div>
                 </mat-step>
@@ -1314,7 +1311,7 @@
                         Please add variants for this product
                     </p> -->
                     <!-- Content -->
-                    <div class="content mx-2 flex flex-auto flex-wrap">
+                    <div class="content overflow-y-auto sm:overflow-hidden mx-2 flex flex-auto flex-wrap">
                         <!-- Variant Control and Table -->
                         <div class="flex flex-auto flex-wrap w-full">
                             <!-- Combo Control-->
@@ -1505,7 +1502,7 @@
                                                         <div [mat-sort-header]="'optionAction'">Action</div>
                                                     </div>
                                                     <!-- Rows -->
-                                                    <div class="h-100 overflow-y-auto">
+                                                    <div class="combo-details-grid overflow-y-auto">
                                                         <div *ngFor="let combos of productsCombos$; trackBy: trackByFn">
                                                             <div class="option-grid grid items-center gap-4 py-3 px-6 md:px-8 border-b">                                       
                                                                 <!-- Option Name -->
@@ -1605,53 +1602,41 @@
                         </button> -->
                         <!-- Back button  -->
                         <button
-                            class="px-8 mr-2"
+                            class="sm:px-8 mr-2"
                             mat-flat-button
                             [color]="'accent'"
                             type="button"
                             matStepperPrevious>
-                            Back
+                            <mat-icon
+                                    *ngIf="!currentScreenSize.includes('sm')"
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:chevron-left'">
+                            </mat-icon>
+                            <span class="hidden sm:block justify-center">
+                                Back
+                            </span>
                         </button>
                         <!-- Create button -->
                         <button
-                            class="px-8"
+                            class="sm:px-8"
                             mat-flat-button
                             [color]="'primary'"
                             type="button"
                             (click)="postVariantMethod()"
                             matStepperNext>
-                            Create
+                            <mat-icon
+                                    *ngIf="!currentScreenSize.includes('sm')"
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:check'">
+                            </mat-icon>
+                            <span class="hidden sm:block justify-center">
+                                Create
+                            </span>
                         </button>
                     </div>
                 </mat-step>
 
             </mat-horizontal-stepper>
-
-            
-            <!-- Delete and cancel button -->
-            <!-- <div class="flex items-center justify-end border-t px-8 py-4">
-                <div *ngIf="message !== ''" class="mr-3 text-warn">
-                    {{message}}
-                </div>
-                <div class="flex items-center">
-                    <button
-                        mat-flat-button
-                        class="bg-gray-300 hover:bg-gray-500 border border-gray-500"
-                        [color]="'gray'"
-                        (click)="cancelAddProduct()"
-                        >
-                        Cancel
-                    </button>
-                    <button
-                        mat-flat-button
-                        class="ml-2"
-                        [color]="'primary'"
-                        (click)="addNewProduct()"
-                    >
-                        Create
-                    </button>
-                </div>
-            </div> -->
         </form>
     </div>
 </div>

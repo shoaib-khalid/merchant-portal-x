@@ -23,11 +23,11 @@
                     </p> -->
 
                     <!-- Content -->
-                    <div class="content">
-
-                        <div class="flex px-2">
+                    <div class="content flex flex-col overflow-y-auto lg:overflow-hidden">
+                        <!-- Main  -->
+                        <div class="flex px-2 flex-col md:flex-row w-full">
                             <!-- Product images and status -->
-                            <div class="flex flex-col items-center lg:w-2/12 sm:items-start">
+                            <div class="flex flex-col items-center md:pr-4 lg:pr-0 lg:w-2/12 sm:items-start">
                                 <div class="flex flex-col items-center w-full">
                                     <!-- Image Frame -->
                                     <div *ngIf="!imagesEditMode" class="w-32 h-40 border rounded overflow-hidden">
@@ -47,7 +47,7 @@
                                     
                                     <!-- Edit Image Frame -->
                                     <div *ngIf="imagesEditMode" class="flex flex-col items-center sm:items-start mb-8 sm:mb-0">
-                                        <div class="relative flex items-center justify-center w-32 h-44 rborder rounded overflow-hidden ring-4 ring-bg-card">
+                                        <div class="relative flex items-center justify-center w-32 h-40 rborder rounded overflow-hidden ring-4 ring-bg-card">
                                             <!-- Upload / Remove Image to Overide Image -->
                                             <div class="absolute inset-0 bg-black bg-opacity-50 z-10"></div>
                                             <div class="absolute inset-0 flex items-center justify-center z-20">
@@ -212,7 +212,7 @@
                                     </div>
                                 </div>
                                 <!-- Product status -->
-                                <div class="flex flex-col mt-7 w-full">
+                                <div class="flex flex-col mt-0 w-full">
                                     <mat-form-field class="w-full" floatLabel="always">
                                         <mat-label class="font-medium">Product status</mat-label>
                                         <mat-select
@@ -248,7 +248,7 @@
                             </div>
 
                             <!-- Name, Description, SKU -->
-                            <div class="flex flex-auto flex-wrap w-full lg:w-7/12 mt-3 lg:mt-0">
+                            <div class="flex flex-auto flex-wrap w-full md:pr-4 lg:pr-0 lg:w-7/12 mt-3 md:mt-0">
                                 <div class="flex flex-col w-full lg:w-2/3 lg:pl-8">
 
                                     <!-- Name -->
@@ -377,7 +377,7 @@
                             </div>
 
                             <!-- Category -->
-                            <div class="flex flex-col w-full lg:w-3/12 lg:pl-8">
+                            <div class="flex flex-col w-full md:pr-4 lg:pr-0 lg:w-3/12 lg:pl-8">
                                 <!-- Category -->
                                 <div class="w-full">
                                     <span class="mb-px font-medium leading-tight">Category *</span>
@@ -517,7 +517,7 @@
                         <!-- Available stock -->
                         <div 
                             *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'"
-                            class="flex flex-col sm:flex-row py-1 border-t px-2">
+                            class="flex flex-col sm:flex-row flex-wrap py-1 border-t px-2">
                             <div class="flex flex-auto flex-wrap">
                                 <!-- Available stock row -->
                                 <div class="flex flex-col w-full sm:w-1/5 sm:pr-2 sm:border-r py-2 sm:py-0">
@@ -709,11 +709,12 @@
                                 class="flex items-center justify-center h-10 px-4 border rounded border-red-300 dark:border-red-500 cursor-pointer hover:bg-hover"
                                 for="product-remove-button"
                                 matRipple>
-                                <span class="justify-center">Delete</span>
+                                <span class="hidden sm:block justify-center">Delete</span>
                                 <mat-icon
-                                    class="ml-1"
+                                    class="sm:ml-1"
                                     [color]="'warn'"
-                                    [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                    [svgIcon]="'heroicons_outline:trash'">
+                                </mat-icon>
                             </label>
 
                         </div>
@@ -740,43 +741,71 @@
                             <!-- Cancel button -->
                             <button
                                 mat-flat-button
-                                class="w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
+                                class="sm:w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
                                 [color]="'gray'"
                                 (click)="cancelAddProduct()"
                                 >
-                                Cancel
+                                <mat-icon
+                                    *ngIf="!currentScreenSize.includes('sm')"
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:x'">
+                                </mat-icon>
+                                <span class="hidden sm:block justify-center">
+                                    Cancel
+                                </span>
                             </button>
                             <!-- Next variant button -->
                             <button
                                 *ngIf="addProductForm.get('step1').get('isVariants').value === true"
-                                class="w-24"
+                                class="sm:w-24"
                                 mat-flat-button
                                 [color]="'primary'"
                                 type="button"
                                 matStepperNext>
-                                Next
+                                <mat-icon
+                                    *ngIf="!currentScreenSize.includes('sm')"
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:chevron-right'">
+                                </mat-icon>
+                                <span class="hidden sm:block justify-center">
+                                    Next
+                                </span>
                             </button>
                             <!-- Next combo button -->
                             <button
                                 *ngIf="addProductForm.get('step1').get('isPackage').value === true"
-                                class="w-24"
+                                class="sm:w-24"
                                 mat-flat-button
                                 [color]="'primary'"
                                 type="button"
                                 matStepperNext>
-                                Next
+                                <mat-icon
+                                    *ngIf="!currentScreenSize.includes('sm')"
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:chevron-right'">
+                                </mat-icon>
+                                <span class="hidden sm:block justify-center">
+                                    Next
+                                </span>
                             </button>
                             <!-- Update button -->
                             <button
                                 *ngIf="addProductForm.get('step1').get('isVariants').value === false && addProductForm.get('step1').get('isPackage').value === false"
-                                class="w-24"
+                                class="sm:w-24"
                                 mat-flat-button
                                 [color]="'primary'"
                                 [disabled]="horizontalStepperStep1.stepControl.pristine"
                                 type="button"
                                 (click)="updateProductMethod()"
                                 matStepperNext>
-                                Update
+                                <mat-icon
+                                    *ngIf="!currentScreenSize.includes('sm')"
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:check'">
+                                </mat-icon>
+                                <span class="hidden sm:block justify-center">
+                                    Update
+                                </span>
                             </button>
 
                         </div>
@@ -796,7 +825,7 @@
                         Please add variants for this product
                     </p> -->
                     <!-- Content -->
-                    <div class="content mx-2 flex flex-auto flex-wrap">
+                    <div class="content overflow-y-auto sm:overflow-hidden mx-2 flex flex-auto flex-wrap">
                         <!-- Variant Control and Table -->
                         <div class="flex flex-auto flex-wrap w-full">
                             <!-- Variants/Options Control-->
@@ -822,7 +851,7 @@
                                             </div>
                                         </div>
                                         <!-- List of variants -->
-                                        <div class="h-44 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
+                                        <div class="h-42 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
                                             <!-- Variants -->
                                             <ng-container>
                                                 <div class="flex flex-col p-4 min-h-34 h-34 mb-2 space-y-2">
@@ -893,7 +922,7 @@
                                 <!-- Variant Options -->
                                 <div class="w-full max-w-2xl">
                                     <span class="mt-2 mb-px font-medium leading-tight">Variant Options</span>
-                                    <div class="w-full mt-2 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-auto">
+                                    <div class="w-full mt-1 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-auto">
                                         <!-- Variants Available -->
                                         <div class="h-30 m-2 leading-none overflow-y-auto border-gray-300 dark:border-gray-500">
                                             <div *ngIf="filteredProductVariants.length > 0">
@@ -1277,11 +1306,12 @@
                                 class="flex items-center justify-center h-10 px-4 border rounded border-red-300 dark:border-red-500 cursor-pointer hover:bg-hover"
                                 for="product-remove-button"
                                 matRipple>
-                                <span class="justify-center">Delete</span>
+                                <span class="hidden sm:block justify-center">Delete</span>
                                 <mat-icon
-                                    class="ml-1"
+                                    class="sm:ml-1"
                                     [color]="'warn'"
-                                    [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                    [svgIcon]="'heroicons_outline:trash'">
+                                </mat-icon>
                             </label>
 
                         </div>
@@ -1308,30 +1338,51 @@
                             <!-- Cancel button -->
                             <button
                                 mat-flat-button
-                                class="w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
+                                class="sm:w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
                                 [color]="'gray'"
                                 (click)="cancelAddProduct()"
                                 >
-                                Cancel
+                                <mat-icon
+                                    *ngIf="!currentScreenSize.includes('sm')"
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:x'">
+                                </mat-icon>
+                                <span class="hidden sm:block justify-center">
+                                    Cancel
+                                </span>
                             </button>
                             <!-- Back button  -->
                             <button
-                                class="px-8 mr-2"
+                                class="sm:px-8 mr-2"
                                 mat-flat-button
                                 [color]="'accent'"
                                 type="button"
                                 matStepperPrevious>
-                                Back
+                                <mat-icon
+                                    *ngIf="!currentScreenSize.includes('sm')"
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:chevron-left'">
+                                </mat-icon>
+                                <span class="hidden sm:block justify-center">
+                                    Back
+                                </span>
                             </button>
-                            <!-- Create button -->
+                            <!-- Update button -->
                             <button
-                                class="px-8"
+                                class="sm:px-8"
                                 mat-flat-button
                                 [color]="'primary'"
                                 type="button"
                                 (click)="updateProductMethod()"
                                 matStepperNext>
-                                Update
+                                <mat-icon
+                                    *ngIf="!currentScreenSize.includes('sm')"
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:check'">
+                                </mat-icon>
+                                <span class="hidden sm:block justify-center">
+                                    Update
+                                </span>
                             </button>
 
                         </div>
@@ -1351,7 +1402,7 @@
                         Please add variants for this product
                     </p> -->
                     <!-- Content -->
-                    <div class="content mx-2 flex flex-auto flex-wrap">
+                    <div class="content overflow-y-auto sm:overflow-hidden mx-2 flex flex-auto flex-wrap">
                         <!-- Combo Control and Table -->
                         <div class="flex flex-auto flex-wrap w-full">
                             <!-- Combo Control-->
@@ -1542,7 +1593,7 @@
                                                         <div [mat-sort-header]="'optionAction'">Action</div>
                                                     </div>
                                                     <!-- Rows -->
-                                                    <div class="h-100 overflow-y-auto">
+                                                    <div class="combo-details-grid overflow-y-auto">
                                                         <div *ngFor="let combos of productsCombos$; trackBy: trackByFn">
                                                             <div class="option-grid grid items-center gap-4 py-3 px-6 md:px-8 border-b">                                       
                                                                 <!-- Option Name -->
@@ -1628,11 +1679,12 @@
                                 class="flex items-center justify-center h-10 px-4 border rounded border-red-300 dark:border-red-500 cursor-pointer hover:bg-hover"
                                 for="product-remove-button"
                                 matRipple>
-                                <span class="justify-center">Delete</span>
+                                <span class="hidden sm:block justify-center">Delete</span>
                                 <mat-icon
-                                    class="ml-1"
+                                    class="sm:ml-1"
                                     [color]="'warn'"
-                                    [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                    [svgIcon]="'heroicons_outline:trash'">
+                                </mat-icon>
                             </label>
 
                         </div>
@@ -1659,30 +1711,51 @@
                             <!-- Cancel button -->
                             <button
                                 mat-flat-button
-                                class="w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
+                                class="sm:w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
                                 [color]="'gray'"
                                 (click)="cancelAddProduct()"
                                 >
-                                Cancel
+                                <mat-icon
+                                    *ngIf="!currentScreenSize.includes('sm')"
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:x'">
+                                </mat-icon>
+                                <span class="hidden sm:block justify-center">
+                                    Cancel
+                                </span>
                             </button>
                             <!-- Back button  -->
                             <button
-                                class="px-8 mr-2"
+                                class="sm:px-8 mr-2"
                                 mat-flat-button
                                 [color]="'accent'"
                                 type="button"
                                 matStepperPrevious>
-                                Back
+                                <mat-icon
+                                    *ngIf="!currentScreenSize.includes('sm')"
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:chevron-left'">
+                                </mat-icon>
+                                <span class="hidden sm:block justify-center">
+                                    Back
+                                </span>
                             </button>
                             <!-- Create button -->
                             <button
-                                class="px-8"
+                                class="sm:px-8"
                                 mat-flat-button
                                 [color]="'primary'"
                                 type="button"
                                 (click)="updateProductMethod()"
                                 matStepperNext>
-                                Update
+                                <mat-icon
+                                    *ngIf="!currentScreenSize.includes('sm')"
+                                    class="text-white icon-size-5"
+                                    [svgIcon]="'heroicons_outline:check'">
+                                </mat-icon>
+                                <span class="hidden sm:block justify-center">
+                                    Update
+                                </span>
                             </button>
 
                         </div>
@@ -1690,32 +1763,6 @@
                 </mat-step>
 
             </mat-horizontal-stepper>
-
-            
-            <!-- Delete and cancel button -->
-            <!-- <div class="flex items-center justify-end border-t px-8 py-4">
-                <div *ngIf="message !== ''" class="mr-3 text-warn">
-                    {{message}}
-                </div>
-                <div class="flex items-center">
-                    <button
-                        mat-flat-button
-                        class="bg-gray-300 hover:bg-gray-500 border border-gray-500"
-                        [color]="'gray'"
-                        (click)="cancelAddProduct()"
-                        >
-                        Cancel
-                    </button>
-                    <button
-                        mat-flat-button
-                        class="ml-2"
-                        [color]="'primary'"
-                        (click)="addNewProduct()"
-                    >
-                        Create
-                    </button>
-                </div>
-            </div> -->
         </form>
     </div>
 </div>
