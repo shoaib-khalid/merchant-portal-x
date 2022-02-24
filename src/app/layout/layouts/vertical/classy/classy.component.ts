@@ -125,7 +125,7 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
 
                     if (this.store) {
                         this.currentStoreId = store.id;
-                        let index = this.store.storeAssets.findIndex(item => item.assetType === 'LogoUrl')
+                        let index = this.store.storeAssets ? this.store.storeAssets.findIndex(item => item.assetType === 'LogoUrl') : -1;
                         this.storeLogo = (index > -1) ? this.store.storeAssets[index].assetUrl : null;
                     } else{
                         this.currentStoreId = '';

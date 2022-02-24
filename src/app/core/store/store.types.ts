@@ -106,25 +106,28 @@ export interface StoreRegionCountries
 
 export interface StoreDeliveryProvider
 {
-    id?: string;
-    name?: string;
-    address?: string;
-    contactNo?: string;
-    contactPerson?: string;
-    getPriceClassname?: string;
-    submitOrderClassName?: string;
-    cancelOrderClassName?: string;
-    queryOrderClassName?: string;
-    spCallbackClassname?: string;
-    pickupDateClassname?: string;
-    pickupTimeClassname?: string;
-    locationIdClassname?: string;
-    providerImage?: string;
-    regionCountryId: string;
-
-    // sesat
     deliveryType?: string;
     deliverySpId?: string;
+    fulfilment?: string;
+    id?: string;
+    regionCountry?: string;
+    storeDeliveryServiceProvider?: {
+        name?: string;
+        address?: string;
+        contactNo?: string;
+        contactPerson?: string;
+        getPriceClassname?: string;
+        submitOrderClassName?: string;
+        cancelOrderClassName?: string;
+        queryOrderClassName?: string;
+        spCallbackClassname?: string;
+        pickupDateClassname?: string;
+        pickupTimeClassname?: string;
+        locationIdClassname?: string;
+        providerImage?: string;
+        regionCountryId: string;
+    }
+    
 }
 
 export interface StoreDeliveryDetails
@@ -176,6 +179,10 @@ export interface StoreDeliveryPeriod
 {
     id: string;
     deliveryPeriod: string;
+    description: string;
     storeId: string;
     enabled: boolean;
+
+    // reka sendiri
+    deliveryProviders: StoreDeliveryProvider[];
 }

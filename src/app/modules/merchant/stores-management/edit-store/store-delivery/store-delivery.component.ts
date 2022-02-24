@@ -27,12 +27,11 @@ export class StoreDeliveryComponent implements OnInit
     _deliveryPeriods: StoreDeliveryPeriod[] = [];
     deliveryPeriods: FormArray;
 
-    deliveryFullfilment: any;
-    deliveryPartners: any = [];
+    deliveryFulfilment: any;
+    deliveryPartners: StoreDeliveryProvider[] = [];
+    deliveryPartnerTypes: any = [];
     hasDeliveryPartnerError: boolean = true;
-
-    storeDeliveryProvider: StoreDeliveryProvider[] = [];
-    
+        
     _allowedSelfDeliveryStates: any = [];
     allowedSelfDeliveryStates: FormArray;
 
@@ -46,7 +45,6 @@ export class StoreDeliveryComponent implements OnInit
         private _formBuilder: FormBuilder,
         private _storesService: StoresService,
         private _route: ActivatedRoute,
-        private _localeService: LocaleService,
         private _changeDetectorRef: ChangeDetectorRef,
         private _chooseVerticalService: ChooseVerticalService,
         private _fuseConfirmationService: FuseConfirmationService,
@@ -80,7 +78,7 @@ export class StoreDeliveryComponent implements OnInit
             regionCountryId             : ['', Validators.required],
         });
         
-        this.deliveryFullfilment = [
+        this.deliveryFulfilment = [
             { selected: false, option: "INSTANT_DELIVERY", label: "Instant Delivery", tooltip: "This store support instant delivery. (Provided by store own logistic or delivery partners)" }, 
             { selected: false, option: "REGULAR_DELIVERY", label: "Regular Delivery", tooltip: "This store support regular delivery. (Provided by store own logistic or delivery partners)" },
             { selected: false, option: "SCHEDULED_DELIVERY", label: "Scheduled Delivery", tooltip: "This store allow scheduled delivery request from customer" },
@@ -120,23 +118,63 @@ export class StoreDeliveryComponent implements OnInit
                     alert("Invalid vertical code : " + _verticalCode);
                 }
 
+                // ----------------------
+                // Get All Available Store Delivery Provider
+                // ----------------------
 
                 this._storesService.getStoreDeliveryProvider({deliveryType: _deliveryType, regionCountryId: _regionCountryId})
                     .subscribe((response: StoreDeliveryProvider[]) => {
                         // reset this.deliveryPartners first to initial state
                         this.deliveryPartners = [];
-                            response.forEach(item => {
-                                // push the data into array
-                                this.deliveryPartners.push({
-                                    id: item.id,
-                                    name: item.name,
-                                    providerImage: item.providerImage,
-                                    label: item.name,
-                                    selected: false
-                                });
-                            });
+                        this.deliveryPartners = response;
+
+                        // filter delivery fulfilment aka delivery period
+                        this.deliveryPartnerTypes = [ ...new Set(this.deliveryPartners.map(item => item.fulfilment))];
+                        
                         // check changes
                         this.checkDeliveryPartner();
+                        
+                        // -------------------------------------
+                        // delivery period fulfillment
+                        // -------------------------------------
+
+                        this._storesService.getDeliveryPeriod(this.storeId)
+                        .subscribe((response: StoreDeliveryPeriod[]) => {
+                            this._deliveryPeriods = response;
+                            
+                            
+                            this._deliveryPeriods.forEach(item => {
+
+                                // find delivery provider for each delviery period
+                                let deliveryPartners = this.deliveryPartners.map(element => { 
+                                    if (element.fulfilment === item.deliveryPeriod) {
+                                        return element;
+                                    } else {
+                                        return null;
+                                    }
+                                });
+
+                                // remove undefined
+                                // deliveryPartners.filter(n => n);
+                                
+                                let _deliveryProviders = this._formBuilder.array(deliveryPartners.filter(n => n));
+                    
+                                // set empty array for each delivery period of deliveryProviders
+                                Object.assign(item, { deliveryProviders: _deliveryProviders });
+
+                                this.deliveryPeriods = this.storeDeliveryForm.get('deliveryPeriods') as FormArray;
+                                
+                                // attacted delivery provider to delivery period
+                                this.deliveryPeriods.push(this._formBuilder.group(item));
+                            });
+
+                            console.log("deliveryPeriods", this.deliveryPeriods);
+                            
+                            
+                            
+                            // Mark for check
+                            this._changeDetectorRef.markForCheck();
+                        });
 
                         // Mark for check
                         this._changeDetectorRef.markForCheck();
@@ -148,8 +186,6 @@ export class StoreDeliveryComponent implements OnInit
 
                 this._storesService.getStoreRegionCountryDeliveryProvider(this.storeId)
                     .subscribe((response: StoreDeliveryProvider[]) => {
-
-                        this.storeDeliveryProvider = response;
                         
                         let _deliverySpId = response.length > 0 ? response[0].deliverySpId : "";
                         this.storeDeliveryForm.get('deliveryPartner').patchValue(_deliverySpId);
@@ -234,23 +270,6 @@ export class StoreDeliveryComponent implements OnInit
 
                 // country (using form builder variable)
                 // this.editStoreForm.get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
-
-                // -------------------------------------
-                // store delivery period
-                // -------------------------------------
-
-                this._storesService.getDeliveryPeriod(this.storeId)
-                    .subscribe((response: StoreDeliveryPeriod[]) => {
-                        this._deliveryPeriods = response;
-
-                        this._deliveryPeriods.forEach(item => {
-                            this.deliveryPeriods = this.storeDeliveryForm.get('deliveryPeriods') as FormArray;
-                            this.deliveryPeriods.push(this._formBuilder.group(item));
-                        });
-                        
-                        // Mark for check
-                        this._changeDetectorRef.markForCheck();
-                    })
                 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -523,14 +542,20 @@ export class StoreDeliveryComponent implements OnInit
         this._changeDetectorRef.markForCheck();
     }
 
-    checkDeliveryPeriodsFullfilment() {
+    checkDeliveryPeriodsFulfilment() {
 
-        let index = this.deliveryPeriods.value.findIndex(item => item.enabled === true);        
+        let index = this.deliveryPeriods.value.findIndex(item => item.enabled === true);
 
-        if (index > -1) {
-            this.storeDeliveryForm.get('deliveryPeriods').setErrors(null)
-        } else {
-            this.storeDeliveryForm.get('deliveryPeriods').setErrors({requiredAtLeastOne: true})
+        if (index > -1) {            
+            if (this.deliveryPeriods.value[index].deliveryProviders.length > 0) {
+                // this.storeDeliveryForm.get('deliveryPeriods').get('validation').setErrors(null);
+                // this.storeDeliveryForm.get('deliveryPeriods').get('validation').patchValue("validated");
+            } else {
+                // this.storeDeliveryForm.get('deliveryPeriods').get('validation').patchValue("noDeliveryPeriod");
+            }
+        } else {            
+            // this.storeDeliveryForm.get('deliveryPeriods').get('validation').setErrors({requiredAtLeastOne: true});
+            // this.storeDeliveryForm.get('deliveryPeriods').get('validation').patchValue(null);
         }
     }
 }

@@ -818,7 +818,7 @@ export class StoresService
     // Store Delivery Provider Section
     // ---------------------------
 
-    getStoreDeliveryProvider(query: StoreDeliveryProvider): Observable<StoreDeliveryProvider[]>
+    getStoreDeliveryProvider(query: any): Observable<StoreDeliveryProvider[]>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;

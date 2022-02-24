@@ -27,6 +27,7 @@ export class RegisterStoreValidationService {
         invalidPhonenumber: 'Invalid phonenumber',
         invalidPostcode: 'Invalid postcode',
         requiredAtLeastOne: 'Required at leat one',
+        noDeliveryPartners: 'No delivery partner available',
         minlength: `Minimum length ${validatorValue.requiredLength}`
       };
   
@@ -137,6 +138,8 @@ export class RegisterStoreValidationService {
         return true;
       } else if (control.value === null)  {
         return { requiredAtLeastOne: true };
+      } else if (control.value === "noDeliveryPeriod")  {
+        return { noDeliveryPartners: true };
       } else {
         return false;
       }
