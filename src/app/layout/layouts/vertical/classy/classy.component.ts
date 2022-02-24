@@ -24,7 +24,7 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
     navigation: Navigation;
     client: Client;
     store: Store;
-    stores: Store[];
+    stores: Store[] = [];
     storeLogo: string;
     currentStoreId: string = "";
     private _unsubscribeAll: Subject<any> = new Subject<any>();
