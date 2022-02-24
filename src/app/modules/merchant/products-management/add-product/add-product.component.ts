@@ -12,6 +12,7 @@ import { Store } from 'app/core/store/store.types';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { StoresService } from 'app/core/store/store.service';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
+import { AddProductValidationService } from './add-product.validation.service';
 
 
 
@@ -96,17 +97,6 @@ export class AddProductComponent implements OnInit, OnDestroy
 
     // get current store
     store$: Store;
-
-    checkinput = {
-        name: false,
-        description: false,
-        status: false,
-        sku: false,
-        price: false,
-        packingSize: false,
-        category: false,
-        availableStock: false
-    };
 
     message: string = "";
 
@@ -226,11 +216,6 @@ export class AddProductComponent implements OnInit, OnDestroy
     /**
      * Getter for storeId
      */
- 
-    get storeId$(): string
-    {
-        return localStorage.getItem('storeId') ?? '';
-    }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
@@ -245,8 +230,8 @@ export class AddProductComponent implements OnInit, OnDestroy
         this.addProductForm = this._formBuilder.group({
             step1: this._formBuilder.group({
                 name             : ['', [Validators.required]],
-                description      : ['', [Validators.required]],
-                categoryId       : ['', [Validators.required]],
+                description      : ['', AddProductValidationService.requiredValidator],
+                categoryId       : ['', AddProductValidationService.requiredValidator],
                 status           : ['ACTIVE', [Validators.required]],
                 trackQuantity    : [false],
                 allowOutOfStockPurchases: [false],
@@ -319,7 +304,6 @@ export class AddProductComponent implements OnInit, OnDestroy
                 // set packingSize to S if verticalCode FnB
                 if (this.store$.verticalCode === "FnB" || this.store$.verticalCode === "FnB_PK"){
                     this.addProductForm.get('step1').get('packingSize').patchValue('S');
-                    this.checkinput.packingSize = true;
                 }
 
                 // Mark for check
@@ -350,16 +334,6 @@ export class AddProductComponent implements OnInit, OnDestroy
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
-
-        // rest of the input checking process occur at bottom
-        // refer function checkInput().... lol
-        this.addProductForm.valueChanges.subscribe(data => {
-            if (data.description) {
-                this.checkinput['description'] = true;
-            } else {
-                this.checkinput['description'] = false;
-            }
-        })
 
         // Filter by category dropdown in combo section
         this.localCategoryFilterControl.valueChanges
@@ -432,7 +406,6 @@ export class AddProductComponent implements OnInit, OnDestroy
             (this.addProductForm.get('step1').get('name').value.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '') === this.addProductForm.get('sku').value) 
         ){
             this.addProductForm.get('step1').get('sku').patchValue(this.addProductForm.get('step1').get('name').value.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''));
-            this.checkinput.sku = true;
         }
     }
 
@@ -514,7 +487,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     {
         const category = {
             name,
-            storeId: this.storeId$,
+            storeId: this._storesService.storeId$,
             parentCategoryId,
             thumbnailUrl
         };
@@ -606,7 +579,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     {
 
         // Update the selected product form
-        this.addProductForm.get('step1').get('categoryId').patchValue("");
+        this.addProductForm.get('step1').get('categoryId').patchValue(null);
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -1233,17 +1206,6 @@ export class AddProductComponent implements OnInit, OnDestroy
          this.filteredProductsOptions = this._filteredProductsOptions;
  
      }
-
-    checkInput(input, event = null){
-        // check input
-        if ((this.addProductForm.get('step1').get(input) && this.addProductForm.get('step1').get(input).value) || 
-            (input === 'category' && event.target.checked)
-            ) {
-            this.checkinput[input] = true;
-        } else {
-            this.checkinput[input] = false;
-        }
-    }
 
     disabledTrackStock(isTrackStock: boolean) {
         if (isTrackStock === false){
@@ -2248,6 +2210,4 @@ export class AddProductComponent implements OnInit, OnDestroy
     openProductPreview(){
         // window.open(this.selectedProductForm.get('seoUrl').value, '_blank');
     }
-
-    
 }

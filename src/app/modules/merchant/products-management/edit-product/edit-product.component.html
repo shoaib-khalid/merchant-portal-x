@@ -24,10 +24,11 @@
 
                     <!-- Content -->
                     <div class="content flex flex-col overflow-y-auto lg:overflow-hidden">
-                        <!-- Main  -->
-                        <div class="flex px-2 flex-col md:flex-row w-full">
+
+                        <!-- Main -->
+                        <div class="flex px-2 flex-col lg:flex-row mb-4 lg:mb-0 w-full">
                             <!-- Product images and status -->
-                            <div class="flex flex-col items-center md:pr-4 lg:pr-0 lg:w-2/12 sm:items-start">
+                            <div class="flex flex-col items-center w-full lg:w-2/12 sm:items-start">
                                 <div class="flex flex-col items-center w-full">
                                     <!-- Image Frame -->
                                     <div *ngIf="!imagesEditMode" class="w-32 h-40 border rounded overflow-hidden">
@@ -247,9 +248,10 @@
                                 </div>
                             </div>
 
-                            <!-- Name, Description, SKU -->
-                            <div class="flex flex-auto flex-wrap w-full md:pr-4 lg:pr-0 lg:w-7/12 mt-3 md:mt-0">
-                                <div class="flex flex-col w-full lg:w-2/3 lg:pl-8">
+                            <!-- Name, Description, SKU, Price , Packing Size-->
+                            <div class="flex flex-col md:flex-row w-full lg:w-7/12 lg:px-4 mt-3 md:mt-0">
+                                <!-- Name, Description -->
+                                <div class="flex flex-col w-full md:pr-2 lg:w-2/3">
 
                                     <!-- Name -->
                                     <mat-form-field class="w-full" appearance="fill" floatLabel="always">
@@ -261,9 +263,9 @@
                                             [formControlName]="'name'"
                                             (change)="generateSku()"
                                         >
-                                        <!-- <mat-error *ngIf="addProductForm.get('step1').get('name').hasError('required')">
+                                        <mat-error *ngIf="addProductForm.get('step1').get('name').hasError('required')">
                                             Required
-                                        </mat-error> -->
+                                        </mat-error>
                                     </mat-form-field>
 
                                     <!-- Description -->
@@ -271,51 +273,38 @@
                                         <span class="font-medium leading-tight">Description *</span>
                                         <div class="mt-1.5 flex items-center -my-px w-full">
                                             <quill-editor
-                                                required
-                                                class="w-full"
-                                                [ngClass]="addProductForm.get('step1').get('description').hasError('required') === true ? 'rounded-md border border-red-600' : 'rounded-md border '"
+                                                class="w-full rounded-md"
+                                                (focusout)="!this.addProductForm.get('step1').get('description').value ? this.addProductForm.get('step1').get('description').patchValue(null) : ''"
+                                                [ngClass]="addProductForm.get('step1').get('description').hasError('required') ? 'border border-red-600' : ''"
                                                 [formControlName]="'description'"
                                                 [modules]="quillModules"></quill-editor>
                                             <!-- use (onContentChanged)="textChanged($event)" for limiting quil editor -->
                                         </div>
-                                        <!-- <mat-error 
-                                            class="text-sm font-medium"
-                                            [ngClass]="addProductForm.get('step1').get('description').hasError('required') === true ? 'visible' : 'invisible'"
-                                            >
-                                            
-                                        </mat-error> -->
+                                        <mat-error *ngIf="addProductForm.get('step1').get('description').hasError('required')">
+                                            Required
+                                        </mat-error> 
                                     </div>
                                 </div>
                                 
                                 <!-- SKU, Price, Packing Size-->
-                                <div class="flex flex-col w-full lg:w-1/3 lg:pl-8">
+                                <div class="flex flex-col w-full md:pl-2 lg:w-1/3">
                                     <!-- SKU -->
-                                    <mat-form-field class="w-full pr-2" appearance="fill" floatLabel="always">
+                                    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
                                         <mat-label>SKU</mat-label>
                                         <input
                                             matInput
                                             required
                                             [formControlName]="'sku'"
-                                            placeholder="Insert SKU"
-                                        >
+                                            placeholder="Insert SKU">
                                         <mat-error *ngIf="addProductForm.get('step1').get('sku').hasError('required')">
                                             Required
                                         </mat-error>
                                     </mat-form-field>
-                                    <!-- <mat-form-field class="w-full pr-2">
-                                        <mat-label>SKU</mat-label>
-                                        <input
-                                            matInput
-                                            [disabled]="addProductForm.get('step1').get('productVariants').value.length > 0"
-                                            (change)="displaySku = $event.target.value"
-                                            [value]="displaySku">
-                                    </mat-form-field> -->
 
                                     <!-- Price -->
                                     <mat-form-field 
-                                        class="w-full pr-2"
-                                        appearance="fill" floatLabel="always"
-                                    >
+                                        class="w-full"
+                                        appearance="fill" floatLabel="always">
                                         <mat-label>Price</mat-label>
                                         <span matSuffix>{{store$.regionCountry.currencySymbol}}</span>
                                         <input
@@ -323,26 +312,15 @@
                                             required
                                             [formControlName]="'price'"
                                             placeholder="Insert price"
-                                            type="number"
-                                        >
+                                            type="number">
                                         <mat-error *ngIf="addProductForm.get('step1').get('price').hasError('required')">
                                             Required
                                         </mat-error>
                                     </mat-form-field>
-                                    <!-- <mat-form-field class="w-full pr-2">
-                                        <mat-label>Price</mat-label>
-                                        <span matSuffix>{{store$.regionCountry.currencySymbol}}</span>
-                                        <input
-                                            matInput
-                                            type="number"
-                                            (change)="displayPrice = $event.target.value"
-                                            [disabled]="addProductForm.get('step1').get('productVariants').value.length > 0"
-                                            [value]="displayPrice">
-                                    </mat-form-field> -->
 
                                     <!-- Packing Size -->
                                     <mat-form-field 
-                                        class="w-full pr-2"
+                                        class="w-full"
                                         appearance="fill" floatLabel="always"
                                         *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'">
                                         <mat-label>Packing Size</mat-label>
@@ -368,22 +346,21 @@
                                                 <mat-option [value]="'XL'">Extra Large (above 2.0KG)</mat-option>
                                             </div>
                                         </mat-select>
-                                        <!-- <mat-error *ngIf="addProductForm.get('step1').get('packingSize').hasError('required')">
+                                        <mat-error *ngIf="addProductForm.get('step1').get('packingSize').hasError('required')">
                                             Required
-                                        </mat-error> -->
+                                        </mat-error>
                                     </mat-form-field>
                                 </div>
-
                             </div>
 
                             <!-- Category -->
-                            <div class="flex flex-col w-full md:pr-4 lg:pr-0 lg:w-3/12 lg:pl-8">
+                            <div class="flex flex-col w-full lg:w-3/12">
                                 <!-- Category -->
                                 <div class="w-full">
                                     <span class="mb-px font-medium leading-tight">Category *</span>
                                     <div 
-                                        [ngClass]="addProductForm.get('step1').get('categoryId').hasError('required') === true ? 'rounded-md border border-red-600' : ''"
-                                        class="mt-0.5 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden">
+                                    [ngClass]="addProductForm.get('step1').get('categoryId').hasError('required') ? 'border-red-600' : 'border-gray-300'"
+                                    class="mt-0.5 rounded-md border dark:border-gray-500 shadow-sm overflow-hidden">
                                         <!-- Header -->
                                         <div class="flex items-center -my-px py-2 px-3">
                                             <div class="flex items-center flex-auto min-w-0">
@@ -429,7 +406,7 @@
                                                         class="flex items-center h-10 min-h-10 px-4"
                                                         required
                                                         [color]="'primary'"
-                                                        [checked]="addProductForm.get('step1').get('categoryId').value.includes(category.id)"
+                                                        [checked]="addProductForm.get('step1').get('categoryId').value && addProductForm.get('step1').get('categoryId').value.includes(category.id)"
                                                         (change)="toggleProductCategory(category, $event);"
                                                     >
                                                         {{category.name}}
@@ -508,12 +485,13 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- <mat-error class="text-sm font-medium" *ngIf="addProductForm.get('step1').get('categoryId').hasError('required')">
+                                    <mat-error class="text-sm font-medium" *ngIf="addProductForm.get('step1').get('categoryId').hasError('required')">
                                         Required
-                                    </mat-error> -->
+                                    </mat-error>
                                 </div>
                             </div>
                         </div>
+
                         <!-- Available stock -->
                         <div 
                             *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'"
@@ -537,6 +515,7 @@
                                             placeholder="Insert current stock"
                                             [formControlName]="'availableStock'"
                                             type="number"
+                                            required
                                             matInput
                                         >
                                         <mat-error *ngIf="addProductForm.get('step1').get('availableStock').hasError('required')">
@@ -760,6 +739,7 @@
                                 class="sm:w-24"
                                 mat-flat-button
                                 [color]="'primary'"
+                                [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
                                 type="button"
                                 matStepperNext>
                                 <mat-icon
@@ -777,6 +757,7 @@
                                 class="sm:w-24"
                                 mat-flat-button
                                 [color]="'primary'"
+                                [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
                                 type="button"
                                 matStepperNext>
                                 <mat-icon
@@ -794,7 +775,7 @@
                                 class="sm:w-24"
                                 mat-flat-button
                                 [color]="'primary'"
-                                [disabled]="horizontalStepperStep1.stepControl.pristine"
+                                [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
                                 type="button"
                                 (click)="updateProductMethod()"
                                 matStepperNext>
