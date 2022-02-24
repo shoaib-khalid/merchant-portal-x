@@ -170,11 +170,12 @@
                                 >
                                 Cancel
                             </button>
-                            <!-- Next variant button -->
+                            <!-- Next button -->
                             <button
                                 class="w-24"
                                 mat-flat-button
                                 [color]="'primary'"
+                                [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
                                 type="button"
                                 matStepperNext>
                                 Next
@@ -372,48 +373,12 @@
                                                         <input
                                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                             type="button"
-                                                            [id]="'edit-discount-tier-btn' + discountTier.value.id"
-                                                            (click)="storeDiscountTierListValueEditMode[i] = !storeDiscountTierListValueEditMode[i]"
-                                                        >
-                                                        <label
-                                                            *ngIf="!storeDiscountTierListValueEditMode[i]"
-                                                            class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
-                                                            [for]="'edit-discount-tier-btn' + discountTier.value.id"
-                                                            matRipple>
-                                                            <mat-icon
-                                                                class="text-white icon-size-5"
-                                                                [svgIcon]="'heroicons_outline:pencil-alt'">
-                                                            </mat-icon>
-                                                        </label>
-    
-                                                        <input
-                                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                            type="button"
-                                                            [id]="'update-discount-tier-btn' + discountTier.value.id"
-                                                            (click)="storeDiscountTierListValueEditMode[i] = !storeDiscountTierListValueEditMode[i]"
-                                                            (click)="updateSelectedDiscountTier(discountTier)"
-                                                        >
-                                                        <label
-                                                            *ngIf="storeDiscountTierListValueEditMode[i]"
-                                                            class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
-                                                            [for]="'update-discount-tier-btn' + discountTier.value.id"
-                                                            matRipple>
-                                                            <mat-icon
-                                                                class="text-white icon-size-5"
-                                                                [svgIcon]="'heroicons_outline:check'">
-                                                            </mat-icon>
-                                                        </label>
-    
-                                                
-                                                        <input
-                                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                            type="button"
-                                                            [id]="'delete-discount-tier-btn' + discountTier.value.id"
-                                                            (click)="deleteSelectedDiscountTier(discountTier.value.id)"
+                                                            [id]="'delete-discount-tier-btn' + i"
+                                                            (click)="deleteSelectedDiscountTier(i)"
                                                         >
                                                         <label
                                                             class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-warn hover:bg-warn-700 mb-3"
-                                                            [for]="'delete-discount-tier-btn' + discountTier.value.id"
+                                                            [for]="'delete-discount-tier-btn' + i"
                                                             matRipple>
                                                             <mat-icon
                                                                 class="text-white icon-size-5"
@@ -443,9 +408,9 @@
                             mat-flat-button
                             [color]="'primary'"
                             type="button"
-                            (click)="updateSelectedDiscount()"
+                            (click)="createDiscount()"
                             >
-                            Update
+                            Create
                             </button>
                         </div>
                     </mat-step>

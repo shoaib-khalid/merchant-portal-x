@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { DiscountsService } from '../order-discount-list/order-discount-list.service';
@@ -105,15 +105,15 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
     this.horizontalStepperForm = this._formBuilder.group({
         //Main Discount
         step1: this._formBuilder.group({
-            id               : [''],
-            discountName   : [''],
-            discountType : [''],
-            startDate : [''],
-            endDate : [''],
-            startTime : [''],
-            endTime : [''],
-            isActive : [''],
-            maxDiscountAmount : [''],
+            // id               : [''],
+            discountName   : ['', Validators.required],
+            discountType : ['', Validators.required],
+            startDate : ['', Validators.required],
+            endDate : ['', Validators.required],
+            startTime : ['', Validators.required],
+            endTime : ['', Validators.required],
+            isActive : ['', Validators.required],
+            maxDiscountAmount : ['', Validators.required],
             normalPriceItemOnly : [''],
             storeId          : [''], // not used
         }),
@@ -122,6 +122,11 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
         
         ]),
     });
+  }
+
+  get storeId$(): string
+  {
+      return localStorage.getItem('storeId') ?? '';
   }
 
   addNewDiscount() {
@@ -145,38 +150,40 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
     this.dialogRef.close({ status: false });
   }
   
-  checkName(){           
-        // check discount name
-        if (this.discountName) {
-            this.checkname = true;
-            this.message = "";
-        }else{
-            this.checkname = false;
-            this.message = "Please insert discount name";
-        }
+//   checkName(){           
+//         // check discount name
+//         if (this.discountName) {
+//             this.checkname = true;
+//             this.message = "";
+//         }else{
+//             this.checkname = false;
+//             this.message = "Please insert discount name";
+//         }
         
-  }
+//   }
 
   checkDateTime(){
          // check min end date not less than min start date
-         if (this.startDate && this.startTime) {
-            // set minimum end date to current selected date
-            this.isDisabledStartDateTime = false;
-            this.minEndDate = this.startDate;
-        }
+        //  if (this.startDate && this.startTime) {
+        //     // set minimum end date to current selected date
+        //     this.isDisabledStartDateTime = false;
+        //     this.minEndDate = this.startDate;
+        // }
         // check date
-        if (this.startTime && this.endTime && this.endDate && this.startDate) {        
-            if (this.startDate < this.endDate){
-                this.checkdate = true;
-            } else if (this.startDate == this.endDate) {
-                if (this.startTime <= this.endTime) {
-                    this.checkdate = true;
-                } else {
-                    this.checkdate = false;
-                    this.message = "Date/time range incorrect";
-                }
-            }
-        }
+        // if (this.startTime && this.endTime && this.endDate && this.startDate) {        
+        //     if (this.startDate < this.endDate){
+        //         this.checkdate = true;
+        //     } else if (this.startDate == this.endDate) {
+        //         if (this.startTime <= this.endTime) {
+        //             this.checkdate = true;
+        //         } else {
+        //             this.checkdate = false;
+        //             this.message = "Date/time range incorrect";
+        //         }
+        //     }
+        // }
+
+        
   }
 
   checkStatus(){
@@ -225,7 +232,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
 
   changeTime(){
     //===========Start Time==================
-    let pickStartTime = this.startTime;
+    let pickStartTime =this.horizontalStepperForm.get('step1.startTime').value;
     let _pickStartTime;
 
     if ((<any>pickStartTime).timeAmPm === "PM") {
@@ -239,7 +246,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
     this.changeStartTime= String(changePickStartTime.getHours()).padStart(2, "0")+':'+String(changePickStartTime.getMinutes()).padStart(2, "0");    
     
     //==============End time===================
-    let pickEndTime = this.endTime;
+    let pickEndTime = this.horizontalStepperForm.get('step1.endTime').value;
     let _pickEndTime;
 
     if ((<any>pickEndTime).timeAmPm === "PM") {
@@ -310,70 +317,69 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
         startTotalSalesAmount: this.startTotalSalesAmount,
     }
 
-    // Create the discount
-    this._discountService.createDiscountTier(this.horizontalStepperForm.get('step1.id').value,discountTier)
-        .subscribe((response) => {
-            
-            this.storeDiscountTierList = this.horizontalStepperForm.get('step2') as FormArray;
+    this.storeDiscountTierList = this.horizontalStepperForm.get('step2') as FormArray;
+    let checkDiscountAmount = (this.storeDiscountTierList.value.find(function checkValue(element, index, array) {
+        return   element.startTotalSalesAmount=== discountTier.startTotalSalesAmount;
+    }));
 
-            // since backend give full discount tier list .. (not the only one that have been created only)
-            this.storeDiscountTierList.clear();
 
-            response["data"].forEach(item => {
-                this.storeDiscountTierList.push(this._formBuilder.group(item));
-            });
+    if(!checkDiscountAmount){
+     
+        this.storeDiscountTierList.push(this._formBuilder.group(discountTier));
+    
+        console.log('this.horizontalStepperForm.get(step2):::',this.horizontalStepperForm.get('step2').value);
+        console.log('storeDiscountTierList:::',this.storeDiscountTierList);
+        
+        //disable button add
+        this.isDisplayAddTier=false;
+    
+        //clear the input
+        (<any>this.startTotalSalesAmount)='';
+        (<any>this.discountAmount)='';
+        this.calculationType='';  
 
-            //disable button add
-            this.isDisplayAddTier=false;
-            //clear the input
-            (<any>this.startTotalSalesAmount)='';
-            (<any>this.discountAmount)='';
-            this.calculationType='';
+    }
+    else{
 
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
-        }, (error) => {
-            console.error(error);
-            if (error.status === 417) {
-                // Open the confirmation dialog
-                const confirmation = this._fuseConfirmationService.open({
-                    title  : 'Minimum subtotal overlap',
-                    message: 'Your minimum subtotal entered overlapping with existing amount! Please change your minimum subtotal',
-                    actions: {
-                        confirm: {
-                            label: 'Ok'
-                        },
-                        cancel : {
-                            show : false,
-                        }
-                    }
-                });
-            }
-    });
+        const confirmation = this._fuseConfirmationService.open({
+                            title  : 'Minimum subtotal overlap',
+                            message: 'Your minimum subtotal entered overlapping with existing amount! Please change your minimum subtotal',
+                            actions: {
+                                confirm: {
+                                    label: 'Ok'
+                                },
+                                cancel : {
+                                    show : false,
+                                }
+                            }
+                        });
+    }
 
   }
 
-  updateSelectedDiscount(): void
+  createDiscount(): void
   {
-      this.changeTime();
-      let sendPayload = [this.horizontalStepperForm.get('step1').value];
-      let toBeSendPayload=sendPayload.
-      map((x)=>(
-          {
-              startTime:this.changeStartTime,
-              endTime:this.changeEndTime,
-              discountName: x.discountName,
-              discountType:x.discountType,
-              endDate: x.endDate,
-              id: x.id,
-              isActive: x.isActive,
-              maxDiscountAmount: x.maxDiscountAmount,
-              normalPriceItemOnly: x.normalPriceItemOnly,
-              startDate: x.startDate,
-              storeDiscountTierList: this.horizontalStepperForm.get('step2').value,
-              storeId: x.storeId,
-          }
-          ));
+    this.changeTime();
+    let sendPayload = [this.horizontalStepperForm.get('step1').value];
+    let toBeSendPayload=sendPayload.
+    map((x)=>(
+        {
+            startTime:this.changeStartTime,
+            endTime:this.changeEndTime,
+            discountName: x.discountName,
+            discountType:x.discountType,
+            endDate: x.endDate,
+            isActive: x.isActive,
+            maxDiscountAmount: x.maxDiscountAmount,
+            normalPriceItemOnly: x.normalPriceItemOnly,
+            startDate: x.startDate,
+            storeId: this.storeId$,
+        }
+    ));
+
+    console.log('toBeSendPayload[0]',toBeSendPayload[0]);
+    console.log('check formm value',this.horizontalStepperForm.value);
+    return;
 
       // Update the discount on the server
       this._discountService.updateDiscount(this.horizontalStepperForm.get('step1.id').value, toBeSendPayload[0])
@@ -401,5 +407,26 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
           );
 
         this.cancel();
+  }
+
+  deleteSelectedDiscountTier(indexForm): void
+  {
+
+    this.storeDiscountTierList = this.horizontalStepperForm.get('step2') as FormArray;
+    let index = (this.storeDiscountTierList.value.findIndex(function checkIndex(element, index, array) {
+        return   index=== indexForm;
+    }));
+
+    // remove from discount tier list
+    if (index > -1) {
+        this.storeDiscountTierList.removeAt(index);
+    }
+
+    // Mark for check
+    this._changeDetectorRef.markForCheck();
+
+    console.log('this.storeDiscountTierList',this.storeDiscountTierList);
+    console.log('this.horizontalStepperForm.get(step2).value',this.horizontalStepperForm.get('step2').value);
+
   }
 }
