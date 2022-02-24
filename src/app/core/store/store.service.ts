@@ -874,7 +874,7 @@ export class StoresService
         );
     }
 
-    postStoreRegionCountryDeliveryProvider(storeId: string, deliveryServiceProviderId: string): Observable<any>
+    postStoreRegionCountryDeliveryProvider(storeId: string, deliveryServiceProviderId: string, deliveryPeriod: string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -883,7 +883,7 @@ export class StoresService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
 
-        return this._httpClient.post<any>(productService + '/stores/' + storeId + '/deliveryServiceProvider/' + deliveryServiceProviderId , header).pipe(
+        return this._httpClient.post<any>(productService + '/stores/' + storeId + '/deliveryServiceProvider/' + deliveryServiceProviderId + '/' + deliveryPeriod, header).pipe(
             map((response) => {
                 this._logging.debug("Response from StoresService (postStoreRegionCountryDeliveryProvider)",response);
             })
@@ -903,7 +903,7 @@ export class StoresService
 
         return this._httpClient.put<any>(productService + '/stores/' + storeId + '/deliveryServiceProvider/' + id + queryParam , header).pipe(
             map((response) => {
-                this._logging.debug("Response from StoresService (postStoreRegionCountryDeliveryProvider)",response);
+                this._logging.debug("Response from StoresService (putStoreRegionCountryDeliveryProvider)",response);
             })
         );
     }
@@ -919,7 +919,7 @@ export class StoresService
 
         return this._httpClient.delete<any>(productService + '/stores/' + storeId + '/deliveryServiceProvider/all', header).pipe(
             map((response) => {
-                this._logging.debug("Response from StoresService (postStoreRegionCountryDeliveryProvider)",response);
+                this._logging.debug("Response from StoresService (deleteStoreRegionCountryDeliveryProviderAll)",response);
             })
         );
     }

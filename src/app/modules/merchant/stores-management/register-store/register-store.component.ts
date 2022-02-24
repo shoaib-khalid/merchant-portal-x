@@ -294,7 +294,7 @@ export class RegisterStoreComponent implements OnInit
                             this.checkDeliveryPartner();
 
                             // -------------------------------------
-                            // delivery period fulfillment
+                            // delivery period fulfilment
                             // -------------------------------------
 
                             this._storesService.getDeliveryPeriod(null)
@@ -496,7 +496,7 @@ export class RegisterStoreComponent implements OnInit
         });
         
         // -------------------------------------
-        // delivery fulfillment
+        // delivery fulfilment
         // -------------------------------------
 
         this.deliveryFulfilment = [
@@ -1022,10 +1022,17 @@ export class RegisterStoreComponent implements OnInit
                 // ---------------------------
 
                 if (deliveryType === "ADHOC") {
-                    this._storesService.postStoreRegionCountryDeliveryProvider(this.storeId, deliveryPartner)
-                        .subscribe((response) => {
-                            
-                        });
+
+                    let index = this.deliveryPartners.findIndex(item => item.id === deliveryPartner);
+
+                    if (index > -1){
+                        this._storesService.postStoreRegionCountryDeliveryProvider(this.storeId, this.deliveryPartners[index].deliverySpId, this.deliveryPartners[index].fulfilment)
+                            .subscribe((response) => {
+                                
+                            });
+                    } else {
+                        console.error("Provision ADHOC delivery failed")
+                    }
                 }
 
                 // ---------------------------

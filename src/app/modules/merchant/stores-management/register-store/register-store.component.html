@@ -669,7 +669,7 @@
                                         <!-- Delivery Fullfillment -->
                                         <div class="flex flex-col w-full mb-3">
                                             <div class="flex flex-col w-full">
-                                                <mat-label class="font-medium pb-2">Store Fulfillment</mat-label>
+                                                <mat-label class="font-medium pb-2">Store Fulfilment</mat-label>
                                                 <div class="flex flex-col sm:flex-row">
                                                     <!-- <div class="flex w-full lg:w-2/4">
                                                         <mat-checkbox class="" [formControlName]="'allowScheduledDelivery'" [checked]="deliveryFulfilment[2].selected">{{deliveryFulfilment[2].label}}</mat-checkbox>
@@ -838,7 +838,7 @@
                                                         >
                                                             <ng-container *ngIf="deliveryPartners.length > 0; else noDeliveryPartners">
                                                                 <section class="p-2" *ngFor="let deliveryPartner of deliveryPartners">
-                                                                    <mat-radio-button [value]="deliveryPartner.storeDeliveryServiceProvider.id">{{deliveryPartner.storeDeliveryServiceProvider.name}}</mat-radio-button>
+                                                                    <mat-radio-button [value]="deliveryPartner.storeDeliveryServiceProvider.id">{{deliveryPartner.storeDeliveryServiceProvider.name + ' (' + deliveryPartner.fulfilment + ')'}}</mat-radio-button>
                                                                 </section>
                                                                 <mat-error *ngIf="createStoreForm.get('step3').get('deliveryPartner').hasError('required')">
                                                                     Required at least 1
