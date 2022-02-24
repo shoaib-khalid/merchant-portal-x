@@ -2,6 +2,8 @@ import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { of } from 'rxjs';
+import { concatMap, map, switchMap, tap } from 'rxjs/operators';
 import { DiscountsService } from '../order-discount-list/order-discount-list.service';
 import { StoreDiscountTierList } from '../order-discount-list/order-discount-list.types';
 
@@ -80,6 +82,8 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
 
     //disable add tier button 
     isDisplayAddTier : boolean = false;
+
+    discountId: string;
 
 
   constructor(
@@ -263,7 +267,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
   
   }
 
-  cancel(){
+  closeDialog(){
     this.dialogRef.close();
   }
 
@@ -327,9 +331,6 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
      
         this.storeDiscountTierList.push(this._formBuilder.group(discountTier));
     
-        console.log('this.horizontalStepperForm.get(step2):::',this.horizontalStepperForm.get('step2').value);
-        console.log('storeDiscountTierList:::',this.storeDiscountTierList);
-        
         //disable button add
         this.isDisplayAddTier=false;
     
@@ -377,36 +378,9 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
         }
     ));
 
-    console.log('toBeSendPayload[0]',toBeSendPayload[0]);
-    console.log('check formm value',this.horizontalStepperForm.value);
-    return;
-
-      // Update the discount on the server
-      this._discountService.updateDiscount(this.horizontalStepperForm.get('step1.id').value, toBeSendPayload[0])
-          .subscribe((resp) => {
-         
-          }, error => {
-              console.error(error);
-
-                  if (error.status === 417) {
-                      // Open the confirmation dialog
-                      const confirmation = this._fuseConfirmationService.open({
-                          title  : 'Discount date overlap',
-                          message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
-                          actions: {
-                              confirm: {
-                                  label: 'Ok'
-                              },
-                              cancel : {
-                                  show : false,
-                              }
-                          }
-                      });
-                  }
-              }
-          );
-
-        this.cancel();
+    this.addMainDiscountAndTier(toBeSendPayload[0],this.horizontalStepperForm.get('step2').value);
+    this.closeDialog();
+ 
   }
 
   deleteSelectedDiscountTier(indexForm): void
@@ -425,8 +399,59 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
     // Mark for check
     this._changeDetectorRef.markForCheck();
 
-    console.log('this.storeDiscountTierList',this.storeDiscountTierList);
-    console.log('this.horizontalStepperForm.get(step2).value',this.horizontalStepperForm.get('step2').value);
-
   }
+
+  async addMainDiscountAndTier(mainDiscountBody,tierListBody){
+    await this.insertMainOrderDiscount(mainDiscountBody,tierListBody);
+    setTimeout(() => {
+        return   this.sendTierList(tierListBody);   
+        }, 1000);
+     return;
+   }
+
+  async insertMainOrderDiscount(mainDiscountBody,tierListBody){
+      
+        this._discountService.createDiscount(mainDiscountBody).subscribe((response) => {
+    
+            return this.discountId= response['data'].id;
+    
+        }, (error) => {
+
+            if (error.status === 417) {
+                // Open the confirmation dialog
+                const confirmation = this._fuseConfirmationService.open({
+                    title  : 'Discount date overlap',
+                    message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
+                    actions: {
+                        confirm: {
+                            label: 'Ok'
+                        },
+                        cancel : {
+                            show : false,
+                        }
+                    }
+                });
+            }
+        });
+   }
+
+   sendTierList(tierListBody){
+    tierListBody
+        .forEach((list)=>{
+
+                let payloadTier ={
+                    calculationType: list.calculationType,
+                    discountAmount: list.discountAmount,
+                    startTotalSalesAmount: list.startTotalSalesAmount,
+                }                
+
+                this._discountService.createDiscountTier(this.discountId,payloadTier)
+                .subscribe();
+            }
+        ) 
+
+
+        return;
+
+   }
 }
