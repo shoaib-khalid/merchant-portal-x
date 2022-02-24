@@ -302,76 +302,76 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
     // @ Public Method
     // -----------------------------------------------------------------------------------------------------
 
-    toggleDetails(discountId: string): void
-    {
-        // If the discount is already selected...
-        if ( this.selectedDiscount && this.selectedDiscount.id === discountId )
-        {
-            // Close the details
-            this.closeDetails();
-            return;
-        }
+    // toggleDetails(discountId: string): void
+    // {
+    //     // If the discount is already selected...
+    //     if ( this.selectedDiscount && this.selectedDiscount.id === discountId )
+    //     {
+    //         // Close the details
+    //         this.closeDetails();
+    //         return;
+    //     }
 
-        this._discountProductService.getDiscountProductByDiscountId(discountId,0,5)
-            .subscribe((response) => {
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            });
+    //     this._discountProductService.getDiscountProductByDiscountId(discountId,0,5)
+    //         .subscribe((response) => {
+    //             // Mark for check
+    //             this._changeDetectorRef.markForCheck();
+    //         });
 
 
-        this._discountProductService.getStoreDiscountProduct(discountId)
-            .subscribe((response: ApiResponseModel<StoreDiscountProduct>)=>{
-                this.storeDiscountProduct = response.data;
+    //     this._discountProductService.getStoreDiscountProduct(discountId)
+    //         .subscribe((response: ApiResponseModel<StoreDiscountProduct>)=>{
+    //             this.storeDiscountProduct = response.data;
 
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            });
+    //             // Mark for check
+    //             this._changeDetectorRef.markForCheck();
+    //         });
 
-        // Get the discount by id
-        this._discountService.getDiscountById(discountId)
-            .subscribe((discount) => {
+    //     // Get the discount by id
+    //     this._discountService.getDiscountById(discountId)
+    //         .subscribe((discount) => {
 
-                // Set the selected discount
-                this.selectedDiscount = discount;
+    //             // Set the selected discount
+    //             this.selectedDiscount = discount;
 
-                // Fill the form
-                this.selectedDiscountForm.patchValue(discount);
+    //             // Fill the form
+    //             this.selectedDiscountForm.patchValue(discount);
 
-                //set the value time with time selector
-                this.setValueToTimeSelector(discount);
+    //             //set the value time with time selector
+    //             this.setValueToTimeSelector(discount);
 
-                // clear discount tier form array
-                (this.selectedDiscountForm.get('storeDiscountTierList') as FormArray).clear();
+    //             // clear discount tier form array
+    //             (this.selectedDiscountForm.get('storeDiscountTierList') as FormArray).clear();
 
-                //to handle logic if storeDiscount tier list exist or not
-                this.storeDiscountTierId = this.selectedDiscount.storeDiscountTierList[0]?.id?this.selectedDiscount.storeDiscountTierList[0].id:null;
-                // load discount tier form array with data frombackend
-                if(this.storeDiscountTierId !== null){
-                    discount.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
-                        this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
-                        this.storeDiscountTierList.push(this._formBuilder.group(item));
-                    });
-                } else {
-                    this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
-                    this.storeDiscountTierList.push(this._formBuilder.group(
-                        {
-                           discountAmount: null,
-                            startTotalSalesAmount: null,
-                            calculationType:null,
-                        }
-                    ));
-                }
+    //             //to handle logic if storeDiscount tier list exist or not
+    //             this.storeDiscountTierId = this.selectedDiscount.storeDiscountTierList[0]?.id?this.selectedDiscount.storeDiscountTierList[0].id:null;
+    //             // load discount tier form array with data frombackend
+    //             if(this.storeDiscountTierId !== null){
+    //                 discount.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
+    //                     this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
+    //                     this.storeDiscountTierList.push(this._formBuilder.group(item));
+    //                 });
+    //             } else {
+    //                 this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
+    //                 this.storeDiscountTierList.push(this._formBuilder.group(
+    //                     {
+    //                        discountAmount: null,
+    //                         startTotalSalesAmount: null,
+    //                         calculationType:null,
+    //                     }
+    //                 ));
+    //             }
 
-                this._discountService.getDiscountsTier(discountId)
-                    .subscribe((response) => {
-                        // Mark for check
-                        this._changeDetectorRef.markForCheck();
-                    });
+    //             this._discountService.getDiscountsTier(discountId)
+    //                 .subscribe((response) => {
+    //                     // Mark for check
+    //                     this._changeDetectorRef.markForCheck();
+    //                 });
 
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            });
-    }
+    //             // Mark for check
+    //             this._changeDetectorRef.markForCheck();
+    //         });
+    // }
 
     closeDetails(): void
     {
@@ -674,6 +674,67 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
     }
 
     openEditPopUp(discountId?:string)    {
+
+        this._discountProductService.getDiscountProductByDiscountId(discountId,0,5)
+        .subscribe((response) => {
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
+
+
+        this._discountProductService.getStoreDiscountProduct(discountId)
+        .subscribe((response: ApiResponseModel<StoreDiscountProduct>)=>{
+            this.storeDiscountProduct = response.data;
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
+
+        // Get the discount by id
+        this._discountService.getDiscountById(discountId)
+            .subscribe((discount) => {
+
+                // Set the selected discount
+                this.selectedDiscount = discount;
+
+                // Fill the form
+                this.selectedDiscountForm.patchValue(discount);
+
+                //set the value time with time selector
+                this.setValueToTimeSelector(discount);
+
+                // clear discount tier form array
+                (this.selectedDiscountForm.get('storeDiscountTierList') as FormArray).clear();
+
+                //to handle logic if storeDiscount tier list exist or not
+                this.storeDiscountTierId = this.selectedDiscount.storeDiscountTierList[0]?.id?this.selectedDiscount.storeDiscountTierList[0].id:null;
+                // load discount tier form array with data frombackend
+                if(this.storeDiscountTierId !== null){
+                    discount.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
+                        this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
+                        this.storeDiscountTierList.push(this._formBuilder.group(item));
+                    });
+                } else {
+                    this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
+                    this.storeDiscountTierList.push(this._formBuilder.group(
+                        {
+                        discountAmount: null,
+                            startTotalSalesAmount: null,
+                            calculationType:null,
+                        }
+                    ));
+                }
+
+                this._discountService.getDiscountsTier(discountId)
+                    .subscribe((response) => {
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    });
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+
         const dialogRef = this._dialog.open(
             EditProductDiscountDialogComponent, {
                 width: '1030px',
