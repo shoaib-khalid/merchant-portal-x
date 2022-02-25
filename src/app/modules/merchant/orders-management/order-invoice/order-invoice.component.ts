@@ -134,7 +134,8 @@ export class OrderInvoiceComponent implements OnInit {
             this.invoiceForm.get('storeEmail').setValue(order["data"].store.email);
             this.invoiceForm.get('storeUrl').setValue(""); 
             this.invoiceForm.get('customerName').setValue(order["data"].orderPaymentDetail.accountName);
-            this.invoiceForm.get('customerAddress').setValue(order["data"].orderShipmentDetail.address);
+            let detailAdress = order["data"].orderShipmentDetail.address+ ' , '+ order["data"].orderShipmentDetail.city + ' , '+ order["data"].orderShipmentDetail.state+ ' , '+ order["data"].orderShipmentDetail.zipcode;
+            this.invoiceForm.get('customerAddress').setValue(detailAdress);
             this.invoiceForm.get('customerPhoneNumber').setValue(order["data"].orderShipmentDetail.phoneNumber);
             this.invoiceForm.get('customerEmail').setValue(order["data"].orderShipmentDetail.email);
 
