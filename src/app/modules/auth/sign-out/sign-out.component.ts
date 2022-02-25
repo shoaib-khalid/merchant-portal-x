@@ -62,4 +62,15 @@ export class AuthSignOutComponent implements OnInit, OnDestroy
         this._unsubscribeAll.next();
         this._unsubscribeAll.complete();
     }
+
+
+
+    signIn(): void
+    {
+        // Unsubscribe from all subscriptions
+        this._unsubscribeAll.next();
+        this._unsubscribeAll.complete();
+
+        this._router.navigate(['sign-in']);
+    }
 }
