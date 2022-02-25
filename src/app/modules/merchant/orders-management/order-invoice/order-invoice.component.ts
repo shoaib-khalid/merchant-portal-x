@@ -13,6 +13,16 @@ import { Order, OrderItem } from '../orders-list/orders-list.types';
 @Component({
   selector: 'app-order-invoice',
   templateUrl: './order-invoice.component.html',
+  styles: [
+    `
+    /* to remove visible container when window dialog is opened  */
+    ::ng-deep .order-invoice-custom-dialog-class {
+      mat-dialog-container {
+        padding: 0 !important;
+      }
+    }
+    `
+  ]
 })
 export class OrderInvoiceComponent implements OnInit {
 
