@@ -381,58 +381,64 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
 
     createDiscount(): void
     {
-        const dialogRef = this._dialog.open(CreateProductDiscountDialogComponent, { disableClose: true });
-        dialogRef.afterClosed().subscribe(result => {
-            if (result.status === true) {
-                // this will remove the item from the object
-                const createDiscountBody  = {
-                    discountName: result.discountName,
-                    discountType: result.discountOn,
-                    startDate: result.startDate,
-                    startTime: result.startTime,
-                    endDate: result.endDate,
-                    endTime: result.endTime,
-                    isActive: result.isActive,
-                    maxDiscountAmount: result.maxDiscountAmount,
-                    normalPriceItemOnly: result.normalPriceItemOnly,
-                    storeId: this.storeId$
-                };
-        
-                // Create the discount
-                this._discountService.createDiscount(createDiscountBody).subscribe(async (newDiscount) => {
-                    
-                    // Go to new discount
-                    this.selectedDiscount = newDiscount["data"];
-    
-                    // Update current form with new discount data
-                    this.selectedDiscountForm.patchValue(newDiscount["data"]);
-
-                    //set value of time with time selector
-                    this.setValueToTimeSelector(newDiscount["data"]);
-
-                    //initialize the form
-                    this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
-                    this.storeDiscountTierList.push(this._formBuilder.group(
-                        {
-                           discountAmount: null,
-                            startTotalSalesAmount: null,
-                            calculationType:null,
-                        }
-                    ));
-    
-                    // Mark for check
-                    this._changeDetectorRef.markForCheck();
-                }, error => {
-
-                        if (error.status === 417) {
-                            // Open the confirmation dialog
-                            this.displayMessage('Discount date overlap','Your discount date range entered overlapping with existing discount date! Please change your date range','Ok',false);
-
-                        }
-
+        const dialogRef = this._dialog.open(
+            CreateProductDiscountDialogComponent, {
+                width: '1030px',
+                height: '520px',
+                disableClose: true,
                 });
-            }
-        });
+        dialogRef.afterClosed().subscribe();
+        // dialogRef.afterClosed().subscribe(result => {
+        //     if (result.status === true) {
+        //         // this will remove the item from the object
+        //         const createDiscountBody  = {
+        //             discountName: result.discountName,
+        //             discountType: result.discountOn,
+        //             startDate: result.startDate,
+        //             startTime: result.startTime,
+        //             endDate: result.endDate,
+        //             endTime: result.endTime,
+        //             isActive: result.isActive,
+        //             maxDiscountAmount: result.maxDiscountAmount,
+        //             normalPriceItemOnly: result.normalPriceItemOnly,
+        //             storeId: this.storeId$
+        //         };
+        
+        //         // Create the discount
+        //         this._discountService.createDiscount(createDiscountBody).subscribe(async (newDiscount) => {
+                    
+        //             // Go to new discount
+        //             this.selectedDiscount = newDiscount["data"];
+    
+        //             // Update current form with new discount data
+        //             this.selectedDiscountForm.patchValue(newDiscount["data"]);
+
+        //             //set value of time with time selector
+        //             this.setValueToTimeSelector(newDiscount["data"]);
+
+        //             //initialize the form
+        //             this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
+        //             this.storeDiscountTierList.push(this._formBuilder.group(
+        //                 {
+        //                    discountAmount: null,
+        //                     startTotalSalesAmount: null,
+        //                     calculationType:null,
+        //                 }
+        //             ));
+    
+        //             // Mark for check
+        //             this._changeDetectorRef.markForCheck();
+        //         }, error => {
+
+        //                 if (error.status === 417) {
+        //                     // Open the confirmation dialog
+        //                     this.displayMessage('Discount date overlap','Your discount date range entered overlapping with existing discount date! Please change your date range','Ok',false);
+
+        //                 }
+
+        //         });
+        //     }
+        // });
     }
 
     updateSelectedDiscount(): void
