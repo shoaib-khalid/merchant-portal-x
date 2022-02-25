@@ -358,6 +358,79 @@
                                                 </tr>
                                 
                                             </table> -->
+
+                                            <!-- Table in form -->
+
+                                            <table class="my-4 mr-2 w-full table-fixed">
+                                                <tr>
+                                                    <th>Product Name</th>
+                                                    <th>Original Price</th>
+                                                    <th>Discount%</th>
+                                                    <th>Action</th>                   
+                                            
+                                                </tr>
+                                                <tr *ngFor="let selectedProduct of productDiscountStepperForm.get('step2')['controls']; let i = index;" [formGroupName]="i">
+                                                    <td class="border-t border-gray-300 pt-2 pl-2"> 
+                                                        <div>
+                                                            <mat-form-field class="w-full pr-4">
+                                                                <input
+                                                                    matInput
+                                                                    [formControlName]="'sku'"
+                                                                    readonly
+                                                                >
+                                                            </mat-form-field>
+                                                        </div>
+                                                    </td>
+                                                    <td class="border-t border-gray-300 pt-2 pl-2">
+                                                        <div>
+                                                            <mat-form-field class="w-full pr-4">
+                                                                <input
+                                                                    type="number"
+                                                                    matInput
+                                                                    [formControlName]="'price'"
+                                                                    readonly
+                                                                >
+                                                            </mat-form-field>
+                                                        </div>
+                                                    </td>
+                                                    <td class="border-t border-gray-300 pt-2 pl-2">
+                                                        <div>
+                                                            <mat-form-field class="w-full pr-4">
+                                                                <input
+                                                                    type="number"
+                                                                    matInput
+                                                                    [formControlName]="'discountAmount'"
+                                                                    min="0" max="100"
+                                                                >
+                                                            </mat-form-field>
+                                                        </div>
+                                                    </td>
+            
+                                                    <td class="border-t border-gray-300 pt-2 pl-2">
+                                                        <div class="flex flex-wrap items-center justify-center ">
+                                                            <div class="flex flex-row w-full items-center justify-center">
+                                                            
+                                                                <input
+                                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                    type="button"
+                                                                    [id]="'delete-selected-product-discount-btn' + i"
+                                                                    (click)="deleteSelectedProductDiscount(i)"
+                                                                >
+                                                                <label
+                                                                    class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-warn hover:bg-warn-700 mb-3"
+                                                                    [for]="'delete-selected-product-discount-btn' + i"
+                                                                    matRipple>
+                                                                    <mat-icon
+                                                                        class="text-white icon-size-5"
+                                                                        [svgIcon]="'heroicons_outline:trash'">
+                                                                    </mat-icon>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                            
+                                                </tr>
+                                            </table>
                                         </div>
                                         <div class="flex items-center justify-between w-full">
                                             <!-- <mat-paginator
@@ -392,9 +465,9 @@
                             mat-flat-button
                             [color]="'primary'"
                             type="button"
-                            (click)="updateSelectedDiscount()"
+                            (click)="createDiscount()"
                             >
-                            Update
+                            Create
                             </button>
                         </div>
                     </mat-step>

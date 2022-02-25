@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { Product, ProductCategory, ProductPagination } from 'app/core/product/inventory.types';
@@ -8,6 +8,8 @@ import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { DiscountsProductService } from '../product-discount-list/product-discount-list.service';
 import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dialog/dialog.component';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { DiscountsService } from '../../order-discount/order-discount-list/order-discount-list.service';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 
 @Component({
   selector: 'dialog-create-product-discount',
@@ -51,6 +53,7 @@ export class CreateProductDiscountDialogComponent implements OnInit {
    
   //=====================new
   productDiscountStepperForm: FormGroup;
+  addProductDiscountLevel: FormArray;
 
   //Search mode
   inputSearchCategory : string ='';
@@ -79,6 +82,7 @@ export class CreateProductDiscountDialogComponent implements OnInit {
     private _formBuilder: FormBuilder,
     private _discountProductService : DiscountsProductService,
     private _inventoryService: InventoryService ,
+    private _discountService: DiscountsService,
     private _changeDetectorRef: ChangeDetectorRef,
     private _fuseConfirmationService: FuseConfirmationService,
 
@@ -107,7 +111,7 @@ export class CreateProductDiscountDialogComponent implements OnInit {
       }),
       //Product Discount
       step2: this._formBuilder.array([
-      
+
       ]),
     });
 
@@ -245,7 +249,7 @@ export class CreateProductDiscountDialogComponent implements OnInit {
 
   changeTime(){
     //===========Start Time==================
-    let pickStartTime = this.startTime;
+    let pickStartTime =this.productDiscountStepperForm.get('step1.startTime').value;
     let _pickStartTime;
 
     if ((<any>pickStartTime).timeAmPm === "PM") {
@@ -259,7 +263,7 @@ export class CreateProductDiscountDialogComponent implements OnInit {
     this.changeStartTime=String(changePickStartTime.getHours()).padStart(2, "0")+':'+String(changePickStartTime.getMinutes()).padStart(2, "0");    
     
     //==============End time===================
-    let pickEndTime = this.endTime;
+    let pickEndTime = this.productDiscountStepperForm.get('step1.endTime').value;
     let _pickEndTime;
 
     if ((<any>pickEndTime).timeAmPm === "PM") {
@@ -323,14 +327,30 @@ export class CreateProductDiscountDialogComponent implements OnInit {
      }
      else {
 
-         const itemCodesArr = this.onChangeSelectProductObject.map( el=> el.productInventories.map(el2=>el2.itemCode));//[[a,c,g],[d,e],[f]]
-         const itemCodes = Array.prototype.concat.apply([],itemCodesArr);//[a,c,g,d,e,f]
+        //  const itemCodesArr = this.onChangeSelectProductObject.map( el=> el.productInventories.map(el2=>el2.itemCode));//[[a,c,g],[d,e],[f]]
+        //  const itemCodes = Array.prototype.concat.apply([],itemCodesArr);//[a,c,g,d,e,f]
 
-         this.addAndReloadProductDiscount(itemCodes,this.discountId);
+        const itemCodesArr = this.onChangeSelectProductObject.map( 
+          el=> el.productInventories.
+          map((el2)=>({
+                  itemCode:el2.itemCode,
+                  sku:el2.sku,
+                  price:el2.price,
+                  calculationType:'PERCENT',
+                  discountAmount:0.00,
+          })));//[[a,c,g],[d,e],[f]]
+        const itemCodes = Array.prototype.concat.apply([],itemCodesArr);//[a,c,g,d,e,f];
+    
+        itemCodes.forEach((item) => {
+            this.addProductDiscountLevel = this.productDiscountStepperForm.get('step2') as FormArray;
+            this.addProductDiscountLevel.push(this._formBuilder.group(item));
+        });
 
          //clear the array after we post the data
          this.onChangeSelectProductValue.length = 0;
          this.onChangeSelectProductObject.length = 0;
+
+         console.log('form array',this.productDiscountStepperForm.get('step2').value);
 
          //CALL BACK THE DISCOUNT PRODUCT
          // return this._discountProductService.getByQueryDiscountsProduct(this.discountId, 0, 5);
@@ -339,6 +359,28 @@ export class CreateProductDiscountDialogComponent implements OnInit {
      }
      this._changeDetectorRef.markForCheck();
 
+  }
+
+  onChangeSelectProduct(product, change: MatCheckboxChange): void
+  {
+      if ( change.checked )
+      {
+          this.onChangeSelectProductValue.push(product.id);
+          this.onChangeSelectProductObject.push(product);
+          this._changeDetectorRef.markForCheck();
+      }
+      else
+      {
+
+          this.onChangeSelectProductValue.splice(this.onChangeSelectProductValue.findIndex(el => el  === product.id), 1);
+          this.onChangeSelectProductObject.splice(this.onChangeSelectProductObject.findIndex(el => el.id  === product.id), 1);
+
+          this._changeDetectorRef.markForCheck();
+          
+      }  
+      
+      console.log('check kat checkbox::::',this.onChangeSelectProductObject);
+      
   }
 
   displayMessage(getTitle:string,getMessage:string,getLabelConfirm:string,showCancel:boolean):MatDialogRef<FuseConfirmationDialogComponent,any>{
@@ -360,40 +402,7 @@ export class CreateProductDiscountDialogComponent implements OnInit {
 
   }
 
-  async addAndReloadProductDiscount(itemCodes,discountId){
-    await this.insertProductDiscount(itemCodes,discountId);
-    
-    setTimeout(() => {
-     return this._discountProductService.getDiscountProductByDiscountId(this.discountId, 0, 5).subscribe();
-     }, 1000);
-
-     return;
-  }
-
-  async insertProductDiscount(itemCodes,discountId){
-    itemCodes
-    .forEach((itemCode)=>{
-
-            let payloadProductDiscount ={
-                storeDiscountId:discountId,
-                itemCode:itemCode,
-                calculationType:'PERCENT',
-                discountAmount:0.00
-            }                
-
-            this._discountProductService.createProductDiscount(this.discountId,payloadProductDiscount).
-            subscribe((response) => {}
-            , error => {
-                this.displayMessage('Cannot be add','The selected product already exist','Ok',false);
-
-            }
-            )
-        }
-    ) 
-    return;
-  }
-
-  updateSelectedDiscount(): void
+  createDiscount(): void
   {
       this.changeTime();
       let sendPayload = [this.productDiscountStepperForm.get('step1').value];
@@ -403,7 +412,7 @@ export class CreateProductDiscountDialogComponent implements OnInit {
               startTime:this.changeStartTime,
               endTime:this.changeEndTime,
               discountName: x.discountName,
-              discountType:x.discountType,
+              discountType:'ITEM',
               endDate: x.endDate,
               id: x.id,
               isActive: x.isActive,
@@ -415,33 +424,76 @@ export class CreateProductDiscountDialogComponent implements OnInit {
           }
           ));
 
-      // Update the discount on the server
-      // this._discountService.updateDiscount(this.discountId, toBeSendPayload[0])
-      //     .subscribe((resp) => {
-         
-      //     }, error => {
-      //         console.error(error);
-
-      //             if (error.status === 417) {
-      //                 // Open the confirmation dialog
-      //                 const confirmation = this._fuseConfirmationService.open({
-      //                     title  : 'Discount date overlap',
-      //                     message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
-      //                     actions: {
-      //                         confirm: {
-      //                             label: 'Ok'
-      //                         },
-      //                         cancel : {
-      //                             show : false,
-      //                         }
-      //                     }
-      //                 });
-      //             }
-      //         }
-      //     );
+        //call method to add the main discount first then apply the selected product discount
+        // console.log('check body form',this.productDiscountStepperForm.value);
+        // return;
+        this.addMainDiscountAndAppliedProduct(toBeSendPayload[0],this.productDiscountStepperForm.get('step2').value)
 
           this.cancel();
   }
+
+  deleteSelectedProductDiscount(indexForm){
+
+  }
+
+  async insertMainDiscount(mainDiscountBody){
+      
+    this._discountService.createDiscount(mainDiscountBody).subscribe((response) => {
+
+        return this.discountId= response['data'].id;
+
+    }, (error) => {
+
+        if (error.status === 417) {
+            // Open the confirmation dialog
+            const confirmation = this._fuseConfirmationService.open({
+                title  : 'Discount date overlap',
+                message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
+                actions: {
+                    confirm: {
+                        label: 'Ok'
+                    },
+                    cancel : {
+                        show : false,
+                    }
+                }
+            });
+        }
+    });
+  }
+
+  async sendAppliedDiscountProduct(selectedProductDiscountBody){
+    selectedProductDiscountBody
+        .forEach((list)=>{
+
+          let payloadProductDiscount ={
+            storeDiscountId:this.discountId,
+            itemCode:list.itemCode,
+            calculationType:list.calculationType,
+            discountAmount:list.discountAmount
+          }              
+
+          this._discountProductService.createProductDiscount(this.discountId,payloadProductDiscount).
+          subscribe();
+
+          }
+        ) 
+
+
+        return;
+
+   }
+
+   async addMainDiscountAndAppliedProduct(mainDiscountBody,selectedProductDiscountBody){
+    await this.insertMainDiscount(mainDiscountBody);
+    setTimeout(() => {
+        //if encounter error during create main discount, the discount id does not exist 
+        if(this.discountId){
+            return   this.sendAppliedDiscountProduct(selectedProductDiscountBody);   
+        }
+        }, 1000);
+     return;
+   }
 
 
 }
