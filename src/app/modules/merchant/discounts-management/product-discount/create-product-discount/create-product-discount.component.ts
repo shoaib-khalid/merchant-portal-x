@@ -329,7 +329,7 @@ export class CreateProductDiscountDialogComponent implements OnInit {
 
         //  const itemCodesArr = this.onChangeSelectProductObject.map( el=> el.productInventories.map(el2=>el2.itemCode));//[[a,c,g],[d,e],[f]]
         //  const itemCodes = Array.prototype.concat.apply([],itemCodesArr);//[a,c,g,d,e,f]
-
+     
         const itemCodesArr = this.onChangeSelectProductObject.map( 
           el=> el.productInventories.
           map((el2)=>({
@@ -340,17 +340,26 @@ export class CreateProductDiscountDialogComponent implements OnInit {
                   discountAmount:0.00,
           })));//[[a,c,g],[d,e],[f]]
         const itemCodes = Array.prototype.concat.apply([],itemCodesArr);//[a,c,g,d,e,f];
-    
-        itemCodes.forEach((item) => {
+
+        //Filter objects that exists in both arrays
+        this.addProductDiscountLevel = this.productDiscountStepperForm.get('step2') as FormArray;
+
+        let checkItemCodeExist = itemCodes.filter(el=> this.addProductDiscountLevel.value.some(x => x.itemCode === el.itemCode));
+
+        if(checkItemCodeExist.length === 0){
+          itemCodes.forEach((item) => {
             this.addProductDiscountLevel = this.productDiscountStepperForm.get('step2') as FormArray;
             this.addProductDiscountLevel.push(this._formBuilder.group(item));
-        });
+          });
+        }else{
+          //show error message the itemcode exist already
+          this.displayMessage('Selected product already exist','Please select other product','Ok',false); 
+
+        }
 
          //clear the array after we post the data
          this.onChangeSelectProductValue.length = 0;
          this.onChangeSelectProductObject.length = 0;
-
-         console.log('form array',this.productDiscountStepperForm.get('step2').value);
 
          //CALL BACK THE DISCOUNT PRODUCT
          // return this._discountProductService.getByQueryDiscountsProduct(this.discountId, 0, 5);
@@ -425,8 +434,8 @@ export class CreateProductDiscountDialogComponent implements OnInit {
           ));
 
         //call method to add the main discount first then apply the selected product discount
-        // console.log('check body form',this.productDiscountStepperForm.value);
-        // return;
+
+        
         this.addMainDiscountAndAppliedProduct(toBeSendPayload[0],this.productDiscountStepperForm.get('step2').value)
 
           this.cancel();
@@ -434,6 +443,18 @@ export class CreateProductDiscountDialogComponent implements OnInit {
 
   deleteSelectedProductDiscount(indexForm){
 
+    this.addProductDiscountLevel= this.productDiscountStepperForm.get('step2') as FormArray;
+    let index = (this.addProductDiscountLevel.value.findIndex(function checkIndex(element, index, array) {
+      return   index=== indexForm;
+     }));
+
+    // remove from discount tier list
+    if (index > -1) {
+        this.addProductDiscountLevel.removeAt(index);
+    }
+
+    // Mark for check
+    this._changeDetectorRef.markForCheck();
   }
 
   async insertMainDiscount(mainDiscountBody){
