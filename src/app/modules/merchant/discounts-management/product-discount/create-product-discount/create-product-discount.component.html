@@ -139,6 +139,7 @@
                                 class="w-24"
                                 mat-flat-button
                                 [color]="'primary'"
+                                [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
                                 type="button"
                                 matStepperNext>
                                 Next

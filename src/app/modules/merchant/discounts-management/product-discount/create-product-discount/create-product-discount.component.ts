@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { Product, ProductCategory, ProductPagination } from 'app/core/product/inventory.types';
@@ -96,13 +96,13 @@ export class CreateProductDiscountDialogComponent implements OnInit {
       //Main Discount
       step1: this._formBuilder.group({
           id               : [''],
-          discountName   : [''],
+          discountName   : ['',Validators.required],
           discountType : [''],
-          startDate : [''],
-          endDate : [''],
-          startTime : [''],
-          endTime : [''],
-          isActive : [''],
+          startDate : ['',Validators.required],
+          endDate : ['',Validators.required],
+          startTime : ['',Validators.required],
+          endTime : ['',Validators.required],
+          isActive : ['',Validators.required],
           maxDiscountAmount : [''],
           normalPriceItemOnly : [''],
           storeId          : [''], // not used
@@ -433,7 +433,7 @@ export class CreateProductDiscountDialogComponent implements OnInit {
           }
           ));
 
-        //call method to add the main discount first then apply the selected product discount
+        //*call method to add the main discount first then apply the selected product discount*//
 
         
         this.addMainDiscountAndAppliedProduct(toBeSendPayload[0],this.productDiscountStepperForm.get('step2').value)
