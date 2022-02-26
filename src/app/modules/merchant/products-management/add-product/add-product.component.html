@@ -268,7 +268,7 @@
                                     </mat-form-field>
 
                                     <!-- Description -->
-                                    <div class="w-full mb-6">
+                                    <div class="w-full mb-2">
                                         <span class="font-medium leading-tight">Description *</span>
                                         <div class="mt-1.5 flex items-center -my-px w-full">
                                             <quill-editor
@@ -279,7 +279,10 @@
                                                 [modules]="quillModules"></quill-editor>
                                             <!-- use (onContentChanged)="textChanged($event)" for limiting quil editor -->
                                         </div>
-                                        <mat-error *ngIf="addProductForm.get('step1').get('description').hasError('required')">
+                                        <mat-error 
+                                            class="text-sm font-medium"
+                                            [ngClass]="addProductForm.get('step1').get('description').hasError('required') ? 'visible' : 'invisible'"
+                                        >
                                             Required
                                         </mat-error> 
                                     </div>
@@ -352,7 +355,7 @@
                                 </div>
                             </div>
 
-                            <!-- Category -->
+                            <!-- Category, Variant Toggle, Bulk Item, Vehicle Type -->
                             <div class="flex flex-col w-full lg:w-3/12">
                                 <!-- Category -->
                                 <div class="w-full">
@@ -483,14 +486,16 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <mat-error class="text-sm font-medium" *ngIf="addProductForm.get('step1').get('categoryId').hasError('required')">
+                                    <mat-error 
+                                    class="text-sm font-medium" 
+                                    [ngClass]="addProductForm.get('step1').get('categoryId').hasError('required') ? 'visible' : 'invisible'">
                                         Required
                                     </mat-error>
                                 </div>
-                                <!-- Variants Toggle -->
+                                <!-- Variants Toggle for Fnb-->
                                 <div 
                                     *ngIf="(store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK') && (productType !=='combo')"
-                                    class="flex flex-col w-full py-2 sm:pt-2"
+                                    class="flex flex-col w-full pb-4"
                                 >
                                     <span class="pb-1 font-medium leading-tight">Variants 
                                         <mat-icon
@@ -504,11 +509,69 @@
                                             class="pr-4"
                                             [formControlName]="'isVariants'"
                                             [color]="'primary'"
-                                            (change)="(addProductForm.get('step1').get('isVariants').value === false) ? deleteAllVariantsConfirmation() : return"
                                             >
                                             {{addProductForm.get('step1').get('isVariants').value === true ? 'Yes' : 'No'}}
                                         </mat-slide-toggle>
                                         
+                                    </div>
+                                </div>
+                                <!-- Bulk Item, Vehicle Type  -->
+                                <div class="w-full pt-0 flex flex-row justify-between">
+                                    <!-- Bulk Item  -->
+                                    <div class="flex flex-col">
+                                        <span class="mb-2 sm:mb-2 font-medium leading-tight">Bulk Item 
+                                            <mat-icon
+                                                matTooltip="Is this product a bulk item?"
+                                                class="transform scale-75"
+                                                [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                            </mat-icon>
+                                        </span>
+                                        <div class="mt-0 flex items-center justify-between -my-px w-full">
+                                            <mat-slide-toggle
+                                                [formControlName]="'isBulkItem'"
+                                                [color]="'primary'"
+                                                (change)="( (addProductForm.get('step1').get('isBulkItem').value === true) ) ? addProductForm.get('step1').get('vehicleType').setValue('CAR') : ''"
+                                                >
+                                                {{addProductForm.get('step1').get('isBulkItem').value === true ? 'Yes' : 'No'}}
+                                            </mat-slide-toggle>
+                                            <!-- *ngIf="selectedProductForm.get('isVariants').value === true" -->
+                                        </div>
+                                    </div>
+                                    <!-- Vehicle Type  -->
+                                    <div *ngIf="addProductForm.get('step1').get('isBulkItem').value === true">
+                                        <mat-form-field 
+                                            class="w-full"
+                                            appearance="fill" floatLabel="always"
+                                            >
+                                            <mat-label>Vehicle Type</mat-label>
+                                            <mat-select
+                                                class="w-full"
+                                                appearance="fill"
+                                                [formControlName]="'vehicleType'"
+                                                placeholder="Select one option"
+                                                (selectionChange)="addProductForm.get('step1').get('vehicleType').patchValue(vehicleTypeSelector.value)"
+                                                #vehicleTypeSelector="matSelect"
+                                                >
+                                                <mat-select-trigger>
+                                                    <span class="flex items-center">
+                                                        <span>{{ vehicleTypeSelector.triggerValue }}</span>
+                                                    </span>
+                                                </mat-select-trigger>
+                                                <div>
+                                                    <!-- <mat-option [value]="'MOTORCYCLE'">Motorcycle</mat-option> -->
+                                                    <mat-option [value]="'CAR'">Car</mat-option>
+                                                    <mat-option disabled="true" [value]="'VAN'">Van</mat-option>
+                                                    <mat-option disabled="true" [value]="'PICKUP'">Pickup Truck</mat-option>
+                                                    <mat-option disabled="true" [value]="'LARGEVAN'">Large Van</mat-option>
+                                                    <mat-option disabled="true" [value]="'SMALLLORRY'">Small Lorry</mat-option>
+                                                    <mat-option disabled="true" [value]="'MEDIUMLORRY'">Medium Lorry</mat-option>
+                                                    <mat-option disabled="true" [value]="'LARGELORRY'">Large Lorry</mat-option>
+                                                </div>
+                                            </mat-select>
+                                            <mat-error *ngIf="addProductForm.get('step1').get('vehicleType').hasError('required')">
+                                                Required
+                                            </mat-error>
+                                        </mat-form-field>
                                     </div>
                                 </div>
                             </div>
@@ -547,7 +610,7 @@
                                 </div>
                                 <!-- Track Stock Level -->
                                 <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
-                                    <span class="mb-2 sm:mb-4 font-medium leading-tight">Track Stock Level
+                                    <span class="mb-2 font-medium leading-tight">Track Stock Level
                                         <mat-icon
                                             matTooltip="Keep track the quantity of the stock"
                                             class="transform scale-75"
@@ -566,7 +629,7 @@
                                 </div>
                                 <!-- Out of Stock Selling -->
                                 <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
-                                    <span class="mb-2 sm:mb-4  font-medium leading-tight">Out-of-stock Sales
+                                    <span class="mb-2 font-medium leading-tight">Out-of-stock Sales
                                         <mat-icon
                                             matTooltip="Continue selling even when out of stock"
                                             class="transform scale-75 mr-4"
@@ -584,7 +647,7 @@
                                 </div>
                                 <!-- Low Stock Alarm -->
                                 <div class="flex flex-col w-full sm:w-1/5 sm:px-2 sm:border-r py-2 sm:py-0">
-                                    <span class="mb-2 sm:mb-4 font-medium leading-tight">Low Stock Alarm
+                                    <span class="mb-2 font-medium leading-tight">Low Stock Alarm
                                         <mat-icon
                                             matTooltip="Minimum 0 value to activate the alarm. Input negative value to disable the alarm"
                                             class="transform scale-75"
@@ -612,7 +675,7 @@
                                     *ngIf="productType === 'normal'"
                                     class="flex flex-col w-full sm:w-1/5 sm:pl-2 py-2 sm:py-0"
                                 >
-                                    <span class="mb-0 sm:mb-3 font-medium leading-tight">Variants 
+                                    <span class="mb-2 font-medium leading-tight">Variants 
                                         <mat-icon
                                             matTooltip="Does this product have variants?"
                                             class="transform scale-75"
@@ -623,7 +686,6 @@
                                         <mat-slide-toggle
                                             [formControlName]="'isVariants'"
                                             [color]="'primary'"
-                                            (change)="(addProductForm.get('step1').get('isVariants').value === false) ? deleteAllVariantsConfirmation() : return"
                                             >
                                             {{addProductForm.get('step1').get('isVariants').value === true ? 'Yes' : 'No'}}
                                         </mat-slide-toggle>
@@ -747,7 +809,7 @@
                                     [svgIcon]="'heroicons_outline:check'">
                             </mat-icon>
                             <span class="hidden sm:block justify-center">
-                                Update
+                                Create
                             </span>
                         </button>
                     </div>
@@ -1002,7 +1064,7 @@
                             <!-- Variant Details Table -->
                             <div class="flex flex-col w-full sm:w-3/4 sm:px-4 py-4 sm:py-0">
                                 <div class="font-medium tracking-tight mb-1 truncate">Variant Details</div>
-                                <div class="flex flex-auto">
+                                <div class="flex flex-auto overflow-x-auto">
                                     <div class="flex flex-col flex-auto sm:mb-18">
                                         <ng-container>
                                             <ng-container>
@@ -1260,7 +1322,7 @@
                         </button> -->
                         <!-- Back button  -->
                         <button
-                            class="sm:px-8 mr-2"
+                            class="sm:px-8 mr-2 sm:w-24"
                             mat-flat-button
                             [color]="'accent'"
                             type="button"
@@ -1276,7 +1338,7 @@
                         </button>
                         <!-- Create button -->
                         <button
-                            class="sm:px-8"
+                            class="sm:px-8 sm:w-24"
                             mat-flat-button
                             [color]="'primary'"
                             type="button"
@@ -1481,8 +1543,8 @@
                             <!-- Combo Details Table -->
                             <div class="flex flex-col w-full sm:w-3/4 sm:pl-8 py-4 sm:py-0">
                                 <div class="font-medium tracking-tight mb-1 truncate">Option Details</div>
-                                <div class="flex flex-auto overflow-hidden">
-                                    <div class="flex flex-col flex-auto sm:mb-18 overflow-hidden sm:overflow-y-auto">
+                                <div class="flex flex-auto overflow-x-auto">
+                                    <div class="flex flex-col flex-auto sm:mb-18">
                                         <ng-container>
                                             <ng-container>
                                                 <div class="grid">
@@ -1501,7 +1563,7 @@
                                                         <div *ngFor="let combos of productsCombos$; trackBy: trackByFn">
                                                             <div class="option-grid grid items-center gap-4 py-3 px-6 md:px-8 border-b">                                       
                                                                 <!-- Option Name -->
-                                                                <div class="hidden sm:block truncate">
+                                                                <div class="truncate">
                                                                     {{combos.title}}
                                                                 </div>
                             
@@ -1511,11 +1573,11 @@
                                                                 </div>
 
                                                                 <!-- Product in option -->
-                                                                <div class="hidden sm:block truncate">
+                                                                <div class="truncate">
                                                                     <ng-container *ngIf="combos.productPackageOptionDetail.length">
                                                                         <ng-container *ngFor="let package of combos.productPackageOptionDetail; trackBy: trackByFn">
-                                                                            <div *ngIf="package.product" class="flex items-center justify-center px-4 m-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                                                <span class="text-md font-medium whitespace-nowrap">{{package.product.name}}</span>
+                                                                            <div *ngIf="package.product" class="flex items-center justify-center px-4 my-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                                                <span class="truncate text-md font-medium whitespace-nowrap">{{package.product.name}}</span>
                                                                             </div>
                                                                         </ng-container>
                                                                     </ng-container>
@@ -1597,7 +1659,7 @@
                         </button> -->
                         <!-- Back button  -->
                         <button
-                            class="sm:px-8 mr-2"
+                            class="sm:px-8 mr-2 sm:w-24"
                             mat-flat-button
                             [color]="'accent'"
                             type="button"
@@ -1613,7 +1675,7 @@
                         </button>
                         <!-- Create button -->
                         <button
-                            class="sm:px-8"
+                            class="sm:px-8 sm:w-24"
                             mat-flat-button
                             [ngClass]="isLoading ? 'cursor-wait' : 'cursor-pointer'"
                             [disabled]="isLoading"

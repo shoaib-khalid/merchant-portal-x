@@ -72,7 +72,10 @@ import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
             }
 
             .option-grid {
-                grid-template-columns: 120px 112px auto 112px;
+                grid-template-columns: 120px 112px 128px 112px;
+                @screen lg {
+                    grid-template-columns: 120px 112px auto 112px;
+                }
             }
 
             .variant-grid {
@@ -288,6 +291,8 @@ export class EditProductComponent implements OnInit, OnDestroy
                 productAssets    : this._formBuilder.array([]),
                 productInventories: this._formBuilder.array([]),
                 productVariants  : this._formBuilder.array([]),
+                isBulkItem       : [false],
+                vehicleType      : [''],
                 // form completion
                 valid            : [false]
             }),
@@ -508,7 +513,25 @@ export class EditProductComponent implements OnInit, OnDestroy
         }
 
         // ---------------------
-        // IsVariant Toogle 
+        // IsBulkItem Toggle
+        // --------------------
+
+        // turn off the bulk item toggle if vehicleType is null
+        if (this.addProductForm.get('step1').get('vehicleType').value === null){
+            this.addProductForm.get('step1').get('isBulkItem').setValue(false)
+        }
+        // if vehicleType is motor, also turn off the toggle
+        else if (this.addProductForm.get('step1').get('vehicleType').value === 'MOTORCYCLE'){
+            this.addProductForm.get('step1').get('isBulkItem').setValue(false)
+        }
+        // else, turn on the toggle
+        else    
+            this.addProductForm.get('step1').get('isBulkItem').setValue(true)
+
+
+    
+        // ---------------------
+        // IsVariant Toggle 
         // ---------------------
 
         // set isVariants = true is productInventories.length > 0
@@ -1149,163 +1172,6 @@ export class EditProductComponent implements OnInit, OnDestroy
         }
     }
 
-    addNewProduct0() {
-
-        // Do nothing if the form is invalid
-        let BreakException = {};
-        try {
-            Object.keys(this.addProductForm.controls).forEach(key => {
-                const controlErrors: ValidationErrors = this.addProductForm.get('step1').get(key).errors;
-                if (controlErrors != null) {
-                    Object.keys(controlErrors).forEach(keyError => {
-                        this.message = 'Field "' + key + '" error: ' + keyError;                        
-                        throw BreakException;
-                    });
-                    this.addProductForm.get('step1').get('valid').patchValue(false);
-                }
-            });
-        } catch (error) {
-            return;
-        }
-        
-        // --------------------
-        // Process
-        // --------------------
-        
-        this.addProductForm.get('step1').get('valid').patchValue(true);
-
-        this.addProductForm.get('step1').get('images').patchValue(this.images);
-        this.addProductForm.get('step1').get('imagefiles').patchValue(this.imagesFile);
-        this.addProductForm.get('step1').get('thumbnailIndex').patchValue(this.thumbnailIndex);
-        this.dialogRef.close(this.addProductForm.value);
-    }
-    /**
-     * Create product
-     */
-    addNewProductMethod(): void
-    {
-        this.creatingProduct = true;
-
-        const {valid, ...productBody} = this.addProductForm.get('step1').value
-
-        const { sku, availableStock, price, images, imagefiles, thumbnailIndex, ...newProductBody } = productBody;
-        
-        // Get store domain
-        let storeFrontURL = 'https://' + this.store$.domain;
-
-        // newProductBody["categoryId"] = categoryId;
-        newProductBody["seoName"] = newProductBody.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
-        newProductBody["seoUrl"] = storeFrontURL + "/product/" + newProductBody.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
-        newProductBody["storeId"] = this.store$.id;
-        newProductBody["minQuantityForAlarm"] = newProductBody.minQuantityForAlarm === false ? -1 : newProductBody.minQuantityForAlarm;
-        newProductBody["packingSize"] = newProductBody.packagingSize ? newProductBody.packagingSize : "S";
-        newProductBody["isPackage"] = (this.productType === "combo") ? true : false;
-        newProductBody["allowOutOfStockPurchases"] = ((this.store$.verticalCode === "FnB" || this.store$.verticalCode === "FnB_PK") && (newProductBody.status !== "OUTOFSTOCK")) ? true : false;
-                
-        // Create the product
-        this._inventoryService.createProduct(newProductBody)
-            .pipe(
-                finalize(() => {
-                    this.creatingProduct = false;
-                })
-            )
-            .subscribe(async (newProduct) => {
-
-                this.newProductId = newProduct["data"].id;
-                this.selectedProduct = newProduct["data"];                
-
-                this.products$
-                    .pipe(take(1)) 
-                    .subscribe(products => {
-
-                        // filter after update
-                        this.filterProductOptionsMethod(products);
-                    })
-
-                // Add Inventory to product
-                this._inventoryService.addInventoryToProduct(newProduct["data"], { sku: sku, quantity: availableStock, price:price, itemCode:newProduct["data"].id + "aa" } )
-                    .subscribe((response)=>{
-                        // update sku, price, quantity display since it's not part of product but product inventory
-                        // this.displayPrice = response.price;
-                        // this.displayQuantity = response.quantity;
-                        // this.displaySku = response.sku;
-
-
-                    });
-
-                // Update the assets product on the server (backend kena enable update)
-                if (imagefiles) {
-                    for (var i = 0; i < imagefiles.length; i++) {
-                        // create a new one
-                        let formData = new FormData();
-                        formData.append('file',imagefiles[i]);
-                        this._inventoryService.addProductAssets(newProduct["data"].id, formData, (i === thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
-                            .pipe(takeUntil(this._unsubscribeAll))
-                            .subscribe((response)=>{
-                                if (response.isThumbnail){
-                                    this.selectedProduct.thumbnailUrl = response.url;
-                                }
-
-                                // Mark for check
-                                this._changeDetectorRef.markForCheck();
-                            });
-                    }
-
-                    // load images
-                    this.currentImageIndex = 0;
-                    this.imagesFile = imagefiles;
-                    this.images = images;
-                    this.thumbnailIndex = thumbnailIndex;
-                }
-
-                // Go to new product
-                // this.selectedProduct = newProduct["data"];
-                                        
-                // Update current form with new product data
-                // this.createdProductForm.patchValue(newProduct["data"]);
-
-                // Set image & isVariants to false ...
-                // this.selectedProductForm.get('isVariants').patchValue(false);
-                
-                // Set filtered variants to empty array
-                this.filteredProductVariants = [];
-                
-                // // Set variants to empty array
-                // this.variants = [];
-
-                // // Set selectedProduct variants to empty array
-                // this.selectedProduct.variants = [];
-
-                if (this.addProductForm.get('step1').get('isVariants').value === false && this.productType !== 'combo') {
-                    
-                    // Show a success message
-                    this.showFlashMessage('success');
-                    // Set delay before closing the window
-                    setTimeout(() => {
-
-                        // close the window
-                        this.cancelAddProduct()
-            
-                        // Mark for check
-                        this._changeDetectorRef.markForCheck();
-                    }, 1000);
-                }
-
-                // get product combo list
-                if (this.productType === "combo") {
-                    this._inventoryService.getProductPackageOptions(this.selectedProduct.id)
-                        .pipe(takeUntil(this._unsubscribeAll))
-                        .subscribe((response)=>{
-                            this.productsCombos$ = response["data"];
-                            
-                        });
-                }
-
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            });
-    }
-
     /**
      * Update the selected product using the form data
      */
@@ -1318,6 +1184,10 @@ export class EditProductComponent implements OnInit, OnDestroy
         // Get store domain
         let storeFrontURL = 'https://' + this.store$.domain;
 
+        // if the bulk item toggle stays close, then set to 'MOTORCYCLE'
+        if (this.addProductForm.get('step1').get('isBulkItem').value === false){
+            this.addProductForm.get('step1').get('vehicleType').setValue('MOTORCYCLE')
+        }
         const step1FormGroup = this.addProductForm.get('step1') as FormGroup;
         
         // Get the product object
@@ -2014,10 +1884,6 @@ export class EditProductComponent implements OnInit, OnDestroy
         // }
     } 
 
-    // displayVariants(){
-    //     console.log('display variants');
-        
-    // }
     deleteAllVariantsConfirmation(){
 
         // Open the confirmation dialog
@@ -2059,6 +1925,7 @@ export class EditProductComponent implements OnInit, OnDestroy
                 this.variantComboItems = [];
                 this.variantComboOptions = [];
 
+                // enable back the fields if variant toggle is set to 'No'
                 this.addProductForm.get('step1').get('sku').enable();
                 this.addProductForm.get('step1').get('price').enable();    
                 this.addProductForm.get('step1').get('availableStock').enable();   
@@ -2113,14 +1980,6 @@ export class EditProductComponent implements OnInit, OnDestroy
      */
     createVariantMethod(name: string): void
     {
-
-    //  this.productVariants.clear;
-
-    //  let _item = this._formBuilder.group({
-    //      id:null,
-    //      name: name,
-    //      productVariantsAvailable:this._formBuilder.array([]),
-    //  });
 
     // push to the array loop
         let item = {
@@ -2191,13 +2050,6 @@ export class EditProductComponent implements OnInit, OnDestroy
              
                 this.getallCombinations(this.variantComboItems)
  
-                //  variant.productVariantsAvailable.forEach(x => {
-
-                //      // to remove combinations with deleted options
-                //      this.selectedVariantCombos = this.selectedVariantCombos.filter(y => !y.variant.includes(x.value));
-
-                //     })
-
                 // remove variant available to be created, if not, api will return error    
                 this.variantAvailableToBeCreated = this.variantAvailableToBeCreated.filter(y => !y.variantName.includes(variant.name));
 

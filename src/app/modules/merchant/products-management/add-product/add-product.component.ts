@@ -68,7 +68,10 @@ import { AddProductValidationService } from './add-product.validation.service';
                 max-height: 370px;
             }
             .option-grid {
-                grid-template-columns: 120px 112px auto 112px;
+                grid-template-columns: 120px 112px 128px 112px;
+                @screen lg {
+                    grid-template-columns: 120px 112px auto 112px;
+                }
             }
 
             .variant-grid {
@@ -245,7 +248,8 @@ export class AddProductComponent implements OnInit, OnDestroy
                 thumbnailIndex   : [0],
                 isVariants       : [false],
                 isPackage        : [false], // combo
-    
+                isBulkItem       : [false],
+                vehicleType      : [''],
                 // form completion
                 valid            : [false]
             }),
@@ -743,42 +747,17 @@ export class AddProductComponent implements OnInit, OnDestroy
         }
     }
 
-    addNewProduct0() {
-
-        // Do nothing if the form is invalid
-        let BreakException = {};
-        try {
-            Object.keys(this.addProductForm.controls).forEach(key => {
-                const controlErrors: ValidationErrors = this.addProductForm.get('step1').get(key).errors;
-                if (controlErrors != null) {
-                    Object.keys(controlErrors).forEach(keyError => {
-                        this.message = 'Field "' + key + '" error: ' + keyError;                        
-                        throw BreakException;
-                    });
-                    this.addProductForm.get('step1').get('valid').patchValue(false);
-                }
-            });
-        } catch (error) {
-            return;
-        }
-        
-        // --------------------
-        // Process
-        // --------------------
-        
-        this.addProductForm.get('step1').get('valid').patchValue(true);
-
-        this.addProductForm.get('step1').get('images').patchValue(this.images);
-        this.addProductForm.get('step1').get('imagefiles').patchValue(this.imagesFile);
-        this.addProductForm.get('step1').get('thumbnailIndex').patchValue(this.thumbnailIndex);
-        this.dialogRef.close(this.addProductForm.value);
-    }
     /**
      * Create product
      */
     addNewProductMethod(): void
     {
         this.creatingProduct = true;
+
+        // if the bulk item toggle stays close, then set to 'motorcycle'
+        if (this.addProductForm.get('step1').get('isBulkItem').value === false){
+            this.addProductForm.get('step1').get('vehicleType').setValue('MOTORCYCLE')
+        }
 
         const {valid, ...productBody} = this.addProductForm.get('step1').value
 
@@ -1336,15 +1315,6 @@ export class AddProductComponent implements OnInit, OnDestroy
         // }
     } 
 
-    // displayVariants(){
-    //     console.log('display variants');
-        
-    // }
-    deleteAllVariantsConfirmation(){
-        console.log('delete variants');
-        
-    }
-
     /**
      * Should the create variant button be visible
      *
@@ -1384,14 +1354,6 @@ export class AddProductComponent implements OnInit, OnDestroy
      */
     createVariantMethod(name: string): void
     {
-
-    //  this.productVariants.clear;
-
-    //  let _item = this._formBuilder.group({
-    //      id:null,
-    //      name: name,
-    //      productVariantsAvailable:this._formBuilder.array([]),
-    //  });
 
     // push to the array loop
         let item = {
@@ -1439,12 +1401,6 @@ export class AddProductComponent implements OnInit, OnDestroy
             if ( result === 'confirmed' )
             {
 
-                // only add to the variantToBeDeleted array if id is null; which means variant is not in BE
-                // if (variant.id){
-                //     // Use to delete on BE
-                //     this.variantToBeDeleted.push(variant)
-                // }
-
                 // Remove from array to be created
                 this.variantToBeCreated.splice(variantIdx, 1);
 
@@ -1461,13 +1417,6 @@ export class AddProductComponent implements OnInit, OnDestroy
                 this.selectedVariantCombos = []
              
                 this.getallCombinations(this.variantComboItems)
- 
-                //  variant.productVariantsAvailable.forEach(x => {
-
-                //      // to remove combinations with deleted options
-                //      this.selectedVariantCombos = this.selectedVariantCombos.filter(y => !y.variant.includes(x.value));
-
-                //     })
 
                 // remove variant available to be created, if not, api will return error    
                 this.variantAvailableToBeCreated = this.variantAvailableToBeCreated.filter(y => !y.variantName.includes(variant.name));
@@ -1552,15 +1501,6 @@ export class AddProductComponent implements OnInit, OnDestroy
             // If the confirm button pressed...
             if ( result === 'confirmed' )
             {
-                //----------------------------
-                // variantAvailableToBeDeleted
-                //----------------------------
-
-                // only add to the variantAvailableToBeDeleted array if id is null; which means variant avail is not in BE
-                if (variantAvailable.id){
-                    // Use to delete on BE
-                    // this.variantAvailableToBeDeleted.push(variantAvailable)
-                }
 
                 //----------------------------
                 // variantAvailableToBeCreated
@@ -1663,10 +1603,6 @@ export class AddProductComponent implements OnInit, OnDestroy
         if (this.selectedVariantCombos[idx]?.assetId) {
             // this.variantImagesToBeDeleted.push(this.selectedVariantCombos[idx].assetId)
         }
-
-        // if (this.variantimages[idx].id) {
-        //     this.variantImagesToBeDeleted.push(this.variantimages[idx].id)
-        // }
 
         // call previewImage to assign 'preview' field with image url 
         this.previewImage(file).then(data => {
