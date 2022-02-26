@@ -13,6 +13,16 @@ import { Order, OrderItem } from '../orders-list/orders-list.types';
 @Component({
   selector: 'app-order-invoice',
   templateUrl: './order-invoice.component.html',
+  styles: [
+    `
+    /* to remove visible container when window dialog is opened  */
+    ::ng-deep .order-invoice-custom-dialog-class {
+      mat-dialog-container {
+        padding: 0 !important;
+      }
+    }
+    `
+  ]
 })
 export class OrderInvoiceComponent implements OnInit {
 
@@ -129,12 +139,32 @@ export class OrderInvoiceComponent implements OnInit {
             this.invoiceForm.patchValue(order["data"]);
 
             this.invoiceForm.get('storeName').setValue(order["data"].store.name);
-            this.invoiceForm.get('storeAddress').setValue(order["data"].store.address);
+            
+            const merchantAddress = () => {
+                const address1 = order["data"].store.address === null ? ' ' : order["data"].store.address+' , ';
+                const city1 = order["data"].store.city === null ? ' ' : order["data"].store.city+' , ';
+                const state1 = order["data"].store.state === null ? ' ' : order["data"].store.state+' , ';
+                const postcode1 = order["data"].store.postcode === null ? ' ' : order["data"].store.postcode+'  ';
+  
+                return `${address1}${city1}${state1}${postcode1}`;
+            }
+
+            this.invoiceForm.get('storeAddress').setValue(merchantAddress());
             this.invoiceForm.get('storePhoneNumber').setValue(order["data"].store.phone);
             this.invoiceForm.get('storeEmail').setValue(order["data"].store.email);
             this.invoiceForm.get('storeUrl').setValue(""); 
             this.invoiceForm.get('customerName').setValue(order["data"].orderPaymentDetail.accountName);
-            this.invoiceForm.get('customerAddress').setValue(order["data"].orderShipmentDetail.address);
+
+            const detailCustomerAddress = () => {
+              const address2 = order["data"].orderShipmentDetail.address === null ? ' ' : order["data"].orderShipmentDetail.address+' , ';
+              const city2 = order["data"].orderShipmentDetail.city === null ? ' ' : order["data"].orderShipmentDetail.city+' , ';
+              const state2 = order["data"].orderShipmentDetail.state === null ? ' ' : order["data"].orderShipmentDetail.state+' , ';
+              const postcode2 = order["data"].orderShipmentDetail.zipcode === null ? ' ' : order["data"].orderShipmentDetail.zipcode+'  ';
+
+              return `${address2}${city2}${state2}${postcode2}`;
+            }
+
+            this.invoiceForm.get('customerAddress').setValue(detailCustomerAddress());
             this.invoiceForm.get('customerPhoneNumber').setValue(order["data"].orderShipmentDetail.phoneNumber);
             this.invoiceForm.get('customerEmail').setValue(order["data"].orderShipmentDetail.email);
 

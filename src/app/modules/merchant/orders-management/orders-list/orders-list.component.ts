@@ -26,10 +26,6 @@ import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dia
     templateUrl    : './orders-list.component.html',
     styles       : [
         `
-        /* to remove visible container when window dialog is opened  */
-        .mat-dialog-container {
-          padding: 0 !important;
-        }
         /* to truncate long text  */
         .truncate-cell {
             max-width: 150px; 
@@ -635,7 +631,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
 
     viewDetails(orderId){
         // this._router.navigateByUrl('/orders/'+orderId)
-        const dialogRef = this._dialog.open(OrderInvoiceComponent, { data: orderId });
+        const dialogRef = this._dialog.open(OrderInvoiceComponent, { panelClass: 'order-invoice-custom-dialog-class', data: orderId });
         
         dialogRef.afterClosed()
         .subscribe((result) => {
