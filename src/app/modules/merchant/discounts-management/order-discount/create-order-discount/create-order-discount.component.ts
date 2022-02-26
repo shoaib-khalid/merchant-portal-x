@@ -2,8 +2,11 @@ import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { of } from 'rxjs';
-import { concatMap, map, switchMap, tap } from 'rxjs/operators';
+import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
+import { StoresService } from 'app/core/store/store.service';
+import { Store } from 'app/core/store/store.types';
+import { of, Subject } from 'rxjs';
+import { concatMap, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { DiscountsService } from '../order-discount-list/order-discount-list.service';
 import { StoreDiscountTierList } from '../order-discount-list/order-discount-list.types';
 
@@ -29,10 +32,20 @@ import { StoreDiscountTierList } from '../order-discount-list/order-discount-lis
         .content{
             height:400px;
         }
+        .create-order-discount-grid {
+            grid-template-columns: 80px 80px auto 80px;
+    
+            @screen sm {
+                grid-template-columns: 20px 120px 120px auto 80px;
+            }
+        }
     `]
 })
 export class CreateOrderDiscountDialogComponent implements OnInit {
 
+    // get current store
+    store$: Store;
+    
     disabledProceed: boolean = true;
 
     discountName: string;
@@ -85,12 +98,19 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
 
     discountId: string;
 
+    currentScreenSize: string[] = [];
+    flashMessage: 'success' | 'error' | null = null;
+    isLoading: boolean = false;
+    
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
 
   constructor(
     public dialogRef: MatDialogRef<CreateOrderDiscountDialogComponent>,
     private _formBuilder: FormBuilder,
     private _fuseConfirmationService: FuseConfirmationService,
     private _discountService: DiscountsService,
+    private _fuseMediaWatcherService: FuseMediaWatcherService,
+    private _storesService: StoresService,
     private _changeDetectorRef: ChangeDetectorRef,
   ) { }
 
@@ -126,6 +146,28 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
         
         ]),
     });
+
+    // Get the store
+    this._storesService.store$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe((store: Store) => {
+
+            // Update the store
+            this.store$ = store;
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
+
+    this._fuseMediaWatcherService.onMediaChange$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe(({matchingAliases}) => {               
+
+            this.currentScreenSize = matchingAliases;                
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
   }
 
   get storeId$(): string
@@ -360,6 +402,9 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
 
   createDiscount(): void
   {
+    // Set loading to true
+    this.isLoading = true;
+
     this.changeTime();
     let sendPayload = [this.horizontalStepperForm.get('step1').value];
     let toBeSendPayload=sendPayload.
@@ -378,7 +423,10 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
         }
     ));
 
-    this.addMainDiscountAndTier(toBeSendPayload[0],this.horizontalStepperForm.get('step2').value);
+    this.addMainDiscountAndTier(toBeSendPayload[0],this.horizontalStepperForm.get('step2').value).then(()=>{
+        // Set loading to false
+        this.isLoading = false;
+    });
     this.closeDialog();
  
   }
@@ -412,10 +460,13 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
   async insertMainOrderDiscount(mainDiscountBody,tierListBody){
       
         this._discountService.createDiscount(mainDiscountBody).subscribe((response) => {
-    
+            // Show a success message
+            this.showFlashMessage('success');
+
             return this.discountId= response['data'].id;
-    
-        }, (error) => {
+        },((error) => {
+            // Show a error message
+            this.showFlashMessage('error');
 
             if (error.status === 417) {
                 // Open the confirmation dialog
@@ -432,7 +483,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
                     }
                 });
             }
-        });
+        }));
    }
 
    sendTierList(tierListBody){
@@ -454,4 +505,22 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
         return;
 
    }
+
+    showFlashMessage(type: 'success' | 'error'): void
+    {
+        // Show the message
+        this.flashMessage = type;
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+
+        // Hide it after 3 seconds
+        setTimeout(() => {
+
+            this.flashMessage = null;
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        }, 3000);
+    }
 }

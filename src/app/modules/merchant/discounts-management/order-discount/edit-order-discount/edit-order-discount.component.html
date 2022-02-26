@@ -1,4 +1,4 @@
-<div class="flex flex-col max-w-260 md:min-w-160 -m-6">
+<div class="flex flex-col max-w-256 lg:min-w-256 -m-6 overflow-hidden">
     <ng-container *ngIf="loadDetails">
         <!-- Compose form -->
         <div class="flex px-4">
@@ -18,17 +18,22 @@
                         <!-- <p class="my-6 font-medium">
                             Fill in order discount period.
                         </p> -->
-                        <div class="content overflow-y-auto">
+                        <div class="content flex flex-col h-full sm:h-auto mb-3 w-full overflow-hidden sm:overflow-y-auto">
                             <!-- discount name -->
                             <mat-form-field 
                                 appearance="fill"
-                                class="w-full">
+                                class="w-full fuse-mat-emphasized-affix">
                                 <mat-label>Discount Name</mat-label>
                                 <input 
                                     matInput
                                     placeholder="Enter discount name"
                                     [formControlName]="'discountName'"        
                                 >
+                                <mat-icon
+                                    *ngIf="currentScreenSize.includes('sm') ? true : false"
+                                    matPrefix
+                                    [svgIcon]="'heroicons_outline:tag'">
+                                </mat-icon>
                             </mat-form-field>
     
                             <!-- capped amount status discounton  -->
@@ -36,7 +41,7 @@
                                 <!-- capped amount-->
                                 <mat-form-field 
                                     appearance="fill"
-                                    class="w-full sm:w-1/3 sm:pr-2">
+                                    class="w-full sm:w-1/3 sm:pr-2 fuse-mat-emphasized-affix">
                                     <mat-label>Capped amount</mat-label>
                                     <input 
                                         matInput
@@ -44,11 +49,16 @@
                                         type="number"
                                         [formControlName]="'maxDiscountAmount'"
                                     >
+                                    <mat-icon
+                                        *ngIf="currentScreenSize.includes('sm') ? true : false"
+                                        matPrefix
+                                        [svgIcon]="'heroicons_outline:currency-dollar'">
+                                    </mat-icon>
                                 </mat-form-field>
                                 <!-- status -->
                                 <mat-form-field 
                                     appearance="fill"
-                                    class="w-full sm:w-1/3 sm:pr-2">
+                                    class="w-full sm:w-1/3 sm:pr-2 fuse-mat-emphasized-affix">
                                     <mat-label>Status</mat-label>
                                     <mat-select
                                         class="w-full"
@@ -58,26 +68,33 @@
                                         <div>
                                             <mat-option [value]="true">Active</mat-option>
                                             <mat-option [value]="false">Inactive</mat-option>
-                                            
                                         </div>
                                     </mat-select>
+                                    <mat-icon
+                                        *ngIf="currentScreenSize.includes('sm') ? true : false"
+                                        matPrefix
+                                        [svgIcon]="'heroicons_outline:question-mark-circle'">
+                                    </mat-icon>
                                 </mat-form-field>
                                 <!-- discount on -->
                                 <mat-form-field 
                                     appearance="fill"
-                                    class="w-full sm:w-1/3">
+                                    class="w-full sm:w-1/3 fuse-mat-emphasized-affix">
                                     <mat-label>Discount on</mat-label>
                                     <mat-select
                                         class="w-full"
                                         [formControlName]="'discountType'"
-                                        placeholder="Select discount to be applied"
-                                        >
-                                        
+                                        placeholder="Select discount to be applied">
                                         <div>
                                             <mat-option [value]="'SHIPPING'">Shipping</mat-option>
                                             <mat-option [value]="'TOTALSALES'">Total Sales</mat-option>
                                         </div>
                                     </mat-select>
+                                    <mat-icon
+                                        *ngIf="currentScreenSize.includes('sm') ? true : false"
+                                        matPrefix
+                                        [svgIcon]="'mat_outline:confirmation_number'">
+                                    </mat-icon>
                                 </mat-form-field>
                             </div>
                     
@@ -86,16 +103,21 @@
                                 <div class="font-semibold mb-2 w-full">Start date/time</div>
                                 <div class="w-full flex flex-col sm:flex-row">
                                     <mat-form-field 
-                                        class="w-full sm:w-1/2 sm:pr-2"
+                                        class="w-full sm:w-1/2 sm:pr-2 fuse-mat-emphasized-affix"
                                         appearance="fill">
                                         <input 
                                             matInput 
                                             type="date" 
                                             [formControlName]="'startDate'"
                                         >
+                                        <mat-icon
+                                            *ngIf="currentScreenSize.includes('sm') ? true : false"
+                                            matPrefix
+                                            [svgIcon]="'heroicons_outline:calendar'">
+                                        </mat-icon>
                                     </mat-form-field>
                                     <mat-form-field 
-                                        class="w-full sm:w-1/2 sm:pl-2" 
+                                        class="w-full sm:w-1/2 sm:pl-2 fuse-mat-emphasized-affix" 
                                         appearance="fill">
                                         <time-selector
                                             class="w-full"
@@ -103,6 +125,11 @@
                                             type="time" 
                                             [formControlName]="'startTime'"                   
                                         ></time-selector>
+                                        <mat-icon
+                                            *ngIf="currentScreenSize.includes('sm') ? true : false"
+                                            matPrefix
+                                            [svgIcon]="'heroicons_outline:clock'">
+                                        </mat-icon>
                                     </mat-form-field>
                                 </div>
                             </div>
@@ -112,16 +139,21 @@
                                 <div class="font-semibold mb-2 w-full">End date/time</div>
                                 <div class="w-full flex flex-col sm:flex-row">
                                     <mat-form-field 
-                                        class="w-full sm:w-1/2 sm:pr-2"
+                                        class="w-full sm:w-1/2 sm:pr-2 fuse-mat-emphasized-affix"
                                         appearance="fill">
                                         <input 
                                             matInput 
                                             type="date" 
                                             [formControlName]="'endDate'"
                                         >
+                                        <mat-icon
+                                            *ngIf="currentScreenSize.includes('sm') ? true : false"
+                                            matPrefix
+                                            [svgIcon]="'heroicons_outline:calendar'">
+                                        </mat-icon>
                                     </mat-form-field>
                                     <mat-form-field 
-                                        class="w-full sm:w-1/2 sm:pl-2" 
+                                        class="w-full sm:w-1/2 sm:pl-2 fuse-mat-emphasized-affix" 
                                         appearance="fill">
                                         <time-selector
                                             class="w-full"
@@ -129,8 +161,12 @@
                                             type="time" 
                                             [formControlName]="'endTime'"                   
                                         ></time-selector>
+                                        <mat-icon
+                                            *ngIf="currentScreenSize.includes('sm') ? true : false"
+                                            matPrefix
+                                            [svgIcon]="'heroicons_outline:clock'">
+                                        </mat-icon>
                                     </mat-form-field>
-                        
                                 </div>
                             </div>
 
@@ -205,74 +241,81 @@
                         <!-- <p class="my-6 font-medium">
                         Insert Tier List
                         </p> -->
-                        <div class="content overflow-y-auto">
-                            <fieldset class="border border-solid border-gray-300 rounded my-1 mx-5">
-                                <legend class="text font-bold ml-2 px-2">Add Discount Tier</legend>
+                        <div class="content flex flex-col h-full sm:h-auto sm:flex-row mb-3 w-full overflow-hidden sm:overflow-y-auto">
+                            <!-- Add discount Tier -->
+                            <fieldset class="border border-solid border-gray-300 rounded p-2 w-full sm:w-1/3 sm:mr-2 mb-2 sm:mb-0">
+                                <legend class="text font-bold px-2">Add Discount Tier</legend>
                                 <!-- Insert discount tier -->
-                                <div class="flex flex-col md:flex-row px-8 pt-5 pb-5">
-            
-                                    <!-- Min Sub Total -->
-                                    <div class="w-full lg:w-4/12 pr-4">
-                                        <div class="flex flex-wrap w-full">
-                                            <mat-label class="flex flex-wrap">Min Order Amount</mat-label>
-                                            <mat-icon
-                                                matTooltip="Setting a wholesale minimum order subtotal ensures that wholesale order at the minimum amount required in order to activate wholesale pricing."
-                                                class="flex flex-wrap items-center transform scale-75"
-                                                [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                            </mat-icon>
-                                        </div>
-                                        <mat-form-field appearance="fill" class="flex flex-col w-full fuse-mat-emphasized-affix">
-                                            <input
-                                                type="number"
-                                                placeholder="Insert Mininum Subtotal"
-                                                matInput
-                                                [(ngModel)]="startTotalSalesAmount"
-                                                [ngModelOptions]="{standalone: true}"
-                                                (change)="validateDiscountTier('startTotalSalesAmount',$event.target.value)"
-                                            >
-                                            <mat-icon
-                                                matPrefix
-                                                [svgIcon]="'heroicons_outline:currency-dollar'">
-                                            </mat-icon>
-                                        </mat-form-field>
-                                    </div>
-                            
-                                    <div class="flex flex-wrap w-full lg:w-4/12 ">
-                                        <div class="flex flex-wrap w-full">
-                                            <mat-label class="flex flex-wrap">Discount Amount</mat-label>
-                                            <mat-icon
-                                                matTooltip="Discount amount is to be key in"
-                                                class="flex flex-wrap items-center transform scale-75"
-                                                [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                            </mat-icon>
-                                        </div>
-                                        <mat-form-field appearance="fill" class="w-full pr-4 fuse-mat-emphasized-affix">
-                                            <input
-                                                type="number"
-                                                placeholder="Insert Discount Amount"
-                                                matInput
-                                                [(ngModel)]="discountAmount"
-                                                [ngModelOptions]="{standalone: true}"
-                                                (change)="validateDiscountTier('discountAmount',$event.target.value)"
+                                <div class="flex flex-col">
+
+                                    <!-- Min Sub Total, Discount Amount -->
+                                    <div class="flex flex-row sm:flex-col">
+                                        <!-- Min Sub Total -->
+                                        <div class="flex flex-col w-1/2 sm:w-full mr-1 sm:mr-0">
+                                            <div class="flex flex-row w-full items-center">
+                                                <mat-label class="flex">Min Order Amount</mat-label>
+                                                <mat-icon
+                                                    matTooltip="Setting a wholesale minimum order subtotal ensures that wholesale order at the minimum amount required in order to activate wholesale pricing."
+                                                    class="flex items-center transform scale-75"
+                                                    [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                                </mat-icon>
+                                            </div>
+                                            <mat-form-field appearance="fill" class="flex flex-col w-full fuse-mat-emphasized-affix">
+                                                <input
+                                                    type="number"
+                                                    placeholder="Insert Mininum Subtotal"
+                                                    matInput
+                                                    [(ngModel)]="startTotalSalesAmount"
+                                                    [ngModelOptions]="{standalone: true}"
+                                                    (change)="validateDiscountTier('startTotalSalesAmount',$event.target.value)"
                                                 >
-                                            <mat-icon
-                                                matPrefix
-                                                [svgIcon]="'mat_solid:confirmation_number'">
-                                            </mat-icon>
-                                        </mat-form-field>
+                                                <mat-icon
+                                                    *ngIf="currentScreenSize.includes('sm') ? true : false"
+                                                    matPrefix
+                                                    [svgIcon]="'heroicons_outline:currency-dollar'">
+                                                </mat-icon>
+                                            </mat-form-field>
+                                        </div>
+                                
+                                        <!-- Discount Amount -->
+                                        <div class="flex flex-col w-1/2 sm:w-full ml-1 sm:ml-0">
+                                            <div class="flex flex-row w-full items-center">
+                                                <mat-label class="flex">Discount Amount</mat-label>
+                                                <mat-icon
+                                                    matTooltip="Discount amount is to be key in"
+                                                    class="flex items-center transform scale-75"
+                                                    [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                                </mat-icon>
+                                            </div>
+                                            <mat-form-field appearance="fill" class="w-full fuse-mat-emphasized-affix">
+                                                <input
+                                                    type="number"
+                                                    placeholder="Insert Discount Amount"
+                                                    matInput
+                                                    [(ngModel)]="discountAmount"
+                                                    [ngModelOptions]="{standalone: true}"
+                                                    (change)="validateDiscountTier('discountAmount',$event.target.value)"
+                                                    >
+                                                <mat-icon
+                                                    *ngIf="currentScreenSize.includes('sm') ? true : false"
+                                                    matPrefix
+                                                    [svgIcon]="'mat_outline:confirmation_number'">
+                                                </mat-icon>
+                                            </mat-form-field>
+                                        </div>
                                     </div>
-    
+
                                     <!-- calculation type -->
-                                    <div class="flex flex-wrap w-full lg:w-3/12 ">
-                                        <div class="flex flex-wrap w-full">
-                                            <mat-label class="flex flex-wrap">Type</mat-label>
+                                    <div class="flex flex-col w-full">
+                                        <div class="flex flex-row w-full items-center">
+                                            <mat-label class="flex">Type</mat-label>
                                             <mat-icon
                                                 matTooltip="Claculation type selection is to choose what type of discount calculation type need to be applied"
-                                                class="flex flex-wrap items-center transform scale-75"
+                                                class="flex items-center transform scale-75"
                                                 [svgIcon]="'heroicons_solid:question-mark-circle'">
                                             </mat-icon>
                                         </div>
-                                        <mat-form-field appearance="fill" class="w-full pr-4 fuse-mat-emphasized-affix">
+                                        <mat-form-field appearance="fill" class="w-full fuse-mat-emphasized-affix">
                                             <mat-select
                                                 class="w-full"
                                                 placeholder="Choose Calculation Type"
@@ -286,151 +329,212 @@
                                                 </div>
                                             </mat-select>
                                             <mat-icon
+                                                *ngIf="currentScreenSize.includes('sm') ? true : false"
                                                 matPrefix
                                                 [svgIcon]="'list'">
                                             </mat-icon>
                                         </mat-form-field>
-                                    </div>
-                                    
+                                    </div>                                
     
                                     <!-- Dbuttons Insert Discount Tier-->
-                                    <div class="flex flex-wrap w-1/1/2 lg:w-1/12 items-center justify-center">
-                                        <div class="items-center justify-center flex flex-row w-full"> 
-                                            <button
-                                            class="hover:bg-primary-500 border border-primary-500 ml-2 w-2 h-2"
+                                    <div class="flex flex-row w-full justify-end"> 
+                                        <button
+                                            class="text-white"
+                                            type="button"
                                             mat-flat-button
                                             [disabled]="!isDisplayAddTier"
                                             (click)="insertTierToDiscount()"
                                             [color]="'primary'">
+                                            <span class="pr-2">Add Tier</span>
                                             <mat-icon
-                                            class="text-white icon-size-5"
-                                            [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
-                                            </button>
-                                
-                                        </div>
+                                                class="text-white icon-size-5"
+                                                [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                                        </button>
                                     </div>
                                 </div>
                             </fieldset> 
-                            <fieldset class="border border-solid border-gray-300 rounded my-1 mx-5">
-                                <legend class="text font-bold ml-2 px-2">Discount Tier List</legend>
-    
-                                <div>
-                                    <table class="my-4 mr-2 w-full table-fixed">
-                                        <tr>
-                                            <th>Min Order Amount</th>
-                                            <th>Discount Amount</th>
-                                            <th>Type</th>
-                                            <th>Action</th>                   
-                                    
-                                        </tr>
-                                        <tr *ngFor="let discountTier of horizontalStepperForm.get('step2')['controls']; let i = index;" [formGroupName]="i">
-                                            <td class="border-t border-gray-300 pt-2 pl-2"> 
-                                                <div>
-                                                    <mat-form-field class="w-full pr-4">
-                                                        <input
-                                                            type="number"
-                                                            matInput
-                                                            [formControlName]="'startTotalSalesAmount'"
-                                                            [readonly]="!storeDiscountTierListValueEditMode[i]"
-                                                        >
-                                                    </mat-form-field>
+                            <!-- Discount tier list -->
+                            <fieldset class="border border-solid border-gray-300 rounded p-2 w-full sm:w-2/3">
+                                <legend class="text font-bold px-2">Discount Tier List</legend>
+
+                                <div class="flex flex-col w-full">
+                                    <ng-container>
+                                        <div class="grid overflow-auto rounded">
+                                            <!-- Header -->
+                                            <div
+                                                class="edit-order-discount-grid sticky grid gap-1 sm:gap-4 py-4 sm:px-3 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                                                matSort
+                                                matSortDisableClear>
+                                                <div class="hidden sm:block"></div>
+                                                <div
+                                                    [mat-sort-header]="'min-order'">
+                                                    Min Order Amount
                                                 </div>
-                                            </td>
-                                            <td class="border-t border-gray-300 pt-2 pl-2">
-                                                <div>
-                                                    <mat-form-field class="w-full pr-4">
-                                                        <input
-                                                            type="number"
-                                                            matInput
-                                                            [formControlName]="'discountAmount'"
-                                                            [readonly]="!storeDiscountTierListValueEditMode[i]"
-                                                        >
-                                                    </mat-form-field>
+                                                <div 
+                                                    [mat-sort-header]="'discount-amount'">
+                                                    Discount Amount
                                                 </div>
-                                            </td>
-                                            <td class="border-t border-gray-300 pt-2 pl-2">
+                                                <div
+                                                    [mat-sort-header]="'type'">
+                                                    Type
+                                                </div>
                                                 <div>
-                                                    <mat-form-field class="w-full pr-4">
-                                                        <mat-select
-                                                            class="w-full"
-                                                            [formControlName]="'calculationType'"
-                                                            [disabled]="!storeDiscountTierListValueEditMode[i]"
-                                                            >
+                                                    Action
+                                                </div>
+                                            </div>
+                                            <!-- Rows -->
+                                            <div 
+                                                class="h-72 overflow-y-auto">
+                                                <div *ngFor="let discountTier of horizontalStepperForm.get('step2')['controls']; let i = index;" [formGroupName]="i">
+                                                    <!-- Variant Header -->
+                                                    <div class="edit-order-discount-grid grid items-center gap-4 mt-4 border-b">      
+                                                        <div class="hidden sm:block"></div>                              
+                                                        <!-- Min Order Amount -->
+                                                        <div class="truncate">
+                                                            <mat-form-field class="w-full text-center"
+                                                                [ngClass]="{'text-gray-400' : !storeDiscountTierListValueEditMode[i]}">
+                                                                <span matPrefix 
+                                                                    *ngIf="currentScreenSize.includes('sm') ? true : false"
+                                                                    [ngClass]="{'text-black' : storeDiscountTierListValueEditMode[i]}">
+                                                                    {{store$.regionCountry.currencySymbol}}
+                                                                </span>
+                                                                <input
+                                                                    type="number"
+                                                                    required
+                                                                    matInput
+                                                                    [formControlName]="'startTotalSalesAmount'"
+                                                                    [readonly]="!storeDiscountTierListValueEditMode[i]"
+                                                                >
+                                                            </mat-form-field>
+                                                        </div>
+                    
+                                                        <!-- Discount Amount -->
+                                                        <div class="truncate">
+                                                            <mat-form-field class="w-full text-center"
+                                                                [ngClass]="{ 'text-left' : discountTier.value.calculationType === 'FIX',
+                                                                             'text-right' : discountTier.value.calculationType === 'PERCENT',
+                                                                             'text-gray-400' : !storeDiscountTierListValueEditMode[i]}">
+                                                                <input
+                                                                    type="number"
+                                                                    required
+                                                                    matInput
+                                                                    [formControlName]="'discountAmount'"
+                                                                    [readonly]="!storeDiscountTierListValueEditMode[i]"
+                                                                >
+                                                                <span matPrefix
+                                                                    *ngIf="currentScreenSize.includes('sm') === true && discountTier.value.calculationType === 'FIX'"
+                                                                    [ngClass]="{'text-black' : storeDiscountTierListValueEditMode[i]}">
+                                                                    {{store$.regionCountry.currencySymbol}}
+                                                                </span>
+                                                                <span matSufix *ngIf="currentScreenSize.includes('sm') === true && discountTier.value.calculationType === 'PERCENT'">%</span>
+                                                            </mat-form-field>
+                                                        </div>
+
+                    
+                                                        <!-- Type -->
+                                                        <div>
+                                                            <mat-form-field class="w-full">
+                                                                <mat-select
+                                                                    class="w-full"
+                                                                    [formControlName]="'calculationType'"
+                                                                    [disabled]="!storeDiscountTierListValueEditMode[i]"
+                                                                    >
+                                                                    
+                                                                    <div>
+                                                                        <mat-option [value]="'PERCENT'">Percentage</mat-option>
+                                                                        <mat-option [value]="'FIX'">Fix</mat-option>
+                                                                    </div>
+                                                                </mat-select>
+                                                            </mat-form-field>
+                                                        </div>
+                    
+                                                        <!-- Action Button -->
+                                                        <div>
+                                                            <div class="flex flex-wrap items-center justify-center ">
+                                                                <div class="flex flex-row w-full items-center justify-center">
+                                                                
+                                                                    <input
+                                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                        type="button"
+                                                                        [id]="'edit-discount-tier-btn' + discountTier.value.id"
+                                                                        (click)="storeDiscountTierListValueEditMode[i] = !storeDiscountTierListValueEditMode[i]"
+                                                                    >
+                                                                    <label
+                                                                        *ngIf="!storeDiscountTierListValueEditMode[i]"
+                                                                        class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
+                                                                        [for]="'edit-discount-tier-btn' + discountTier.value.id"
+                                                                        matRipple>
+                                                                        <mat-icon
+                                                                            class="text-white icon-size-5"
+                                                                            [svgIcon]="'heroicons_outline:pencil-alt'">
+                                                                        </mat-icon>
+                                                                    </label>
+                
+                                                                    <input
+                                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                        type="button"
+                                                                        [id]="'update-discount-tier-btn' + discountTier.value.id"
+                                                                        (click)="storeDiscountTierListValueEditMode[i] = !storeDiscountTierListValueEditMode[i]"
+                                                                        (click)="updateSelectedDiscountTier(discountTier)"
+                                                                    >
+                                                                    <label
+                                                                        *ngIf="storeDiscountTierListValueEditMode[i]"
+                                                                        class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
+                                                                        [for]="'update-discount-tier-btn' + discountTier.value.id"
+                                                                        matRipple>
+                                                                        <mat-icon
+                                                                            class="text-white icon-size-5"
+                                                                            [svgIcon]="'heroicons_outline:check'">
+                                                                        </mat-icon>
+                                                                    </label>
+                
                                                             
-                                                            <div>
-                                                                <mat-option [value]="'PERCENT'">Percentage</mat-option>
-                                                                <mat-option [value]="'FIX'">Fix</mat-option>
+                                                                    <input
+                                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                        type="button"
+                                                                        [id]="'delete-discount-tier-btn' + discountTier.value.id"
+                                                                        (click)="deleteSelectedDiscountTier(discountTier.value.id)"
+                                                                    >
+                                                                    <label
+                                                                        class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-warn hover:bg-warn-700 mb-3"
+                                                                        [for]="'delete-discount-tier-btn' + discountTier.value.id"
+                                                                        matRipple>
+                                                                        <mat-icon
+                                                                            class="text-white icon-size-5"
+                                                                            [svgIcon]="'heroicons_outline:trash'">
+                                                                        </mat-icon>
+                                                                    </label>
+                                                                </div>
                                                             </div>
-                                                        </mat-select>
-                                                    </mat-form-field>
-                                                </div>
-                                            </td>
-    
-                                            <td class="border-t border-gray-300 pt-2 pl-2">
-                                                <div class="flex flex-wrap items-center justify-center ">
-                                                    <div class="flex flex-row w-full items-center justify-center">
-                                                    
-                                                        <input
-                                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                            type="button"
-                                                            [id]="'edit-discount-tier-btn' + discountTier.value.id"
-                                                            (click)="storeDiscountTierListValueEditMode[i] = !storeDiscountTierListValueEditMode[i]"
-                                                        >
-                                                        <label
-                                                            *ngIf="!storeDiscountTierListValueEditMode[i]"
-                                                            class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
-                                                            [for]="'edit-discount-tier-btn' + discountTier.value.id"
-                                                            matRipple>
-                                                            <mat-icon
-                                                                class="text-white icon-size-5"
-                                                                [svgIcon]="'heroicons_outline:pencil-alt'">
-                                                            </mat-icon>
-                                                        </label>
-    
-                                                        <input
-                                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                            type="button"
-                                                            [id]="'update-discount-tier-btn' + discountTier.value.id"
-                                                            (click)="storeDiscountTierListValueEditMode[i] = !storeDiscountTierListValueEditMode[i]"
-                                                            (click)="updateSelectedDiscountTier(discountTier)"
-                                                        >
-                                                        <label
-                                                            *ngIf="storeDiscountTierListValueEditMode[i]"
-                                                            class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
-                                                            [for]="'update-discount-tier-btn' + discountTier.value.id"
-                                                            matRipple>
-                                                            <mat-icon
-                                                                class="text-white icon-size-5"
-                                                                [svgIcon]="'heroicons_outline:check'">
-                                                            </mat-icon>
-                                                        </label>
-    
-                                                
-                                                        <input
-                                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                            type="button"
-                                                            [id]="'delete-discount-tier-btn' + discountTier.value.id"
-                                                            (click)="deleteSelectedDiscountTier(discountTier.value.id)"
-                                                        >
-                                                        <label
-                                                            class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-warn hover:bg-warn-700 mb-3"
-                                                            [for]="'delete-discount-tier-btn' + discountTier.value.id"
-                                                            matRipple>
-                                                            <mat-icon
-                                                                class="text-white icon-size-5"
-                                                                [svgIcon]="'heroicons_outline:trash'">
-                                                            </mat-icon>
-                                                        </label>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </td>
-                                    
-                                        </tr>
-                                    </table>
+                                            </div>
+                                        </div>
+                                    </ng-container>
                                 </div>
                             </fieldset>
                         </div>
+
                         <div class="flex justify-end">
+                            <!-- Flash message -->
+                            <div
+                                class="items-center flex mr-4"
+                                [ngClass]="flashMessage ? 'visible' : 'invisible'"
+                                >
+                                <ng-container *ngIf="flashMessage === 'success'">
+                                    <mat-icon
+                                        class="text-green-500"
+                                        [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                                    <span class="ml-2">Discount updated</span>
+                                </ng-container>
+                                <ng-container *ngIf="flashMessage === 'error'">
+                                    <mat-icon
+                                        class="text-red-500"
+                                        [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                                    <span class="ml-2">An error occurred, try again!</span>
+                                </ng-container>
+                            </div>
                             <button
                                 class="px-8 mr-2"
                                 mat-flat-button
@@ -440,12 +544,13 @@
                                 Back
                             </button>
                             <button 
-                            class="px-8"
-                            mat-flat-button
-                            [color]="'primary'"
-                            type="button"
-                            (click)="updateSelectedDiscount()"
-                            >
+                                class="px-8"
+                                [ngClass]="isLoading ? 'cursor-wait' : 'cursor-pointer'"
+                                mat-flat-button
+                                [disabled]="isLoading"
+                                [color]="'primary'"
+                                type="button"
+                                (click)="updateSelectedDiscount()">
                             Update
                             </button>
                         </div>

@@ -6,6 +6,10 @@ import { Subject } from 'rxjs';
 import { DiscountsService } from '../order-discount-list/order-discount-list.service';
 import { ApiResponseModel, Discount, StoreDiscountTierList } from '../order-discount-list/order-discount-list.types';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { Store } from 'app/core/store/store.types';
+import { StoresService } from 'app/core/store/store.service';
+import { takeUntil } from 'rxjs/operators';
+import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 
 @Component({
   selector: 'app-edit-order-discount',
@@ -28,10 +32,21 @@ import { FuseConfirmationService } from '@fuse/services/confirmation';
     .content{
         height:400px;
     }
+
+    .edit-order-discount-grid {
+        grid-template-columns: 80px 80px auto 80px;
+
+        @screen sm {
+            grid-template-columns: 20px 120px 120px auto 80px;
+        }
+    }
   `]
 })
 export class EditOrderDiscountDialogComponent implements OnInit {
 
+    // get current store
+    store$: Store;
+    
     horizontalStepperForm: FormGroup;
     discountId:string;
     selectedDiscount: Discount | null = null;
@@ -56,6 +71,9 @@ export class EditOrderDiscountDialogComponent implements OnInit {
     changeStartTime:string;
     changeEndTime:string;
 
+    currentScreenSize: string[] = [];
+
+    isLoading: boolean = false;
 
   constructor(
     public dialogRef: MatDialogRef<EditOrderDiscountDialogComponent>,
@@ -63,6 +81,8 @@ export class EditOrderDiscountDialogComponent implements OnInit {
     private _formBuilder: FormBuilder,
     private _discountService: DiscountsService,
     private _fuseConfirmationService: FuseConfirmationService,
+    private _fuseMediaWatcherService: FuseMediaWatcherService,
+    private _storesService: StoresService,
     // private createOrderDiscount:CreateOrderDiscount,
     @Inject(MAT_DIALOG_DATA) public data: MatDialog
   ) { }
@@ -90,45 +110,68 @@ export class EditOrderDiscountDialogComponent implements OnInit {
      
         }),
         //Tier List
-        step2: this._formBuilder.array([
-        
-        ]),
+        step2: this._formBuilder.array([]),
     });
 
     // if id is exist so it is edit mode, Get the discount by id
     // if(this.discountId){
         this._discountService.getDiscountByGuid(this.discountId)
-        .subscribe((response:ApiResponseModel<Discount>) => {
+            .subscribe((response:ApiResponseModel<Discount>) => {
 
-            //Set the selected discount
-            this.selectedDiscount = response.data;
+                //Set the selected discount
+                this.selectedDiscount = response.data;
 
-            // Fill the form step 1
-            this.horizontalStepperForm.get('step1').patchValue(response.data);
+                // Fill the form step 1
+                this.horizontalStepperForm.get('step1').patchValue(response.data);
 
-            //set value for time in tieme selector
-            this.setValueToTimeSelector(response.data);
+                //set value for time in tieme selector
+                this.setValueToTimeSelector(response.data);
 
-            //after we set the form with custom field time selector then we display the details form
-            this.loadDetails =true;
+                //after we set the form with custom field time selector then we display the details form
+                this.loadDetails =true;
 
-            // clear discount tier form array
-            (this.horizontalStepperForm.get('step2') as FormArray).clear();
-            
-            // load discount tier form array with data frombackend
-            response.data.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
-                this.storeDiscountTierList = this.horizontalStepperForm.get('step2') as FormArray;
-                this.storeDiscountTierList.push(this._formBuilder.group(item));
+                // clear discount tier form array
+                (this.horizontalStepperForm.get('step2') as FormArray).clear();
+                
+                // load discount tier form array with data frombackend
+                response.data.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
+                    this.storeDiscountTierList = this.horizontalStepperForm.get('step2') as FormArray;
+                    this.storeDiscountTierList.push(this._formBuilder.group(item));
+                });
+
+                console.log("this.storeDiscountTierList", this.storeDiscountTierList);
+                
+                
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
             });
-            
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
-        });
     // }
     // //for create mode
     // else{
     //     this.loadDetails =true;
     // }
+
+    // Get the store
+    this._storesService.store$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe((store: Store) => {
+
+            // Update the store
+            this.store$ = store;
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
+
+    this._fuseMediaWatcherService.onMediaChange$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe(({matchingAliases}) => {               
+
+            this.currentScreenSize = matchingAliases;                
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
 
   }
 
@@ -138,6 +181,9 @@ export class EditOrderDiscountDialogComponent implements OnInit {
 
   updateSelectedDiscount(): void
   {
+      // Set loading to true
+      this.isLoading = true;
+
       this.changeTime();
       let sendPayload = [this.horizontalStepperForm.get('step1').value];
       let toBeSendPayload=sendPayload.
@@ -161,29 +207,47 @@ export class EditOrderDiscountDialogComponent implements OnInit {
       // Update the discount on the server
       this._discountService.updateDiscount(this.discountId, toBeSendPayload[0])
           .subscribe((resp) => {
-         
-          }, error => {
-              console.error(error);
+            // Set loading to false
+            this.isLoading = false;
 
-                  if (error.status === 417) {
-                      // Open the confirmation dialog
-                      const confirmation = this._fuseConfirmationService.open({
-                          title  : 'Discount date overlap',
-                          message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
-                          actions: {
-                              confirm: {
-                                  label: 'Ok'
-                              },
-                              cancel : {
-                                  show : false,
-                              }
-                          }
-                      });
-                  }
-              }
-          );
+            // Show a success message
+            this.showFlashMessage('success');
 
-          this.cancel();
+          },((error) => {
+              // Set loading to false
+                this.isLoading = false;
+
+                console.error(error);
+
+                if (error.status === 417) {
+                    // Open the confirmation dialog
+                    const confirmation = this._fuseConfirmationService.open({
+                        title  : 'Discount date overlap',
+                        message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
+                        actions: {
+                            confirm: {
+                                label: 'Ok'
+                            },
+                            cancel : {
+                                show : false,
+                            }
+                        }
+                    });
+                }
+                // Show a success message
+                this.showFlashMessage('error');
+            }
+          ));
+
+        // Set delay before closing the details window
+        setTimeout(() => {
+
+            // close the window
+            this.cancel();
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        }, 1000);
   }
 
   checkButton(){

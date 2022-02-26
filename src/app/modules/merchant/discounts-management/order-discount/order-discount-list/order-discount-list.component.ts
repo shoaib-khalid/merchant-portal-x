@@ -25,16 +25,17 @@ import { EditOrderDiscountDialogComponent } from '../edit-order-discount/edit-or
                 grid-template-columns: 72px auto 40px;
 
                 @screen sm {
-                    grid-template-columns: 48px 112px auto 112px 40px;
+                    grid-template-columns: 20px 112px auto 128px 72px;
                 }
 
                 @screen md {
-                    grid-template-columns: 48px 112px auto 150px 40px;
+                    grid-template-columns: 20px 112px auto 128px 72px;
                 }
 
                 @screen lg {
-                    grid-template-columns: 48px 112px auto 48px 112px 112px 96px 40px;
+                    grid-template-columns: 20px 112px auto 128px 112px 112px 96px 72px;
                 }
+
             }
         `
     ],
@@ -163,7 +164,7 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
             )
             .subscribe();
 
-            this._fuseMediaWatcherService.onMediaChange$
+        this._fuseMediaWatcherService.onMediaChange$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(({matchingAliases}) => {               
 
@@ -244,8 +245,10 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
     createDiscount(): void
     {   const dialogRef = this._dialog.open(
         CreateOrderDiscountDialogComponent, {
-            width: '1030px',
-            height: '520px',
+            width: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
+            height: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
+            maxWidth: this.currentScreenSize.includes('sm') ? 'auto' : '100vw',  
+            maxHeight: this.currentScreenSize.includes('sm') ? 'auto' : '100vh',
             disableClose: true,
             });
         
@@ -442,12 +445,12 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
     openEditPopUp(discountId?:string)    {
         const dialogRef = this._dialog.open(
             EditOrderDiscountDialogComponent, {
-                width: '1030px',
-                // maxWidth: '90vw',  
-                height: '520px',
-                // maxHeight: '95vh',
+                width: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
+                height: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
+                maxWidth: this.currentScreenSize.includes('sm') ? 'auto' : '100vw',  
+                maxHeight: this.currentScreenSize.includes('sm') ? 'auto' : '100vh',
                 disableClose: true,
-                data:{discountId:discountId} 
+                data:{ discountId:discountId }
                 });
 
         dialogRef.afterClosed().subscribe(result => {

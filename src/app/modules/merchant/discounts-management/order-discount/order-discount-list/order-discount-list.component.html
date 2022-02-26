@@ -54,9 +54,9 @@
                             <div [mat-sort-header]="'discountType'">Discount On</div>
                             <div [mat-sort-header]="'discountName'">Name</div>
                             <div 
-                                class="hidden sm:block"
+                                class="hidden sm:block hide-arrow"
                                 [mat-sort-header]="'maxDiscountAmount'">
-                                Capped<br>Amount
+                                Capped Amount
                             </div>
                             <div
                                 class="hidden lg:block"
@@ -93,7 +93,7 @@
                                     </div>
 
                                     <!-- Max Amount -->
-                                    <div class="hidden sm:block truncate">
+                                    <div class="hidden sm:block text-center pr-6 truncate">
                                         {{ discount.maxDiscountAmount }}
                                     </div>
 
@@ -114,21 +114,16 @@
 
                                     <!-- Details button -->
                                     <div>
-                                        <input
-                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                        type="button"
-                                        [id]="'edit-discount-btn' + discount.id"
-                                        (click)="openEditPopUp(discount.id)"
-                                        >
-                                        <label
-                                            class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
-                                            [for]="'edit-discount-btn' + discount.id"
-                                            matRipple>
+                                        <button
+                                            type="button"
+                                            class="min-w-10 min-h-10 h-7 px-2 leading-6"
+                                            mat-button
+                                            [id]="'edit-discount-btn' + discount.id"
+                                            (click)="openEditPopUp(discount.id)">
                                             <mat-icon
-                                                class="text-white icon-size-5"
-                                                [svgIcon]="'heroicons_outline:pencil-alt'">
-                                            </mat-icon>
-                                        </label>
+                                                class="icon-size-5"
+                                                [svgIcon]="'heroicons_solid:dots-horizontal'"></mat-icon>
+                                        </button>
                                     </div>
                                 </div>
                                 <div class="grid">
