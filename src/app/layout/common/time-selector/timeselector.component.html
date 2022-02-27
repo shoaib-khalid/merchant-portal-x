@@ -4,10 +4,9 @@
     [formGroup]="timeSelection"
     [attr.aria-labelledby]="_formField?.getLabelId()">
     <input class="justify-between w-0 h-0 invisible" type="text" readonly="true"/>
-    <div class="w-full sm:w-auto flex flex-row justify justify-around">
+    <div class="flex flex-row w-full justify-around">
         <select 
-            class="p-2 border border-gray-300 rounded example-tel-input-element" 
-            [ngClass]="timeHour.value === '--' ? 'bg-gray-100 text-gray-500' : ''"
+            class="py-2 text-center w-1/3 border border-gray-300 rounded example-tel-input-element" 
             formControlName="timeHour"
             aria-label="timeHour code"
             (change)="_handleInput(timeSelection.controls.timeHour, timeMinute)"
@@ -27,8 +26,7 @@
             <option value="12">12</option>
         </select>
         <select 
-            class="p-2 border border-gray-300 rounded"
-            [ngClass]="timeMinute.value === '--' ? 'bg-gray-100 text-gray-500' : ''" 
+            class="mx-2 py-2 text-center w-1/3 border border-gray-300 rounded"
             formControlName="timeMinute"
             aria-label="timeMinute code"
             (change)="_handleInput(timeSelection.controls.timeMinute, timeAmPm)"
@@ -44,8 +42,7 @@
             <option value="55">55</option>
         </select>
         <select 
-            class="p-2 border border-gray-300 rounded" 
-            [ngClass]="timeAmPm.value === '--' ? 'bg-gray-100 text-gray-500' : ''" 
+            class="py-2 text-center w-1/3 border border-gray-300 rounded" 
             formControlName="timeAmPm"
             aria-label="timeAmPm code"
             (change)="_handleInput(timeSelection.controls.timeAmPm)"

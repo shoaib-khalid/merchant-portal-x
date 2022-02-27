@@ -144,7 +144,6 @@
                         class="w-24"
                         mat-flat-button
                         [color]="'primary'"
-                        [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
                         type="button"
                         matStepperNext>
                         Next
@@ -202,7 +201,7 @@
                                     <div class="grid overflow-auto rounded">
                                         <!-- Header -->
                                         <div
-                                            class="create-product-product-grid sticky grid gap-1 sm:gap-4 py-4 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                                            class="edit-product-product-grid sticky grid gap-1 sm:gap-4 py-4 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
                                         >
                                             <div></div>
                                             <div>
@@ -220,11 +219,11 @@
                                             class="overflow-y-auto">
                                             <div *ngFor="let productList of products; let i = index;">
                                                 <!-- Product Body -->
-                                                <div class="create-product-product-grid grid items-center gap-4 py-2 sm:py-3 border-b">      
+                                                <div class="edit-product-product-grid grid items-center gap-4 py-2 sm:py-3 border-b">      
                                                     <!-- Min Order Amount -->
                                                     <div class="truncate">
                                                         <mat-checkbox  
-                                                            class="pl-2"
+                                                            class="flex items-center pl-2"
                                                             [color]="'primary'"
                                                             (change)="onChangeSelectProduct(productList,$event)"
                                                             [checked]="onChangeSelectProductValue.includes(productList.id)"></mat-checkbox>
@@ -309,14 +308,14 @@
                             <!-- Content -->
                             <div class="relative flex flex-col border border-solid rounded p-2 h-96">
                                 <!-- Table -->
-                                <ng-container *ngIf="true">
+                                <ng-container *ngIf="(storeDiscountProduct$ | async) as storeDiscountProducts">
                                     <div class="grid overflow-auto rounded">
                                         <!-- Header -->
                                         <div
-                                            class="create-product-discount-grid sticky grid gap-1 sm:gap-4 py-3 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                                            class="edit-product-discount-grid sticky grid gap-1 sm:gap-4 py-3 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
                                         >
                                             <div>
-                                                Product SKU
+                                                Product Name (SKU)
                                             </div>
                                             <div class="text-center">
                                                 Original Price
@@ -331,54 +330,103 @@
                                         <!-- Rows -->
                                         <div 
                                             class="overflow-y-auto">
-                                            <div *ngFor="let selectedProduct of productDiscountStepperForm.get('step2')['controls']; let i = index;" [formGroupName]="i">
+                                            <div *ngFor="let productDiscountList of storeDiscountProducts; let i = index;">
                                                 <!-- Selected Product Header -->
-                                                <div class="create-product-discount-grid grid items-center gap-4 py-1 border-b">      
+                                                <div class="edit-product-discount-grid grid items-center gap-4 py-1 border-b">      
                                                     <!-- Product Name (SKU) -->
                                                     <div class="truncate">
-                                                        {{ selectedProduct.value.sku }}
+                                                        {{ productDiscountList.productInventory.product.name + " ( "+productDiscountList.productInventory.sku +  " ) " }}
                                                     </div>
                 
                                                     <!-- Original Price-->
                                                     <div class="truncate text-center">
-                                                        {{ selectedProduct.value.price }}
+                                                        {{productDiscountList.productInventory.price}}
                                                     </div>
     
                                                     <!-- Discount % -->
                                                     <div class="truncate text-center">
-                                                        <input
-                                                            class="p-2 border border-gray-500 rounded w-18"
-                                                            type="number"
-                                                            [formControlName]="'discountAmount'"
-                                                            min="0" max="100"
-                                                        >
+                                                        <div *ngIf=!editModeDiscountProduct[i]>{{productDiscountList.discountAmount}}</div>
+                                            
+                                                        <div *ngIf=editModeDiscountProduct[i]>
+                                                            <input
+                                                                class="p-2 border border-gray-500 rounded w-18"
+                                                                type="number"
+                                                                [value]="productDiscountList.discountAmount"
+                                                                (input)="inputEditDiscountAmount(i,$event)"
+                                                            >
+                                                        </div>
                                                     </div>
                 
                                                     <!-- Action Button -->
                                                     <div class="truncate flex w-full items-center justify-center">
+                                                        <!-- Edit Button -->
+                                                        <input
+                                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                            type="button"
+                                                            [id]="'edit-button'+productDiscountList.id"
+                                                            (click)="editModeDiscountProduct[i] = !editModeDiscountProduct[i]">
+                                                        <label
+                                                            *ngIf="!editModeDiscountProduct[i]"
+                                                            class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400 mr-2"
+                                                            [for]="'edit-button'+productDiscountList.id"
+                                                            matRipple>
+                                                            <mat-icon
+                                                                class="text-white icon-size-5"
+                                                                [svgIcon]="'heroicons_outline:pencil-alt'">
+                                                            </mat-icon>
+                                                        </label>
+                                
+                                                        <!-- Update Button -->
+                                                        <input
+                                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                            type="button"
+                                                            [id]="'update-button'+productDiscountList.id"
+                                                            (click)="editModeDiscountProduct[i] = !editModeDiscountProduct[i]"
+                                                            (click)="editStoreProductDiscount(productDiscountList)">
+                                                        <label
+                                                            *ngIf="editModeDiscountProduct[i]"
+                                                            class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400 mr-2"
+                                                            [for]="'update-button'+productDiscountList.id"
+                                                            matRipple>
+                                                            <mat-icon
+                                                                class="text-white icon-size-5"
+                                                                [svgIcon]="'heroicons_outline:check'">
+                                                            </mat-icon>
+                                                        </label>
+                                
                                                         <!-- Delete Button -->
                                                         <input
                                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                             type="button"
-                                                            [id]="'delete-selected-product-discount-btn' + i"
-                                                            (click)="deleteSelectedProductDiscount(i)"
-                                                        >
+                                                            [id]="'delete-button'+productDiscountList.id"
+                                                            (click)="deleteStoreProductDiscount(productDiscountList)">
                                                         <label
                                                             class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-warn hover:bg-warn-700"
-                                                            [for]="'delete-selected-product-discount-btn' + i"
+                                                            [for]="'delete-button'+productDiscountList.id"
                                                             matRipple>
                                                             <mat-icon
                                                                 class="text-white icon-size-5"
                                                                 [svgIcon]="'heroicons_outline:trash'">
                                                             </mat-icon>
                                                         </label>
-
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </ng-container>
+                                <div class="absolute bottom-0 left-0 right-0 w-full">
+                                    <mat-paginator
+                                        [ngClass]="{'pointer-events-none': isLoading}"
+                                        [length]="storeDiscountPagination.length"
+                                        [pageIndex]="storeDiscountPagination.page"
+                                        [pageSize]="storeDiscountPagination.size"
+                                        [pageSizeOptions]="[5]"
+                                        [hidePageSize]="true"
+                                        [showFirstLastButtons]="true"
+                                        #productDiscountPaginator>
+                                    </mat-paginator>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -397,9 +445,9 @@
                     mat-flat-button
                     [color]="'primary'"
                     type="button"
-                    (click)="createDiscount()"
+                    (click)="updateSelectedDiscount()"
                     >
-                    Create
+                    Update
                     </button>
                 </div>
             </mat-step>

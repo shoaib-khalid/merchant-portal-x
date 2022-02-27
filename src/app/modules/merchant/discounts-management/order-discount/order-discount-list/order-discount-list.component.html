@@ -54,9 +54,9 @@
                             <div [mat-sort-header]="'discountType'">Discount On</div>
                             <div [mat-sort-header]="'discountName'">Name</div>
                             <div 
-                                class="hidden sm:block"
+                                class="hidden sm:block hide-arrow"
                                 [mat-sort-header]="'maxDiscountAmount'">
-                                Capped<br>Amount
+                                Capped Amount
                             </div>
                             <div
                                 class="hidden lg:block"
@@ -93,7 +93,7 @@
                                     </div>
 
                                     <!-- Max Amount -->
-                                    <div class="hidden sm:block truncate">
+                                    <div class="hidden sm:block text-center pr-6 truncate">
                                         {{ discount.maxDiscountAmount }}
                                     </div>
 
@@ -115,12 +115,15 @@
                                     <!-- Details button -->
                                     <div>
                                         <button
-                                            class="min-w-10 min-h-7 h-7 px-2 leading-6"
+                                            type="button"
                                             mat-stroked-button
-                                            (click)="toggleDetails(discount.id);">
+                                            class="min-w-10 min-h-7 h-7 px-2 leading-6"
+                                            mat-button
+                                            [id]="'edit-discount-btn' + discount.id"
+                                            (click)="openEditPopUp(discount.id)">
                                             <mat-icon
                                                 class="icon-size-5"
-                                                [svgIcon]="selectedDiscount?.id === discount.id ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'"></mat-icon>
+                                                [svgIcon]="'heroicons_solid:dots-horizontal'"></mat-icon>
                                         </button>
                                     </div>
                                 </div>

@@ -19,6 +19,7 @@ import { ProductListDialogComponent } from '../product-list-dialog/product-list-
 import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dialog/dialog.component';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { TimeSelector } from 'app/layout/common/time-selector/timeselector.component';
+import { EditProductDiscountDialogComponent } from '../edit-product-discount/edit-product-discount.component';
 
 @Component({
     selector       : 'product-discount-list',
@@ -30,11 +31,11 @@ import { TimeSelector } from 'app/layout/common/time-selector/timeselector.compo
                 grid-template-columns: 72px auto 40px;
 
                 @screen sm {
-                    grid-template-columns: 48px 112px auto 72px;
+                    grid-template-columns: 20px 112px auto 72px;
                 }
 
                 @screen lg {
-                    grid-template-columns: 48px 112px auto 180px 180px 180px 72px;
+                    grid-template-columns: 20px 112px auto 180px 180px 180px 72px;
                 }
             }
         `
@@ -301,76 +302,76 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
     // @ Public Method
     // -----------------------------------------------------------------------------------------------------
 
-    toggleDetails(discountId: string): void
-    {
-        // If the discount is already selected...
-        if ( this.selectedDiscount && this.selectedDiscount.id === discountId )
-        {
-            // Close the details
-            this.closeDetails();
-            return;
-        }
+    // toggleDetails(discountId: string): void
+    // {
+    //     // If the discount is already selected...
+    //     if ( this.selectedDiscount && this.selectedDiscount.id === discountId )
+    //     {
+    //         // Close the details
+    //         this.closeDetails();
+    //         return;
+    //     }
 
-        this._discountProductService.getDiscountProductByDiscountId(discountId,0,5)
-            .subscribe((response) => {
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            });
+    //     this._discountProductService.getDiscountProductByDiscountId(discountId,0,5)
+    //         .subscribe((response) => {
+    //             // Mark for check
+    //             this._changeDetectorRef.markForCheck();
+    //         });
 
 
-        this._discountProductService.getStoreDiscountProduct(discountId)
-            .subscribe((response: ApiResponseModel<StoreDiscountProduct>)=>{
-                this.storeDiscountProduct = response.data;
+    //     this._discountProductService.getStoreDiscountProduct(discountId)
+    //         .subscribe((response: ApiResponseModel<StoreDiscountProduct>)=>{
+    //             this.storeDiscountProduct = response.data;
 
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            });
+    //             // Mark for check
+    //             this._changeDetectorRef.markForCheck();
+    //         });
 
-        // Get the discount by id
-        this._discountService.getDiscountById(discountId)
-            .subscribe((discount) => {
+    //     // Get the discount by id
+    //     this._discountService.getDiscountById(discountId)
+    //         .subscribe((discount) => {
 
-                // Set the selected discount
-                this.selectedDiscount = discount;
+    //             // Set the selected discount
+    //             this.selectedDiscount = discount;
 
-                // Fill the form
-                this.selectedDiscountForm.patchValue(discount);
+    //             // Fill the form
+    //             this.selectedDiscountForm.patchValue(discount);
 
-                //set the value time with time selector
-                this.setValueToTimeSelector(discount);
+    //             //set the value time with time selector
+    //             this.setValueToTimeSelector(discount);
 
-                // clear discount tier form array
-                (this.selectedDiscountForm.get('storeDiscountTierList') as FormArray).clear();
+    //             // clear discount tier form array
+    //             (this.selectedDiscountForm.get('storeDiscountTierList') as FormArray).clear();
 
-                //to handle logic if storeDiscount tier list exist or not
-                this.storeDiscountTierId = this.selectedDiscount.storeDiscountTierList[0]?.id?this.selectedDiscount.storeDiscountTierList[0].id:null;
-                // load discount tier form array with data frombackend
-                if(this.storeDiscountTierId !== null){
-                    discount.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
-                        this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
-                        this.storeDiscountTierList.push(this._formBuilder.group(item));
-                    });
-                } else {
-                    this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
-                    this.storeDiscountTierList.push(this._formBuilder.group(
-                        {
-                           discountAmount: null,
-                            startTotalSalesAmount: null,
-                            calculationType:null,
-                        }
-                    ));
-                }
+    //             //to handle logic if storeDiscount tier list exist or not
+    //             this.storeDiscountTierId = this.selectedDiscount.storeDiscountTierList[0]?.id?this.selectedDiscount.storeDiscountTierList[0].id:null;
+    //             // load discount tier form array with data frombackend
+    //             if(this.storeDiscountTierId !== null){
+    //                 discount.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
+    //                     this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
+    //                     this.storeDiscountTierList.push(this._formBuilder.group(item));
+    //                 });
+    //             } else {
+    //                 this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
+    //                 this.storeDiscountTierList.push(this._formBuilder.group(
+    //                     {
+    //                        discountAmount: null,
+    //                         startTotalSalesAmount: null,
+    //                         calculationType:null,
+    //                     }
+    //                 ));
+    //             }
 
-                this._discountService.getDiscountsTier(discountId)
-                    .subscribe((response) => {
-                        // Mark for check
-                        this._changeDetectorRef.markForCheck();
-                    });
+    //             this._discountService.getDiscountsTier(discountId)
+    //                 .subscribe((response) => {
+    //                     // Mark for check
+    //                     this._changeDetectorRef.markForCheck();
+    //                 });
 
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            });
-    }
+    //             // Mark for check
+    //             this._changeDetectorRef.markForCheck();
+    //         });
+    // }
 
     closeDetails(): void
     {
@@ -380,58 +381,66 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
 
     createDiscount(): void
     {
-        const dialogRef = this._dialog.open(CreateProductDiscountDialogComponent, { disableClose: true });
-        dialogRef.afterClosed().subscribe(result => {
-            if (result.status === true) {
-                // this will remove the item from the object
-                const createDiscountBody  = {
-                    discountName: result.discountName,
-                    discountType: result.discountOn,
-                    startDate: result.startDate,
-                    startTime: result.startTime,
-                    endDate: result.endDate,
-                    endTime: result.endTime,
-                    isActive: result.isActive,
-                    maxDiscountAmount: result.maxDiscountAmount,
-                    normalPriceItemOnly: result.normalPriceItemOnly,
-                    storeId: this.storeId$
-                };
-        
-                // Create the discount
-                this._discountService.createDiscount(createDiscountBody).subscribe(async (newDiscount) => {
-                    
-                    // Go to new discount
-                    this.selectedDiscount = newDiscount["data"];
-    
-                    // Update current form with new discount data
-                    this.selectedDiscountForm.patchValue(newDiscount["data"]);
-
-                    //set value of time with time selector
-                    this.setValueToTimeSelector(newDiscount["data"]);
-
-                    //initialize the form
-                    this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
-                    this.storeDiscountTierList.push(this._formBuilder.group(
-                        {
-                           discountAmount: null,
-                            startTotalSalesAmount: null,
-                            calculationType:null,
-                        }
-                    ));
-    
-                    // Mark for check
-                    this._changeDetectorRef.markForCheck();
-                }, error => {
-
-                        if (error.status === 417) {
-                            // Open the confirmation dialog
-                            this.displayMessage('Discount date overlap','Your discount date range entered overlapping with existing discount date! Please change your date range','Ok',false);
-
-                        }
-
+        const dialogRef = this._dialog.open(
+            CreateProductDiscountDialogComponent, {
+                width: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
+                height: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
+                maxWidth: this.currentScreenSize.includes('sm') ? 'auto' : '100vw',  
+                maxHeight: this.currentScreenSize.includes('sm') ? 'auto' : '100vh',
+                disableClose: true,
                 });
-            }
-        });
+        dialogRef.afterClosed().subscribe();
+        // dialogRef.afterClosed().subscribe(result => {
+        //     if (result.status === true) {
+        //         // this will remove the item from the object
+        //         const createDiscountBody  = {
+        //             discountName: result.discountName,
+        //             discountType: result.discountOn,
+        //             startDate: result.startDate,
+        //             startTime: result.startTime,
+        //             endDate: result.endDate,
+        //             endTime: result.endTime,
+        //             isActive: result.isActive,
+        //             maxDiscountAmount: result.maxDiscountAmount,
+        //             normalPriceItemOnly: result.normalPriceItemOnly,
+        //             storeId: this.storeId$
+        //         };
+        
+        //         // Create the discount
+        //         this._discountService.createDiscount(createDiscountBody).subscribe(async (newDiscount) => {
+                    
+        //             // Go to new discount
+        //             this.selectedDiscount = newDiscount["data"];
+    
+        //             // Update current form with new discount data
+        //             this.selectedDiscountForm.patchValue(newDiscount["data"]);
+
+        //             //set value of time with time selector
+        //             this.setValueToTimeSelector(newDiscount["data"]);
+
+        //             //initialize the form
+        //             this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
+        //             this.storeDiscountTierList.push(this._formBuilder.group(
+        //                 {
+        //                    discountAmount: null,
+        //                     startTotalSalesAmount: null,
+        //                     calculationType:null,
+        //                 }
+        //             ));
+    
+        //             // Mark for check
+        //             this._changeDetectorRef.markForCheck();
+        //         }, error => {
+
+        //                 if (error.status === 417) {
+        //                     // Open the confirmation dialog
+        //                     this.displayMessage('Discount date overlap','Your discount date range entered overlapping with existing discount date! Please change your date range','Ok',false);
+
+        //                 }
+
+        //         });
+        //     }
+        // });
     }
 
     updateSelectedDiscount(): void
@@ -670,6 +679,81 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
         this.selectedDiscountForm.get('endTime').setValue(new TimeSelector(_pickEndTimeHour,_pickEndTimeMinute, _pickEndTimeAMPM));
         //===================== / END TIME =====================
         return;
+    }
+
+    openEditPopUp(discountId?:string)    {
+
+        this._discountProductService.getDiscountProductByDiscountId(discountId,0,5)
+        .subscribe((response) => {
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
+
+
+        this._discountProductService.getStoreDiscountProduct(discountId)
+        .subscribe((response: ApiResponseModel<StoreDiscountProduct>)=>{
+            this.storeDiscountProduct = response.data;
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
+
+        // Get the discount by id
+        this._discountService.getDiscountById(discountId)
+            .subscribe((discount) => {
+
+                // Set the selected discount
+                this.selectedDiscount = discount;
+
+                // Fill the form
+                this.selectedDiscountForm.patchValue(discount);
+
+                //set the value time with time selector
+                this.setValueToTimeSelector(discount);
+
+                // clear discount tier form array
+                (this.selectedDiscountForm.get('storeDiscountTierList') as FormArray).clear();
+
+                //to handle logic if storeDiscount tier list exist or not
+                this.storeDiscountTierId = this.selectedDiscount.storeDiscountTierList[0]?.id?this.selectedDiscount.storeDiscountTierList[0].id:null;
+                // load discount tier form array with data frombackend
+                if(this.storeDiscountTierId !== null){
+                    discount.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
+                        this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
+                        this.storeDiscountTierList.push(this._formBuilder.group(item));
+                    });
+                } else {
+                    this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
+                    this.storeDiscountTierList.push(this._formBuilder.group(
+                        {
+                        discountAmount: null,
+                            startTotalSalesAmount: null,
+                            calculationType:null,
+                        }
+                    ));
+                }
+
+                this._discountService.getDiscountsTier(discountId)
+                    .subscribe((response) => {
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    });
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+
+        const dialogRef = this._dialog.open(
+            EditProductDiscountDialogComponent, {
+                width: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
+                height: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
+                maxWidth: this.currentScreenSize.includes('sm') ? 'auto' : '100vw',  
+                maxHeight: this.currentScreenSize.includes('sm') ? 'auto' : '100vh',
+                disableClose: true,
+                data:{discountId:discountId} 
+            });
+
+        dialogRef.afterClosed().subscribe(result => {});
     }
 
 }

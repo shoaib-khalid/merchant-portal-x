@@ -15,7 +15,6 @@
                 <div class="content flex flex-col h-full sm:h-auto mb-3 w-full overflow-hidden sm:overflow-y-auto">
                     <!-- discount name -->
                     <mat-form-field 
-                        floatLabel="always"
                         appearance="fill"
                         class="w-full fuse-mat-emphasized-affix">
                         <mat-label>Discount Name</mat-label>
@@ -35,7 +34,6 @@
                     <div class="w-full">
                         <!-- capped amount-->
                         <mat-form-field 
-                            floatLabel="always"
                             appearance="fill"
                             class="w-full sm:w-1/3 sm:pr-2 fuse-mat-emphasized-affix">
                             <mat-label>Capped amount</mat-label>
@@ -53,7 +51,6 @@
                         </mat-form-field>
                         <!-- status -->
                         <mat-form-field 
-                            floatLabel="always"
                             appearance="fill"
                             class="w-full sm:w-1/3 sm:pr-2 fuse-mat-emphasized-affix">
                             <mat-label>Status</mat-label>
@@ -65,7 +62,6 @@
                                 <div>
                                     <mat-option [value]="true">Active</mat-option>
                                     <mat-option [value]="false">Inactive</mat-option>
-                                    
                                 </div>
                             </mat-select>
                             <mat-icon
@@ -76,7 +72,6 @@
                         </mat-form-field>
                         <!-- discount on -->
                         <mat-form-field 
-                            floatLabel="always"
                             appearance="fill"
                             class="w-full sm:w-1/3 fuse-mat-emphasized-affix">
                             <mat-label>Discount on</mat-label>
@@ -102,7 +97,6 @@
                         <div class="font-semibold mb-2 w-full">Start date/time</div>
                         <div class="w-full flex flex-col sm:flex-row">
                             <mat-form-field 
-                                floatLabel="always"
                                 class="w-full sm:w-1/2 sm:pr-2 fuse-mat-emphasized-affix"
                                 appearance="fill">
                                 <input 
@@ -117,7 +111,6 @@
                                 </mat-icon>
                             </mat-form-field>
                             <mat-form-field 
-                                floatLabel="always"
                                 class="w-full sm:w-1/2 sm:pl-2 fuse-mat-emphasized-affix" 
                                 appearance="fill">
                                 <time-selector
@@ -140,7 +133,6 @@
                         <div class="font-semibold mb-2 w-full">End date/time</div>
                         <div class="w-full flex flex-col sm:flex-row">
                             <mat-form-field 
-                                floatLabel="always"
                                 class="w-full sm:w-1/2 sm:pr-2 fuse-mat-emphasized-affix"
                                 appearance="fill">
                                 <input 
@@ -155,7 +147,6 @@
                                 </mat-icon>
                             </mat-form-field>
                             <mat-form-field 
-                                floatLabel="always"
                                 class="w-full sm:w-1/2 sm:pl-2 fuse-mat-emphasized-affix" 
                                 appearance="fill">
                                 <time-selector
@@ -206,16 +197,15 @@
                         mat-flat-button
                         class="w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
                         [color]="'gray'"
-                        (click)="closeDialog()"
+                        (click)="cancel()"
                         >
                         Cancel
                     </button>
-                    <!-- Next button -->
+                    <!-- Next variant button -->
                     <button
                         class="w-24"
                         mat-flat-button
                         [color]="'primary'"
-                        [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
                         type="button"
                         matStepperNext>
                         Next
@@ -366,7 +356,7 @@
                                 <div class="grid overflow-auto rounded">
                                     <!-- Header -->
                                     <div
-                                        class="create-order-discount-grid sticky grid gap-1 sm:gap-4 py-4 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                                        class="edit-order-discount-grid sticky grid gap-1 sm:gap-4 py-4 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
                                         matSort
                                         matSortDisableClear>
                                         <div class="hidden sm:block"></div>
@@ -391,7 +381,7 @@
                                         class="h-72 overflow-y-auto">
                                         <div *ngFor="let discountTier of horizontalStepperForm.get('step2')['controls']; let i = index;" [formGroupName]="i">
                                             <!-- Variant Header -->
-                                            <div class="create-order-discount-grid grid items-center gap-4 mt-4 border-b">      
+                                            <div class="edit-order-discount-grid grid items-center gap-4 mt-4 border-b">      
                                                 <div class="hidden sm:block"></div>                              
                                                 <!-- Min Order Amount -->
                                                 <div class="truncate">
@@ -519,6 +509,7 @@
                         </div>
                     </fieldset>
                 </div>
+
                 <div class="flex justify-end">
                     <!-- Flash message -->
                     <div
@@ -553,9 +544,8 @@
                         [disabled]="isLoading"
                         [color]="'primary'"
                         type="button"
-                        (click)="createDiscount()"
-                    >
-                    Create
+                        (click)="updateSelectedDiscount()">
+                    Update
                     </button>
                 </div>
             </mat-step>
