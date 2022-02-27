@@ -158,14 +158,15 @@
                 #horizontalStepperStep2>
                 <ng-template matStepLabel>View Product</ng-template>
                 <div class="overflow-y-auto">
-                    <div class="flex flex-col md:flex-col lg:flex-row flex-auto mb-2">      
+                    <div class="flex flex-col sm:flex-row flex-auto mb-2">      
                         <!-- Product Search -->
-                        <div class="w-1/2 lg:pr-2">
-                            <!-- Product Search -->
-                            <div class="flex sm:flex-col sm:h-24 md:h-14 md:flex-row flex-wrap items-center justify-between py-2 mb-4">
-                                <div class="flex items-center text-lg font-extrabold">Product Search</div>
-                                <div class="flex items-center">
-                                    <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-40 px-2">
+                        <div class="w-full sm:w-1/2 sm:pr-2">
+                            <!-- Header -->
+                            <div class="flex flex-col sm:flex-row w-full items-center justify-between py-2 mb-1 h-auto sm:h-14">
+                                <div class="flex w-full sm:w-1/2 items-center text-lg font-extrabold mb-2 sm:mb-0">Product Search</div>
+                                <div class="flex flex-col w-full sm:w-1/2 sm:flex-row items-center sm:mb-2  ">
+                                    <!-- Category filter -->
+                                    <mat-form-field class="w-full order-2 sm:order-1 fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded sm:pr-2">
                                         <mat-select
                                             class="w-full"
                                             placeholder="Category"
@@ -179,7 +180,8 @@
                                         </mat-select>
                                     </mat-form-field>
                 
-                                    <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-40">
+                                    <!-- Product filter -->
+                                    <mat-form-field class="w-full order-1 sm:order-2 fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded mb-2 sm:mb-0">
                                         <mat-icon
                                             class="icon-size-5"
                                             matPrefix
@@ -217,7 +219,7 @@
                                             class="overflow-y-auto">
                                             <div *ngFor="let productList of products; let i = index;">
                                                 <!-- Product Body -->
-                                                <div class="edit-product-product-grid grid items-center gap-4 py-3 border-b">      
+                                                <div class="edit-product-product-grid grid items-center gap-4 py-2 sm:py-3 border-b">      
                                                     <!-- Min Order Amount -->
                                                     <div class="truncate">
                                                         <mat-checkbox  
@@ -269,21 +271,40 @@
                                         #productPaginator>
                                     </mat-paginator>
                                     <!-- Send -->
+                                    <!-- Button Big -->
                                     <button
+                                        *ngIf="currentScreenSize.includes('sm') ? true : false"
                                         class="flex"
                                         mat-flat-button
                                         (click)="addProductDiscount()"
                                         [color]="'primary'">
                                         Add
                                     </button>
+                                    <!-- Button small -->
+                                    <input
+                                        id="add-product-discount-btn"
+                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                        type="button"
+                                        [multiple]="false"
+                                        (click)="addProductDiscount()"
+                                        #imageFileInput>
+                                    <label
+                                        *ngIf="currentScreenSize.includes('sm') ? false : true"
+                                        class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-primary hover:bg-primary-500"
+                                        for="add-product-discount-btn"
+                                        matRipple>
+                                        <mat-icon
+                                            class="icon-size-5 text-white"
+                                            [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                                    </label>
                                 </div>
                             </div>
                         </div>
                 
                         <!-- Selected Product -->
-                        <div class="w-1/2 lg:pl-2">
+                        <div class="w-full sm:w-1/2 sm:pl-2">
                             <!-- Title -->
-                            <div class="flex flex-row text-lg font-extrabold h-14 py-2 items-end lg:items-center mb-4">Selected Product</div>
+                            <div class="flex flex-row text-lg font-extrabold py-2 items-end sm:items-center mb-1 h-14">Selected Product</div>
                             <!-- Content -->
                             <div class="relative flex flex-col border border-solid rounded p-2 h-96">
                                 <!-- Table -->
@@ -327,12 +348,12 @@
                                                         <div *ngIf=!editModeDiscountProduct[i]>{{productDiscountList.discountAmount}}</div>
                                             
                                                         <div *ngIf=editModeDiscountProduct[i]>
-                                                                <input
-                                                                    type="number"
-                                                                    [value]="productDiscountList.discountAmount"
-                                                                    (input)="inputEditDiscountAmount(i,$event)"
-                                                                    style="border: 1px solid rgba(0, 0, 0, 0.200);font-size: 14px;width: 70px; height:30px;"
-                                                                >
+                                                            <input
+                                                                class="p-2 border border-gray-500 rounded w-18"
+                                                                type="number"
+                                                                [value]="productDiscountList.discountAmount"
+                                                                (input)="inputEditDiscountAmount(i,$event)"
+                                                            >
                                                         </div>
                                                     </div>
                 
@@ -346,7 +367,7 @@
                                                             (click)="editModeDiscountProduct[i] = !editModeDiscountProduct[i]">
                                                         <label
                                                             *ngIf="!editModeDiscountProduct[i]"
-                                                            class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 my-1.5"
+                                                            class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400 mr-2"
                                                             [for]="'edit-button'+productDiscountList.id"
                                                             matRipple>
                                                             <mat-icon
@@ -364,7 +385,7 @@
                                                             (click)="editStoreProductDiscount(productDiscountList)">
                                                         <label
                                                             *ngIf="editModeDiscountProduct[i]"
-                                                            class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 my-1.5"
+                                                            class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400 mr-2"
                                                             [for]="'update-button'+productDiscountList.id"
                                                             matRipple>
                                                             <mat-icon
@@ -380,7 +401,7 @@
                                                             [id]="'delete-button'+productDiscountList.id"
                                                             (click)="deleteStoreProductDiscount(productDiscountList)">
                                                         <label
-                                                            class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-warn hover:bg-warn-700 my-1.5"
+                                                            class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-warn hover:bg-warn-700"
                                                             [for]="'delete-button'+productDiscountList.id"
                                                             matRipple>
                                                             <mat-icon

@@ -1,9 +1,10 @@
-import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { MatPaginator } from '@angular/material/paginator';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { Product, ProductCategory, ProductPagination } from 'app/core/product/inventory.types';
-import { fromEvent, Observable, Subject } from 'rxjs';
+import { fromEvent, merge, Observable, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { DiscountsProductService } from '../product-discount-list/product-discount-list.service';
 import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dialog/dialog.component';
@@ -13,11 +14,12 @@ import { MatCheckboxChange } from '@angular/material/checkbox';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { StoresService } from 'app/core/store/store.service';
 import { Store } from 'app/core/store/store.types';
+import { StoreDiscountProduct, StoreDiscountProductPagination } from '../product-discount-list/product-discount-list.types';
 
 @Component({
-  selector: 'dialog-create-product-discount',
-  templateUrl: './create-product-discount.component.html',
-  styles    :   [`
+    selector: 'dialog-create-product-discount',
+    templateUrl: './create-product-discount.component.html',
+    styles    :   [`
         /** language=SCSS */
         :host ::ng-deep .mat-horizontal-content-container {
             // max-height: 90vh;
@@ -35,74 +37,94 @@ import { Store } from 'app/core/store/store.types';
         .content{
             height:400px;
         }
+        .create-product-product-grid {
+            grid-template-columns: 80px 80px auto 80px;
+
+            @screen sm {
+                grid-template-columns: 30px auto 104px 104px;
+            }
+        }
+        .create-product-discount-grid {
+            grid-template-columns: 80px 80px auto 80px;
+
+            @screen sm {
+                grid-template-columns: auto 104px 90px 90px;
+            }
+        }
     `]
 })
 export class CreateProductDiscountDialogComponent implements OnInit {
 
+    @ViewChild("productPaginator", {read: MatPaginator}) private _productPaginator: MatPaginator;
+    @ViewChild('productDiscountPaginator', {read: MatPaginator}) private _productDiscountPaginator: MatPaginator;
 
-  store$: Store;
-  disabledProceed: boolean = true;
+    store$: Store;
+    disabledProceed: boolean = true;
 
-  discountName: string;
-  status: boolean;
-  discountType: string;
-  isActive: boolean;
-  maxDiscountAmount: string;
-  normalPriceItemOnly: boolean;
+    discountName: string;
+    status: boolean;
+    discountType: string;
+    isActive: boolean;
+    maxDiscountAmount: string;
+    normalPriceItemOnly: boolean;
 
-  checkdate = false;
-  checkname = false;
-  checkstatus = false;
-  checktype = false;
-  checkdiscountamount = false;
+    checkdate = false;
+    checkname = false;
+    checkstatus = false;
+    checktype = false;
+    checkdiscountamount = false;
 
-  startDate: string;
-  startTime: string;
-  isDisabledStartDateTime: boolean = true;
-  minStartDate: string;
-  minStartTime: string;
-  maxStartDate:string;
-  maxStartTime:string;
+    startDate: string;
+    startTime: string;
+    isDisabledStartDateTime: boolean = true;
+    minStartDate: string;
+    minStartTime: string;
+    maxStartDate:string;
+    maxStartTime:string;
 
-  endDate: string;
-  endTime: string;
-  minEndDate: string;
-  minEndTime: string;
-  maxEndDate: string;
-  maxEndTime: string;
+    endDate: string;
+    endTime: string;
+    minEndDate: string;
+    minEndTime: string;
+    maxEndDate: string;
+    maxEndTime: string;
 
-  message: string = "";
-  changeStartTime:string;
-  changeEndTime:string;
-   
-  //=====================new
-  productDiscountStepperForm: FormGroup;
-  addProductDiscountLevel: FormArray;
+    message: string = "";
+    changeStartTime:string;
+    changeEndTime:string;
 
-  //Search mode
-  inputSearchCategory : string ='';
-  inputSearchProducts : string = '';
-  selectedCategory:string ='';
+    //=====================new
+    productDiscountStepperForm: FormGroup;
+    addProductDiscountLevel: FormArray;
 
-  private _unsubscribeAll: Subject<any> = new Subject<any>();
+    //Search mode
+    inputSearchCategory : string ='';
+    inputSearchProducts : string = '';
+    selectedCategory:string ='';
 
-  categoriesListing$ : ProductCategory[];
-  filteredCategories: ProductCategory[];
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
 
-  products$: Observable<Product[]>;
-  _products:Product[];
-  filteredProductsOptions: Product[] = [];
-  productPagination: ProductPagination;
+    categoriesListing$ : ProductCategory[];
+    filteredCategories: ProductCategory[];
 
-  isLoading: boolean = false;
+    products$: Observable<Product[]>;
+    _products:Product[];
+    filteredProductsOptions: Product[] = [];
+    productPagination: ProductPagination;
 
-  onChangeSelectProductObject : Product[] = [];// to keep object which has been select
-  onChangeSelectProductValue : any =[];//to be display on checkbox
+    isLoading: boolean = false;
 
-  discountId:string;
+    storeDiscountProduct$: Observable<StoreDiscountProduct[]>;
+    storeDiscountProduct : StoreDiscountProduct[] = []; 
+    storeDiscountPagination: StoreDiscountProductPagination = { length: 0, page: 0, size: 0, lastPage: 0, startIndex: 0, endIndex: 0 };
 
-  currentScreenSize: string[] = [];
-  flashMessage: 'success' | 'error' | null = null;
+    onChangeSelectProductObject : Product[] = [];// to keep object which has been select
+    onChangeSelectProductValue : any = [];//to be display on checkbox
+
+    discountId:string;
+
+    currentScreenSize: string[] = [];
+    flashMessage: 'success' | 'error' | null = null;
 
   constructor(
     public dialogRef: MatDialogRef<CreateProductDiscountDialogComponent>,
@@ -206,6 +228,59 @@ export class CreateProductDiscountDialogComponent implements OnInit {
 
     // Mark for check
     this._changeDetectorRef.markForCheck();
+
+  }
+
+  ngAfterViewInit(): void
+  {
+      // Mark for check
+      this._changeDetectorRef.markForCheck();
+
+      setTimeout(() => {
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();        
+
+          if ( this._productPaginator )
+          {
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+    
+            merge(this._productPaginator.page).pipe(
+                switchMap(() => {                    
+
+                    // set loading to true
+                    this.isLoading = true;
+
+                    return this._discountProductService.getByQueryProducts(this._productPaginator.pageIndex, this._productPaginator.pageSize, 'name', 'asc',this.inputSearchProducts,'ACTIVE,INACTIVE',this.selectedCategory);
+                
+                }),
+                map(() => {
+                    // set loading to false
+                    this.isLoading = false;
+                })
+            ).subscribe();
+          }
+          if (this._productDiscountPaginator)
+          {
+    
+             this._productDiscountPaginator.page.pipe(
+                  switchMap(() => {
+                      return this._discountProductService.getDiscountProductByDiscountId(this.discountId, this._productDiscountPaginator.pageIndex, this._productDiscountPaginator.pageSize);
+                  }),
+                  map(() => {
+                      this.isLoading = false;
+                  })
+              ).subscribe();
+          }
+
+          // Mark for check
+          this._changeDetectorRef.markForCheck();
+
+      }, 0);
+
+      // Mark for check
+      this._changeDetectorRef.markForCheck();
 
   }
 
@@ -415,6 +490,8 @@ export class CreateProductDiscountDialogComponent implements OnInit {
 
 
      }
+
+     // Mark for check
      this._changeDetectorRef.markForCheck();
 
   }

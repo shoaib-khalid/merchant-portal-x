@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, Inject, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, Inject, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { TimeSelector } from 'app/layout/common/time-selector/timeselector.component';
@@ -50,9 +50,7 @@ import { StoresService } from 'app/core/store/store.service';
                 grid-template-columns: auto 104px 90px 90px;
             }
         }
-    `],
-    encapsulation  : ViewEncapsulation.None,
-    changeDetection: ChangeDetectionStrategy.OnPush
+    `]
 })
 export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
 

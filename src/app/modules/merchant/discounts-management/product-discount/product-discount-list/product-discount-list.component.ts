@@ -31,11 +31,11 @@ import { EditProductDiscountDialogComponent } from '../edit-product-discount/edi
                 grid-template-columns: 72px auto 40px;
 
                 @screen sm {
-                    grid-template-columns: 48px 112px auto 72px;
+                    grid-template-columns: 20px 112px auto 72px;
                 }
 
                 @screen lg {
-                    grid-template-columns: 48px 112px auto 180px 180px 180px 72px;
+                    grid-template-columns: 20px 112px auto 180px 180px 180px 72px;
                 }
             }
         `

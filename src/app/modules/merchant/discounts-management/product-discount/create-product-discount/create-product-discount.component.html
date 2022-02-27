@@ -1,4 +1,4 @@
-<div class="flex flex-col max-w-256 lg:min-w-256 -m-6 px-4 overflow-hidden">
+<div class="flex flex-col max-w-320 lg:min-w-320 -m-6 px-4 overflow-hidden">
     <form
         class="flex flex-col w-full"
         [formGroup]="productDiscountStepperForm">
@@ -158,15 +158,16 @@
                 [stepControl]="productDiscountStepperForm.get('step2')"
                 #horizontalStepperStep2>
                 <ng-template matStepLabel>View Product</ng-template>
-                <div class="content overflow-y-auto">
-                    <div class="flex flex-col md:flex-col lg:flex-row flex-auto mb-2">      
+                <div class="overflow-y-auto">
+                    <div class="flex flex-col sm:flex-row flex-auto mb-2">      
                         <!-- Product Search -->
-                        <div class="h-110 lg:pr-2">
-                            <!-- Product Search -->
-                            <div class="flex sm:flex-col sm:h-24 md:h-14 md:flex-row flex-wrap items-center justify-between py-2 mb-4">
-                                <div class="flex items-center text-lg font-extrabold">Product Search</div>
-                                <div class="flex items-center">
-                                    <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-40 px-2">
+                        <div class="w-full sm:w-1/2 sm:pr-2">
+                            <!-- Header -->
+                            <div class="flex flex-col sm:flex-row w-full items-center justify-between py-2 mb-1 h-auto sm:h-14">
+                                <div class="flex w-full sm:w-1/2 items-center text-lg font-extrabold mb-2 sm:mb-0">Product Search</div>
+                                <div class="flex flex-col w-full sm:w-1/2 sm:flex-row items-center sm:mb-2  ">
+                                    <!-- Category filter -->
+                                    <mat-form-field class="w-full order-2 sm:order-1 fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded sm:pr-2">
                                         <mat-select
                                             class="w-full"
                                             placeholder="Category"
@@ -180,7 +181,8 @@
                                         </mat-select>
                                     </mat-form-field>
                 
-                                    <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-40">
+                                    <!-- Product filter -->
+                                    <mat-form-field class="w-full order-1 sm:order-2 fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded mb-2 sm:mb-0">
                                         <mat-icon
                                             class="icon-size-5"
                                             matPrefix
@@ -194,208 +196,167 @@
                                 </div>
                             </div>
                             <!-- Content -->
-                            <div class="flex flex-col border border-solid rounded p-2">
+                            <div class="relative flex flex-col border border-solid rounded p-2 h-96">
                                 <!-- Table -->
-                                <div class="h-64">
-                                    <table *ngIf="(products$ | async) as products" class="table-fixed mt-2 mb-4 w-full flex-row">
-                                        <tr class="border-b border-gray-300 pt-2 pl-2 sm:my-12">
-                                            <th class="text-left">Select</th>
-                                            <th class="text-left">Product Name</th>
-                                            <th class="text-left">Original Price</th>
-                                            <th class="text-left">Have Variant</th>
+                                <ng-container *ngIf="(products$ | async) as products">
+                                    <div class="grid overflow-auto rounded">
+                                        <!-- Header -->
+                                        <div
+                                            class="create-product-product-grid sticky grid gap-1 sm:gap-4 py-4 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                                        >
+                                            <div></div>
+                                            <div>
+                                                Product Name
+                                            </div>
+                                            <div class="text-center">
+                                                Original Price
+                                            </div>
+                                            <div class="text-center">
+                                                Have Variant
+                                            </div>
+                                        </div>
+                                        <!-- Rows -->
+                                        <div 
+                                            class="overflow-y-auto">
+                                            <div *ngFor="let productList of products; let i = index;">
+                                                <!-- Product Body -->
+                                                <div class="create-product-product-grid grid items-center gap-4 py-2 sm:py-3 border-b">      
+                                                    <!-- Min Order Amount -->
+                                                    <div class="truncate">
+                                                        <mat-checkbox  
+                                                            class="pl-2"
+                                                            [color]="'primary'"
+                                                            (change)="onChangeSelectProduct(productList,$event)"
+                                                            [checked]="onChangeSelectProductValue.includes(productList.id)"></mat-checkbox>
+                                                    </div>
                 
-                                        </tr>
-                                        <tr class="border-b border-gray-300 pt-2 pl-2" *ngFor="let productList of products;let i =index;" >
-                                            <td>
-                                                <input type="checkbox"
-                                                    (change)="onChangeSelectProduct(productList,$event)"
-                                                    [checked]="onChangeSelectProductValue.includes(productList.id)">
-                                            </td>
-                                            <td>{{productList.name}}</td>
-                                            <td>{{productList.productInventories[0].price}}</td>
-                                            <td>
+                                                    <!-- Product Name -->
+                                                    <div class="truncate">
+                                                        {{productList.name}}
+                                                    </div>
+    
+                                                    <!-- Original Price -->
+                                                    <div class="truncate text-center">
+                                                        {{productList.productInventories[0].price}}
+                                                    </div>
                 
-                                                <ng-container *ngIf="productList.productVariants.length > 0">
-                                                    <mat-icon
-                                                        class="text-green-400 icon-size-5"
-                                                        [svgIcon]="'heroicons_solid:check'"></mat-icon>
-                                                </ng-container>
-                                                <ng-container *ngIf="productList.productVariants.length === 0">
-                                                    <mat-icon
-                                                        class="text-gray-400 icon-size-5"
-                                                        [svgIcon]="'heroicons_solid:x'"></mat-icon>
-                                                </ng-container>
-                                            </td>
-                        
-                                        </tr>
-                                    </table>
-                                </div>
+                                                    <!-- Action Button -->
+                                                    <div class="truncate text-center">
+                                                        <ng-container *ngIf="productList.productVariants.length > 0">
+                                                            <mat-icon
+                                                                class="text-green-400 icon-size-5"
+                                                                [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                                        </ng-container>
+                                                        <ng-container *ngIf="productList.productVariants.length === 0">
+                                                            <mat-icon
+                                                                class="text-gray-400 icon-size-5"
+                                                                [svgIcon]="'heroicons_solid:x'"></mat-icon>
+                                                        </ng-container>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-container>
                                 <!-- Pagination & Button -->
-                                <div class="flex items-center justify-between w-full">
+                                <div class="absolute flex flex-row justify-between items-center bg-white px-4 bottom-0 left-0 right-0 w-full">
                                     <mat-paginator
-                                        #_paginator
+                                        class=""
                                         [ngClass]="{'pointer-events-none': isLoading}"
                                         [length]="productPagination.length"
                                         [pageIndex]="productPagination.page"
                                         [pageSize]="productPagination.size"
-                                        [pageSizeOptions]="[5]"
+                                        [pageSizeOptions]="[5, 10, 25, 100]"
                                         [showFirstLastButtons]="true"
-                                        [hidePageSize]="currentScreenSize.includes('sm') ? false : true">
+                                        [hidePageSize]="true"
+                                        #productPaginator>
                                     </mat-paginator>
-                                    <div>
-                                        <!-- Send -->
-                                        <button
-                                            class="flex"
-                                            mat-flat-button
-                                            (click)="addProductDiscount()"
-                                            [color]="'primary'">
-                                            Add
-                                        </button>
-                                    </div>
+                                    <!-- Send -->
+                                    <!-- Button Big -->
+                                    <button
+                                        *ngIf="currentScreenSize.includes('sm') ? true : false"
+                                        class="flex"
+                                        mat-flat-button
+                                        (click)="addProductDiscount()"
+                                        [color]="'primary'">
+                                        Add
+                                    </button>
+                                    <!-- Button small -->
+                                    <input
+                                        id="add-product-discount-btn"
+                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                        type="button"
+                                        [multiple]="false"
+                                        (click)="addProductDiscount()"
+                                        #imageFileInput>
+                                    <label
+                                        *ngIf="currentScreenSize.includes('sm') ? false : true"
+                                        class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-primary hover:bg-primary-500"
+                                        for="add-product-discount-btn"
+                                        matRipple>
+                                        <mat-icon
+                                            class="icon-size-5 text-white"
+                                            [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                                    </label>
                                 </div>
                             </div>
                         </div>
                 
                         <!-- Selected Product -->
-                        <div class="h-110 lg:pl-2">
+                        <div class="w-full sm:w-1/2 sm:pl-2">
                             <!-- Title -->
-                            <div class="flex flex-row text-lg font-extrabold h-14 py-2 items-end lg:items-center mb-4">Selected Product</div>
+                            <div class="flex flex-row text-lg font-extrabold py-2 items-end sm:items-center mb-1 h-14">Selected Product</div>
                             <!-- Content -->
-                            <div class="flex flex-col border border-solid rounded p-2">
-                                <div class="h-64">
-                                    <!-- <table *ngIf="(storeDiscountProduct$ | async) as storeDiscountProducts" class="table-fixed mt-2 mb-4 w-full flex-row">
-                                        <tr class="border-b border-gray-300 pt-2 pl-2">
-                                            <th class="text-left truncate">Product Name (SKU)</th>
-                                            <th class="text-left w-28">Original Price</th>
-                                            <th class="text-left w-24">Discount%</th>
-                                            <th>Action</th>
-                                        </tr>
-                                        <tr class="border-b border-gray-300 pt-2 pl-2" *ngFor="let productDiscountList of storeDiscountProducts;let i =index;" >
-                                            <td class="truncate">{{ productDiscountList.productInventory.product.name + " ( "+productDiscountList.productInventory.sku +  " ) " }}</td>
-                                            <td>{{productDiscountList.productInventory.price}}</td>
-                                            <td>
-                                                <div *ngIf=!editModeDiscountProduct[i]>{{productDiscountList.discountAmount}}</div>
-                                                
-                                                <div *ngIf=editModeDiscountProduct[i]>
+                            <div class="relative flex flex-col border border-solid rounded p-2 h-96">
+                                <!-- Table -->
+                                <ng-container *ngIf="true">
+                                    <div class="grid overflow-auto rounded">
+                                        <!-- Header -->
+                                        <div
+                                            class="create-product-discount-grid sticky grid gap-1 sm:gap-4 py-3 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                                        >
+                                            <div>
+                                                Product SKU
+                                            </div>
+                                            <div class="text-center">
+                                                Original Price
+                                            </div>
+                                            <div class="text-center">
+                                                Discount %
+                                            </div>
+                                            <div class="text-center">
+                                                Action
+                                            </div>
+                                        </div>
+                                        <!-- Rows -->
+                                        <div 
+                                            class="overflow-y-auto">
+                                            <div *ngFor="let selectedProduct of productDiscountStepperForm.get('step2')['controls']; let i = index;" [formGroupName]="i">
+                                                <!-- Selected Product Header -->
+                                                <div class="create-product-discount-grid grid items-center gap-4 py-1 border-b">      
+                                                    <!-- Product Name (SKU) -->
+                                                    <div class="truncate">
+                                                        {{ selectedProduct.value.sku }}
+                                                    </div>
+                
+                                                    <!-- Original Price-->
+                                                    <div class="truncate text-center">
+                                                        {{ selectedProduct.value.price }}
+                                                    </div>
+    
+                                                    <!-- Discount % -->
+                                                    <div class="truncate text-center">
                                                         <input
+                                                            class="p-2 border border-gray-500 rounded w-18"
                                                             type="number"
-                                                            [value]="productDiscountList.discountAmount"
-                                                            (input)="inputEditDiscountAmount(i,$event)"
-                                                            style="border: 1px solid rgba(0, 0, 0, 0.200);font-size: 14px;width: 70px; height:30px;"
-                                                        >
-                                                </div>
-                                                
-                                            </td>
-                                            <td class="flex flex-wrap items-center justify-center">
-                                            
-                                                    <input
-                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                    type="button"
-                                                    [id]="'edit-button'+productDiscountList.id"
-                                                    (click)="editModeDiscountProduct[i] = !editModeDiscountProduct[i]"
-                                                    >
-                                                    <label
-                                                    *ngIf="!editModeDiscountProduct[i]"
-                                                    class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 my-1.5"
-                                                    [for]="'edit-button'+productDiscountList.id"
-                                                    matRipple>
-                                                    <mat-icon
-                                                        class="text-white icon-size-5"
-                                                        [svgIcon]="'heroicons_outline:pencil-alt'">
-                                                    </mat-icon>
-                                                    </label>
-                        
-                                                    <input
-                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                    type="button"
-                                                    [id]="'update-button'+productDiscountList.id"
-                                                    (click)="editModeDiscountProduct[i] = !editModeDiscountProduct[i]"
-                                                    (click)="editStoreProductDiscount(productDiscountList)"
-                                                    >
-                                                    <label
-                                                        *ngIf="editModeDiscountProduct[i]"
-                                                        class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 my-1.5"
-                                                        [for]="'update-button'+productDiscountList.id"
-                                                        matRipple>
-                                                        <mat-icon
-                                                            class="text-white icon-size-5"
-                                                            [svgIcon]="'heroicons_outline:check'">
-                                                        </mat-icon>
-                                                    </label>
-                        
-                                                    <input
-                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                    type="button"
-                                                    [id]="'delete-button'+productDiscountList.id"
-                                                    (click)="deleteStoreProductDiscount(productDiscountList)"
-                                                    >
-                                                    <label
-                                                        class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-warn hover:bg-warn-700 my-1.5"
-                                                        [for]="'delete-button'+productDiscountList.id"
-                                                        matRipple>
-                                                        <mat-icon
-                                                            class="text-white icon-size-5"
-                                                            [svgIcon]="'heroicons_outline:trash'">
-                                                        </mat-icon>
-                                                    </label>
-                                                
-                                            </td>
-                        
-                                        </tr>
-                        
-                                    </table> -->
-
-                                    <!-- Table in form -->
-
-                                    <table class="my-4 mr-2 w-full table-fixed">
-                                        <tr>
-                                            <th>Product Name</th>
-                                            <th>Original Price</th>
-                                            <th>Discount%</th>
-                                            <th>Action</th>                   
-                                    
-                                        </tr>
-                                        <tr *ngFor="let selectedProduct of productDiscountStepperForm.get('step2')['controls']; let i = index;" [formGroupName]="i">
-                                            <td class="border-t border-gray-300 pt-2 pl-2"> 
-                                                <div>
-                                                    <mat-form-field class="w-full pr-4">
-                                                        <input
-                                                            matInput
-                                                            [formControlName]="'sku'"
-                                                            readonly
-                                                        >
-                                                    </mat-form-field>
-                                                </div>
-                                            </td>
-                                            <td class="border-t border-gray-300 pt-2 pl-2">
-                                                <div>
-                                                    <mat-form-field class="w-full pr-4">
-                                                        <input
-                                                            type="number"
-                                                            matInput
-                                                            [formControlName]="'price'"
-                                                            readonly
-                                                        >
-                                                    </mat-form-field>
-                                                </div>
-                                            </td>
-                                            <td class="border-t border-gray-300 pt-2 pl-2">
-                                                <div>
-                                                    <mat-form-field class="w-full pr-4">
-                                                        <input
-                                                            type="number"
-                                                            matInput
                                                             [formControlName]="'discountAmount'"
                                                             min="0" max="100"
                                                         >
-                                                    </mat-form-field>
-                                                </div>
-                                            </td>
-    
-                                            <td class="border-t border-gray-300 pt-2 pl-2">
-                                                <div class="flex flex-wrap items-center justify-center ">
-                                                    <div class="flex flex-row w-full items-center justify-center">
-                                                    
+                                                    </div>
+                
+                                                    <!-- Action Button -->
+                                                    <div class="truncate flex w-full items-center justify-center">
+                                                        <!-- Delete Button -->
                                                         <input
                                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                             type="button"
@@ -403,7 +364,7 @@
                                                             (click)="deleteSelectedProductDiscount(i)"
                                                         >
                                                         <label
-                                                            class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-warn hover:bg-warn-700 mb-3"
+                                                            class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-warn hover:bg-warn-700"
                                                             [for]="'delete-selected-product-discount-btn' + i"
                                                             matRipple>
                                                             <mat-icon
@@ -411,28 +372,13 @@
                                                                 [svgIcon]="'heroicons_outline:trash'">
                                                             </mat-icon>
                                                         </label>
+
                                                     </div>
                                                 </div>
-                                            </td>
-                                    
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="flex items-center justify-between w-full">
-                                    <!-- <mat-paginator
-                                        #_paginatorDiscountProduct
-                                        [ngClass]="{'pointer-events-none': isLoading}"
-                                        [length]="storeDiscountPagination.length"
-                                        [pageIndex]="storeDiscountPagination.page"
-                                        [pageSize]="storeDiscountPagination.size"
-                                        [pageSizeOptions]="[5]"
-                                        [showFirstLastButtons]="true"
-                                        >
-                                    </mat-paginator> -->
-                                    <div  class="flex w-6 bg-red-300">
-                                    
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                </ng-container>
                             </div>
                         </div>
                     </div>

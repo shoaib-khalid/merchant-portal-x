@@ -12,35 +12,35 @@ import { takeUntil } from 'rxjs/operators';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 
 @Component({
-  selector: 'app-edit-order-discount',
-  templateUrl: './edit-order-discount.component.html',
-  styles    :   [`
-    /** language=SCSS */
-    :host ::ng-deep .mat-horizontal-content-container {
-        // max-height: 90vh;
-        padding: 0 0px 20px 0px;
-        // overflow-y: auto;
-    }
-    :host ::ng-deep .mat-horizontal-stepper-header-container {
-        height: 60px;
-    }
-    :host ::ng-deep .mat-horizontal-stepper-header {
-        height: 60px;
-        padding-left: 8px;
-        padding-right: 8px;
-    }
-    .content{
-        height:400px;
-    }
-
-    .edit-order-discount-grid {
-        grid-template-columns: 80px 80px auto 80px;
-
-        @screen sm {
-            grid-template-columns: 20px 120px 120px auto 80px;
+    selector: 'app-edit-order-discount',
+    templateUrl: './edit-order-discount.component.html',
+    styles    :   [`
+        /** language=SCSS */
+        :host ::ng-deep .mat-horizontal-content-container {
+            // max-height: 90vh;
+            padding: 0 0px 20px 0px;
+            // overflow-y: auto;
         }
-    }
-  `]
+        :host ::ng-deep .mat-horizontal-stepper-header-container {
+            height: 60px;
+        }
+        :host ::ng-deep .mat-horizontal-stepper-header {
+            height: 60px;
+            padding-left: 8px;
+            padding-right: 8px;
+        }
+        .content{
+            height:400px;
+        }
+
+        .edit-order-discount-grid {
+            grid-template-columns: 80px 80px auto 80px;
+
+            @screen sm {
+                grid-template-columns: 20px 120px 120px auto 80px;
+            }
+        }
+    `]
 })
 export class EditOrderDiscountDialogComponent implements OnInit {
 
@@ -96,17 +96,17 @@ export class EditOrderDiscountDialogComponent implements OnInit {
     this.horizontalStepperForm = this._formBuilder.group({
         //Main Discount
         step1: this._formBuilder.group({
-            id               : [''],
-            discountName   : [''],
-            discountType : [''],
-            startDate : [''],
-            endDate : [''],
-            startTime : [''],
-            endTime : [''],
-            isActive : [''],
-            maxDiscountAmount : [''],
+            id                  : [''],
+            discountName        : [''],
+            discountType        : [''],
+            startDate           : [''],
+            endDate             : [''],
+            startTime           : [new TimeSelector("--","--","--")],
+            endTime             : [new TimeSelector("--","--","--")],
+            isActive            : [''],
+            maxDiscountAmount   : [''],
             normalPriceItemOnly : [''],
-            storeId          : [''], // not used
+            storeId             : [''], // not used
      
         }),
         //Tier List
@@ -121,8 +121,10 @@ export class EditOrderDiscountDialogComponent implements OnInit {
                 //Set the selected discount
                 this.selectedDiscount = response.data;
 
+                const { startTime, endTime, ...selectedDiscount } = this.selectedDiscount;
+    
                 // Fill the form step 1
-                this.horizontalStepperForm.get('step1').patchValue(response.data);
+                this.horizontalStepperForm.get('step1').patchValue(selectedDiscount);
 
                 //set value for time in tieme selector
                 this.setValueToTimeSelector(response.data);
@@ -138,8 +140,6 @@ export class EditOrderDiscountDialogComponent implements OnInit {
                     this.storeDiscountTierList = this.horizontalStepperForm.get('step2') as FormArray;
                     this.storeDiscountTierList.push(this._formBuilder.group(item));
                 });
-
-                console.log("this.storeDiscountTierList", this.storeDiscountTierList);
                 
                 
                 // Mark for check
@@ -251,8 +251,8 @@ export class EditOrderDiscountDialogComponent implements OnInit {
   }
 
   checkButton(){
-    console.log('this.horizontalStepperForm ',this.horizontalStepperForm.value);
-    console.log('form array',this.horizontalStepperForm.get('step2')['controls']);
+    console.info('this.horizontalStepperForm ',this.horizontalStepperForm.value);
+    console.info('form array',this.horizontalStepperForm.get('step2')['controls']);
   }
 
   setValueToTimeSelector(discount){
