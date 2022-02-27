@@ -30,12 +30,14 @@ import { EditProductDiscountDialogComponent } from './product-discount/edit-prod
 
 @NgModule({
     declarations: [
+        ProductListDialogComponent,
+        
         OrderDiscountListComponent,
         CreateOrderDiscountDialogComponent,
+        EditOrderDiscountDialogComponent,
+
         ProductDiscountListComponent,
         CreateProductDiscountDialogComponent,
-        ProductListDialogComponent,
-        EditOrderDiscountDialogComponent,
         EditProductDiscountDialogComponent
     ],
     imports     : [
@@ -58,9 +60,7 @@ import { EditProductDiscountDialogComponent } from './product-discount/edit-prod
         MatTooltipModule,
         SharedModule,
         TimeSelectorInputModule, 
-        MatStepperModule,
-
-
+        MatStepperModule
     ]
 })
 export class DiscountsManagementModule

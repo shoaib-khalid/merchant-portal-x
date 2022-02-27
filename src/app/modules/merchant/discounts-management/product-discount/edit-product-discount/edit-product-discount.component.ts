@@ -1,11 +1,8 @@
-import { ChangeDetectorRef, Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, Inject, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { TimeSelector } from 'app/layout/common/time-selector/timeselector.component';
-import { fromEvent, Observable, Subject } from 'rxjs';
-// import { DiscountsService } from '../order-discount-list/order-discount-list.service';
-// import { ApiResponseModel, Discount, StoreDiscountTierList } from '../order-discount-list/order-discount-list.types';
-import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { fromEvent, merge, Observable, Subject } from 'rxjs';
 import { ApiResponseModel, Discount, StoreDiscountTierList } from '../../order-discount/order-discount-list/order-discount-list.types';
 import { DiscountsService } from '../../order-discount/order-discount-list/order-discount-list.service';
 import { InventoryService } from 'app/core/product/inventory.service';
@@ -16,37 +13,56 @@ import { StoreDiscountProduct, StoreDiscountProductPagination } from '../product
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MatPaginator } from '@angular/material/paginator';
 import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dialog/dialog.component';
-
-
+import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
+import { Store } from 'app/core/store/store.types';
+import { StoresService } from 'app/core/store/store.service';
 
 @Component({
-  selector: 'app-edit-product-discount',
-  templateUrl: './edit-product-discount.component.html',
-  styles    :   [`
-    /** language=SCSS */
-    :host ::ng-deep .mat-horizontal-content-container {
-        // max-height: 90vh;
-        padding: 0 0px 20px 0px;
-        // overflow-y: auto;
-    }
-    :host ::ng-deep .mat-horizontal-stepper-header-container {
-        height: 60px;
-    }
-    :host ::ng-deep .mat-horizontal-stepper-header {
-        height: 60px;
-        padding-left: 8px;
-        padding-right: 8px;
-    }
-    .content{
-        height:400px;
-    }
-  `]
+    selector: 'app-edit-product-discount',
+    templateUrl: './edit-product-discount.component.html',
+    styles    :   [`
+        /** language=SCSS */
+        :host ::ng-deep .mat-horizontal-content-container {
+            // max-height: 90vh;
+            padding: 0 0px 20px 0px;
+            // overflow-y: auto;
+        }
+        :host ::ng-deep .mat-horizontal-stepper-header-container {
+            height: 60px;
+        }
+        :host ::ng-deep .mat-horizontal-stepper-header {
+            height: 60px;
+            padding-left: 8px;
+            padding-right: 8px;
+        }
+        .edit-product-product-grid {
+            grid-template-columns: 80px 80px auto 80px;
+
+            @screen sm {
+                grid-template-columns: 30px auto 104px 104px;
+            }
+        }
+        .edit-product-discount-grid {
+            grid-template-columns: 80px 80px auto 80px;
+
+            @screen sm {
+                grid-template-columns: auto 104px 90px 90px;
+            }
+        }
+    `],
+    encapsulation  : ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EditProductDiscountDialogComponent implements OnInit {
+export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
+
+    @ViewChild("productPaginator", {read: MatPaginator}) private _productPaginator: MatPaginator;
+    @ViewChild('productDiscountPaginator', {read: MatPaginator}) private _productDiscountPaginator: MatPaginator;
+
+    store$: Store;
 
     productDiscountStepperForm: FormGroup;
     discountId:string;
-    selectedDiscount: Discount | null = null;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     loadDetails:boolean=false;
@@ -63,17 +79,14 @@ export class EditProductDiscountDialogComponent implements OnInit {
     products$: Observable<Product[]>;
     _products:Product[];
     filteredProductsOptions: Product[] = [];
-    productPagination: ProductPagination;
+    productPagination: ProductPagination = { length: 0, page: 0, size: 0, lastPage: 0, startIndex: 0, endIndex: 0 };;
 
     storeDiscountProduct$: Observable<StoreDiscountProduct[]>;
     storeDiscountProduct : StoreDiscountProduct[] = []; 
-    storeDiscountPagination:StoreDiscountProductPagination;
+    storeDiscountPagination: StoreDiscountProductPagination = { length: 0, page: 0, size: 0, lastPage: 0, startIndex: 0, endIndex: 0 };
 
     onChangeSelectProductObject : Product[] = [];// to keep object which has been select
     onChangeSelectProductValue : any =[];//to be display on checkbox
-
-    @ViewChild('_paginator') private _paginator: MatPaginator;//paginator for product
-    @ViewChild('_paginatorDiscountProduct') private _paginatorDiscountProduct: MatPaginator;
 
     isLoading: boolean = false;
 
@@ -86,14 +99,18 @@ export class EditProductDiscountDialogComponent implements OnInit {
     editModeDiscountProduct:any = [];
     editDiscountAmount :number;
 
+    currentScreenSize: string[] = [];
+
   constructor(
     public dialogRef: MatDialogRef<EditProductDiscountDialogComponent>,
     private _changeDetectorRef: ChangeDetectorRef,
     private _formBuilder: FormBuilder,
     private _discountService: DiscountsService,
-    private _fuseConfirmationService: FuseConfirmationService,
     private _inventoryService: InventoryService ,
     private _discountProductService : DiscountsProductService,
+    private _fuseConfirmationService: FuseConfirmationService,
+    private _fuseMediaWatcherService: FuseMediaWatcherService,
+    private _storesService: StoresService,
     // private createOrderDiscount:CreateOrderDiscount,
     @Inject(MAT_DIALOG_DATA) public data: MatDialog
   ) { }
@@ -109,18 +126,18 @@ export class EditProductDiscountDialogComponent implements OnInit {
     this.productDiscountStepperForm = this._formBuilder.group({
         //Main Discount
         step1: this._formBuilder.group({
-            id               : [''],
-            discountName   : [''],
-            discountType : [''],
-            startDate : [''],
-            endDate : [''],
-            startTime : [''],
-            endTime : [''],
-            isActive : [''],
-            maxDiscountAmount : [''],
-            normalPriceItemOnly : [''],
-            storeId          : [''], // not used
-            storeDiscountTierList : this._formBuilder.array([]),
+            id                      : [''],
+            discountName            : [''],
+            discountType            : [''],
+            startDate               : [''],
+            endDate                 : [''],
+            startTime               : [new TimeSelector("--","--","--")],
+            endTime                 : [new TimeSelector("--","--","--")],
+            isActive                : [''],
+            maxDiscountAmount       : [''],
+            normalPriceItemOnly     : [''],
+            storeId                 : [''], // not used
+            storeDiscountTierList   : this._formBuilder.array([]),
      
         }),
         //Product Discount
@@ -131,39 +148,42 @@ export class EditProductDiscountDialogComponent implements OnInit {
 
     //==============Main discount ======================= 
     this._discountService.getDiscountByGuid(this.discountId)
-    .subscribe((response:ApiResponseModel<Discount>) => {
+        .subscribe((response:ApiResponseModel<Discount>) => {
 
-        //Set the selected discount
-        this.selectedDiscount = response.data;
-
-        // Fill the form step 1
-        this.productDiscountStepperForm.get('step1').patchValue(response.data);
-
-        //set value for time in tieme selector
-        this.setValueToTimeSelector(response.data);
-
-        //after we set the form with custom field time selector then we display the details form
-        this.loadDetails =true;
-        
-        //Take note that in product discount it will be empty array only cause backedn structure like that 
-        // clear discount tier form array
-        (this.productDiscountStepperForm.get('step1.storeDiscountTierList') as FormArray).clear();
-        
-        // load discount tier form array with data frombackend
-        response.data.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
-            this.storeDiscountTierList = this.productDiscountStepperForm.get('step1.storeDiscountTierList') as FormArray;
-            this.storeDiscountTierList.push(this._formBuilder.group(item));
+            if (response.data) {
+                
+                // remove startTime and endTime since format from backend is different from frontend
+                // the startTime, endTime will be set in this.setValueToTimeSelector() below
+                const { startTime, endTime, ...selectedDiscount } = response.data;
+    
+                // Fill the form step 1
+                this.productDiscountStepperForm.get('step1').patchValue(selectedDiscount);
+    
+                //set value for time in tieme selector
+                this.setValueToTimeSelector(response.data);
+    
+                //after we set the form with custom field time selector then we display the details form
+                this.loadDetails = true;
+                
+                //Take note that in product discount it will be empty array only cause backedn structure like that 
+                // clear discount tier form array
+                (this.productDiscountStepperForm.get('step1.storeDiscountTierList') as FormArray).clear();
+                
+                // load discount tier form array with data frombackend
+                response.data.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
+                    this.storeDiscountTierList = this.productDiscountStepperForm.get('step1.storeDiscountTierList') as FormArray;
+                    this.storeDiscountTierList.push(this._formBuilder.group(item));
+                });
+    
+            }
+            
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
         });
-
-        console.log('check form',this.productDiscountStepperForm.get('step1').value);
-        
-        // Mark for check
-        this._changeDetectorRef.markForCheck();
-    });
 
     //====================View PRODUCTS =====================
 
-        this._inventoryService.categories$
+    this._inventoryService.categories$
         .pipe(takeUntil(this._unsubscribeAll))
         .subscribe((categories: ProductCategory[]) => {
 
@@ -174,55 +194,87 @@ export class EditProductDiscountDialogComponent implements OnInit {
             this._changeDetectorRef.markForCheck();
         });
 
-        //==================== PRODUCTS =====================
+    //==================== PRODUCTS =====================
 
-          this.products$ = this._discountProductService.products$;
+    this.products$ = this._discountProductService.products$;
 
-          // Assign to local products
-          this.products$
-          .pipe(takeUntil(this._unsubscribeAll))    
-          .subscribe((response)=>{
-              this._products = response;
-    
-              // remove object for array of object where item.isPackage !== true
-              let _filteredProductsOptions = response.filter(item => item.isPackage !== true );
-    
-              this.filteredProductsOptions = _filteredProductsOptions;
-          });
+    // Assign to local products
+    this.products$
+        .pipe(takeUntil(this._unsubscribeAll))    
+        .subscribe((response)=>{
+            this._products = response;
+
+            // remove object for array of object where item.isPackage !== true
+            let _filteredProductsOptions = response.filter(item => item.isPackage !== true );
+
+            this.filteredProductsOptions = _filteredProductsOptions;
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
               
-          this._discountProductService.productpagination$
-              .pipe(takeUntil(this._unsubscribeAll))
-              .subscribe((pagination: ProductPagination) => {
+    this._discountProductService.productpagination$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe((pagination: ProductPagination) => {            
+
+            if (pagination) {
+                // Update the pagination
+                this.productPagination = pagination;
+            }
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
     
-                  // Update the pagination
-                  this.productPagination = pagination;
-    
-                  // Mark for check
-                  this._changeDetectorRef.markForCheck();
-              });
-    
-        //==================== PRODUCT DISCOUNT =====================
-    
-            this.storeDiscountProduct$ = this._discountProductService.discounts$;
-    
-            // Assign to local products
-            this.storeDiscountProduct$
-            .pipe(takeUntil(this._unsubscribeAll))    
-            .subscribe((response)=>{
-                this.storeDiscountProduct = response;
-            });
+    //==================== PRODUCT DISCOUNT =====================
+
+    this.storeDiscountProduct$ = this._discountProductService.discounts$;
+
+    // Assign to local products
+    this.storeDiscountProduct$
+        .pipe(takeUntil(this._unsubscribeAll))    
+        .subscribe((response)=>{
+            this.storeDiscountProduct = response;
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
                 
-            this._discountProductService.pagination$
-                .pipe(takeUntil(this._unsubscribeAll))
-                .subscribe((pagination: StoreDiscountProductPagination) => {
-    
-                    // Update the pagination
-                    this.storeDiscountPagination = pagination;
-    
-                    // Mark for check
-                    this._changeDetectorRef.markForCheck();
-                });
-    
+    this._discountProductService.pagination$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe((pagination: StoreDiscountProductPagination) => {
+
+            if (pagination) {
+                // Update the pagination
+                this.storeDiscountPagination = pagination;
+            }
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
+
+    // Get the store
+    this._storesService.store$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe((store: Store) => {
+
+            // Update the store
+            this.store$ = store;
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
+
+    this._fuseMediaWatcherService.onMediaChange$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe(({matchingAliases}) => {               
+
+            this.currentScreenSize = matchingAliases;                
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
+
     // Mark for check
     this._changeDetectorRef.markForCheck();
 
@@ -230,27 +282,40 @@ export class EditProductDiscountDialogComponent implements OnInit {
 
   ngAfterViewInit(): void
   {
+      // Mark for check
+      this._changeDetectorRef.markForCheck();
+
       setTimeout(() => {
-          if (this._paginator )
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();        
+
+          if ( this._productPaginator )
           {
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
     
-             this._paginator.page.pipe(
-                  switchMap(() => {
-             
-                        return this._discountProductService.getByQueryProducts(this._paginator.pageIndex, this._paginator.pageSize, 'name', 'asc',this.inputSearchProducts,'ACTIVE,INACTIVE',this.selectedCategory);
-                  
-                    }),
-                  map(() => {
-                      this.isLoading = false;
-                  })
-              ).subscribe();
+            merge(this._productPaginator.page).pipe(
+                switchMap(() => {                    
+
+                    // set loading to true
+                    this.isLoading = true;
+
+                    return this._discountProductService.getByQueryProducts(this._productPaginator.pageIndex, this._productPaginator.pageSize, 'name', 'asc',this.inputSearchProducts,'ACTIVE,INACTIVE',this.selectedCategory);
+                
+                }),
+                map(() => {
+                    // set loading to false
+                    this.isLoading = false;
+                })
+            ).subscribe();
           }
-          if (this._paginatorDiscountProduct)
+          if (this._productDiscountPaginator)
           {
     
-             this._paginatorDiscountProduct.page.pipe(
+             this._productDiscountPaginator.page.pipe(
                   switchMap(() => {
-                      return this._discountProductService.getDiscountProductByDiscountId(this.discountId, this._paginatorDiscountProduct.pageIndex, this._paginatorDiscountProduct.pageSize);
+                      return this._discountProductService.getDiscountProductByDiscountId(this.discountId, this._productDiscountPaginator.pageIndex, this._productDiscountPaginator.pageSize);
                   }),
                   map(() => {
                       this.isLoading = false;
@@ -258,8 +323,13 @@ export class EditProductDiscountDialogComponent implements OnInit {
               ).subscribe();
           }
 
+          // Mark for check
+          this._changeDetectorRef.markForCheck();
+
       }, 0);
 
+      // Mark for check
+      this._changeDetectorRef.markForCheck();
 
   }
 
@@ -274,20 +344,20 @@ export class EditProductDiscountDialogComponent implements OnInit {
       let toBeSendPayload=sendPayload.
       map((x)=>(
           {
-              startTime:this.changeStartTime,
-              endTime:this.changeEndTime,
-              discountName: x.discountName,
-              discountType:x.discountType,
-              endDate: x.endDate,
-              id: x.id,
-              isActive: x.isActive,
-              maxDiscountAmount: x.maxDiscountAmount,
-              normalPriceItemOnly: x.normalPriceItemOnly,
-              startDate: x.startDate,
-              storeDiscountTierList: x.storeDiscountTierList,
-              storeId: x.storeId,
+              id                    : x.id,
+              startTime             : this.changeStartTime,
+              endTime               : this.changeEndTime,
+              discountName          : x.discountName,
+              discountType          : x.discountType,
+              endDate               : x.endDate,
+              isActive              : x.isActive,
+              maxDiscountAmount     : x.maxDiscountAmount,
+              normalPriceItemOnly   : x.normalPriceItemOnly,
+              startDate             : x.startDate,
+              storeDiscountTierList : x.storeDiscountTierList,
+              storeId               : x.storeId,
           }
-          ));
+        ));
 
       // Update the discount on the server
       this._discountService.updateDiscount(this.discountId, toBeSendPayload[0])
@@ -317,7 +387,7 @@ export class EditProductDiscountDialogComponent implements OnInit {
           this.cancel();
   }
 
-  setValueToTimeSelector(discount){
+  setValueToTimeSelector(discount){    
 
     //=====================START TIME =====================
     let _pickStartTimeHour = discount.startTime.split(":")[0];
@@ -333,7 +403,7 @@ export class EditProductDiscountDialogComponent implements OnInit {
         _pickStartTimeAMPM = "AM";
     }
 
-    this.productDiscountStepperForm.get('step1.startTime').setValue(new TimeSelector(_pickStartTimeHour,_pickStartTimeMinute, _pickStartTimeAMPM));
+    this.productDiscountStepperForm.get('step1').get('startTime').patchValue(new TimeSelector(_pickStartTimeHour,_pickStartTimeMinute, _pickStartTimeAMPM));
 
     //=====================/ START TIME =====================
 
@@ -352,10 +422,14 @@ export class EditProductDiscountDialogComponent implements OnInit {
         _pickEndTimeAMPM = "AM";
     }
     
-    this.productDiscountStepperForm.get('step1.endTime').setValue(new TimeSelector(_pickEndTimeHour,_pickEndTimeMinute, _pickEndTimeAMPM));
+    this.productDiscountStepperForm.get('step1.endTime').patchValue(new TimeSelector(_pickEndTimeHour,_pickEndTimeMinute, _pickEndTimeAMPM));
+
+    // Mark for check
+    this._changeDetectorRef.markForCheck();
 
     //===================== / END TIME =====================
     return;
+
   }
 
   ngOnDestroy(): void
@@ -398,7 +472,7 @@ export class EditProductDiscountDialogComponent implements OnInit {
     const changePickStartTime = new Date();
     changePickStartTime.setHours(_pickStartTime,(<any>pickStartTime).timeMinute,0);
     
-    this.changeStartTime= String(changePickStartTime.getHours()).padStart(2, "0")+':'+String(changePickStartTime.getMinutes()).padStart(2, "0");    
+    this.changeStartTime = String(changePickStartTime.getHours()).padStart(2, "0")+':'+String(changePickStartTime.getMinutes()).padStart(2, "0");    
     
     //==============End time===================
     let pickEndTime = this.productDiscountStepperForm.get('step1.endTime').value;
@@ -412,7 +486,7 @@ export class EditProductDiscountDialogComponent implements OnInit {
     const changePickEndTime = new Date();
     changePickEndTime.setHours(_pickEndTime,(<any>pickEndTime).timeMinute,0);
     
-    this.changeEndTime= String(changePickEndTime.getHours()).padStart(2, "0")+':'+String(changePickEndTime.getMinutes()).padStart(2, "0");  
+    this.changeEndTime = String(changePickEndTime.getHours()).padStart(2, "0")+':'+String(changePickEndTime.getMinutes()).padStart(2, "0");  
     
     return;
   
@@ -478,33 +552,30 @@ onSelectCategoryList(event){
 
    }
 
-   closeDialog(){
-     
-    this.discountId = '';
-    this.dialogRef.close({ status: false });
-
-   }
+    closeDialog(){
+        this.discountId = '';
+        this.dialogRef.close({ status: false });
+    }
    
    inputSearchProduct(event){
-    // Get the value
-    const value = event.target.value.toLowerCase();
-    this.inputSearchProducts = value;
+        // Get the value
+        const value = event.target.value.toLowerCase();
+        this.inputSearchProducts = value;
 
-    fromEvent(event.target,'keyup')
-    .pipe(
-        takeUntil(this._unsubscribeAll),
-        debounceTime(500),
-        switchMap((event:any) => {
-                    
-            return this._discountProductService.getByQueryProducts(0, 5, 'name', 'asc', event.target.value,'ACTIVE,INACTIVE',this.selectedCategory)
-        }),
-        map(() => {
-            this.isLoading = false;
-        })
-    )
-    .subscribe();
-
-   }
+        fromEvent(event.target,'keyup')
+        .pipe(
+            takeUntil(this._unsubscribeAll),
+            debounceTime(500),
+            switchMap((event:any) => {
+                        
+                return this._discountProductService.getByQueryProducts(0, 5, 'name', 'asc', event.target.value,'ACTIVE,INACTIVE',this.selectedCategory)
+            }),
+            map(() => {
+                this.isLoading = false;
+            })
+        )
+        .subscribe();
+    }
 
     //Delete discount product
     deleteStoreProductDiscount(productDiscount){

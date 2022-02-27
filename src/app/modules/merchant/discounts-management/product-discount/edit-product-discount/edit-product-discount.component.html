@@ -1,236 +1,244 @@
-<div class="flex flex-col max-w-260 md:min-w-160 -m-6">
-    <ng-container *ngIf="loadDetails">
-        <!-- Compose form -->
-        <div class="flex px-4">
-            <form
-            class="flex flex-col w-full"
-            [formGroup]="productDiscountStepperForm">
-                <mat-horizontal-stepper
-                    [linear]="true"
-                    #horizontalStepper>
+<div class="flex flex-col max-w-320 lg:min-w-320 -m-6 px-4 overflow-hidden">
+    <form
+        class="flex flex-col w-full"
+        [formGroup]="productDiscountStepperForm">
+        <mat-horizontal-stepper
+            [linear]="true"
+            #horizontalStepper>
 
-                    <!-- SECTION FOR ORDER DISCOUNT -->
-                    <mat-step
-                        [formGroupName]="'step1'"
-                        [stepControl]="productDiscountStepperForm.get('step1')"
-                        #horizontalStepperStep1>
-                        <ng-template matStepLabel>Product Discount</ng-template>
-                        <!-- <p class="my-6 font-medium">
-                            Fill in order discount period.
-                        </p> -->
-                        <div class="content overflow-y-auto">
-                            <!-- discount name -->
+            <!-- SECTION FOR ORDER DISCOUNT -->
+            <mat-step
+                [formGroupName]="'step1'"
+                [stepControl]="productDiscountStepperForm.get('step1')"
+                #horizontalStepperStep1>
+                <ng-template matStepLabel>Product Discount</ng-template>
+                <div class="content flex flex-col h-full sm:h-auto mb-3 w-full overflow-hidden sm:overflow-y-auto">
+                    <!-- discount name, status -->
+                    <div class="flex flex-col sm:flex-row">
+                        <!-- discount name -->
+                        <mat-form-field 
+                            floatLabel="always"
+                            appearance="fill"
+                            class="w-full sm:w-1/2 sm:pr-2 fuse-mat-emphasized-affix">
+                            <mat-label>Discount Name</mat-label>
+                            <input 
+                                matInput
+                                placeholder="Enter discount name"
+                                [formControlName]="'discountName'"        
+                            >
+                            <mat-icon
+                                *ngIf="currentScreenSize.includes('sm') ? true : false"
+                                matPrefix
+                                [svgIcon]="'heroicons_outline:tag'">
+                            </mat-icon>
+                        </mat-form-field>
+                        <!-- status -->
+                        <mat-form-field 
+                            floatLabel="always"
+                            appearance="fill"
+                            class="w-full sm:w-1/2 sm:pl-2 fuse-mat-emphasized-affix">
+                            <mat-label>Status</mat-label>
+                            <mat-select
+                                class="w-full"
+                                placeholder="Select status"
+                                [formControlName]="'isActive'"
+                                >
+                                <div>
+                                    <mat-option [value]="true">Active</mat-option>
+                                    <mat-option [value]="false">Inactive</mat-option>
+                                </div>
+                            </mat-select>
+                            <mat-icon
+                                *ngIf="currentScreenSize.includes('sm') ? true : false"
+                                matPrefix
+                                [svgIcon]="'heroicons_outline:question-mark-circle'">
+                            </mat-icon>
+                        </mat-form-field>
+                    </div>
+                
+                    <!-- start date/time -->
+                    <div class="w-full flex flex-col">
+                        <div class="font-semibold mb-2 w-full">Start date/time</div>
+                        <div class="w-full flex flex-col sm:flex-row">
                             <mat-form-field 
-                                appearance="fill"
-                                class="w-full">
-                                <mat-label>Discount Name</mat-label>
+                                class="w-full sm:w-1/2 sm:pr-2 fuse-mat-emphasized-affix"
+                                appearance="fill">
                                 <input 
-                                    matInput
-                                    placeholder="Enter discount name"
-                                    [formControlName]="'discountName'"        
-                                >
+                                    matInput 
+                                    type="date" 
+                                    [formControlName]="'startDate'">
+                                <mat-icon
+                                    *ngIf="currentScreenSize.includes('sm') ? true : false"
+                                    matPrefix
+                                    [svgIcon]="'heroicons_outline:calendar'">
+                                </mat-icon>
                             </mat-form-field>
-                        
-                            <!-- start date/time -->
-                            <div class="w-full flex flex-col">
-                                <div class="font-semibold mb-2 w-full">Start date/time</div>
-                                <div class="w-full flex flex-col sm:flex-row">
-                                    <mat-form-field 
-                                        class="w-full sm:w-1/2 sm:pr-2"
-                                        appearance="fill">
-                                        <input 
-                                            matInput 
-                                            type="date" 
-                                            [formControlName]="'startDate'"
-                                        >
-                                    </mat-form-field>
-                                    <mat-form-field 
-                                        class="w-full sm:w-1/2 sm:pl-2" 
-                                        appearance="fill">
-                                        <time-selector
+                            <mat-form-field 
+                                class="w-full sm:w-1/2 sm:pl-2 fuse-mat-emphasized-affix" 
+                                appearance="fill">
+                                <time-selector
+                                    class="w-full"
+                                    matInput
+                                    type="time" 
+                                    [formControlName]="'startTime'"                   
+                                ></time-selector>
+                                <mat-icon
+                                    *ngIf="currentScreenSize.includes('sm') ? true : false"
+                                    matPrefix
+                                    [svgIcon]="'heroicons_outline:clock'">
+                                </mat-icon>
+                            </mat-form-field>
+                        </div>
+                    </div>
+            
+                    <!-- End date /time -->
+                    <div class="w-full flex flex-col">
+                        <div class="font-semibold mb-2 w-full">End date/time</div>
+                        <div class="w-full flex flex-col sm:flex-row">
+                            <mat-form-field 
+                                class="w-full sm:w-1/2 sm:pr-2 fuse-mat-emphasized-affix"
+                                appearance="fill">
+                                <input 
+                                    matInput 
+                                    type="date" 
+                                    [formControlName]="'endDate'">
+                                <mat-icon
+                                    *ngIf="currentScreenSize.includes('sm') ? true : false"
+                                    matPrefix
+                                    [svgIcon]="'heroicons_outline:calendar'">
+                                </mat-icon>
+                            </mat-form-field>
+                            <mat-form-field 
+                                class="w-full sm:w-1/2 sm:pl-2 fuse-mat-emphasized-affix" 
+                                appearance="fill">
+                                <time-selector
+                                    class="w-full"
+                                    matInput
+                                    type="time" 
+                                    [formControlName]="'endTime'"                   
+                                ></time-selector>
+                                <mat-icon
+                                    *ngIf="currentScreenSize.includes('sm') ? true : false"
+                                    matPrefix
+                                    [svgIcon]="'heroicons_outline:clock'">
+                                </mat-icon>
+                            </mat-form-field>
+                
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cancel, Next button -->
+                <div class="flex justify-end">
+                    <!-- Cancel button -->
+                    <button
+                        mat-flat-button
+                        class="w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
+                        [color]="'gray'"
+                        (click)="cancel()"
+                        >
+                        Cancel
+                    </button>
+                    <!-- Next variant button -->
+                    <button
+                        class="w-24"
+                        mat-flat-button
+                        [color]="'primary'"
+                        type="button"
+                        matStepperNext>
+                        Next
+                    </button>
+                </div>
+            </mat-step>
+
+            <!-- SECTION FOR View Product -->
+            <mat-step
+                formArrayName="step2"
+                [stepControl]="productDiscountStepperForm.get('step2')"
+                #horizontalStepperStep2>
+                <ng-template matStepLabel>View Product</ng-template>
+                <div class="overflow-y-auto">
+                    <div class="flex flex-col md:flex-col lg:flex-row flex-auto mb-2">      
+                        <!-- Product Search -->
+                        <div class="w-1/2 lg:pr-2">
+                            <!-- Product Search -->
+                            <div class="flex sm:flex-col sm:h-24 md:h-14 md:flex-row flex-wrap items-center justify-between py-2 mb-4">
+                                <div class="flex items-center text-lg font-extrabold">Product Search</div>
+                                <div class="flex items-center">
+                                    <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-40 px-2">
+                                        <mat-select
                                             class="w-full"
+                                            placeholder="Category"
+                                            (selectionChange)="onSelectCategoryList($event)">
+                                            <div>
+                                                <mat-option [value]="">All Categories</mat-option>
+                                                <mat-option *ngFor="let listing of filteredCategories;" [value]="listing.id">
+                                                    {{listing.name}}
+                                                </mat-option>
+                                            </div>
+                                        </mat-select>
+                                    </mat-form-field>
+                
+                                    <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-40">
+                                        <mat-icon
+                                            class="icon-size-5"
+                                            matPrefix
+                                            [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                        <input
                                             matInput
-                                            type="time" 
-                                            [formControlName]="'startTime'"                   
-                                        ></time-selector>
+                                            [autocomplete]="'off'"
+                                            [placeholder]="'Products'"
+                                            (input) = "inputSearchProduct($event)">
                                     </mat-form-field>
                                 </div>
                             </div>
-                    
-                            <!-- End date /time -->
-                            <div class="w-full flex flex-col">
-                                <div class="font-semibold mb-2 w-full">End date/time</div>
-                                <div class="w-full flex flex-col sm:flex-row">
-                                    <mat-form-field 
-                                        class="w-full sm:w-1/2 sm:pr-2"
-                                        appearance="fill">
-                                        <input 
-                                            matInput 
-                                            type="date" 
-                                            [formControlName]="'endDate'"
+                            <!-- Content -->
+                            <div class="relative flex flex-col border border-solid rounded p-2 h-96">
+                                <!-- Table -->
+                                <ng-container *ngIf="(products$ | async) as products">
+                                    <div class="grid overflow-auto rounded">
+                                        <!-- Header -->
+                                        <div
+                                            class="edit-product-product-grid sticky grid gap-1 sm:gap-4 py-4 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
                                         >
-                                    </mat-form-field>
-                                    <mat-form-field 
-                                        class="w-full sm:w-1/2 sm:pl-2" 
-                                        appearance="fill">
-                                        <time-selector
-                                            class="w-full"
-                                            matInput
-                                            type="time" 
-                                            [formControlName]="'endTime'"                   
-                                        ></time-selector>
-                                    </mat-form-field>
-                        
-                                </div>
-                            </div>
-
-                            <!-- status -->
-                            <div class="w-full">
-                                <!-- status -->
-                                <mat-form-field 
-                                    appearance="fill"
-                                    class="w-full sm:w-1/2 sm:pr-2">
-                                    <mat-label>Status</mat-label>
-                                    <mat-select
-                                        class="w-full"
-                                        placeholder="Select status"
-                                        [formControlName]="'isActive'"
-                                        >
-                                        <div>
-                                            <mat-option [value]="true">Active</mat-option>
-                                            <mat-option [value]="false">Inactive</mat-option>
-                                            
+                                            <div></div>
+                                            <div>
+                                                Product Name
+                                            </div>
+                                            <div class="text-center">
+                                                Original Price
+                                            </div>
+                                            <div class="text-center">
+                                                Have Variant
+                                            </div>
                                         </div>
-                                    </mat-select>
-                                </mat-form-field>
-                            </div>
-
-                        </div>
-
-                        <!-- Cancel, Next button -->
-                        <div class="flex justify-end">
-                            <!-- Flash message -->
-                            <!-- <div
-                                class="flex items-center mr-4"
-                                *ngIf="flashMessage">
-                                <ng-container *ngIf="flashMessage === 'success'">
-                                    <mat-icon
-                                        class="text-green-500"
-                                        [svgIcon]="'heroicons_outline:check'"></mat-icon>
-                                    <span class="ml-2">Product created</span>
-                                </ng-container>
-                                <ng-container *ngIf="flashMessage === 'error'">
-                                    <mat-icon
-                                        class="text-red-500"
-                                        [svgIcon]="'heroicons_outline:x'"></mat-icon>
-                                    <span class="ml-2">An error occurred, try again!</span>
-                                </ng-container>
-                            </div> -->
-                            <!-- Cancel button -->
-                            <button
-                                mat-flat-button
-                                class="w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
-                                [color]="'gray'"
-                                (click)="cancel()"
-                                >
-                                Cancel
-                            </button>
-                            <!-- Next variant button -->
-                            <button
-                                class="w-24"
-                                mat-flat-button
-                                [color]="'primary'"
-                                type="button"
-                                matStepperNext>
-                                Next
-                            </button>
-                            <!--[disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid" -->
-                            <!-- Create button -->
-                            <!-- <button
-                                *ngIf="addProductForm.get('step1').get('isVariants').value === false && productType != 'combo'"
-                                class="w-24"
-                                mat-flat-button
-                                [color]="'primary'"
-                                [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
-                                type="button"
-                                (click)="addNewProductMethod()"
-                                matStepperNext>
-                                Create
-                            </button> -->
-                        </div>
-                    </mat-step>
-
-                    <!-- SECTION FOR View Product -->
-                    <mat-step
-                        formArrayName="step2"
-                        [stepControl]="productDiscountStepperForm.get('step2')"
-                        #horizontalStepperStep2>
-                        <ng-template matStepLabel>View Product</ng-template>
-                        <!-- <p class="my-6 font-medium">
-                        Product List
-                        </p> -->
-                        <div class="content overflow-y-auto">
-                            <div class="flex flex-col md:flex-col lg:flex-row flex-auto mb-2">      
-                                <!-- Product Search -->
-                                <div class="h-110 lg:pr-2">
-                                    <!-- Product Search -->
-                                    <div class="flex sm:flex-col sm:h-24 md:h-14 md:flex-row flex-wrap items-center justify-between py-2 mb-4">
-                                        <div class="flex items-center text-lg font-extrabold">Product Search</div>
-                                        <div class="flex items-center">
-                                            <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-40 px-2">
-                                                <mat-select
-                                                    class="w-full"
-                                                    placeholder="Category"
-                                                    (selectionChange)="onSelectCategoryList($event)">
-                                                    <div>
-                                                        <mat-option [value]="">All Categories</mat-option>
-                                                        <mat-option *ngFor="let listing of filteredCategories;" [value]="listing.id">
-                                                            {{listing.name}}
-                                                        </mat-option>
-                                                    </div>
-                                                </mat-select>
-                                            </mat-form-field>
-                        
-                                            <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-40">
-                                                <mat-icon
-                                                    class="icon-size-5"
-                                                    matPrefix
-                                                    [svgIcon]="'heroicons_solid:search'"></mat-icon>
-                                                <input
-                                                    matInput
-                                                    [autocomplete]="'off'"
-                                                    [placeholder]="'Products'"
-                                                    (input) = "inputSearchProduct($event)">
-                                            </mat-form-field>
-                                        </div>
-                                    </div>
-                                    <!-- Content -->
-                                    <div class="flex flex-col border border-solid rounded p-2">
-                                        <!-- Table -->
-                                        <div class="h-64">
-                                            <table *ngIf="(products$ | async) as products" class="table-fixed mt-2 mb-4 w-full flex-row">
-                                                <tr class="border-b border-gray-300 pt-2 pl-2 sm:my-12">
-                                                    <th class="text-left">Select</th>
-                                                    <th class="text-left">Product Name</th>
-                                                    <th class="text-left">Original Price</th>
-                                                    <th class="text-left">Have Variant</th>
-                        
-                                                </tr>
-                                                <tr class="border-b border-gray-300 pt-2 pl-2" *ngFor="let productList of products;let i =index;" >
-                                                    <td>
+                                        <!-- Rows -->
+                                        <div 
+                                            class="overflow-y-auto">
+                                            <div *ngFor="let productList of products; let i = index;">
+                                                <!-- Product Body -->
+                                                <div class="edit-product-product-grid grid items-center gap-4 py-3 border-b">      
+                                                    <!-- Min Order Amount -->
+                                                    <div class="truncate">
                                                         <mat-checkbox  
-                                                        class="flex items-center h-10 min-h-10 px-4"
-                                                        [color]="'primary'"
-                                                        (change)="onChangeSelectProduct(productList,$event)"
-                                                        [checked]="onChangeSelectProductValue.includes(productList.id)"
-                                                        >
-                                                            
-                                                        </mat-checkbox>
-                                                    </td>
-                                                    <td>{{productList.name}}</td>
-                                                    <td>{{productList.productInventories[0].price}}</td>
-                                                    <td>
-                        
+                                                            class="flex items-center pl-2"
+                                                            [color]="'primary'"
+                                                            (change)="onChangeSelectProduct(productList,$event)"
+                                                            [checked]="onChangeSelectProductValue.includes(productList.id)"></mat-checkbox>
+                                                    </div>
+                
+                                                    <!-- Product Name -->
+                                                    <div class="truncate">
+                                                        {{productList.name}}
+                                                    </div>
+    
+                                                    <!-- Original Price -->
+                                                    <div class="truncate text-center">
+                                                        {{productList.productInventories[0].price}}
+                                                    </div>
+                
+                                                    <!-- Action Button -->
+                                                    <div class="truncate text-center">
                                                         <ng-container *ngIf="productList.productVariants.length > 0">
                                                             <mat-icon
                                                                 class="text-green-400 icon-size-5"
@@ -241,56 +249,83 @@
                                                                 class="text-gray-400 icon-size-5"
                                                                 [svgIcon]="'heroicons_solid:x'"></mat-icon>
                                                         </ng-container>
-                                                    </td>
-                                
-                                                </tr>
-                                            </table>
-                                        </div>
-                                        <!-- Pagination & Button -->
-                                        <div class="flex items-center justify-between w-full">
-                                            <mat-paginator
-                                                #_paginator
-                                                [ngClass]="{'pointer-events-none': isLoading}"
-                                                [length]="productPagination.length"
-                                                [pageIndex]="productPagination.page"
-                                                [pageSize]="productPagination.size"
-                                                [pageSizeOptions]="[5]"
-                                                [showFirstLastButtons]="true">
-                                            </mat-paginator>
-                                            <div>
-                                                <!-- Send -->
-                                                <button
-                                                    class="flex"
-                                                    mat-flat-button
-                                                    (click)="addProductDiscount()"
-                                                    [color]="'primary'">
-                                                    Add
-                                                </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                </ng-container>
+                                <!-- Pagination & Button -->
+                                <div class="absolute flex flex-row justify-between items-center bg-white px-4 bottom-0 left-0 right-0 w-full">
+                                    <mat-paginator
+                                        class=""
+                                        [ngClass]="{'pointer-events-none': isLoading}"
+                                        [length]="productPagination.length"
+                                        [pageIndex]="productPagination.page"
+                                        [pageSize]="productPagination.size"
+                                        [pageSizeOptions]="[5, 10, 25, 100]"
+                                        [showFirstLastButtons]="true"
+                                        [hidePageSize]="true"
+                                        #productPaginator>
+                                    </mat-paginator>
+                                    <!-- Send -->
+                                    <button
+                                        class="flex"
+                                        mat-flat-button
+                                        (click)="addProductDiscount()"
+                                        [color]="'primary'">
+                                        Add
+                                    </button>
                                 </div>
-                        
-                                <!-- Selected Product -->
-                                <div class="h-110 lg:pl-2">
-                                    <!-- Title -->
-                                    <div class="flex flex-row text-lg font-extrabold h-14 py-2 items-end lg:items-center mb-4">Selected Product</div>
-                                    <!-- Content -->
-                                    <div class="flex flex-col border border-solid rounded p-2">
-                                        <div class="h-64">
-                                            <table *ngIf="(storeDiscountProduct$ | async) as storeDiscountProducts" class="table-fixed mt-2 mb-4 w-full flex-row">
-                                                <tr class="border-b border-gray-300 pt-2 pl-2">
-                                                    <th class="text-left truncate">Product Name (SKU)</th>
-                                                    <th class="text-left w-28">Original Price</th>
-                                                    <th class="text-left w-24">Discount%</th>
-                                                    <th>Action</th>
-                                                </tr>
-                                                <tr class="border-b border-gray-300 pt-2 pl-2" *ngFor="let productDiscountList of storeDiscountProducts;let i =index;" >
-                                                    <td class="truncate">{{ productDiscountList.productInventory.product.name + " ( "+productDiscountList.productInventory.sku +  " ) " }}</td>
-                                                    <td>{{productDiscountList.productInventory.price}}</td>
-                                                    <td>
+                            </div>
+                        </div>
+                
+                        <!-- Selected Product -->
+                        <div class="w-1/2 lg:pl-2">
+                            <!-- Title -->
+                            <div class="flex flex-row text-lg font-extrabold h-14 py-2 items-end lg:items-center mb-4">Selected Product</div>
+                            <!-- Content -->
+                            <div class="relative flex flex-col border border-solid rounded p-2 h-96">
+                                <!-- Table -->
+                                <ng-container *ngIf="(storeDiscountProduct$ | async) as storeDiscountProducts">
+                                    <div class="grid overflow-auto rounded">
+                                        <!-- Header -->
+                                        <div
+                                            class="edit-product-discount-grid sticky grid gap-1 sm:gap-4 py-3 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                                        >
+                                            <div>
+                                                Product Name (SKU)
+                                            </div>
+                                            <div class="text-center">
+                                                Original Price
+                                            </div>
+                                            <div class="text-center">
+                                                Discount %
+                                            </div>
+                                            <div class="text-center">
+                                                Action
+                                            </div>
+                                        </div>
+                                        <!-- Rows -->
+                                        <div 
+                                            class="overflow-y-auto">
+                                            <div *ngFor="let productDiscountList of storeDiscountProducts; let i = index;">
+                                                <!-- Selected Product Header -->
+                                                <div class="edit-product-discount-grid grid items-center gap-4 py-1 border-b">      
+                                                    <!-- Product Name (SKU) -->
+                                                    <div class="truncate">
+                                                        {{ productDiscountList.productInventory.product.name + " ( "+productDiscountList.productInventory.sku +  " ) " }}
+                                                    </div>
+                
+                                                    <!-- Original Price-->
+                                                    <div class="truncate text-center">
+                                                        {{productDiscountList.productInventory.price}}
+                                                    </div>
+    
+                                                    <!-- Discount % -->
+                                                    <div class="truncate text-center">
                                                         <div *ngIf=!editModeDiscountProduct[i]>{{productDiscountList.discountAmount}}</div>
-                                                     
+                                            
                                                         <div *ngIf=editModeDiscountProduct[i]>
                                                                 <input
                                                                     type="number"
@@ -299,17 +334,17 @@
                                                                     style="border: 1px solid rgba(0, 0, 0, 0.200);font-size: 14px;width: 70px; height:30px;"
                                                                 >
                                                         </div>
-                                                      
-                                                    </td>
-                                                    <td class="flex flex-wrap items-center justify-center">
-                                                   
-                                                            <input
+                                                    </div>
+                
+                                                    <!-- Action Button -->
+                                                    <div class="truncate flex w-full items-center justify-center">
+                                                        <!-- Edit Button -->
+                                                        <input
                                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                             type="button"
                                                             [id]="'edit-button'+productDiscountList.id"
-                                                            (click)="editModeDiscountProduct[i] = !editModeDiscountProduct[i]"
-                                                            >
-                                                            <label
+                                                            (click)="editModeDiscountProduct[i] = !editModeDiscountProduct[i]">
+                                                        <label
                                                             *ngIf="!editModeDiscountProduct[i]"
                                                             class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 my-1.5"
                                                             [for]="'edit-button'+productDiscountList.id"
@@ -318,90 +353,84 @@
                                                                 class="text-white icon-size-5"
                                                                 [svgIcon]="'heroicons_outline:pencil-alt'">
                                                             </mat-icon>
-                                                            </label>
+                                                        </label>
                                 
-                                                            <input
+                                                        <!-- Update Button -->
+                                                        <input
                                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                             type="button"
                                                             [id]="'update-button'+productDiscountList.id"
                                                             (click)="editModeDiscountProduct[i] = !editModeDiscountProduct[i]"
-                                                            (click)="editStoreProductDiscount(productDiscountList)"
-                                                            >
-                                                            <label
-                                                                *ngIf="editModeDiscountProduct[i]"
-                                                                class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 my-1.5"
-                                                                [for]="'update-button'+productDiscountList.id"
-                                                                matRipple>
-                                                                <mat-icon
-                                                                    class="text-white icon-size-5"
-                                                                    [svgIcon]="'heroicons_outline:check'">
-                                                                </mat-icon>
-                                                            </label>
+                                                            (click)="editStoreProductDiscount(productDiscountList)">
+                                                        <label
+                                                            *ngIf="editModeDiscountProduct[i]"
+                                                            class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 my-1.5"
+                                                            [for]="'update-button'+productDiscountList.id"
+                                                            matRipple>
+                                                            <mat-icon
+                                                                class="text-white icon-size-5"
+                                                                [svgIcon]="'heroicons_outline:check'">
+                                                            </mat-icon>
+                                                        </label>
                                 
-                                                            <input
+                                                        <!-- Delete Button -->
+                                                        <input
                                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                             type="button"
                                                             [id]="'delete-button'+productDiscountList.id"
-                                                            (click)="deleteStoreProductDiscount(productDiscountList)"
-                                                            >
-                                                            <label
-                                                                class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-warn hover:bg-warn-700 my-1.5"
-                                                                [for]="'delete-button'+productDiscountList.id"
-                                                                matRipple>
-                                                                <mat-icon
-                                                                    class="text-white icon-size-5"
-                                                                    [svgIcon]="'heroicons_outline:trash'">
-                                                                </mat-icon>
-                                                            </label>
-                                                       
-                                                    </td>
-                                
-                                                </tr>
-                                
-                                            </table>
-                                        </div>
-                                        <div class="flex items-center justify-between w-full">
-                                            <mat-paginator
-                                                #_paginatorDiscountProduct
-                                                [ngClass]="{'pointer-events-none': isLoading}"
-                                                [length]="storeDiscountPagination.length"
-                                                [pageIndex]="storeDiscountPagination.page"
-                                                [pageSize]="storeDiscountPagination.size"
-                                                [pageSizeOptions]="[5]"
-                                                [showFirstLastButtons]="true"
-                                                >
-                                            </mat-paginator>
-                                            <div  class="flex w-6 bg-red-300">
-                                           
+                                                            (click)="deleteStoreProductDiscount(productDiscountList)">
+                                                        <label
+                                                            class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-warn hover:bg-warn-700 my-1.5"
+                                                            [for]="'delete-button'+productDiscountList.id"
+                                                            matRipple>
+                                                            <mat-icon
+                                                                class="text-white icon-size-5"
+                                                                [svgIcon]="'heroicons_outline:trash'">
+                                                            </mat-icon>
+                                                        </label>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                </ng-container>
+                                <div class="absolute bottom-0 left-0 right-0 w-full">
+                                    <mat-paginator
+                                        [ngClass]="{'pointer-events-none': isLoading}"
+                                        [length]="storeDiscountPagination.length"
+                                        [pageIndex]="storeDiscountPagination.page"
+                                        [pageSize]="storeDiscountPagination.size"
+                                        [pageSizeOptions]="[5]"
+                                        [hidePageSize]="true"
+                                        [showFirstLastButtons]="true"
+                                        #productDiscountPaginator>
+                                    </mat-paginator>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex justify-end">
-                            <button
-                                class="px-8 mr-2"
-                                mat-flat-button
-                                [color]="'accent'"
-                                type="button"
-                                matStepperPrevious>
-                                Back
-                            </button>
-                            <button 
-                            class="px-8"
-                            mat-flat-button
-                            [color]="'primary'"
-                            type="button"
-                            (click)="updateSelectedDiscount()"
-                            >
-                            Update
-                            </button>
-                        </div>
-                    </mat-step>
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <button
+                        class="px-8 mr-2"
+                        mat-flat-button
+                        [color]="'accent'"
+                        type="button"
+                        matStepperPrevious>
+                        Back
+                    </button>
+                    <button 
+                    class="px-8"
+                    mat-flat-button
+                    [color]="'primary'"
+                    type="button"
+                    (click)="updateSelectedDiscount()"
+                    >
+                    Update
+                    </button>
+                </div>
+            </mat-step>
 
-                </mat-horizontal-stepper>
-            </form>
-        </div>
-    </ng-container>
+        </mat-horizontal-stepper>
+    </form>
 </div>

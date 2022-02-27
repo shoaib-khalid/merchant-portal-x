@@ -7,7 +7,6 @@
     <div class="flex flex-row w-full justify-around">
         <select 
             class="py-2 text-center w-1/3 border border-gray-300 rounded example-tel-input-element" 
-            [ngClass]="timeHour.value === '--' ? 'bg-gray-100 text-gray-500' : ''"
             formControlName="timeHour"
             aria-label="timeHour code"
             (change)="_handleInput(timeSelection.controls.timeHour, timeMinute)"
@@ -28,7 +27,6 @@
         </select>
         <select 
             class="mx-2 py-2 text-center w-1/3 border border-gray-300 rounded"
-            [ngClass]="timeMinute.value === '--' ? 'bg-gray-100 text-gray-500' : ''" 
             formControlName="timeMinute"
             aria-label="timeMinute code"
             (change)="_handleInput(timeSelection.controls.timeMinute, timeAmPm)"
@@ -45,7 +43,6 @@
         </select>
         <select 
             class="py-2 text-center w-1/3 border border-gray-300 rounded" 
-            [ngClass]="timeAmPm.value === '--' ? 'bg-gray-100 text-gray-500' : ''" 
             formControlName="timeAmPm"
             aria-label="timeAmPm code"
             (change)="_handleInput(timeSelection.controls.timeAmPm)"

@@ -3,13 +3,13 @@ export interface Discount
     discountName: string;
     discountType: string;
     endDate: string;
-    endTime: string;
+    endTime?: string;
     id?: string;
     isActive: boolean;
     maxDiscountAmount: string;
     normalPriceItemOnly: boolean;
     startDate: string;
-    startTime: string;
+    startTime?: string;
     storeDiscountTierList?: StoreDiscountTierList[];
     storeId: string;
 }

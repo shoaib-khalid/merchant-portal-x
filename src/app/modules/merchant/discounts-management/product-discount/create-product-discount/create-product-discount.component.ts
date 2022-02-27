@@ -10,13 +10,37 @@ import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dia
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { DiscountsService } from '../../order-discount/order-discount-list/order-discount-list.service';
 import { MatCheckboxChange } from '@angular/material/checkbox';
+import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
+import { StoresService } from 'app/core/store/store.service';
+import { Store } from 'app/core/store/store.types';
 
 @Component({
   selector: 'dialog-create-product-discount',
-  templateUrl: './create-product-discount.component.html'
+  templateUrl: './create-product-discount.component.html',
+  styles    :   [`
+        /** language=SCSS */
+        :host ::ng-deep .mat-horizontal-content-container {
+            // max-height: 90vh;
+            padding: 0 0px 20px 0px;
+            // overflow-y: auto;
+        }
+        :host ::ng-deep .mat-horizontal-stepper-header-container {
+            height: 60px;
+        }
+        :host ::ng-deep .mat-horizontal-stepper-header {
+            height: 60px;
+            padding-left: 8px;
+            padding-right: 8px;
+        }
+        .content{
+            height:400px;
+        }
+    `]
 })
 export class CreateProductDiscountDialogComponent implements OnInit {
 
+
+  store$: Store;
   disabledProceed: boolean = true;
 
   discountName: string;
@@ -77,6 +101,9 @@ export class CreateProductDiscountDialogComponent implements OnInit {
 
   discountId:string;
 
+  currentScreenSize: string[] = [];
+  flashMessage: 'success' | 'error' | null = null;
+
   constructor(
     public dialogRef: MatDialogRef<CreateProductDiscountDialogComponent>,
     private _formBuilder: FormBuilder,
@@ -85,8 +112,8 @@ export class CreateProductDiscountDialogComponent implements OnInit {
     private _discountService: DiscountsService,
     private _changeDetectorRef: ChangeDetectorRef,
     private _fuseConfirmationService: FuseConfirmationService,
-
-
+    private _fuseMediaWatcherService: FuseMediaWatcherService,
+    private _storesService: StoresService
   ) { }
 
   ngOnInit(): void {
@@ -154,6 +181,28 @@ export class CreateProductDiscountDialogComponent implements OnInit {
                   // Mark for check
                   this._changeDetectorRef.markForCheck();
               });
+
+        // Get the store
+        this._storesService.store$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((store: Store) => {
+
+                // Update the store
+                this.store$ = store;
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+
+        this._fuseMediaWatcherService.onMediaChange$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(({matchingAliases}) => {               
+
+                this.currentScreenSize = matchingAliases;                
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
 
     // Mark for check
     this._changeDetectorRef.markForCheck();
@@ -386,10 +435,7 @@ export class CreateProductDiscountDialogComponent implements OnInit {
 
           this._changeDetectorRef.markForCheck();
           
-      }  
-      
-      console.log('check kat checkbox::::',this.onChangeSelectProductObject);
-      
+      }
   }
 
   displayMessage(getTitle:string,getMessage:string,getLabelConfirm:string,showCancel:boolean):MatDialogRef<FuseConfirmationDialogComponent,any>{

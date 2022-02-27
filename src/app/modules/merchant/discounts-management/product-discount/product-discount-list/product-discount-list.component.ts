@@ -383,8 +383,10 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
     {
         const dialogRef = this._dialog.open(
             CreateProductDiscountDialogComponent, {
-                width: '1030px',
-                height: '520px',
+                width: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
+                height: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
+                maxWidth: this.currentScreenSize.includes('sm') ? 'auto' : '100vw',  
+                maxHeight: this.currentScreenSize.includes('sm') ? 'auto' : '100vh',
                 disableClose: true,
                 });
         dialogRef.afterClosed().subscribe();
@@ -743,17 +745,15 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
 
         const dialogRef = this._dialog.open(
             EditProductDiscountDialogComponent, {
-                width: '1030px',
-                // maxWidth: '90vw',  
-                height: '520px',
-                // maxHeight: '95vh',
+                width: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
+                height: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
+                maxWidth: this.currentScreenSize.includes('sm') ? 'auto' : '100vw',  
+                maxHeight: this.currentScreenSize.includes('sm') ? 'auto' : '100vh',
                 disableClose: true,
                 data:{discountId:discountId} 
-                });
+            });
 
-        dialogRef.afterClosed().subscribe(result => {
-      
-        });
+        dialogRef.afterClosed().subscribe(result => {});
     }
 
 }
