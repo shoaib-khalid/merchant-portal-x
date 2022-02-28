@@ -71,13 +71,14 @@
                                             </mat-error>
                                         </mat-form-field>
                                         <!-- Store URL -->
-                                        <mat-form-field class="w-full fuse-mat-emphasized-affix">
+                                        <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
                                             <mat-label>Store URL</mat-label>
                                             <span class="sm:flex sm:flex-col">https://</span> 
                                             <input
                                                 matInput
                                                 minlength="4"
                                                 maxlength="15"
+                                                placeholder="UrlName"
                                                 [formControlName]="'subdomain'"
                                                 [required]="true"
                                                 (input)="checkExistingURL($event.target.value)">
@@ -112,6 +113,9 @@
                                                     [modules]="quillModules"
                                                     (onContentChanged)="textChanged($event)"></quill-editor>
                                             </div>
+                                            <mat-error *ngIf="createStoreForm.get('step1').get('storeDescription').hasError('maxlength')">
+                                                Maximum character length exceed (maximum 200 character)
+                                            </mat-error>
                                         </div>
                                         <!-- Email -->
                                         <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
@@ -635,6 +639,7 @@
                                                 <input
                                                     matInput
                                                     maxlength="100"
+                                                    placeholder="Enter city"
                                                     [formControlName]="'city'"
                                                     [required]="true">
                                                 <mat-label>City</mat-label>
@@ -643,10 +648,11 @@
                                                 </mat-error>
                                             </mat-form-field>
                                             <!-- Postcode -->
-                                            <mat-form-field class="w-full sm:w-1/2 sm:pl-3">
+                                            <mat-form-field class="w-full sm:w-1/2 sm:pl-3" floatLabel="always">
                                                 <input
                                                     matInput
                                                     [formControlName]="'postcode'"
+                                                    placeholder="XXXXXX"
                                                     minlength="5"
                                                     maxlength="10"
                                                     [required]="true">

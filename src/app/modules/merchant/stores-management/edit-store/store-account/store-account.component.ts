@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { StoresService } from 'app/core/store/store.service';
 import { ChooseVerticalService } from '../../choose-vertical/choose-vertical.service';
@@ -84,7 +84,7 @@ export class StoreAccountComponent implements OnInit
         this.storeAccountForm = this._formBuilder.group({
             name                : ['', Validators.required],
             subdomain           : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), EditStoreValidationService.domainValidator]],
-            storeDescription    : ['', [Validators.required, Validators.maxLength(100)]],
+            storeDescription    : ['', [Validators.required, Validators.maxLength(200)]],
             email               : ['', [Validators.required, Validators.email]],
             phoneNumber         : ['', EditStoreValidationService.phonenumberValidator],
             displayAddress      : [''],
@@ -221,5 +221,4 @@ export class StoreAccountComponent implements OnInit
            $event.editor.deleteText(MAX_LENGTH, $event.editor.getLength());
         }
     }
-
 }

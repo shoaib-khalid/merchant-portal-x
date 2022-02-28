@@ -12,7 +12,7 @@
                     <div class="sm:grid sm:grid-cols-4 gap-6 w-full mt-8">
                         <!-- Store Name -->
                         <div class="sm:col-span-4">
-                            <mat-form-field class="fuse-mat-no-subscript fuse-mat-emphasized-affix w-full" floatLabel="always">
+                            <mat-form-field class="fuse-mat-emphasized-affix w-full" floatLabel="always">
                                 <mat-label>Store Name</mat-label>
                                 <mat-icon
                                     class="icon-size-5"
@@ -35,7 +35,7 @@
                         </div>
                         <!-- Store Url -->
                         <div class="sm:col-span-4 pt-8 sm:pt-0">
-                            <mat-form-field class="fuse-mat-no-subscript fuse-mat-emphasized-affix w-full" floatLabel="always">
+                            <mat-form-field class="fuse-mat-emphasized-affix w-full" floatLabel="always">
                                 <mat-label>Store URL</mat-label>
                                 <span>https://</span> 
                                 <mat-icon
@@ -51,6 +51,7 @@
                                 <input
                                     minlength="4"
                                     maxlength="15"
+                                    placeholder="UrlName"
                                     [formControlName]="'subdomain'"
                                     [required]="true"
                                     (input)="checkExistingURL($event.target.value)"
@@ -86,6 +87,9 @@
                                     [modules]="quillModules"
                                     (onContentChanged)="textChanged($event)"></quill-editor>
                             </div>
+                            <mat-error *ngIf="storeAccountForm.get('storeDescription').hasError('maxlength')">
+                                Maximum character length exceed (maximum 200 character)
+                            </mat-error>
                         </div>
                     </div>
             
@@ -199,6 +203,7 @@
                             class="ml-4"
                             mat-flat-button
                             type="button"
+                            [disabled]="storeAccountForm.pristine || storeAccountForm.invalid"
                             [color]="'primary'"
                             (click)="updateStoreAccount()">
                             Save

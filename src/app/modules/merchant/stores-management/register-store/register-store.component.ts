@@ -154,13 +154,13 @@ export class RegisterStoreComponent implements OnInit
      * On init
      */
     ngOnInit(): void
-    {
+    {        
         // Vertical stepper form
         this.createStoreForm = this._formBuilder.group({
             step1: this._formBuilder.group({
                 name                : ['', Validators.required],
                 subdomain           : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
-                storeDescription    : ['', [Validators.required, Validators.maxLength(100)]],
+                storeDescription    : ['', [Validators.required, Validators.maxLength(200)]],
                 displayAddress      : [''],
                 email               : ['', [Validators.required, Validators.email]],
                 phoneNumber         : ['', RegisterStoreValidationService.phonenumberValidator],
@@ -1217,6 +1217,13 @@ export class RegisterStoreComponent implements OnInit
                 this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
             });
 
+            let deliveryPeriods = this.createStoreForm.get('step3').get('deliveryPeriods').get('values') as FormArray;
+            
+            deliveryPeriods['controls'].forEach(item => {
+                
+                item['controls'].enabled.patchValue(false);                
+            }); 
+            
             // Set validation of deliveryPeriods to some value to disable required value
             this.createStoreForm.get('step3').get('deliveryPeriods').get('validation').patchValue("not required");
         }
@@ -1565,17 +1572,28 @@ export class RegisterStoreComponent implements OnInit
 
     checkDeliveryPeriodsFulfilment() {
 
-        let index = this.deliveryPeriods.value.findIndex(item => item.enabled === true);
+        // will give array of checked item
+        let deliveryPeriodItems = this.deliveryPeriods.value.map(item => {
+            if (item.enabled === true) {
+                return item;
+            }
+        });        
 
-        if (index > -1) {            
-            if (this.deliveryPeriods.value[index].deliveryProviders.length > 0) {
-                // this.createStoreForm.get('step3').get('deliveryPeriods').get('validation').setErrors(null);
+        // remove empty value from array
+        deliveryPeriodItems = deliveryPeriodItems.filter(n => n);
+
+        // if this value -1, than all the checked deliveryProviders > 1
+        let findEmptyDeliveryProviders = deliveryPeriodItems.findIndex(item => item.deliveryProviders.length < 1);
+
+        if (deliveryPeriodItems.length > 0) {            
+            if (findEmptyDeliveryProviders < 0) {
+                // this.storeDeliveryForm.get('deliveryPeriods').get('validation').setErrors(null);
                 this.createStoreForm.get('step3').get('deliveryPeriods').get('validation').patchValue("validated");
             } else {
                 this.createStoreForm.get('step3').get('deliveryPeriods').get('validation').patchValue("noDeliveryPeriod");
             }
         } else {            
-            // this.createStoreForm.get('step3').get('deliveryPeriods').get('validation').setErrors({requiredAtLeastOne: true});
+            // this.storeDeliveryForm.get('deliveryPeriods').get('validation').setErrors({requiredAtLeastOne: true});
             this.createStoreForm.get('step3').get('deliveryPeriods').get('validation').patchValue(null);
         }
     }
