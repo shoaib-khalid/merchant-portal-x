@@ -687,5 +687,40 @@ onSelectCategoryList(event){
         return;
    }
 
+   deleteSelectedDiscount(): void
+   {
+
+       //check if the there is product disocunt , if yes just show pop up to delete the product level first
+       if (this.storeDiscountProduct.length > 0) {
+           this.displayMessage('Cannot delete','Delete the selected product first before delete this.','Ok',false);
+       } else {
+           // Open the confirmation dialog
+           const confirmation = this.displayMessage('Delete discount','Are you sure you want to remove this discount? This action cannot be undone!','Delete',true);
+          
+           // Subscribe to the confirmation dialog closed action
+           confirmation.afterClosed().subscribe((result) => {
+               // If the confirm button pressed...
+               if ( result === 'confirmed' )
+               {
+                   // Get the discount object
+                   const discount = this.productDiscountStepperForm.get('step1').value;
+
+                   // Delete the discount on the server
+                   this._discountService.deleteDiscount(discount.id).subscribe(() => {     
+                         // Set delay before closing the details window
+                    setTimeout(() => {
+
+                        // close the window
+                        this.cancel();
+
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    }, 1000);
+                    });
+               }
+           });
+       }
+   }
+
 
 }

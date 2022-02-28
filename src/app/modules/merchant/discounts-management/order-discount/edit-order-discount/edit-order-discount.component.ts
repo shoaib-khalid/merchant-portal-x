@@ -537,5 +537,45 @@ export class EditOrderDiscountDialogComponent implements OnInit {
     // this.createOrderDiscount.displayMessage();
   }
 
+  deleteSelectedDiscount(): void
+  {
+      // Open the confirmation dialog
+      const confirmation = this._fuseConfirmationService.open({
+          title  : 'Delete discount',
+          message: 'Are you sure you want to remove this discount? This action cannot be undone!',
+          actions: {
+              confirm: {
+                  label: 'Delete'
+              }
+          }
+      });
+
+      // Subscribe to the confirmation dialog closed action
+      confirmation.afterClosed().subscribe((result) => {
+
+          // If the confirm button pressed...
+          if ( result === 'confirmed' )
+          {
+
+              // Get the discount object
+              const discount = this.horizontalStepperForm.get('step1').value;
+
+              // Delete the discount on the server
+              this._discountService.deleteDiscount(discount.id).subscribe(() => {
+
+                // Set delay before closing the details window
+                setTimeout(() => {
+
+                    // close the window
+                    this.cancel();
+
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                }, 1000);
+              });
+          }
+      });
+  }
+
 
 }

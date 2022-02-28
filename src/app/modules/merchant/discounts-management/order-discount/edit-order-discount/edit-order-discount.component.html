@@ -173,57 +173,53 @@
                     </mat-slide-toggle>
                 </div>
 
-                <!-- Cancel, Next button -->
-                <div class="flex justify-end">
-                    <!-- Flash message -->
-                    <!-- <div
-                        class="flex items-center mr-4"
-                        *ngIf="flashMessage">
-                        <ng-container *ngIf="flashMessage === 'success'">
-                            <mat-icon
-                                class="text-green-500"
-                                [svgIcon]="'heroicons_outline:check'"></mat-icon>
-                            <span class="ml-2">Product created</span>
-                        </ng-container>
-                        <ng-container *ngIf="flashMessage === 'error'">
-                            <mat-icon
-                                class="text-red-500"
-                                [svgIcon]="'heroicons_outline:x'"></mat-icon>
-                            <span class="ml-2">An error occurred, try again!</span>
-                        </ng-container>
-                    </div> -->
-                    <!-- Cancel button -->
-                    <button
-                        mat-flat-button
-                        class="w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
-                        [color]="'gray'"
-                        (click)="cancel()"
-                        >
-                        Cancel
-                    </button>
-                    <!-- Next variant button -->
-                    <button
-                        class="w-24"
-                        mat-flat-button
-                        [color]="'primary'"
+                <!-- Delete, Cancel , Next -->
+                <div class="w-full flex flex row items-center justify-between">
+
+                    <!-- Delete -->
+                    <div class="justify-self-start"> 
+                        <input
+                        id="product-remove-button"
                         type="button"
-                        matStepperNext>
-                        Next
-                    </button>
-                    <!--[disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid" -->
-                    <!-- Create button -->
-                    <!-- <button
-                        *ngIf="addProductForm.get('step1').get('isVariants').value === false && productType != 'combo'"
-                        class="w-24"
-                        mat-flat-button
-                        [color]="'primary'"
-                        [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
-                        type="button"
-                        (click)="addNewProductMethod()"
-                        matStepperNext>
-                        Create
-                    </button> -->
+                        (click)="deleteSelectedDiscount()"
+                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                        mat-button>
+                        <label 
+                            class="flex items-center justify-center h-10 px-4 border rounded border-red-300 dark:border-red-500 cursor-pointer hover:bg-hover"
+                            for="product-remove-button"
+                            matRipple>
+                            <span>Delete</span>
+                            <mat-icon
+                                class="ml-1"
+                                [color]="'warn'"
+                                [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                        </label>
+                    </div>
+
+                    <!-- Cancel, Next button -->
+                    <div class="justify-end">
+                        <!-- Cancel button -->
+                        <button
+                            mat-flat-button
+                            class="w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
+                            [color]="'gray'"
+                            (click)="cancel()"
+                            >
+                            Cancel
+                        </button>
+                        <!-- Next variant button -->
+                        <button
+                            class="w-24"
+                            mat-flat-button
+                            [color]="'primary'"
+                            type="button"
+                            matStepperNext>
+                            Next
+                        </button>
+                    </div>
+
                 </div>
+
             </mat-step>
 
             <!-- SECTION FOR TIER -->
@@ -510,7 +506,28 @@
                     </fieldset>
                 </div>
 
-                <div class="flex justify-end">
+                <div class="w-full flex flex row items-center justify-between">
+
+                    <!-- Delete -->
+                    <div class="justify-self-start"> 
+                        <input
+                        id="product-remove-button"
+                        type="button"
+                        (click)="deleteSelectedDiscount()"
+                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                        mat-button>
+                        <label 
+                            class="flex items-center justify-center h-10 px-4 border rounded border-red-300 dark:border-red-500 cursor-pointer hover:bg-hover"
+                            for="product-remove-button"
+                            matRipple>
+                            <span>Delete</span>
+                            <mat-icon
+                                class="ml-1"
+                                [color]="'warn'"
+                                [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                        </label>
+                    </div>
+                    
                     <!-- Flash message -->
                     <div
                         class="items-center flex mr-4"
@@ -528,16 +545,21 @@
                                 [svgIcon]="'heroicons_outline:x'"></mat-icon>
                             <span class="ml-2">An error occurred, try again!</span>
                         </ng-container>
-                    </div>
-                    <button
+                     </div>
+
+                    <!-- Back, Update button -->
+                    <div class="justify-end">
+                        <!-- Back button -->
+                        <button
                         class="px-8 mr-2"
                         mat-flat-button
                         [color]="'accent'"
                         type="button"
                         matStepperPrevious>
                         Back
-                    </button>
-                    <button 
+                        </button>
+                        <!-- Update button -->
+                        <button 
                         class="px-8"
                         [ngClass]="isLoading ? 'cursor-wait' : 'cursor-pointer'"
                         mat-flat-button
@@ -545,8 +567,10 @@
                         [color]="'primary'"
                         type="button"
                         (click)="updateSelectedDiscount()">
-                    Update
-                    </button>
+                        Update
+                        </button>
+                    </div>
+
                 </div>
             </mat-step>
 
