@@ -25,6 +25,7 @@ export class EditStoreValidationService {
         domainAlreadyTaken: 'Sorry, the selected domain name is already taken',
         storeNameAlreadytaken:'Sorry, the selected name is already taken',
         invalidPhonenumber: 'Invalid phonenumber',
+        noDeliveryPartners: 'No delivery partner available',
         invalidPostcode: 'Invalid postcode',
         minlength: `Minimum length ${validatorValue.requiredLength}`
       };
@@ -94,6 +95,18 @@ export class EditStoreValidationService {
           return { invalidPhonenumber: true };
         }
     }
+
+    static requiredAtLeastOneValidator(control) {
+        if (control.value === "") {
+          return true;
+        } else if (control.value === null)  {
+          return { requiredAtLeastOne: true };
+        } else if (control.value === "noDeliveryPeriod")  {
+          return { noDeliveryPartners: true };
+        } else {
+          return false;
+        }
+      }
 
     static postcodeValidator(control) {
 

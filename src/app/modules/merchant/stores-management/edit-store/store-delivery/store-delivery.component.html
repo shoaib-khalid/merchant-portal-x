@@ -30,10 +30,11 @@
                         </div>
                         <!-- City -->
                         <div class="col-span-2">
-                            <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
+                            <mat-form-field class="w-full" floatLabel="always">
                                 <mat-label>City</mat-label>
                                 <input
                                     maxlength="100"
+                                    placeholder="Enter city"
                                     [required]="true"
                                     [formControlName]="'city'"
                                     matInput>
@@ -44,10 +45,11 @@
                         </div>
                         <!-- Postcode -->
                         <div class="col-span-2">
-                            <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
+                            <mat-form-field class="w-full" floatLabel="always">
                                 <mat-label>Postcode</mat-label>
                                 <input
                                     [formControlName]="'postcode'"
+                                    placeholder="XXXXX"
                                     minlength="5"
                                     maxlength="10"
                                     [required]="true"
@@ -149,9 +151,10 @@
                     <div class="grid grid-cols-4 gap-6 w-full mt-4">
                         <!-- Delivery Type -->
                         <div class="col-span-4">
-                            <mat-form-field class="fuse-mat-no-subscript w-full">
+                            <mat-form-field class="fuse-mat-emphasized-affix w-full">
                                 <mat-label>Delivery Type</mat-label>
                                     <mat-select
+
                                     [formControlName]="'deliveryType'"
                                     [required]="true"
                                     [value]="'deliveryType'"
@@ -167,7 +170,7 @@
                                     </mat-select-trigger>
                                     <div>
                                         <mat-option [value]="'SELF'">Self Delivery</mat-option>
-                                        <mat-option 
+                                        <mat-option
                                             *ngIf="this.storeDeliveryForm.get('verticalCode').value === 'E-Commerce' || this.storeDeliveryForm.get('verticalCode').value === 'e-commerce-b2b2c' || this.storeDeliveryForm.get('verticalCode').value === 'ECommerce_PK'" 
                                             [value]="'SCHEDULED'">Delivery Partner (Scheduled)</mat-option>
                                         <mat-option 
@@ -195,21 +198,23 @@
                                     <span class="text-xs">(required at least 1)</span>
                                 </mat-label>
                                 <div class="flex flex-col sm:flex-row">
-                                    <ng-container formArrayName="deliveryPeriods" *ngFor="let deliveryPeriod of storeDeliveryForm.get('deliveryPeriods')['controls']; let i = index;">
-                                        <ng-container [formGroupName]="i">
-                                            <div class="flex w-full py-0.5 sm:py-0">
-                                                <mat-checkbox (change)="checkDeliveryPeriodsFulfilment()" [formControlName]="'enabled'" [checked]="deliveryPeriod.value.enabled">{{deliveryPeriod.value.description}}</mat-checkbox>
-                                                <!-- <mat-icon
-                                                    *ngIf="deliveryPeriod.value.description"
-                                                    [matTooltip]="deliveryPeriod.value.description"
-                                                    class="flex flex-wrap transform scale-75"
-                                                    [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                                </mat-icon> -->
-                                            </div>
+                                    <ng-container [formGroupName]="'deliveryPeriods'">
+                                        <ng-container formArrayName="values" *ngFor="let deliveryPeriod of storeDeliveryForm.get('deliveryPeriods').get('values')['controls']; let i = index;">
+                                            <ng-container [formGroupName]="i">
+                                                <div class="flex w-full py-0.5 sm:py-0">
+                                                    <mat-checkbox (change)="checkDeliveryPeriodsFulfilment()" [formControlName]="'enabled'" [checked]="deliveryPeriod.value.enabled">{{deliveryPeriod.value.description}}</mat-checkbox>
+                                                    <!-- <mat-icon
+                                                        *ngIf="deliveryPeriod.value.description"
+                                                        [matTooltip]="deliveryPeriod.value.description"
+                                                        class="flex flex-wrap transform scale-75"
+                                                        [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                                    </mat-icon> -->
+                                                </div>
+                                            </ng-container>
                                         </ng-container>
                                     </ng-container>
                                 </div>
-                                <mat-error *ngIf="storeDeliveryForm.get('deliveryPeriods').hasError('requiredAtLeastOne')">
+                                <mat-error *ngIf="storeDeliveryForm.get('deliveryPeriods').get('validation').hasError('requiredAtLeastOne')">
                                     Required at least 1
                                 </mat-error>
                             </div>
@@ -230,10 +235,10 @@
                                 <div class="border border-gray-300 rounded min-h-26 max-h-72 overflow-auto">
                                     <div class="p-2 w-full">
                                         <ng-container *ngIf="storeDeliveryForm.get('deliveryType').value === 'SCHEDULED'">
-                                            <ng-container *ngFor="let displayDeliveryPeriod of this.storeDeliveryForm.get('deliveryPeriods').value; let i = index;">
+                                            <ng-container *ngFor="let displayDeliveryPeriod of this.storeDeliveryForm.get('deliveryPeriods').get('values').value; let i = index;">
                                                 <ng-container *ngIf="displayDeliveryPeriod.enabled">
                                                     <fieldset class="border border-solid border-gray-300 rounded pt-1" 
-                                                        [ngClass]="this.storeDeliveryForm.get('deliveryPeriods').value.length - 1 === i ? 'mb-0' : 'mb-2'">
+                                                        [ngClass]="this.storeDeliveryForm.get('deliveryPeriods').get('values').value.length - 1 === i ? 'mb-0' : 'mb-2'">
                                                         <legend class="ml-2 px-2">{{ displayDeliveryPeriod.description }}</legend>
                                                         <ng-container *ngIf="displayDeliveryPeriod.deliveryProviders.length > 0">
                                                             <ng-container *ngFor="let deliveryProvider of displayDeliveryPeriod.deliveryProviders">
@@ -258,6 +263,9 @@
                                                         </ng-container>
                                                         <ng-container *ngIf="displayDeliveryPeriod.deliveryProviders.length < 1">
                                                             <div class="w-full px-2 pb-2">
+                                                                <!-- <mat-error *ngIf="storeDeliveryForm.get('deliveryPeriods').get('validation').hasError('noDeliveryPartner')">
+                                                                    Sorry there is no delivery partner for this delivery type, please choose another delivery period
+                                                                </mat-error> -->
                                                                 <h1 class="text-warn">Sorry there is no delivery partner for this delivery type, please choose another delivery period</h1>
                                                                 <!-- <mat-error *ngIf="storeDeliveryForm.get('step3').get('deliveryPeriods').get('validation').hasError('noDeliveryPartners')">
                                                                     Sorry there is no delivery partner for this delivery type, please choose another delivery period
@@ -274,7 +282,7 @@
                                                 <span class="py-0.5">{{deliveryPartner.name}}</span>
                                             </section>
                                         </ng-container> -->
-                                        <mat-radio-group 
+                                        <mat-radio-group
                                             *ngIf="storeDeliveryForm.get('deliveryType').value === 'ADHOC'"
                                             class="flex flex-col w-full"
                                             [formControlName]="'deliveryPartner'"
@@ -402,6 +410,7 @@
                             class="ml-4"
                             mat-flat-button
                             type="button"
+                            [disabled]="storeDeliveryForm.pristine || storeDeliveryForm.invalid"
                             (click)="updateStoreDelivery()"
                             [color]="'primary'">Save
                         </button>
