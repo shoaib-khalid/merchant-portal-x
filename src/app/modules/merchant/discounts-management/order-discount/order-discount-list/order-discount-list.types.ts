@@ -6,6 +6,7 @@ export interface Discount
     endTime?: string;
     id?: string;
     isActive: boolean;
+    isExpired?:boolean;
     maxDiscountAmount: string;
     normalPriceItemOnly: boolean;
     startDate: string;

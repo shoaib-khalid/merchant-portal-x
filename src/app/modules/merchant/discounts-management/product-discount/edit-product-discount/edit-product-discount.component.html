@@ -34,20 +34,23 @@
                         </mat-form-field>
                         <!-- status -->
                         <mat-form-field 
-                            floatLabel="always"
-                            appearance="fill"
-                            class="w-full sm:w-1/2 sm:pl-2 fuse-mat-emphasized-affix">
+                        floatLabel="always"
+                        appearance="fill"
+                        class="w-full sm:w-1/2 sm:pl-2 fuse-mat-emphasized-affix"
+                        >
                             <mat-label>Status</mat-label>
-                            <mat-select
+                                <mat-select
                                 class="w-full"
                                 placeholder="Select status"
                                 [formControlName]="'isActive'"
                                 >
                                 <div>
-                                    <mat-option [value]="true">Active</mat-option>
-                                    <mat-option [value]="false">Inactive</mat-option>
+                                    <mat-option [value]="'ACTIVE'">Active</mat-option>
+                                    <mat-option [value]="'INACTIVE'">Inactive</mat-option>
+                                    <mat-option [value]="'EXPIRED'" *ngIf="productDiscountStepperForm.get('step1').get('isActive').value ==='EXPIRED'">Expired</mat-option>
+                                    
                                 </div>
-                            </mat-select>
+                                </mat-select>
                             <mat-icon
                                 *ngIf="currentScreenSize.includes('sm') ? true : false"
                                 matPrefix

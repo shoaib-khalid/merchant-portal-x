@@ -60,8 +60,9 @@
                                 [formControlName]="'isActive'"
                                 >
                                 <div>
-                                    <mat-option [value]="true">Active</mat-option>
-                                    <mat-option [value]="false">Inactive</mat-option>
+                                    <mat-option [value]="'ACTIVE'">Active</mat-option>
+                                    <mat-option [value]="'INACTIVE'">Inactive</mat-option>
+                                    <mat-option [value]="'EXPIRED'" *ngIf="horizontalStepperForm.get('step1').get('isActive').value ==='EXPIRED'">Expired</mat-option>
                                 </div>
                             </mat-select>
                             <mat-icon
@@ -527,7 +528,7 @@
                                 [svgIcon]="'heroicons_outline:trash'"></mat-icon>
                         </label>
                     </div>
-                    
+
                     <!-- Flash message -->
                     <div
                         class="items-center flex mr-4"

@@ -103,7 +103,11 @@
 
                                     <!-- Status -->
                                     <div class="hidden lg:block">
-                                        {{ discount.isActive ? 'Active' : 'Inactive' }}
+                                        {{  
+                                            discount.isExpired==true ? 'Expired'  
+                                            : discount.isExpired==false && discount.isActive==true?'Active'
+                                            : 'Inactive'
+                                        }}
                                     </div>
 
                                     <!-- Details button -->

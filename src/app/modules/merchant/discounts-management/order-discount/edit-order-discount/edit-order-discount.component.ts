@@ -129,6 +129,18 @@ export class EditOrderDiscountDialogComponent implements OnInit {
                 //set value for time in tieme selector
                 this.setValueToTimeSelector(response.data);
 
+                // UI need to show based on this logic :
+                // if isExpired==true then show "EXPIRED"
+                // if isExpired==false AND isActive==true then show "ACTIVE"
+                // is isExpired==false AND isActive==false then show "INACTIVE"
+                const displayStatus = () => {
+                    const resultStatus = response.data.isExpired==true ? 'EXPIRED' 
+                    : response.data.isExpired==false && response.data.isActive==true?'ACTIVE'
+                    : 'INACTIVE';
+                    return resultStatus;
+                }
+                this.horizontalStepperForm.get('step1').get('isActive').patchValue(displayStatus());
+
                 //after we set the form with custom field time selector then we display the details form
                 this.loadDetails =true;
 
@@ -189,18 +201,21 @@ export class EditOrderDiscountDialogComponent implements OnInit {
       let toBeSendPayload=sendPayload.
       map((x)=>(
           {
-              startTime:this.changeStartTime,
-              endTime:this.changeEndTime,
-              discountName: x.discountName,
-              discountType:x.discountType,
-              endDate: x.endDate,
-              id: x.id,
-              isActive: x.isActive,
-              maxDiscountAmount: x.maxDiscountAmount,
-              normalPriceItemOnly: x.normalPriceItemOnly,
-              startDate: x.startDate,
-              storeDiscountTierList: this.horizontalStepperForm.get('step2').value,
-              storeId: x.storeId,
+              startTime             :this.changeStartTime,
+              endTime               :this.changeEndTime,
+              discountName          : x.discountName,
+              discountType          :x.discountType,
+              endDate               : x.endDate,
+              id                    : x.id,
+              isActive              : x.isActive === 'EXPIRED'? false
+                                        :x.isActive === 'ACTIVE'? true
+                                        :x.isActive === 'INACTIVE'? false
+                                        :false,//change the value from string to boolean for isActive before we send to backend
+              maxDiscountAmount     : x.maxDiscountAmount,
+              normalPriceItemOnly   : x.normalPriceItemOnly,
+              startDate             : x.startDate,
+              storeDiscountTierList : this.horizontalStepperForm.get('step2').value,
+              storeId               : x.storeId,
           }
           ));
 
