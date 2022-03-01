@@ -39,8 +39,14 @@ import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
                 }
             }
             .content {
-                max-height: 455px;
-                height: 75vh
+
+                max-height: 80vh;
+                height: 80vh;
+
+                @screen sm {
+                    max-height: 455px;
+                    height: 75vh;
+                }
                 // overflow-y: auto;
             }
             // .ql-container {
@@ -125,6 +131,7 @@ export class EditProductComponent implements OnInit, OnDestroy
     productType: string;
     newProductId: string = null; // product id after it is created
     creatingProduct: boolean; // use to disable next button until product is created
+    allProductsFiltered: Product[]; // used for checking if product name already exist 
 
 
     // inventories
@@ -310,7 +317,7 @@ export class EditProductComponent implements OnInit, OnDestroy
 
         // Get the products
         this.products$ = this._inventoryService.products$;
-            
+
         // Get the stores
         this._storesService.store$
             .pipe(takeUntil(this._unsubscribeAll))
@@ -493,6 +500,14 @@ export class EditProductComponent implements OnInit, OnDestroy
 
         // Fill the form
         this.addProductForm.get('step1').patchValue(product);
+
+        // Filter out current product from all products list
+        this.products$
+        .pipe(takeUntil(this._unsubscribeAll)) 
+        .subscribe(products => {
+
+            this.allProductsFiltered = products.filter(product => product.name !== this.addProductForm.get('step1').get('name').value)
+        })
 
         // Fill the form for SKU , Price & Quantity productInventories[0]
         // this because SKU , Price & Quantity migh have variants
@@ -2845,6 +2860,20 @@ export class EditProductComponent implements OnInit, OnDestroy
 
     openProductPreview(){
         // window.open(this.selectedProductForm.get('seoUrl').value, '_blank');
+    }
+
+    /**
+     * 
+     * Check if the product name is already exists
+     * 
+     * @param value 
+     */
+     checkProductName(value: string){
+        
+        if (this.allProductsFiltered.some(product => product.name === value )){
+            // if identical, set Error
+            this.addProductForm.get('step1').get('name').setErrors({productAlreadyExists: true});
+        }
     }
 
     

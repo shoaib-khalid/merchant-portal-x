@@ -39,8 +39,14 @@ import { AddProductValidationService } from './add-product.validation.service';
                 }
             }
             .content {
-                max-height: 455px;
-                height: 75vh
+
+                max-height: 80vh;
+                height: 80vh;
+
+                @screen sm {
+                    max-height: 455px;
+                    height: 75vh;
+                }
                 // overflow-y: auto;
             }
             :host ::ng-deep .ql-container .ql-editor {
@@ -111,7 +117,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     productType: string;
     newProductId: string = null; // product id after it is created
     creatingProduct: boolean; // use to disable next button until product is created
-
+    allProducts: Product[]; // used for checking if product name already exist 
 
     // product combo package
     _products: Product[]; // use in combo section -> 'Add product' --before filter
@@ -296,6 +302,12 @@ export class AddProductComponent implements OnInit, OnDestroy
 
         // Get the products
         this.products$ = this._inventoryService.products$;
+
+        this.products$
+            .pipe(takeUntil(this._unsubscribeAll)) 
+            .subscribe(products => {
+                this.allProducts = products;
+            })
             
         // Get the stores
         this._storesService.store$
@@ -405,12 +417,17 @@ export class AddProductComponent implements OnInit, OnDestroy
     // Product Section
     // --------------------------------------
 
-    generateSku(){
-        if ((this.addProductForm.get('step1').get('name').value && !this.addProductForm.get('step1').get('sku').value) ||
-            (this.addProductForm.get('step1').get('name').value.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '') === this.addProductForm.get('sku').value) 
-        ){
-            this.addProductForm.get('step1').get('sku').patchValue(this.addProductForm.get('step1').get('name').value.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''));
-        }
+    // generateSku(){
+    //     if ((this.addProductForm.get('step1').get('name').value && !this.addProductForm.get('step1').get('sku').value) ||
+    //         (this.addProductForm.get('step1').get('name').value.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '') === this.addProductForm.get('sku').value) 
+    //     ){
+    //         this.addProductForm.get('step1').get('sku').patchValue(this.addProductForm.get('step1').get('name').value.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''));
+    //     }
+    // }
+
+    generateSku(value: string){
+
+        this.addProductForm.get('step1').get('sku').patchValue(value.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''));
     }
 
     // --------------------------------------
@@ -785,8 +802,8 @@ export class AddProductComponent implements OnInit, OnDestroy
             .subscribe(async (newProduct) => {
 
                 this.newProductId = newProduct["data"].id;
-                this.selectedProduct = newProduct["data"];                
-
+                this.selectedProduct = newProduct["data"];    
+                
                 this.products$
                     .pipe(take(1)) 
                     .subscribe(products => {
@@ -2145,5 +2162,19 @@ export class AddProductComponent implements OnInit, OnDestroy
 
     openProductPreview(){
         // window.open(this.selectedProductForm.get('seoUrl').value, '_blank');
+    }
+
+    /**
+     * 
+     * Check if the product name is already exists
+     * 
+     * @param value 
+     */
+    checkProductName(value: string){
+        
+        if (this.allProducts.some(product => product.name === value )){
+            // if identical, set Error
+            this.addProductForm.get('step1').get('name').setErrors({productAlreadyExists: true});
+        }
     }
 }

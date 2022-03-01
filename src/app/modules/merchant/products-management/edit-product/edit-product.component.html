@@ -259,12 +259,16 @@
                                         <input
                                             matInput
                                             required
-                                            [placeholder]="'Insert product ' + ((data['productType'] === 'combo') ? 'combo ' : '') + 'name'"
+                                            [placeholder]="'Insert ' + ((data['productType'] === 'combo') ? 'combo' : 'product') + ' name'"
                                             [formControlName]="'name'"
                                             (change)="generateSku()"
+                                            (change)="checkProductName($event.target.value)"
                                         >
                                         <mat-error *ngIf="addProductForm.get('step1').get('name').hasError('required')">
                                             Required
+                                        </mat-error>
+                                        <mat-error *ngIf="addProductForm.get('step1').get('name').hasError('productAlreadyExists')">
+                                            '{{addProductForm.get('step1').get('name').value}}' already exists
                                         </mat-error>
                                     </mat-form-field>
 
