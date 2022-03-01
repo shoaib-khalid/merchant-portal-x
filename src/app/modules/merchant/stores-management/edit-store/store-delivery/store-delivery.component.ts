@@ -78,7 +78,6 @@ export class StoreDeliveryComponent implements OnInit
             regionCountryStateId        : ['', Validators.required],
             regionCountryId             : ['', Validators.required],
         });
-        console.log("this.storeDeliveryForm.get('deliveryPeriods').get('values').value",this.storeDeliveryForm.get('deliveryPeriods').get('values'));
         
         this.deliveryFulfilment = [
             { selected: false, option: "INSTANT_DELIVERY", label: "Instant Delivery", tooltip: "This store support instant delivery. (Provided by store own logistic or delivery partners)" }, 
