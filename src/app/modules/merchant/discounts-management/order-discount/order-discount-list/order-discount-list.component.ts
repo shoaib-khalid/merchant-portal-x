@@ -246,9 +246,9 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
     {   const dialogRef = this._dialog.open(
         CreateOrderDiscountDialogComponent, {
             width: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
-            height: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
+            // height: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
             maxWidth: this.currentScreenSize.includes('sm') ? 'auto' : '100vw',  
-            maxHeight: this.currentScreenSize.includes('sm') ? 'auto' : '100vh',
+            // maxHeight: this.currentScreenSize.includes('sm') ? 'auto' : '100vh',
             disableClose: true,
             });
         

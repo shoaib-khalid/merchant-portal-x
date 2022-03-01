@@ -47,7 +47,7 @@ export class EditOrderDiscountDialogComponent implements OnInit {
     // get current store
     store$: Store;
     
-    horizontalStepperForm: FormGroup;
+    editOrderDiscountForm: FormGroup;
     discountId:string;
     selectedDiscount: Discount | null = null;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -93,18 +93,18 @@ export class EditOrderDiscountDialogComponent implements OnInit {
     this.discountId = this.data['discountId'];
     
     // Horizontal stepper form
-    this.horizontalStepperForm = this._formBuilder.group({
+    this.editOrderDiscountForm = this._formBuilder.group({
         //Main Discount
         step1: this._formBuilder.group({
             id                  : [''],
-            discountName        : [''],
-            discountType        : [''],
-            startDate           : [''],
-            endDate             : [''],
-            startTime           : [new TimeSelector("--","--","--")],
-            endTime             : [new TimeSelector("--","--","--")],
-            isActive            : [''],
-            maxDiscountAmount   : [''],
+            discountName        : ['', Validators.required],
+            discountType        : ['', Validators.required],
+            startDate           : ['', Validators.required],
+            endDate             : ['', Validators.required],
+            startTime           : [new TimeSelector("--","--","--"), Validators.required],
+            endTime             : [new TimeSelector("--","--","--"), Validators.required],
+            isActive            : ['', Validators.required],
+            maxDiscountAmount   : ['', Validators.required],
             normalPriceItemOnly : [''],
             storeId             : [''], // not used
      
@@ -124,7 +124,7 @@ export class EditOrderDiscountDialogComponent implements OnInit {
                 const { startTime, endTime, ...selectedDiscount } = this.selectedDiscount;
     
                 // Fill the form step 1
-                this.horizontalStepperForm.get('step1').patchValue(selectedDiscount);
+                this.editOrderDiscountForm.get('step1').patchValue(selectedDiscount);
 
                 //set value for time in tieme selector
                 this.setValueToTimeSelector(response.data);
@@ -139,17 +139,17 @@ export class EditOrderDiscountDialogComponent implements OnInit {
                     : 'INACTIVE';
                     return resultStatus;
                 }
-                this.horizontalStepperForm.get('step1').get('isActive').patchValue(displayStatus());
+                this.editOrderDiscountForm.get('step1').get('isActive').patchValue(displayStatus());
 
                 //after we set the form with custom field time selector then we display the details form
                 this.loadDetails =true;
 
                 // clear discount tier form array
-                (this.horizontalStepperForm.get('step2') as FormArray).clear();
+                (this.editOrderDiscountForm.get('step2') as FormArray).clear();
                 
                 // load discount tier form array with data frombackend
                 response.data.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
-                    this.storeDiscountTierList = this.horizontalStepperForm.get('step2') as FormArray;
+                    this.storeDiscountTierList = this.editOrderDiscountForm.get('step2') as FormArray;
                     this.storeDiscountTierList.push(this._formBuilder.group(item));
                 });
                 
@@ -197,7 +197,7 @@ export class EditOrderDiscountDialogComponent implements OnInit {
       this.isLoading = true;
 
       this.changeTime();
-      let sendPayload = [this.horizontalStepperForm.get('step1').value];
+      let sendPayload = [this.editOrderDiscountForm.get('step1').value];
       let toBeSendPayload=sendPayload.
       map((x)=>(
           {
@@ -214,7 +214,7 @@ export class EditOrderDiscountDialogComponent implements OnInit {
               maxDiscountAmount     : x.maxDiscountAmount,
               normalPriceItemOnly   : x.normalPriceItemOnly,
               startDate             : x.startDate,
-              storeDiscountTierList : this.horizontalStepperForm.get('step2').value,
+              storeDiscountTierList : this.editOrderDiscountForm.get('step2').value,
               storeId               : x.storeId,
           }
           ));
@@ -266,8 +266,8 @@ export class EditOrderDiscountDialogComponent implements OnInit {
   }
 
   checkButton(){
-    console.info('this.horizontalStepperForm ',this.horizontalStepperForm.value);
-    console.info('form array',this.horizontalStepperForm.get('step2')['controls']);
+    console.info('this.editOrderDiscountForm ',this.editOrderDiscountForm.value);
+    console.info('form array',this.editOrderDiscountForm.get('step2')['controls']);
   }
 
   setValueToTimeSelector(discount){
@@ -286,7 +286,7 @@ export class EditOrderDiscountDialogComponent implements OnInit {
         _pickStartTimeAMPM = "AM";
     }
 
-    this.horizontalStepperForm.get('step1.startTime').setValue(new TimeSelector(_pickStartTimeHour,_pickStartTimeMinute, _pickStartTimeAMPM));
+    this.editOrderDiscountForm.get('step1.startTime').setValue(new TimeSelector(_pickStartTimeHour,_pickStartTimeMinute, _pickStartTimeAMPM));
 
     //=====================/ START TIME =====================
 
@@ -305,7 +305,7 @@ export class EditOrderDiscountDialogComponent implements OnInit {
         _pickEndTimeAMPM = "AM";
     }
     
-    this.horizontalStepperForm.get('step1.endTime').setValue(new TimeSelector(_pickEndTimeHour,_pickEndTimeMinute, _pickEndTimeAMPM));
+    this.editOrderDiscountForm.get('step1.endTime').setValue(new TimeSelector(_pickEndTimeHour,_pickEndTimeMinute, _pickEndTimeAMPM));
 
     //===================== / END TIME =====================
     return;
@@ -349,7 +349,7 @@ export class EditOrderDiscountDialogComponent implements OnInit {
     this._discountService.createDiscountTier(this.selectedDiscount.id,discountTier)
         .subscribe((response) => {
             
-            this.storeDiscountTierList = this.horizontalStepperForm.get('step2') as FormArray;
+            this.storeDiscountTierList = this.editOrderDiscountForm.get('step2') as FormArray;
 
             // since backend give full discount tier list .. (not the only one that have been created only)
             this.storeDiscountTierList.clear();
@@ -410,7 +410,7 @@ export class EditOrderDiscountDialogComponent implements OnInit {
               // Delete the discount on the server
               this._discountService.deleteDiscountTier(this.selectedDiscount.id, discountTierId).subscribe(() => {
                   
-                  this.storeDiscountTierList = this.horizontalStepperForm.get('step2') as FormArray;
+                  this.storeDiscountTierList = this.editOrderDiscountForm.get('step2') as FormArray;
 
                   let index = (this.storeDiscountTierList.value.findIndex(x => x.id === discountTierId));
 
@@ -517,7 +517,7 @@ export class EditOrderDiscountDialogComponent implements OnInit {
 
   changeTime(){
     //===========Start Time==================
-    let pickStartTime =this.horizontalStepperForm.get('step1.startTime').value;
+    let pickStartTime =this.editOrderDiscountForm.get('step1.startTime').value;
     let _pickStartTime;
 
     if ((<any>pickStartTime).timeAmPm === "PM") {
@@ -531,7 +531,7 @@ export class EditOrderDiscountDialogComponent implements OnInit {
     this.changeStartTime= String(changePickStartTime.getHours()).padStart(2, "0")+':'+String(changePickStartTime.getMinutes()).padStart(2, "0");    
     
     //==============End time===================
-    let pickEndTime = this.horizontalStepperForm.get('step1.endTime').value;
+    let pickEndTime = this.editOrderDiscountForm.get('step1.endTime').value;
     let _pickEndTime;
 
     if ((<any>pickEndTime).timeAmPm === "PM") {
@@ -573,7 +573,7 @@ export class EditOrderDiscountDialogComponent implements OnInit {
           {
 
               // Get the discount object
-              const discount = this.horizontalStepperForm.get('step1').value;
+              const discount = this.editOrderDiscountForm.get('step1').value;
 
               // Delete the discount on the server
               this._discountService.deleteDiscount(discount.id).subscribe(() => {

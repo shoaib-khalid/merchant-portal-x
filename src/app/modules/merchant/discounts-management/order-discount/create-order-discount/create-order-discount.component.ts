@@ -5,8 +5,10 @@ import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { StoresService } from 'app/core/store/store.service';
 import { Store } from 'app/core/store/store.types';
+import { TimeSelector } from 'app/layout/common/time-selector/timeselector.component';
 import { of, Subject } from 'rxjs';
 import { concatMap, map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { DiscountManagementValidationService } from '../../discounts-management.validation.service';
 import { DiscountsService } from '../order-discount-list/order-discount-list.service';
 import { StoreDiscountTierList } from '../order-discount-list/order-discount-list.types';
 
@@ -82,7 +84,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
 
     message: string = "";
 
-    horizontalStepperForm: FormGroup;
+    createOrderDiscountForm: FormGroup;
     storeDiscountTierList: FormArray;
 
     storeDiscountTierListValueEditMode:any = [];
@@ -126,7 +128,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
     // let ms = now.getMinutes();
     // let ss = now.getSeconds();
     // this.minStartTime = hh + ':' + ms;
-    this.horizontalStepperForm = this._formBuilder.group({
+    this.createOrderDiscountForm = this._formBuilder.group({
         //Main Discount
         step1: this._formBuilder.group({
             // id               : [''],
@@ -134,8 +136,8 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
             discountType : ['', Validators.required],
             startDate : ['', Validators.required],
             endDate : ['', Validators.required],
-            startTime : ['', Validators.required],
-            endTime : ['', Validators.required],
+            startTime : [new TimeSelector("--","--","--"),  DiscountManagementValidationService.timeValidator],
+            endTime : [new TimeSelector("--","--","--"), Validators.required],
             isActive : ['', Validators.required],
             maxDiscountAmount : ['', Validators.required],
             normalPriceItemOnly : [''],
@@ -278,7 +280,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
 
   changeTime(){
     //===========Start Time==================
-    let pickStartTime =this.horizontalStepperForm.get('step1.startTime').value;
+    let pickStartTime =this.createOrderDiscountForm.get('step1.startTime').value;
     let _pickStartTime;
 
     if ((<any>pickStartTime).timeAmPm === "PM") {
@@ -292,7 +294,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
     this.changeStartTime= String(changePickStartTime.getHours()).padStart(2, "0")+':'+String(changePickStartTime.getMinutes()).padStart(2, "0");    
     
     //==============End time===================
-    let pickEndTime = this.horizontalStepperForm.get('step1.endTime').value;
+    let pickEndTime = this.createOrderDiscountForm.get('step1.endTime').value;
     let _pickEndTime;
 
     if ((<any>pickEndTime).timeAmPm === "PM") {
@@ -363,7 +365,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
         startTotalSalesAmount: this.startTotalSalesAmount,
     }
 
-    this.storeDiscountTierList = this.horizontalStepperForm.get('step2') as FormArray;
+    this.storeDiscountTierList = this.createOrderDiscountForm.get('step2') as FormArray;
     let checkDiscountAmount = (this.storeDiscountTierList.value.find(function checkValue(element, index, array) {
         return   element.startTotalSalesAmount=== discountTier.startTotalSalesAmount;
     }));
@@ -406,7 +408,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
     this.isLoading = true;
 
     this.changeTime();
-    let sendPayload = [this.horizontalStepperForm.get('step1').value];
+    let sendPayload = [this.createOrderDiscountForm.get('step1').value];
     let toBeSendPayload=sendPayload.
     map((x)=>(
         {
@@ -423,7 +425,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
         }
     ));
 
-    this.addMainDiscountAndTier(toBeSendPayload[0],this.horizontalStepperForm.get('step2').value).then(()=>{
+    this.addMainDiscountAndTier(toBeSendPayload[0],this.createOrderDiscountForm.get('step2').value).then(()=>{
         // Set loading to false
         this.isLoading = false;
     });
@@ -434,7 +436,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
   deleteSelectedDiscountTier(indexForm): void
   {
 
-    this.storeDiscountTierList = this.horizontalStepperForm.get('step2') as FormArray;
+    this.storeDiscountTierList = this.createOrderDiscountForm.get('step2') as FormArray;
     let index = (this.storeDiscountTierList.value.findIndex(function checkIndex(element, index, array) {
         return   index=== indexForm;
     }));
