@@ -6,6 +6,7 @@ import { FuseMediaWatcherModule } from '@fuse/services/media-watcher/media-watch
 import { FuseSplashScreenModule } from '@fuse/services/splash-screen/splash-screen.module';
 import { FuseTailwindConfigModule } from '@fuse/services/tailwind/tailwind.module';
 import { FuseUtilsModule } from '@fuse/services/utils/utils.module';
+import { FuseLoadingModule } from '@fuse/services/loading';
 
 @NgModule({
     imports  : [
@@ -13,7 +14,8 @@ import { FuseUtilsModule } from '@fuse/services/utils/utils.module';
         FuseMediaWatcherModule,
         FuseSplashScreenModule,
         FuseTailwindConfigModule,
-        FuseUtilsModule
+        FuseUtilsModule,
+        FuseLoadingModule
     ],
     providers: [
         {
