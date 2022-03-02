@@ -1486,6 +1486,8 @@ export class AddProductComponent implements OnInit, OnDestroy
             this.selectedVariantCombos = []
         }
 
+        this.selectedVariantCombos = []
+
         // to generate the combinations
         this.getallCombinations(this.variantComboItems)
 
@@ -1555,29 +1557,34 @@ export class AddProductComponent implements OnInit, OnDestroy
                     this.variantComboItems[variantIdx].values.splice(indexVariantItems, 1);
                 }
 
+                this.selectedVariantCombos = []
+
+                // to generate the combinations
+                this.getallCombinations(this.variantComboItems)
+
                 //----------------------------
                 // selectedVariantCombos
                 //----------------------------
 
                 // to remove combinations with deleted options
 
-                let splitted = [];
-                let temp = this.selectedVariantCombos;
+                // let splitted = [];
+                // let temp = this.selectedVariantCombos;
 
-                this.selectedVariantCombos.forEach( v => {
+                // this.selectedVariantCombos.forEach( v => {
 
-                    // first, split the variant name
-                    splitted = v.variant.split(" / ")
+                //     // first, split the variant name
+                //     splitted = v.variant.split(" / ")
 
-                    // then, check if the splitted name is identical to the variant available to be deleted, if same, return true
-                    if (splitted.some( (name) => name === variantAvailable.value ))
-                        // if identical, filter the temp
-                        {
-                            temp = temp.filter(x => x.variant !== v.variant);
-                        }
-                })
+                //     // then, check if the splitted name is identical to the variant available to be deleted, if same, return true
+                //     if (splitted.some( (name) => name === variantAvailable.value ))
+                //         // if identical, filter the temp
+                //         {
+                //             temp = temp.filter(x => x.variant !== v.variant);
+                //         }
+                // })
                 
-                this.selectedVariantCombos = temp;
+                // this.selectedVariantCombos = temp;
 
                 //----------------------------
                 // variantimages

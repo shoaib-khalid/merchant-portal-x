@@ -193,7 +193,7 @@ export class EditProductComponent implements OnInit, OnDestroy
     // product variant section
 
     filteredProductVariants: any[] = []; // used in html to loop variant
-    productVariants: any[] = []; // (variantComboOptions)
+    // productVariants: any[] = []; // (variantComboOptions)
     variantToBeCreated: any[] = []; // use for creating on BE 
     variantToBeDeleted: any[] = []; // use for deleting on BE 
     selectedVariantCombos: any = []; // this is the list of combinations generated
@@ -748,9 +748,6 @@ export class EditProductComponent implements OnInit, OnDestroy
         this.variantComboOptions = variantOptions
         this.filteredProductVariants = this.variantComboOptions        
 
-        //old
-        // this.getallCombinations(variantItems)
-
         this.getallCombinations(this.variantComboItems)
 
         
@@ -1229,20 +1226,45 @@ export class EditProductComponent implements OnInit, OnDestroy
                 this.filterProductOptionsMethod(products);
             })
 
-            // DELETE ENTIRE INVENTORY
-            await this.deleteEntireInventory()
-
+            
             // if got variants
             if (this.addProductForm.get('step1').get('isVariants').value === true) {
-                
-                // INVENTORY
-                if (this.selectedVariantCombos.length > 0){
-                    for (var i = 0; i < this.selectedVariantCombos.length; i++) {
-                
+
+                // if the combinations were changed, delete entire inventory and create them 
+                if (this.variantToBeCreated.length > 0 || this.variantToBeDeleted.length > 0 || this.variantAvailableToBeCreated.length > 0 || this.variantAvailableToBeDeleted.length > 0){
+                    // DELETE ENTIRE INVENTORY
+                    await this.deleteEntireInventory()
+                    
+                    // INVENTORY
+                    if (this.selectedVariantCombos.length > 0){
+                        for (let i = 0; i < this.selectedVariantCombos.length; i++) {
+                    
+                            // }
+                            const body = {
+                                // itemCode: this.selectedProduct.id + "-" + i,
+                                itemCode: this.selectedProduct.id + i,
+                                price: this.selectedVariantCombos[i].price,
+                                compareAtPrice: 0,
+                                quantity: this.selectedVariantCombos[i].quantity,
+                                sku: this.selectedVariantCombos[i].sku,
+                                status: this.selectedVariantCombos[i].status
+                            }
+        
+                            await this._inventoryService.addInventoryToProduct(this.selectedProduct, body).toPromise()
+                            .then((response)=>{
+        
+                            });
+                        }
+                        
+                    }
+                } 
+                // if no changes were made to the combinations, just update the inventory
+                else {
+
+                    for (let i = 0; i < this.selectedVariantCombos.length; i++) {
+                    
                         // }
                         const body = {
-                            // itemCode: this.selectedProduct.id + "-" + i,
-                            itemCode: this.selectedProduct.id + i,
                             price: this.selectedVariantCombos[i].price,
                             compareAtPrice: 0,
                             quantity: this.selectedVariantCombos[i].quantity,
@@ -1250,12 +1272,12 @@ export class EditProductComponent implements OnInit, OnDestroy
                             status: this.selectedVariantCombos[i].status
                         }
     
-                        await this._inventoryService.addInventoryToProduct(this.selectedProduct, body).toPromise()
+                        await this._inventoryService.updateInventoryToProduct(this.selectedProduct.id, this.productInventories$[i].itemCode, body).toPromise()
                         .then((response)=>{
     
                         });
                     }
-                    
+
                 }
         
                 // VARIANT
@@ -1312,19 +1334,14 @@ export class EditProductComponent implements OnInit, OnDestroy
             else {
                 // Update the inventory product on the server
                 let _productInventories = {
-                    // productId: this.selectedProduct.id,
-                    itemCode: this.selectedProduct.id + "aa",
-                    // price: this.displayPrice,
                     price: step1FormGroup.value.price,
                     compareAtprice: 0,
-                    // quantity: this.displayQuantity,
                     quantity: step1FormGroup.value.availableStock,
-                    // sku: this.displaySku,
                     sku: step1FormGroup.value.sku,
                     status: "AVAILABLE"
                 } 
                 
-                await this._inventoryService.addInventoryToProduct(this.selectedProduct, _productInventories).toPromise().then(() => {
+                await this._inventoryService.updateInventoryToProduct(this.selectedProduct.id, this.productInventories$[0].itemCode, _productInventories).toPromise().then(() => {
                     // Show a success message
                     // this.showFlashMessage('success');
                 });
@@ -1423,7 +1440,8 @@ export class EditProductComponent implements OnInit, OnDestroy
                                 });
                         }
                     })
-                } else {
+                } 
+                else {
                     for (let i = 0; i < this.imagesFile.length; i++) {
                         // create a new one
                         let formData = new FormData();
@@ -1796,7 +1814,7 @@ export class EditProductComponent implements OnInit, OnDestroy
         const value = event.target.value.toLowerCase();
 
         // Filter the variants
-    //  this.productVariants = this.variantComboOptions.filter(variant => variant.name.toLowerCase().includes(value));
+        this.filteredProductVariants = this.productVariants$.filter(variant => variant.name.toLowerCase().includes(value));
 
 
     }
@@ -1964,9 +1982,9 @@ export class EditProductComponent implements OnInit, OnDestroy
     shouldShowCreateVariantButton(inputValue: string): boolean
     {
         
-        // return !!!(inputValue === '' || this.productVariants$.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
-        return !!!(inputValue === '' || this.productVariants.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
-    //  return !!!(inputValue === '' || this.variantComboOptions.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
+        return !!!(inputValue === '' || this.productVariants$.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
+        // return !!!(inputValue === '' || this.productVariants.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
+        // return !!!(inputValue === '' || this.variantComboOptions.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
 
     }
 
@@ -2002,8 +2020,8 @@ export class EditProductComponent implements OnInit, OnDestroy
             name: name,
             productVariantsAvailable: [],
         };
-        this.productVariants.push(item);    
-        this.filteredProductVariants= this.productVariants;    
+        this.productVariants$.push(item);    
+        this.filteredProductVariants= this.productVariants$;    
         
         // push to array to be created to BE
         this.variantToBeCreated.push(item);
@@ -2052,8 +2070,8 @@ export class EditProductComponent implements OnInit, OnDestroy
                 this.variantToBeCreated.splice(variantIdx, 1);
 
                 // Delete the variant from formArray - formArray cannot use splice. Need to use removeAt
-                this.productVariants.splice(variantIdx, 1);
-                this.filteredProductVariants = this.productVariants;
+                this.productVariants$.splice(variantIdx, 1);
+                this.filteredProductVariants = this.productVariants$;
                 //  this.variantComboOptions = this.productVariants.value;
                 
                 // Delete the variant from variantComboItems
@@ -2115,6 +2133,8 @@ export class EditProductComponent implements OnInit, OnDestroy
         if (variantIdx > 0 && this.variantComboItems[variantIdx].values.length < 2){
             this.selectedVariantCombos = []
         }
+
+        this.selectedVariantCombos = []
 
         // to generate the combinations
         this.getallCombinations(this.variantComboItems)
@@ -2194,29 +2214,34 @@ export class EditProductComponent implements OnInit, OnDestroy
                     this.variantComboItems[variantIdx].values.splice(indexVariantItems, 1);
                 }
 
+                this.selectedVariantCombos = []
+
+                // to generate the combinations
+                this.getallCombinations(this.variantComboItems)
+
                 //----------------------------
                 // selectedVariantCombos
                 //----------------------------
 
                 // to remove combinations with deleted options
 
-                let splitted = [];
-                let temp = this.selectedVariantCombos;
+                // let splitted = [];
+                // let temp = this.selectedVariantCombos;
 
-                this.selectedVariantCombos.forEach( v => {
+                // this.selectedVariantCombos.forEach( v => {
 
-                    // first, split the variant name
-                    splitted = v.variant.split(" / ")
+                //     // first, split the variant name
+                //     splitted = v.variant.split(" / ")
 
-                    // then, check if the splitted name is identical to the variant available to be deleted, if same, return true
-                    if (splitted.some( (name) => name === variantAvailable.value ))
-                        // if identical, filter the temp
-                        {
-                            temp = temp.filter(x => x.variant !== v.variant);
-                        }
-                })
+                //     // then, check if the splitted name is identical to the variant available to be deleted, if same, return true
+                //     if (splitted.some( (name) => name === variantAvailable.value ))
+                //         // if identical, filter the temp
+                //         {
+                //             temp = temp.filter(x => x.variant !== v.variant);
+                //         }
+                // })
                 
-                this.selectedVariantCombos = temp;
+                // this.selectedVariantCombos = temp;
 
                 //----------------------------
                 // variantimages
@@ -2440,13 +2465,14 @@ export class EditProductComponent implements OnInit, OnDestroy
      * @returns 
      */
     getallCombinations(combos, itemCode = "", nameComboOutput = "", n = 0) {
+
         var nameCombo = "";
         if (n == combos.length) {
             if (nameComboOutput.substring(1) != "") {
-            // this.selectedVariantCombos.push({ itemCode: itemCode, variant: nameComboOutput.substring(1), price: 0, quantity: 0, sku: 0, status: "NOTAVAILABLE" })
-            this.selectedVariantCombos.push({ itemCode: itemCode, variant: nameComboOutput.substring(1), price: 0, quantity: 0, sku: nameComboOutput.substring(1).toLowerCase().replace(" / ", "-"), status: "NOTAVAILABLE" })
-            // this.variantimages.push([])
-          }
+                // this.selectedVariantCombos.push({ itemCode: itemCode, variant: nameComboOutput.substring(1), price: 0, quantity: 0, sku: 0, status: "NOTAVAILABLE" })
+                this.selectedVariantCombos.push({ itemCode: itemCode, variant: nameComboOutput.substring(1), price: 0, quantity: 0, sku: nameComboOutput.substring(1).toLowerCase().replace(" / ", "-"), status: "NOTAVAILABLE" })
+            }
+        
           return nameComboOutput.substring(1);
         }
     
@@ -2471,8 +2497,9 @@ export class EditProductComponent implements OnInit, OnDestroy
             if (i <= -1){
                 resArr.push(item);
             }
+
             return null;
-            });
+        });
 
         this.selectedVariantCombos = resArr;
         
