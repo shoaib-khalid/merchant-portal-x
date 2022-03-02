@@ -1,7 +1,7 @@
-<div class="flex flex-col max-w-256 lg:min-w-256 -m-6 px-4 overflow-hidden">
+<div class="flex flex-col max-w-256 lg:min-w-256 -m-6 px-6 overflow-hidden">
     <form
         class="flex flex-col w-full"
-        [formGroup]="horizontalStepperForm">
+        [formGroup]="createOrderDiscountForm">
         <mat-horizontal-stepper
             [linear]="true"
             #horizontalStepper>
@@ -9,17 +9,18 @@
             <!-- SECTION FOR ORDER DISCOUNT -->
             <mat-step
                 [formGroupName]="'step1'"
-                [stepControl]="horizontalStepperForm.get('step1')"
+                [stepControl]="createOrderDiscountForm.get('step1')"
                 #horizontalStepperStep1>
                 <ng-template matStepLabel>Order Discount</ng-template>
-                <div class="content flex flex-col h-full sm:h-auto mb-3 w-full overflow-hidden sm:overflow-y-auto">
+                <div class="content flex flex-col h-full sm:h-auto mb-3 w-full overflow-hidden">
                     <!-- discount name -->
                     <mat-form-field 
                         floatLabel="always"
                         appearance="fill"
                         class="w-full fuse-mat-emphasized-affix">
                         <mat-label>Discount Name</mat-label>
-                        <input 
+                        <input
+                            [required]="true" 
                             matInput
                             placeholder="Enter discount name"
                             [formControlName]="'discountName'"        
@@ -29,17 +30,21 @@
                             matPrefix
                             [svgIcon]="'heroicons_outline:tag'">
                         </mat-icon>
+                        <mat-error *ngIf="createOrderDiscountForm.get('step1').get('discountName').hasError('required')">
+                            Required
+                        </mat-error>
                     </mat-form-field>
 
                     <!-- capped amount status discounton  -->
-                    <div class="w-full">
+                    <div class="w-full flex flex-row">
                         <!-- capped amount-->
                         <mat-form-field 
                             floatLabel="always"
                             appearance="fill"
                             class="w-full sm:w-1/3 sm:pr-2 fuse-mat-emphasized-affix">
                             <mat-label>Capped amount</mat-label>
-                            <input 
+                            <input
+                                [required]="true" 
                                 matInput
                                 placeholder="Enter Maximum discount amount"
                                 type="number"
@@ -50,6 +55,9 @@
                                 matPrefix
                                 [svgIcon]="'heroicons_outline:currency-dollar'">
                             </mat-icon>
+                            <mat-error *ngIf="createOrderDiscountForm.get('step1').get('maxDiscountAmount').hasError('required')">
+                                Required
+                            </mat-error>
                         </mat-form-field>
                         <!-- status -->
                         <mat-form-field 
@@ -58,6 +66,7 @@
                             class="w-full sm:w-1/3 sm:pr-2 fuse-mat-emphasized-affix">
                             <mat-label>Status</mat-label>
                             <mat-select
+                                [required]="true" 
                                 class="w-full"
                                 placeholder="Select status"
                                 [formControlName]="'isActive'"
@@ -73,6 +82,9 @@
                                 matPrefix
                                 [svgIcon]="'heroicons_outline:question-mark-circle'">
                             </mat-icon>
+                            <mat-error *ngIf="createOrderDiscountForm.get('step1').get('isActive').hasError('required')">
+                                Required
+                            </mat-error>
                         </mat-form-field>
                         <!-- discount on -->
                         <mat-form-field 
@@ -81,6 +93,7 @@
                             class="w-full sm:w-1/3 fuse-mat-emphasized-affix">
                             <mat-label>Discount on</mat-label>
                             <mat-select
+                                [required]="true" 
                                 class="w-full"
                                 [formControlName]="'discountType'"
                                 placeholder="Select discount to be applied">
@@ -94,10 +107,13 @@
                                 matPrefix
                                 [svgIcon]="'mat_outline:confirmation_number'">
                             </mat-icon>
+                            <mat-error *ngIf="createOrderDiscountForm.get('step1').get('discountType').hasError('required')">
+                                Required
+                            </mat-error>
                         </mat-form-field>
                     </div>
             
-                    <!-- start date/time -->
+                    <!-- start date & time -->
                     <div class="w-full flex flex-col">
                         <div class="font-semibold mb-2 w-full">Start date/time</div>
                         <div class="w-full flex flex-col sm:flex-row">
@@ -107,6 +123,7 @@
                                 appearance="fill">
                                 <input 
                                     matInput 
+                                    [required]="true"
                                     type="date" 
                                     [formControlName]="'startDate'"
                                 >
@@ -115,6 +132,9 @@
                                     matPrefix
                                     [svgIcon]="'heroicons_outline:calendar'">
                                 </mat-icon>
+                                <mat-error *ngIf="createOrderDiscountForm.get('step1').get('startDate').hasError('required')">
+                                    Required
+                                </mat-error>
                             </mat-form-field>
                             <mat-form-field 
                                 floatLabel="always"
@@ -122,6 +142,7 @@
                                 appearance="fill">
                                 <time-selector
                                     class="w-full"
+                                    [required]="true"
                                     matInput
                                     type="time" 
                                     [formControlName]="'startTime'"                   
@@ -131,11 +152,14 @@
                                     matPrefix
                                     [svgIcon]="'heroicons_outline:clock'">
                                 </mat-icon>
+                                <mat-error *ngIf="createOrderDiscountForm.get('step1').get('startTime').hasError('inavlidTime')">
+                                    Invalid time format
+                                </mat-error>
                             </mat-form-field>
                         </div>
                     </div>
             
-                    <!-- End date /time -->
+                    <!-- End date & time -->
                     <div class="w-full flex flex-col">
                         <div class="font-semibold mb-2 w-full">End date/time</div>
                         <div class="w-full flex flex-col sm:flex-row">
@@ -143,7 +167,8 @@
                                 floatLabel="always"
                                 class="w-full sm:w-1/2 sm:pr-2 fuse-mat-emphasized-affix"
                                 appearance="fill">
-                                <input 
+                                <input
+                                    [required]="true" 
                                     matInput 
                                     type="date" 
                                     [formControlName]="'endDate'"
@@ -153,12 +178,16 @@
                                     matPrefix
                                     [svgIcon]="'heroicons_outline:calendar'">
                                 </mat-icon>
+                                <mat-error *ngIf="createOrderDiscountForm.get('step1').get('endDate').hasError('required')">
+                                    Required
+                                </mat-error>
                             </mat-form-field>
-                            <mat-form-field 
+                            <mat-form-field
                                 floatLabel="always"
                                 class="w-full sm:w-1/2 sm:pl-2 fuse-mat-emphasized-affix" 
                                 appearance="fill">
                                 <time-selector
+                                    [required]="true" 
                                     class="w-full"
                                     matInput
                                     type="time" 
@@ -169,12 +198,16 @@
                                     matPrefix
                                     [svgIcon]="'heroicons_outline:clock'">
                                 </mat-icon>
+                                <mat-error *ngIf="createOrderDiscountForm.get('step1').get('endTime').hasError('required')">
+                                    Required
+                                </mat-error>
                             </mat-form-field>
                         </div>
                     </div>
 
                     <!-- toogle normal  price -->
                     <mat-slide-toggle
+                        class="w-full sm:w-4/12"
                         [color]="'primary'"
                         [formControlName]="'normalPriceItemOnly'"
                         [matTooltip]="'To enable normal price if there is already discount applied'">
@@ -239,7 +272,7 @@
             <!-- SECTION FOR TIER -->
             <mat-step
                 formArrayName="step2"
-                [stepControl]="horizontalStepperForm.get('step2')"
+                [stepControl]="createOrderDiscountForm.get('step2')"
                 #horizontalStepperStep2>
                 <ng-template matStepLabel>Tier</ng-template>
                 <!-- <p class="my-6 font-medium">
@@ -389,7 +422,7 @@
                                     <!-- Rows -->
                                     <div 
                                         class="h-72 overflow-y-auto">
-                                        <div *ngFor="let discountTier of horizontalStepperForm.get('step2')['controls']; let i = index;" [formGroupName]="i">
+                                        <div *ngFor="let discountTier of createOrderDiscountForm.get('step2')['controls']; let i = index;" [formGroupName]="i">
                                             <!-- Variant Header -->
                                             <div class="create-order-discount-grid grid items-center gap-4 mt-4 border-b">      
                                                 <div class="hidden sm:block"></div>                              
@@ -456,35 +489,35 @@
                                                 <div>
                                                     <div class="flex flex-wrap items-center justify-center ">
                                                         <div class="flex flex-row w-full items-center justify-center">
-                                                        
+                                                            <!-- Edit Button -->
                                                             <input
                                                                 class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                                 type="button"
-                                                                [id]="'edit-discount-tier-btn' + discountTier.value.id"
+                                                                [id]="'edit-discount-tier-btn[i]' + discountTier.value.id"
                                                                 (click)="storeDiscountTierListValueEditMode[i] = !storeDiscountTierListValueEditMode[i]"
                                                             >
                                                             <label
                                                                 *ngIf="!storeDiscountTierListValueEditMode[i]"
                                                                 class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
-                                                                [for]="'edit-discount-tier-btn' + discountTier.value.id"
+                                                                [for]="'edit-discount-tier-btn[i]' + discountTier.value.id"
                                                                 matRipple>
                                                                 <mat-icon
                                                                     class="text-white icon-size-5"
                                                                     [svgIcon]="'heroicons_outline:pencil-alt'">
                                                                 </mat-icon>
                                                             </label>
-        
+                                                            <!-- Edited Button -->
                                                             <input
                                                                 class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                                 type="button"
-                                                                [id]="'update-discount-tier-btn' + discountTier.value.id"
+                                                                [id]="'update-discount-tier-btn[i]' + discountTier.value.id"
                                                                 (click)="storeDiscountTierListValueEditMode[i] = !storeDiscountTierListValueEditMode[i]"
                                                                 (click)="updateSelectedDiscountTier(discountTier)"
                                                             >
                                                             <label
                                                                 *ngIf="storeDiscountTierListValueEditMode[i]"
                                                                 class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
-                                                                [for]="'update-discount-tier-btn' + discountTier.value.id"
+                                                                [for]="'update-discount-tier-btn[i]' + discountTier.value.id"
                                                                 matRipple>
                                                                 <mat-icon
                                                                     class="text-white icon-size-5"
@@ -492,7 +525,7 @@
                                                                 </mat-icon>
                                                             </label>
         
-                                                    
+                                                            <!-- Delete Button -->
                                                             <input
                                                                 class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                                 type="button"
