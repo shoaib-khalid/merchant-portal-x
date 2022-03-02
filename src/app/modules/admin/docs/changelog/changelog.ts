@@ -9,6 +9,29 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 export class ChangelogComponent
 {
     changelog: any[] = [
+        // v0.0.26
+        {
+            version    : 'v0.0.26',
+            releaseDate: 'Mar 02, 2022',
+            changes    : [
+                {
+                    type: 'Fix',
+                    list: [
+                        '(DiscountManagement) Add validator before proceed to next',
+                        '(StoreManagement) Fix store timing bug for 12:00PM',
+                    ]
+                },
+                {
+                    type: 'Added',
+                    list: [
+                        '(DiscountManagement) Add expired discount label',
+                        '(StoreManagement) Add store delvery periods for Ecommerce (MYS)',
+                        '(ProductManagement) Add checking product name for duplication',
+                        '(Layout) Add global loading'
+                    ]
+                }
+            ]
+        },
         // v0.0.25
         {
             version    : 'v0.0.25',
