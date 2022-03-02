@@ -153,16 +153,14 @@
                         <div class="col-span-4">
                             <mat-form-field class="fuse-mat-emphasized-affix w-full">
                                 <mat-label>Delivery Type</mat-label>
-                                    <mat-select
-
+                                <mat-select
                                     [formControlName]="'deliveryType'"
                                     [required]="true"
                                     [value]="'deliveryType'"
                                     [placeholder]="'Select Delivery Type'"
                                     (selectionChange)="storeDeliveryForm.get('deliveryType').patchValue($event.value)"
                                     (selectionChange)="checkDeliveryPartner()"
-                                    #deliverySelector="matSelect"
-                                    >
+                                    #deliverySelector="matSelect">
                                     <mat-select-trigger>
                                         <span class="flex items-center">
                                             <span>{{ deliverySelector.triggerValue }}</span>
@@ -190,11 +188,11 @@
                                 </mat-icon>
                             </mat-form-field>
                         </div>
-                        <!-- Delivery Period -->
+                        <!-- Delivery Period / Delivery Service -->
                         <div class="col-span-4" *ngIf="storeDeliveryForm.get('deliveryType').value === 'SCHEDULED'">
                             <div class="flex flex-col w-full">
                                 <mat-label class="font-medium">
-                                    <span>Delivery Periods</span> &nbsp;
+                                    <span>Delivery Service</span> &nbsp;
                                     <span class="text-xs">(required at least 1)</span>
                                 </mat-label>
                                 <div class="flex flex-col sm:flex-row">
