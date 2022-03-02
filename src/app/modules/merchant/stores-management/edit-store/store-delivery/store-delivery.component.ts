@@ -69,7 +69,7 @@ export class StoreDeliveryComponent implements OnInit
             deliveryPeriods          : this._formBuilder.group({ 
                 values      : this._formBuilder.array([]),
                 validation  : ['', EditStoreValidationService.requiredAtLeastOneValidator]
-        }),
+            }),
             // Else
             allowStorePickup            : [false],
             address                     : ['', Validators.required],

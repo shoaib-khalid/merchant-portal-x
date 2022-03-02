@@ -760,13 +760,13 @@
                                                     <ng-container formArrayName="values" *ngFor="let deliveryPeriod of createStoreForm.get('step3').get('deliveryPeriods').get('values')['controls']; let i = index;">
                                                         <ng-container [formGroupName]="i">
                                                             <div class="flex w-full py-0.5 sm:py-0">
-                                                                <mat-checkbox (change)="checkDeliveryPeriodsFulfilment()" [formControlName]="'enabled'" [checked]="deliveryPeriod.value.enabled">{{deliveryPeriod.value.description}}</mat-checkbox>
-                                                                <!-- <mat-icon
-                                                                    *ngIf="deliveryPeriod.value.description"
-                                                                    [matTooltip]="deliveryPeriod.value.description"
+                                                                <mat-checkbox (change)="checkDeliveryPeriodsFulfilment()" [formControlName]="'enabled'" [checked]="deliveryPeriod.value.enabled">{{deliveryPeriod.value.deliveryPeriodDetails.name}}</mat-checkbox>
+                                                                <mat-icon
+                                                                    *ngIf="deliveryPeriod.value.deliveryPeriodDetails.description"
+                                                                    [matTooltip]="deliveryPeriod.value.deliveryPeriodDetails.description"
                                                                     class="flex flex-wrap transform scale-75"
                                                                     [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                                                </mat-icon> -->
+                                                                </mat-icon>
                                                             </div>
                                                         </ng-container>
                                                     </ng-container>
@@ -798,7 +798,7 @@
                                                                 <ng-container *ngIf="displayDeliveryPeriod.enabled">
                                                                     <fieldset class="border border-solid border-gray-300 rounded pt-1" 
                                                                         [ngClass]="this.createStoreForm.get('step3').get('deliveryPeriods').get('values').value.length - 1 === i ? 'mb-0' : 'mb-2'">
-                                                                        <legend class="ml-2 px-2">{{ displayDeliveryPeriod.description }}</legend>
+                                                                        <legend class="ml-2 px-2 text-primary">{{ displayDeliveryPeriod.deliveryPeriodDetails.name }}</legend>
                                                                         <ng-container *ngIf="displayDeliveryPeriod.deliveryProviders.length > 0">
                                                                             <ng-container *ngFor="let deliveryProvider of displayDeliveryPeriod.deliveryProviders">
                                                                                 <section class="flex flex-col px-2">

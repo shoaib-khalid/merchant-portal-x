@@ -744,8 +744,10 @@ export class RegisterStoreComponent implements OnInit
                 let startTime = filteredItem.openTime;
                 let _startTime;
         
-                if (startTime.timeAmPm === "PM") {
+                if (startTime.timeAmPm === "PM" && startTime.timeHour !== "12") {
                     _startTime = parseInt(startTime.timeHour) + 12;
+                } else if (startTime.timeAmPm === "AM" && startTime.timeHour === "12") {
+                    _startTime = parseInt(startTime.timeHour) - 12;
                 } else {
                     _startTime = startTime.timeHour;
                 }
@@ -754,8 +756,10 @@ export class RegisterStoreComponent implements OnInit
                 let endTime = filteredItem.closeTime;
                 let _endTime;
 
-                if (endTime.timeAmPm === "PM") {
+                if (endTime.timeAmPm === "PM" && endTime.timeHour !== "12") {
                     _endTime = parseInt(endTime.timeHour) + 12;
+                } else if (endTime.timeAmPm === "AM" && endTime.timeHour === "12") {
+                    _endTime = parseInt(endTime.timeHour) - 12;
                 } else {
                     _endTime = endTime.timeHour;
                 }
@@ -764,8 +768,10 @@ export class RegisterStoreComponent implements OnInit
                 let breakStartTime = filteredItem.breakStartTime;
                 let _breakStartTime;
         
-                if (breakStartTime.timeAmPm !== null && breakStartTime.timeAmPm === "PM") {
+                if (breakStartTime.timeAmPm === "PM" && breakStartTime.timeHour !== "12") {
                     _breakStartTime = parseInt(breakStartTime.timeHour) + 12;
+                } else if (breakStartTime.timeAmPm === "AM" && breakStartTime.timeHour === "12") {
+                    _breakStartTime = parseInt(breakStartTime.timeHour) - 12;
                 } else {
                     _breakStartTime = breakStartTime.timeHour;
                 }
@@ -774,8 +780,10 @@ export class RegisterStoreComponent implements OnInit
                 let breakEndTime = filteredItem.breakEndTime;
                 let _breakendTime;
         
-                if (breakEndTime.timeAmPm !== null && breakEndTime.timeAmPm === "PM") {
+                if (breakEndTime.timeAmPm === "PM" && breakEndTime.timeHour !== "12") {
                     _breakendTime = parseInt(breakEndTime.timeHour) + 12;
+                } else if (breakEndTime.timeAmPm === "AM" && breakEndTime.timeHour === "12") {
+                    _breakendTime = parseInt(breakEndTime.timeHour) - 12;
                 } else {
                     _breakendTime = breakEndTime.timeHour;
                 }
@@ -1501,11 +1509,14 @@ export class RegisterStoreComponent implements OnInit
         let startTime = this.createStoreForm.get('step4').get('storeTiming').value[i].openTime;
         let _startTime;
 
-        if (startTime.timeAmPm === "PM") {
+        if (startTime.timeAmPm === "PM" && startTime.timeHour !== "12") {
             _startTime = parseInt(startTime.timeHour) + 12;
+        } else if (startTime.timeAmPm === "AM" && startTime.timeHour === "12") {
+            _startTime = parseInt(startTime.timeHour) - 12;
         } else {
             _startTime = startTime.timeHour;
         }
+
         const workingHourStartTime = new Date();
         workingHourStartTime.setHours(_startTime,startTime.timeMinute,0);
 
@@ -1513,11 +1524,14 @@ export class RegisterStoreComponent implements OnInit
         let endTime = this.createStoreForm.get('step4').get('storeTiming').value[i].closeTime;
         let _endTime;
     
-        if (endTime.timeAmPm === "PM") {
+        if (endTime.timeAmPm === "PM" && endTime.timeHour !== "12") {
             _endTime = parseInt(endTime.timeHour) + 12;
+        } else if (endTime.timeAmPm === "AM" && endTime.timeHour === "12") {
+            _endTime = parseInt(endTime.timeHour) - 12;
         } else {
             _endTime = endTime.timeHour;
-        }        
+        }
+
         const workingHourEndTime = new Date();
         workingHourEndTime.setHours(_endTime,endTime.timeMinute,0);
         
@@ -1534,11 +1548,14 @@ export class RegisterStoreComponent implements OnInit
         let breakStartTime = this.createStoreForm.get('step4').get('storeTiming').value[i].breakStartTime;
         let _breakStartTime;
 
-        if (breakStartTime.timeAmPm === "PM") {
+        if (breakStartTime.timeAmPm === "PM" && breakStartTime.timeHour !== "12") {
             _breakStartTime = parseInt(breakStartTime.timeHour) + 12;
+        } else if (breakStartTime.timeAmPm === "AM" && breakStartTime.timeHour === "12") {
+            _breakStartTime = parseInt(breakStartTime.timeHour) - 12;
         } else {
             _breakStartTime = breakStartTime.timeHour;
         }
+
         const breakHourStartTime = new Date();
         breakHourStartTime.setHours(_breakStartTime,breakStartTime.timeMinute,0);
 
@@ -1546,11 +1563,14 @@ export class RegisterStoreComponent implements OnInit
         let breakEndTime = this.createStoreForm.get('step4').get('storeTiming').value[i].breakEndTime;
         let _breakEndTime;
     
-        if (breakEndTime.timeAmPm === "PM") {
+        if (breakEndTime.timeAmPm === "PM" && breakEndTime.timeHour !== "12") {
             _breakEndTime = parseInt(breakEndTime.timeHour) + 12;
+        } else if (breakEndTime.timeAmPm === "AM" && breakEndTime.timeHour === "12") {
+            _breakEndTime = parseInt(breakEndTime.timeHour) - 12;
         } else {
             _breakEndTime = breakEndTime.timeHour;
-        }        
+        }
+
         const breakHourEndTime = new Date();
         breakHourEndTime.setHours(_breakEndTime,breakEndTime.timeMinute,0);
 
