@@ -874,7 +874,7 @@ export class StoresService
         );
     }
 
-    postStoreRegionCountryDeliveryProvider(storeId: string, deliveryServiceProviderId: string, deliveryPeriod: string): Observable<any>
+    postStoreRegionCountryDeliveryProvider(storeId: string, deliveryServiceProviderId: string, deliveryPeriod: string, deliveryServiceProviderTypeId: string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -883,7 +883,7 @@ export class StoresService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
 
-        return this._httpClient.post<any>(productService + '/stores/' + storeId + '/deliveryServiceProvider/' + deliveryServiceProviderId + '/' + deliveryPeriod, header).pipe(
+        return this._httpClient.post<any>(productService + '/stores/' + storeId + '/deliveryServiceProvider/' + deliveryServiceProviderId + '/' + deliveryPeriod + '/' + deliveryServiceProviderTypeId, header).pipe(
             map((response) => {
                 this._logging.debug("Response from StoresService (postStoreRegionCountryDeliveryProvider)",response);
             })

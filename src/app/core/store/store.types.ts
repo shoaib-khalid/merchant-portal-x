@@ -108,6 +108,7 @@ export interface StoreDeliveryProvider
 {
     deliveryType?: string;
     deliverySpId?: string;
+    deliverySpTypeId?: number;
     fulfilment?: string;
     id?: string;
     regionCountry?: string;

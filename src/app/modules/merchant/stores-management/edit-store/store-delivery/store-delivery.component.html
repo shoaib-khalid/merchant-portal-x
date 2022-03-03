@@ -232,6 +232,7 @@
                                 <div class="mb-0.5"></div>
                                 <div class="border border-gray-300 rounded min-h-26 max-h-72 overflow-auto">
                                     <div class="p-2 w-full">
+                                        <!-- Scheduled -->
                                         <ng-container *ngIf="storeDeliveryForm.get('deliveryType').value === 'SCHEDULED'">
                                             <ng-container *ngFor="let displayDeliveryPeriod of this.storeDeliveryForm.get('deliveryPeriods').get('values').value; let i = index;">
                                                 <ng-container *ngIf="displayDeliveryPeriod.enabled">
@@ -280,25 +281,28 @@
                                                 <span class="py-0.5">{{deliveryPartner.name}}</span>
                                             </section>
                                         </ng-container> -->
-                                        <mat-radio-group
-                                            *ngIf="storeDeliveryForm.get('deliveryType').value === 'ADHOC'"
-                                            class="flex flex-col w-full"
-                                            [formControlName]="'deliveryPartner'"
-                                        >
-                                            <ng-container *ngIf="deliveryPartners.length > 0; else noAdhocDeliveryPartners">
-                                                <section class="p-2" *ngFor="let deliveryPartner of deliveryPartners">
-                                                    <mat-radio-button [value]="deliveryPartner.id">{{deliveryPartner.storeDeliveryServiceProvider.name + ' (' + deliveryPartner.fulfilment + ')'}}</mat-radio-button>
-                                                </section>
-                                                <mat-error *ngIf="storeDeliveryForm.get('deliveryPartner').hasError('required')">
-                                                    Required at least 1
-                                                </mat-error>
-                                            </ng-container>
-                                            <ng-template #noAdhocDeliveryPartners>
-                                                <section class="p-2">
-                                                    <h1 class="text-warn">Sorry there is no delivery partner for this delivery type, please choose another delivery type</h1>
-                                                </section>
-                                            </ng-template>
-                                        </mat-radio-group>
+
+                                        <!-- Adhoc -->
+                                        <ng-container *ngIf="storeDeliveryForm.get('deliveryType').value === 'ADHOC'">
+                                            <mat-radio-group
+                                                class="flex flex-col w-full"
+                                                [formControlName]="'deliverySpType'"
+                                            >
+                                                <ng-container *ngIf="deliveryPartners.length > 0; else noAdhocDeliveryPartners">
+                                                    <section class="p-2" *ngFor="let deliveryPartner of deliveryPartners">
+                                                        <mat-radio-button [value]="deliveryPartner.id">{{deliveryPartner.storeDeliveryServiceProvider.name + ' (' + deliveryPartner.fulfilment + ')'}}</mat-radio-button>
+                                                    </section>
+                                                    <mat-error *ngIf="storeDeliveryForm.get('deliverySpType').hasError('required')">
+                                                        Required at least 1
+                                                    </mat-error>
+                                                </ng-container>
+                                                <ng-template #noAdhocDeliveryPartners>
+                                                    <section class="p-2">
+                                                        <h1 class="text-warn">Sorry there is no delivery partner for this delivery type, please choose another delivery type</h1>
+                                                    </section>
+                                                </ng-template>
+                                            </mat-radio-group>
+                                        </ng-container>
                                     </div>
                                 </div>
                             </div>

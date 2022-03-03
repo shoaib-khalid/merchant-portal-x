@@ -65,7 +65,7 @@ export class StoreDeliveryComponent implements OnInit
             verticalCode                : [''],
             allowedSelfDeliveryStates   : this._formBuilder.array([]), // Allowed Self Delivery States
             deliveryType                : ['', Validators.required], // Delivery Provider
-            deliveryPartner             : [''], // Delivery Partner
+            deliverySpType              : [''], // Delivery Partner for adhoc
             deliveryPeriods          : this._formBuilder.group({ 
                 values      : this._formBuilder.array([]),
                 validation  : ['', EditStoreValidationService.requiredAtLeastOneValidator]
@@ -127,7 +127,7 @@ export class StoreDeliveryComponent implements OnInit
                     .subscribe((response: StoreDeliveryProvider[]) => {
                         // reset this.deliveryPartners first to initial state
                         this.deliveryPartners = [];
-                        this.deliveryPartners = response;
+                        this.deliveryPartners = response;                        
 
                         // filter delivery fulfilment aka delivery period
                         this.deliveryPartnerTypes = [ ...new Set(this.deliveryPartners.map(item => item.fulfilment))];
@@ -168,7 +168,7 @@ export class StoreDeliveryComponent implements OnInit
                                     // this.deliveryPeriods = this.storeDeliveryForm.get('deliveryPeriods').get('values') as FormArray;
                                     
                                     // attacted delivery provider to delivery period
-                                    this.deliveryPeriods.push(this._formBuilder.group(item));
+                                    this.deliveryPeriods.push(this._formBuilder.group(item));                                    
 
                                     // Mark for check
                                     this._changeDetectorRef.markForCheck();
@@ -189,8 +189,9 @@ export class StoreDeliveryComponent implements OnInit
                 this._storesService.getStoreRegionCountryDeliveryProvider(this.storeId)
                     .subscribe((response: StoreDeliveryProvider[]) => {
                         
-                        let _deliverySpId = response.length > 0 ? response[0].deliverySpId : "";
-                        this.storeDeliveryForm.get('deliveryPartner').patchValue(_deliverySpId);
+                        let _deliverySpType = response.length > 0 ? response[0].deliverySpTypeId + "" : "";
+                        
+                        this.storeDeliveryForm.get('deliverySpType').patchValue(_deliverySpType);
 
                         // Mark for check
                         this._changeDetectorRef.markForCheck();
@@ -293,7 +294,7 @@ export class StoreDeliveryComponent implements OnInit
     checkDeliveryPartner(){
         
         // on every change set error to false first (reset state)
-        if (this.storeDeliveryForm.get('deliveryType').errors || this.storeDeliveryForm.get('deliveryPartner').errors){
+        if (this.storeDeliveryForm.get('deliveryType').errors || this.storeDeliveryForm.get('deliverySpType').errors){
             this.hasDeliveryPartnerError = false; 
         }
         
@@ -325,8 +326,8 @@ export class StoreDeliveryComponent implements OnInit
         }
 
         if (this.storeDeliveryForm.get('deliveryType').value === "ADHOC") {
-            if (!this.storeDeliveryForm.get('deliveryPartner').value) {
-                this.storeDeliveryForm.get('deliveryPartner').setErrors({required:true});
+            if (!this.storeDeliveryForm.get('deliverySpType').value) {
+                this.storeDeliveryForm.get('deliverySpType').setErrors({required:true});
             }
             this.storeDeliveryForm.get('deliveryPeriods').get('validation').patchValue("not-required");
 
@@ -405,12 +406,12 @@ export class StoreDeliveryComponent implements OnInit
     {
 
         if(this.hasDeliveryPartnerError === false) {
-            this.storeDeliveryForm.get('deliveryPartner').setErrors(null);
+            this.storeDeliveryForm.get('deliverySpType').setErrors(null);
         }
 
         // this will remove the item from the object
         const { allowedSelfDeliveryStates, allowStorePickup, deliveryPeriods,
-            deliveryType, deliveryPartner, storeTiming, ...storeDeliveryBody } = this.storeDeliveryForm.value;
+            deliveryType, deliverySpType, storeTiming, ...storeDeliveryBody } = this.storeDeliveryForm.value;
   
         // this.editStoreForm.disable();
 
@@ -500,10 +501,10 @@ export class StoreDeliveryComponent implements OnInit
         if (this.storeDeliveryForm.get('deliveryType').value === "ADHOC") {
             this._storesService.deleteStoreRegionCountryDeliveryProviderAll(this.storeId)
                 .subscribe(() => {
-                    let index = this.deliveryPartners.findIndex(item => item.id === deliveryPartner);
+                    let index = this.deliveryPartners.findIndex(item => item.id === deliverySpType);
 
                     if (index > -1){
-                        this._storesService.postStoreRegionCountryDeliveryProvider(this.storeId, this.deliveryPartners[index].deliverySpId, this.deliveryPartners[index].fulfilment)
+                        this._storesService.postStoreRegionCountryDeliveryProvider(this.storeId, this.deliveryPartners[index].deliverySpId, this.deliveryPartners[index].fulfilment, this.deliveryPartners[index].id)
                             .subscribe((response) => {
                                 
                             });
