@@ -335,7 +335,8 @@ export class EditOrderComponent implements OnInit
               }
               ))
             },error=>{
-              this.displayMessage('Cannot be edit','The order has been updated earlier','Ok','Close',false);
+         
+              this.displayMessage('Cannot be edit',error.error.message,'Ok','Close',false);
 
               this.close();
             });
