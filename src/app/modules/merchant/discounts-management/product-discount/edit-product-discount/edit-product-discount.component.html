@@ -264,7 +264,7 @@
     
                                                     <!-- Original Price -->
                                                     <div class="truncate text-center">
-                                                        {{productList.productInventories[0].price}}
+                                                        {{productList.productInventories[0] ? productList.productInventories[0].price : 'undefined'}}
                                                     </div>
                 
                                                     <!-- Action Button -->

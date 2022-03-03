@@ -741,9 +741,10 @@ export class CreateProductDiscountDialogComponent implements OnInit {
 
         } else {
             // check validate at backend
-            if(this.checkExistingDate(discountBody)) {
-                this.disabledProceed = true;
-            }
+            // if(this.checkExistingDate(discountBody)) {
+            //     this.disabledProceed = true;
+            // }
+            
             this.dateAlert = " " ;
             this.disabledProceed = false;
         }
