@@ -9,6 +9,27 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 export class ChangelogComponent
 {
     changelog: any[] = [
+        // v0.0.28
+        {
+            version    : 'v0.0.28',
+            releaseDate: 'Mar 03, 2022',
+            changes    : [
+                {
+                    type: 'Fix',
+                    list: [
+                        '(StoreManagement) Fix fnb choose delivery provider not saved after refresh',
+                        '(ProductManagement) Fix product image not reflected in list after created',
+                        '(OrderManagement) Fix product image not reflected in list after created',
+                    ]
+                },
+                {
+                    type: 'Added',
+                    list: [
+                        '(OrderManagement) Add delivery service on order management list'
+                    ]
+                },
+            ]
+        },
         // v0.0.27
         {
             version    : 'v0.0.27',
