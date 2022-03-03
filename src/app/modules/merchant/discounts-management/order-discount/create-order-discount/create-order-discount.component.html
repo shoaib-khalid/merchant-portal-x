@@ -122,6 +122,7 @@
                                 class="w-full sm:w-1/2 sm:pr-2 fuse-mat-emphasized-affix"
                                 appearance="fill">
                                 <input 
+                                    (change)="checkDateTime()"
                                     matInput 
                                     [required]="true"
                                     type="date" 
@@ -141,6 +142,7 @@
                                 class="w-full sm:w-1/2 sm:pl-2 fuse-mat-emphasized-affix" 
                                 appearance="fill">
                                 <time-selector
+                                    (change)="checkDateTime()"
                                     class="w-full"
                                     [required]="true"
                                     matInput
@@ -168,6 +170,7 @@
                                 class="w-full sm:w-1/2 sm:pr-2 fuse-mat-emphasized-affix"
                                 appearance="fill">
                                 <input
+                                    (change)="checkDateTime()"
                                     [required]="true" 
                                     matInput 
                                     type="date" 
@@ -187,6 +190,7 @@
                                 class="w-full sm:w-1/2 sm:pl-2 fuse-mat-emphasized-affix" 
                                 appearance="fill">
                                 <time-selector
+                                    (change)="checkDateTime()"
                                     [required]="true" 
                                     class="w-full"
                                     matInput
@@ -235,6 +239,12 @@
                         </ng-container>
                     </div> -->
                     <!-- Cancel button -->
+                    <div *ngIf="dateAlert !== 'invisible'" class="flex flex-wrap text-warn items-center pr-2">
+                        {{dateAlert}}
+                    </div>
+                    <div *ngIf="this.createOrderDiscountForm.get('step1.startDate').hasError('dateOverlapped')" class="flex flex-wrap text-warn items-center pr-2">
+                        Date selected is overlapped with existing date, please select another date !
+                    </div>
                     <button
                         mat-flat-button
                         class="w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
@@ -248,7 +258,7 @@
                         class="w-24"
                         mat-flat-button
                         [color]="'primary'"
-                        [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
+                        [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid || disabledProceed === true "
                         type="button"
                         matStepperNext>
                         Next

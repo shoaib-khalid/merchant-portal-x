@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { filter, map, switchMap, take, tap } from 'rxjs/operators';
+import { catchError, filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { ApiResponseModel, Discount, DiscountPagination, StoreDiscountTierList } from 'app/modules/merchant/discounts-management/order-discount/order-discount-list/order-discount-list.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
@@ -304,6 +304,8 @@ export class DiscountsService
             switchMap(discounts => this._httpClient.put<Discount>(productService + '/stores/' + this.storeId$ + '/discount/' , body , header).pipe(
                 map((updatedDiscount) => {
 
+                    this._logging.debug("Response from DiscountsService (Update Discount)",updatedDiscount);
+
                     // Find the index of the updated discount
                     const index = discounts.findIndex(item => item.id === id);
 
@@ -433,43 +435,64 @@ export class DiscountsService
      *
      * @param id
      */
-         deleteDiscountTier(discountId: string, discountTierId: string): Observable<boolean>
-         {
-             let productService = this._apiServer.settings.apiServer.productService;
-             let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-             let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
-     
-             const header = {
-                 headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
-             };
-           
-             return this.discountTierList$.pipe(
-                 take(1),
-                 switchMap(discountTier => this._httpClient.delete(productService +'/stores/'+this.storeId$+'/discount/'+ discountId +'/tier/'+discountTierId, header).pipe(
-                     map((response) => {
-     
-                         let isDeleted:boolean = false;
-                         if (response["status"] === 200) {
-                             isDeleted = true
-                         }
-     
-                         // Return the deleted status
-                         return isDeleted;
-                     })
-                 ))
-             );
-         }
-     
-         updateDiscountTier(StorediscountId: string, body: StoreDiscountTierList): Observable<any>
-         {
-             let productService = this._apiServer.settings.apiServer.productService;
-             let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-             let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
-     
-             const header = {
-                 headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
-             };
-               return this._httpClient.put(productService + '/stores/' + this.storeId$ + '/discount/' + StorediscountId + '/tier', body, header);
-         }
+    deleteDiscountTier(discountId: string, discountTierId: string): Observable<boolean>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
 
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+    
+        return this.discountTierList$.pipe(
+            take(1),
+            switchMap(discountTier => this._httpClient.delete(productService +'/stores/'+this.storeId$+'/discount/'+ discountId +'/tier/'+discountTierId, header).pipe(
+                map((response) => {
+
+                    let isDeleted:boolean = false;
+                    if (response["status"] === 200) {
+                        isDeleted = true
+                    }
+
+                    // Return the deleted status
+                    return isDeleted;
+                })
+            ))
+        );
+    }
+
+    updateDiscountTier(StorediscountId: string, body: StoreDiscountTierList): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+        return this._httpClient.put(productService + '/stores/' + this.storeId$ + '/discount/' + StorediscountId + '/tier', body, header);
+    }
+
+    async getExistingDate(body: Discount){
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`)
+        };
+
+        let response = await this._httpClient.post<any>(productService + '/stores/' + this.storeId$ + '/discount/validate',body ,header)
+            .pipe<any>(catchError((error:HttpErrorResponse)=>{
+                    return of(error);
+                })
+            )
+            .toPromise();
+
+        this._logging.debug("Response from DiscountsService (validateStoreDiscount) ",response);
+        
+        //if exist status = 409, if not exist status = 200
+        return response.status;
+
+    }
 }
