@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { filter, map, switchMap, take, tap } from 'rxjs/operators';
+import { catchError, filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { Product, ProductVariant, ProductInventory, ProductCategory, ProductPagination, ProductVariantAvailable, ProductPackageOption, ProductAssets } from 'app/core/product/inventory.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
@@ -1494,6 +1494,41 @@ export class InventoryService
                 })
             ))
         );
+    }
+
+
+    /**
+     * Get existing product name to check if the product name already exists 
+     * 
+     * @param name 
+     * @returns 
+     */
+    async getExistingProductName(name:string){
+        
+
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params:{
+                storeName: name
+            }
+        };
+
+        let response = await this._httpClient.get<any>(productService + '/stores/' + this.storeId$ + 'products/checkname', header)
+                            .pipe<any>(catchError((error:HttpErrorResponse)=>{
+                                    return of(error);
+                                })
+                            )
+                            .toPromise();
+
+
+        this._logging.debug("Response from ProductsService (getExistingProductName) ", response);
+        
+        //if exist status = 409, if not exist status = 200
+        return response.status;
+
     }
 
 }
