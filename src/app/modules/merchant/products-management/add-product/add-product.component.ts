@@ -427,7 +427,7 @@ export class AddProductComponent implements OnInit, OnDestroy
 
     generateSku(value: string){
 
-        this.addProductForm.get('step1').get('sku').patchValue(value.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''));
+        this.addProductForm.get('step1').get('sku').patchValue(value.trim().toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''));
     }
 
     // --------------------------------------
@@ -2179,7 +2179,7 @@ export class AddProductComponent implements OnInit, OnDestroy
      */
     checkProductName(value: string){
         
-        if (this.allProducts.some(product => product.name === value )){
+        if (this.allProducts.some(product => product.name === value.trim() )){
             // if identical, set Error
             this.addProductForm.get('step1').get('name').setErrors({productAlreadyExists: true});
         }

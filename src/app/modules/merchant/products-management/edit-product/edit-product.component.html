@@ -268,7 +268,7 @@
                                             Required
                                         </mat-error>
                                         <mat-error *ngIf="addProductForm.get('step1').get('name').hasError('productAlreadyExists')">
-                                            '{{addProductForm.get('step1').get('name').value}}' already exists
+                                            '{{addProductForm.get('step1').get('name').value.trim()}}' already exists
                                         </mat-error>
                                     </mat-form-field>
 

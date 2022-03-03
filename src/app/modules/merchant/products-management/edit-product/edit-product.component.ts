@@ -844,7 +844,7 @@ export class EditProductComponent implements OnInit, OnDestroy
             if ((this.addProductForm.get('step1').get('name').value && !this.addProductForm.get('step1').get('sku').value) ||
                 (this.addProductForm.get('step1').get('name').value.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '') === this.addProductForm.get('sku').value) 
             ){
-                this.addProductForm.get('step1').get('sku').patchValue(this.addProductForm.get('step1').get('name').value.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''));
+                this.addProductForm.get('step1').get('sku').patchValue(this.addProductForm.get('step1').get('name').value.trim().toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''));
                 this.checkinput.sku = true;
             }
         }
@@ -2895,9 +2895,9 @@ export class EditProductComponent implements OnInit, OnDestroy
      * 
      * @param value 
      */
-     checkProductName(value: string){
-        
-        if (this.allProductsFiltered.some(product => product.name === value )){
+    checkProductName(value: string){
+    
+        if (this.allProductsFiltered.some(product => product.name === value.trim() )){
             // if identical, set Error
             this.addProductForm.get('step1').get('name').setErrors({productAlreadyExists: true});
         }
