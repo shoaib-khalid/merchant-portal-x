@@ -268,7 +268,7 @@
                                             Required
                                         </mat-error>
                                         <mat-error *ngIf="addProductForm.get('step1').get('name').hasError('productAlreadyExists')">
-                                            '{{addProductForm.get('step1').get('name').value}}' already exists
+                                            '{{addProductForm.get('step1').get('name').value.trim()}}' already exists
                                         </mat-error>
                                     </mat-form-field>
 
@@ -1061,48 +1061,58 @@
                                                         </div>
                                                     </div>
                                                     <div
-                                                        class="flex flex-col max-h-64 py-2 border-t overflow-y-auto">
+                                                        class="flex flex-col max-h-70 py-2 border-t">
                                                         <!-- Variant Available -->
                                                         <ng-container *ngIf="!productVariantAvailableEditMode">
-                                                            <div class="py-2 space-y-2">
-                                                                <ng-container *ngFor="let variantAvailable of filteredProductVariantAvailable; let i = index; trackBy: trackByFn">
-                                                                    <div class="flex items-center">
-                                                                        <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full mx-4">
-                                                                            <input
-                                                                                matInput 
-                                                                                [value]="variantAvailable.value"
-                                                                                (input)="editVariantAvailableTitleMethod(variant, $event)"
-                                                                                [readonly]="!productVariantAvailableValueEditMode[i]"
-                                                                            >
-                                                                            <!-- <button
-                                                                                mat-icon-button
-                                                                                *ngIf="productVariantAvailableValueEditMode[i]"
-                                                                                (click)="productVariantAvailableValueEditMode[i] = !productVariantAvailableValueEditMode[i]; updateVariantAvailableTitle(variant, $event)"
-                                                                                matSuffix>
-                                                                                <mat-icon
-                                                                                    class="icon-size-5 ml-2"
-                                                                                    [svgIcon]="'heroicons_solid:check'"></mat-icon>
-                                                                            </button>
-                                                                            <button
-                                                                                mat-icon-button
-                                                                                *ngIf="!productVariantAvailableValueEditMode[i]"
-                                                                                (click)="productVariantAvailableValueEditMode[i] = !productVariantAvailableValueEditMode[i]"
-                                                                                matSuffix>
-                                                                                <mat-icon
-                                                                                    class="icon-size-5 ml-2"
-                                                                                    [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
-                                                                            </button> -->
-                                                                            <button
-                                                                                mat-icon-button
-                                                                                (click)="deleteVariantAvailableMethod(variantAvailable, variantIndex)"
-                                                                                matSuffix>
-                                                                                <mat-icon
-                                                                                    class="icon-size-5 ml-2"
-                                                                                    [svgIcon]="'heroicons_solid:trash'"></mat-icon>
-                                                                            </button>
-                                                                        </mat-form-field>
-                                                                    </div>
-                                                                </ng-container>
+                                                            <div class="pt-2 space-y-2">
+                                                                <div class="overflow-y-auto space-y-2 max-h-48">
+                                                                    <ng-container *ngFor="let variantAvailable of filteredProductVariantAvailable; let i = index; trackBy: trackByFn">
+                                                                        <div class="flex items-center">
+                                                                            <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full mx-4">
+                                                                                <input
+                                                                                    matInput 
+                                                                                    [value]="variantAvailable.value"
+                                                                                    (input)="editVariantAvailableTitleMethod(variant, $event)"
+                                                                                    [readonly]="!productVariantAvailableValueEditMode[i]"
+                                                                                >
+                                                                                <!-- <button
+                                                                                    mat-icon-button
+                                                                                    *ngIf="productVariantAvailableValueEditMode[i]"
+                                                                                    (click)="productVariantAvailableValueEditMode[i] = !productVariantAvailableValueEditMode[i]; updateVariantAvailableTitle(variant, $event)"
+                                                                                    matSuffix>
+                                                                                    <mat-icon
+                                                                                        class="icon-size-5 ml-2"
+                                                                                        [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                                                                </button>
+                                                                                <button
+                                                                                    mat-icon-button
+                                                                                    *ngIf="!productVariantAvailableValueEditMode[i]"
+                                                                                    (click)="productVariantAvailableValueEditMode[i] = !productVariantAvailableValueEditMode[i]"
+                                                                                    matSuffix>
+                                                                                    <mat-icon
+                                                                                        class="icon-size-5 ml-2"
+                                                                                        [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                                                                                </button> -->
+                                                                                <button
+                                                                                    mat-icon-button
+                                                                                    (click)="deleteVariantAvailableMethod(variantAvailable, variantIndex)"
+                                                                                    matSuffix>
+                                                                                    <mat-icon
+                                                                                        class="icon-size-5 ml-2"
+                                                                                        [svgIcon]="'heroicons_solid:trash'"></mat-icon>
+                                                                                </button>
+                                                                            </mat-form-field>
+                                                                        </div>
+                                                                    </ng-container>
+                                                                </div>
+                                                                <div class="flex items-center h-14 sm:h-12 min-h-10 -ml-0.5 pl-4 pr-3 leading-none">
+                                                                    <mat-icon
+                                                                        class="mr-2 icon-size-5"
+                                                                        [svgIcon]="'heroicons_outline:exclamation-circle'"></mat-icon>
+                                                                    <span class="md:text-xs sm:text-sm">
+                                                                        Adding/deleting variant option will reset the variant list values
+                                                                    </span>
+                                                                </div>
                                                             </div>
                                                         </ng-container>
                                                         <!-- Create variant options-->
@@ -1117,7 +1127,7 @@
                                                             <div class="break-all">Create "<b>{{newVariantAvailableInput.value}}</b>"</div>
                                                         </div>
                                                         <div
-                                                            class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-default border-t hover:bg-gray-50 dark:hover:bg-hover"
+                                                            class="flex items-center h-12 sm:h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-default border-t hover:bg-gray-50 dark:hover:bg-hover"
                                                             *ngIf="productVariantAvailable?.length >= 5"
                                                         >
                                                             <mat-icon
@@ -1135,7 +1145,20 @@
                             </div>
                             <!-- Variant Details Table -->
                             <div class="flex flex-col w-full sm:w-3/4 sm:px-4 py-4 sm:py-0">
-                                <div class="font-medium tracking-tight mb-1 truncate">Variant Details</div>
+                                <div class="flex flex-col sm:flex-row justify-between">
+                                    <div class="font-medium tracking-tight mb-1 truncate">Variant Details</div>
+                                    <div 
+                                        *ngIf="this.variantToBeDeleted.length > 0 || this.variantAvailableToBeCreated.length > 0 || this.variantAvailableToBeDeleted.length > 0" 
+                                        class="flex flex-row px-1 items-center"
+                                        >
+                                        <mat-icon
+                                            class="mr-2 icon-size-5 text-amber-500"
+                                            [svgIcon]="'heroicons_solid:exclamation'"></mat-icon>
+                                        <span class="font-medium text-sm text-amber-500">
+                                            The list has been reset. Please confirm the values!
+                                        </span>
+                                    </div>
+                                </div>
                                 <div class="flex flex-auto overflow-x-auto">
                                     <div class="flex flex-col flex-auto sm:mb-18">
                                         <ng-container>
@@ -1352,7 +1375,7 @@
 
 
                                         <ng-template #noVariants>
-                                            <div class="p-8 sm:p-16 border-t text-2xl font-semibold tracking-tight text-center">There are no Variants! Add them now.</div>
+                                            <div class="p-8 sm:p-16 border-t text-2xl font-semibold tracking-tight text-center">There are no Variants! Add them now</div>
                                         </ng-template>
                                     </div>
                                 </div>

@@ -666,7 +666,7 @@ export class InventoryService
      *
      * @param product
      */
-    updateInventoryToProduct(productId: string, productInventoriesId: string, productInventories: ProductInventory): Observable<ProductInventory>{
+    updateInventoryToProduct(productId: string, productInventoriesId: string, productInventory): Observable<ProductInventory>{
 
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -676,10 +676,22 @@ export class InventoryService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
 
+        const body = {
+            "productId": productId,
+            // "itemCode": product.id + date,
+            "itemCode": productInventory.itemCode,
+            "price": productInventory.price,
+            "compareAtprice": 0,
+            "quantity": productInventory.quantity,
+            "sku": productInventory.sku,
+            // "status": "AVAILABLE"
+            "status": productInventory.status? productInventory.status : "NOTAVAILABLE"
+        };
+
         return this._products.pipe(
             take(1),
             // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
-            switchMap(products => this._httpClient.put<Product>(productService +'/stores/'+this.storeId$+'/products/' + productId + "/inventory/" + productInventoriesId, productInventories , header).pipe(
+            switchMap(products => this._httpClient.put<Product>(productService +'/stores/'+this.storeId$+'/products/' + productId + "/inventory/" + productInventoriesId, body , header).pipe(
                 map((response) => {
 
                     this._logging.debug("Response from ProductsService (updateInventoryToProduct)",response);
