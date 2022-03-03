@@ -224,15 +224,32 @@ export class StoreTimingComponent implements OnInit
             _endTime = endTime.timeHour;
         }
 
+        // if(_endTime > 23 && endTime.timeMinute > "55") {
+        //     this.timeAlert[i] ="End time exceeds minimum time range for today" ;
+        // }
+
         const workingHourEndTime = new Date();
         workingHourEndTime.setHours(_endTime,endTime.timeMinute,0);
         
+        // 12:00 AM
+        const minToday = new Date();
+        minToday.setHours(0,0,0);
+
         //working Hour Display Error
-        if( workingHourStartTime >= workingHourEndTime ){            
+        if (workingHourEndTime.getTime() === minToday.getTime()) {
+            this.timeAlert[i] ="End time exceeds minimum time range for today (11:55PM)" ;
+        } else if( workingHourStartTime >= workingHourEndTime){            
             this.timeAlert[i] ="End time range incorrect" ;
         }else{
             this.timeAlert[i] = " " ;
-        }   
+        }  
+        
+        console.log("minToday", minToday);
+        console.log("workingHourStartTime",workingHourStartTime);
+        console.log("workingHourEndTime",workingHourEndTime);
+        console.log("_endTime",_endTime);
+        console.log("endTime.timeMinute",endTime.timeMinute);
+       
     }
 
     changeBreakTime(i){
