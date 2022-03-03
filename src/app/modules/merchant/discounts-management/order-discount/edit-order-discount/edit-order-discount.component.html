@@ -122,6 +122,7 @@
                                 class="w-full sm:w-1/2 sm:pr-2 fuse-mat-emphasized-affix"
                                 appearance="fill">
                                 <input 
+                                    (change)="checkDateTime()"
                                     [required]="true"
                                     matInput 
                                     type="date" 
@@ -141,6 +142,7 @@
                                 class="w-full sm:w-1/2 sm:pl-2 fuse-mat-emphasized-affix" 
                                 appearance="fill">
                                 <time-selector
+                                    (change)="checkDateTime()"
                                     [required]="true"
                                     class="w-full"
                                     matInput
@@ -168,6 +170,7 @@
                                 class="w-full sm:w-1/2 sm:pr-2 fuse-mat-emphasized-affix"
                                 appearance="fill">
                                 <input
+                                    (change)="checkDateTime()"
                                     [required]="true" 
                                     matInput 
                                     type="date" 
@@ -187,6 +190,7 @@
                                 class="w-full sm:w-1/2 sm:pl-2 fuse-mat-emphasized-affix" 
                                 appearance="fill">
                                 <time-selector
+                                    (change)="checkDateTime()"
                                     [required]="true"
                                     class="w-full"
                                     matInput
@@ -238,7 +242,10 @@
                     </div>
 
                     <!-- Cancel, Next button -->
-                    <div class="justify-end">
+                    <div class="flex flex-row justify-end">
+                        <div *ngIf="dateAlert !== 'invisible'" class="flex flex-wrap text-warn items-center pr-2">
+                            {{dateAlert}}
+                        </div>
                         <!-- Cancel button -->
                         <button
                             mat-flat-button
@@ -253,7 +260,7 @@
                             class="w-24"
                             mat-flat-button
                             [color]="'primary'"
-                            [disabled]="horizontalStepperStep1.stepControl.invalid"
+                            [disabled]="horizontalStepperStep1.stepControl.invalid || disabledProceed === true "
                             type="button"
                             matStepperNext>
                             Next

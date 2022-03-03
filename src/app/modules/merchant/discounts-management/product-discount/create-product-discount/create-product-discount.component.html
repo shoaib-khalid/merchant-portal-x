@@ -31,6 +31,9 @@
                                 matPrefix
                                 [svgIcon]="'heroicons_outline:tag'">
                             </mat-icon>
+                            <mat-error *ngIf="productDiscountStepperForm.get('step1.discountName').hasError('required')">
+                                Required
+                            </mat-error>
                         </mat-form-field>
                         <!-- status -->
                         <mat-form-field 
@@ -53,6 +56,9 @@
                                 matPrefix
                                 [svgIcon]="'heroicons_outline:question-mark-circle'">
                             </mat-icon>
+                            <mat-error *ngIf="productDiscountStepperForm.get('step1.isActive').hasError('required')">
+                                Required
+                            </mat-error>
                         </mat-form-field>
                     </div>
                 
@@ -64,6 +70,7 @@
                                 class="w-full sm:w-1/2 sm:pr-2 fuse-mat-emphasized-affix"
                                 appearance="fill">
                                 <input 
+                                    (change)="checkDateTime()"
                                     matInput 
                                     type="date" 
                                     [formControlName]="'startDate'">
@@ -72,12 +79,16 @@
                                     matPrefix
                                     [svgIcon]="'heroicons_outline:calendar'">
                                 </mat-icon>
+                                <mat-error *ngIf="productDiscountStepperForm.get('step1.startDate').hasError('required')">
+                                    Required
+                                </mat-error>
                             </mat-form-field>
                             <mat-form-field 
                                 class="w-full sm:w-1/2 sm:pl-2 fuse-mat-emphasized-affix" 
                                 appearance="fill">
                                 <time-selector
                                     class="w-full"
+                                    (change)="checkDateTime()"
                                     matInput
                                     type="time" 
                                     [formControlName]="'startTime'"                   
@@ -99,7 +110,8 @@
                                 class="w-full sm:w-1/2 sm:pr-2 fuse-mat-emphasized-affix"
                                 appearance="fill">
                                 <input 
-                                    matInput 
+                                    matInput
+                                    (change)="checkDateTime()" 
                                     type="date" 
                                     [formControlName]="'endDate'">
                                 <mat-icon
@@ -107,12 +119,16 @@
                                     matPrefix
                                     [svgIcon]="'heroicons_outline:calendar'">
                                 </mat-icon>
+                                <mat-error *ngIf="productDiscountStepperForm.get('step1.endDate').hasError('required')">
+                                    Required
+                                </mat-error>
                             </mat-form-field>
                             <mat-form-field 
                                 class="w-full sm:w-1/2 sm:pl-2 fuse-mat-emphasized-affix" 
                                 appearance="fill">
                                 <time-selector
                                     class="w-full"
+                                    (change)="checkDateTime()"
                                     matInput
                                     type="time" 
                                     [formControlName]="'endTime'"                   
@@ -130,6 +146,12 @@
 
                 <!-- Cancel, Next button -->
                 <div class="flex justify-end">
+                    <div *ngIf="dateAlert !== 'invisible'" class="flex flex-wrap text-warn items-center pr-2">
+                        {{dateAlert}}
+                    </div>
+                    <div *ngIf="this.productDiscountStepperForm.get('step1.startDate').hasError('dateOverlapped')" class="flex flex-wrap text-warn items-center pr-2">
+                        Date selected is overlapped with existing date, please select another date !
+                    </div>
                     <!-- Cancel button -->
                     <button
                         mat-flat-button
@@ -144,7 +166,7 @@
                         class="w-24"
                         mat-flat-button
                         [color]="'primary'"
-                        [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
+                        [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid || disabledProceed === true "
                         type="button"
                         matStepperNext>
                         Next
@@ -237,7 +259,7 @@
     
                                                     <!-- Original Price -->
                                                     <div class="truncate text-center">
-                                                        {{productList.productInventories[0].price}}
+                                                        {{productList.productInventories[0] ? productList.productInventories[0].price : 'undefined'}}
                                                     </div>
                 
                                                     <!-- Action Button -->

@@ -75,49 +75,54 @@ export class EditOrderDiscountDialogComponent implements OnInit {
 
     isLoading: boolean = false;
 
-  constructor(
-    public dialogRef: MatDialogRef<EditOrderDiscountDialogComponent>,
-    private _changeDetectorRef: ChangeDetectorRef,
-    private _formBuilder: FormBuilder,
-    private _discountService: DiscountsService,
-    private _fuseConfirmationService: FuseConfirmationService,
-    private _fuseMediaWatcherService: FuseMediaWatcherService,
-    private _storesService: StoresService,
-    // private createOrderDiscount:CreateOrderDiscount,
-    @Inject(MAT_DIALOG_DATA) public data: MatDialog
-  ) { }
+    dateAlert: any;
+    disabledProceed: boolean = false;
 
-  ngOnInit(): void {
+    constructor(
+        public dialogRef: MatDialogRef<EditOrderDiscountDialogComponent>,
+        private _changeDetectorRef: ChangeDetectorRef,
+        private _formBuilder: FormBuilder,
+        private _discountService: DiscountsService,
+        private _fuseConfirmationService: FuseConfirmationService,
+        private _fuseMediaWatcherService: FuseMediaWatcherService,
+        private _storesService: StoresService,
+        // private createOrderDiscount:CreateOrderDiscount,
+        @Inject(MAT_DIALOG_DATA) public data: MatDialog
+    ) { }
 
-    //get value when open matdialot
-    this.discountId = this.data['discountId'];
-    
-    // Horizontal stepper form
-    this.editOrderDiscountForm = this._formBuilder.group({
-        //Main Discount
-        step1: this._formBuilder.group({
-            id                  : [''],
-            discountName        : ['', Validators.required],
-            discountType        : ['', Validators.required],
-            startDate           : ['', Validators.required],
-            endDate             : ['', Validators.required],
-            startTime           : [new TimeSelector("--","--","--"), Validators.required],
-            endTime             : [new TimeSelector("--","--","--"), Validators.required],
-            isActive            : ['', Validators.required],
-            maxDiscountAmount   : ['', Validators.required],
-            normalPriceItemOnly : [''],
-            storeId             : [''], // not used
-     
-        }),
-        //Tier List
-        step2: this._formBuilder.array([]),
-    });
+    // ----------------------------------------------------------------------------------
+    //                          @ Lifecycle hooks
+    // ----------------------------------------------------------------------------------
+    ngOnInit(): void {
 
-    // if id is exist so it is edit mode, Get the discount by id
-    // if(this.discountId){
+        //get value when open matdialot
+        this.discountId = this.data['discountId'];
+        
+        // Horizontal stepper form
+        this.editOrderDiscountForm = this._formBuilder.group({
+            //Main Discount
+            step1: this._formBuilder.group({
+                id                  : [''],
+                discountName        : ['', Validators.required],
+                discountType        : ['', Validators.required],
+                startDate           : ['', Validators.required],
+                endDate             : ['', Validators.required],
+                startTime           : [new TimeSelector("--","--","--"), Validators.required],
+                endTime             : [new TimeSelector("--","--","--"), Validators.required],
+                isActive            : ['', Validators.required],
+                maxDiscountAmount   : ['', Validators.required],
+                normalPriceItemOnly : [''],
+                storeId             : [''], // not used
+        
+            }),
+            //Tier List
+            step2: this._formBuilder.array([]),
+        });
+
+        // if id is exist so it is edit mode, Get the discount by id
         this._discountService.getDiscountByGuid(this.discountId)
             .subscribe((response:ApiResponseModel<Discount>) => {
-
+                
                 //Set the selected discount
                 this.selectedDiscount = response.data;
 
@@ -127,15 +132,15 @@ export class EditOrderDiscountDialogComponent implements OnInit {
                 this.editOrderDiscountForm.get('step1').patchValue(selectedDiscount);
 
                 //set value for time in tieme selector
-                this.setValueToTimeSelector(response.data);
-
+                this.setValueToTimeSelector(response.data);                
+                
                 // UI need to show based on this logic :
                 // if isExpired==true then show "EXPIRED"
                 // if isExpired==false AND isActive==true then show "ACTIVE"
                 // is isExpired==false AND isActive==false then show "INACTIVE"
                 const displayStatus = () => {
-                    const resultStatus = response.data.isExpired==true ? 'EXPIRED' 
-                    : response.data.isExpired==false && response.data.isActive==true?'ACTIVE'
+                    const resultStatus = response.data.isExpired == true ? 'EXPIRED' 
+                    : response.data.isExpired == false && response.data.isActive == true?'ACTIVE'
                     : 'INACTIVE';
                     return resultStatus;
                 }
@@ -156,89 +161,236 @@ export class EditOrderDiscountDialogComponent implements OnInit {
                 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
+            }
+        );
+        // }
+        // //for create mode
+        // else{
+        //     this.loadDetails =true;
+        // }
+
+        // Get the store
+        this._storesService.store$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((store: Store) => {
+
+                // Update the store
+                this.store$ = store;
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
             });
-    // }
-    // //for create mode
-    // else{
-    //     this.loadDetails =true;
-    // }
 
-    // Get the store
-    this._storesService.store$
-        .pipe(takeUntil(this._unsubscribeAll))
-        .subscribe((store: Store) => {
+        this._fuseMediaWatcherService.onMediaChange$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(({matchingAliases}) => {               
 
-            // Update the store
-            this.store$ = store;
+                this.currentScreenSize = matchingAliases;                
 
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
-        });
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
 
-    this._fuseMediaWatcherService.onMediaChange$
-        .pipe(takeUntil(this._unsubscribeAll))
-        .subscribe(({matchingAliases}) => {               
+    }
 
-            this.currentScreenSize = matchingAliases;                
+    ngOnDestroy(): void
+    {
+        // Unsubscribe from all subscriptions
+        this._unsubscribeAll.next();
+        this._unsubscribeAll.complete();
+    }
 
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
-        });
+    // ----------------------------------------------------------------------------------
+    //                              @ Public methods
+    // ----------------------------------------------------------------------------------
 
-  }
+    // --------------------------------------
+    //          Discount Section
+    // --------------------------------------
+ 
+    updateSelectedDiscount(): void
+    {
+        // Set loading to true
+        this.isLoading = true;
 
-  cancel(){
-    this.dialogRef.close();
-  }
+        this.checkDateTime();
+        let sendPayload = [this.editOrderDiscountForm.get('step1').value];
+        let toBeSendPayload=sendPayload.
+        map((x)=>(
+            {
+                startTime             :this.changeStartTime,
+                endTime               :this.changeEndTime,
+                discountName          : x.discountName,
+                discountType          :x.discountType,
+                endDate               : x.endDate,
+                id                    : x.id,
+                isActive              : x.isActive === 'EXPIRED'? false
+                                            :x.isActive === 'ACTIVE'? true
+                                            :x.isActive === 'INACTIVE'? false
+                                            :false,//change the value from string to boolean for isActive before we send to backend
+                maxDiscountAmount     : x.maxDiscountAmount,
+                normalPriceItemOnly   : x.normalPriceItemOnly,
+                startDate             : x.startDate,
+                storeDiscountTierList : this.editOrderDiscountForm.get('step2').value,
+                storeId               : x.storeId,
+            }
+            ));
 
-  updateSelectedDiscount(): void
-  {
-      // Set loading to true
-      this.isLoading = true;
-
-      this.changeTime();
-      let sendPayload = [this.editOrderDiscountForm.get('step1').value];
-      let toBeSendPayload=sendPayload.
-      map((x)=>(
-          {
-              startTime             :this.changeStartTime,
-              endTime               :this.changeEndTime,
-              discountName          : x.discountName,
-              discountType          :x.discountType,
-              endDate               : x.endDate,
-              id                    : x.id,
-              isActive              : x.isActive === 'EXPIRED'? false
-                                        :x.isActive === 'ACTIVE'? true
-                                        :x.isActive === 'INACTIVE'? false
-                                        :false,//change the value from string to boolean for isActive before we send to backend
-              maxDiscountAmount     : x.maxDiscountAmount,
-              normalPriceItemOnly   : x.normalPriceItemOnly,
-              startDate             : x.startDate,
-              storeDiscountTierList : this.editOrderDiscountForm.get('step2').value,
-              storeId               : x.storeId,
-          }
-          ));
-
-      // Update the discount on the server
-      this._discountService.updateDiscount(this.discountId, toBeSendPayload[0])
-          .subscribe((resp) => {
-            // Set loading to false
-            this.isLoading = false;
-
-            // Show a success message
-            this.showFlashMessage('success');
-
-          },((error) => {
-              // Set loading to false
+        // Update the discount on the server
+        this._discountService.updateDiscount(this.discountId, toBeSendPayload[0])
+            .subscribe((resp) => {
+                // Set loading to false
                 this.isLoading = false;
 
-                console.error(error);
+                // Show a success message
+                this.showFlashMessage('success');
 
+            },((error) => {
+                // Set loading to false
+                    this.isLoading = false;
+
+                    console.error(error);
+
+                    if (error.status === 417) {
+                        // Open the confirmation dialog
+                        const confirmation = this._fuseConfirmationService.open({
+                            title  : 'Discount date overlap',
+                            message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
+                            actions: {
+                                confirm: {
+                                    label: 'Ok'
+                                },
+                                cancel : {
+                                    show : false,
+                                }
+                            }
+                        });
+                    }
+                    // Show a success message
+                    this.showFlashMessage('error');
+                }
+            ));
+
+            // Set delay before closing the details window
+            setTimeout(() => {
+
+                // close the window
+                this.cancel();
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            }, 1000);
+    }
+
+    deleteSelectedDiscount(): void
+    {
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title  : 'Delete discount',
+            message: 'Are you sure you want to remove this discount? This action cannot be undone!',
+            actions: {
+                confirm: {
+                    label: 'Delete'
+                }
+            }
+        });
+
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+
+            // If the confirm button pressed...
+            if ( result === 'confirmed' )
+            {
+
+                // Get the discount object
+                const discount = this.editOrderDiscountForm.get('step1').value;
+
+                // Delete the discount on the server
+                this._discountService.deleteDiscount(discount.id).subscribe(() => {
+
+                    // Set delay before closing the details window
+                    setTimeout(() => {
+
+                        // close the window
+                        this.cancel();
+
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    }, 1000);
+                });
+            }
+        });
+    }
+
+    cancel(){
+        this.dialogRef.close();
+    }
+
+    checkButton(){
+        console.info('this.editOrderDiscountForm ',this.editOrderDiscountForm.value);
+        console.info('form array',this.editOrderDiscountForm.get('step2')['controls']);
+    }
+
+    // --------------------------------------
+    //       Discount Tier Section
+    // --------------------------------------
+
+    insertTierToDiscount(){
+
+        // check condition first before pass to backend
+        if(this.calculationType === 'PERCENT' && this.discountAmount>100){
+
+            const confirmation = this._fuseConfirmationService.open({
+                title  : 'Exceed maximum amount discount percentage',
+                message: 'Please change your discount amount for percentage calculation type',
+                actions: {
+                    confirm: {
+                        label: 'Ok'
+                    },
+                    cancel : {
+                        show : false,
+                    }
+                }
+            });
+
+            return;
+        }
+
+        let discountTier: StoreDiscountTierList = {
+            calculationType: this.calculationType,
+            discountAmount: this.discountAmount,
+            startTotalSalesAmount: this.startTotalSalesAmount,
+        }
+
+        // Create the discount
+        this._discountService.createDiscountTier(this.selectedDiscount.id,discountTier)
+            .subscribe((response) => {
+                
+                this.storeDiscountTierList = this.editOrderDiscountForm.get('step2') as FormArray;
+
+                // since backend give full discount tier list .. (not the only one that have been created only)
+                this.storeDiscountTierList.clear();
+
+                response["data"].forEach(item => {
+                    this.storeDiscountTierList.push(this._formBuilder.group(item));
+                });
+
+                //disable button add
+                this.isDisplayAddTier=false;
+                //clear the input
+                (<any>this.startTotalSalesAmount)='';
+                (<any>this.discountAmount)='';
+                this.calculationType='';
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            }, (error) => {
+                console.error(error);
                 if (error.status === 417) {
                     // Open the confirmation dialog
                     const confirmation = this._fuseConfirmationService.open({
-                        title  : 'Discount date overlap',
-                        message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
+                        title  : 'Minimum subtotal overlap',
+                        message: 'Your minimum subtotal entered overlapping with existing amount! Please change your minimum subtotal',
                         actions: {
                             confirm: {
                                 label: 'Ok'
@@ -249,125 +401,77 @@ export class EditOrderDiscountDialogComponent implements OnInit {
                         }
                     });
                 }
-                // Show a success message
-                this.showFlashMessage('error');
-            }
-          ));
-
-        // Set delay before closing the details window
-        setTimeout(() => {
-
-            // close the window
-            this.cancel();
-
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
-        }, 1000);
-  }
-
-  checkButton(){
-    console.info('this.editOrderDiscountForm ',this.editOrderDiscountForm.value);
-    console.info('form array',this.editOrderDiscountForm.get('step2')['controls']);
-  }
-
-  setValueToTimeSelector(discount){
-
-    //=====================START TIME =====================
-    let _pickStartTimeHour = discount.startTime.split(":")[0];
-    let _pickStartTimeMinute = discount.startTime.split(":")[1];
-
-    let _pickStartTimeAMPM : 'AM' | 'PM';
-    if ((<any>_pickStartTimeHour) > 12) {
-        _pickStartTimeAMPM = "PM";
-        (<any>_pickStartTimeHour) = (<any>_pickStartTimeHour) - 12;
-        (<any>_pickStartTimeHour) = (((<any>_pickStartTimeHour) < 10) ? '0' : '') + _pickStartTimeHour;    
-
-    } else {
-        _pickStartTimeAMPM = "AM";
+            });
     }
 
-    this.editOrderDiscountForm.get('step1.startTime').setValue(new TimeSelector(_pickStartTimeHour,_pickStartTimeMinute, _pickStartTimeAMPM));
-
-    //=====================/ START TIME =====================
-
-    //=====================END TIME =====================
-
-    let _pickEndTimeHour = discount.endTime.split(":")[0];
-    let _pickEndTimeMinute = discount.endTime.split(":")[1];
-
-    let _pickEndTimeAMPM : 'AM' | 'PM';
-    if (<any>_pickEndTimeHour > 12) {
-        _pickEndTimeAMPM = "PM";
-        (<any>_pickEndTimeHour) = (<any>_pickEndTimeHour) - 12;
-        (<any>_pickEndTimeHour) = (((<any>_pickEndTimeHour) < 10) ? '0' : '') + _pickEndTimeHour;    
-
-    } else {
-        _pickEndTimeAMPM = "AM";
-    }
-    
-    this.editOrderDiscountForm.get('step1.endTime').setValue(new TimeSelector(_pickEndTimeHour,_pickEndTimeMinute, _pickEndTimeAMPM));
-
-    //===================== / END TIME =====================
-    return;
-  }
-
-  ngOnDestroy(): void
-  {
-      // Unsubscribe from all subscriptions
-      this._unsubscribeAll.next();
-      this._unsubscribeAll.complete();
-  }
-
-  insertTierToDiscount(){
-
-    // check condition first before pass to backend
-    if(this.calculationType === 'PERCENT' && this.discountAmount>100){
-
+    deleteSelectedDiscountTier(discountTierId: string): void
+    {
+        // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title  : 'Exceed maximum amount discount percentage',
-            message: 'Please change your discount amount for percentage calculation type',
+            title  : 'Delete discount tier',
+            message: 'Are you sure you want to remove this discount tier? This action cannot be undone!',
             actions: {
                 confirm: {
-                    label: 'Ok'
-                },
-                cancel : {
-                    show : false,
+                    label: 'Delete'
                 }
             }
         });
 
-        return;
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+
+            // If the confirm button pressed...
+            if ( result === 'confirmed' )
+            {
+
+                // Delete the discount on the server
+                this._discountService.deleteDiscountTier(this.selectedDiscount.id, discountTierId).subscribe(() => {
+                    
+                    this.storeDiscountTierList = this.editOrderDiscountForm.get('step2') as FormArray;
+
+                    let index = (this.storeDiscountTierList.value.findIndex(x => x.id === discountTierId));
+
+                    // remove from discount tier list
+                    if (index > -1) {
+                        this.storeDiscountTierList.removeAt(index);
+                    }
+
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                });
+            }
+        });
     }
 
-    let discountTier: StoreDiscountTierList = {
-        calculationType: this.calculationType,
-        discountAmount: this.discountAmount,
-        startTotalSalesAmount: this.startTotalSalesAmount,
-    }
 
-    // Create the discount
-    this._discountService.createDiscountTier(this.selectedDiscount.id,discountTier)
-        .subscribe((response) => {
-            
-            this.storeDiscountTierList = this.editOrderDiscountForm.get('step2') as FormArray;
+    updateSelectedDiscountTier(discountTier){
 
-            // since backend give full discount tier list .. (not the only one that have been created only)
-            this.storeDiscountTierList.clear();
+        // check condition first before pass to backend
 
-            response["data"].forEach(item => {
-                this.storeDiscountTierList.push(this._formBuilder.group(item));
+        if(discountTier.value.calculationType === 'PERCENT' && discountTier.value.discountAmount>100){
+
+            const confirmation = this._fuseConfirmationService.open({
+                title  : 'Exceed maximum amount discount percentage',
+                message: 'Please change your discount amount for percentage calculation type',
+                actions: {
+                    confirm: {
+                        label: 'Ok'
+                    },
+                    cancel : {
+                        show : false,
+                    }
+                }
             });
+            this.storeDiscountTierListValueEditMode = [true];
 
-            //disable button add
-            this.isDisplayAddTier=false;
-            //clear the input
-            (<any>this.startTotalSalesAmount)='';
-            (<any>this.discountAmount)='';
-            this.calculationType='';
+            return;
+        }
 
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
-        }, (error) => {
+        // Update the discount on the server
+        this._discountService.updateDiscountTier(discountTier.value.storeDiscountId, discountTier.value).subscribe(() => {
+            // Show a success message
+            this.showFlashMessage('success');
+        }, error => {
             console.error(error);
             if (error.status === 417) {
                 // Open the confirmation dialog
@@ -385,212 +489,209 @@ export class EditOrderDiscountDialogComponent implements OnInit {
                 });
             }
         });
-  }
-
-  deleteSelectedDiscountTier(discountTierId: string): void
-  {
-      // Open the confirmation dialog
-      const confirmation = this._fuseConfirmationService.open({
-          title  : 'Delete discount tier',
-          message: 'Are you sure you want to remove this discount tier? This action cannot be undone!',
-          actions: {
-              confirm: {
-                  label: 'Delete'
-              }
-          }
-      });
-
-      // Subscribe to the confirmation dialog closed action
-      confirmation.afterClosed().subscribe((result) => {
-
-          // If the confirm button pressed...
-          if ( result === 'confirmed' )
-          {
-
-              // Delete the discount on the server
-              this._discountService.deleteDiscountTier(this.selectedDiscount.id, discountTierId).subscribe(() => {
-                  
-                  this.storeDiscountTierList = this.editOrderDiscountForm.get('step2') as FormArray;
-
-                  let index = (this.storeDiscountTierList.value.findIndex(x => x.id === discountTierId));
-
-                  // remove from discount tier list
-                  if (index > -1) {
-                      this.storeDiscountTierList.removeAt(index);
-                  }
-
-                  // Mark for check
-                  this._changeDetectorRef.markForCheck();
-              });
-          }
-      });
-  }
-
-
-  updateSelectedDiscountTier(discountTier){
-
-      // check condition first before pass to backend
-
-      if(discountTier.value.calculationType === 'PERCENT' && discountTier.value.discountAmount>100){
-
-          const confirmation = this._fuseConfirmationService.open({
-              title  : 'Exceed maximum amount discount percentage',
-              message: 'Please change your discount amount for percentage calculation type',
-              actions: {
-                  confirm: {
-                      label: 'Ok'
-                  },
-                  cancel : {
-                      show : false,
-                  }
-              }
-          });
-          this.storeDiscountTierListValueEditMode = [true];
-
-          return;
-      }
-
-      // Update the discount on the server
-      this._discountService.updateDiscountTier(discountTier.value.storeDiscountId, discountTier.value).subscribe(() => {
-          // Show a success message
-          this.showFlashMessage('success');
-      }, error => {
-          console.error(error);
-          if (error.status === 417) {
-              // Open the confirmation dialog
-              const confirmation = this._fuseConfirmationService.open({
-                  title  : 'Minimum subtotal overlap',
-                  message: 'Your minimum subtotal entered overlapping with existing amount! Please change your minimum subtotal',
-                  actions: {
-                      confirm: {
-                          label: 'Ok'
-                      },
-                      cancel : {
-                          show : false,
-                      }
-                  }
-              });
-          }
-      });
-  }
-
-  validateDiscountTier(type:string, value){
-    if (type === 'startTotalSalesAmount') {
-        this.startTotalSalesAmount = value;
     }
-    // if (type === 'endTotalSalesAmount') {
-    //     this.endTotalSalesAmount = value;
+
+    validateDiscountTier(type:string, value){
+        if (type === 'startTotalSalesAmount') {
+            this.startTotalSalesAmount = value;
+        }
+        // if (type === 'endTotalSalesAmount') {
+        //     this.endTotalSalesAmount = value;
+        // }
+        if (type === 'discountAmount') {
+            this.discountAmount = value;
+        }
+        if (type === 'calculationType') {
+            this.calculationType = value;
+        }
+
+        if(<any>this.startTotalSalesAmount === "" || <any>this.discountAmount === "" ){
+            this.isDisplayAddTier = false;
+        }
+        else if(this.startTotalSalesAmount !== undefined && this.discountAmount!==undefined && this.calculationType!==undefined){
+            this.isDisplayAddTier = true;
+        }
+
+    }
+
+    showFlashMessage(type: 'success' | 'error'): void
+    {
+        // Show the message
+        this.flashMessage = type;
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+
+        // Hide it after 3 seconds
+        setTimeout(() => {
+
+            this.flashMessage = null;
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        }, 3000);
+    }
+
+    // --------------------------------------
+    //          Date and Time Section
+    // --------------------------------------
+
+    setValueToTimeSelector(discount){
+
+        //=======================================================
+        //                      Start Time
+        //=======================================================
+        let _itemStartTimeHour = discount.startTime.split(":")[0];
+        if (discount.startTime.split(":")[0] > 12) {
+            _itemStartTimeHour = _itemStartTimeHour - 12;
+            _itemStartTimeHour = ((_itemStartTimeHour < 10) ? '0' : '') + _itemStartTimeHour;    
+        }                    
+
+        let _itemStartTimeMinute = discount.startTime.split(":")[1];
+
+        let _itemStartTimeAMPM : 'AM' | 'PM';
+        if (discount.startTime.split(":")[0] >= 12) {
+            _itemStartTimeAMPM = "PM";
+        } else {
+            _itemStartTimeAMPM = "AM";
+        }
+
+        this.editOrderDiscountForm.get('step1.startTime').setValue(new TimeSelector(_itemStartTimeHour,_itemStartTimeMinute, _itemStartTimeAMPM));        
+
+        //=======================================================
+        //                      End Time
+        //=======================================================
+        let _itemEndTimeHour = discount.endTime.split(":")[0];
+        if (discount.endTime.split(":")[0] > 12) {
+            _itemEndTimeHour = _itemEndTimeHour - 12;
+            _itemEndTimeHour = ((_itemEndTimeHour < 10) ? '0' : '') + _itemEndTimeHour;    
+        }
+
+        let _itemEndTimeMinute = discount.endTime.split(":")[1];
+
+        let _itemEndTimeAMPM : 'AM' | 'PM';
+        if (discount.endTime.split(":")[0] >= 12) {
+            _itemEndTimeAMPM = "PM";
+        } else {
+            _itemEndTimeAMPM = "AM";
+        }
+
+        this.editOrderDiscountForm.get('step1.endTime').setValue(new TimeSelector(_itemEndTimeHour,_itemEndTimeMinute, _itemEndTimeAMPM));
+        
+        return;
+    }
+
+    checkDateTime() {
+        // ==============================================================
+        //                     Start Date & Time
+        // ==============================================================
+
+        // Get startDate
+        let _startDate = this.editOrderDiscountForm.get('step1').get('startDate').value
+        // Get startTime
+        let startTime = this.editOrderDiscountForm.get('step1.startTime').value;
+        let _startTime;        
+
+        // Split start date format
+        var selectedStartDay = _startDate.split("-")[2];
+        var selectedStartMonth = _startDate.split("-")[1];
+        var selectedStartYear = _startDate.split("-")[0];
+
+
+        if (startTime.timeAmPm === "PM" && startTime.timeHour !== "12") {
+            _startTime = parseInt(startTime.timeHour) + 12;
+        } else if (startTime.timeAmPm === "AM" && startTime.timeHour === "12") {
+            _startTime = parseInt(startTime.timeHour) - 12;
+        } else {
+            _startTime = startTime.timeHour;
+        }
+
+        // Set new start date and time
+        const startDateTime = new Date();
+        startDateTime.setDate(selectedStartDay)
+        startDateTime.setMonth(selectedStartMonth - 1)
+        startDateTime.setFullYear(selectedStartYear)
+        startDateTime.setHours(_startTime,startTime.timeMinute,0)
+
+        this.changeStartTime = _startTime + ":" + startTime.timeMinute   
+
+        // ==============================================================
+        //                      End Date
+        // ==============================================================
+
+        // Get endDate
+        let _endDate = this.editOrderDiscountForm.get('step1').get('endDate').value
+        // Get endTime
+        let endTime = this.editOrderDiscountForm.get('step1.endTime').value;
+        let _endTime;
+
+        // Split end date format
+        var selectedEndDay = _endDate.split("-")[2];
+        var selectedEndMonth = _endDate.split("-")[1];
+        var selectedEndYear = _endDate.split("-")[0];
+
+        if (endTime.timeAmPm === "PM" && endTime.timeHour !== "12") {
+            _endTime = parseInt(endTime.timeHour) + 12;
+        } else if (endTime.timeAmPm === "AM" && endTime.timeHour === "12") {
+            _endTime = parseInt(endTime.timeHour) - 12;
+        } else {
+            _endTime = endTime.timeHour;
+        }
+
+        // Set new end date and time
+        const endDateTime = new Date();
+        endDateTime.setDate(selectedEndDay)
+        endDateTime.setMonth(selectedEndMonth - 1)
+        endDateTime.setFullYear(selectedEndYear)
+        endDateTime.setHours(_endTime,endTime.timeMinute,0)
+
+        this.changeEndTime = _endTime + ":" + endTime.timeMinute
+
+        // ==============================================================
+        //              Date and time range Display Error
+        // ==============================================================
+
+        if(startDateTime > endDateTime && _endDate !== ""){            
+            this.dateAlert ="Date and Time Range incorrect !" ;
+            this.disabledProceed = true;
+        } else if(endTime.timeMinute === "--" || _endTime === "--" || endTime.timeAmPm === "--"){
+            this.disabledProceed = true;
+        } else {
+            this.dateAlert = " " ;
+            this.disabledProceed = false;
+        }
+    }
+
+    // changeTime(){
+    //     //===========Start Time==================
+    //     let pickStartTime =this.editOrderDiscountForm.get('step1.startTime').value;
+    //     let _pickStartTime;
+
+    //     if ((<any>pickStartTime).timeAmPm === "PM") {
+    //         _pickStartTime = parseInt((<any>pickStartTime).timeHour) + 12;
+    //     } else {
+    //         _pickStartTime = (<any>pickStartTime).timeHour;
+    //     }
+    //     const changePickStartTime = new Date();
+    //     changePickStartTime.setHours(_pickStartTime,(<any>pickStartTime).timeMinute,0);
+        
+    //     this.changeStartTime= String(changePickStartTime.getHours()).padStart(2, "0")+':'+String(changePickStartTime.getMinutes()).padStart(2, "0");    
+        
+    //     //==============End time===================
+    //     let pickEndTime = this.editOrderDiscountForm.get('step1.endTime').value;
+    //     let _pickEndTime;
+
+    //     if ((<any>pickEndTime).timeAmPm === "PM") {
+    //         _pickEndTime = parseInt((<any>pickEndTime).timeHour) + 12;
+    //     } else {
+    //         _pickEndTime = (<any>pickEndTime).timeHour;
+    //     }
+    //     const changePickEndTime = new Date();
+    //     changePickEndTime.setHours(_pickEndTime,(<any>pickEndTime).timeMinute,0);
+        
+    //     this.changeEndTime= String(changePickEndTime.getHours()).padStart(2, "0")+':'+String(changePickEndTime.getMinutes()).padStart(2, "0");  
+        
+    //     return;
+    
     // }
-    if (type === 'discountAmount') {
-        this.discountAmount = value;
-    }
-    if (type === 'calculationType') {
-        this.calculationType = value;
-    }
-
-    if(<any>this.startTotalSalesAmount === "" || <any>this.discountAmount === "" ){
-        this.isDisplayAddTier = false;
-    }
-    else if(this.startTotalSalesAmount !== undefined && this.discountAmount!==undefined && this.calculationType!==undefined){
-        this.isDisplayAddTier = true;
-    }
-
-  }
-
-  showFlashMessage(type: 'success' | 'error'): void
-  {
-      // Show the message
-      this.flashMessage = type;
-
-      // Mark for check
-      this._changeDetectorRef.markForCheck();
-
-      // Hide it after 3 seconds
-      setTimeout(() => {
-
-          this.flashMessage = null;
-
-          // Mark for check
-          this._changeDetectorRef.markForCheck();
-      }, 3000);
-  }
-
-  changeTime(){
-    //===========Start Time==================
-    let pickStartTime =this.editOrderDiscountForm.get('step1.startTime').value;
-    let _pickStartTime;
-
-    if ((<any>pickStartTime).timeAmPm === "PM") {
-        _pickStartTime = parseInt((<any>pickStartTime).timeHour) + 12;
-    } else {
-        _pickStartTime = (<any>pickStartTime).timeHour;
-    }
-    const changePickStartTime = new Date();
-    changePickStartTime.setHours(_pickStartTime,(<any>pickStartTime).timeMinute,0);
-    
-    this.changeStartTime= String(changePickStartTime.getHours()).padStart(2, "0")+':'+String(changePickStartTime.getMinutes()).padStart(2, "0");    
-    
-    //==============End time===================
-    let pickEndTime = this.editOrderDiscountForm.get('step1.endTime').value;
-    let _pickEndTime;
-
-    if ((<any>pickEndTime).timeAmPm === "PM") {
-        _pickEndTime = parseInt((<any>pickEndTime).timeHour) + 12;
-    } else {
-        _pickEndTime = (<any>pickEndTime).timeHour;
-    }
-    const changePickEndTime = new Date();
-    changePickEndTime.setHours(_pickEndTime,(<any>pickEndTime).timeMinute,0);
-    
-    this.changeEndTime= String(changePickEndTime.getHours()).padStart(2, "0")+':'+String(changePickEndTime.getMinutes()).padStart(2, "0");  
-    
-    return;
-  
-  }
-
-  createButton(){
-    // this.createOrderDiscount.displayMessage();
-  }
-
-  deleteSelectedDiscount(): void
-  {
-      // Open the confirmation dialog
-      const confirmation = this._fuseConfirmationService.open({
-          title  : 'Delete discount',
-          message: 'Are you sure you want to remove this discount? This action cannot be undone!',
-          actions: {
-              confirm: {
-                  label: 'Delete'
-              }
-          }
-      });
-
-      // Subscribe to the confirmation dialog closed action
-      confirmation.afterClosed().subscribe((result) => {
-
-          // If the confirm button pressed...
-          if ( result === 'confirmed' )
-          {
-
-              // Get the discount object
-              const discount = this.editOrderDiscountForm.get('step1').value;
-
-              // Delete the discount on the server
-              this._discountService.deleteDiscount(discount.id).subscribe(() => {
-
-                // Set delay before closing the details window
-                setTimeout(() => {
-
-                    // close the window
-                    this.cancel();
-
-                    // Mark for check
-                    this._changeDetectorRef.markForCheck();
-                }, 1000);
-              });
-          }
-      });
-  }
-
-
 }

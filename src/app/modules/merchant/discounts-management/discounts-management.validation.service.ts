@@ -24,6 +24,7 @@ export class DiscountManagementValidationService {
         invalidDomain: 'Store URL should only contain alphanumeric and "-" character',
         domainAlreadyTaken: 'Sorry, the selected domain name is already taken',
         storeNameAlreadytaken:'Sorry, the selected name is already taken',
+        dateOverlapped:'Date selected is overlapped with existing date, please select another date',
         invalidPhonenumber: 'Invalid phonenumber',
         invalidPostcode: 'Invalid postcode',
         inavlidTime:'Invalid time format',
