@@ -771,6 +771,9 @@ export class AddProductComponent implements OnInit, OnDestroy
     {
         this.creatingProduct = true;
 
+        this.addProductForm.get('step1').get('images').patchValue(this.images);
+        this.addProductForm.get('step1').get('imagefiles').patchValue(this.imagesFile);
+
         // if the bulk item toggle stays close, then set to 'motorcycle'
         if (this.addProductForm.get('step1').get('isBulkItem').value === false){
             this.addProductForm.get('step1').get('vehicleType').setValue('MOTORCYCLE')
@@ -2173,15 +2176,20 @@ export class AddProductComponent implements OnInit, OnDestroy
 
     /**
      * 
-     * Check if the product name is already exists
+     * Check if the product name already exists
      * 
      * @param value 
      */
-    checkProductName(value: string){
+    async checkProductName(name: string){
+
+        // let status = await this._inventoryService.getExistingProductName(name);
+        // if (status === 409){
+        //     this.addProductForm.get('step1').get('name').setErrors({productAlreadyExists: true});
+        // }
         
-        if (this.allProducts.some(product => product.name === value.trim() )){
-            // if identical, set Error
-            this.addProductForm.get('step1').get('name').setErrors({productAlreadyExists: true});
-        }
+        // if (this.allProducts.some(product => product.name === value.trim() )){
+        //     // if identical, set Error
+        //     this.addProductForm.get('step1').get('name').setErrors({productAlreadyExists: true});
+        // }
     }
 }

@@ -168,6 +168,8 @@ export class EditProductComponent implements OnInit, OnDestroy
     productAssets$: ProductAssets[] = [];
     variantimages: any = [];
     productAssetsFA: FormArray;
+    imagesToBeDeleted: any = []; // images to be deleted from BE
+
 
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -500,14 +502,6 @@ export class EditProductComponent implements OnInit, OnDestroy
 
         // Fill the form
         this.addProductForm.get('step1').patchValue(product);
-
-        // Filter out current product from all products list
-        this.products$
-        .pipe(takeUntil(this._unsubscribeAll)) 
-        .subscribe(products => {
-
-            this.allProductsFiltered = products.filter(product => product.name !== this.addProductForm.get('step1').get('name').value)
-        })
 
         // Fill the form for SKU , Price & Quantity productInventories[0]
         // this because SKU , Price & Quantity migh have variants
@@ -1125,11 +1119,43 @@ export class EditProductComponent implements OnInit, OnDestroy
     removeImage(): void
     {
         const index = this.currentImageIndex;
-        if (index > -1) {
-            this.images.splice(index, 1);
-            this.imagesFile.splice(index, 1);
-            this.currentImageIndex = 0;
+
+        if (index === this.thumbnailIndex){
+
+            this._fuseConfirmationService.open({
+            title  : 'Reminder',
+            message: 'You cannot delete a thumbnail image.',
+            icon       : {
+                show : true,
+                name : 'heroicons_outline:exclamation',
+                color: 'warning'
+            },
+            actions: {
+                
+                cancel: {
+                    label: 'OK',
+                    show: true
+                    },
+                confirm: {
+                    show: false,
+                }
+                }
+            });
+
         }
+        else {
+            
+            if (index > -1) {
+                this.images.splice(index, 1);
+                this.imagesFile.splice(index, 1);
+                this.currentImageIndex = 0;
+                if (this.addProductForm.get('step1').get('productAssets').value[index]) {
+                    
+                    this.imagesToBeDeleted.push({id: this.addProductForm.get('step1').get('productAssets').value[index].id, index: index})
+                }
+            }
+        }
+        
     }
 
     /**
@@ -1212,7 +1238,6 @@ export class EditProductComponent implements OnInit, OnDestroy
         // Get the product object for updating the product
         const { productAssets, productInventories, productReviews, productVariants, ...productToUpdate} = product;
         
-        // return;
         // Update the product on the server
         await this._inventoryService.updateProduct(this.selectedProduct.id, productToUpdate)
         .pipe(takeUntil(this._unsubscribeAll))
@@ -1353,7 +1378,9 @@ export class EditProductComponent implements OnInit, OnDestroy
                     let expression = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
                     let regex = new RegExp(expression);
                     let iteration = 0;// this iteration used by new product added to existing old product (not update tau)
+                    
                     this.addProductForm.get('step1').get('productAssets').value.forEach((item, i) => {
+                    // this.images.forEach((item, i) => {
                         let assetIndex = product.productAssets.findIndex(element => element.id === item.id)                        
                         
                         let _thumbnailIndex = product.productAssets.findIndex(element => element.isThumbnail === true)
@@ -1394,18 +1421,22 @@ export class EditProductComponent implements OnInit, OnDestroy
                                 });
         
         
-                            } else if (i === this.thumbnailIndex) { // this mean thumbnail index change, diffent from backend
-                                // update the image (only thumbnail)
-                                let updateItemIndex = item;
-                                updateItemIndex.isThumbnail = true;
-        
-                                this._inventoryService.updateProductAssets(this.selectedProduct.id, updateItemIndex, item.id)
-                                    .pipe(takeUntil(this._unsubscribeAll))
-                                    .subscribe((response)=>{
-                                        // Mark for check
-                                        this._changeDetectorRef.markForCheck();
-                                    });
-                            } else {
+                            } else if (i === this.thumbnailIndex)
+                            
+                                { // this mean thumbnail index change, diffent from backend
+                                    // update the image (only thumbnail)
+                                    let updateItemIndex = item;
+                                    updateItemIndex.isThumbnail = true;
+            
+                                    this._inventoryService.updateProductAssets(this.selectedProduct.id, updateItemIndex, item.id)
+                                        .pipe(takeUntil(this._unsubscribeAll))
+                                        .subscribe((response)=>{
+                                            // Mark for check
+                                            this._changeDetectorRef.markForCheck();
+                                        });
+
+                                } 
+                            else {
                                 
                             }
                         } else {
@@ -1418,7 +1449,7 @@ export class EditProductComponent implements OnInit, OnDestroy
         
                             let formData = new FormData();
                             formData.append('file',this.imagesFile[i]);
-        
+
                             this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false }, i)
                                 .pipe(takeUntil(this._unsubscribeAll))
                                 .subscribe((addResponse)=>{
@@ -1440,6 +1471,24 @@ export class EditProductComponent implements OnInit, OnDestroy
                                 });
                         }
                     })
+
+                    // if new images added and got old one as well 
+                    this.imagesFile.forEach((item, i )=> {
+                        
+                        if (item){
+                            let formData = new FormData();
+                            formData.append('file',this.imagesFile[i]);
+                            this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
+                                .pipe(takeUntil(this._unsubscribeAll))
+                                .subscribe((response)=>{
+
+                                    this.addProductForm.get('step1').get('productAssets').value[i] = response;
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                });
+                            }
+                    })
+
                 } 
                 else {
                     for (let i = 0; i < this.imagesFile.length; i++) {
@@ -1456,6 +1505,8 @@ export class EditProductComponent implements OnInit, OnDestroy
                             });
                     }
                 }
+
+                
             }
             // Show a success message
             this.showFlashMessage('success');
@@ -1475,6 +1526,16 @@ export class EditProductComponent implements OnInit, OnDestroy
 
         });
 
+        // Delete main product images
+        for (let i = 0; i < this.imagesToBeDeleted.length; i++) {
+            
+            await this._inventoryService.deleteProductAssets(this.selectedProduct.id, this.imagesToBeDeleted[i].id).toPromise().then(data => {
+
+                this.thumbnailIndex
+                this._changeDetectorRef.markForCheck();
+            });
+        }
+
 
         // DELETE VARIANT IMAGES
         for (let i = 0; i < this.variantImagesToBeDeleted.length; i++) {
@@ -1485,6 +1546,7 @@ export class EditProductComponent implements OnInit, OnDestroy
 
         // set the array to null
         this.variantImagesToBeDeleted = [];
+        this.imagesToBeDeleted = [];
 
 
         // CREATE VARIANT IMAGES
@@ -1513,112 +1575,112 @@ export class EditProductComponent implements OnInit, OnDestroy
     }
 
 
-    async postVariantMethod(){
+    // async postVariantMethod(){
         
-        // if it is variants
-        if (this.addProductForm.get('step1').get('isVariants').value === true) {
+    //     // if it is variants
+    //     if (this.addProductForm.get('step1').get('isVariants').value === true) {
 
-            // DELETE ENTIRE INVENTORY
-            await this.deleteEntireInventory()
+    //         // DELETE ENTIRE INVENTORY
+    //         await this.deleteEntireInventory()
                     
-            // INVENTORY
-            if (this.selectedVariantCombos.length > 0){
-                for (var i = 0; i < this.selectedVariantCombos.length; i++) {
+    //         // INVENTORY
+    //         if (this.selectedVariantCombos.length > 0){
+    //             for (var i = 0; i < this.selectedVariantCombos.length; i++) {
             
-                    // }
-                    const body = {
-                        // itemCode: this.selectedProduct.id + "-" + i,
-                        itemCode: this.selectedProduct.id + i,
-                        price: this.selectedVariantCombos[i].price,
-                        compareAtPrice: 0,
-                        quantity: this.selectedVariantCombos[i].quantity,
-                        sku: this.selectedVariantCombos[i].sku,
-                        status: this.selectedVariantCombos[i].status
-                    }
+    //                 // }
+    //                 const body = {
+    //                     // itemCode: this.selectedProduct.id + "-" + i,
+    //                     itemCode: this.selectedProduct.id + i,
+    //                     price: this.selectedVariantCombos[i].price,
+    //                     compareAtPrice: 0,
+    //                     quantity: this.selectedVariantCombos[i].quantity,
+    //                     sku: this.selectedVariantCombos[i].sku,
+    //                     status: this.selectedVariantCombos[i].status
+    //                 }
     
-                    await this._inventoryService.addInventoryToProduct(this.selectedProduct, body).toPromise()
-                    .then((response)=>{
+    //                 await this._inventoryService.addInventoryToProduct(this.selectedProduct, body).toPromise()
+    //                 .then((response)=>{
     
-                    });
-                }
+    //                 });
+    //             }
                 
-            }
+    //         }
     
     
-            // create new variants
-            const variantIds = await this.createVariantInBE()
+    //         // create new variants
+    //         const variantIds = await this.createVariantInBE()
     
-            let variantAvailablesCreated = [];
-            // if got new variant availables, pass the variantIds from the createVariant endpoint
-            if (this.variantAvailableToBeCreated.length > 0){
+    //         let variantAvailablesCreated = [];
+    //         // if got new variant availables, pass the variantIds from the createVariant endpoint
+    //         if (this.variantAvailableToBeCreated.length > 0){
                 
-                variantAvailablesCreated = await this.createVariantAvailableInBE(variantIds);
+    //             variantAvailablesCreated = await this.createVariantAvailableInBE(variantIds);
     
                 
-            }
-            else {
+    //         }
+    //         else {
     
-                await this._inventoryService.getVariantAvailable(this.selectedProduct.id).then((response) => {
+    //             await this._inventoryService.getVariantAvailable(this.selectedProduct.id).then((response) => {
     
-                    variantAvailablesCreated = response;
+    //                 variantAvailablesCreated = response;
                     
-                })
+    //             })
     
-            }
+    //         }
     
-            await this.addInventoryItem(variantAvailablesCreated);
+    //         await this.addInventoryItem(variantAvailablesCreated);
 
-            // CREATE VARIANT IMAGES
-            for (let i = 0; i < this.selectedVariantCombos.length; i++) {
+    //         // CREATE VARIANT IMAGES
+    //         for (let i = 0; i < this.selectedVariantCombos.length; i++) {
                 
-                // if new, create new asset
-                if (this.selectedVariantCombos[i].newAsset == true) {
+    //             // if new, create new asset
+    //             if (this.selectedVariantCombos[i].newAsset == true) {
                 
-                    let formdata = new FormData();
-                    formdata.append("file", this.selectedVariantCombos[i].file);
-                    await this._inventoryService.addProductAssets(this.selectedProduct.id, formdata, (i === this.thumbnailIndex) ? { isThumbnail: true , itemCode: this.selectedProduct.id + i } : { isThumbnail: false, itemCode: this.selectedProduct.id + i }, i)
-                    .toPromise().then(data => {
-                        this._changeDetectorRef.markForCheck();
-                        // Show a success message
-                        this.showFlashMessage('success');
-                        // Set delay before closing the window
-                        setTimeout(() => {
+    //                 let formdata = new FormData();
+    //                 formdata.append("file", this.selectedVariantCombos[i].file);
+    //                 await this._inventoryService.addProductAssets(this.selectedProduct.id, formdata, (i === this.thumbnailIndex) ? { isThumbnail: true , itemCode: this.selectedProduct.id + i } : { isThumbnail: false, itemCode: this.selectedProduct.id + i }, i)
+    //                 .toPromise().then(data => {
+    //                     this._changeDetectorRef.markForCheck();
+    //                     // Show a success message
+    //                     this.showFlashMessage('success');
+    //                     // Set delay before closing the window
+    //                     setTimeout(() => {
 
-                            // close the window
-                            this.cancelAddProduct()
+    //                         // close the window
+    //                         this.cancelAddProduct()
                 
-                            // Mark for check
-                            this._changeDetectorRef.markForCheck();
-                        }, 1000);
+    //                         // Mark for check
+    //                         this._changeDetectorRef.markForCheck();
+    //                     }, 1000);
 
-                    });
-                }
-                // if it is an old one, update it (update thumbnail)
-                else if ((i === this.thumbnailIndex) && (this.selectedVariantCombos[i].newAsset == false) && (this.selectedVariantCombos[i].file != '')) {
-                    await this._inventoryService.updateProductAssets(this.selectedProduct.id, { isThumbnail: true , itemCode: this.selectedProduct.id + i }, this.selectedVariantCombos[i].assetId)
-                    .toPromise().then(data => {
-                    // Mark for check
-                    this._changeDetectorRef.markForCheck();
-                    });
-                }
-            }
+    //                 });
+    //             }
+    //             // if it is an old one, update it (update thumbnail)
+    //             else if ((i === this.thumbnailIndex) && (this.selectedVariantCombos[i].newAsset == false) && (this.selectedVariantCombos[i].file != '')) {
+    //                 await this._inventoryService.updateProductAssets(this.selectedProduct.id, { isThumbnail: true , itemCode: this.selectedProduct.id + i }, this.selectedVariantCombos[i].assetId)
+    //                 .toPromise().then(data => {
+    //                 // Mark for check
+    //                 this._changeDetectorRef.markForCheck();
+    //                 });
+    //             }
+    //         }
     
-        }
-        // else means combo
-        else {
-            // Show a success message
-            this.showFlashMessage('success');
-            // Set delay before closing the window
-            setTimeout(() => {
+    //     }
+    //     // else means combo
+    //     else {
+    //         // Show a success message
+    //         this.showFlashMessage('success');
+    //         // Set delay before closing the window
+    //         setTimeout(() => {
     
-                // close the window
-                this.cancelAddProduct()
+    //             // close the window
+    //             this.cancelAddProduct()
     
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            }, 1000);
-        }
-    }
+    //             // Mark for check
+    //             this._changeDetectorRef.markForCheck();
+    //         }, 1000);
+    //     }
+    // }
 
     /**
      * Create variant
@@ -2895,12 +2957,19 @@ export class EditProductComponent implements OnInit, OnDestroy
      * 
      * @param value 
      */
-    checkProductName(value: string){
-    
-        if (this.allProductsFiltered.some(product => product.name === value.trim() )){
-            // if identical, set Error
-            this.addProductForm.get('step1').get('name').setErrors({productAlreadyExists: true});
-        }
+    async checkProductName(name: string){
+
+
+       
+        // Check if the entered name is identical to the original name
+        // if (name.trim() !== this.selectedProduct.name.trim()){
+
+        //     let status = await this._inventoryService.getExistingProductName(name);
+        //     if (status === 409){
+        //         this.addProductForm.get('step1').get('name').setErrors({productAlreadyExists: true});
+        //     }
+        // }
+
     }
 
     
