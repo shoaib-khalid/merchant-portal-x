@@ -95,7 +95,8 @@ export class OrderDetailsComponent implements OnInit
         // discount            : [0],
         storeServiceCharges : [0],
         deliveryCharges     : [0],
-        deliveryDiscount    : [0],      
+        deliveryDiscount    : [0], 
+        deliveryType  : [''],     
         deliveryDiscountDescription: [0],
         total               : [0],
         discountCalculationValue: [0],
@@ -115,7 +116,13 @@ export class OrderDetailsComponent implements OnInit
         deliveryDiscountMaxAmount : [],
         customerNotes: [''], //order level
         paymentType: [''],
-        completionStatus: ['']
+        completionStatus: [''],
+        deliveryPeriodDetails:this._formBuilder.group({
+          id: [''],
+          name: [''],
+          description: [''],
+        })
+        
       });
   
       this._storesService.store$
@@ -134,6 +141,8 @@ export class OrderDetailsComponent implements OnInit
         this._ordersService.getOrderById(this.orderId)
           .pipe(takeUntil(this._unsubscribeAll))
           .subscribe((order: Order) => {
+
+            console.log('check data',order['data']);
     
               // Update the pagination
               this.order = order["data"];
@@ -216,6 +225,20 @@ export class OrderDetailsComponent implements OnInit
   
               this.detailsForm.get('invoiceCreatedDate').setValue(this.dateCreated);
               this.detailsForm.get('invoiceUpdatedDate').setValue(this.dateUpdated);
+
+              this.detailsForm.patchValue(
+                { 
+                  deliveryPeriodDetails : { 
+                                  id        : order["data"].orderShipmentDetail.deliveryPeriodDetails?.id? order["data"].orderShipmentDetail.deliveryPeriodDetails.id : '',
+                                  description : order["data"].orderShipmentDetail.deliveryPeriodDetails?.description? order["data"].orderShipmentDetail.deliveryPeriodDetails.description : '',   
+                                  name : order["data"].orderShipmentDetail.deliveryPeriodDetails?.name? order["data"].orderShipmentDetail.deliveryPeriodDetails.name : '',
+                                   
+                                 }
+                })
+  
+
+              console.log("check formmmmm",this.detailsForm.value);
+              
   
   
               // Mark for check

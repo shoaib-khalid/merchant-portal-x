@@ -369,6 +369,7 @@
                                     <th
                                         class="w-22 p-0"
                                         mat-header-cell
+                                        [style.display]="'none'"
                                         mat-sort-header
                                         *matHeaderCellDef>
                                         Delivery Type
@@ -376,12 +377,38 @@
                                     <td
                                         class="cell-style-small"
                                         mat-cell
+                                        [style.display]="'none'"
                                         *matCellDef="let transaction">
                                         <span *ngIf="store" 
                                               class="inline-flex items-center font-bold text-xs px-2.5 py-0.5 rounded-full tracking-wide uppercase"
                                               [ngClass]="{'bg-green-200 text-green-800 dark:bg-green-600 dark:text-green-50': transaction.order.deliveryType === 'SCHEDULED',
                                                           'bg-blue-200 text-blue-800 dark:bg-blue-600 dark:text-blue-50': transaction.order.deliveryType === 'ADHOC'}">
                                             {{ transaction.order.deliveryType }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Delivery Service -->
+                                <ng-container matColumnDef="deliveryService">
+                                    <th
+                                        class="w-22 p-0"
+                                        mat-header-cell
+                                        mat-sort-header
+                                        *matHeaderCellDef>
+                                        Delivery Service
+                                    </th>
+                                    <td
+                                        class="cell-style-small"
+                                        mat-cell
+                                        *matCellDef="let transaction">
+                                        <span *ngIf="store" 
+                                                class="inline-flex items-center font-bold text-xs px-2.5 py-0.5 rounded-full tracking-wide uppercase"
+                                                [ngClass]="transaction.order.orderShipmentDetail.deliveryPeriodDetails?.id === 'EXPRESS' ? 'bg-green-200 text-green-800 dark:bg-green-600 dark:text-green-50'
+                                                : transaction.order.orderShipmentDetail.deliveryPeriodDetails?.id === 'FOURDAYS' ? 'bg-blue-200 text-blue-800 dark:bg-blue-600 dark:text-blue-50' 
+                                                : transaction.order.orderShipmentDetail.deliveryPeriodDetails?.id === 'FOURHOURS' ? 'bg-purple-200 text-purple-800 dark:bg-purple-600 dark:text-purple-50' 
+                                                : transaction.order.orderShipmentDetail.deliveryPeriodDetails?.id === 'NEXTDAY' ? 'bg-yellow-200 text-yellow-800 dark:bg-yellow-600 dark:text-yellow-50' 
+                                                : ''"   >
+                                            {{ transaction.order.orderShipmentDetail.deliveryPeriodDetails?transaction.order.orderShipmentDetail.deliveryPeriodDetails.name:' ' }}
                                         </span>
                                     </td>
                                 </ng-container>

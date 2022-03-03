@@ -91,7 +91,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     orderSubmitted: any = [];
     bulkOrderSubmitted: boolean = false;
 
-    recentTransactionsTableColumns: string[] = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'deliveryType', 'deliveryProvider', 'pickup', 'action'];
+    recentTransactionsTableColumns: string[] = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total','deliveryType','deliveryService', 'deliveryProvider', 'pickup', 'action'];
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     loading: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -398,9 +398,9 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
 
         let currentOpenTab = displayStatuses;
         if (displayStatuses === "PROCESS") {
-            this.recentTransactionsTableColumns = ['bulkId', 'invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'deliveryType', 'deliveryProvider', 'pickup', 'action'];
+            this.recentTransactionsTableColumns = ['bulkId', 'invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'deliveryType', 'deliveryService', 'deliveryProvider', 'pickup', 'action'];
         } else if (displayStatuses !== "HISTORY") {
-            this.recentTransactionsTableColumns = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'deliveryType', 'deliveryProvider', 'pickup', 'action'];
+            this.recentTransactionsTableColumns = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'deliveryType','deliveryService', 'deliveryProvider', 'pickup', 'action'];
         }  else {
             this.recentTransactionsTableColumns = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'completionStatus', 'pickup', 'action'];
         }

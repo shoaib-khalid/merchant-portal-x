@@ -24,33 +24,51 @@
                 <!-- Spacer -->
                 <div class="col-span-12 mt-3"></div>
 
-                <!-- Completion Status -->
+                <!-- Status Details -->
+
                 <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-                    <div class="border-t border-gray-200">
-                        <dl>
-                            <div class="bg-white px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
-                            <dt class="text-base font-medium text-gray-900">
-                                Completion Status
-                            </dt>
-                            <dd 
-                            [ngClass]="{'text-green-400 dark:text-green-50': detailsForm.get('completionStatus').value === 'PAYMENT_CONFIRMED',
-                            'text-yellow-400 dark:text-yellow-50': detailsForm.get('completionStatus').value === 'BEING_PREPARED',
-                            'text-orange-400 dark:text-orange-50': detailsForm.get('completionStatus').value === 'AWAITING_PICKUP',
-                            'text-purple-400 dark:text-purple-50': detailsForm.get('completionStatus').value === 'BEING_DELIVERED',
-                            'text-red-400 dark:text-red-50': detailsForm.get('completionStatus').value === 'CANCELED_BY_MERCHANT',
-                            'text-blue-400 dark:text-blue-50': detailsForm.get('completionStatus').value === 'DELIVERED_TO_CUSTOMER'}"
-                            class="mt-1 text-sm self-center text-gray-900 sm:mt-0 sm:col-span-2">
-                                {{ detailsForm.get('completionStatus').value }}
-                            </dd>
-                            </div>
-                            
-                        </dl>
+                    <div class="px-4 py-1.5 ">
+                    <h3 class="text-base leading-6 font-medium text-gray-900">
+                        Status Details
+                    </h3>
+                    <!-- <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                        Personal details and application.
+                    </p> -->
                     </div>
-                    
+                    <div class="border-t border-gray-200">
+                    <dl>
+                        <div class="bg-gray-50 px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Completion Status
+                        </dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                            {{ detailsForm.get('completionStatus').value }}
+                        </dd>
+                        </div>
+                        <div class="bg-white px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Delivery Type
+                        </dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                            {{ detailsForm.get('deliveryType').value }}
+                        </dd>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Delivery Service
+                        </dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                            {{ detailsForm.get('deliveryPeriodDetails').value.name }}
+                        </dd>
+                        </div>
+                    </dl>
+                    </div>
                 </div>
 
                 <!-- Spacer -->
                 <div class="col-span-12 mt-3"></div>
+
+
 
                 <!-- Customer Details -->
 
