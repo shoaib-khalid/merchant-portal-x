@@ -132,6 +132,9 @@ export class StoreDeliveryComponent implements OnInit
                         // filter delivery fulfilment aka delivery period
                         this.deliveryPartnerTypes = [ ...new Set(this.deliveryPartners.map(item => item.fulfilment))];
                         
+                        // Set deliveryPeriods
+                        this.deliveryPeriods = this.storeDeliveryForm.get('deliveryPeriods').get('values') as FormArray;
+
                         // check changes
                         this.checkDeliveryPartner();
                         
@@ -140,34 +143,36 @@ export class StoreDeliveryComponent implements OnInit
                         // -------------------------------------
 
                         this._storesService.getDeliveryPeriod(this.storeId)
-                        .subscribe((response: StoreDeliveryPeriod[]) => {
-                            this._deliveryPeriods = response;
+                            .subscribe((response: StoreDeliveryPeriod[]) => {
+                                this._deliveryPeriods = response;
                             
-                            
-                            this._deliveryPeriods.forEach(item => {
+                                this._deliveryPeriods.forEach(item => {
 
-                                // find delivery provider for each delviery period
-                                let deliveryPartners = this.deliveryPartners.map(element => { 
-                                    if (element.fulfilment === item.deliveryPeriod) {
-                                        return element;
-                                    } else {
-                                        return null;
-                                    }
+                                    // find delivery provider for each delviery period
+                                    let deliveryPartners = this.deliveryPartners.map(element => { 
+                                        if (element.fulfilment === item.deliveryPeriod) {
+                                            return element;
+                                        } else {
+                                            return null;
+                                        }
+                                    });
+
+                                    // remove undefined
+                                    // deliveryPartners.filter(n => n);
+                                    
+                                    let _deliveryProviders = this._formBuilder.array(deliveryPartners.filter(n => n));
+                        
+                                    // set empty array for each delivery period of deliveryProviders
+                                    Object.assign(item, { deliveryProviders: _deliveryProviders });
+
+                                    // this.deliveryPeriods = this.storeDeliveryForm.get('deliveryPeriods').get('values') as FormArray;
+                                    
+                                    // attacted delivery provider to delivery period
+                                    this.deliveryPeriods.push(this._formBuilder.group(item));
+
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
                                 });
-
-                                // remove undefined
-                                // deliveryPartners.filter(n => n);
-                                
-                                let _deliveryProviders = this._formBuilder.array(deliveryPartners.filter(n => n));
-                    
-                                // set empty array for each delivery period of deliveryProviders
-                                Object.assign(item, { deliveryProviders: _deliveryProviders });
-
-                                this.deliveryPeriods = this.storeDeliveryForm.get('deliveryPeriods').get('values') as FormArray;
-                                
-                                // attacted delivery provider to delivery period
-                                this.deliveryPeriods.push(this._formBuilder.group(item));
-                            });
                             
                             // Mark for check
                             this._changeDetectorRef.markForCheck();
