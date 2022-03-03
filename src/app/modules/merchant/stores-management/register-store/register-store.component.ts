@@ -176,8 +176,8 @@ export class RegisterStoreComponent implements OnInit
 
                 // Delivery Provider
                 deliveryType             : ['', Validators.required],
-                // Delivery Partner
-                deliveryPartner          : ['', Validators.required],
+                // Delivery deliverySpType for adhoc
+                deliverySpType          : ['', Validators.required],
                 // Allowed Self Delivery States
                 allowedSelfDeliveryStates: this._formBuilder.array([]),
                 // Delivery Periods
@@ -285,7 +285,7 @@ export class RegisterStoreComponent implements OnInit
                         (response: StoreDeliveryProvider[]) => {
                             // reset this.deliveryPartners first to initial state
                             this.deliveryPartners = [];
-                            this.deliveryPartners = response;
+                            this.deliveryPartners = response;                            
 
                             // filter delivery fulfilment aka delivery period
                             this.deliveryPartnerTypes = [ ...new Set(this.deliveryPartners.map(item => item.fulfilment))];
@@ -710,7 +710,7 @@ export class RegisterStoreComponent implements OnInit
         const deliveryType = this.createStoreForm.get('step3').get('deliveryType').value;
         const allowStorePickup = this.createStoreForm.get('step3').get('allowStorePickup').value;
         const allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates').value;
-        const deliveryPartner = this.createStoreForm.get('step3').get('deliveryPartner').value;        
+        const deliverySpType = this.createStoreForm.get('step3').get('deliverySpType').value;        
 
         // add domain when sending to backend.. at frontend form call it subdomain
         createStoreBody["domain"] =  this.createStoreForm.get('step1').get('subdomain').value + this.domainName;
@@ -1034,12 +1034,12 @@ export class RegisterStoreComponent implements OnInit
                 // Provision ADHOC 
                 // ---------------------------
 
-                if (deliveryType === "ADHOC") {
+                if (deliveryType === "ADHOC") {                    
 
-                    let index = this.deliveryPartners.findIndex(item => item.id === deliveryPartner);
+                    let index = this.deliveryPartners.findIndex(item => item.id === deliverySpType + "");
 
                     if (index > -1){
-                        this._storesService.postStoreRegionCountryDeliveryProvider(this.storeId, this.deliveryPartners[index].deliverySpId, this.deliveryPartners[index].fulfilment)
+                        this._storesService.postStoreRegionCountryDeliveryProvider(this.storeId, this.deliveryPartners[index].deliverySpId, this.deliveryPartners[index].fulfilment, this.deliveryPartners[index].id)
                             .subscribe((response) => {
                                 
                             });
@@ -1188,8 +1188,8 @@ export class RegisterStoreComponent implements OnInit
 
     checkDeliveryPartner(){
         // on every change set error to false first (reset state)
-        if (this.createStoreForm.get('step3').get('deliveryType').errors || this.createStoreForm.get('step3').get('deliveryPartner').errors){
-            this.createStoreForm.get('step3').get('deliveryPartner').setErrors(null);
+        if (this.createStoreForm.get('step3').get('deliveryType').errors || this.createStoreForm.get('step3').get('deliverySpType').errors){
+            this.createStoreForm.get('step3').get('deliverySpType').setErrors(null);
         }
 
         // ------------------------------------------------------------
