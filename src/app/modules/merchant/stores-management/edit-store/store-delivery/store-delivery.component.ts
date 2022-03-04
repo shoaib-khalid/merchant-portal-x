@@ -28,7 +28,6 @@ export class StoreDeliveryComponent implements OnInit
     deliveryFulfilment: any;
     deliveryPartners: StoreDeliveryProvider[] = [];
     deliveryPartnerTypes: any = [];
-    hasDeliveryPartnerError: boolean = true;
         
     _allowedSelfDeliveryStates: any = [];
     allowedSelfDeliveryStates: FormArray;
@@ -168,7 +167,10 @@ export class StoreDeliveryComponent implements OnInit
                                     // this.deliveryPeriods = this.storeDeliveryForm.get('deliveryPeriods').get('values') as FormArray;
                                     
                                     // attacted delivery provider to delivery period
-                                    this.deliveryPeriods.push(this._formBuilder.group(item));                                    
+                                    this.deliveryPeriods.push(this._formBuilder.group(item));
+                                    
+                                    // Set validation of deliveryPeriods to some null to initially set required value
+                                    this.storeDeliveryForm.get('deliveryPeriods').get('validation').patchValue("value-detected");
 
                                     // Mark for check
                                     this._changeDetectorRef.markForCheck();
@@ -236,8 +238,12 @@ export class StoreDeliveryComponent implements OnInit
                             ];
                         }
 
+                        this.allowedSelfDeliveryStates = this.storeDeliveryForm.get('allowedSelfDeliveryStates') as FormArray;
+
+                        // since backend give full discount tier list .. (not the only one that have been created only)
+                        this.allowedSelfDeliveryStates.clear();
+
                         this._allowedSelfDeliveryStates.forEach(item => {
-                            this.allowedSelfDeliveryStates = this.storeDeliveryForm.get('allowedSelfDeliveryStates') as FormArray;
                             this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
                         });                        
 
@@ -295,37 +301,60 @@ export class StoreDeliveryComponent implements OnInit
         
         // on every change set error to false first (reset state)
         if (this.storeDeliveryForm.get('deliveryType').errors || this.storeDeliveryForm.get('deliverySpType').errors){
-            this.hasDeliveryPartnerError = false; 
+            this.storeDeliveryForm.get('deliverySpType').setErrors(null);
         }
         
         // -----------------------------------
         // reset allowedSelfDeliveryStates if user change delivery type
         // -----------------------------------
         
-        if (this.storeDeliveryForm.get('deliveryType').value === "SELF") {
-            
+        // ADHOC || SCHEDULED
+        if (this.storeDeliveryForm.get('deliveryType').value === "ADHOC" || this.storeDeliveryForm.get('deliveryType').value === "SCHEDULED") {
+
             // push to allowedSelfDeliveryStates (form)
             this.allowedSelfDeliveryStates = this.storeDeliveryForm.get('allowedSelfDeliveryStates') as FormArray;
-            // since backend give full discount tier list .. (not the only one that have been edited only)
+            // since backend give full discount tier list .. (not the only one that have been created only)
             this.allowedSelfDeliveryStates.clear();
-   
-            this.deliveryPeriods['controls'].forEach(item => {
-                
-                item['controls'].enabled.patchValue(false);                
-            });            
-
+            
             // re populate items
             this._allowedSelfDeliveryStates.forEach(item => {
                 this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
             });
-        }
-        
-        // then check it again and set if there's an error
-        if (this.deliveryPartners.length < 1 && this.storeDeliveryForm.get('deliveryType').value !== "SELF"){
-            this.storeDeliveryForm.get('deliveryType').setErrors({noDeliveryPartners: true});
-        }
 
+            if (this.storeDeliveryForm.get('deliveryType').value === "SCHEDULED") {
+                // Set validation of deliveryPeriods to some null to initially set required value
+                this.storeDeliveryForm.get('deliveryPeriods').get('validation').patchValue("");
+            }
+
+        } else {
+
+            // SELF
+            // push to allowedSelfDeliveryStates (form)
+            this.allowedSelfDeliveryStates = this.storeDeliveryForm.get('allowedSelfDeliveryStates') as FormArray;
+            // since backend give full discount tier list .. (not the only one that have been created only)
+            this.allowedSelfDeliveryStates.clear();
+            
+            this._allowedSelfDeliveryStates.forEach(item => {
+                this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
+            });
+
+            let deliveryPeriods = this.storeDeliveryForm.get('deliveryPeriods').get('values') as FormArray;
+            
+            deliveryPeriods['controls'].forEach(item => {
+                item['controls'].enabled.patchValue(false);                
+            }); 
+            
+            // Set validation of deliveryPeriods to some value to disable required value
+            this.storeDeliveryForm.get('deliveryPeriods').get('validation').patchValue("not required");
+        }
+                
+        // check for ADHOC
         if (this.storeDeliveryForm.get('deliveryType').value === "ADHOC") {
+
+            if (this.deliveryPartners.length < 1) {
+                this.storeDeliveryForm.get('deliveryType').setErrors({noDeliveryPartners: true});
+            }
+
             if (!this.storeDeliveryForm.get('deliverySpType').value) {
                 this.storeDeliveryForm.get('deliverySpType').setErrors({required:true});
             }
@@ -333,6 +362,7 @@ export class StoreDeliveryComponent implements OnInit
 
         }
 
+        // check for SCHEDULED
         if (this.storeDeliveryForm.get('deliveryType').value === "SCHEDULED") {
             // Set validation of deliveryPeriods to some null to initially set required value
             this.storeDeliveryForm.get('deliveryPeriods').get('validation').patchValue("");
@@ -405,17 +435,30 @@ export class StoreDeliveryComponent implements OnInit
     updateStoreDelivery(): void
     {
 
-        if(this.hasDeliveryPartnerError === false) {
-            this.storeDeliveryForm.get('deliverySpType').setErrors(null);
-        }
-
         // this will remove the item from the object
         const { allowedSelfDeliveryStates, allowStorePickup, deliveryPeriods,
-            deliveryType, deliverySpType, storeTiming, ...storeDeliveryBody } = this.storeDeliveryForm.value;
+                address, city, postcode, regionCountryStateId, regionCountryId,
+                deliveryType, deliverySpType, storeTiming, ...storeDeliveryBody } = this.storeDeliveryForm.value;
   
         // this.editStoreForm.disable();
 
         let storeId = this.storeId;
+
+        // ---------------------------
+        // Update store Delivery Address
+        // ---------------------------
+
+        let storeBody = this.store;
+        storeBody.address = address;
+        storeBody.city = city;
+        storeBody.postcode = postcode;
+        storeBody.regionCountryStateId = regionCountryStateId;
+        storeBody.regionCountry = regionCountryId;
+
+        this._storesService.update(storeId, storeBody)
+            .subscribe(()=>{
+
+            });
 
         // ---------------------------
         // Update Store Provider
@@ -600,6 +643,31 @@ export class StoreDeliveryComponent implements OnInit
         } else {            
             // this.storeDeliveryForm.get('deliveryPeriods').get('validation').setErrors({requiredAtLeastOne: true});
             this.storeDeliveryForm.get('deliveryPeriods').get('validation').patchValue(null);
+        }
+    }
+
+    validateForm() {
+
+        console.info("xxx", this.storeDeliveryForm);
+        console.info("xxx", this.storeDeliveryForm.get('deliveryPeriods')['controls']);        
+
+        // Do nothing if the form is invalid
+        let BreakException = {};
+        try {
+            Object.keys(this.storeDeliveryForm.get('deliveryPeriods')['controls'].get('validation')['controls']).forEach(key => {
+                const controlErrors: ValidationErrors = this.storeDeliveryForm.get(key).errors;
+                if (controlErrors != null) {
+                    Object.keys(controlErrors).forEach(keyError => {
+                        console.error({
+                            type   : 'error',
+                            message: 'Field ' + key + ' error: ' + keyError
+                        });
+                        throw BreakException;
+                    });
+                }
+            });
+        } catch (error) {
+            return;
         }
     }
 }

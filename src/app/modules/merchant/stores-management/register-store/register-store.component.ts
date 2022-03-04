@@ -1195,6 +1195,7 @@ export class RegisterStoreComponent implements OnInit
         // ------------------------------------------------------------
         // reset allowedSelfDeliveryStates if user change delivery type
         // ------------------------------------------------------------
+
         // ADHOC || SCHEDULED
         if (this.createStoreForm.get('step3').get('deliveryType').value === "ADHOC" || this.createStoreForm.get('step3').get('deliveryType').value === "SCHEDULED") {
 
@@ -1233,7 +1234,6 @@ export class RegisterStoreComponent implements OnInit
             let deliveryPeriods = this.createStoreForm.get('step3').get('deliveryPeriods').get('values') as FormArray;
             
             deliveryPeriods['controls'].forEach(item => {
-                
                 item['controls'].enabled.patchValue(false);                
             }); 
             
