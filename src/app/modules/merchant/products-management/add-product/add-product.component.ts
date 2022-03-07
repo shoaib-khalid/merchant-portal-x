@@ -2182,10 +2182,10 @@ export class AddProductComponent implements OnInit, OnDestroy
      */
     async checkProductName(name: string){
 
-        // let status = await this._inventoryService.getExistingProductName(name);
-        // if (status === 409){
-        //     this.addProductForm.get('step1').get('name').setErrors({productAlreadyExists: true});
-        // }
+        let status = await this._inventoryService.getExistingProductName(name.trim());
+        if (status === 409){
+            this.addProductForm.get('step1').get('name').setErrors({productAlreadyExists: true});
+        }
         
         // if (this.allProducts.some(product => product.name === value.trim() )){
         //     // if identical, set Error

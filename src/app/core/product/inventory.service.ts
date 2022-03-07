@@ -1512,11 +1512,11 @@ export class InventoryService
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
             params:{
-                storeName: name
+                productName: name
             }
         };
 
-        let response = await this._httpClient.get<any>(productService + '/stores/' + this.storeId$ + 'products/checkname', header)
+        let response = await this._httpClient.get<any>(productService + '/stores/' + this.storeId$ + '/products/checkname', header)
                             .pipe<any>(catchError((error:HttpErrorResponse)=>{
                                     return of(error);
                                 })

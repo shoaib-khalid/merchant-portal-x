@@ -2962,13 +2962,13 @@ export class EditProductComponent implements OnInit, OnDestroy
 
        
         // Check if the entered name is identical to the original name
-        // if (name.trim() !== this.selectedProduct.name.trim()){
+        if (name.trim() !== this.selectedProduct.name.trim()){
 
-        //     let status = await this._inventoryService.getExistingProductName(name);
-        //     if (status === 409){
-        //         this.addProductForm.get('step1').get('name').setErrors({productAlreadyExists: true});
-        //     }
-        // }
+            let status = await this._inventoryService.getExistingProductName(name.trim());
+            if (status === 409){
+                this.addProductForm.get('step1').get('name').setErrors({productAlreadyExists: true});
+            }
+        }
 
     }
 
