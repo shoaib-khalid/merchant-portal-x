@@ -86,6 +86,13 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 type : 'basic',
                 link : '/discounts/product-list',
                 exactMatch: true
+            },
+            {
+                id   : 'app.manage-banner',
+                title: 'Manage Discount Banner',
+                type : 'basic',
+                link : '/discounts/discount-banner',
+                exactMatch: true
             }
         ],
     },

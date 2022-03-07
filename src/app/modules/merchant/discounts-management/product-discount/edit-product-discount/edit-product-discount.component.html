@@ -1,7 +1,7 @@
-<div class="flex flex-col max-w-320 lg:min-w-320 -m-6 px-4 overflow-hidden">
+<div class="flex flex-col max-w-256 lg:min-w-256 -m-6 py-4 px-8 overflow-hidden">
     <form
         class="flex flex-col w-full"
-        [formGroup]="productDiscountStepperForm">
+        [formGroup]="editProductDiscountForm">
         <mat-horizontal-stepper
             [linear]="true"
             #horizontalStepper>
@@ -9,7 +9,7 @@
             <!-- SECTION FOR ORDER DISCOUNT -->
             <mat-step
                 [formGroupName]="'step1'"
-                [stepControl]="productDiscountStepperForm.get('step1')"
+                [stepControl]="editProductDiscountForm.get('step1')"
                 #horizontalStepperStep1>
                 <ng-template matStepLabel>Product Discount</ng-template>
                 <div class="content flex flex-col h-full sm:h-auto mb-3 w-full overflow-hidden sm:overflow-y-auto">
@@ -31,6 +31,9 @@
                                 matPrefix
                                 [svgIcon]="'heroicons_outline:tag'">
                             </mat-icon>
+                            <mat-error *ngIf="this.editProductDiscountForm.get('step1.discountName').hasError('required')">
+                                Required
+                            </mat-error>
                         </mat-form-field>
                         <!-- status -->
                         <mat-form-field 
@@ -47,7 +50,7 @@
                                 <div>
                                     <mat-option [value]="'ACTIVE'">Active</mat-option>
                                     <mat-option [value]="'INACTIVE'">Inactive</mat-option>
-                                    <mat-option [value]="'EXPIRED'" *ngIf="productDiscountStepperForm.get('step1').get('isActive').value ==='EXPIRED'">Expired</mat-option>
+                                    <mat-option [value]="'EXPIRED'" *ngIf="editProductDiscountForm.get('step1').get('isActive').value ==='EXPIRED'">Expired</mat-option>
                                     
                                 </div>
                                 </mat-select>
@@ -56,6 +59,9 @@
                                 matPrefix
                                 [svgIcon]="'heroicons_outline:question-mark-circle'">
                             </mat-icon>
+                            <mat-error *ngIf="this.editProductDiscountForm.get('step1.isActive').hasError('required')">
+                                Required
+                            </mat-error>
                         </mat-form-field>
                     </div>
                 
@@ -68,6 +74,7 @@
                                 appearance="fill">
                                 <input 
                                     matInput 
+                                    (change)="checkDateTime()"
                                     type="date" 
                                     [formControlName]="'startDate'">
                                 <mat-icon
@@ -75,12 +82,16 @@
                                     matPrefix
                                     [svgIcon]="'heroicons_outline:calendar'">
                                 </mat-icon>
+                                <mat-error *ngIf="this.editProductDiscountForm.get('step1.startDate').hasError('required')">
+                                    Required
+                                </mat-error>
                             </mat-form-field>
                             <mat-form-field 
                                 class="w-full sm:w-1/2 sm:pl-2 fuse-mat-emphasized-affix" 
                                 appearance="fill">
                                 <time-selector
                                     class="w-full"
+                                    (change)="checkDateTime()"
                                     matInput
                                     type="time" 
                                     [formControlName]="'startTime'"                   
@@ -102,7 +113,8 @@
                                 class="w-full sm:w-1/2 sm:pr-2 fuse-mat-emphasized-affix"
                                 appearance="fill">
                                 <input 
-                                    matInput 
+                                    matInput
+                                    (change)="checkDateTime()" 
                                     type="date" 
                                     [formControlName]="'endDate'">
                                 <mat-icon
@@ -110,12 +122,16 @@
                                     matPrefix
                                     [svgIcon]="'heroicons_outline:calendar'">
                                 </mat-icon>
+                                <mat-error *ngIf="this.editProductDiscountForm.get('step1.endDate').hasError('required')">
+                                    Required
+                                </mat-error>
                             </mat-form-field>
                             <mat-form-field 
                                 class="w-full sm:w-1/2 sm:pl-2 fuse-mat-emphasized-affix" 
                                 appearance="fill">
                                 <time-selector
                                     class="w-full"
+                                    (change)="checkDateTime()"
                                     matInput
                                     type="time" 
                                     [formControlName]="'endTime'"                   
@@ -130,10 +146,12 @@
                         </div>
                     </div>
                 </div>
-
+                <!-- Date Error alert -->
+                <div *ngIf="dateAlert !== 'invisible'" class="flex flex-wrap text-warn items-center pb-4">
+                    {{dateAlert}}
+                </div>
                 <!-- Delete, Cancel , Next -->
-                <div class="w-full flex flex row items-center justify-between">
-
+                <div class="w-full flex flex-row items-center justify-between">
                     <!-- Delete -->
                     <div class="justify-self-start"> 
                         <input
@@ -153,27 +171,29 @@
                                 [svgIcon]="'heroicons_outline:trash'"></mat-icon>
                         </label>
                     </div>
-
                     <!-- Cancel, Next button -->
                     <div class="justify-end">
-                        <!-- Cancel button -->
-                        <button
-                            mat-flat-button
-                            class="w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
-                            [color]="'gray'"
-                            (click)="cancel()"
-                            >
-                            Cancel
-                        </button>
-                        <!-- Next variant button -->
-                        <button
-                            class="w-24"
-                            mat-flat-button
-                            [color]="'primary'"
-                            type="button"
-                            matStepperNext>
-                            Next
-                        </button>
+                        <div>
+                            <!-- Cancel button -->
+                            <button
+                                mat-flat-button
+                                class="w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
+                                [color]="'gray'"
+                                (click)="cancel()"
+                                >
+                                Cancel
+                            </button>
+                            <!-- Next variant button -->
+                            <button
+                                class="w-24"
+                                mat-flat-button
+                                [color]="'primary'"
+                                [disabled]="horizontalStepperStep1.stepControl.invalid || disabledProceed === true "
+                                type="button"
+                                matStepperNext>
+                                Next
+                            </button>
+                        </div>
                     </div>
 
                 </div>
@@ -182,7 +202,7 @@
             <!-- SECTION FOR View Product -->
             <mat-step
                 formArrayName="step2"
-                [stepControl]="productDiscountStepperForm.get('step2')"
+                [stepControl]="editProductDiscountForm.get('step2')"
                 #horizontalStepperStep2>
                 <ng-template matStepLabel>View Product</ng-template>
                 <div class="overflow-y-auto">
@@ -190,11 +210,11 @@
                         <!-- Product Search -->
                         <div class="w-full sm:w-1/2 sm:pr-2">
                             <!-- Header -->
-                            <div class="flex flex-col sm:flex-row w-full items-center justify-between py-2 mb-1 h-auto sm:h-14">
-                                <div class="flex w-full sm:w-1/2 items-center text-lg font-extrabold mb-2 sm:mb-0">Product Search</div>
-                                <div class="flex flex-col w-full sm:w-1/2 sm:flex-row items-center sm:mb-2  ">
+                            <div class="flex flex-col md:flex-row w-full items-center justify-between py-2 mb-1 h-auto md:h-14">
+                                <div class="flex w-full items-center text-lg font-extrabold mb-2 md:mb-0">Product Search</div>
+                                <div class="flex flex-col w-full md:flex-row items-center md:mb-2  ">
                                     <!-- Category filter -->
-                                    <mat-form-field class="w-full order-2 sm:order-1 fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded sm:pr-2">
+                                    <mat-form-field class="w-full order-2 md:order-1 fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded md:pr-2">
                                         <mat-select
                                             class="w-full"
                                             placeholder="Category"
@@ -209,7 +229,7 @@
                                     </mat-form-field>
                 
                                     <!-- Product filter -->
-                                    <mat-form-field class="w-full order-1 sm:order-2 fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded mb-2 sm:mb-0">
+                                    <mat-form-field class="w-full order-1 md:order-2 fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded mb-2 md:mb-0">
                                         <mat-icon
                                             class="icon-size-5"
                                             matPrefix
@@ -251,7 +271,7 @@
                                                     <!-- Min Order Amount -->
                                                     <div class="truncate">
                                                         <mat-checkbox  
-                                                            class="flex items-center pl-2"
+                                                            class="pl-2"
                                                             [color]="'primary'"
                                                             (change)="onChangeSelectProduct(productList,$event)"
                                                             [checked]="onChangeSelectProductValue.includes(productList.id)"></mat-checkbox>
@@ -288,7 +308,6 @@
                                 <!-- Pagination & Button -->
                                 <div class="absolute flex flex-row justify-between items-center bg-white px-4 bottom-0 left-0 right-0 w-full">
                                     <mat-paginator
-                                        class=""
                                         [ngClass]="{'pointer-events-none': isLoading}"
                                         [length]="productPagination.length"
                                         [pageIndex]="productPagination.page"
@@ -301,7 +320,7 @@
                                     <!-- Send -->
                                     <!-- Button Big -->
                                     <button
-                                        *ngIf="currentScreenSize.includes('sm') ? true : false"
+                                        *ngIf="currentScreenSize.includes('md') ? true : false"
                                         class="flex"
                                         mat-flat-button
                                         (click)="addProductDiscount()"
@@ -317,7 +336,7 @@
                                         (click)="addProductDiscount()"
                                         #imageFileInput>
                                     <label
-                                        *ngIf="currentScreenSize.includes('sm') ? false : true"
+                                        *ngIf="currentScreenSize.includes('md') ? false : true"
                                         class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer bg-primary hover:bg-primary-500"
                                         for="add-product-discount-btn"
                                         matRipple>
@@ -460,7 +479,7 @@
                     </div>
                 </div>
 
-                <div class="w-full flex flex row items-center justify-between">
+                <div class="w-full flex flex-row items-center justify-between">
                     <!-- Delete -->
                     <div class="justify-self-start"> 
                         <input
@@ -484,29 +503,27 @@
                     <div class="justify-end">
                         <!-- Back button -->
                         <button
-                        class="px-8 mr-2"
-                        mat-flat-button
-                        [color]="'accent'"
-                        type="button"
-                        matStepperPrevious>
-                        Back
+                            class="sm:px-8 mr-2"
+                            mat-flat-button
+                            [color]="'accent'"
+                            type="button"
+                            matStepperPrevious>
+                            Back
                         </button>
                         <!-- Update button -->
                         <button 
-                        class="px-8"
-                        [ngClass]="isLoading ? 'cursor-wait' : 'cursor-pointer'"
-                        mat-flat-button
-                        [disabled]="isLoading"
-                        [color]="'primary'"
-                        type="button"
-                        (click)="updateSelectedDiscount()">
-                        Update
+                            class="sm:px-8"
+                            [ngClass]="isLoading ? 'cursor-wait' : 'cursor-pointer'"
+                            mat-flat-button
+                            [disabled]="isLoading"
+                            [color]="'primary'"
+                            type="button"
+                            (click)="updateSelectedDiscount()">
+                            Update
                         </button>
                     </div>
                 </div>
-
             </mat-step>
-
         </mat-horizontal-stepper>
     </form>
 </div>
