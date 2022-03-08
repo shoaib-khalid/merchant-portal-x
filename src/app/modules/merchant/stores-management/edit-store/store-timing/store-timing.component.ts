@@ -243,13 +243,6 @@ export class StoreTimingComponent implements OnInit
         }else{
             this.timeAlert[i] = " " ;
         }  
-        
-        console.log("minToday", minToday);
-        console.log("workingHourStartTime",workingHourStartTime);
-        console.log("workingHourEndTime",workingHourEndTime);
-        console.log("_endTime",_endTime);
-        console.log("endTime.timeMinute",endTime.timeMinute);
-       
     }
 
     changeBreakTime(i){
