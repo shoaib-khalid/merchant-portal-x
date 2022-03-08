@@ -27,6 +27,10 @@ import { TimeSelectorInputModule } from 'app/layout/common/time-selector/timesel
 import { EditOrderDiscountDialogComponent } from './order-discount/edit-order-discount/edit-order-discount.component';
 import { MatStepperModule } from '@angular/material/stepper';
 import { EditProductDiscountDialogComponent } from './product-discount/edit-product-discount/edit-product-discount.component';
+import { DiscountBannerComponent } from './discount-banner/discount-banner.component';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { NgxGalleryModule } from 'ngx-gallery-9';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
     declarations: [
@@ -38,7 +42,8 @@ import { EditProductDiscountDialogComponent } from './product-discount/edit-prod
 
         ProductDiscountListComponent,
         CreateProductDiscountDialogComponent,
-        EditProductDiscountDialogComponent
+        EditProductDiscountDialogComponent,
+        DiscountBannerComponent
     ],
     imports     : [
         RouterModule.forChild(discountsManagementRoutes),
@@ -60,7 +65,10 @@ import { EditProductDiscountDialogComponent } from './product-discount/edit-prod
         MatTooltipModule,
         SharedModule,
         TimeSelectorInputModule, 
-        MatStepperModule
+        MatStepperModule,
+        MatToolbarModule,
+        NgxGalleryModule,
+        FontAwesomeModule
     ]
 })
 export class DiscountsManagementModule

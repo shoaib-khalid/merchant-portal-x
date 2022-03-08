@@ -10,6 +10,8 @@ import { Store } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
 import { takeUntil } from 'rxjs/operators';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
+import { DiscountManagementValidationService } from '../../discounts-management.validation.service';
+import { debounce } from 'lodash';
 
 @Component({
     selector: 'app-edit-order-discount',
@@ -46,9 +48,11 @@ export class EditOrderDiscountDialogComponent implements OnInit {
 
     // get current store
     store$: Store;
+    originalStartDate: any;
+    originalEndDate: any;
     
     editOrderDiscountForm: FormGroup;
-    discountId:string;
+    discountId: string;
     selectedDiscount: Discount | null = null;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
@@ -88,7 +92,10 @@ export class EditOrderDiscountDialogComponent implements OnInit {
         private _storesService: StoresService,
         // private createOrderDiscount:CreateOrderDiscount,
         @Inject(MAT_DIALOG_DATA) public data: MatDialog
-    ) { }
+    ) 
+    { 
+        this.checkExistingDate = debounce(this.checkExistingDate,300);
+    }
 
     // ----------------------------------------------------------------------------------
     //                          @ Lifecycle hooks
@@ -105,8 +112,8 @@ export class EditOrderDiscountDialogComponent implements OnInit {
                 id                  : [''],
                 discountName        : ['', Validators.required],
                 discountType        : ['', Validators.required],
-                startDate           : ['', Validators.required],
-                endDate             : ['', Validators.required],
+                startDate           : ['', [Validators.required]],
+                endDate             : ['', [Validators.required]],
                 startTime           : [new TimeSelector("--","--","--"), Validators.required],
                 endTime             : [new TimeSelector("--","--","--"), Validators.required],
                 isActive            : ['', Validators.required],
@@ -122,6 +129,9 @@ export class EditOrderDiscountDialogComponent implements OnInit {
         // if id is exist so it is edit mode, Get the discount by id
         this._discountService.getDiscountByGuid(this.discountId)
             .subscribe((response:ApiResponseModel<Discount>) => {
+
+                this.originalStartDate = response.data.startDate;
+                this.originalEndDate = response.data.endDate;
                 
                 //Set the selected discount
                 this.selectedDiscount = response.data;
@@ -443,7 +453,6 @@ export class EditOrderDiscountDialogComponent implements OnInit {
         });
     }
 
-
     updateSelectedDiscountTier(discountTier){
 
         // check condition first before pass to backend
@@ -541,6 +550,7 @@ export class EditOrderDiscountDialogComponent implements OnInit {
         //=======================================================
         //                      Start Time
         //=======================================================
+
         let _itemStartTimeHour = discount.startTime.split(":")[0];
         if (discount.startTime.split(":")[0] > 12) {
             _itemStartTimeHour = _itemStartTimeHour - 12;
@@ -561,6 +571,7 @@ export class EditOrderDiscountDialogComponent implements OnInit {
         //=======================================================
         //                      End Time
         //=======================================================
+        
         let _itemEndTimeHour = discount.endTime.split(":")[0];
         if (discount.endTime.split(":")[0] > 12) {
             _itemEndTimeHour = _itemEndTimeHour - 12;
@@ -649,16 +660,45 @@ export class EditOrderDiscountDialogComponent implements OnInit {
 
         // ==============================================================
         //              Date and time range Display Error
-        // ==============================================================
+        // ==============================================================        
 
+        // this will set what need to be sent to backend
+        const discountBody = {
+
+            id          : this.discountId,
+            startDate   : this.editOrderDiscountForm.get('step1.startDate').value,
+            endDate     : this.editOrderDiscountForm.get('step1.endDate').value,
+            startTime   : _startTime + ":" + startTime.timeMinute,
+            endTime     : _endTime + ":" + endTime.timeMinute,
+            isActive    : this.editOrderDiscountForm.get('step1.isActive').value === 'EXPIRED'? false
+                            :this.editOrderDiscountForm.get('step1.isActive').value === 'ACTIVE'? true
+                            :this.editOrderDiscountForm.get('step1.isActive').value === 'INACTIVE'? false
+                            :false,
+            discountType: this.editOrderDiscountForm.get('step1.discountType').value            
+        };        
+ 
         if(startDateTime > endDateTime && _endDate !== ""){            
-            this.dateAlert ="Date and Time Range incorrect !" ;
+            this.dateAlert ="Date and Time Range incorrect !";
             this.disabledProceed = true;
         } else if(endTime.timeMinute === "--" || _endTime === "--" || endTime.timeAmPm === "--"){
             this.disabledProceed = true;
         } else {
-            this.dateAlert = " " ;
+            // check validate at backend
+            if(this.checkExistingDate(discountBody)) {
+                this.disabledProceed = true;
+            }
+            this.dateAlert = " ";
             this.disabledProceed = false;
+        }
+    }
+
+    //post validate (validateStoreDiscount)
+    async checkExistingDate(discountBody){
+        
+        let status = await this._discountService.getExistingDate(discountBody);
+        if (status === 417){
+            this.dateAlert ="Date selected is overlapped with existing date, please select another date !";
+            this.disabledProceed = true;
         }
     }
 

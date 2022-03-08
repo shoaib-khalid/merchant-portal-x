@@ -7,6 +7,7 @@ import { StoresService } from 'app/core/store/store.service';
 import { Store } from 'app/core/store/store.types';
 import { TimeSelector } from 'app/layout/common/time-selector/timeselector.component';
 import { LOADIPHLPAPI } from 'dns';
+import { debounce } from 'lodash';
 import { of, Subject } from 'rxjs';
 import { concatMap, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { DiscountManagementValidationService } from '../../discounts-management.validation.service';
@@ -111,7 +112,10 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
         private _fuseMediaWatcherService: FuseMediaWatcherService,
         private _storesService: StoresService,
         private _changeDetectorRef: ChangeDetectorRef,
-    ) { }
+    ) 
+    {
+        this.checkExistingDate = debounce(this.checkExistingDate,300);
+    }
 
     // ----------------------------------------------------------------------------------
     //                          Getter and Setter
@@ -157,8 +161,8 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
             step2: this._formBuilder.array([
             
             ]),
-        });        
-
+        });
+        
         // Get the store
         this._storesService.store$
             .pipe(takeUntil(this._unsubscribeAll))
@@ -194,15 +198,15 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
         this.checkDateTime();
     
         this.dialogRef.close({ 
-            status: true ,
-            discountName: this.discountName,
-            discountOn: this.discountType,
-            startDate: this.startDate,
-            startTime: this.changeStartTime,
-            endDate: this.endDate,
-            endTime: this.changeEndTime,
-            isActive :this.isActive,
-            maxDiscountAmount :this.maxDiscountAmount,
+            status              : true ,
+            discountName        : this.discountName,
+            discountOn          : this.discountType,
+            startDate           : this.startDate,
+            startTime           : this.changeStartTime,
+            endDate             : this.endDate,
+            endTime             : this.changeEndTime,
+            isActive            : this.isActive,
+            maxDiscountAmount   : this.maxDiscountAmount,
             normalPriceItemOnly : this.normalPriceItemOnly
         });
     }
@@ -243,28 +247,27 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
 
         this.checkDateTime();
         let sendPayload = [this.createOrderDiscountForm.get('step1').value];
-        let toBeSendPayload=sendPayload.
+        let toBeSendPayload = sendPayload.
         map((x)=>(
             {
-                startTime:this.changeStartTime,
-                endTime:this.changeEndTime,
-                discountName: x.discountName,
-                discountType:x.discountType,
-                endDate: x.endDate,
-                isActive: x.isActive,
-                maxDiscountAmount: x.maxDiscountAmount,
-                normalPriceItemOnly: x.normalPriceItemOnly,
-                startDate: x.startDate,
-                storeId: this.storeId$,
+                storeId             : this.storeId$,
+                startTime           : this.changeStartTime,
+                endTime             : this.changeEndTime,
+                startDate           : x.startDate,
+                endDate             : x.endDate,
+                discountName        : x.discountName,
+                discountType        : x.discountType,
+                isActive            : x.isActive,
+                maxDiscountAmount   : x.maxDiscountAmount,
+                normalPriceItemOnly : x.normalPriceItemOnly,
             }
-        ));
+        ));        
 
         this.addMainDiscountAndTier(toBeSendPayload[0],this.createOrderDiscountForm.get('step2').value).then(()=>{
             // Set loading to false
             this.isLoading = false;
         });
         this.closeDialog();
-    
     }
 
     closeDialog(){
@@ -357,7 +360,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
 
         }
         else{
-
+            // Pop-up error (overlap amount)
             const confirmation = this._fuseConfirmationService.open({
                 title  : 'Minimum subtotal overlap',
                 message: 'Your minimum subtotal entered overlapping with existing amount! Please change your minimum subtotal',
@@ -452,9 +455,9 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
         let _startTime;        
 
         // Split start date format
-        var selectedStartDay = _startDate.split("-")[2];
+        var selectedStartDay   = _startDate.split("-")[2];
         var selectedStartMonth = _startDate.split("-")[1];
-        var selectedStartYear = _startDate.split("-")[0];
+        var selectedStartYear  = _startDate.split("-")[0];
 
 
         if (startTime.timeAmPm === "PM" && startTime.timeHour !== "12") {
@@ -485,9 +488,9 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
         let _endTime;
 
         // Split end date format
-        var selectedEndDay = _endDate.split("-")[2];
+        var selectedEndDay   = _endDate.split("-")[2];
         var selectedEndMonth = _endDate.split("-")[1];
-        var selectedEndYear = _endDate.split("-")[0];
+        var selectedEndYear  = _endDate.split("-")[0];
 
         if (endTime.timeAmPm === "PM" && endTime.timeHour !== "12") {
             _endTime = parseInt(endTime.timeHour) + 12;
@@ -542,9 +545,8 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
     async checkExistingDate(discountBody){
         let status = await this._discountService.getExistingDate(discountBody);
         if (status === 417 ){
-            this.createOrderDiscountForm.get('step1.startDate').setErrors({dateOverlapped: true});
-            this.createOrderDiscountForm.get('step1.endDate').setErrors({dateOverlapped: true});
-
+            this.dateAlert ="Date selected is overlapped with existing date, please select another date !";
+            this.disabledProceed = true;
         }
     }
 

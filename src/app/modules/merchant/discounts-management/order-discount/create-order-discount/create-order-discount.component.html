@@ -1,4 +1,4 @@
-<div class="flex flex-col max-w-256 lg:min-w-256 -m-6 px-6 overflow-hidden">
+<div class="flex flex-col max-w-256 lg:min-w-256 -m-6 py-4 px-8 overflow-hidden">
     <form
         class="flex flex-col w-full"
         [formGroup]="createOrderDiscountForm">
@@ -211,7 +211,7 @@
 
                     <!-- toogle normal  price -->
                     <mat-slide-toggle
-                        class="w-full sm:w-4/12"
+                        class="w-full sm:w-3/12"
                         [color]="'primary'"
                         [formControlName]="'normalPriceItemOnly'"
                         [matTooltip]="'To enable normal price if there is already discount applied'">
@@ -242,9 +242,9 @@
                     <div *ngIf="dateAlert !== 'invisible'" class="flex flex-wrap text-warn items-center pr-2">
                         {{dateAlert}}
                     </div>
-                    <div *ngIf="this.createOrderDiscountForm.get('step1.startDate').hasError('dateOverlapped')" class="flex flex-wrap text-warn items-center pr-2">
+                    <!-- <div *ngIf="this.createOrderDiscountForm.get('step1.startDate').hasError('dateOverlapped')" class="flex flex-wrap text-warn items-center pr-2">
                         Date selected is overlapped with existing date, please select another date !
-                    </div>
+                    </div> -->
                     <button
                         mat-flat-button
                         class="w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"

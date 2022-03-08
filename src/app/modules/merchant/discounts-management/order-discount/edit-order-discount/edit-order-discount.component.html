@@ -1,4 +1,4 @@
-<div class="flex flex-col max-w-256 lg:min-w-256 -m-6 px-4 overflow-hidden">
+<div class="flex flex-col max-w-256 lg:min-w-256 -m-6 py-4 px-8 overflow-hidden">
     <form
         class="flex flex-col w-full"
         [formGroup]="editOrderDiscountForm">
@@ -12,7 +12,7 @@
                 [stepControl]="editOrderDiscountForm.get('step1')"
                 #horizontalStepperStep1>
                 <ng-template matStepLabel>Order Discount</ng-template>
-                <div class="content flex flex-col h-full sm:h-auto mb-3 w-full overflow-hidden sm:overflow-y-auto">
+                <div class="content flex flex-col h-full sm:h-auto mb-3 w-full overflow-hidden ">
                     <!-- discount name -->
                     <mat-form-field 
                         floatLabel="always"
@@ -123,7 +123,6 @@
                                 appearance="fill">
                                 <input 
                                     (change)="checkDateTime()"
-                                    [required]="true"
                                     matInput 
                                     type="date" 
                                     [formControlName]="'startDate'"
@@ -171,7 +170,6 @@
                                 appearance="fill">
                                 <input
                                     (change)="checkDateTime()"
-                                    [required]="true" 
                                     matInput 
                                     type="date" 
                                     [formControlName]="'endDate'"
@@ -211,15 +209,19 @@
 
                     <!-- toogle normal  price -->
                     <mat-slide-toggle
+                        class="w-full sm:w-3/12"
                         [color]="'primary'"
                         [formControlName]="'normalPriceItemOnly'"
                         [matTooltip]="'To enable normal price if there is already discount applied'">
                         Normal Price
                     </mat-slide-toggle>
                 </div>
-
+                <!-- Date Error alert -->
+                <div *ngIf="dateAlert !== 'invisible'" class="flex flex-wrap text-warn items-center pb-4">
+                    {{dateAlert}}
+                </div>
                 <!-- Delete, Cancel , Next -->
-                <div class="w-full flex flex row items-center justify-between">
+                <div class="w-full flex flex-row items-center justify-between">
 
                     <!-- Delete -->
                     <div class="justify-self-start"> 
@@ -240,12 +242,8 @@
                                 [svgIcon]="'heroicons_outline:trash'"></mat-icon>
                         </label>
                     </div>
-
                     <!-- Cancel, Next button -->
                     <div class="flex flex-row justify-end">
-                        <div *ngIf="dateAlert !== 'invisible'" class="flex flex-wrap text-warn items-center pr-2">
-                            {{dateAlert}}
-                        </div>
                         <!-- Cancel button -->
                         <button
                             mat-flat-button
@@ -266,9 +264,7 @@
                             Next
                         </button>
                     </div>
-
                 </div>
-
             </mat-step>
 
             <!-- SECTION FOR TIER -->
@@ -555,7 +551,7 @@
                     </fieldset>
                 </div>
 
-                <div class="w-full flex flex row items-center justify-between">
+                <div class="w-full flex flex-row items-center justify-between">
 
                     <!-- Delete -->
                     <div class="justify-self-start"> 
@@ -597,29 +593,28 @@
                      </div>
 
                     <!-- Back, Update button -->
-                    <div class="justify-end">
+                    <div class="flex flex-row justify-end">
                         <!-- Back button -->
                         <button
-                        class="px-8 mr-2"
-                        mat-flat-button
-                        [color]="'accent'"
-                        type="button"
-                        matStepperPrevious>
-                        Back
+                            class="px-8 mr-2"
+                            mat-flat-button
+                            [color]="'accent'"
+                            type="button"
+                            matStepperPrevious>
+                            Back
                         </button>
                         <!-- Update button -->
                         <button 
-                        class="px-8"
-                        [ngClass]="isLoading ? 'cursor-wait' : 'cursor-pointer'"
-                        mat-flat-button
-                        [disabled]="isLoading"
-                        [color]="'primary'"
-                        type="button"
-                        (click)="updateSelectedDiscount()">
-                        Update
+                            class="px-8"
+                            [ngClass]="isLoading ? 'cursor-wait' : 'cursor-pointer'"
+                            mat-flat-button
+                            [disabled]="isLoading"
+                            [color]="'primary'"
+                            type="button"
+                            (click)="updateSelectedDiscount()">
+                            Update
                         </button>
                     </div>
-
                 </div>
             </mat-step>
 
