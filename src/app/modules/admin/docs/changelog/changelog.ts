@@ -9,6 +9,21 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 export class ChangelogComponent
 {
     changelog: any[] = [
+        //v0.0.30
+        {
+            version    : 'v0.0.30',
+            releaseDate: 'Mar 09, 2022',
+            changes    : [
+                {
+                    type: 'Fix',
+                    list: [
+                        '(ProductManagement) Fix Limit categories to 30 item',
+                        '(DiscountManagement) Fix apply single image',
+                        '(Profile Settings) Display after post for bank info',
+                    ]
+                }
+            ]
+        },
         // v0.0.29
         {
             version    : 'v0.0.29',
