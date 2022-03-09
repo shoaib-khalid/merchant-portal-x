@@ -88,58 +88,59 @@ export class DiscountBannerComponent implements OnInit, AfterViewInit, OnDestroy
             recommendedImageHeight: "560", 
             selectedImageWidth: "", 
             selectedImageHeight: "",
-            isMultiple: true,
-            toDelete: [],
-            toAdd:[], 
+            isMultiple: false,
+            toDelete: false,
+            // toDelete: [],
+            // toAdd:[], 
             galleryImages: []
         }
 
-        // initialise gallery
-        // set galleryOptions
-        this.galleryOptions = [
-            {
-                width: '350px',
-                height: '350px',
-                thumbnailsColumns: 3,
-                imageAnimation: NgxGalleryAnimation.Slide,
-                thumbnailsArrows: true,
-                // previewDownload: true,
-                imageArrowsAutoHide: true, 
-                thumbnailsArrowsAutoHide: true,
-                thumbnailsAutoHide: false,
-                thumbnailActions: [
-                    {
-                        icon: 'fa fa-times-circle',
-                        onClick: (event, index) => {
+        // // initialise gallery
+        // // set galleryOptions for multiple images
+        // this.galleryOptions = [
+        //     {
+        //         width: '350px',
+        //         height: '350px',
+        //         thumbnailsColumns: 3,
+        //         imageAnimation: NgxGalleryAnimation.Slide,
+        //         thumbnailsArrows: true,
+        //         // previewDownload: true,
+        //         imageArrowsAutoHide: true, 
+        //         thumbnailsArrowsAutoHide: true,
+        //         thumbnailsAutoHide: false,
+        //         thumbnailActions: [
+        //             {
+        //                 icon: 'fa fa-times-circle',
+        //                 onClick: (event, index) => {
                             
-                            this.deleteBannerDiscount(event, index)
-                        },
-                    }
-                ],
-                // "imageSize": "contain",
-                "previewCloseOnClick": true, 
-                "previewCloseOnEsc": true,
-                // "thumbnailsRemainingCount": true
-            },
-            // max-width 767 Mobile configuration
-            {
-                breakpoint: 767,
-                thumbnailsColumns: 2,
-                thumbnailsAutoHide: false,
-                width: '350px',
-                height: '350px',
-                imagePercent: 100,
-                thumbnailsPercent: 30,
-                thumbnailsMargin: 10,
-                thumbnailMargin: 5,
-                thumbnailActions: [
-                    {
-                        icon: 'fa fa-times-circle',
-                        onClick: () => {},
-                    }
-                ]
-            }
-        ];
+        //                     this.deleteBannerDiscount(event, index)
+        //                 },
+        //             }
+        //         ],
+        //         // "imageSize": "contain",
+        //         "previewCloseOnClick": true, 
+        //         "previewCloseOnEsc": true,
+        //         // "thumbnailsRemainingCount": true
+        //     },
+        //     // max-width 767 Mobile configuration
+        //     {
+        //         breakpoint: 767,
+        //         thumbnailsColumns: 2,
+        //         thumbnailsAutoHide: false,
+        //         width: '350px',
+        //         height: '350px',
+        //         imagePercent: 100,
+        //         thumbnailsPercent: 30,
+        //         thumbnailsMargin: 10,
+        //         thumbnailMargin: 5,
+        //         thumbnailActions: [
+        //             {
+        //                 icon: 'fa fa-times-circle',
+        //                 onClick: () => {},
+        //             }
+        //         ]
+        //     }
+        // ];
 
         this.storeId = this.storeId$;
         
@@ -161,13 +162,16 @@ export class DiscountBannerComponent implements OnInit, AfterViewInit, OnDestroy
                 response.storeAssets.map(item => {
                     
                     if (item.assetType === "DiscountBannerUrl") {
-                        // this.files[1].fileSource = item.assetUrl
-                        this.files.galleryImages.push({
-                            small       : '' + item.assetUrl,
-                            medium      : '' + item.assetUrl,
-                            big         : '' + item.assetUrl,
-                            assetId     : item.id
-                        });    
+                        // for single
+                        this.files.fileSource = item.assetUrl;
+                        this.files.assetId = item.id;
+                        // //for multiple image 
+                        // this.files.galleryImages.push({
+                        //     small       : '' + item.assetUrl,
+                        //     medium      : '' + item.assetUrl,
+                        //     big         : '' + item.assetUrl,
+                        //     assetId     : item.id
+                        // });    
                     }
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
@@ -200,12 +204,84 @@ export class DiscountBannerComponent implements OnInit, AfterViewInit, OnDestroy
     // @ Public Method
     // -----------------------------------------------------------------------------------------------------
 
-        /**
-    * 
-    * @param event 
-    */
-    selectFiles(event: any): void {
+    // /**
+    // * 
+    // * @param event for ---------------multiple selectFiles----------------
+    // */
+    // selectFiles(event: any): void {
         
+    //     // set each of the attributes        
+    //     if (event.target.files.length > 0) {
+    //         this.files.fileSource = null;
+    //         this.files.selectedFileName = "";
+    //         this.files.selectedFiles = event.target.files;
+    //     }
+        
+    //     let maxSize = 2097152;
+    //     var maxSizeInMB = (maxSize / (1024*1024)).toFixed(2);
+    //     if (this.files.selectedFiles[0].size > maxSize ){
+    //         // Show a success message (it can also be an error message)
+    //         const confirmation = this._fuseConfirmationService.open({
+    //             title  : 'Image size limit',
+    //             message: 'Your uploaded image is exceeds the maximum size of ' + maxSizeInMB + ' MB !',
+    //             icon: {
+    //                 show: true,
+    //                 name: "image_not_supported",
+    //                 color: "warn"
+    //             },
+    //             actions: {
+    //                 confirm: {
+    //                     label: 'Ok',
+    //                     color: "primary",
+    //                 },
+    //                 cancel: {
+    //                     show: false,
+    //                 },
+    //             }
+    //         });
+    //         return;
+    //     }
+
+    //     if (this.files.selectedFiles && this.files.selectedFiles[0] && this.files.selectedFiles[0].size < maxSize ) {
+    //         const numberOfFiles = this.files.selectedFiles.length;
+    //         for (let i = 0; i < numberOfFiles; i++) {
+    //         const reader = new FileReader();
+            
+    //         reader.onload = (e: any) => {
+    //             this.files.fileSource = e.target.result;
+    //             this.files.toAdd.push(event.target.files);
+                
+    //             if(this.files.galleryImages.length < 3){
+                    
+    //                 this.files.galleryImages.unshift({
+    //                     small           : '' + e.target.result,
+    //                     medium          : '' + e.target.result,
+    //                     big             : '' + e.target.result
+    //                 });
+
+    //                 var image = new Image();
+    //                 image.src = e.target.result;
+    
+    //                 image.onload = (imageInfo: any) => {
+    //                     this.files.selectedImageWidth = imageInfo.path[0].width;
+    //                     this.files.selectedImageHeight = imageInfo.path[0].height;
+    
+    //                     this._changeDetectorRef.markForCheck();
+    //                 };
+    //             } 
+    //             this._changeDetectorRef.markForCheck();               
+    //         };
+            
+    //         reader.readAsDataURL(this.files.selectedFiles[i]);
+    //         this.files.selectedFileName = this.files.selectedFiles[i].name;
+    //         }
+    //     }
+    //     this._changeDetectorRef.markForCheck();
+    // }
+
+    // For single image select files
+    selectFiles(event) {
+
         // set each of the attributes        
         if (event.target.files.length > 0) {
             this.files.fileSource = null;
@@ -244,28 +320,20 @@ export class DiscountBannerComponent implements OnInit, AfterViewInit, OnDestroy
             const reader = new FileReader();
             
             reader.onload = (e: any) => {
-                this.files.fileSource = e.target.result;
-                this.files.toAdd.push(event.target.files);
-                
-                if(this.files.galleryImages.length < 3){
-                    
-                    this.files.galleryImages.unshift({
-                        small           : '' + e.target.result,
-                        medium          : '' + e.target.result,
-                        big             : '' + e.target.result
-                    });
 
-                    var image = new Image();
-                    image.src = e.target.result;
-    
-                    image.onload = (imageInfo: any) => {
-                        this.files.selectedImageWidth = imageInfo.path[0].width;
-                        this.files.selectedImageHeight = imageInfo.path[0].height;
-    
-                        this._changeDetectorRef.markForCheck();
-                    };
-                }
-                this._changeDetectorRef.markForCheck();               
+                this.files.fileSource = e.target.result;
+
+                var image = new Image();
+                image.src = e.target.result;
+
+                image.onload = (imageInfo: any) => {
+                    this.files.selectedImageWidth = imageInfo.path[0].width;
+                    this.files.selectedImageHeight = imageInfo.path[0].height;
+
+                    this._changeDetectorRef.markForCheck();
+                };
+                
+                this._changeDetectorRef.markForCheck();                
             };
             
             reader.readAsDataURL(this.files.selectedFiles[i]);
@@ -283,45 +351,95 @@ export class DiscountBannerComponent implements OnInit, AfterViewInit, OnDestroy
 
         let discountBanner = this.files
  
-        // BannerDesktop update using loop for each for delete and post 
-        if(discountBanner.type === 'DiscountBannerUrl') {
-            // toDelete
-            discountBanner.toDelete.forEach(assetId => {
-                if(assetId){
-                    this._storesService.deleteAssets(this.storeId, assetId)
-                    .subscribe(response => {
-                            console.info('Uploaded the file successfully');
+        // // BannerDesktop update using loop for each for delete and post (for multiple Image)
+        // if(discountBanner.type === 'DiscountBannerUrl') {
+        //     // toDelete
+        //     discountBanner.toDelete.forEach(assetId => {
+        //         if(assetId){
+        //             this._storesService.deleteAssets(this.storeId, assetId)
+        //             .subscribe(response => {
+        //                     console.info('Uploaded the file successfully');
     
+        //                     // Mark for check
+        //                     this._changeDetectorRef.markForCheck();
+        //                 },
+        //                 (err: any) => {
+        //                     console.error('Could not upload the file');
+        //             });
+        //         }
+        //     });
+        //     // toAdd
+        //     discountBanner.toAdd.forEach(selectedFiles => {
+        //         let formData = new FormData();
+        //         formData.append('assetFile',selectedFiles[0]);
+        //         formData.append('assetType',discountBanner.type);
+        //         formData.append('assetDescription',discountBanner.description);
+
+        //         if (discountBanner.selectedFiles && discountBanner.selectedFiles !== null) {
+        //             this._storesService.postAssets(this.storeId, "DiscountBannerUrl", formData,"DiscountBanner")
+        //             .subscribe(response => {
+        //                 console.info('Uploaded the file successfully');
+
+        //                 this.files.assetId = event["id"];
+
+        //                 // Mark for check
+        //                 this._changeDetectorRef.markForCheck();
+        //             },
+        //             (err: any) => {
+        //                 console.error('Could not upload the file');
+        //             });
+        //         }
+        //     }); 
+        // }
+
+        //discount banner update using selected files (for single image)
+        if (discountBanner.type === 'DiscountBannerUrl'){
+    
+            let formData = new FormData();
+
+            if (discountBanner.selectedFiles && discountBanner.selectedFiles !== null){
+                formData.append('assetFile',discountBanner.selectedFiles[0]);
+                formData.append('assetType',discountBanner.type);
+                formData.append('assetDescription',discountBanner.description);
+            }
+
+            if (discountBanner.selectedFiles && discountBanner.assetId !== null && discountBanner.toDelete === false) {                   
+                this._storesService.putAssets(this.storeId, discountBanner.assetId, formData, "DiscountBannerUrl")
+                    .subscribe(response => {
+                        console.info('Uploaded the file successfully');
+
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    }, (err: any) => {
+                            console.error('Could not upload the file');
+                    });
+            } else if (discountBanner.toDelete === true && discountBanner.assetId !== null) {
+                this._storesService.deleteAssets(this.storeId, discountBanner.assetId)
+                    .subscribe(response => {
+                        console.info('Uploaded the file successfully');
+
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                        },
+                        (err: any) => {
+                            console.error('Could not upload the file');
+                        });
+            } else {
+                if (discountBanner.selectedFiles && discountBanner.selectedFiles !== null) {
+                    this._storesService.postAssets(this.storeId, "DiscountBannerUrl", formData,"DiscountBanner")
+                        .subscribe(response => {
+                            console.info('Uploaded the file successfully');
+
+                            discountBanner.assetId = event["id"];
+
                             // Mark for check
                             this._changeDetectorRef.markForCheck();
                         },
                         (err: any) => {
                             console.error('Could not upload the file');
-                    });
+                        });
                 }
-            });
-            // toAdd
-            discountBanner.toAdd.forEach(selectedFiles => {
-                let formData = new FormData();
-                formData.append('assetFile',selectedFiles[0]);
-                formData.append('assetType',discountBanner.type);
-                formData.append('assetDescription',discountBanner.description);
-
-                if (discountBanner.selectedFiles && discountBanner.selectedFiles !== null) {
-                    this._storesService.postAssets(this.storeId, "DiscountBannerUrl", formData,"DiscountBanner")
-                    .subscribe(response => {
-                        console.info('Uploaded the file successfully');
-
-                        this.files.assetId = event["id"];
-
-                        // Mark for check
-                        this._changeDetectorRef.markForCheck();
-                    },
-                    (err: any) => {
-                        console.error('Could not upload the file');
-                    });
-                }
-            }); 
+            }
         }
         
 
@@ -346,15 +464,22 @@ export class DiscountBannerComponent implements OnInit, AfterViewInit, OnDestroy
         });
     }
 
-    deleteBannerDiscount(e, index){
-        let assetId = this.files.galleryImages[index].assetId;
+    // deleteBannerDiscount(e, index){
+    //     let assetId = this.files.galleryImages[index].assetId;
 
-        this.files.toDelete.push(assetId);
-        this.files.galleryImages.splice(index,1);
+    //     this.files.toDelete.push(assetId);
+    //     this.files.galleryImages.splice(index,1);
 
-        if(this.files.galleryImages.length < 1){
-            this.files.fileSource = null
-        }
+    //     if(this.files.galleryImages.length < 1){
+    //         this.files.fileSource = null
+    //     }
+    // }
+
+    //for single image
+    deleteDiscountBanner() {
+        this.files.toDelete = true;        
+        this.files.fileSource = '';
+        this._changeDetectorRef.markForCheck();
     }
 
     // -----------------------------------------------------------------------------------------------------

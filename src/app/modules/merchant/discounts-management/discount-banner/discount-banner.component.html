@@ -11,6 +11,7 @@
             <div class="my-2"></div>
             <div class="sm:p-6 sm:border border-gray-300 rounded h-auto">
                 <div class="w-full">
+                    <!-- Add image  button and resolution requirement -->
                     <mat-form-field class="fuse-mat-emphasized-affix w-full">
                         <mat-label class="font-medium">Discount Banner</mat-label>
                         <span class="w-30 leading-3 text-sm font-bold">Add Image</span>
@@ -18,7 +19,12 @@
                             <div class="truncate flex flex-col w-full h-12 p-0 m-0 leading-3 justify-center items-center">
                                 <span class="hidden sm:block text-xs text-gray-400 p-0 m-0">Image Size : Max 2MB, Resolution: 1440 x 560 px</span>
                             </div>
-                            <div *ngIf="this.files.galleryImages.length < 1">
+
+                            <!-- this for multiple image -->
+                            <!-- <div *ngIf="this.files.galleryImages.length < 1"> --> 
+
+                            <!-- this for single image -->
+                            <div *ngIf="this.files.fileSource === ''">
                                 <input
                                     id="add-BannerDesktop-btn"
                                     class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -36,7 +42,11 @@
                                         [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
                                 </label>    
                             </div>
-                            <div *ngIf="this.files.galleryImages.length > 0">
+                            <!-- for multiple image -->
+                            <!-- <div *ngIf="this.files.galleryImages.length > 0"> -->
+                            
+                            <!-- for single image -->
+                            <div *ngIf="this.files.fileSource !== ''">
                                 <input
                                     id="edit-BannerDesktop-btn"
                                     class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -66,7 +76,9 @@
                     <div class="w-full">
                         <mat-label class="font-medium">Preview</mat-label>
                         <div class="my-2"></div>
-                        <div class="p-8 border border-gray-300 rounded h-auto">
+
+                        <!-- For multiple image -->
+                        <!-- <div class="p-8 border border-gray-300 rounded h-auto">
                             <ng-container *ngIf="this.files.fileSource">
                                 <span *ngIf="this.files.selectedImageWidth && this.files.selectedImageHeight" class="block text-sm"><b>Uploaded Image Size</b>: {{ this.files.selectedImageWidth }} x {{ this.files.selectedImageHeight }} pixel </span>
                                 <span class="block text-sm"><b>Recommended Size</b>: {{ this.files.recommendedImageWidth }} x {{ this.files.recommendedImageHeight }} pixel </span>
@@ -74,7 +86,25 @@
                             <div class="flex justify-center w-full">
                                 <ngx-gallery style="z-index: 0;" [options]="galleryOptions" [images]="this.files.galleryImages"></ngx-gallery>
                             </div>
-                        </div> 
+                        </div>  -->
+
+                        <!-- For single image -->
+                        <div class="p-8 border border-gray-300 rounded h-96">
+                            <div *ngIf="this.files.selectedFiles">
+                                <span *ngIf="this.files.selectedImageWidth && this.files.selectedImageHeight" class="block text-sm"><b>Uploaded Image Size</b>: {{ this.files.selectedImageWidth }} x {{ this.files.selectedImageHeight }} pixel </span>
+                                <span class="block text-sm"><b>Recommended Size</b>: {{ this.files.recommendedImageWidth }} x {{ this.files.recommendedImageHeight }} pixel </span>
+                            </div>
+                            <div *ngIf="this.files.fileSource">
+                                <div class="flex w-full flex-auto">
+                                    <img [src]="this.files.fileSource" class="object-scale-down h-52" />
+                                    <mat-icon
+                                        class="top-0 right-0 cursor-pointer"
+                                        (click)="deleteDiscountBanner();"
+                                        [svgIcon]="'heroicons_solid:x-circle'">
+                                    </mat-icon>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div> 
