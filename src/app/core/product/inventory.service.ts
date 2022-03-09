@@ -1081,18 +1081,23 @@ export class InventoryService
      * 
      * @param name
      */
-    getCategories(name: string = null): Observable<ProductCategory[]>
+    getCategories(name: string = null, id: string = "", page: number = 0, size: number = 30, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc'): Observable<ProductCategory[]>
     {
 
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
 
-        const header = {
+          const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
             params: {
-                storeId: this.storeId$
+                name        : '' + name,
+                storeId     : this.storeId$,
+                page        : '' + page,
+                pageSize    : '' + size,
+                sortByCol   : '' + sort,
+                sortingOrder: '' + order.toUpperCase(),
             }
-        };
+        };        
         
         if (name !== null) {
             header.params["name"] = name;
@@ -1219,6 +1224,13 @@ export class InventoryService
                     // Update the categories with the new category
                     this._categories.next([newCategory.data, ...categories]);
 
+                    let paginationNumber = this._pagination["_value"]
+
+                    if (paginationNumber.length = 30) {
+                        paginationNumber.length = paginationNumber.length + 1
+
+                    }
+
                     // Return new category from observable
                     return newCategory;
                 })
@@ -1308,6 +1320,13 @@ export class InventoryService
 
                     // Update the categories
                     this._categories.next(categories);
+                    
+                    let paginationNumber = this._pagination["_value"]
+
+                    if (paginationNumber.length = 30) {
+                        paginationNumber.length = paginationNumber.length - 1
+
+                    }
 
                     // Return the deleted status
                     return response["status"];

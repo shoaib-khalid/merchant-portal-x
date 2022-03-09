@@ -180,3 +180,32 @@ export class GetStoreByIdResolver implements Resolve<any>
         return this._storesService.getStoresById(this.storeId$);
     }
 }
+
+@Injectable({
+    providedIn: 'root'
+})
+export class ProductCategoriesResolver implements Resolve<any>
+{
+    /**
+     * Constructor
+     */
+    constructor(private _inventoryService: InventoryService)
+    {
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Resolver
+     *
+     * @param route
+     * @param state
+     */
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<{ pagination: ProductPagination; products: ProductCategory[] }>
+    
+    {
+        return this._inventoryService.getByQueryCategories( 0 , 30, 'name', 'asc');
+    }
+}

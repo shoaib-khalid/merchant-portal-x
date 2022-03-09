@@ -286,24 +286,47 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
      */
     createCategory(): void
     {
-        const dialogRef = this._dialog.open(AddCategoryComponent, { disableClose: true });
-        dialogRef.afterClosed().subscribe(result => {
-            let category = {
-                name:result.name,
-                storeId: this.storeId$,
-                parentCategoryId: null,
-                thumbnailUrl:null,
-            };
-            const formData = new FormData();
-            formData.append("file", result.imagefiles[0]);
-    
-            // Create category on the server
-            this._inventoryService.createCategory(category, formData)
-                .pipe(takeUntil(this._unsubscribeAll))
-                .subscribe((response) => {
-                    response["data"]; 
-                });            
-        });
+        let categoriesLimit = this.pagination
+        if(categoriesLimit.length >= 30) {
+            // Open the confirmation dialog
+            const confirmation = this._fuseConfirmationService.open({
+                title   : "Categories Limit",
+                message : "Your category creation has reached it's limit of 30 categories!",
+                icon    : {
+                    show    : true,
+                    name    : "heroicons_outline:ban",
+                    color   : "warn" },
+                actions : {
+                    confirm : {
+                        label: 'Ok'
+                    },
+                    cancel  : {
+                        show: false,
+                        label: "Cancel"
+                        }
+                    }
+            });
+        } else {
+            const dialogRef = this._dialog.open(AddCategoryComponent, { disableClose: true });
+            dialogRef.afterClosed().subscribe(result => {
+                let category = {
+                    name:result.name,
+                    storeId: this.storeId$,
+                    parentCategoryId: null,
+                    thumbnailUrl:null,
+                };
+                const formData = new FormData();
+                formData.append("file", result.imagefiles[0]);
+        
+                // Create category on the server
+                this._inventoryService.createCategory(category, formData)
+                    .pipe(takeUntil(this._unsubscribeAll))
+                    .subscribe((response) => {
+                        response["data"]; 
+                    });
+            });
+            
+        }        
     }
 
     /**

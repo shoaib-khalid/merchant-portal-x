@@ -350,6 +350,7 @@ export class AddProductComponent implements OnInit, OnDestroy
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
+        
 
         // Filter by category dropdown in combo section
         this.localCategoryFilterControl.valueChanges
