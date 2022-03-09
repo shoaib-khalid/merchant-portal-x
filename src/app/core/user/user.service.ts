@@ -399,6 +399,9 @@ export class UserService
                         this._logging.debug("Response from  (Create PaymentProfile )",response);
     
                         let newUserPaymentDetails = response["data"];
+
+                        // Update the products
+                        this._clientPaymentdetails.next(newUserPaymentDetails);
     
                         // Return the new user payment details
                         return newUserPaymentDetails;
