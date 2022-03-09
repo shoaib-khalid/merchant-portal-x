@@ -277,7 +277,7 @@ export class EditProductComponent implements OnInit, OnDestroy
      * On init
      */
     ngOnInit(): void
-    {
+    {        
         // Horizontol stepper
         this.addProductForm = this._formBuilder.group({
             step1: this._formBuilder.group({
