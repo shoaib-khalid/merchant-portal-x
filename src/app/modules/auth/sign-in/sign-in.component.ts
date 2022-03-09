@@ -5,6 +5,12 @@ import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
 
+import { SocialAuthService } from "angularx-social-login";
+import { FacebookLoginProvider, GoogleLoginProvider } from "angularx-social-login";
+import { LoginOauthService } from './login-oauth.service';
+
+
+
 @Component({
     selector     : 'auth-sign-in',
     templateUrl  : './sign-in.component.html',
@@ -29,7 +35,11 @@ export class AuthSignInComponent implements OnInit
         private _activatedRoute: ActivatedRoute,
         private _authService: AuthService,
         private _formBuilder: FormBuilder,
-        private _router: Router
+        private _router: Router,
+        private _socialAuthService: SocialAuthService,
+        private _loginOauthService:LoginOauthService,
+
+
     )
     {
     }
@@ -116,5 +126,66 @@ export class AuthSignInComponent implements OnInit
                     this.showAlert = true;
                 }
             );
+    }
+
+    signInWithGoogle(): void {
+        // this.authService.signIn(GoogleLoginProvider.PROVIDER_ID);
+
+        this._socialAuthService.signIn(GoogleLoginProvider.PROVIDER_ID).then(userData => {
+
+            console.log('userData', userData);
+
+            // const body = {
+            // googleToken: userData.idToken,
+            // googleAppId:
+            //     '1016192814433-413aemq088t6cgcn0irnqgo22tuujs3a.apps.googleusercontent.com'
+            // };
+             const body =
+            {
+                email: userData.email,
+                loginType: "GOOGLE",
+                token: userData.idToken,
+                name:userData.name,
+                country:'MYS'
+            }
+            console.log('BODY :::::', body);
+            this._loginOauthService.loginOauth(body).subscribe(
+            (response: any) => {
+              
+                console.log("response ::::",response);
+                // this.router.navigate(['/example' ]);
+                
+            },
+            exception => {
+                console.log("exception ::::",exception);
+
+            }
+            );
+
+
+
+            return;
+
+        });
+    }
+    
+    signInWithFB(): void {
+        // this.authService.signIn(FacebookLoginProvider.PROVIDER_ID);
+        // this.authService.signIn(FacebookLoginProvider.PROVIDER_ID).then(userData => {
+
+        //     console.log('userData', userData);
+
+       
+        // });
+    }
+
+    signInWithApple(): void {
+        // this.authService.signIn(FacebookLoginProvider.PROVIDER_ID);
+        // this.authService.signIn(AppleLoginProvider.PROVIDER_ID).then(userData => {
+
+        //     console.log('userData', userData);
+
+       
+        // });
     }
 }

@@ -14,6 +14,11 @@ import { authSignInRoutes } from 'app/modules/auth/sign-in/sign-in.routing';
 import { SharedBackgroundComponent } from '../shared-background/shared-background.component';
 import { SharedBackgroundModule } from '../shared-background/shared-background.module';
 
+import { SocialLoginModule, SocialAuthServiceConfig } from 'angularx-social-login';
+
+import { GoogleLoginProvider,FacebookLoginProvider } from 'angularx-social-login';
+import { AppleLoginProvider } from './apple.provider';
+
 @NgModule({
     declarations: [
         AuthSignInComponent,
@@ -29,8 +34,44 @@ import { SharedBackgroundModule } from '../shared-background/shared-background.m
         FuseCardModule,
         FuseAlertModule,
         SharedModule,
-        SharedBackgroundModule
+        SharedBackgroundModule,
+        SocialLoginModule
     ],
+    providers: [
+        {
+          provide: 'SocialAuthServiceConfig',
+          useValue: {
+            autoLogin: false,
+            providers: [
+              {
+                id: GoogleLoginProvider.PROVIDER_ID,
+                provider: new GoogleLoginProvider(
+                  // 'clientId'                  
+                //   '155178094159-ivl0potc6e41dh1f0j8jleer92n96csp.apps.googleusercontent.com'
+                '905470792335-krfa0c32ajed37ktrn16ggj3km0783rd.apps.googleusercontent.com'
+                )
+              },
+            //   {
+            //     id: AppleLoginProvider.PROVIDER_ID,
+            //     provider: new AppleLoginProvider(
+            //       '[CLIENT_ID]'
+            //     ),
+            //   },
+              {
+                id: FacebookLoginProvider.PROVIDER_ID,
+                provider: new FacebookLoginProvider(
+                  // 'clientId'
+                  '283489330438468'
+                  // '283489330438468'
+                  )
+              }
+            ],
+            onError: (err) => {
+              console.error(err);
+            }
+          } as SocialAuthServiceConfig,
+        }
+      ],
 })
 export class AuthSignInModule
 {
