@@ -17,6 +17,7 @@ export class StoreTimingComponent implements OnInit
     timeAlert: any = [];
 
     storeTimingForm: FormGroup;
+    disabledProcced: boolean = false;
 
     _storeTiming: any;
     storeTiming: FormArray;
@@ -238,8 +239,10 @@ export class StoreTimingComponent implements OnInit
         //working Hour Display Error
         if (workingHourEndTime.getTime() === minToday.getTime()) {
             this.timeAlert[i] ="End time exceeds minimum time range for today (11:55PM)" ;
+            this.disabledProcced = true;
         } else if( workingHourStartTime >= workingHourEndTime){            
             this.timeAlert[i] ="End time range incorrect" ;
+            this.disabledProcced = true;
         }else{
             this.timeAlert[i] = " " ;
         }  
