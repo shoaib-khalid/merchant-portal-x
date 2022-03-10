@@ -115,8 +115,18 @@
                 <!-- Single sign-on buttons -->
                 <div class="flex items-center mt-8 space-x-4">
                     <button
+                    class="flex-auto"
+                    type="button"
+                    (click)="signInWithGoogle()"
+                    mat-stroked-button>
+                    <mat-icon
+                        class="icon-size-5"
+                        [svgIcon]="'iconsmind:google_plus'"></mat-icon>
+                    </button>
+                    <button
                         class="flex-auto"
                         type="button"
+                        (click)="signInWithFB()"
                         mat-stroked-button>
                         <mat-icon
                             class="icon-size-5"
@@ -125,19 +135,11 @@
                     <button
                         class="flex-auto"
                         type="button"
+                        (click)="signInWithApple()"
                         mat-stroked-button>
                         <mat-icon
                             class="icon-size-5"
                             [svgIcon]="'iconsmind:ios_apple'"></mat-icon>
-                    </button>
-                    <button
-                        class="flex-auto"
-                        type="button"
-                        (click)="signInWithGoogle()"
-                        mat-stroked-button>
-                        <mat-icon
-                            class="icon-size-5"
-                            [svgIcon]="'iconsmind:google_plus'"></mat-icon>
                     </button>
                 </div>
 

@@ -36,7 +36,7 @@ export class AppleLoginProvider extends BaseLoginProvider {
             scope: 'name email',
             redirectURI: 'https://auth.example.com/auth/apple',
             state: '[ANYTHING]', //used to prevent CSFR
-            usePopup: false,
+            usePopup: true,
           });
           resolve();
         }

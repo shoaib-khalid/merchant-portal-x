@@ -8,6 +8,10 @@ import { AuthService } from 'app/core/auth/auth.service';
 import { SocialAuthService } from "angularx-social-login";
 import { FacebookLoginProvider, GoogleLoginProvider } from "angularx-social-login";
 import { LoginOauthService } from './login-oauth.service';
+import { LocaleService } from 'app/core/locale/locale.service';
+import { AppleLoginProvider } from './apple.provider';
+import { ValidateOauthRequest } from './oauth.types';
+import { HttpHeaders } from '@angular/common/http';
 
 
 
@@ -28,6 +32,13 @@ export class AuthSignInComponent implements OnInit
     signInForm: FormGroup;
     showAlert: boolean = false;
 
+    //display field country
+    displayCountryField:boolean = false;
+    countryCode : string = '';
+
+    //validate Payload
+    validateOauthRequest : ValidateOauthRequest;
+
     /**
      * Constructor
      */
@@ -38,6 +49,8 @@ export class AuthSignInComponent implements OnInit
         private _router: Router,
         private _socialAuthService: SocialAuthService,
         private _loginOauthService:LoginOauthService,
+        private _localeService:LocaleService,
+
 
 
     )
@@ -61,8 +74,25 @@ export class AuthSignInComponent implements OnInit
             rememberMe: ['']
         });
         
-        // Disable the form
+        // We need to check first the location before we proceed to send the payload
         this.signInForm.disable();
+
+                //get current location
+                this._localeService.get().subscribe((resp)=>
+                {
+                    //the response status either fail or success
+                    if(resp.status === "success" && (resp.countryCode === 'MY' || resp.countryCode === 'PK')){
+    
+                        this.displayCountryField = true;
+                        this.countryCode = resp.countryCode === 'MY'?'MYS':resp.countryCode === 'PK'?'PAK':null;
+    
+                    } else{
+                        this.displayCountryField = false;
+                    }
+    
+                    return this.displayCountryField;
+                }
+            );
     }
     
     ngAfterViewInit() {
@@ -129,31 +159,25 @@ export class AuthSignInComponent implements OnInit
     }
 
     signInWithGoogle(): void {
-        // this.authService.signIn(GoogleLoginProvider.PROVIDER_ID);
 
         this._socialAuthService.signIn(GoogleLoginProvider.PROVIDER_ID).then(userData => {
 
-            console.log('userData', userData);
-
-            // const body = {
-            // googleToken: userData.idToken,
-            // googleAppId:
-            //     '1016192814433-413aemq088t6cgcn0irnqgo22tuujs3a.apps.googleusercontent.com'
-            // };
-             const body =
-            {
-                email: userData.email,
-                loginType: "GOOGLE",
-                token: userData.idToken,
-                name:userData.name,
-                country:'MYS'
-            }
-            console.log('BODY :::::', body);
-            this._loginOauthService.loginOauth(body).subscribe(
-            (response: any) => {
+            this.validateOauthRequest = new ValidateOauthRequest();
+            this.validateOauthRequest.country = this.countryCode;
+            this.validateOauthRequest.email = userData.email
+            this.validateOauthRequest.loginType = "GOOGLE";
+            this.validateOauthRequest.name = userData.name;
+            this.validateOauthRequest.token = userData.idToken;
+            
+            this._loginOauthService.loginOauth(this.validateOauthRequest).subscribe(
+            () => {
               
-                console.log("response ::::",response);
-                // this.router.navigate(['/example' ]);
+                // const redirectURL = this._activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/signed-in-redirect';
+
+                // // Navigate to the redirect url
+                // this._router.navigateByUrl(redirectURL);
+
+                this._router.navigate(['/stores' ]);
                 
             },
             exception => {
@@ -163,29 +187,27 @@ export class AuthSignInComponent implements OnInit
             );
 
 
-
-            return;
-
         });
     }
     
     signInWithFB(): void {
-        // this.authService.signIn(FacebookLoginProvider.PROVIDER_ID);
-        // this.authService.signIn(FacebookLoginProvider.PROVIDER_ID).then(userData => {
 
-        //     console.log('userData', userData);
+        this._socialAuthService.signIn(FacebookLoginProvider.PROVIDER_ID).then(userData => {
+
+            console.log('userData', userData);
 
        
-        // });
+        });
     }
 
     signInWithApple(): void {
-        // this.authService.signIn(FacebookLoginProvider.PROVIDER_ID);
-        // this.authService.signIn(AppleLoginProvider.PROVIDER_ID).then(userData => {
 
-        //     console.log('userData', userData);
+        this._socialAuthService.signIn(AppleLoginProvider.PROVIDER_ID).then(userData => {
+
+            console.log('userData', userData);
 
        
-        // });
+        });
     }
+
 }
