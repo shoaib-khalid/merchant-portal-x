@@ -18,6 +18,7 @@ import { SocialLoginModule, SocialAuthServiceConfig } from 'angularx-social-logi
 
 import { GoogleLoginProvider,FacebookLoginProvider } from 'angularx-social-login';
 import { AppleLoginProvider } from './apple.provider';
+import { SocialLooginClientId } from './oauth.types';
 
 @NgModule({
     declarations: [
@@ -46,23 +47,19 @@ import { AppleLoginProvider } from './apple.provider';
               {
                 id: GoogleLoginProvider.PROVIDER_ID,
                 provider: new GoogleLoginProvider(
-                  // 'clientId'                  
-                  '905470792335-krfa0c32ajed37ktrn16ggj3km0783rd.apps.googleusercontent.com'
+                  SocialLooginClientId.GOOGLE_CLIENT_ID
                 )
               },
               {
                 id: AppleLoginProvider.PROVIDER_ID,
                 provider: new AppleLoginProvider(
-                  // 'clientId'   
-                  '[CLIENT_ID]'
+                  SocialLooginClientId.APPLE_CLIENT_ID
                 ),
               },
               {
                 id: FacebookLoginProvider.PROVIDER_ID,
                 provider: new FacebookLoginProvider(
-                  // 'clientId'
-                  '283489330438468'
-                  // '2915126152079198'
+                  SocialLooginClientId.FACEBOOK_CLIENT_ID
                   )
               }
             ],

@@ -194,7 +194,30 @@ export class AuthSignInComponent implements OnInit
 
         this._socialAuthService.signIn(FacebookLoginProvider.PROVIDER_ID).then(userData => {
 
-            console.log('userData', userData);
+            this.validateOauthRequest = new ValidateOauthRequest();
+            this.validateOauthRequest.country = this.countryCode;
+            this.validateOauthRequest.email = userData.email
+            this.validateOauthRequest.loginType = "FACEBOOK";
+            this.validateOauthRequest.name = userData.name;
+            this.validateOauthRequest.token = userData.authToken;
+            this.validateOauthRequest.userId = userData.id;
+            
+            this._loginOauthService.loginOauth(this.validateOauthRequest).subscribe(
+            () => {
+              
+                // const redirectURL = this._activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/signed-in-redirect';
+
+                // // Navigate to the redirect url
+                // this._router.navigateByUrl(redirectURL);
+
+                this._router.navigate(['/stores' ]);
+                
+            },
+            exception => {
+                console.log("exception ::::",exception);
+
+            }
+            );
 
        
         });
