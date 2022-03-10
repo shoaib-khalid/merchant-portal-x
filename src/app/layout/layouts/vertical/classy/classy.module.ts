@@ -29,6 +29,7 @@ import { UserModule } from 'app/layout/common/user/user.module';
 import { SharedModule } from 'app/shared/shared.module';
 import { ClassyLayoutComponent } from 'app/layout/layouts/vertical/classy/classy.component';
 import { FuseLoadingBarModule } from '@fuse/components/loading-bar';
+import { RocketChatModule } from 'app/layout/common/rocket-chat/rocket-chat.module';
 
 @NgModule({
     declarations: [
@@ -53,7 +54,8 @@ import { FuseLoadingBarModule } from '@fuse/components/loading-bar';
         UserModule,
         SharedModule,
         MatSelectModule,
-        FuseLoadingBarModule
+        FuseLoadingBarModule,
+        RocketChatModule
     ],
     exports     : [
         ClassyLayoutComponent
