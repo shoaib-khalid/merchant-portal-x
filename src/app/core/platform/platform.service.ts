@@ -128,42 +128,49 @@ export class PlatformService
             map((platform) => {
 
                 let platformSlug;
+                let platformId;
                 let platformName;
                 let platformLogo;
                 let platformLogoDark;
                 let platformUrl;
                 if (this.url.domain === 'merchant.symplified.it') {
                     // Staging Symplified
+                    platformId = "symplified";
                     platformName = "SYMplified.biz";
                     platformSlug = "symplified-staging";
                     platformLogo = "logo_symplified_bg-removebg.png";
                     platformLogoDark = "logo_symplified_bg-removebg.png";
                 } else if (this.url.domain === 'merchant.symplified.biz') {
                     // Production Symplified
+                    platformId = "symplified";
                     platformName = "SYMplified.biz";
                     platformSlug = "symplified-production";
                     platformLogo = "logo_symplified_bg-removebg.png";
                     platformLogoDark = "logo_symplified_bg-removebg.png";
                 } else if (this.url.domain === 'merchant.symplified.test') {
                     // Development Symplified
+                    platformId = "symplified";
                     platformName = "SYMplified.biz";
                     platformSlug = "symplified-development";
                     platformLogo = "logo_symplified_bg-removebg.png";
                     platformLogoDark = "logo_symplified_bg-removebg.png";
                 } else if (this.url.domain === 'merchant2.symplified.it') {
                     // Staging Easydukan
+                    platformId = "easydukan";
                     platformName = "EasyDukan";
                     platformSlug = "easydukan-staging";
                     platformLogo = "logo_easydukan_bg-removebg.png";
                     platformLogoDark = "logo_easydukan_bg-removebg-dark.png";
                 } else if (this.url.domain === 'merchant.easydukan.co') {
                     // Production Easydukan
+                    platformId = "easydukan";
                     platformName = "EasyDukan";
                     platformSlug = "easydukan-production";
                     platformLogo = "logo_easydukan_bg-removebg.png";
                     platformLogoDark = "logo_easydukan_bg-removebg-dark.png";
                 } else if (this.url.domain === 'merchant.easydukan.test') {
                     // Development Easydukan
+                    platformId = "easydukan";
                     platformName = "EasyDukan";
                     platformSlug = "easydukan-development";
                     platformLogo = "logo_easydukan_bg-removebg.png";
@@ -173,6 +180,7 @@ export class PlatformService
                 }
                 
                 let newPlatform = {
+                    id: platformId,
                     slug: platformSlug,
                     name: platformName,
                     logo: platformLogo,
