@@ -61,6 +61,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
     searchInputControl: FormControl = new FormControl();
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
+    totalCategories: number;
 
     /**
      * Constructor
@@ -111,7 +112,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
 
 
         // Get the pagination
-        this._inventoryService.pagination$
+        this._inventoryService.categoriesPagination$
         .pipe(takeUntil(this._unsubscribeAll))
         .subscribe((pagination: ProductCategoryPagination) => {
 
@@ -272,11 +273,14 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
             {
 
                 // Delete the product on the server
-                this._inventoryService.deleteCategory(categoryId).subscribe(() => {
-
+                this._inventoryService.deleteCategory(categoryId).subscribe((resp) => {
+                    
                     // Close the details
                     this.closeDetails();
                 });
+
+                
+
             }
         });
     }
@@ -286,7 +290,8 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
      */
     createCategory(): void
     {
-        let categoriesLimit = this.pagination
+        let categoriesLimit = this.pagination;
+        
         if(categoriesLimit.length >= 30) {
             // Open the confirmation dialog
             const confirmation = this._fuseConfirmationService.open({

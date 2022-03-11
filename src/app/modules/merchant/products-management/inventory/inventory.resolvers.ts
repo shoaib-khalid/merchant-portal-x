@@ -3,7 +3,7 @@ import { ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot } from '@a
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { InventoryService } from 'app/core/product/inventory.service';
-import { Product, ProductCategory, ProductPagination, ProductVariant } from 'app/core/product/inventory.types';
+import { Product, ProductCategory, ProductCategoryPagination, ProductPagination, ProductVariant } from 'app/core/product/inventory.types';
 import { StoresService } from 'app/core/store/store.service';
 import { Store } from 'app/core/store/store.types';
 
@@ -29,7 +29,7 @@ export class InventoryCategoriesResolver implements Resolve<any>
      * @param route
      * @param state
      */
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<{ pagination: ProductPagination; products: ProductCategory[] }>
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<{ pagination: ProductCategoryPagination; products: ProductCategory[] }>
     
     {
         return this._inventoryService.getByQueryCategories();
@@ -203,7 +203,7 @@ export class ProductCategoriesResolver implements Resolve<any>
      * @param route
      * @param state
      */
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<{ pagination: ProductPagination; products: ProductCategory[] }>
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<{ pagination: ProductCategoryPagination; products: ProductCategory[] }>
     
     {
         return this._inventoryService.getByQueryCategories( 0 , 30, 'name', 'asc');
