@@ -44,8 +44,8 @@ export class AppComponent
     
                     // set icon
                     if (this.platform.id === "symplified") {
-                        this.favIcon16.href = 'assets/branding/deliverin/favicon/favicon-16x16.png';
-                        this.favIcon32.href = 'assets/branding/deliverin/favicon/favicon-32x32.png';
+                        this.favIcon16.href = 'assets/branding/symplified/favicon/favicon-16x16.png';
+                        this.favIcon32.href = 'assets/branding/symplified/favicon/favicon-32x32.png';
                     } else if (this.platform.id === "easydukan") {
                         this.favIcon16.href = 'assets/branding/easydukan/favicon/favicon-16x16.png';
                         this.favIcon32.href = 'assets/branding/easydukan/favicon/favicon-32x32.png';
