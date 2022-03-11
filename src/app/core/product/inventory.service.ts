@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { catchError, filter, map, switchMap, take, tap } from 'rxjs/operators';
-import { Product, ProductVariant, ProductInventory, ProductCategory, ProductPagination, ProductVariantAvailable, ProductPackageOption, ProductAssets } from 'app/core/product/inventory.types';
+import { Product, ProductVariant, ProductInventory, ProductCategory, ProductPagination, ProductVariantAvailable, ProductPackageOption, ProductAssets, ProductCategoryPagination } from 'app/core/product/inventory.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from '../logging/log.service';
@@ -22,6 +22,7 @@ export class InventoryService
 
     private _category: BehaviorSubject<ProductCategory | null> = new BehaviorSubject(null);
     private _categories: BehaviorSubject<ProductCategory[] | null> = new BehaviorSubject(null);
+    private _categoryPagination: BehaviorSubject<ProductCategoryPagination | null> = new BehaviorSubject(null);
 
     private _inventory: BehaviorSubject<ProductInventory | null> = new BehaviorSubject(null);
     private _inventories: BehaviorSubject<ProductInventory[] | null> = new BehaviorSubject(null);
@@ -75,6 +76,14 @@ export class InventoryService
     get categories$(): Observable<ProductCategory[]>
     {
         return this._categories.asObservable();
+    }
+
+    /**
+     * Getter for pagination
+     */
+    get categoriesPagination$(): Observable<ProductCategoryPagination>
+    {
+        return this._categoryPagination.asObservable();
     }
 
     /**
@@ -1126,7 +1135,7 @@ export class InventoryService
      * @param search
      */
     getByQueryCategories(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = ''):
-    Observable<{ pagination: ProductPagination; products: ProductCategory[] }>
+    Observable<{ pagination: ProductCategoryPagination; products: ProductCategory[] }>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
@@ -1156,7 +1165,7 @@ export class InventoryService
                     startIndex: response.data.pageable.offset,
                     endIndex: response.data.pageable.offset + response.data.numberOfElements - 1
                 }
-                this._pagination.next(_pagination);
+                this._categoryPagination.next(_pagination);
                 this._categories.next(response.data.content);
             })
         );
@@ -1223,14 +1232,13 @@ export class InventoryService
 
                     // Update the categories with the new category
                     this._categories.next([newCategory.data, ...categories]);
-
-                    let paginationNumber = this._pagination["_value"]
-
-                    if (paginationNumber.length = 30) {
-                        paginationNumber.length = paginationNumber.length + 1
-
-                    }
-
+                    
+                    let paginationNumber = this._categoryPagination["_value"]
+                    
+                    paginationNumber.length = paginationNumber.length + 1
+                        
+                    this._categoryPagination.next(paginationNumber)
+                    
                     // Return new category from observable
                     return newCategory;
                 })
@@ -1321,12 +1329,11 @@ export class InventoryService
                     // Update the categories
                     this._categories.next(categories);
                     
-                    let paginationNumber = this._pagination["_value"]
-
-                    if (paginationNumber.length = 30) {
-                        paginationNumber.length = paginationNumber.length - 1
-
-                    }
+                    let paginationNumber = this._categoryPagination["_value"]
+                    
+                    paginationNumber.length = paginationNumber.length - 1
+                        
+                    this._categoryPagination.next(paginationNumber)
 
                     // Return the deleted status
                     return response["status"];

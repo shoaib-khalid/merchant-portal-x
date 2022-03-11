@@ -115,12 +115,12 @@ thumbnailUrl: string;
 
  export interface ProductCategoryPagination
  {
-     length: number;
-     size: number;
-     page: number;
-     lastPage: number;
-     startIndex: number;
-     endIndex: number;
+    length: number;
+    size: number;
+    page: number;
+    lastPage: number;
+    startIndex: number;
+    endIndex: number;
  }
 
 /**
