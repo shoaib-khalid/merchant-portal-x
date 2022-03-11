@@ -5,6 +5,10 @@ import { fuseAnimations } from '@fuse/animations';
 import { AuthService } from 'app/core/auth/auth.service';
 import { UserService } from 'app/core/user/user.service';
 import { FuseAlertType } from '@fuse/components/alert';
+import { Platform } from 'app/core/platform/platform.types';
+import { PlatformService } from 'app/core/platform/platform.service';
+import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 @Component({
     selector     : 'auth-unlock-session',
@@ -16,6 +20,8 @@ export class AuthUnlockSessionComponent implements OnInit
 {
     @ViewChild('unlockSessionNgForm') unlockSessionNgForm: NgForm;
 
+    platform: Platform;
+    
     alert: { type: FuseAlertType; message: string } = {
         type   : 'success',
         message: ''
@@ -25,12 +31,15 @@ export class AuthUnlockSessionComponent implements OnInit
     unlockSessionForm: FormGroup;
     private _email: string;
 
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
+
     /**
      * Constructor
      */
     constructor(
         private _activatedRoute: ActivatedRoute,
         private _authService: AuthService,
+        private _platformsService: PlatformService,
         private _formBuilder: FormBuilder,
         private _router: Router,
         private _userService: UserService
@@ -52,6 +61,13 @@ export class AuthUnlockSessionComponent implements OnInit
             this.name = user.name;
             this._email = user.email;
         });
+
+        // Subscribe to platform data
+        this._platformsService.platform$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((platform: Platform) => {
+                this.platform = platform;
+            });
 
         // Create the form
         this.unlockSessionForm = this._formBuilder.group({

@@ -6,6 +6,8 @@ import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { FuseNavigationService, FuseVerticalNavigationComponent } from '@fuse/components/navigation';
 import { Navigation } from 'app/core/navigation/navigation.types';
 import { NavigationService } from 'app/core/navigation/navigation.service';
+import { PlatformService } from 'app/core/platform/platform.service';
+import { Platform } from 'app/core/platform/platform.types';
 
 @Component({
     selector     : 'compact-layout',
@@ -14,6 +16,7 @@ import { NavigationService } from 'app/core/navigation/navigation.service';
 })
 export class CompactLayoutComponent implements OnInit, OnDestroy
 {
+    platform: Platform;
     isScreenSmall: boolean;
     navigation: Navigation;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -24,6 +27,7 @@ export class CompactLayoutComponent implements OnInit, OnDestroy
     constructor(
         private _activatedRoute: ActivatedRoute,
         private _router: Router,
+        private _platformsService: PlatformService,
         private _navigationService: NavigationService,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
         private _fuseNavigationService: FuseNavigationService
@@ -57,6 +61,13 @@ export class CompactLayoutComponent implements OnInit, OnDestroy
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((navigation: Navigation) => {
                 this.navigation = navigation;
+            });
+
+        // Subscribe to platform data
+        this._platformsService.platform$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((platform: Platform) => {
+                this.platform = platform;
             });
 
         // Subscribe to media changes

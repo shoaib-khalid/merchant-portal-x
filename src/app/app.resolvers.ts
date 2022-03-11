@@ -8,6 +8,7 @@ import { QuickChatService } from 'app/layout/common/quick-chat/quick-chat.servic
 import { ShortcutsService } from 'app/layout/common/shortcuts/shortcuts.service';
 import { MerchantSetupService } from './core/merchant-setup/merchant-setup.service';
 import { StoresService } from './core/store/store.service';
+import { PlatformService } from './core/platform/platform.service';
 // import { LocaleService } from './core/locale/locale.service';
 // import { UserService } from 'app/core/user/user.service';
 
@@ -58,5 +59,35 @@ export class InitialDataResolver implements Resolve<any>
             this._storesService.getStoreRegionCountries(),
             // this._userService.get(),
         ]);
+    }
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class PlatformSetupResolver implements Resolve<any>
+{
+    /**
+     * Constructor
+     */
+    constructor(
+        private _platformsService: PlatformService
+    )
+    {
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Use this resolver to resolve initial mock-api for the application
+     *
+     * @param route
+     * @param state
+     */
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
+    {
+        return this._platformsService.set();
     }
 }

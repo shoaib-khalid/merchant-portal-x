@@ -10,6 +10,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { StoresService } from 'app/core/store/store.service';
 import { UserService } from 'app/core/user/user.service';
 import { Client, RegionCountry } from 'app/core/user/user.types';
+import { Platform } from 'app/core/platform/platform.types';
+import { PlatformService } from 'app/core/platform/platform.service';
 
 @Component({
     selector       : 'choose-vertical-page',
@@ -19,6 +21,8 @@ import { Client, RegionCountry } from 'app/core/user/user.types';
 })
 export class ChooseVerticalComponent
 {
+    platform: Platform;
+    
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     yearlyBilling: boolean = true;
     verticals: Vertical[];
@@ -39,6 +43,7 @@ export class ChooseVerticalComponent
         private _changeDetectorRef: ChangeDetectorRef,
         private _chooseVerticalService: ChooseVerticalService,
         private _localeService: LocaleService,
+        private _platformsService: PlatformService,
         // private _matDialog: MatDialog,
         private _storesService: StoresService,
         private _userService: UserService
@@ -83,7 +88,14 @@ export class ChooseVerticalComponent
                 this.createStoreCondition.errorTitle = "Maximum store creation has been reached";
                 this.createStoreCondition.errorDesc = "You have reached the maximum allowed store creation";
             }
-        })
+        });
+
+        // Subscribe to platform data
+        this._platformsService.platform$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((platform: Platform) => {
+                this.platform = platform;
+            });
     }
 
     /**

@@ -21,6 +21,8 @@ import { UserService } from 'app/core/user/user.service';
 import { Client } from 'app/core/user/user.types';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { takeUntil } from 'rxjs/operators';
+import { Platform } from 'app/core/platform/platform.types';
+import { PlatformService } from 'app/core/platform/platform.service';
 
 @Component({
     selector     : 'register-store-page',
@@ -32,6 +34,8 @@ import { takeUntil } from 'rxjs/operators';
 export class RegisterStoreComponent implements OnInit
 {
     @ViewChild('supportNgForm') supportNgForm: NgForm;
+
+    platform: Platform;
 
     storeId: string;
 
@@ -128,6 +132,7 @@ export class RegisterStoreComponent implements OnInit
         private _chooseVerticalService: ChooseVerticalService,
         private _router: Router,
         private _route: ActivatedRoute,
+        private _platformsService: PlatformService,
         private _fuseConfirmationService: FuseConfirmationService,
         private _domSanitizer: DomSanitizer,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
@@ -678,6 +683,13 @@ export class RegisterStoreComponent implements OnInit
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
+            });
+
+        // Subscribe to platform data
+        this._platformsService.platform$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((platform: Platform) => {
+                this.platform = platform;
             });
 
         // Get allowed store countries 

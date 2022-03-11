@@ -184,7 +184,7 @@ export class AuthService
                     "updated": userData.data.updated,
                     "roleId": userData.data.roleId,
                     "email": userData.data.email,
-                    "avatar": "assets/images/logo/logo_symplified_bg.png",
+                    "avatar": "assets/images/logo/logo_default_bg.jpg",
                     "status": "online",
                     "role": userData.data.roleId
                 };
@@ -295,7 +295,7 @@ export class AuthService
                     "updated": userData.data.updated,
                     "roleId": userData.data.roleId,
                     "email": userData.data.email,
-                    "avatar": "assets/images/logo/logo_symplified_bg.png",
+                    "avatar": "assets/images/logo/logo_default_bg.jpg",
                     "status": "online",
                     "role": userData.data.roleId
                 };

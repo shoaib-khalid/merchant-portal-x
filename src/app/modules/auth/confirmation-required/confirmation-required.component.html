@@ -3,11 +3,11 @@
         <div class="w-full max-w-80 sm:w-80 mx-auto sm:mx-0">
             <!-- Logo -->
             <div class="w-32">
-                <img src="assets/images/logo/logo_symplified_bg-removebg.png">
+                <img [src]="'assets/images/logo/' + platform.logo">
             </div>
 
             <!-- Title -->
-            <div class="mt-8 text-4xl font-extrabold tracking-tight leading-tight">Thank you for creating a merchant account on Symplified.Biz platform</div>
+            <div class="mt-8 text-4xl font-extrabold tracking-tight leading-tight">Thank you for creating a merchant account on {{platform.name}} platform</div>
             <div class="mt-4">
                 <span>“Your account has been successfully activated.  Please log in to your account with your username or email</span>
                 <a
