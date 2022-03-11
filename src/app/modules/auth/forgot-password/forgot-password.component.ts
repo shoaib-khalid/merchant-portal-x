@@ -1,9 +1,12 @@
 import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
-import { finalize } from 'rxjs/operators';
+import { finalize, takeUntil } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
+import { PlatformService } from 'app/core/platform/platform.service';
+import { Subject } from 'rxjs';
+import { Platform } from 'app/core/platform/platform.types';
 
 @Component({
     selector     : 'auth-forgot-password',
@@ -15,6 +18,8 @@ export class AuthForgotPasswordComponent implements OnInit
 {
     @ViewChild('forgotPasswordNgForm') forgotPasswordNgForm: NgForm;
 
+    platform: Platform;
+    
     alert: { type: FuseAlertType; message: string } = {
         type   : 'success',
         message: ''
@@ -22,11 +27,14 @@ export class AuthForgotPasswordComponent implements OnInit
     forgotPasswordForm: FormGroup;
     showAlert: boolean = false;
 
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
+
     /**
      * Constructor
      */
     constructor(
         private _authService: AuthService,
+        private _platformsService: PlatformService,
         private _formBuilder: FormBuilder
     )
     {
@@ -45,6 +53,13 @@ export class AuthForgotPasswordComponent implements OnInit
         this.forgotPasswordForm = this._formBuilder.group({
             email: ['', [Validators.required, Validators.email]]
         });
+
+        // Subscribe to platform data
+        this._platformsService.platform$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((platform: Platform) => {
+                this.platform = platform;
+            });
     }
 
     // -----------------------------------------------------------------------------------------------------

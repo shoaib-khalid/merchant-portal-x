@@ -15,7 +15,7 @@
             <div class="flex items-center justify-center">
                 <img
                     class="w-14"
-                    src="assets/images/logo/logo_symplified_bg-removebg.png">
+                    [src]="'assets/images/logo/' + platform.logoDark">
             </div>
             <!-- Components -->
             <div class="flex items-center ml-auto">
@@ -34,7 +34,7 @@
                 <ng-template #defaultImage>
                     <img
                         class="w-full h-full rounded-full"
-                        src="assets/images/logo/logo_symplified_bg.png"
+                        src="assets/images/logo/logo_default_bg.png"
                         alt="Client avatar">
                         <!-- <mat-icon
                             class="icon-size-24"
@@ -97,7 +97,7 @@
     <!-- Navigation footer hook -->
     <ng-container fuseVerticalNavigationContentFooter>
         <div class="flex flex-0 items-center justify-center h-16 pr-6 pl-2 mt-2 mb-4 opacity-70">
-            <span class="font-medium text-secondary text-xs">Symplified &copy; {{currentYear}} . version {{version}}</span>
+            <span class="font-medium text-secondary text-xs">{{platform.name}} &copy; {{currentYear}} . version {{version}}</span>
         </div>
     </ng-container>
 </fuse-vertical-navigation>

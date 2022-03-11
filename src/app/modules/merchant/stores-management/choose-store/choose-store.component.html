@@ -20,7 +20,7 @@
                 What do you want to learn today?
             </div> -->
             <div class="max-w-2xl mt-6 sm:text-2xl text-center tracking-tight text-secondary">
-                Simply manage your store with SYMPlified
+                Simply manage your store with {{platform.name}}
             </div>
         </div>
     </div>
@@ -146,7 +146,7 @@
                                         <img *ngIf="displayStoreLogo(store); else defaultLogo" class="max-h-20 my-4 w-auto" [src]="displayStoreLogo(store)" alt="">
                                     </div>
                                     <ng-template #defaultLogo>
-                                        <img class="max-h-20 my-4 w-auto" [src]="'assets/images/logo/logo_symplified_bg-removebg.png'" alt="">
+                                        <img class="max-h-20 my-4 w-auto" [src]="'assets/images/logo/' + platform.logo" alt="">
                                     </ng-template>
                                 </div>
                                 <!-- Store title & description -->

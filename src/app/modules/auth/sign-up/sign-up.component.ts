@@ -5,8 +5,12 @@ import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
 import { LocaleService } from 'app/core/locale/locale.service';
+import { PlatformService } from 'app/core/platform/platform.service';
+import { Platform } from 'app/core/platform/platform.types';
 import { StoresService } from 'app/core/store/store.service';
 import { StoreRegionCountries } from 'app/core/store/store.types';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
     selector     : 'auth-sign-up',
@@ -18,6 +22,8 @@ export class AuthSignUpComponent implements OnInit
 {
     @ViewChild('signUpNgForm') signUpNgForm: NgForm;
 
+    platform: Platform;
+    
     alert: { type: FuseAlertType; message: string } = {
         type   : 'success',
         message: ''
@@ -32,6 +38,8 @@ export class AuthSignUpComponent implements OnInit
     //display field country
     displayCountryField:boolean = false;
 
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
+
     /**
      * Constructor
      */
@@ -39,6 +47,7 @@ export class AuthSignUpComponent implements OnInit
         private _authService: AuthService,
         private _formBuilder: FormBuilder,
         private _router: Router,
+        private _platformsService: PlatformService,
         private _storesService: StoresService,
         private _localeService:LocaleService,
 
@@ -65,6 +74,13 @@ export class AuthSignUpComponent implements OnInit
                 countryId:['', Validators.required]
             }
         );
+
+        // Subscribe to platform data
+        this._platformsService.platform$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((platform: Platform) => {
+                this.platform = platform;
+            });
 
         // get value for country list
         this._storesService.getStoreRegionCountries().subscribe((response: StoreRegionCountries[])=>{

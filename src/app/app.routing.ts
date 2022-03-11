@@ -2,7 +2,7 @@ import { Route } from '@angular/router';
 import { AuthGuard } from 'app/core/auth/guards/auth.guard';
 import { NoAuthGuard } from 'app/core/auth/guards/noAuth.guard';
 import { LayoutComponent } from 'app/layout/layout.component';
-import { InitialDataResolver } from 'app/app.resolvers';
+import { InitialDataResolver, PlatformSetupResolver } from 'app/app.resolvers';
 import { UserRole } from 'app/core/user/user.roles';
 
 // @formatter:off
@@ -47,6 +47,9 @@ export const appRoutes: Route[] = [
         data: {
             layout: 'empty'
         },
+        resolve    : {
+            platformSetup: PlatformSetupResolver
+        },
         children: [
             // you also need to add in auth.interceptor to avoid page refresh if there's any auth error
             {path: 'confirmation-required', loadChildren: () => import('app/modules/auth/confirmation-required/confirmation-required.module').then(m => m.AuthConfirmationRequiredModule)},
@@ -66,6 +69,9 @@ export const appRoutes: Route[] = [
         data: {
             layout: 'empty'
         },
+        resolve    : {
+            platformSetup: PlatformSetupResolver
+        },
         children: [
             {path: 'sign-out', loadChildren: () => import('app/modules/auth/sign-out/sign-out.module').then(m => m.AuthSignOutModule)},
             {path: 'unlock-session', loadChildren: () => import('app/modules/auth/unlock-session/unlock-session.module').then(m => m.AuthUnlockSessionModule)},
@@ -84,6 +90,7 @@ export const appRoutes: Route[] = [
         },
         resolve    : {
             initialData: InitialDataResolver,
+            platformSetup: PlatformSetupResolver
         },
         children   : [
             {path: '', loadChildren: () => import('app/modules/merchant/merchant.module').then(m => m.MerchantModule)},

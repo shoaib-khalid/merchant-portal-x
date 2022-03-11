@@ -1,11 +1,14 @@
 import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
-import { finalize } from 'rxjs/operators';
+import { finalize, takeUntil } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseValidators } from '@fuse/validators';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
 import { ActivatedRoute } from '@angular/router';
+import { PlatformService } from 'app/core/platform/platform.service';
+import { Subject } from 'rxjs';
+import { Platform } from 'app/core/platform/platform.types';
 
 @Component({
     selector     : 'auth-reset-password',
@@ -17,6 +20,8 @@ export class AuthResetPasswordComponent implements OnInit
 {
     @ViewChild('resetPasswordNgForm') resetPasswordNgForm: NgForm;
 
+    platform: Platform;
+    
     clientId: string;
     code: string;
 
@@ -27,11 +32,14 @@ export class AuthResetPasswordComponent implements OnInit
     resetPasswordForm: FormGroup;
     showAlert: boolean = false;
 
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
+
     /**
      * Constructor
      */
     constructor(
         private _authService: AuthService,
+        private _platformsService: PlatformService,
         private _formBuilder: FormBuilder,
         private _route: ActivatedRoute
     )
@@ -56,6 +64,13 @@ export class AuthResetPasswordComponent implements OnInit
                 validators: FuseValidators.mustMatch('password', 'passwordConfirm')
             }
         );
+
+        // Subscribe to platform data
+        this._platformsService.platform$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((platform: Platform) => {
+                this.platform = platform;
+            });
 
         this._route.queryParams.subscribe(params => {
             this.clientId = params['id'];

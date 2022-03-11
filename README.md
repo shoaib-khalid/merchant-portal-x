@@ -1,4 +1,4 @@
-# Symplified Merchant Portal (MP)
+# Symplified / EasyDukan - Merchant Portal (MP)
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli)
 

@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { Subject, timer } from 'rxjs';
 import { finalize, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import { AuthService } from 'app/core/auth/auth.service';
+import { PlatformService } from 'app/core/platform/platform.service';
+import { Platform } from 'app/core/platform/platform.types';
 
 @Component({
     selector     : 'auth-sign-out',
@@ -11,6 +13,8 @@ import { AuthService } from 'app/core/auth/auth.service';
 })
 export class AuthSignOutComponent implements OnInit, OnDestroy
 {
+    platform: Platform;
+
     countdown: number = 5;
     countdownMapping: any = {
         '=1'   : '# second',
@@ -23,6 +27,7 @@ export class AuthSignOutComponent implements OnInit, OnDestroy
      */
     constructor(
         private _authService: AuthService,
+        private _platformsService: PlatformService,
         private _router: Router
     )
     {
@@ -39,6 +44,13 @@ export class AuthSignOutComponent implements OnInit, OnDestroy
     {
         // Sign out
         this._authService.signOut();
+
+        // Subscribe to platform data
+        this._platformsService.platform$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((platform: Platform) => {
+                this.platform = platform;
+            });
 
         // Redirect after the countdown
         timer(1000, 1000)

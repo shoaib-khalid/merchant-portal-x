@@ -12,6 +12,8 @@ import { Store } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
 import { InventoryService } from 'app/core/product/inventory.service';
 import {environment} from 'environments/environment';
+import { Platform } from 'app/core/platform/platform.types';
+import { PlatformService } from 'app/core/platform/platform.service';
 
 @Component({
     selector     : 'classy-layout',
@@ -20,6 +22,7 @@ import {environment} from 'environments/environment';
 })
 export class ClassyLayoutComponent implements OnInit, OnDestroy
 {
+    platform: Platform;
     isScreenSmall: boolean;
     navigation: Navigation;
     client: Client;
@@ -39,6 +42,7 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
         private _changeDetectorRef: ChangeDetectorRef,
         private _router: Router,
         private _navigationService: NavigationService,
+        private _platformsService: PlatformService,
         private _userService: UserService,
         private _storesService: StoresService,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
@@ -85,6 +89,13 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((navigation: Navigation) => {
                 this.navigation = navigation;
+            });
+
+        // Subscribe to platform data
+        this._platformsService.platform$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((platform: Platform) => {
+                this.platform = platform;
             });
 
         // Subscribe to the user service

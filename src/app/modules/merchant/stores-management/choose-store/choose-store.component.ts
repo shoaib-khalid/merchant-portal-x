@@ -13,6 +13,8 @@ import { MatSort } from '@angular/material/sort';
 import { FormControl } from '@angular/forms';
 import { items } from 'app/mock-api/apps/file-manager/data';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
+import { Platform } from 'app/core/platform/platform.types';
+import { PlatformService } from 'app/core/platform/platform.service';
 
 @Component({
     selector       : 'choose-store',
@@ -24,6 +26,8 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
 {
     @ViewChild(MatPaginator) private _paginator: MatPaginator;
     @ViewChild(MatSort) private _sort: MatSort;
+
+    platform: Platform;
 
     categories: StoreCategory[];
     stores$: Observable<Store[]>;
@@ -51,6 +55,7 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
         private _activatedRoute: ActivatedRoute,
         private _fuseConfirmationService: FuseConfirmationService,
         private _changeDetectorRef: ChangeDetectorRef,
+        private _platformsService: PlatformService,
         private _router: Router,
         private _chooseStoreService: ChooseStoreService,
         private _inventoryService: InventoryService,
@@ -95,6 +100,13 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
+            });
+
+        // Subscribe to platform data
+        this._platformsService.platform$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((platform: Platform) => {
+                this.platform = platform;
             });
 
         // Get the stores

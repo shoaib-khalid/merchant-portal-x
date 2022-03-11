@@ -4,6 +4,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
+import { PlatformService } from 'app/core/platform/platform.service';
+import { Platform } from 'app/core/platform/platform.types';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
     selector     : 'auth-sign-in',
@@ -15,6 +19,8 @@ export class AuthSignInComponent implements OnInit
 {
     @ViewChild('signInNgForm') signInNgForm: NgForm;
 
+    platform: Platform;
+    
     alert: { type: FuseAlertType; message: string } = {
         type   : 'success',
         message: ''
@@ -22,12 +28,15 @@ export class AuthSignInComponent implements OnInit
     signInForm: FormGroup;
     showAlert: boolean = false;
 
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
+
     /**
      * Constructor
      */
     constructor(
         private _activatedRoute: ActivatedRoute,
         private _authService: AuthService,
+        private _platformsService: PlatformService,
         private _formBuilder: FormBuilder,
         private _router: Router
     )
@@ -50,6 +59,13 @@ export class AuthSignInComponent implements OnInit
             password  : ['', Validators.required],
             rememberMe: ['']
         });
+
+        // Subscribe to platform data
+        this._platformsService.platform$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((platform: Platform) => {
+                this.platform = platform;
+            });
         
         // Disable the form
         this.signInForm.disable();
