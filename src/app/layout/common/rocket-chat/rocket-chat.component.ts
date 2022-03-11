@@ -1,5 +1,5 @@
-import { Component, ElementRef, HostBinding, HostListener, NgZone, OnDestroy, OnInit, Renderer2, ViewChild, ViewEncapsulation } from '@angular/core';
-import { ScrollStrategy, ScrollStrategyOptions } from '@angular/cdk/overlay';
+import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { Subject } from 'rxjs';
 
 @Component({
     selector     : 'app-rocket-chat',
@@ -8,9 +8,9 @@ import { ScrollStrategy, ScrollStrategyOptions } from '@angular/cdk/overlay';
     encapsulation: ViewEncapsulation.None,
     exportAs     : 'rocketChat'
 })
-export class RocketChatComponent implements OnInit
+export class RocketChatComponent implements OnInit,OnDestroy
 {
-  
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     /**
      * Constructor
@@ -19,21 +19,29 @@ export class RocketChatComponent implements OnInit
     )
     {
     }
-
-
+    
+    
     ngOnInit(){
-        showChat(window, document, 'script', `https://support.symplified.it/livechat`);
+        
+        if (localStorage.getItem("accessToken") !== null){
+            showChat(window, document, 'script', `https://support.symplified.it/livechat`);
+        }     
+
+    }
+
+
+    ngOnDestroy(): void {
+        // Unsubscribe from all subscriptions
+        this._unsubscribeAll.next();
+        this._unsubscribeAll.complete();
     }
     
-
-    
- 
 }
 
-function showChat(w, d, s, u) {
-    w.RocketChat = function (c) { w.RocketChat._.push(c) }; w.RocketChat._ = []; w.RocketChat.url = u;
+function showChat(w:Window & typeof globalThis, d:Document, s:string, u:string) {
+    (<any>w).RocketChat = function (c) { (<any>w).RocketChat._.push(c) }; (<any>w).RocketChat._ = []; (<any>w).RocketChat.url = u;
     var h = d.getElementsByTagName(s)[0], j = d.createElement(s);
-    j.async = true; j.src = `https://support.symplified.it/livechat/rocketchat-livechat.min.js?_=201903270000`;
+    (<any>j).async = true; (<any>j).src = `https://support.symplified.it/livechat/rocketchat-livechat.min.js?_=201903270000`;
     h.parentNode.insertBefore(j, h);
 }
 
