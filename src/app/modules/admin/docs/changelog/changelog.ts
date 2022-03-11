@@ -18,7 +18,7 @@ export class ChangelogComponent
                     type: 'Fix',
                     list: [
                         '(ProductManagement) Fix Limit categories bugs',
-                        '(DiscountManagement) Fix apply single image unable scroll',
+                        '(DiscountManagement) Fix Discount Banner Management page unable to scroll',
                     ]
                 }
             ]
