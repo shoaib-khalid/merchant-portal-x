@@ -9,6 +9,29 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 export class ChangelogComponent
 {
     changelog: any[] = [
+        //v0.0.33
+        {
+            version    : 'v0.0.33',
+            releaseDate: 'Mar 14, 2022',
+            changes    : [
+                {
+                    type: 'Fix',
+                    list: [
+                        '(ProductManagement) Fix Update button still disabled even after upload image',
+						'(ProductManagement) Trim product name when create new products to remove empty spaces',
+						'(ProductManagement) Fix unable to edit categories in Manage Product page -> Add/Edit window',
+                        '(DiscountManagement) Fix discount banner and timing'
+                    ]
+                },
+                {
+                    type: 'Added',
+                    list: [
+                        '(ProductManagement) Add warning dialog if image filename is longer than 50 chars'
+                    ]
+                }
+				
+            ]
+        },
         //v0.0.32
         {
             version    : 'v0.0.32',
