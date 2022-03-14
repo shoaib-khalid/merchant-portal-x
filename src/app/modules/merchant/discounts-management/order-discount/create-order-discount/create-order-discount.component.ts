@@ -464,9 +464,13 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
             _startTime = parseInt(startTime.timeHour) + 12;
         } else if (startTime.timeAmPm === "AM" && startTime.timeHour === "12") {
             _startTime = parseInt(startTime.timeHour) - 12;
+            _startTime = (_startTime === 0) ? "00" : _startTime;
         } else {
             _startTime = startTime.timeHour;
         }
+
+        console.log("_startTime::::::::::",_startTime);
+        
 
         // Set new start date and time
         const startDateTime = new Date();
@@ -496,9 +500,13 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
             _endTime = parseInt(endTime.timeHour) + 12;
         } else if (endTime.timeAmPm === "AM" && endTime.timeHour === "12") {
             _endTime = parseInt(endTime.timeHour) - 12;
+            _endTime = (_endTime === 0) ? "00" : _endTime;
         } else {
             _endTime = endTime.timeHour;
         }
+
+        console.log("_endTime",_endTime);
+        
 
         // Set new end date and time
         const endDateTime = new Date();
