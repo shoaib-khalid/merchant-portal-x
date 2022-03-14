@@ -1096,6 +1096,34 @@ export class EditProductComponent implements OnInit, OnDestroy
         {
             return;
         }
+
+        // Return and throw warning dialog if image filename is more than 100 characters
+        if ( fileList[0].name.length > 50 )
+        {
+            this._fuseConfirmationService.open({
+                title  : 'The file name is too long',
+                message: 'The file name cannot exceed 50 characters (including spaces).',
+                icon       : {
+                    show : true,
+                    name : 'heroicons_outline:exclamation',
+                    color: 'warning'
+                },
+                actions: {
+                    
+                    cancel: {
+                        label: 'OK',
+                        show: true
+                        },
+                    confirm: {
+                        show: false,
+                    }
+                    }
+            });
+
+            return;
+        }
+
+        
         
         var reader = new FileReader();
         reader.readAsDataURL(file); 
@@ -1104,6 +1132,10 @@ export class EditProductComponent implements OnInit, OnDestroy
                 this.images.push(reader.result);
                 this.imagesFile.push(file);
                 this.currentImageIndex = this.images.length - 1;
+
+                // set as dirty to remove pristine condition of the form control
+                this.addProductForm.get('step1').markAsDirty();
+
             } else {
                 this.images[this.currentImageIndex] = reader.result + "";
             }
@@ -1234,6 +1266,7 @@ export class EditProductComponent implements OnInit, OnDestroy
         
         product.seoName = product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
         product.seoUrl = storeFrontURL + '/product/' + product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
+        product.name = product.name.trim();
 
         // Get the product object for updating the product
         const { productAssets, productInventories, productReviews, productVariants, ...productToUpdate} = product;

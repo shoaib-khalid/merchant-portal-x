@@ -683,6 +683,33 @@ export class AddProductComponent implements OnInit, OnDestroy
         {
             return;
         }
+
+        // Return and throw warning dialog if image filename is more than 100 characters
+        if ( fileList[0].name.length > 50 )
+        {
+            this._fuseConfirmationService.open({
+                title  : 'The file name is too long',
+                message: 'The file name cannot exceed 50 characters (including spaces).',
+                icon       : {
+                    show : true,
+                    name : 'heroicons_outline:exclamation',
+                    color: 'warning'
+                },
+                actions: {
+                    
+                    cancel: {
+                        label: 'OK',
+                        show: true
+                        },
+                    confirm: {
+                        show: false,
+                    }
+                    }
+            });
+
+            return;
+        }
+        
         
         var reader = new FileReader();
         reader.readAsDataURL(file); 
@@ -795,7 +822,8 @@ export class AddProductComponent implements OnInit, OnDestroy
         newProductBody["packingSize"] = newProductBody.packagingSize ? newProductBody.packagingSize : "S";
         newProductBody["isPackage"] = (this.productType === "combo") ? true : false;
         newProductBody["allowOutOfStockPurchases"] = ((this.store$.verticalCode === "FnB" || this.store$.verticalCode === "FnB_PK") && (newProductBody.status !== "OUTOFSTOCK")) ? true : false;
-                
+        newProductBody["name"] = newProductBody.name.trim();
+
         // Create the product
         this._inventoryService.createProduct(newProductBody)
             .pipe(

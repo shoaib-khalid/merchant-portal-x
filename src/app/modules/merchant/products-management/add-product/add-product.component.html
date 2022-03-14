@@ -422,7 +422,7 @@
                                             <!-- Categories editing -->
                                             <ng-container *ngIf="productCategoriesEditMode">
                                                 <div class="p-4 space-y-2">
-                                                    <ng-container>
+                                                    <ng-container *ngFor="let category of filteredProductCategories; trackBy: trackByFn;">
                                                         <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full">
                                                             <input
                                                                 matInput
