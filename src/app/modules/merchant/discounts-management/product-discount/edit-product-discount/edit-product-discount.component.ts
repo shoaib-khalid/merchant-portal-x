@@ -751,6 +751,7 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
             _startTime = parseInt(startTime.timeHour) + 12;
         } else if (startTime.timeAmPm === "AM" && startTime.timeHour === "12") {
             _startTime = parseInt(startTime.timeHour) - 12;
+            _startTime = (_startTime === 0) ? "00" : _startTime;
         } else {
             _startTime = startTime.timeHour;
         }
@@ -783,6 +784,7 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
             _endTime = parseInt(endTime.timeHour) + 12;
         } else if (endTime.timeAmPm === "AM" && endTime.timeHour === "12") {
             _endTime = parseInt(endTime.timeHour) - 12;
+            _endTime = (_endTime === 0) ? "00" : _endTime;
         } else {
             _endTime = endTime.timeHour;
         }

@@ -340,6 +340,9 @@ export class DiscountBannerComponent implements OnInit, AfterViewInit, OnDestroy
             this.files.selectedFileName = this.files.selectedFiles[i].name;
             }
         }
+
+        this.files.toDelete = false;
+
         this._changeDetectorRef.markForCheck();
     }
     
@@ -406,32 +409,37 @@ export class DiscountBannerComponent implements OnInit, AfterViewInit, OnDestroy
             if (discountBanner.selectedFiles && discountBanner.assetId !== null && discountBanner.toDelete === false) {                   
                 this._storesService.putAssets(this.storeId, discountBanner.assetId, formData, "DiscountBannerUrl")
                     .subscribe(response => {
-                        console.info('Uploaded the file successfully');
+                        console.info('Updated the file successfully');
 
                         // Mark for check
                         this._changeDetectorRef.markForCheck();
                     }, (err: any) => {
-                            console.error('Could not upload the file');
+                            console.error('Could not update the file');
                     });
-            } else if (discountBanner.toDelete === true && discountBanner.assetId !== null) {
+            } else if (discountBanner.toDelete === true && discountBanner.assetId !== null && discountBanner.assetId) {
                 this._storesService.deleteAssets(this.storeId, discountBanner.assetId)
                     .subscribe(response => {
-                        console.info('Uploaded the file successfully');
+                        console.info('Deleted the file successfully');
 
+                        discountBanner.toDelete = false;
                         // Mark for check
                         this._changeDetectorRef.markForCheck();
                         },
                         (err: any) => {
-                            console.error('Could not upload the file');
+                            console.error('Could not delete the file');
                         });
             } else {
                 if (discountBanner.selectedFiles && discountBanner.selectedFiles !== null) {
                     this._storesService.postAssets(this.storeId, "DiscountBannerUrl", formData,"DiscountBanner")
                         .subscribe(response => {
-                            console.info('Uploaded the file successfully');
+                            console.info('Uploaded the file successfully', response);
 
-                            discountBanner.assetId = event["id"];
-
+                            response.forEach(element => {
+                                if(element.assetType === "DiscountBannerUrl"){
+                                    discountBanner.assetId = element.id
+                                }
+                            });
+                            
                             // Mark for check
                             this._changeDetectorRef.markForCheck();
                         },
