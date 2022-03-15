@@ -10,7 +10,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { ProductCategory, ProductCategoryPagination } from 'app/core/product/inventory.types';
 import { AddCategoryComponent } from '../add-category/add-category.component';
-import { Product } from 'app/core/product/inventory.types';
+import { Store, StoreAsset } from 'app/core/store/store.types';
+import { StoresService } from 'app/core/store/store.service';
 
 @Component({
     selector       : 'categories',
@@ -38,6 +39,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
 
     // store id
     storeId: string;
+    store: Store;
 
     // products$: Observable<Product[]>;
     categories$: Observable<ProductCategory[]>;
@@ -71,6 +73,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
         private _fuseConfirmationService: FuseConfirmationService,
         private _formBuilder: FormBuilder,
         private _inventoryService: InventoryService,
+        private _storesService: StoresService,
         public _dialog: MatDialog,
     )
     {
@@ -110,6 +113,14 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
         // Get the categories
         this.categories$ = this._inventoryService.categories$;
 
+        this._storesService.store$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe((response: Store) => {
+            this.store = response;
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
 
         // Get the pagination
         this._inventoryService.categoriesPagination$
@@ -325,10 +336,27 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
         
                 // Create category on the server
                 this._inventoryService.createCategory(category, formData)
-                    .pipe(takeUntil(this._unsubscribeAll))
-                    .subscribe((response) => {
-                        response["data"]; 
-                    });
+                .pipe(takeUntil(this._unsubscribeAll))
+                .subscribe((response) => {
+                    response["data"]; 
+                },(error) => {
+
+                    if (error.status === 409) {
+                        // Open the confirmation dialog
+                        const confirmation = this._fuseConfirmationService.open({
+                            title  : 'Name already existed',
+                            message: 'The category name inserted is already existed, please create new category with a different name',
+                            actions: {
+                                confirm: {
+                                    label: 'Ok'
+                                },
+                                cancel : {
+                                    show : false,
+                                }
+                            }
+                        });
+                    }
+                });
             });
             
         }        
@@ -431,50 +459,50 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
         return item.id || index;
     }
 
- /**
-     * 
-     * @param event 
-     */
-  selectFiles(fileType,event: any): void {
-      
-    // find index of object this.files
-    let index = this.files.findIndex(preview => preview.type === fileType);
-
-    // set each of the attributes
-    this.files[index].fileSource = null;
-    this.files[index].selectedFileName = "";
-    this.files[index].selectedFiles = event.target.files;
-    
-    if (this.files[index].selectedFiles && this.files[index].selectedFiles[0]) {
-        const numberOfFiles = this.files[index].selectedFiles.length;
-        for (let i = 0; i < numberOfFiles; i++) {
-        const reader = new FileReader();
+    /**
+    * 
+    * @param event 
+    */
+    selectFiles(fileType,event: any): void {
         
-        reader.onload = (e: any) => {
+        // find index of object this.files
+        let index = this.files.findIndex(preview => preview.type === fileType);
+
+        // set each of the attributes
+        this.files[index].fileSource = null;
+        this.files[index].selectedFileName = "";
+        this.files[index].selectedFiles = event.target.files;
+        
+        if (this.files[index].selectedFiles && this.files[index].selectedFiles[0]) {
+            const numberOfFiles = this.files[index].selectedFiles.length;
+            for (let i = 0; i < numberOfFiles; i++) {
+            const reader = new FileReader();
             
-            // set this.files[index].delete to false 
-            this.files[index].toDelete = false;
+            reader.onload = (e: any) => {
+                
+                // set this.files[index].delete to false 
+                this.files[index].toDelete = false;
 
-            this.files[index].fileSource = e.target.result;
+                this.files[index].fileSource = e.target.result;
 
-            var image = new Image();
-            image.src = e.target.result;
+                var image = new Image();
+                image.src = e.target.result;
 
-            image.onload = (imageInfo: any) => {
-                this.files[index].selectedImageWidth = imageInfo.path[0].width;
-                this.files[index].selectedImageHeight = imageInfo.path[0].height;
+                image.onload = (imageInfo: any) => {
+                    this.files[index].selectedImageWidth = imageInfo.path[0].width;
+                    this.files[index].selectedImageHeight = imageInfo.path[0].height;
 
-                this._changeDetectorRef.markForCheck();
+                    this._changeDetectorRef.markForCheck();
+                };
+
+                this._changeDetectorRef.markForCheck();                
             };
-
-            this._changeDetectorRef.markForCheck();                
-        };
-        reader.readAsDataURL(this.files[index].selectedFiles[i]);
-        this.files[index].selectedFileName = this.files[index].selectedFiles[i].name;
+            reader.readAsDataURL(this.files[index].selectedFiles[i]);
+            this.files[index].selectedFileName = this.files[index].selectedFiles[i].name;
+            }
         }
+        this._changeDetectorRef.markForCheck();
     }
-    this._changeDetectorRef.markForCheck();
-}
 
     // This fuction used to sort object
     dynamicSort(property) {
@@ -493,6 +521,16 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
 
             var result = ( aProp.toLowerCase() < bProp.toLowerCase()) ? -1 : (aProp.toLowerCase() > bProp.toLowerCase()) ? 1 : 0;
             return (result * sortOrder);
+        }
+    }
+
+    displayStoreLogo(storeAssets: StoreAsset[]) {
+        
+        let storeAssetsIndex = storeAssets.findIndex(item => item.assetType === 'LogoUrl');
+        if (storeAssetsIndex > -1) {
+            return storeAssets[storeAssetsIndex].assetUrl;
+        } else {
+            return 'assets/branding/symplified/logo/symplified.png'
         }
     }
 }
