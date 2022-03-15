@@ -169,6 +169,7 @@ export class EditProductComponent implements OnInit, OnDestroy
     variantimages: any = [];
     productAssetsFA: FormArray;
     imagesToBeDeleted: any = []; // images to be deleted from BE
+    imagesWithId: any = [];
 
 
 
@@ -554,6 +555,10 @@ export class EditProductComponent implements OnInit, OnDestroy
         let imagesObjSorted = product.productAssets.sort(this.dynamicSort("itemCode"));
         let imageArr = imagesObjSorted.map(item => item.url);
 
+        imagesObjSorted.forEach(item => {
+            this.imagesWithId.push({id: item.id, url: item.url})
+        })
+        
         this.images = imageArr;
 
         // get thumbnail index
@@ -1124,21 +1129,27 @@ export class EditProductComponent implements OnInit, OnDestroy
         }
 
         
-        
         var reader = new FileReader();
         reader.readAsDataURL(file); 
         reader.onload = (_event)  => {
+            // add new image
             if(!images.length === true) {
                 this.images.push(reader.result);
                 this.imagesFile.push(file);
                 this.currentImageIndex = this.images.length - 1;
-
-                // set as dirty to remove pristine condition of the form control
-                this.addProductForm.get('step1').markAsDirty();
-
-            } else {
+                
+            } 
+            // replace current image
+            else {
                 this.images[this.currentImageIndex] = reader.result + "";
+                this.imagesFile[this.currentImageIndex] = file;
+                this.imagesToBeDeleted.push({id: this.addProductForm.get('step1').get('productAssets').value[this.currentImageIndex].id, index: this.currentImageIndex})
+
+                this.imagesWithId[this.currentImageIndex] = { id: null, url: reader.result + ""}
             }
+            
+            // set as dirty to remove pristine condition of the form control
+            this.addProductForm.get('step1').markAsDirty();
 
             this.imagesEditMode = false; 
             this._changeDetectorRef.markForCheck();
@@ -1152,42 +1163,55 @@ export class EditProductComponent implements OnInit, OnDestroy
     {
         const index = this.currentImageIndex;
 
-        if (index === this.thumbnailIndex){
+        // if (index === this.thumbnailIndex){
 
-            this._fuseConfirmationService.open({
-            title  : 'Reminder',
-            message: 'You cannot delete a thumbnail image.',
-            icon       : {
-                show : true,
-                name : 'heroicons_outline:exclamation',
-                color: 'warning'
-            },
-            actions: {
+        //     this._fuseConfirmationService.open({
+        //     title  : 'Reminder',
+        //     message: 'You cannot delete a thumbnail image.',
+        //     icon       : {
+        //         show : true,
+        //         name : 'heroicons_outline:exclamation',
+        //         color: 'warning'
+        //     },
+        //     actions: {
                 
-                cancel: {
-                    label: 'OK',
-                    show: true
-                    },
-                confirm: {
-                    show: false,
-                }
-                }
-            });
+        //         cancel: {
+        //             label: 'OK',
+        //             show: true
+        //             },
+        //         confirm: {
+        //             show: false,
+        //         }
+        //         }
+        //     });
 
-        }
-        else {
-            
-            if (index > -1) {
-                this.images.splice(index, 1);
-                this.imagesFile.splice(index, 1);
-                this.currentImageIndex = 0;
-                if (this.addProductForm.get('step1').get('productAssets').value[index]) {
-                    
-                    this.imagesToBeDeleted.push({id: this.addProductForm.get('step1').get('productAssets').value[index].id, index: index})
-                }
+        // }
+        // else {
+
+
+        // }
+        if (index > -1) {
+            this.images.splice(index, 1);
+            this.imagesFile.splice(index, 1);
+            this.currentImageIndex = 0;
+            if (this.imagesWithId[index]) {
+                
+                this.imagesToBeDeleted.push({id: this.imagesWithId[index].id, index: index})
             }
+            this.imagesWithId.splice(index, 1);
         }
+
+        if (this.images.length == 0) {
+            this.thumbnailIndex = -1;
+        }
+        else if (this.images.length == 1) {
+            this.thumbnailIndex = 0;
+        }
+
+        this._changeDetectorRef.markForCheck();
         
+        // set as dirty to remove pristine condition of the form control
+        this.addProductForm.get('step1').markAsDirty();
     }
 
     /**
@@ -1241,6 +1265,15 @@ export class EditProductComponent implements OnInit, OnDestroy
            $event.editor.deleteText(MAX_LENGTH, $event.editor.getLength());
         }
     }
+
+    // test() {
+    //     console.log('this.imagesWithId', this.imagesWithId);
+    //     console.log('this.addProductForm.get(step1).get(productAssets)', this.addProductForm.get('step1').get('productAssets').value);
+    //     console.log('this.imagesFile', this.imagesFile);
+    //     console.log('this.currentImageIndex', this.currentImageIndex);
+    //     console.log('this.thumbnailIndex', this.thumbnailIndex);
+    //     console.log('this.imagesToBeDeleted', this.imagesToBeDeleted);
+    // }
 
     /**
      * Update the selected product using the form data
@@ -1404,128 +1437,10 @@ export class EditProductComponent implements OnInit, OnDestroy
                     // this.showFlashMessage('success');
                 });
     
-    
-                
-                // If got product assets
-                if (product.productAssets) {
-                    let expression = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
-                    let regex = new RegExp(expression);
-                    let iteration = 0;// this iteration used by new product added to existing old product (not update tau)
-                    
-                    this.addProductForm.get('step1').get('productAssets').value.forEach((item, i) => {
-                    // this.images.forEach((item, i) => {
-                        let assetIndex = product.productAssets.findIndex(element => element.id === item.id)                        
+                // create image
+                this.imagesFile.forEach((item, i )=> {
                         
-                        let _thumbnailIndex = product.productAssets.findIndex(element => element.isThumbnail === true)
-                        if (assetIndex > -1) {
-                            if (!item.url.match(regex)) { // if url is not valid, it mean the data is new data
-        
-                                // -----------------
-                                // delete old one
-                                // -----------------
-        
-                                this._inventoryService.deleteProductAssets(this.selectedProduct.id, item.id)
-                                .pipe(takeUntil(this._unsubscribeAll))
-                                .subscribe((deleteResponse)=>{
-        
-                                    // -----------------
-                                    // create a new one
-                                    // ----------------
-        
-                                    let formData = new FormData();
-                                    formData.append('file',this.imagesFile[i]);
-                                    this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false }, i)
-                                        .pipe(takeUntil(this._unsubscribeAll))
-                                        .subscribe((addResponse)=>{
-        
-                                            // update the deleted product assets
-                                            let _updatedProduct = product.productAssets;
-                                            _updatedProduct[assetIndex] = addResponse;
-        
-                                            // patch the value
-                                            this.addProductForm.get('step1').get('productAssets').patchValue(_updatedProduct);
-        
-                                            // Mark for check
-                                            this._changeDetectorRef.markForCheck();
-                                        });
-        
-                                    // Mark for check
-                                    this._changeDetectorRef.markForCheck();
-                                });
-        
-        
-                            } else if (i === this.thumbnailIndex)
-                            
-                                { // this mean thumbnail index change, diffent from backend
-                                    // update the image (only thumbnail)
-                                    let updateItemIndex = item;
-                                    updateItemIndex.isThumbnail = true;
-            
-                                    this._inventoryService.updateProductAssets(this.selectedProduct.id, updateItemIndex, item.id)
-                                        .pipe(takeUntil(this._unsubscribeAll))
-                                        .subscribe((response)=>{
-                                            // Mark for check
-                                            this._changeDetectorRef.markForCheck();
-                                        });
-
-                                } 
-                            else {
-                                
-                            }
-                        } else {
-        
-                            // -----------------
-                            // create a new one
-                            // ----------------
-        
-                            iteration = iteration + 1;
-        
-                            let formData = new FormData();
-                            formData.append('file',this.imagesFile[i]);
-
-                            this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false }, i)
-                                .pipe(takeUntil(this._unsubscribeAll))
-                                .subscribe((addResponse)=>{
-        
-                                    // update the deleted product assets
-                                    // let _updatedProduct = this.selectedProductForm.get('productAssets').value;
-                                    // _updatedProduct[i + iteration -1] = addResponse;
-        
-                                    // if (this.selectedProductForm.get('productAssets').value.length > 0 ){
-                                    //     // patch the value if have existing value 
-                                        this.addProductForm.get('step1').get('productAssets').value[i] = addResponse;
-                                    // } else {
-                                        // patch the value if empty 
-                                        // this.selectedProductForm.get('productAssets').patchValue(_updatedProduct);
-                                    // }
-        
-                                    // Mark for check
-                                    this._changeDetectorRef.markForCheck();
-                                });
-                        }
-                    })
-
-                    // if new images added and got old one as well 
-                    this.imagesFile.forEach((item, i )=> {
-                        
-                        if (item){
-                            let formData = new FormData();
-                            formData.append('file',this.imagesFile[i]);
-                            this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
-                                .pipe(takeUntil(this._unsubscribeAll))
-                                .subscribe((response)=>{
-
-                                    this.addProductForm.get('step1').get('productAssets').value[i] = response;
-                                    // Mark for check
-                                    this._changeDetectorRef.markForCheck();
-                                });
-                            }
-                    })
-
-                } 
-                else {
-                    for (let i = 0; i < this.imagesFile.length; i++) {
-                        // create a new one
+                    if (item){
                         let formData = new FormData();
                         formData.append('file',this.imagesFile[i]);
                         this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
@@ -1536,8 +1451,168 @@ export class EditProductComponent implements OnInit, OnDestroy
                                 // Mark for check
                                 this._changeDetectorRef.markForCheck();
                             });
+                        }
+                })
+
+                // update the image (only thumbnail)
+                this.imagesWithId.forEach((asset, i) => {
+                        
+                    if (i === this.thumbnailIndex && asset.id) {
+                        
+                        let updateItemIndex = asset;
+                        updateItemIndex.isThumbnail = true;
+        
+                        this._inventoryService.updateProductAssets(this.selectedProduct.id, updateItemIndex, asset.id)
+                            .pipe(takeUntil(this._unsubscribeAll))
+                            .subscribe((response)=>{
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
+                            });
                     }
-                }
+
+                })
+
+                
+
+                //////////////////////////////////////////////////////////////////////
+
+                // // If got product assets
+                // if (product.productAssets) {
+                //     let expression = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+                //     let regex = new RegExp(expression);
+                //     let iteration = 0; // this iteration used by new product added to existing old product (not update tau)
+                    
+                //     this.addProductForm.get('step1').get('productAssets').value.forEach((item, i) => {
+                //     // this.images.forEach((item, i) => {
+                //         let assetIndex = product.productAssets.findIndex(element => element.id === item.id)                        
+                        
+                //         let _thumbnailIndex = product.productAssets.findIndex(element => element.isThumbnail === true)
+                //         if (assetIndex > -1) {
+                //             console.log('masuk assetIndex > -1');
+                //             if (!item.url.match(regex)) { // if url is not valid, it mean the data is new data
+                //                 console.log('masuk url not valid');
+                                
+        
+                //                 // -----------------
+                //                 // delete old one
+                //                 // -----------------
+        
+                //                 this._inventoryService.deleteProductAssets(this.selectedProduct.id, item.id)
+                //                 .pipe(takeUntil(this._unsubscribeAll))
+                //                 .subscribe((deleteResponse)=>{
+        
+                //                     // -----------------
+                //                     // create a new one
+                //                     // ----------------
+        
+                //                     let formData = new FormData();
+                //                     formData.append('file',this.imagesFile[i]);
+                //                     this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false }, i)
+                //                         .pipe(takeUntil(this._unsubscribeAll))
+                //                         .subscribe((addResponse)=>{
+        
+                //                             // update the deleted product assets
+                //                             let _updatedProduct = product.productAssets;
+                //                             _updatedProduct[assetIndex] = addResponse;
+        
+                //                             // patch the value
+                //                             this.addProductForm.get('step1').get('productAssets').patchValue(_updatedProduct);
+        
+                //                             // Mark for check
+                //                             this._changeDetectorRef.markForCheck();
+                //                         });
+        
+                //                     // Mark for check
+                //                     this._changeDetectorRef.markForCheck();
+                //                 });
+        
+        
+                //             } else if (i === this.thumbnailIndex)
+                //                 { // this mean thumbnail index change, diffent from backend
+                //                     // update the image (only thumbnail)
+
+                //                     console.log('masuk url valid');
+
+                //                     let updateItemIndex = item;
+                //                     updateItemIndex.isThumbnail = true;
+            
+                //                     this._inventoryService.updateProductAssets(this.selectedProduct.id, updateItemIndex, item.id)
+                //                         .pipe(takeUntil(this._unsubscribeAll))
+                //                         .subscribe((response)=>{
+                //                             // Mark for check
+                //                             this._changeDetectorRef.markForCheck();
+                //                         });
+
+                //                 } 
+                //             else {
+                                
+                //             }
+                //         } else {
+        
+                //             // -----------------
+                //             // create a new one
+                //             // ----------------
+        
+                //             iteration = iteration + 1;
+        
+                //             let formData = new FormData();
+                //             formData.append('file',this.imagesFile[i]);
+
+                //             this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false }, i)
+                //                 .pipe(takeUntil(this._unsubscribeAll))
+                //                 .subscribe((addResponse)=>{
+        
+                //                     // update the deleted product assets
+                //                     // let _updatedProduct = this.selectedProductForm.get('productAssets').value;
+                //                     // _updatedProduct[i + iteration -1] = addResponse;
+        
+                //                     // if (this.selectedProductForm.get('productAssets').value.length > 0 ){
+                //                     //     // patch the value if have existing value 
+                //                         this.addProductForm.get('step1').get('productAssets').value[i] = addResponse;
+                //                     // } else {
+                //                         // patch the value if empty 
+                //                         // this.selectedProductForm.get('productAssets').patchValue(_updatedProduct);
+                //                     // }
+        
+                //                     // Mark for check
+                //                     this._changeDetectorRef.markForCheck();
+                //                 });
+                //         }
+                //     })
+
+                //     // if new images added and got old one as well 
+                //     this.imagesFile.forEach((item, i )=> {
+                        
+                //         if (item){
+                //             let formData = new FormData();
+                //             formData.append('file',this.imagesFile[i]);
+                //             this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
+                //                 .pipe(takeUntil(this._unsubscribeAll))
+                //                 .subscribe((response)=>{
+
+                //                     this.addProductForm.get('step1').get('productAssets').value[i] = response;
+                //                     // Mark for check
+                //                     this._changeDetectorRef.markForCheck();
+                //                 });
+                //             }
+                //     })
+
+                // } 
+                // else {
+                //     for (let i = 0; i < this.imagesFile.length; i++) {
+                //         // create a new one
+                //         let formData = new FormData();
+                //         formData.append('file',this.imagesFile[i]);
+                //         this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
+                //             .pipe(takeUntil(this._unsubscribeAll))
+                //             .subscribe((response)=>{
+
+                //                 this.addProductForm.get('step1').get('productAssets').value[i] = response;
+                //                 // Mark for check
+                //                 this._changeDetectorRef.markForCheck();
+                //             });
+                //     }
+                // }
 
                 
             }
@@ -1892,6 +1967,10 @@ export class EditProductComponent implements OnInit, OnDestroy
 
     setThumbnail(currentImageIndex: number){
         this.thumbnailIndex = currentImageIndex;
+
+        // set as dirty to remove pristine condition of the form control
+        this.addProductForm.get('step1').markAsDirty();
+    
     }
 
     // --------------------------------------
