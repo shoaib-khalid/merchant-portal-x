@@ -9,6 +9,27 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 export class ChangelogComponent
 {
     changelog: any[] = [
+        //v0.0.34
+        {
+            version    : 'v0.0.34',
+            releaseDate: 'Mar 15, 2022',
+            changes    : [
+                {
+                    type: 'Fix',
+                    list: [
+                        '(ProductCategoryManagement) Display store logo instead of "no image" if there are no category image',
+						'(ProductManagement) Display store logo instead of "no image" if there are no product image'
+                    ]
+                },
+                {
+                    type: 'Added',
+                    list: [
+                        '(GoogleAnalytic) Add Google analytic for easydukan merchant portal'
+                    ]
+                }
+				
+            ]
+        },
         //v0.0.33
         {
             version    : 'v0.0.33',
