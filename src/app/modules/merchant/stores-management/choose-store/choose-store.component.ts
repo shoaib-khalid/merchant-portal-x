@@ -39,7 +39,8 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
     isLoading: boolean = false;
 
     filterControl: FormControl = new FormControl();
-    sortName: 'asc' | 'desc' | '' = 'asc';
+    sortName: string = "name";
+    sortOrder: 'asc' | 'desc' | '' = 'asc';
     searchName: string = "";
 
     categoryFilterControl: FormControl = new FormControl();
@@ -158,17 +159,34 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
 
                     // since sortName and searchName share same input field 
                     // below if statement is needed
-                    if (typeof(query) === "boolean") {
-                        query = "";
-                    } else if (query === null){
-                        query = "";
-                    }
-                    else {
+                    // if (typeof(query) === "boolean") {
+                    //     query = "";
+                    // } else if (query === null){
+                    //     query = "";
+                    // }
+                    // else {
+                    //     this.searchName = query;
+                    // }
+                    if (query === "recent") {
+                        this.sortName = "created";
+                        this.sortOrder = "desc";
+                    } else if (query === "oldest") {
+                        this.sortName = "created";
+                        this.sortOrder = "asc";
+                    } else if (query === "ascending") {
+                        this.sortName = "name";
+                        this.sortOrder = "asc";
+                    } else if (query === "descending") {
+                        this.sortName = "name";
+                        this.sortOrder = "desc";
+                    } else {
+                        // default to recent (same as recent)
                         this.searchName = query;
+
                     }
 
                     this.isLoading = true;
-                    return this._storesService.getStores("",0, 10, 'name', this.sortName, this.searchName, this.filteredCategory);
+                    return this._storesService.getStores("",0, 10, this.sortName, this.sortOrder, this.searchName, this.filteredCategory);
                 }),
                 map(() => {
                     this.isLoading = false;
@@ -190,7 +208,7 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
                     }
 
                     this.isLoading = true;
-                    return this._storesService.getStores("",0, 10, 'name', this.sortName, this.searchName, this.filteredCategory);
+                    return this._storesService.getStores("",0, 10, 'name', this.sortOrder, this.searchName, this.filteredCategory);
                 }),
                 map(() => {
                     this.isLoading = false;
@@ -227,7 +245,7 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
             merge(this._paginator.page).pipe(
                 switchMap(() => {
                     this.isLoading = true;
-                    return this._storesService.getStores("", this._paginator.pageIndex, this._paginator.pageSize,"name", this.sortName, this.searchName, this.filteredCategory);
+                    return this._storesService.getStores("", this._paginator.pageIndex, this._paginator.pageSize,"name",this.sortOrder, this.searchName, this.filteredCategory);
                 }),
                 map(() => {
                     this.isLoading = false;
@@ -245,8 +263,9 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
     }
 
     clearFilter(){
-        this.sortName = 'asc';
         this.searchName = "";
+        this.sortName = "";
+        this.sortOrder = "asc";
 
         this.filterControl.reset();
 

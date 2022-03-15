@@ -181,7 +181,11 @@ export class StoresService
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;        
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        if(search === null) {
+            search = ""
+        }
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),

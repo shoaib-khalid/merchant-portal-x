@@ -33,6 +33,7 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { TimeSelectorInputModule } from 'app/layout/common/time-selector/timeselector.module';
 import { NgxGalleryModule } from 'ngx-gallery-9';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { MatMenuModule } from '@angular/material/menu';
 
 
 @NgModule({
@@ -68,7 +69,8 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
         TimeSelectorInputModule,
         QuillModule,
         NgxGalleryModule,
-        FontAwesomeModule
+        FontAwesomeModule,
+        MatMenuModule
     ],
     providers: [
         // GraphHelper
