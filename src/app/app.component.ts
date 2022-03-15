@@ -1,9 +1,12 @@
 import { Component } from '@angular/core';
 import { Title } from '@angular/platform-browser';
+import { NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { PlatformService } from './core/platform/platform.service';
 import { Platform } from './core/platform/platform.types';
+
+declare let gtag: Function;
 
 @Component({
     selector   : 'app-root',
@@ -24,6 +27,7 @@ export class AppComponent
      */
     constructor(
         private _titleService: Title,
+        private _router: Router,
         private _platformsService: PlatformService
     )
     {
@@ -38,25 +42,69 @@ export class AppComponent
             .subscribe((platform: Platform) => {
                 if (platform) {
                     this.platform = platform;
+                    let googleAnalyticId = null;
     
                     // set title
                     this._titleService.setTitle(this.platform.name + " - Merchant Portal");
     
-                    // set icon
                     if (this.platform.id === "symplified") {
+                        // set icon
                         this.favIcon16.href = 'assets/branding/symplified/favicon/favicon-16x16.png';
                         this.favIcon32.href = 'assets/branding/symplified/favicon/favicon-32x32.png';
+
+                        // set GA code
+                        // googleAnalyticId = "";
                     } else if (this.platform.id === "easydukan") {
+                        // set icon
                         this.favIcon16.href = 'assets/branding/easydukan/favicon/favicon-16x16.png';
                         this.favIcon32.href = 'assets/branding/easydukan/favicon/favicon-32x32.png';
+
+                        // set GA code
+                        googleAnalyticId = "UA-216100220-1";
                     } else {
                         console.error("Unregistered platform");
                         
                         this.favIcon16.href = 'favicon-16x16.png';
                         this.favIcon32.href = 'favicon-32x32.png';
                     } 
+
+                    // Set Google Analytic Code
+                    if (googleAnalyticId) {
+
+                        // Remove this later
+                        // load google tag manager script
+                        // const script = document.createElement('script');
+                        // script.type = 'text/javascript';
+                        // script.async = true;
+                        // script.src = 'https://www.google-analytics.com/analytics.js';
+                        // document.head.appendChild(script);   
+                        
+                        // register google tag manager
+                        const script2 = document.createElement('script');
+                        script2.async = true;
+                        script2.src = 'https://www.googletagmanager.com/gtag/js?id=' + googleAnalyticId;
+                        document.head.appendChild(script2);
+
+                        // load custom GA script
+                        const gaScript = document.createElement('script');
+                        gaScript.innerHTML = `
+                        window.dataLayer = window.dataLayer || [];
+                        function gtag() { dataLayer.push(arguments); }
+                        gtag('js', new Date());
+                        gtag('config', '${googleAnalyticId}');
+                        `;
+                        document.head.appendChild(gaScript);
+
+                        // GA for all pages
+                        this._router.events.subscribe(event => {
+                            if(event instanceof NavigationEnd){
+                                // register google analytics            
+                                gtag('config', googleAnalyticId, {'page_path': event.urlAfterRedirects});
+                                
+                            }
+                        });
+                    }
                 }
             });
-            
     }
 }
