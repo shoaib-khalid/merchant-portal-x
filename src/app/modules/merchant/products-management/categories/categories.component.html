@@ -70,11 +70,10 @@
                                                 *ngIf="category.thumbnailUrl"
                                                 [alt]="'category thumbnail image'"
                                                 [src]="category.thumbnailUrl">
-                                            <div
-                                                class="flex items-center justify-center w-full h-full text-xs font-semibold leading-none text-center uppercase"
-                                                *ngIf="!category.thumbnailUrl">
-                                                NO IMAGE
-                                            </div>
+                                            <img
+                                                class="w-full p-2"
+                                                *ngIf="!category.thumbnailUrl"
+                                                [src]="displayStoreLogo(store.storeAssets)">
                                         </div>
                                     </div>
 
@@ -139,11 +138,9 @@
                                                     [src]="this.files[0].fileSource">
                                             </ng-container>
                                             <ng-template #noImage>
-                                                <div
-                                                    class="flex items-center justify-center w-full h-full rounded overflow-hidden uppercase text-8xl font-bold leading-none bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200"
-                                                >
-                                                    <span class="text-md">NO IMAGE</span> 
-                                                </div>
+                                                <img
+                                                    class="w-full h-full object-cover"
+                                                    [src]="displayStoreLogo(store.storeAssets)">
                                             </ng-template>
                                         </div>
                                         <div class="flex items-center mt-2 whitespace-nowrap">
