@@ -34,11 +34,11 @@ import { EditProductComponent } from '../edit-product/edit-product.component';
                 }
 
                 @screen md {
-                    grid-template-columns: 48px 128px auto 112px 72px;
+                    grid-template-columns: 48px 128px auto 80px 100px 72px;
                 }
 
                 @screen lg {
-                    grid-template-columns: 48px 128px auto 112px 96px 96px 72px;
+                    grid-template-columns: 48px 128px auto 80px 100px 72px 72px 72px;
                 }
             }
 
@@ -50,11 +50,11 @@ import { EditProductComponent } from '../edit-product/edit-product.component';
                 }
 
                 @screen md {
-                    grid-template-columns: 48px 128px auto 112px 72px;
+                    grid-template-columns: 48px 128px auto 80px 100px 72px;
                 }
 
                 @screen lg {
-                    grid-template-columns: 48px 128px auto 112px 96px 72px;
+                    grid-template-columns: 48px 128px auto 80px 100px 72px 72px;
                 }
             }
 
@@ -112,54 +112,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
     pagination: ProductPagination;
     
-    // // product combo
-    // productsCombos$: ProductPackageOption[] = [];
-    // showCombosValueEditMode:any = [];
-    // showCombosSection: boolean = false;
-    
-    // // product combo package
-    // _products: Product[]; // use in combo section -> 'Add product' --before filter
-    // filteredProductsOptions: Product[] = []; // use in listing html
-    // selectedProductsOptions: Product[] = [];
-    // selectedProductsOption: ProductPackageOption = null;
-    // _selectedProductsOption = {};
-    // optionChecked = [];
-    // _filteredProductsOptions: Product[] = []; // use in combo section -> 'Add product' --after filter
-
-
-    // // -----------------------
-    // // product variant
-    // // -----------------------
-
-    // productVariants: FormArray;
-    // productVariants$: ProductVariant[] = [];
-    // filteredProductVariants: any[] = []; // used in html to loop variant
-    // selectedProductVariants: ProductVariant;
-
-    // productVariantsEditMode: boolean = false;
-    // productVariantsValueEditMode:any = [];
-    // showVariantsSection: boolean = false;
-
-    // variantComboItems: any = []; // this is used for generating combinations
-    // variantComboOptions: any = []; //
-    // variantToBeCreated: any[] = []; // use for creating on BE 
-    // variantToBeDeleted: any[] = []; // use for deleting on BE 
-
-
-
-    // // product variant available
-    // productVariantAvailable: FormArray;
-    // productVariantAvailable$: ProductVariantAvailable[] = []; // used in html
-
-    // variantAvailableToBeCreated: any = []; // use for creating on BE 
-    // variantAvailableToBeDeleted: any = []; // use for deleting on BE 
-
-    // filteredProductVariantAvailable: any[] = [];
-    // selectedProductVariantAvailable: ProductVariantAvailable[] = [];
-    
-    // productVariantAvailableEditMode: boolean = false;
-    // productVariantAvailableValueEditMode:any = [];
-
     // -----------------------
     // product inventory
     // -----------------------
@@ -856,6 +808,24 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         else {
             return 0;
         }
+    }
 
+    /**
+     * Return the product type
+     * 
+     * @param product 
+     * @returns 
+     */
+    productType(product: Product) {
+
+        if (product.isPackage === true) {
+            return 'Combo'
+        }
+        else if (product.productInventories.length > 1 && product.isPackage === false) {
+            return 'Variant'
+        }
+        else {
+            return 'Normal'
+        }
     }
 }
