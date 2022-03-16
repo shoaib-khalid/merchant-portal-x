@@ -685,11 +685,11 @@ export class AddProductComponent implements OnInit, OnDestroy
         }
 
         // Return and throw warning dialog if image filename is more than 100 characters
-        if ( fileList[0].name.length > 50 )
+        if ( fileList[0].name.length > 100 )
         {
             this._fuseConfirmationService.open({
                 title  : 'The file name is too long',
-                message: 'The file name cannot exceed 50 characters (including spaces).',
+                message: 'The file name cannot exceed 100 characters (including spaces).',
                 icon       : {
                     show : true,
                     name : 'heroicons_outline:exclamation',

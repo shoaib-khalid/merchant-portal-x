@@ -941,10 +941,10 @@
                                             </div>
                                         </div>
                                         <!-- List of variants -->
-                                        <div class="h-42 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
+                                        <div class="h-44 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
                                             <!-- Variants -->
                                             <ng-container>
-                                                <div class="flex flex-col p-4 min-h-34 h-34 mb-2 space-y-2">
+                                                <div class="flex flex-col p-4 min-h-30 h-30 mb-2 space-y-2">
                                                     <ng-container *ngIf="filteredProductVariants.length; else productVariantsBlank">
                                                         <ng-container *ngFor="let variant of filteredProductVariants; let i = index; trackBy: trackByFn">
                                                             <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full">
@@ -1014,7 +1014,7 @@
                                     <span class="mt-2 mb-px font-medium leading-tight">Variant Options</span>
                                     <div class="w-full mt-1 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-auto">
                                         <!-- Variants Available -->
-                                        <div class="h-30 m-2 leading-none overflow-y-auto border-gray-300 dark:border-gray-500">
+                                        <div class="h-34 m-2 leading-none overflow-y-auto border-gray-300 dark:border-gray-500">
                                             <div *ngIf="filteredProductVariants.length > 0">
                                                 <div *ngFor="let variant of filteredProductVariants; let i = index; trackBy: trackVariant">
                                                     <span class="w-full mb-px font-small leading-tight">{{variant.name}}</span>
