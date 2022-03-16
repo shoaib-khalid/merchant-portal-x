@@ -1,18 +1,9 @@
 import { BaseLoginProvider, SocialUser } from 'angularx-social-login';
+import { AppleConfiguration, SocialLooginClientId } from './oauth.types';
 
 declare let AppleID: any;
 
 export class AppleLoginProvider extends BaseLoginProvider {
-//   getLoginStatus(): Promise<SocialUser> {
-//       throw new Error('Method not implemented.');
-//   }
-//   signIn(): Promise<SocialUser> {
-//       throw new Error('Method not implemented.');
-//   }
-//   signOut(revoke?: boolean): Promise<void> {
-//       throw new Error('Method not implemented.');
-//   }
-
 
   public static readonly PROVIDER_ID: string = 'APPLE';
 
@@ -20,7 +11,7 @@ export class AppleLoginProvider extends BaseLoginProvider {
 
   constructor(
     private clientId: string,
-    private _initOptions: any = { scope: 'email name' }
+    private _initOptions: any = { scope: 'name email' }
   ) {
     super();
   }
@@ -32,11 +23,11 @@ export class AppleLoginProvider extends BaseLoginProvider {
         'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js',
         () => {
           AppleID.auth.init({
-            clientId: this.clientId,
-            scope: 'name email',
-            redirectURI: 'https://auth.example.com/auth/apple',
-            state: '[ANYTHING]', //used to prevent CSFR
-            usePopup: true,
+            clientId: SocialLooginClientId.APPLE_CLIENT_ID,
+            scope: AppleConfiguration.scope,
+            redirectURI: AppleConfiguration.redirectURI,
+            state: AppleConfiguration.state, //used to prevent CSFR
+            usePopup: false,
           });
           resolve();
         }
@@ -51,13 +42,25 @@ export class AppleLoginProvider extends BaseLoginProvider {
     });
   }
 
-  public async signIn(signInOptions?: any): Promise<SocialUser> {
-    try {
-      const data = await AppleID.auth.signIn()
-    } catch (er) {
-      console.log(er);
-    }
-    return;
+  // public async signIn(signInOptions?: any): Promise<SocialUser> {
+  //   // try {
+  //   //   const data = await AppleID.auth.signIn()
+  //   // } catch (er) {
+  //   //   console.log(er);
+  //   // }
+  //   // return;
+
+  // }
+
+  public signIn(signInOptions?: any):Promise<SocialUser>{
+
+    const options = { ...this._initOptions, ...signInOptions };
+    return new Promise((resolve, reject) => {
+      AppleID.auth.signIn((response: any) => {
+      //  console.log('response',response);
+       
+      }, options);
+    });
   }
 
   public signOut(revoke?: boolean): Promise<any> {

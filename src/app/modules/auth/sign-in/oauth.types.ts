@@ -13,3 +13,10 @@ export enum SocialLooginClientId{
     FACEBOOK_CLIENT_ID =  '283489330438468',                  // 'clientId'   // '283489330438468'      // '2915126152079198'
     APPLE_CLIENT_ID = 'my.deliverin.symplified.service',
 }
+
+export enum AppleConfiguration{
+
+    scope= 'name email',
+    redirectURI= 'https://merchant.symplified.it/applelogin',
+    state= 'init',
+}
