@@ -513,7 +513,7 @@ export class EditProductComponent implements OnInit, OnDestroy
 
         this.addProductForm.get('step1').get('sku').setValue(product.productInventories[0].sku);
         this.addProductForm.get('step1').get('price').setValue(product.productInventories[0].price);
-        this.addProductForm.get('step1').get('availableStock').setValue(product.productInventories[0].quantity);
+        this.addProductForm.get('step1').get('availableStock').setValue(this.totalInventories(product.productInventories));
 
         // disable the input if product has variants
         if (product.productVariants.length > 0) {
@@ -1103,11 +1103,11 @@ export class EditProductComponent implements OnInit, OnDestroy
         }
 
         // Return and throw warning dialog if image filename is more than 100 characters
-        if ( fileList[0].name.length > 50 )
+        if ( fileList[0].name.length > 100 )
         {
             this._fuseConfirmationService.open({
                 title  : 'The file name is too long',
-                message: 'The file name cannot exceed 50 characters (including spaces).',
+                message: 'The file name cannot exceed 100 characters (including spaces).',
                 icon       : {
                     show : true,
                     name : 'heroicons_outline:exclamation',
@@ -3080,6 +3080,31 @@ export class EditProductComponent implements OnInit, OnDestroy
             if (status === 409){
                 this.addProductForm.get('step1').get('name').setErrors({productAlreadyExists: true});
             }
+        }
+
+    }
+
+    /**
+     * Return the value of product quantity
+     * 
+     * @param productInventories 
+     * @returns 
+     */
+    totalInventories(productInventories: ProductInventory[] = []){
+
+        if (productInventories.length > 1) {
+            const quantity = productInventories.map(x => x.quantity)
+
+            let total = quantity.reduce((acc, val) => acc + val)
+            
+            return total;
+            
+        } 
+        else if (productInventories.length === 1) {
+            return productInventories[0].quantity;
+        }
+        else {
+            return 0;
         }
 
     }

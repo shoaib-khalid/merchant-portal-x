@@ -834,5 +834,28 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         }
     }
 
+    /**
+     * Return the value of product quantity
+     * 
+     * @param productInventories 
+     * @returns 
+     */
+    totalInventories(productInventories: ProductInventory[] = []){
 
+        if (productInventories.length > 1) {
+            const quantity = productInventories.map(x => x.quantity)
+
+            let total = quantity.reduce((acc, val) => acc + val)
+            
+            return total;
+            
+        } 
+        else if (productInventories.length === 1) {
+            return productInventories[0].quantity;
+        }
+        else {
+            return 0;
+        }
+
+    }
 }
