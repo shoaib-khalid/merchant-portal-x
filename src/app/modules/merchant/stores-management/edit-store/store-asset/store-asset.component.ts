@@ -67,7 +67,7 @@ export class StoreAssetComponent implements OnInit
                 recommendedImageHeight: "500", 
                 selectedImageWidth: "", 
                 selectedImageHeight: "",
-                toDelete: false,
+                toDeleted: false,
                 isMultiple: false,
                 galleryImages: [] 
             },
@@ -114,7 +114,7 @@ export class StoreAssetComponent implements OnInit
                 recommendedImageHeight: "100", 
                 selectedImageWidth: "", 
                 selectedImageHeight: "",
-                toDelete: false,
+                toDeleted: false,
                 isMultiple: false,
                 galleryImages: []
             },
@@ -407,6 +407,11 @@ export class StoreAssetComponent implements OnInit
             this.files[index].selectedFileName = this.files[index].selectedFiles[i].name;
             }
         }
+        if(this.files[0].selectedFiles) {
+            this.files[0].toDeleted = false
+        } else if (this.files[3].selectedFiles) {
+            this.files[3].toDeleted = false
+        }
         this._changeDetectorRef.markForCheck();
     }
 
@@ -438,13 +443,13 @@ export class StoreAssetComponent implements OnInit
     }
 
     deleteLogo() {
-        this.files[0].toDelete = true;        
+        this.files[0].toDeleted = true;        
         this.files[0].fileSource = '';
         this._changeDetectorRef.markForCheck();
     }
 
     deleteFavicon(){
-        this.files[3].toDelete = true;        
+        this.files[3].toDeleted = true;        
         this.files[3].fileSource = '';
         this._changeDetectorRef.markForCheck();
     }
@@ -475,20 +480,22 @@ export class StoreAssetComponent implements OnInit
                     formData.append('assetDescription',item.description);
                 }
 
-                if (item.selectedFiles && this.files[0].assetId !== null && this.files[0].toDelete === false) {                   
+                if (item.selectedFiles && this.files[0].assetId !== null && this.files[0].toDeleted === false) {                   
                     this._storesService.putAssets(this.storeId, this.files[0].assetId, formData, "LogoUrl")
                         .subscribe(response => {
-                            console.info('Uploaded the file successfully');
+                            console.info('File updated the file successfully');
 
                             // Mark for check
                             this._changeDetectorRef.markForCheck();
                         }, (err: any) => {
                                 console.error('Could not upload the file');
                         });
-                } else if (this.files[0].toDelete === true && this.files[0].assetId !== null) {
+                } else if (this.files[0].toDeleted === true && this.files[0].assetId !== null) {
                     this._storesService.deleteAssets(this.storeId, this.files[0].assetId)
                         .subscribe(response => {
-                            console.info('Uploaded the file successfully');
+                            console.info('File deleted the file successfully');
+
+                            this.files[0].toDeleted = false;
 
                             // Mark for check
                             this._changeDetectorRef.markForCheck();
@@ -500,7 +507,7 @@ export class StoreAssetComponent implements OnInit
                     if (item.selectedFiles && item.selectedFiles !== null) {
                         this._storesService.postAssets(this.storeId, "LogoUrl", formData,"Logo")
                             .subscribe(response => {
-                                console.info('Uploaded the file successfully');
+                                console.info('File uploaded the file successfully');
     
                                 this.files[3].assetId = event["id"];
     
@@ -525,10 +532,10 @@ export class StoreAssetComponent implements OnInit
                     formData.append('assetDescription',item.description);
                 }
 
-                if (item.selectedFiles && this.files[3].assetId !== null && this.files[3].toDelete === false) {
+                if (item.selectedFiles && this.files[3].assetId !== null && this.files[3].toDeleted === false) {
                     this._storesService.putAssets(this.storeId, this.files[3].assetId, formData)
                         .subscribe(response => {
-                                console.info('Uploaded the file successfully');
+                                console.info('File updated the file successfully');
 
                                 // Mark for check
                                 this._changeDetectorRef.markForCheck();
@@ -536,11 +543,12 @@ export class StoreAssetComponent implements OnInit
                             (err: any) => {
                                 console.error('Could not upload the file');
                             });
-                } else if (this.files[3].toDelete === true && this.files[3].assetId !== null) {
+                } else if (this.files[3].toDeleted === true && this.files[3].assetId !== null) {
                     this._storesService.deleteAssets(this.storeId, this.files[3].assetId)
                         .subscribe(response => {
-                            console.info('Uploaded the file successfully');
+                            console.info('File deleted the file successfully');
 
+                            this.files[3].toDeleted = false;
                             // Mark for check
                             this._changeDetectorRef.markForCheck();
                         },
@@ -551,7 +559,7 @@ export class StoreAssetComponent implements OnInit
                     if (item.selectedFiles && item.selectedFiles !== null) {
                         this._storesService.postAssets(this.storeId, "FaviconUrl", formData,"Favicon")
                             .subscribe(response => {
-                                console.info('Uploaded the file successfully');
+                                console.info('File uploaded the file successfully');
     
     
                                 this.files[3].assetId = event["id"];
@@ -573,7 +581,7 @@ export class StoreAssetComponent implements OnInit
                     if(assetId){
                         this._storesService.deleteAssets(this.storeId, assetId)
                         .subscribe(response => {
-                                console.info('Uploaded the file successfully');
+                                console.info('File deleted the file successfully');
         
                                 // Mark for check
                                 this._changeDetectorRef.markForCheck();
@@ -615,7 +623,7 @@ export class StoreAssetComponent implements OnInit
                     if(assetId){
                         this._storesService.deleteAssets(this.storeId, assetId)
                             .subscribe(response => {
-                                console.info('Uploaded the file successfully');
+                                console.info('File deleted the file successfully');
         
                                 // Mark for check
                                 this._changeDetectorRef.markForCheck();
