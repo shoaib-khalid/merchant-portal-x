@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { catchError, filter, map, switchMap, take, tap } from 'rxjs/operators';
-import { Product, ProductVariant, ProductInventory, ProductCategory, ProductPagination, ProductVariantAvailable, ProductPackageOption, ProductAssets, ProductCategoryPagination } from 'app/core/product/inventory.types';
+import { Product, ProductVariant, ProductInventory, ProductCategory, ProductPagination, ProductVariantAvailable, ProductPackageOption, ProductAssets, ProductCategoryPagination, DeliveryVehicleType } from 'app/core/product/inventory.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from '../logging/log.service';
@@ -1555,6 +1555,25 @@ export class InventoryService
         //if exist status = 409, if not exist status = 200
         return response.status;
 
+    }
+
+    getDeliveryVehicleType(): Observable<DeliveryVehicleType>
+    {
+        let deliveryService = this._apiServer.settings.apiServer.deliveryService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+        
+        return this._httpClient.get<any>(deliveryService + '/orders/getDeliveryVehicleType/' , header)
+            .pipe(
+                map((response) => {
+                    this._logging.debug("Response from DeliveryService (getDeliveryVehicleType)", response);
+                    return response["data"];
+                })
+            );
     }
 
 }

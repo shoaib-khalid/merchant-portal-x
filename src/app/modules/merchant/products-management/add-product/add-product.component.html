@@ -564,13 +564,14 @@
                                                 </mat-select-trigger>
                                                 <div>
                                                     <!-- <mat-option [value]="'MOTORCYCLE'">Motorcycle</mat-option> -->
-                                                    <mat-option [value]="'CAR'">Car</mat-option>
+                                                    <!-- <mat-option [value]="'CAR'">Car</mat-option>
                                                     <mat-option disabled="true" [value]="'VAN'">Van</mat-option>
                                                     <mat-option disabled="true" [value]="'PICKUP'">Pickup Truck</mat-option>
                                                     <mat-option disabled="true" [value]="'LARGEVAN'">Large Van</mat-option>
                                                     <mat-option disabled="true" [value]="'SMALLLORRY'">Small Lorry</mat-option>
                                                     <mat-option disabled="true" [value]="'MEDIUMLORRY'">Medium Lorry</mat-option>
-                                                    <mat-option disabled="true" [value]="'LARGELORRY'">Large Lorry</mat-option>
+                                                    <mat-option disabled="true" [value]="'LARGELORRY'">Large Lorry</mat-option> -->
+                                                    <mat-option *ngFor="let vehicle of deliveryVehicle" [value]="vehicle.vehicleType">{{vehicle.vehicleType}}</mat-option>
                                                 </div>
                                             </mat-select>
                                             <mat-error *ngIf="addProductForm.get('step1').get('vehicleType').hasError('required')">
@@ -921,7 +922,7 @@
                                                 <mat-icon
                                                     class="mr-2 icon-size-5"
                                                     [svgIcon]="'heroicons_outline:exclamation-circle'"></mat-icon>
-                                                <div class="md:text-xs sm:text-sm">You can only create maximum of 2 variants</div>
+                                                <div class="text-sm md:text-xs">You can only create maximum of 2 variants</div>
                                             </div>
                                         </div>
                                     </div>
@@ -1042,7 +1043,7 @@
                                                                     <mat-icon
                                                                         class="mr-2 icon-size-5"
                                                                         [svgIcon]="'heroicons_outline:exclamation-circle'"></mat-icon>
-                                                                    <span class="md:text-xs sm:text-sm">
+                                                                    <span class="text-sm md:text-xs">
                                                                         Adding/deleting variant option will reset the variant list values
                                                                     </span>
                                                                 </div>
@@ -1066,7 +1067,7 @@
                                                             <mat-icon
                                                                 class="mr-2 icon-size-5"
                                                                 [svgIcon]="'heroicons_outline:exclamation-circle'"></mat-icon>
-                                                            <div class="md:text-xs sm:text-sm">You can only create maximum of 5 variant options</div>
+                                                            <div class="text-sm md:text-xs">You can only create maximum of 5 variant options</div>
                                                         </div>
                                                     </div>
                                                 </div>

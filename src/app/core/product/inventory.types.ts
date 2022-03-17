@@ -163,3 +163,12 @@ export interface ProductAssets
      
  }
  
+/**
+ * Delivery Service Section
+ * 
+ */
+export interface DeliveryVehicleType 
+{
+    vehicleType?: string;
+    vehicleName?: string;      
+}

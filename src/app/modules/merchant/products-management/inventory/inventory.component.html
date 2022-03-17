@@ -103,6 +103,11 @@
                             </div>
                             <div [mat-sort-header]="'name'">Name</div>
                             <div
+                                class="hidden md:block"
+                                >
+                                Type
+                            </div>
+                            <div
                                 class="hidden sm:block"
                                 [mat-sort-header]="'price'">
                                 Price
@@ -153,6 +158,12 @@
                                     <!-- Name -->
                                     <div class="truncate">
                                         {{ product.name }}
+                                    </div>
+
+                                    <!-- Type -->
+                                    <div class="hidden md:block">
+                                        <!-- {{ product.productInventories.length > 0 ? (product.productInventories[0].price | currency:store$.regionCountry.currencySymbol:'symbol':'1.2-2') : '' }} -->
+                                        {{ productType(product) }}
                                     </div>
 
                                     <!-- Price -->

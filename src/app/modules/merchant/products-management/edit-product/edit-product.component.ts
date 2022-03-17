@@ -6,7 +6,7 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { merge, Observable, of, Subject } from 'rxjs';
 import { debounceTime, delay, finalize, map, switchMap, take, takeUntil } from 'rxjs/operators';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, ProductCategory, ProductPagination, ProductPackageOption, ProductAssets } from 'app/core/product/inventory.types';
+import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, ProductCategory, ProductPagination, ProductPackageOption, ProductAssets, DeliveryVehicleType } from 'app/core/product/inventory.types';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { Store } from 'app/core/store/store.types';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -232,6 +232,7 @@ export class EditProductComponent implements OnInit, OnDestroy
     displayPrice: number = 0;
     displayQuantity: number = 0;
     currentScreenSize: string[];
+    deliveryVehicle: any;
 
 
 
@@ -350,6 +351,19 @@ export class EditProductComponent implements OnInit, OnDestroy
                 this.filterProductOptionsMethod(this._products);
 
             });
+
+        // Get delivery vehicle type
+        this._inventoryService.getDeliveryVehicleType()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((vehicles: any) => {
+
+                // Get the vehicles except MOTORCYCLE
+                this.deliveryVehicle = vehicles.filter(veh => veh.vehicleType !== 'MOTORCYCLE')
+                
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+
             
         // Get the categories
         this._inventoryService.categories$
@@ -1437,40 +1451,7 @@ export class EditProductComponent implements OnInit, OnDestroy
                     // this.showFlashMessage('success');
                 });
     
-                // create image
-                this.imagesFile.forEach((item, i )=> {
-                        
-                    if (item){
-                        let formData = new FormData();
-                        formData.append('file',this.imagesFile[i]);
-                        this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
-                            .pipe(takeUntil(this._unsubscribeAll))
-                            .subscribe((response)=>{
-
-                                this.addProductForm.get('step1').get('productAssets').value[i] = response;
-                                // Mark for check
-                                this._changeDetectorRef.markForCheck();
-                            });
-                        }
-                })
-
-                // update the image (only thumbnail)
-                this.imagesWithId.forEach((asset, i) => {
-                        
-                    if (i === this.thumbnailIndex && asset.id) {
-                        
-                        let updateItemIndex = asset;
-                        updateItemIndex.isThumbnail = true;
-        
-                        this._inventoryService.updateProductAssets(this.selectedProduct.id, updateItemIndex, asset.id)
-                            .pipe(takeUntil(this._unsubscribeAll))
-                            .subscribe((response)=>{
-                                // Mark for check
-                                this._changeDetectorRef.markForCheck();
-                            });
-                    }
-
-                })
+                
 
                 
 
@@ -1633,6 +1614,40 @@ export class EditProductComponent implements OnInit, OnDestroy
             }, 1000);
 
         });
+
+        // create image
+        this.imagesFile.forEach((item, i )=> {
+            if (item){
+                let formData = new FormData();
+                formData.append('file',this.imagesFile[i]);
+                this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
+                    .pipe(takeUntil(this._unsubscribeAll))
+                    .subscribe((response)=>{
+
+                        this.addProductForm.get('step1').get('productAssets').value[i] = response;
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    });
+                }
+        })
+
+        // update the image (only thumbnail)
+        this.imagesWithId.forEach((asset, i) => {
+                
+            if (i === this.thumbnailIndex && asset.id) {
+                
+                let updateItemIndex = asset;
+                updateItemIndex.isThumbnail = true;
+
+                this._inventoryService.updateProductAssets(this.selectedProduct.id, updateItemIndex, asset.id)
+                    .pipe(takeUntil(this._unsubscribeAll))
+                    .subscribe((response)=>{
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    });
+            }
+
+        })
 
         // Delete main product images
         for (let i = 0; i < this.imagesToBeDeleted.length; i++) {

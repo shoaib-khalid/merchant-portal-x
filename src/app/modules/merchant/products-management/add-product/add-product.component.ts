@@ -194,6 +194,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     flashMessage: 'success' | 'error' | null = null;
     isLoading: boolean = false;
     currentScreenSize: string[];
+    deliveryVehicle: any;
 
 
 
@@ -347,6 +348,19 @@ export class AddProductComponent implements OnInit, OnDestroy
                 this.productCategories$ = categories;
                 this.filteredProductCategories = categories;
 
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+
+        
+        // Get delivery vehicle type
+        this._inventoryService.getDeliveryVehicleType()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((vehicles: any) => {
+
+                // Get the vehicles except MOTORCYCLE
+                this.deliveryVehicle = vehicles.filter(veh => veh.vehicleType !== 'MOTORCYCLE')
+                
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
