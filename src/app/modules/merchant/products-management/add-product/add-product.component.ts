@@ -214,7 +214,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     inputSearchProducts : string = '';
     selectedCategory:string ='';
     onChangeSelectProductValue: any = []; // for product checkbox in combo section
-
+    totalAllowed: number = 0;
 
 
     /**
@@ -2283,11 +2283,14 @@ export class AddProductComponent implements OnInit, OnDestroy
     }
 
 
-    resetSelectedProductsOption(){
+    resetSelectedProductsOption() {
         this.selectedProductsOption = null;
         // Clear checkbox
         this.onChangeSelectProductValue.length = 0;
-
+        this.addProductForm.get('comboSection').get('categoryId').reset;
+        this.totalAllowed = 0;
+        this._selectedProductsOption = {};
+        
     }
 
     validateProductsOptionName(value){
@@ -2376,6 +2379,8 @@ export class AddProductComponent implements OnInit, OnDestroy
         }
         
         this._selectedProductsOption["totalAllow"] = value;
+        this.totalAllowed = value;
+
     }
 
     

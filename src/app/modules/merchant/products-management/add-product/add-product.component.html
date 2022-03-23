@@ -1522,7 +1522,7 @@
                                         <!-- Buttons -->
                                         <div>
                                             <div class="w-full flex pl-2 pt-2">
-                                                <input
+                                                <!-- <input
                                                     *ngIf="selectedProductsOption"
                                                     class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                     type="button"
@@ -1557,22 +1557,36 @@
                                                         *ngIf="!selectedProductsOption"
                                                         class="text-white icon-size-5"
                                                         [svgIcon]="'heroicons_outline:plus'"></mat-icon>
-                                                </label>
+                                                </label> -->
 
-                                                <!-- <button
-                                                    mat-flat-button
-                                                    class="mr-3 bg-gray-300 hover:bg-gray-400"
+                                                <button
+                                                    type="button"
+                                                    class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-gray-300 hover:bg-gray-400 mr-3"
                                                     *ngIf="selectedProductsOption"
                                                     (click)="resetSelectedProductsOption()">
-                                                    Cancel
-                                                </button> -->
-                                                <!-- <button
-                                                    mat-flat-button
-                                                    [color]="'primary'"
+                                                    
+                                                    <mat-icon
+                                                        class="text-white icon-size-5"
+                                                        [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400 mr-0"
                                                     (click)="updateSelectedProductsOption((selectedProductsOption) ? selectedProductsOption.id : '')"
-                                                    (click)="optionName.value='';optionTotalAllow.value=0">
-                                                    {{(selectedProductsOption) ? 'Update' : 'Create'}}
-                                                </button> -->
+                                                    (click)="optionTotalAllow.value=0"
+                                                    (click)="clearOptName === true ? optionName.value='' : ''" 
+                                                    [disabled]="addProductForm.get('comboSection').get('categoryId').value.length < totalAllowed"
+                                                    [ngClass]="(addProductForm.get('comboSection').get('categoryId').value.length < totalAllowed) ? 'bg-blue-500 opacity-50 cursor-not-allowed' : ''"
+                                                    >
+                                                    <mat-icon
+                                                        *ngIf="selectedProductsOption"
+                                                        class="text-white icon-size-5"
+                                                        [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                                                    <mat-icon
+                                                        *ngIf="!selectedProductsOption"
+                                                        class="text-white icon-size-5"
+                                                        [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
