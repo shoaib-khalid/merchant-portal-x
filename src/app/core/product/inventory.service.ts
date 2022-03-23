@@ -30,6 +30,8 @@ export class InventoryService
     private _package: BehaviorSubject<ProductPackageOption | null> = new BehaviorSubject(null);
     private _packages: BehaviorSubject<ProductPackageOption[] | null> = new BehaviorSubject(null);
 
+    private _productPaginationForCombo: BehaviorSubject<ProductPagination | null> = new BehaviorSubject(null);
+    private _productsForCombo: BehaviorSubject<Product[] | null> = new BehaviorSubject(null);
     /**
      * Constructor
      */
@@ -69,6 +71,22 @@ export class InventoryService
     {
         return this._pagination.asObservable();
     }
+
+    /**
+     * Getter for products for combo
+     */
+     get productsForCombo$(): Observable<Product[]>
+     {
+         return this._productsForCombo.asObservable();
+     }
+ 
+     /**
+      * Getter for product pagination for combo
+      */
+     get productPaginationForCombo$(): Observable<ProductPagination>
+     {
+         return this._productPaginationForCombo.asObservable();
+     }
 
     /**
      * Getter for categories
@@ -134,7 +152,7 @@ export class InventoryService
      * @param order
      * @param search
      */
-    getProducts(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', status: string = 'ACTIVE,INACTIVE', categoryId: string = ''):
+    getProducts(page: number = 0, size: number = 10, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', status: string = 'ACTIVE,INACTIVE', categoryId: string = ''):
         Observable<{ pagination: ProductPagination; products: Product[] }>
     {
         let productService = this._apiServer.settings.apiServer.productService;
@@ -192,6 +210,57 @@ export class InventoryService
                 this._logging.debug("Response from ProductsService (getAllProducts)", response);
 
                 // this._products.next(response.data);
+            })
+        );
+    }
+
+    /**
+     * 
+     * Get products for product list in combo section
+     * 
+     * @param page 
+     * @param size 
+     * @param sort 
+     * @param order 
+     * @param search 
+     * @param status 
+     * @param categoryId 
+     * @returns 
+     */
+    getProductsForCombo(page: number = 0, size: number = 10, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', status: string = 'ACTIVE,INACTIVE', categoryId: string = ''):
+        Observable<{ pagination: ProductPagination; products: Product[] }>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                page        : '' + page,
+                pageSize    : '' + size,
+                sortByCol   : '' + sort,
+                sortingOrder: '' + order.toUpperCase(),
+                name        : '' + search,
+                status      : '' + status,
+                categoryId  : '' + categoryId
+            }
+        };
+
+        return this._httpClient.get<any>(productService +'/stores/'+this.storeId$+'/products', header).pipe(
+            tap((response) => {
+
+                this._logging.debug("Response from ProductsService (getProductsForCombo)", response);
+
+                let _pagination = {
+                    length: response.data.totalElements,
+                    size: response.data.size,
+                    page: response.data.number,
+                    lastPage: response.data.totalPages,
+                    startIndex: response.data.pageable.offset,
+                    endIndex: response.data.pageable.offset + response.data.numberOfElements - 1
+                }
+                this._productPaginationForCombo.next(_pagination);
+                this._productsForCombo.next(response.data.content);
             })
         );
     }
@@ -331,6 +400,7 @@ export class InventoryService
 
                     // Update the products
                     this._products.next(products);
+                    this._productsForCombo.next(products);
 
                     // Return the updated product
                     return updatedProduct["data"];
@@ -379,6 +449,7 @@ export class InventoryService
 
                     // Update the products
                     this._products.next(products);
+                    this._productsForCombo.next(products);
 
                     let isDeleted:boolean = false;
                     if (status === 200) {

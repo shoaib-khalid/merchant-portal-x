@@ -162,8 +162,11 @@
 
                                     <!-- Type -->
                                     <div class="hidden md:block">
-                                        <!-- {{ product.productInventories.length > 0 ? (product.productInventories[0].price | currency:store$.regionCountry.currencySymbol:'symbol':'1.2-2') : '' }} -->
-                                        {{ productType(product) }}
+                                        <!-- {{ productType(product) }} -->
+                                        {{ 
+                                            ( product.isPackage === true ) ? 'Combo' : 
+                                            ( product.productInventories.length > 1 && product.isPackage === false ) ? 'Variant' : 'Normal' 
+                                        }}
                                     </div>
 
                                     <!-- Price -->

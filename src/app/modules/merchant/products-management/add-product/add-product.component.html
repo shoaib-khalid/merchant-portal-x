@@ -571,7 +571,7 @@
                                                     <mat-option disabled="true" [value]="'SMALLLORRY'">Small Lorry</mat-option>
                                                     <mat-option disabled="true" [value]="'MEDIUMLORRY'">Medium Lorry</mat-option>
                                                     <mat-option disabled="true" [value]="'LARGELORRY'">Large Lorry</mat-option> -->
-                                                    <mat-option *ngFor="let vehicle of deliveryVehicle" [value]="vehicle.vehicleType">{{vehicle.vehicleType}}</mat-option>
+                                                    <mat-option *ngFor="let vehicle of deliveryVehicle" [value]="vehicle.vehicleType">{{vehicle.name}}</mat-option>
                                                 </div>
                                             </mat-select>
                                             <mat-error *ngIf="addProductForm.get('step1').get('vehicleType').hasError('required')">
@@ -1420,7 +1420,7 @@
                                         </div>
                                         <!-- Filter by category -->
                                         <div class="justify-self-end">
-                                            <mat-form-field class="fuse-mat-dense fuse-mat-rounded fuse-mat-no-subscript w-30 sm:w-30">
+                                            <!-- <mat-form-field class="fuse-mat-dense fuse-mat-rounded fuse-mat-no-subscript w-30 sm:w-30">
                                                 <mat-select
                                                     [formControl]="localCategoryFilterControl"
                                                     [value]="localFilterByCatId"
@@ -1437,12 +1437,27 @@
                                                         <mat-option [value]="category.id">{{category.name}}</mat-option>
                                                     </ng-container>
                                                 </mat-select>
+                                            </mat-form-field> -->
+
+                                            <!-- Category filter -->
+                                            <mat-form-field class="fuse-mat-dense fuse-mat-rounded fuse-mat-no-subscript w-30 sm:w-30">
+                                                <mat-select
+                                                    class="w-full"
+                                                    placeholder="Category"
+                                                    (selectionChange)="onSelectCategoryList($event)">
+                                                    <div>
+                                                        <mat-option [value]="">All Categories</mat-option>
+                                                        <mat-option *ngFor="let listing of productCategories$;" [value]="listing.id">
+                                                            {{listing.name}}
+                                                        </mat-option>
+                                                    </div>
+                                                </mat-select>
                                             </mat-form-field>
                                         </div>
                                     </div>
                                     <div class="mt-1 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden">
                                         <!-- Header -->
-                                        <div class="flex items-center -my-px py-3 px-3">
+                                        <div class="flex items-center -my-px py-2 px-3">
                                             <div class="flex items-center flex-auto min-w-0">
                                                 <mat-icon
                                                     class="icon-size-5"
@@ -1464,14 +1479,27 @@
                                                 <mat-checkbox
                                                     class="flex items-center h-10 min-h-10 px-4"
                                                     [color]="'primary'"
-                                                    [checked]="validateProductsInOption(product.id)"
-                                                    (change)="insertProductsInOption(product.id, $event.checked)"
+                                                    (change)="insertProductsInOption(product.id, $event)"
+                                                    [checked]="onChangeSelectProductValue.includes(product.id)"
                                                     [ngModelOptions]="{standalone: true}"
-                                                    [(ngModel)]="optionChecked[i]"
-                                                >
+                                                    [disabled]="product.isPackage"
+                                                    >
+                                                    <!-- [(ngModel)]="optionChecked[i]" -->
                                                     {{product.name}}
                                                 </mat-checkbox>
                                             </ng-container>
+                                        </div>
+                                        <div class="border-t border-gray-300">
+                                            <mat-paginator
+                                                [ngClass]="{'pointer-events-none': isLoading}"
+                                                [length]="productPaginationForCombo.length"
+                                                [pageIndex]="productPaginationForCombo.page"
+                                                [pageSize]="productPaginationForCombo.size"
+                                                [pageSizeOptions]="[5, 10, 25, 100]"
+                                                [showFirstLastButtons]="false"
+                                                [hidePageSize]="true"
+                                                #productPaginationCombo>
+                                            </mat-paginator>
                                         </div>
                                     </div>
                                 </div>
@@ -1485,6 +1513,7 @@
                                             <input
                                                 matInput
                                                 type="number"
+                                                [disabled]="addProductForm.get('comboSection').get('categoryId').value.length == 0"
                                                 (change)="validateProductsOptionTotalAllowed($event.target.value)"
                                                 [value]="(selectedProductsOption) ? selectedProductsOption.totalAllow : ''"
                                                 #optionTotalAllow
@@ -1516,7 +1545,8 @@
                                                 <label
                                                     class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400 mr-6"
                                                     (click)="updateSelectedProductsOption((selectedProductsOption) ? selectedProductsOption.id : '')"
-                                                    (click)="optionName.value='';optionTotalAllow.value=0"
+                                                    (click)="optionTotalAllow.value=0"
+                                                    (click)="clearOptName === true ? optionName.value='' : ''" 
                                                     [matTooltip]="selectedProductsOption ? 'Update' : 'Create'"
                                                     matRipple>
                                                     <mat-icon

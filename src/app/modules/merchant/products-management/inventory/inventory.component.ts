@@ -794,6 +794,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      */
     totalInventories(productInventories: ProductInventory[] = []){
 
+        // if has variants
         if (productInventories.length > 1) {
             const quantity = productInventories.map(x => x.quantity)
 
@@ -816,16 +817,16 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
      * @param product 
      * @returns 
      */
-    productType(product: Product) {
+    // productType(product: Product) {
 
-        if (product.isPackage === true) {
-            return 'Combo'
-        }
-        else if (product.productInventories.length > 1 && product.isPackage === false) {
-            return 'Variant'
-        }
-        else {
-            return 'Normal'
-        }
-    }
+    //     if (product.isPackage === true) {
+    //         return 'Combo'
+    //     }
+    //     else if (product.productInventories.length > 1 && product.isPackage === false) {
+    //         return 'Variant'
+    //     }
+    //     else {
+    //         return 'Normal'
+    //     }
+    // }
 }

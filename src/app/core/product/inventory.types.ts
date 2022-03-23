@@ -1,5 +1,6 @@
 export interface Product
 {
+    product: ProductInventory;
     id: string;
     name: string;
     description: string;
@@ -170,5 +171,5 @@ export interface ProductAssets
 export interface DeliveryVehicleType 
 {
     vehicleType?: string;
-    vehicleName?: string;      
+    name?: string;      
 }
