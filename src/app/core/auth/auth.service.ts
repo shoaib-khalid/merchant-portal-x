@@ -60,6 +60,14 @@ export class AuthService
         return localStorage.getItem('refreshToken') ?? '';
     }
 
+    /**
+     * Getter for public access token
+     */
+    get publicToken(): string
+    {
+        return "Bearer accessToken";
+    }
+
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
@@ -72,12 +80,9 @@ export class AuthService
     forgotPassword(email: string): Observable<any>
     {
         let userService = this._apiServer.settings.apiServer.userService;
-        let productService = this._apiServer.settings.apiServer.productService;
-        let token = "accessToken"
         const header = {
-            headers: new HttpHeaders().set("Authorization", `Bearer ${token}`)
+            headers: new HttpHeaders().set("Authorization", this.publicToken)
         };
-        
 
         return this._httpClient.get(userService + '/clients/' + email + '/password_reset', header).pipe(
             switchMap(async (response: any) => {
@@ -96,10 +101,8 @@ export class AuthService
     resetPassword(id: string, code, body): Observable<any>
     {
         let userService = this._apiServer.settings.apiServer.userService;
-        let productService = this._apiServer.settings.apiServer.productService;
-        let token = "accessToken"
         const header = {
-            headers: new HttpHeaders().set("Authorization", `Bearer ${token}`)
+            headers: new HttpHeaders().set("Authorization", this.publicToken)
         };
 
         return this._httpClient.put(userService + '/clients/' + id + '/password/' + code + '/reset' , body ,  header).pipe(
@@ -125,10 +128,8 @@ export class AuthService
         }
 
         let userService = this._apiServer.settings.apiServer.userService;
-        let productService = this._apiServer.settings.apiServer.productService;
-        let token = "accessToken"
         const header = {
-            headers: new HttpHeaders().set("Authorization", `Bearer ${token}`)
+            headers: new HttpHeaders().set("Authorization", this.publicToken)
         };
         
         return this._httpClient.post(userService + '/clients/authenticate', credentials, header).pipe(
@@ -229,11 +230,8 @@ export class AuthService
     {
         // Renew token
         let userService = this._apiServer.settings.apiServer.userService;
-        let productService = this._apiServer.settings.apiServer.productService;
-        // kena accessToken
-        let token = "accessToken"
         const header = {
-            headers: new HttpHeaders().set("Authorization", `Bearer ${token}`)
+            headers: new HttpHeaders().set("Authorization", this.publicToken)
         };
         
         return this._httpClient.post(userService + '/clients/session/refresh',
