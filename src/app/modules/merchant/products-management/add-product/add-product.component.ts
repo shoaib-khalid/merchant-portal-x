@@ -2196,84 +2196,58 @@ export class AddProductComponent implements OnInit, OnDestroy
 
     updateSelectedProductsOption(optionId = "") {
 
-        if (this._selectedProductsOption["totalAllow"] > this.onChangeSelectProductValue.length) {
-            // Show a error message
-            // Open the confirmation dialog
-            this._fuseConfirmationService.open({
-                title  : 'Reminder',
-                message: 'Total allowed cannot be more than products in option.',
-                icon       : {
-                    show : true,
-                    name : 'heroicons_outline:exclamation',
-                    color: 'warning'
-                },
-                actions: {
-                    
-                    cancel: {
-                        label: 'OK',
-                        show: true
-                        },
-                    confirm: {
-                        show: false,
-                    }
-                    }
-            });
-            
-            
-        } else {
+        
+        this.clearOptName = true;
 
-            this.clearOptName = true;
+        // add / update _selectedProductsOption["packageId"] value 
+        this._selectedProductsOption["packageId"] = this.selectedProduct.id;   
+        
+        if (optionId !== ""){
+            // update
 
-            // add / update _selectedProductsOption["packageId"] value 
-            this._selectedProductsOption["packageId"] = this.selectedProduct.id;   
-            
-            if (optionId !== ""){
-                // update
-    
-                // this is to remove all other element except productId when updating
-                let updateProductPackageOptionDetail = [];
-                this._selectedProductsOption["productPackageOptionDetail"].forEach(item => {
-                    updateProductPackageOptionDetail.push({
-                        productId: item.productId
-                    });
+            // this is to remove all other element except productId when updating
+            let updateProductPackageOptionDetail = [];
+            this._selectedProductsOption["productPackageOptionDetail"].forEach(item => {
+                updateProductPackageOptionDetail.push({
+                    productId: item.productId
                 });
-                this._selectedProductsOption["productPackageOptionDetail"] = updateProductPackageOptionDetail;
-                
-                this._inventoryService.updateProductsOption(this.selectedProduct.id, this._selectedProductsOption, optionId )
-                    .pipe(takeUntil(this._unsubscribeAll))
-                    .subscribe((response) => {
-    
-                        const index = this.productsCombos$.findIndex(item => item.id === optionId);
-                        this.productsCombos$[index] = response;
+            });
+            this._selectedProductsOption["productPackageOptionDetail"] = updateProductPackageOptionDetail;
+            
+            this._inventoryService.updateProductsOption(this.selectedProduct.id, this._selectedProductsOption, optionId )
+                .pipe(takeUntil(this._unsubscribeAll))
+                .subscribe((response) => {
 
-                        this.clearOptName = false;
-    
-                        // Mark for check
-                        this._changeDetectorRef.markForCheck();
-                    });
-            } else {
-                // add new
-                this._inventoryService.createProductsOptionById(this.selectedProduct.id, this._selectedProductsOption)
-                    .pipe(takeUntil(this._unsubscribeAll))
-                    .subscribe((response) => {
-    
-                        // push to this.productsCombos$
-                        this.productsCombos$.push(response);
+                    const index = this.productsCombos$.findIndex(item => item.id === optionId);
+                    this.productsCombos$[index] = response;
 
-                        this.clearOptName = false;
-    
-                        // Mark for check
-                        this._changeDetectorRef.markForCheck();
-                    });
-            }
-    
-            // Clear the form
-            this.selectedProductsOption = null;
-            // Clear the invisible form
-            this._selectedProductsOption = {};
-            // Clear checkbox
-            this.onChangeSelectProductValue.length = 0;
+                    this.clearOptName = false;
+
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                });
+        } else {
+            // add new
+            this._inventoryService.createProductsOptionById(this.selectedProduct.id, this._selectedProductsOption)
+                .pipe(takeUntil(this._unsubscribeAll))
+                .subscribe((response) => {
+
+                    // push to this.productsCombos$
+                    this.productsCombos$.push(response);
+
+                    this.clearOptName = false;
+
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                });
         }
+
+        // Clear the form
+        this.selectedProductsOption = null;
+        // Clear the invisible form
+        this._selectedProductsOption = {};
+        // Clear checkbox
+        this.onChangeSelectProductValue.length = 0;
 
 
         // for(let i=0;i < this.filteredProductsOptions.length;i++){
