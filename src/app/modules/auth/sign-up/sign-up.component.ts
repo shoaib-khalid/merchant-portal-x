@@ -85,20 +85,14 @@ export class AuthSignUpComponent implements OnInit
                     // set to PAK
                     case 'easydukan':
                         this.signUpForm.get('countryId').patchValue('PAK')
-                        this.displayCountryField = true;
-
                         break;
 
                     // set to MYS
                     case 'symplified':
                         this.signUpForm.get('countryId').patchValue('MYS')
-                        this.displayCountryField = true;
-
                         break;
                 
                     default:
-                        this.displayCountryField = false;
-                        
                         break;
                 }
             
