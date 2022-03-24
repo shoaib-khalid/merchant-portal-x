@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } fro
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { merge, Observable, of, Subject } from 'rxjs';
+import { fromEvent, merge, Observable, of, Subject } from 'rxjs';
 import { debounceTime, delay, finalize, map, switchMap, take, takeUntil } from 'rxjs/operators';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, ProductCategory, ProductPagination, ProductPackageOption } from 'app/core/product/inventory.types';
@@ -13,6 +13,7 @@ import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dial
 import { StoresService } from 'app/core/store/store.service';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { AddProductValidationService } from './add-product.validation.service';
+import { MatPaginator } from '@angular/material/paginator';
 
 
 
@@ -36,6 +37,15 @@ import { AddProductValidationService } from './add-product.validation.service';
                     height: 60px;
                     padding-left: 8px;
                     padding-right: 8px;
+                }
+                
+                :host ::ng-deep .mat-paginator .mat-paginator-container {
+                    padding: 0px 16px;
+                    justify-content: center;
+                }
+                :host ::ng-deep .mat-paginator-outer-container {
+                    display: flex;
+                    height: 40px;
                 }
             }
             .content {
@@ -65,8 +75,8 @@ import { AddProductValidationService } from './add-product.validation.service';
             // combo section
             
             .add-product-list {
-                height: 25vh;
-                max-height: 175px;
+                height: 21vh;
+                max-height: 150px;
             }
 
             .combo-details-grid {
@@ -102,6 +112,7 @@ export class AddProductComponent implements OnInit, OnDestroy
 {
     @ViewChild('variantsPanelOrigin') private _variantsPanelOrigin: ElementRef;
     @ViewChild('variantsPanel') private _variantsPanel: TemplateRef<any>;
+    @ViewChild('productPaginationCombo', {read: MatPaginator}) private _productPaginator: MatPaginator;
 
 
     // get current store
@@ -118,6 +129,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     newProductId: string = null; // product id after it is created
     creatingProduct: boolean; // use to disable next button until product is created
     allProducts: Product[]; // used for checking if product name already exist 
+    productPagination: ProductPagination = { length: 0, page: 0, size: 0, lastPage: 0, startIndex: 0, endIndex: 0 };
 
     // product combo package
     _products: Product[]; // use in combo section -> 'Add product' --before filter
@@ -129,6 +141,9 @@ export class AddProductComponent implements OnInit, OnDestroy
     _filteredProductsOptions: Product[] = []; // use in combo section -> 'Add product' --after filter
     productsCombos$: ProductPackageOption[] = [];
     localCategoryFilterControl: FormControl = new FormControl();
+    productsForCombo$: Observable<Product[]>;
+    productPaginationForCombo: ProductPagination;
+    clearOptName: boolean = false;
 
 
     // product category
@@ -196,7 +211,10 @@ export class AddProductComponent implements OnInit, OnDestroy
     currentScreenSize: string[];
     deliveryVehicle: any;
 
-
+    inputSearchProducts : string = '';
+    selectedCategory:string ='';
+    onChangeSelectProductValue: any = []; // for product checkbox in combo section
+    totalAllowed: number = 0;
 
 
     /**
@@ -266,11 +284,9 @@ export class AddProductComponent implements OnInit, OnDestroy
                 userName : ['', Validators.required],
                 about    : ['']
             }),
-            comboSection: this._formBuilder.group({
-                firstName: ['', Validators.required],
-                lastName : ['', Validators.required],
-                userName : ['', Validators.required],
-                about    : ['']
+            comboSection : this._formBuilder.group({
+                optionName       : ['', [Validators.required]],
+                categoryId       : [''],
             })
         });
 
@@ -279,36 +295,40 @@ export class AddProductComponent implements OnInit, OnDestroy
         // get the product type
         this.productType = this.data['productType'];
         
-
-        // Create the selected product form
-        // this.addProductForm = this._formBuilder.group({
-        //     name             : ['', [Validators.required]],
-        //     description      : ['', [Validators.required]],
-        //     categoryId       : ['', [Validators.required]],
-        //     status           : ['ACTIVE', [Validators.required]],
-        //     trackQuantity    : [false],
-        //     allowOutOfStockPurchases: [false],
-        //     minQuantityForAlarm: [-1],
-        //     packingSize      : ['', [Validators.required]],
-        //     availableStock   : [1, [Validators.required]],
-        //     sku              : ['', [Validators.required]],
-        //     price            : ['', [Validators.required]],
-        //     images           : [[]],
-        //     imagefiles       : [[]],
-        //     thumbnailIndex   : [0],
-
-        //     // form completion
-        //     valid            : [false]
-        // });
-
         // Get the products
-        this.products$ = this._inventoryService.products$;
+        // this.products$ = this._inventoryService.products$;
 
-        this.products$
-            .pipe(takeUntil(this._unsubscribeAll)) 
-            .subscribe(products => {
-                this.allProducts = products;
-            })
+        // Get the products for combo
+        this.productsForCombo$ = this._inventoryService.productsForCombo$;
+
+        this.productsForCombo$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((products: Product[]) => {
+
+                this.filteredProductsOptions = products;
+                
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+
+        // Get the pagination
+        this._inventoryService.productPaginationForCombo$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((pagination: ProductPagination) => {
+
+                // Update the pagination
+                this.productPaginationForCombo = pagination;
+                
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+
+
+        // this.products$
+        //     .pipe(takeUntil(this._unsubscribeAll)) 
+        //     .subscribe(products => {
+        //         this.allProducts = products;
+        //     })
             
         // Get the stores
         this._storesService.store$
@@ -328,16 +348,16 @@ export class AddProductComponent implements OnInit, OnDestroy
             });
 
         // Get all products for combo section
-        this._inventoryService.getAllProducts()
-            .pipe(takeUntil(this._unsubscribeAll))    
-            .subscribe((response)=>{
+        // this._inventoryService.getAllProducts()
+        //     .pipe(takeUntil(this._unsubscribeAll))    
+        //     .subscribe((response)=>{
 
-                this._products = response["data"].content
+        //         this._products = response["data"].content
                 
-                // filter the product
-                this.filterProductOptionsMethod(this._products);
+        //         // filter the product
+        //         this.filterProductOptionsMethod(this._products);
 
-            });
+        //     });
             
         // Get the categories
         this._inventoryService.categories$
@@ -422,6 +442,48 @@ export class AddProductComponent implements OnInit, OnDestroy
         {
             this._variantsPanelOverlayRef.dispose();
         }
+    }
+
+    ngAfterViewInit(): void
+    {
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+
+        setTimeout(() => {
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();        
+
+            
+            
+            if ( this._productPaginator )
+            {
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+        
+                merge(this._productPaginator.page).pipe(
+                    switchMap(() => {                    
+
+                        // set loading to true
+                        this.isLoading = true;
+
+                        return this._inventoryService.getProductsForCombo(this._productPaginator.pageIndex, this._productPaginator.pageSize, 'name', 'asc',this.inputSearchProducts,'ACTIVE,INACTIVE',this.selectedCategory);
+                    
+                    }),
+                    map(() => {
+                        // set loading to false
+                        this.isLoading = false;
+                    })
+                ).subscribe();
+            }
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+
+        }, 150);
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -724,6 +786,34 @@ export class AddProductComponent implements OnInit, OnDestroy
             return;
         }
         
+
+        // Return and throw warning dialog if image file size is big
+        let maxSize = 2097152;
+        var maxSizeInMB = (maxSize / (1024*1024)).toFixed(2);
+        
+        if (fileList[0].size > maxSize ){
+            // Show a success message (it can also be an error message)
+            const confirmation = this._fuseConfirmationService.open({
+                title  : 'Image size limit',
+                message: 'Your uploaded image exceeds the maximum size of ' + maxSizeInMB + ' MB !',
+                icon: {
+                    show: true,
+                    name: "image_not_supported",
+                    color: "warn"
+                },
+                actions: {
+                    
+                    cancel: {
+                        label: 'OK',
+                        show: true
+                        },
+                    confirm: {
+                        show: false,
+                    }
+                    }
+            });
+            return;
+        }
         
         var reader = new FileReader();
         reader.readAsDataURL(file); 
@@ -850,13 +940,13 @@ export class AddProductComponent implements OnInit, OnDestroy
                 this.newProductId = newProduct["data"].id;
                 this.selectedProduct = newProduct["data"];    
                 
-                this.products$
-                    .pipe(take(1)) 
-                    .subscribe(products => {
+                // this.products$
+                //     .pipe(take(1)) 
+                //     .subscribe(products => {
 
-                        // filter after update
-                        this.filterProductOptionsMethod(products);
-                    })
+                //         // filter after update
+                //         this.filterProductOptionsMethod(products);
+                //     })
 
                 // Add Inventory to product
                 this._inventoryService.addInventoryToProduct(newProduct["data"], { sku: sku, quantity: availableStock, price:price, itemCode:newProduct["data"].id + "aa" } )
@@ -1927,7 +2017,38 @@ export class AddProductComponent implements OnInit, OnDestroy
         const value = event.target.value.toLowerCase();
 
         // Filter the categories
-        this.filteredProductsOptions = this._filteredProductsOptions.filter(product => product.name.toLowerCase().includes(value));
+        // this.filteredProductsOptions = this._filteredProductsOptions.filter(product => product.name.toLowerCase().includes(value));
+
+        this.inputSearchProducts = value;
+
+        fromEvent(event.target,'keyup')
+        .pipe(
+            takeUntil(this._unsubscribeAll),
+            debounceTime(500),
+            switchMap((event:any) => {
+                        
+                return this._inventoryService.getProductsForCombo(0, 10, 'name', 'asc', event.target.value,'ACTIVE,INACTIVE')
+            }),
+            map(() => {
+                this.isLoading = false;
+            })
+        )
+        .subscribe();
+    }
+
+    onSelectCategoryList(event) {
+
+        this.selectedCategory = event.value;
+
+        if (this.selectedCategory )
+        {
+            return this._inventoryService.getProductsForCombo(0, 10, 'name', 'asc', this.inputSearchProducts,'ACTIVE,INACTIVE',this.selectedCategory).subscribe();
+        } 
+        else {
+            return this._inventoryService.getProductsForCombo(0, 10, 'name', 'asc', this.inputSearchProducts,'ACTIVE,INACTIVE').subscribe();
+
+        }
+
     }
  
     filterProductsInputKeyDown(event): void
@@ -2000,11 +2121,14 @@ export class AddProductComponent implements OnInit, OnDestroy
     }
 
     selectProductOption(optionId){
+
         // If the product is already selected...
         if ( this.selectedProductsOption && this.selectedProductsOption.id === optionId )
         {
             // Clear the form
             this.selectedProductsOption = null;
+            this.onChangeSelectProductValue.length = 0;
+
         }
 
         // Get the product by id
@@ -2012,6 +2136,13 @@ export class AddProductComponent implements OnInit, OnDestroy
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((packages) => {
                 this.selectedProductsOption = packages;
+
+                // this is for checkbox
+                this.onChangeSelectProductValue = this.selectedProductsOption["productPackageOptionDetail"].map(x => x.productId);
+
+                // this is for Total Allowed input field, to make it dirty
+                this.addProductForm.get('comboSection').get('categoryId').setValue(this.onChangeSelectProductValue);
+                
             });
     }
 
@@ -2021,6 +2152,8 @@ export class AddProductComponent implements OnInit, OnDestroy
         {
             // Clear the form
             this.selectedProductsOption = null;
+            this.onChangeSelectProductValue.length = 0;
+
         }
 
 
@@ -2063,9 +2196,12 @@ export class AddProductComponent implements OnInit, OnDestroy
 
     updateSelectedProductsOption(optionId = "") {
 
-        // add / update _selectedProductsOption["packageId"] value 
-        this._selectedProductsOption["packageId"] = this.selectedProduct.id;
+        
+        this.clearOptName = true;
 
+        // add / update _selectedProductsOption["packageId"] value 
+        this._selectedProductsOption["packageId"] = this.selectedProduct.id;   
+        
         if (optionId !== ""){
             // update
 
@@ -2085,6 +2221,8 @@ export class AddProductComponent implements OnInit, OnDestroy
                     const index = this.productsCombos$.findIndex(item => item.id === optionId);
                     this.productsCombos$[index] = response;
 
+                    this.clearOptName = false;
+
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
                 });
@@ -2097,6 +2235,8 @@ export class AddProductComponent implements OnInit, OnDestroy
                     // push to this.productsCombos$
                     this.productsCombos$.push(response);
 
+                    this.clearOptName = false;
+
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
                 });
@@ -2106,15 +2246,25 @@ export class AddProductComponent implements OnInit, OnDestroy
         this.selectedProductsOption = null;
         // Clear the invisible form
         this._selectedProductsOption = {};
+        // Clear checkbox
+        this.onChangeSelectProductValue.length = 0;
 
-        for(let i=0;i < this.filteredProductsOptions.length;i++){
-            this.optionChecked[i] = false;
-        }
+
+        // for(let i=0;i < this.filteredProductsOptions.length;i++){
+        //     this.optionChecked[i] = false;
+        // }
         
     }
 
-    resetSelectedProductsOption(){
+
+    resetSelectedProductsOption() {
         this.selectedProductsOption = null;
+        // Clear checkbox
+        this.onChangeSelectProductValue.length = 0;
+        this.addProductForm.get('comboSection').get('categoryId').reset;
+        this.totalAllowed = 0;
+        this._selectedProductsOption = {};
+        
     }
 
     validateProductsOptionName(value){
@@ -2127,14 +2277,14 @@ export class AddProductComponent implements OnInit, OnDestroy
         this._selectedProductsOption["title"] = value;
     }
 
-    insertProductsInOption(productId, isChecked: boolean) {
+    insertProductsInOption(productId, isChecked: MatCheckboxChange) {
 
         // if this.selectedProductsOption have value // for update
         if (this.selectedProductsOption) {
             this._selectedProductsOption = this.selectedProductsOption;
         }
 
-        if (isChecked) {
+        if (isChecked.checked) {
 
             // get product object in filteredProductsOptions
             let currentSelectedProductInOption = this.filteredProductsOptions.find(item => item.id === productId);
@@ -2178,6 +2328,10 @@ export class AddProductComponent implements OnInit, OnDestroy
             }
         }
 
+        this.onChangeSelectProductValue = this._selectedProductsOption["productPackageOptionDetail"].map(x => x.productId);
+        this.addProductForm.get('comboSection').get('categoryId').patchValue(this.onChangeSelectProductValue);
+
+
     }
 
     validateProductsInOption(productId) {
@@ -2199,6 +2353,8 @@ export class AddProductComponent implements OnInit, OnDestroy
         }
         
         this._selectedProductsOption["totalAllow"] = value;
+        this.totalAllowed = value;
+
     }
 
     
@@ -2229,10 +2385,5 @@ export class AddProductComponent implements OnInit, OnDestroy
         if (status === 409){
             this.addProductForm.get('step1').get('name').setErrors({productAlreadyExists: true});
         }
-        
-        // if (this.allProducts.some(product => product.name === value.trim() )){
-        //     // if identical, set Error
-        //     this.addProductForm.get('step1').get('name').setErrors({productAlreadyExists: true});
-        // }
     }
 }
