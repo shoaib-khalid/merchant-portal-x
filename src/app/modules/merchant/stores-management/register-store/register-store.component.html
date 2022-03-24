@@ -234,7 +234,7 @@
                                                         <span class="text-xs text-gray-400 p-0 m-0">Image Size : Max 2MB,</span>
                                                         <span class="text-xs text-gray-400 p-0 m-0">Resolution: 500 x 500 px</span>
                                                     </div>
-                                                    <div *ngIf="this.files[0].fileSource !== '' && this.files[0].selectedFiles === null">
+                                                    <div *ngIf="this.files[0].fileSource !== '' && this.files[0].selectedFiles === null || this.files[0].fileSource === null">
                                                         <input
                                                             id="add-logo-btn"
                                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
