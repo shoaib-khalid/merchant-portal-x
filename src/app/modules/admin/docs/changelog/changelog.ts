@@ -9,6 +9,30 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 export class ChangelogComponent
 {
     changelog: any[] = [
+            //v0.0.36
+            {
+            version    : 'v0.0.36',
+            releaseDate: 'Mar 24, 2022',
+            changes    : [
+                {
+                    type: 'Fix',
+                    list: [
+                        '(ProductManagement) In Combo section, disallow user to add combo options if total allowed is more than product in option',
+                        '(StoreManagement) In store creation page, currency symbol and dialing code are now formatted to their respective country',
+                        '(StoreManagement) Fix image upload size limit on store creation',
+                        '(OrderManagement) Some UI fix on Pickup Datetime'
+                    ]
+                },
+                {
+                    type: 'Added',
+                    list: [
+                        '(ProductManagement) Add pagination to product list in combo section',
+                        '(ProductManagement) Add warning dialog if uploaded product image size is bigger than 2MB'
+                    ]
+                }
+                
+            ]
+        },
         //v0.0.35
         {
             version    : 'v0.0.35',
