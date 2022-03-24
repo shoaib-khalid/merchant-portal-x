@@ -1285,7 +1285,12 @@ export class RegisterStoreComponent implements OnInit
         let maxSize = 2097152;
         var maxSizeInMB = (maxSize / (1024*1024)).toFixed(2);
 
-        if (this.files[index].fileSource && this.files[index].selectedFiles[0].size > maxSize ){
+        console.log("sinii",this.files[index].selectedFiles[0]);
+        console.log("here",this.files[index].fileSource);
+        
+        
+
+        if (this.files[index].selectedFiles[0].size > maxSize ){
             // Show a success message (it can also be an error message)
             const confirmation = this._fuseConfirmationService.open({
                 title  : 'Image size limit',
@@ -1366,6 +1371,7 @@ export class RegisterStoreComponent implements OnInit
             this.files[index].selectedFileName = this.files[index].selectedFiles[i].name;
             }
         }
+        
         this._changeDetectorRef.markForCheck();
     }
 
