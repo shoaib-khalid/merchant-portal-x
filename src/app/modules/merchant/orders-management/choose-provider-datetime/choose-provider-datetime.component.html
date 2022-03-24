@@ -1,8 +1,8 @@
-<div class="flex flex-col max-w-120 md:min-w-160 ">
+<div class="flex flex-col max-w-120 md:min-w-160">
 
     <!-- Compose form -->
     <div
-        class="flex flex-col flex-auto p-6 sm:p-8 overflow-y-auto"
+        class="flex flex-col flex-auto overflow-y-auto"
     >
 
         <div class="flex flex-col items-center mb-4 min-w-0">
@@ -34,14 +34,15 @@
         <mat-form-field *ngIf="data['scheduleDate'] === true" appearance="fill">
             <mat-label>Pick a time</mat-label>
             <time-selector
-            matInput
-            type="time"
-            [(ngModel)]="time"
-            (change)="checkTime()"></time-selector>
+                class="w-full"
+                matInput
+                type="time"
+                [(ngModel)]="time"
+                (change)="checkTime()"></time-selector>
         </mat-form-field>
 
         <!-- Actions -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-end mt-4 sm:mt-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-end mt-4">
             <div class="order-last">
                 <!-- Send -->
                 <button
