@@ -44,7 +44,7 @@
                                 #verticalStepperStep1>
                                 <ng-template matStepLabel>Store Account</ng-template>
                                 <p class="mt-2 mb-4 font-medium">
-                                    Fill in your basic information to let us know your preferences
+                                    Fill in basic information for your store
                                 </p>
                                 <!-- Name, Store URL, Description, Email, Phonenumber, Message, City, State, Country, Postcode -->
                                 <div class="flex flex-col sm:px-4">
@@ -54,7 +54,7 @@
                                             <input
                                                 matInput
                                                 maxlength="100"
-                                                placeholder="Tell us, what is your store name ?"
+                                                placeholder="Tell us, what is your store name?"
                                                 [formControlName]="'name'"
                                                 [required]="true"
                                                 (input)="checkExistingName($event.target.value)">
@@ -97,7 +97,7 @@
                                                 Minimum character length not meet (mininum 4 character)
                                             </mat-error>
                                             <mat-error *ngIf="createStoreForm.get('step1').get('subdomain').hasError('maxlength')">
-                                                Maximum character length exceed (maximum 15 character)
+                                                Maximum character length reached (maximum 15 character)
                                             </mat-error>
                                             <mat-error *ngIf="createStoreForm.get('step1').get('subdomain').hasError('domainAlreadyTaken')">
                                                 The domain name entered is already taken
@@ -114,7 +114,7 @@
                                                     (onContentChanged)="textChanged($event)"></quill-editor>
                                             </div>
                                             <mat-error *ngIf="createStoreForm.get('step1').get('storeDescription').hasError('maxlength')">
-                                                Maximum character length exceed (maximum 200 character)
+                                                Maximum character length reached (maximum 200 character)
                                             </mat-error>
                                         </div>
                                         <!-- Email -->
@@ -141,7 +141,7 @@
                                         <mat-form-field class="fuse-mat-textarea w-full" floatLabel="always">
                                             <textarea
                                                 matInput
-                                                placeholder="Your customer will be looking for your store, add your store address now !"
+                                                placeholder="Your customer will be looking for your store, add your store address now!"
                                                 maxlength="500"
                                                 [formControlName]="'displayAddress'"
                                                 [rows]="5"
@@ -157,7 +157,7 @@
                                             <mat-form-field class="w-full sm:w-1/2 sm:pr-3 fuse-mat-emphasized-affix" floatLabel="always">
                                                 <input
                                                     matInput
-                                                    placeholder="+60123456789"
+                                                    [placeholder]="dialingCode + '123456789'"
                                                     [formControlName]="'phoneNumber'"
                                                     [required]="true">
                                                     <mat-icon
@@ -169,7 +169,7 @@
                                                     Required
                                                 </mat-error>
                                                 <mat-error *ngIf="createStoreForm.get('step1').get('phoneNumber').hasError('invalidPhonenumber')">
-                                                    Invalid Phonenumber
+                                                    Invalid phone number
                                                 </mat-error>
                                             </mat-form-field>
                                             <mat-form-field class="w-full sm:w-1/2 sm:pl-3 fuse-mat-emphasized-affix" appearance="fill" floatLabel="always">
@@ -567,7 +567,7 @@
                                         <mat-form-field class="fuse-mat-textarea w-full" floatLabel="always">
                                             <textarea
                                                 matInput
-                                                placeholder="Your customer will be looking for your store, add your store address now !"
+                                                placeholder="Your customer will be looking for your store, add your store address now!"
                                                 maxlength="500"
                                                 [formControlName]="'address'"
                                                 [required]="true"
@@ -652,7 +652,7 @@
                                                 <input
                                                     matInput
                                                     [formControlName]="'postcode'"
-                                                    placeholder="XXXXXX"
+                                                    placeholder="12345"
                                                     minlength="5"
                                                     maxlength="10"
                                                     [required]="true">
@@ -667,7 +667,7 @@
                                                     Minimum length of postcode not meet
                                                 </mat-error>
                                                 <mat-error *ngIf="createStoreForm.get('step3').get('postcode').hasError('maxlength')">
-                                                    Exceed maximum length of postcode
+                                                    Maximum length of postcode reached
                                                 </mat-error>
                                             </mat-form-field>
                                         </div>
@@ -899,7 +899,7 @@
                                                                         </mat-form-field>
                                                                         <!-- Input -->
                                                                         <mat-form-field class="w-full sm:w-1/2 sm:pl-3">
-                                                                            <span matSuffix>$</span>
+                                                                            <span matSuffix>{{currencySymbol}}</span>
                                                                             <input
                                                                                 matInput
                                                                                 type="number"
@@ -1145,7 +1145,7 @@
                             <mat-step>
                                 <ng-template matStepLabel>Done</ng-template>
                                 <p class="my-6 font-medium">
-                                    Thank you for completing our form! Click the submit button to create your store.  You can reset the form as well if you would like to change your information.
+                                    Thank you for completing our form! Click the submit button to create your store. You can reset the form as well if you would like to change your information.
                                 </p>
                                 <div class="flex justify-end mt-8">
                                     <button

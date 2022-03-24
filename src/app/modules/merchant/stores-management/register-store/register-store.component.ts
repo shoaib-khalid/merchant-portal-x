@@ -118,6 +118,10 @@ export class RegisterStoreComponent implements OnInit
     currentScreenSize: string[] = [];
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
+
+    countryCode: string;
+    currencySymbol: string;
+    dialingCode: string;
     
     /**
      * Constructor
@@ -239,6 +243,9 @@ export class RegisterStoreComponent implements OnInit
                 if (response['data'].regionCountry) {
 
                     let symplifiedCountryId = response['data'].regionCountry.id;
+
+                    this.countryCode = symplifiedCountryId;
+
     
                     // check if vertical selected is valid for selected country
                     if ((_verticalCode === "ECommerce_PK" || _verticalCode === "FnB_PK") && symplifiedCountryId === "PAK") {
@@ -346,7 +353,26 @@ export class RegisterStoreComponent implements OnInit
                         }
                     );
                 }
+
+                // -------------------------
+                // Set Dialing code
+                // -------------------------
                 
+                let countryId = response['data'].countryId;
+                
+                switch (countryId) {
+                    case 'MYS':
+                        this.dialingCode = '+60'
+                        break;
+                
+                    case 'PAK':
+                        this.dialingCode = '+92'
+                        break;
+
+                    default:
+                        break;
+                }
+                                
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
@@ -697,6 +723,10 @@ export class RegisterStoreComponent implements OnInit
         this._storesService.storeRegionCountries$.subscribe((response: StoreRegionCountries[])=>{
             response.forEach((country: StoreRegionCountries) => {
                 this.countriesList.push(country);
+
+                if (country.id === this.countryCode) {
+                    this.currencySymbol = country.currencySymbol;
+                }
             });
         });
 
@@ -716,6 +746,8 @@ export class RegisterStoreComponent implements OnInit
     {   
         // Hide the alert
         this.isDisplayStatus = false;
+
+        let BreakException = {};
 
         const { subdomain ,...createStoreBody} = this.createStoreForm.get('step1').value; 
         const storeTimingBody = this.createStoreForm.get('step4').get('storeTiming').value;
@@ -830,11 +862,23 @@ export class RegisterStoreComponent implements OnInit
                     this.createStoreForm.get('step4').get('storeTiming').value.breakEndTime = _filteredItem.breakEndTime;
                 }
 
+                // ---------------------------
+                //    Create Store Timing
+                // ---------------------------
+
                 this._storesService.postTiming(this.storeId, _filteredItem)
-                    .subscribe((response)=>{});
+                    .subscribe((response)=>{
+
+                    },
+                    (err: any) => {
+                        console.error('Error postTiming: ', err);
+                        // throw BreakException;
+                    }
+                    
+                    );
                 });
 
-                // manual set store timing to new created store at service
+                // manual set store timing to new created store at service (ngarut)
                 this._storesService.setTimingToStore(this.storeId, this._storeTiming).subscribe(()=>{
         
                 });
@@ -865,7 +909,8 @@ export class RegisterStoreComponent implements OnInit
                             }
                             },
                             (err: any) => {
-                                console.error('Could not upload the file');
+                                console.error('Error in postAssets');
+                                // throw BreakException;
                             });
                     }
 
@@ -890,7 +935,8 @@ export class RegisterStoreComponent implements OnInit
                             }
                             },
                             (err: any) => {
-                                console.error('Could not upload the file');
+                                console.error('Error in postAssets');
+                                // throw BreakException;
                             });
                     }
                     if(item.type === 'BannerDesktopUrl') {
@@ -906,7 +952,8 @@ export class RegisterStoreComponent implements OnInit
                                 }
                                 },
                                 (err: any) => {
-                                    console.error('Could not upload the file');
+                                    console.error('Error in deleteAssets');
+                                    // throw BreakException;
                             });
                         });
                         // toAdd
@@ -929,7 +976,8 @@ export class RegisterStoreComponent implements OnInit
                                 }
                                 },
                                 (err: any) => {
-                                    console.error('Could not upload the file');
+                                    console.error('Error in postAssets');
+                                    // throw BreakException;
                                 });
                         });
                         
@@ -947,7 +995,8 @@ export class RegisterStoreComponent implements OnInit
                                 }
                                 },
                                 (err: any) => {
-                                    console.error('Could not upload the file');
+                                    console.error('Error in deleteAssets');
+                                    // throw BreakException;
                             });
                         });
                         // toAdd
@@ -970,7 +1019,8 @@ export class RegisterStoreComponent implements OnInit
                                 }
                                 },
                                 (err: any) => {
-                                    console.error('Could not upload the file');
+                                    console.error('Error in postAssets');
+                                    // throw BreakException;
                                 });
                         });
                     }
@@ -1018,6 +1068,10 @@ export class RegisterStoreComponent implements OnInit
                 this._storesService.postStoreDeliveryDetails(this.storeId, deliveryDetailBody).subscribe(
                     (response) => {
 
+                    },
+                    (err: any) => {
+                        console.error('Error in postStoreDeliveryDetails');
+                        // throw BreakException;
                     }
                 );
 
@@ -1037,6 +1091,10 @@ export class RegisterStoreComponent implements OnInit
                         this._storesService.postSelfDeliveryStateCharges(this.storeId, selfDeliveryStateBody).subscribe(
                             (response) => {
         
+                            },
+                            (err: any) => {
+                                console.error('Error in postSelfDeliveryStateCharges');
+                                // throw BreakException;
                             }
                         );
                     }
@@ -1054,7 +1112,12 @@ export class RegisterStoreComponent implements OnInit
                         this._storesService.postStoreRegionCountryDeliveryProvider(this.storeId, this.deliveryPartners[index].deliverySpId, this.deliveryPartners[index].fulfilment, this.deliveryPartners[index].id)
                             .subscribe((response) => {
                                 
-                            });
+                            },
+                            (err: any) => {
+                                console.error('Error in postStoreRegionCountryDeliveryProvider');
+                                // throw BreakException;
+                            }
+                            );
                     } else {
                         console.error("Provision ADHOC delivery failed")
                     }
@@ -1074,38 +1137,56 @@ export class RegisterStoreComponent implements OnInit
                     this._storesService.postDeliveryPeriod(this.storeId, deliveryPeriodBody)
                         .subscribe(()=>{
 
-                        });
+                        },
+                        (err: any) => {
+                            console.error('Error in postDeliveryPeriod');
+                            // throw BreakException;
+                        }
+                        );
                 }
-
+                
+                // Show a success message (it can also be an error message)
+                const confirmation = this._fuseConfirmationService.open({
+                    title  : 'Store Created',
+                    message: 'Your have successfully create store',
+                    icon: {
+                        show: true,
+                        name: "heroicons_outline:clipboard-check",
+                        color: "success"
+                    },
+                    actions: {
+                        confirm: {
+                            label: 'Ok',
+                            color: "primary",
+                        },
+                        cancel: {
+                            show: false,
+                        },
+                    }
+                });
+    
+                setTimeout(() => {
+                    this.isDisplayStatus = false;
+    
+                    // Navigate to the confirmation required page
+                    this._router.navigateByUrl('/stores');
+                }, 1000);
             },
-        );
-
-        // Show a success message (it can also be an error message)
-        const confirmation = this._fuseConfirmationService.open({
-            title  : 'Store Created',
-            message: 'Your have successfully create store',
-            icon: {
-                show: true,
-                name: "heroicons_outline:clipboard-check",
-                color: "success"
-            },
-            actions: {
-                confirm: {
-                    label: 'Ok',
-                    color: "primary",
-                },
-                cancel: {
-                    show: false,
-                },
+            (err: any) => {
+                console.error('Error in post (create store): ', err);
+                // throw 'StoreCreationError';
             }
-        });
+        );
+        // try {
 
-        setTimeout(() => {
-            this.isDisplayStatus = false;
+            
+        // } catch (error) {
 
-            // Navigate to the confirmation required page
-            this._router.navigateByUrl('/stores');
-        }, 1000);
+            
+        // }
+
+
+        
     }
 
     async checkExistingURL(subdomain: string){
@@ -1289,7 +1370,7 @@ export class RegisterStoreComponent implements OnInit
             // Show a success message (it can also be an error message)
             const confirmation = this._fuseConfirmationService.open({
                 title  : 'Image size limit',
-                message: 'Your uploaded image is exceeds the maximum size of ' + maxSizeInMB + ' MB !',
+                message: 'Your uploaded image exceeds the maximum size of ' + maxSizeInMB + ' MB !',
                 icon: {
                     show: true,
                     name: "image_not_supported",
