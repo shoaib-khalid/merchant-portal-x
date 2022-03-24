@@ -35,7 +35,7 @@ fullnameOverride: ""
 image:
   pullPolicy: Always
   repository: kalsym/merchant-portal-x
-  tag: 0.0.36
+  tag: v1.0.0
 imagePullSecrets:
 - name: kalsym-docker-hub
 ingress:

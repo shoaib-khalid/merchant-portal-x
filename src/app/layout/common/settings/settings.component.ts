@@ -1,10 +1,8 @@
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Subject, takeUntil } from 'rxjs';
 import { FuseConfigService } from '@fuse/services/config';
-import { FuseTailwindService } from '@fuse/services/tailwind';
-import { AppConfig, Scheme, Theme } from 'app/core/config/app.config';
+import { AppConfig, Scheme, Theme, Themes } from 'app/core/config/app.config';
 import { Layout } from 'app/layout/layout.types';
 
 @Component({
@@ -28,7 +26,7 @@ export class SettingsComponent implements OnInit, OnDestroy
     layout: Layout;
     scheme: 'dark' | 'light';
     theme: string;
-    themes: [string, any][] = [];
+    themes: Themes;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     /**
@@ -36,8 +34,7 @@ export class SettingsComponent implements OnInit, OnDestroy
      */
     constructor(
         private _router: Router,
-        private _fuseConfigService: FuseConfigService,
-        private _fuseTailwindService: FuseTailwindService
+        private _fuseConfigService: FuseConfigService
     )
     {
     }
@@ -51,13 +48,6 @@ export class SettingsComponent implements OnInit, OnDestroy
      */
     ngOnInit(): void
     {
-        // Get the themes
-        this._fuseTailwindService.tailwindConfig$
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((config) => {
-                this.themes = Object.entries(config.themes);
-            });
-
         // Subscribe to config changes
         this._fuseConfigService.config$
             .pipe(takeUntil(this._unsubscribeAll))
@@ -74,7 +64,7 @@ export class SettingsComponent implements OnInit, OnDestroy
     ngOnDestroy(): void
     {
         // Unsubscribe from all subscriptions
-        this._unsubscribeAll.next();
+        this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
 

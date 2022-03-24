@@ -1,6 +1,9 @@
 {
     "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
     "version": 1,
+    "cli": {
+        "defaultCollection": "@angular-eslint/schematics"
+    },
     "newProjectRoot": "projects",
     "projects": {
         "fuse": {
@@ -38,8 +41,7 @@
                                 "glob": "_redirects",
                                 "input": "src",
                                 "output": "/"
-                            },
-                            "src/.htaccess"
+                            }
                         ],
                         "stylePreprocessorOptions": {
                             "includePaths": [
@@ -52,15 +54,9 @@
                             "src/styles/vendors.scss",
                             "src/@fuse/styles/main.scss",
                             "src/styles/styles.scss",
-                            "src/styles/tailwind.scss",
-                            "./node_modules/font-awesome/css/font-awesome.css"
+                            "src/styles/tailwind.scss"
                         ],
-                        "scripts": [
-                            "src/assets/js/mxgraph.conf.js",
-                            "node_modules/mxgraph/javascript/mxClient.js",
-                            "src/assets/js/json2xml.js",
-                            "src/assets/js/xml2json.js"
-                        ]
+                        "scripts": []
                     },
                     "configurations": {
                         "production": {
@@ -93,7 +89,7 @@
                             "namedChunks": true
                         }
                     },
-                    "defaultConfiguration": "development"
+                    "defaultConfiguration": "production"
                 },
                 "serve": {
                     "builder": "@angular-devkit/build-angular:dev-server",
@@ -127,15 +123,9 @@
                             "src/assets"
                         ],
                         "styles": [
-                            "src/styles/styles.scss",
-                            "./node_modules/font-awesome/css/font-awesome.css"
+                            "src/styles/styles.scss"
                         ],
-                        "scripts": [
-                            "src/assets/js/mxgraph.conf.js",
-                            "node_modules/mxgraph/javascript/mxClient.js",
-                            "src/assets/js/json2xml.js",
-                            "src/assets/js/xml2json.js"
-                        ]
+                        "scripts": []
                     }
                 },
                 "lint": {
@@ -150,9 +140,5 @@
             }
         }
     },
-    "defaultProject": "fuse",
-    "cli": {
-      "analytics": false,
-        "defaultCollection": "@angular-eslint/schematics"
-    }
+    "defaultProject": "fuse"
 }

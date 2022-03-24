@@ -71,7 +71,7 @@ export class AuthSignOutComponent implements OnInit, OnDestroy
     ngOnDestroy(): void
     {
         // Unsubscribe from all subscriptions
-        this._unsubscribeAll.next();
+        this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
 
@@ -80,7 +80,7 @@ export class AuthSignOutComponent implements OnInit, OnDestroy
     signIn(): void
     {
         // Unsubscribe from all subscriptions
-        this._unsubscribeAll.next();
+        this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
 
         this._router.navigate(['sign-in']);
