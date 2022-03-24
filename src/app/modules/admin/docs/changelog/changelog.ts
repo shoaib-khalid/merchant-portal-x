@@ -25,7 +25,7 @@ export class ChangelogComponent
             ]
         },
         //v0.0.36
-            {
+        {
             version    : 'v0.0.36',
             releaseDate: 'Mar 24, 2022',
             changes    : [
