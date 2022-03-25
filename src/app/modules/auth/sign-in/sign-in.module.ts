@@ -19,6 +19,7 @@ import { SocialLoginModule, SocialAuthServiceConfig } from 'angularx-social-logi
 import { GoogleLoginProvider,FacebookLoginProvider } from 'angularx-social-login';
 import { AppleLoginProvider } from './apple.provider';
 import { SocialLooginClientId } from './oauth.types';
+import { AppConfig } from 'app/config/service.config';
 
 @NgModule({
     declarations: [
@@ -53,8 +54,7 @@ import { SocialLooginClientId } from './oauth.types';
               {
                 id: AppleLoginProvider.PROVIDER_ID,
                 provider: new AppleLoginProvider(
-                  SocialLooginClientId.APPLE_CLIENT_ID
-                ),
+                  SocialLooginClientId.APPLE_CLIENT_ID                )
               },
               {
                 id: FacebookLoginProvider.PROVIDER_ID,
@@ -72,4 +72,7 @@ import { SocialLooginClientId } from './oauth.types';
 })
 export class AuthSignInModule
 {
+  constructor(private _apiServer: AppConfig) {
+    console.log('checkingimannn',this._apiServer.settings.apiServer.userService);
+  }
 }

@@ -1,19 +1,22 @@
 import { BaseLoginProvider, SocialUser } from 'angularx-social-login';
 import { AppleConfiguration, SocialLooginClientId } from './oauth.types';
+import { AppConfig } from 'app/config/service.config';
+import { Injectable } from '@angular/core';
 
 declare let AppleID: any;
-
+Injectable()
 export class AppleLoginProvider extends BaseLoginProvider {
 
   public static readonly PROVIDER_ID: string = 'APPLE';
-
   protected auth2: any;
+  userServiceUrl:string;
 
   constructor(
     private clientId: string,
     private _initOptions: any = { scope: 'name email' }
   ) {
     super();
+    this.userServiceUrl = AppConfig.settings.apiServer.userService + '/clients/applecallback';
   }
 
   public initialize(): Promise<void> {
@@ -25,7 +28,7 @@ export class AppleLoginProvider extends BaseLoginProvider {
           AppleID.auth.init({
             clientId: SocialLooginClientId.APPLE_CLIENT_ID,
             scope: AppleConfiguration.scope,
-            redirectURI: AppleConfiguration.redirectURI,
+            redirectURI: this.userServiceUrl,
             state: AppleConfiguration.state, //used to prevent CSFR
             usePopup: false,
           });
@@ -41,16 +44,6 @@ export class AppleLoginProvider extends BaseLoginProvider {
       resolve(new SocialUser);
     });
   }
-
-  // public async signIn(signInOptions?: any): Promise<SocialUser> {
-  //   // try {
-  //   //   const data = await AppleID.auth.signIn()
-  //   // } catch (er) {
-  //   //   console.log(er);
-  //   // }
-  //   // return;
-
-  // }
 
   public signIn(signInOptions?: any):Promise<SocialUser>{
 
@@ -70,3 +63,5 @@ export class AppleLoginProvider extends BaseLoginProvider {
     });
   }
 }
+
+

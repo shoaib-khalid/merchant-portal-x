@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnIni
 import { take, takeUntil } from 'rxjs/operators';
 import { AvailableLangs, TranslocoService } from '@ngneat/transloco';
 import { FuseNavigationService, FuseVerticalNavigationComponent } from '@fuse/components/navigation';
-import { LocaleService } from 'app/core/locale/locale.service';
+// import { LocaleService } from 'app/core/locale/locale.service';
 import { AvailableCountries } from 'app/core/locale/locale.types';
 import { Subject } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
@@ -38,7 +38,7 @@ export class CountriesComponent implements OnInit, OnDestroy
         private _fuseNavigationService: FuseNavigationService,
         private _translocoService: TranslocoService,
         private _storesService: StoresService,
-        private _localeService: LocaleService,
+        // private _localeService: LocaleService,
         private _matDialog: MatDialog,
         private _router: Router
     )
@@ -82,16 +82,16 @@ export class CountriesComponent implements OnInit, OnDestroy
         });
         
         // Get current country from locale service
-        this._localeService.locale$
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((response) => {
+        // this._localeService.locale$
+        //     .pipe(takeUntil(this._unsubscribeAll))
+        //     .subscribe((response) => {
 
-                // Get the active lang
-                this.activeCountry = response.countryCode.toLowerCase();
+        //         // Get the active lang
+        //         this.activeCountry = response.countryCode.toLowerCase();
 
-                // Update the navigation
-                this._updateNavigation(response.countryCode.toLowerCase());
-            });
+        //         // Update the navigation
+        //         this._updateNavigation(response.countryCode.toLowerCase());
+        //     });
 
         // Check if current country from locale service is empty
         if (!this.activeCountry && this.currentURLPath === "/stores/choose-vertical"){
@@ -100,11 +100,11 @@ export class CountriesComponent implements OnInit, OnDestroy
             const dialogRef = this._matDialog.open(ChooseCountryComponent, { disableClose: true });
 
             // first set locate service data to null
-            this._localeService.locale = {
-                symplifiedCountryId: "",
-                symplifiedRegion: null,
-                countryCode: "null"
-            };
+            // this._localeService.locale = {
+            //     symplifiedCountryId: "",
+            //     symplifiedRegion: null,
+            //     countryCode: "null"
+            // };
 
             // then ask for locale service data from user
             dialogRef.afterClosed()
@@ -122,11 +122,11 @@ export class CountriesComponent implements OnInit, OnDestroy
                             if (symplifiedCountryId === "MYS"){ _countryCode = "my" }
                             else if (symplifiedCountryId === "PAK"){ _countryCode = "pk" }
                             else { _countryCode = "null" }
-                            this._localeService.locale = {
-                                symplifiedCountryId,
-                                symplifiedRegion: response[index].region,
-                                countryCode: _countryCode
-                            };
+                            // this._localeService.locale = {
+                            //     symplifiedCountryId,
+                            //     symplifiedRegion: response[index].region,
+                            //     countryCode: _countryCode
+                            // };
                             this._changeDetectorRef.markForCheck();
                         }
                     });
@@ -188,7 +188,7 @@ export class CountriesComponent implements OnInit, OnDestroy
         }
 
         // Set the active country
-        this._localeService.update(symplifiedCountryId,symplifiedRegion,countryCode);
+        // this._localeService.update(symplifiedCountryId,symplifiedRegion,countryCode);
     }
 
     /**

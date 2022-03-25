@@ -3,7 +3,7 @@ import { ChooseVerticalService } from 'app/modules/merchant/stores-management/ch
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Vertical } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.types';
-import { LocaleService } from 'app/core/locale/locale.service';
+// import { LocaleService } from 'app/core/locale/locale.service';
 import { Locale } from 'app/core/locale/locale.types';
 import { MatDialog } from '@angular/material/dialog';
 // import { ChooseCountryComponent } from 'app/layout/common/countries/choose-country/choose-country.component'
@@ -42,7 +42,7 @@ export class ChooseVerticalComponent
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _chooseVerticalService: ChooseVerticalService,
-        private _localeService: LocaleService,
+        // private _localeService: LocaleService,
         private _platformsService: PlatformService,
         // private _matDialog: MatDialog,
         private _storesService: StoresService,

@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
-import { LocaleService } from 'app/core/locale/locale.service';
+// import { LocaleService } from 'app/core/locale/locale.service';
 import { LogService } from 'app/core/logging/log.service';
 import { PlatformService } from 'app/core/platform/platform.service';
 import { Platform } from 'app/core/platform/platform.types';
@@ -36,7 +36,7 @@ export class SharedBackgroundComponent implements OnInit
         private _router: Router,
         private _platformsService: PlatformService,
         private _storesService:StoresService,
-        private _localeService:LocaleService,
+        // private _localeService:LocaleService,
 
     )
     {
@@ -53,28 +53,49 @@ export class SharedBackgroundComponent implements OnInit
     {
         //need to call service for get the latest merchant registered
 
-        this._localeService.get()
-            .pipe(
-                map((resp)=>{
-                    if(resp.status === "success" && (resp.countryCode === 'MY' || resp.countryCode === 'PK')){
-                        this.countryCode = resp.countryCode === 'MY'?'MYS':resp.countryCode === 'PK'?'PAK':null;
-                    } else{
-                        this.countryCode = 'MYS';//ELSE WE RETURN DEFAULT
-                    }
-                    return this.countryCode;
-                }),
-                switchMap(countryCode=>this._storesService.getStoreTop(countryCode)),
-            )
-            .subscribe((resp)=>{
-                this.image = resp.topStoreAsset;
-            })
+        // this._localeService.get()
+        //     .pipe(
+        //         map((resp)=>{
+        //             if(resp.status === "success" && (resp.countryCode === 'MY' || resp.countryCode === 'PK')){
+        //                 this.countryCode = resp.countryCode === 'MY'?'MYS':resp.countryCode === 'PK'?'PAK':null;
+        //             } else{
+        //                 this.countryCode = 'MYS';//ELSE WE RETURN DEFAULT
+        //             }
+        //             return this.countryCode;
+        //         }),
+        //         switchMap(countryCode=>this._storesService.getStoreTop(countryCode)),
+        //     )
+        //     .subscribe((resp)=>{
+        //         this.image = resp.topStoreAsset;
+        //     })
 
-        // Subscribe to platform data
+        //Subscribe to platform data
+        // this._platformsService.platform$
+        //     .pipe(takeUntil(this._unsubscribeAll))
+        //     .subscribe((platform: Platform) => {
+        //         this.platform = platform;
+        //     });
+
         this._platformsService.platform$
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((platform: Platform) => {
-                this.platform = platform;
-            });
+        .pipe(
+            map((resp)=>{
+                this.platform = resp;
+                if(this.platform.id){
+                    this.countryCode = this.platform.id === 'symplified'?'MYS':this.platform.id === 'easydukan'?'PAK':null;
+                }
+                else{
+                    this.countryCode = null
+                }
+                return this.countryCode;
+            }),
+            switchMap(countryCode=>this._storesService.getStoreTop(countryCode)),
+        )
+        .subscribe((resp)=>{
+            this.image = resp.topStoreAsset;
+        })
+
+
+
       
     }
 

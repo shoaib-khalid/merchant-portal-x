@@ -12,7 +12,7 @@ import { takeUntil } from 'rxjs/operators';
 import { SocialAuthService } from "angularx-social-login";
 import { FacebookLoginProvider, GoogleLoginProvider } from "angularx-social-login";
 import { LoginOauthService } from './login-oauth.service';
-import { LocaleService } from 'app/core/locale/locale.service';
+// import { LocaleService } from 'app/core/locale/locale.service';
 import { AppleLoginProvider } from './apple.provider';
 import { ValidateOauthRequest } from './oauth.types';
 import { HttpHeaders } from '@angular/common/http';
@@ -57,7 +57,7 @@ export class AuthSignInComponent implements OnInit
         private _router: Router,
         private _socialAuthService: SocialAuthService,
         private _loginOauthService:LoginOauthService,
-        private _localeService:LocaleService,
+        // private _localeService:LocaleService,
 
 
 
@@ -87,27 +87,37 @@ export class AuthSignInComponent implements OnInit
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((platform: Platform) => {
                 this.platform = platform;
+                if(this.platform.id){
+  
+                    this.countryCode = this.platform.id === 'symplified'?'MYS':this.platform.id === 'easydukan'?'PAK':null;
+
+                }
+                else{
+                    this.countryCode = null
+                }
+
             });
         
         // We need to check first the location before we proceed to send the payload
         this.signInForm.disable();
 
-                //get current location
-                this._localeService.get().subscribe((resp)=>
-                {
-                    //the response status either fail or success
-                    if(resp.status === "success" && (resp.countryCode === 'MY' || resp.countryCode === 'PK')){
+        //     //get current location
+        //     this._localeService.get().subscribe((resp)=>
+        //     {
+        //         //the response status either fail or success
+        //         if(resp.status === "success" && (resp.countryCode === 'MY' || resp.countryCode === 'PK')){
+
+        //             this.displayCountryField = true;
+        //             this.countryCode = resp.countryCode === 'MY'?'MYS':resp.countryCode === 'PK'?'PAK':null;
+
+        //         } else{
+        //             this.displayCountryField = false;
+        //         }
+
+        //         return this.displayCountryField;
+        //     }
+        // );
     
-                        this.displayCountryField = true;
-                        this.countryCode = resp.countryCode === 'MY'?'MYS':resp.countryCode === 'PK'?'PAK':null;
-    
-                    } else{
-                        this.displayCountryField = false;
-                    }
-    
-                    return this.displayCountryField;
-                }
-            );
     }
     
     ngAfterViewInit() {

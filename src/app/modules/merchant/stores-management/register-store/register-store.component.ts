@@ -3,7 +3,7 @@ import { FormArray, FormBuilder, FormGroup, NgForm, ValidationErrors, Validators
 import { fuseAnimations } from '@fuse/animations';
 import { RegisterStoreValidationService } from 'app/modules/merchant/stores-management/register-store/register-store.validation.service';
 import { Observable, Subject } from 'rxjs';
-import { LocaleService } from 'app/core/locale/locale.service';
+// import { LocaleService } from 'app/core/locale/locale.service';
 import { Locale } from 'app/core/locale/locale.types';
 import { StoresService } from 'app/core/store/store.service';
 import { Store, StoreRegionCountries, CreateStore, StoreAssets, StoreDeliveryProvider, StoreDeliveryPeriod } from 'app/core/store/store.types';
@@ -131,7 +131,7 @@ export class RegisterStoreComponent implements OnInit
         private _storesService: StoresService,
         private _jwt: JwtService,
         private _changeDetectorRef: ChangeDetectorRef,
-        private _localeService: LocaleService,
+        // private _localeService: LocaleService,
         private _userService: UserService,
         private _chooseVerticalService: ChooseVerticalService,
         private _router: Router,

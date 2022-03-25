@@ -5,7 +5,7 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 import { AuthUtils } from 'app/core/auth/auth.utils';
 import { UserService } from 'app/core/user/user.service';
 import { StoresService } from 'app/core/store/store.service';
-import { LocaleService } from 'app/core/locale/locale.service';
+// import { LocaleService } from 'app/core/locale/locale.service';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service'
@@ -22,7 +22,7 @@ export class AuthService
         private _httpClient: HttpClient,
         private _userService: UserService,
         private _storesService: StoresService,
-        private _localeService: LocaleService,
+        // private _localeService: LocaleService,
         private _apiServer: AppConfig,
         private _jwt: JwtService,
         private _logging: LogService

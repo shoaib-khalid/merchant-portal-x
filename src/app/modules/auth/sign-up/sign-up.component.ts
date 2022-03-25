@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
-import { LocaleService } from 'app/core/locale/locale.service';
+// import { LocaleService } from 'app/core/locale/locale.service';
 import { PlatformService } from 'app/core/platform/platform.service';
 import { Platform } from 'app/core/platform/platform.types';
 import { StoresService } from 'app/core/store/store.service';
@@ -49,7 +49,7 @@ export class AuthSignUpComponent implements OnInit
         private _router: Router,
         private _platformsService: PlatformService,
         private _storesService: StoresService,
-        private _localeService:LocaleService,
+        // private _localeService:LocaleService,
 
     )
     {

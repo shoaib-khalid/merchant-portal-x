@@ -1,3 +1,5 @@
+import { AppConfig } from "app/config/service.config";
+
 export class ValidateOauthRequest{
     country     :	string;
     email       :   string;
@@ -15,8 +17,9 @@ export enum SocialLooginClientId{
 }
 
 export enum AppleConfiguration{
-
+    
     scope= 'name email',
-    redirectURI= 'https://api.symplified.it/user-service/v1/clients/applecallback',
+    // redirectURI= '/clients/applecallback',
+    redirectURI = '',
     state= 'init',
 } 

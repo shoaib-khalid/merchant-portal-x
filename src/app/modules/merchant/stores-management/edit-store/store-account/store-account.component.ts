@@ -5,7 +5,7 @@ import { StoresService } from 'app/core/store/store.service';
 import { ChooseVerticalService } from '../../choose-vertical/choose-vertical.service';
 import { EditStoreValidationService } from 'app/modules/merchant/stores-management/edit-store/edit-store.validation.service';
 import { StoreRegionCountries } from 'app/core/store/store.types';
-import { LocaleService } from 'app/core/locale/locale.service';
+// import { LocaleService } from 'app/core/locale/locale.service';
 import { Locale } from 'app/core/locale/locale.types';
 import { debounce } from 'lodash';
 import { FuseConfirmationService } from '@fuse/services/confirmation';

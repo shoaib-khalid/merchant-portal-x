@@ -23,11 +23,6 @@ export class LoginOauthService
         private _userService: UserService,
         private _logging: LogService,
         private _jwt: JwtService,
-
-
-
-
-
     )
     {
     }
@@ -39,8 +34,6 @@ export class LoginOauthService
         withCredentials : true
       
       };
-
-    OAUTH_API_LOGIN: string = "https://api.symplified.it/user-service/v1/" + "clients/loginoauth";
 
     get userService$()
     {

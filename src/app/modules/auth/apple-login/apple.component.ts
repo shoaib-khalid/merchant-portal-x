@@ -2,9 +2,13 @@ import { Component, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { JwtService } from 'app/core/jwt/jwt.service';
-import { LocaleService } from 'app/core/locale/locale.service';
+// import { LocaleService } from 'app/core/locale/locale.service';
+import { PlatformService } from 'app/core/platform/platform.service';
+import { map, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { LoginOauthService } from '../sign-in/login-oauth.service';
 import { ValidateOauthRequest } from '../sign-in/oauth.types';
+import { Platform } from 'app/core/platform/platform.types';
+
 
 @Component({
     selector     : 'apple-login',
@@ -24,6 +28,11 @@ export class AppleLoginComponent
     //validate Payload
     validateOauthRequest : ValidateOauthRequest;
 
+    platform: Platform;
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
+
+
+
     /**
      * Constructor
      */
@@ -31,12 +40,16 @@ export class AppleLoginComponent
         private _activatedRoute: ActivatedRoute,
         private _jwtService: JwtService,
         private _loginOauthService:LoginOauthService,
+        // private _localeService:LocaleService,
         private _router: Router,
+        private _platformsService: PlatformService,
+
 
 
 
     )
     {
+      
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -54,54 +67,38 @@ export class AppleLoginComponent
             this.jwtData = this._jwtService.getJwtPayload(this.idToken);
 
             this.clientEmail = this.jwtData['email'];
-
-            console.log("mmm", this.idToken);
-            console.log("xxxx", this.jwtData);
-            console.log("yyyyy", this.clientEmail);
-
-
-
-            
             
           });
 
-        // //get current location
-        // this._localeService.get().subscribe((resp)=>{
-        //     //the response status either fail or success
-        //     if(resp.status === "success" && (resp.countryCode === 'MY' || resp.countryCode === 'PK')){
-
-        //         // this.displayCountryField = true;
-        //         this.countryCode = resp.countryCode === 'MY'?'MYS':resp.countryCode === 'PK'?'PAK':null;
-
-        //     } else{
-        //         // this.displayCountryField = false;
-        //     }
-
-        //     // return this.displayCountryField;
-        // });
-
-          this.validateOauthRequest = new ValidateOauthRequest();
-          this.validateOauthRequest.country = this.countryCode;
-          this.validateOauthRequest.loginType = "APPLE";
-          this.validateOauthRequest.token = this.idToken;
-          this.validateOauthRequest.email = this.clientEmail;
-
-
-        //   this._loginOauthService.loginOauth(this.validateOauthRequest).subscribe(
-        //       () => {
+        this._platformsService.platform$
+        .pipe(
+            map((resp)=>{
+                this.platform = resp;
+                if(this.platform.id){
+                    this.countryCode = this.platform.id === 'symplified'?'MYS':this.platform.id === 'easydukan'?'PAK':null;
+                }
+                else{
+                    this.countryCode = null
+                }
                 
-        //           // const redirectURL = this._activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/signed-in-redirect';
-  
-        //           // // Navigate to the redirect url
-        //           // this._router.navigateByUrl(redirectURL);
-  
-        //           this._router.navigate(['/stores' ]);
-                  
-        //       },
-        //       exception => {
-        //           console.log("exception ::::",exception);
-  
-        //       }
-        //     );
+                this.validateOauthRequest = new ValidateOauthRequest();
+                this.validateOauthRequest.country = this.countryCode;
+                this.validateOauthRequest.loginType = "APPLE";
+                this.validateOauthRequest.token = this.idToken;
+                this.validateOauthRequest.email = this.clientEmail;
+                return this.validateOauthRequest;
+            }),
+            switchMap((resp:ValidateOauthRequest)=>this._loginOauthService.loginOauth(resp)),
+        )
+        .subscribe(
+          () => {
+              this._router.navigate(['/stores' ]);
+              
+          },
+          exception => {
+              console.log("exception ::::",exception);
+          }
+        );
+
      } 
 }
