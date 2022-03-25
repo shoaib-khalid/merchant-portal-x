@@ -9,6 +9,16 @@ import { Platform } from 'app/core/platform/platform.types';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
+import { SocialAuthService } from "angularx-social-login";
+import { FacebookLoginProvider, GoogleLoginProvider } from "angularx-social-login";
+import { LoginOauthService } from './login-oauth.service';
+import { LocaleService } from 'app/core/locale/locale.service';
+import { AppleLoginProvider } from './apple.provider';
+import { ValidateOauthRequest } from './oauth.types';
+import { HttpHeaders } from '@angular/common/http';
+
+
+
 @Component({
     selector     : 'auth-sign-in',
     templateUrl  : './sign-in.component.html',
@@ -29,6 +39,12 @@ export class AuthSignInComponent implements OnInit
     showAlert: boolean = false;
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
+    //display field country
+    displayCountryField:boolean = false;
+    countryCode : string = '';
+
+    //validate Payload
+    validateOauthRequest : ValidateOauthRequest;
 
     /**
      * Constructor
@@ -38,7 +54,13 @@ export class AuthSignInComponent implements OnInit
         private _authService: AuthService,
         private _platformsService: PlatformService,
         private _formBuilder: FormBuilder,
-        private _router: Router
+        private _router: Router,
+        private _socialAuthService: SocialAuthService,
+        private _loginOauthService:LoginOauthService,
+        private _localeService:LocaleService,
+
+
+
     )
     {
     }
@@ -67,8 +89,25 @@ export class AuthSignInComponent implements OnInit
                 this.platform = platform;
             });
         
-        // Disable the form
+        // We need to check first the location before we proceed to send the payload
         this.signInForm.disable();
+
+                //get current location
+                this._localeService.get().subscribe((resp)=>
+                {
+                    //the response status either fail or success
+                    if(resp.status === "success" && (resp.countryCode === 'MY' || resp.countryCode === 'PK')){
+    
+                        this.displayCountryField = true;
+                        this.countryCode = resp.countryCode === 'MY'?'MYS':resp.countryCode === 'PK'?'PAK':null;
+    
+                    } else{
+                        this.displayCountryField = false;
+                    }
+    
+                    return this.displayCountryField;
+                }
+            );
     }
     
     ngAfterViewInit() {
@@ -133,4 +172,79 @@ export class AuthSignInComponent implements OnInit
                 }
             );
     }
+
+    signInWithGoogle(): void {
+
+        this._socialAuthService.signIn(GoogleLoginProvider.PROVIDER_ID).then(userData => {
+
+            this.validateOauthRequest = new ValidateOauthRequest();
+            this.validateOauthRequest.country = this.countryCode;
+            this.validateOauthRequest.email = userData.email;
+            this.validateOauthRequest.loginType = "GOOGLE";
+            this.validateOauthRequest.name = userData.name;
+            this.validateOauthRequest.token = userData.idToken;
+            
+            this._loginOauthService.loginOauth(this.validateOauthRequest).subscribe(
+            () => {
+              
+                // const redirectURL = this._activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/signed-in-redirect';
+
+                // // Navigate to the redirect url
+                // this._router.navigateByUrl(redirectURL);
+
+                this._router.navigate(['/stores' ]);
+                
+            },
+            exception => {
+                console.log("exception ::::",exception);
+
+            }
+            );
+
+
+        });
+    }
+    
+    signInWithFB(): void {
+
+        this._socialAuthService.signIn(FacebookLoginProvider.PROVIDER_ID).then(userData => {
+
+            this.validateOauthRequest = new ValidateOauthRequest();
+            this.validateOauthRequest.country = this.countryCode;
+            this.validateOauthRequest.email = userData.email
+            this.validateOauthRequest.loginType = "FACEBOOK";
+            this.validateOauthRequest.name = userData.name;
+            this.validateOauthRequest.token = userData.authToken;
+            this.validateOauthRequest.userId = userData.id;
+            
+            this._loginOauthService.loginOauth(this.validateOauthRequest).subscribe(
+            () => {
+              
+                // const redirectURL = this._activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/signed-in-redirect';
+
+                // // Navigate to the redirect url
+                // this._router.navigateByUrl(redirectURL);
+
+                this._router.navigate(['/stores' ]);
+                
+            },
+            exception => {
+                console.log("exception ::::",exception);
+
+            }
+            );
+
+       
+        });
+    }
+
+    signInWithApple(): void {
+
+        this._socialAuthService.signIn(AppleLoginProvider.PROVIDER_ID).then(userData => {
+
+       
+        });
+
+    }
+
 }
