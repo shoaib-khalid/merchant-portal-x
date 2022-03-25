@@ -164,7 +164,7 @@ export class AuthSignInComponent implements OnInit
 
             this.validateOauthRequest = new ValidateOauthRequest();
             this.validateOauthRequest.country = this.countryCode;
-            this.validateOauthRequest.email = userData.email
+            this.validateOauthRequest.email = userData.email;
             this.validateOauthRequest.loginType = "GOOGLE";
             this.validateOauthRequest.name = userData.name;
             this.validateOauthRequest.token = userData.idToken;
@@ -227,10 +227,9 @@ export class AuthSignInComponent implements OnInit
 
         this._socialAuthService.signIn(AppleLoginProvider.PROVIDER_ID).then(userData => {
 
-            console.log('userData', userData);
-
        
         });
+
     }
 
 }

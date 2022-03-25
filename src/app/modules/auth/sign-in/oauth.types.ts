@@ -2,7 +2,7 @@ export class ValidateOauthRequest{
     country     :	string;
     email       :   string;
     loginType	:   string;
-    name	    :   string;
+    name	    ?:   string;
     token	    :   string;
     userId	   ?:   string;
 } 
@@ -17,6 +17,6 @@ export enum SocialLooginClientId{
 export enum AppleConfiguration{
 
     scope= 'name email',
-    redirectURI= 'https://merchant.symplified.it/applelogin',
+    redirectURI= 'https://api.symplified.it/user-service/v1/clients/applecallback',
     state= 'init',
-}
+} 
