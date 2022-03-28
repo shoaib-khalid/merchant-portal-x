@@ -5,7 +5,6 @@ import { JwtService } from 'app/core/jwt/jwt.service';
 // import { LocaleService } from 'app/core/locale/locale.service';
 import { PlatformService } from 'app/core/platform/platform.service';
 import { map, Subject, switchMap, takeUntil, tap } from 'rxjs';
-import { LoginOauthService } from '../sign-in/login-oauth.service';
 import { ValidateOauthRequest } from '../sign-in/oauth.types';
 import { Platform } from 'app/core/platform/platform.types';
 import { AuthService } from 'app/core/auth/auth.service';
@@ -41,7 +40,6 @@ export class AppleLoginComponent
         private _activatedRoute: ActivatedRoute,
         private _jwtService: JwtService,
         private _authService: AuthService,
-        // private _loginOauthService:LoginOauthService,
         // private _localeService:LocaleService,
         private _router: Router,
         private _platformsService: PlatformService,

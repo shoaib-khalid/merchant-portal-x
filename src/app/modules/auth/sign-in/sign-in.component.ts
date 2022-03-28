@@ -11,7 +11,6 @@ import { takeUntil } from 'rxjs/operators';
 
 import { SocialAuthService } from "angularx-social-login";
 import { FacebookLoginProvider, GoogleLoginProvider } from "angularx-social-login";
-import { LoginOauthService } from './login-oauth.service';
 // import { LocaleService } from 'app/core/locale/locale.service';
 import { AppleLoginProvider } from './apple.provider';
 import { ValidateOauthRequest } from './oauth.types';
@@ -56,7 +55,6 @@ export class AuthSignInComponent implements OnInit
         private _formBuilder: FormBuilder,
         private _router: Router,
         private _socialAuthService: SocialAuthService,
-        // private _loginOauthService:LoginOauthService,
         // private _localeService:LocaleService,
 
 
@@ -239,7 +237,7 @@ export class AuthSignInComponent implements OnInit
                 
             },
             exception => {
-                console.log("exception ::::",exception);
+                 console.log("exception ::::",exception);
 
             }
             );

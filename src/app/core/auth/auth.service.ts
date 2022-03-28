@@ -432,7 +432,7 @@ export class AuthService
 
     loginOauth(authRequest:ValidateOauthRequest, origin: string):Observable<any> {
         
-        console.log("origin",origin);
+        // console.log("origin",origin);
   
           // Throw error, if the user is already logged in
           if ( this._authenticated )
