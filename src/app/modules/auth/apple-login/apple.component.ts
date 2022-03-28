@@ -63,42 +63,32 @@ export class AppleLoginComponent
      {  
         this._activatedRoute.queryParams.subscribe(params => {
             this.idToken = params['id_token'];
-
             this.jwtData = this._jwtService.getJwtPayload(this.idToken);
-
             this.clientEmail = this.jwtData['email'];
             
+            this._platformsService.platform$
+                .pipe(
+                    map((resp)=>{
+                        this.platform = resp;
+                        if(this.platform.id){
+                            this.countryCode = this.platform.id === 'symplified'?'MYS':this.platform.id === 'easydukan'?'PAK':null;
+                        }
+                        else{
+                            this.countryCode = null
+                        }
+                        
+                        this.validateOauthRequest = new ValidateOauthRequest();
+                        this.validateOauthRequest.country = this.countryCode;
+                        this.validateOauthRequest.loginType = "APPLE";
+                        this.validateOauthRequest.token = this.idToken;
+                        this.validateOauthRequest.email = this.clientEmail;
+                        return this.validateOauthRequest;
+                    }),
+                    switchMap((resp:ValidateOauthRequest)=>this._loginOauthService.loginOauth(resp, "apple comp")),
+                )
+                .subscribe(() => {
+                    this._router.navigate(['/stores' ]);
+                });
           });
-
-        this._platformsService.platform$
-        .pipe(
-            map((resp)=>{
-                this.platform = resp;
-                if(this.platform.id){
-                    this.countryCode = this.platform.id === 'symplified'?'MYS':this.platform.id === 'easydukan'?'PAK':null;
-                }
-                else{
-                    this.countryCode = null
-                }
-                
-                this.validateOauthRequest = new ValidateOauthRequest();
-                this.validateOauthRequest.country = this.countryCode;
-                this.validateOauthRequest.loginType = "APPLE";
-                this.validateOauthRequest.token = this.idToken;
-                this.validateOauthRequest.email = this.clientEmail;
-                return this.validateOauthRequest;
-            }),
-            switchMap((resp:ValidateOauthRequest)=>this._loginOauthService.loginOauth(resp, "apple comp")),
-        )
-        .subscribe(
-          () => {
-              this._router.navigate(['/stores' ]);
-              
-          },
-          exception => {
-              console.log("exception ::::",exception);
-          }
-        );
-
      } 
 }
