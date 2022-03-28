@@ -8,6 +8,7 @@ import { map, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { LoginOauthService } from '../sign-in/login-oauth.service';
 import { ValidateOauthRequest } from '../sign-in/oauth.types';
 import { Platform } from 'app/core/platform/platform.types';
+import { AuthService } from 'app/core/auth/auth.service';
 
 
 @Component({
@@ -39,7 +40,8 @@ export class AppleLoginComponent
     constructor(
         private _activatedRoute: ActivatedRoute,
         private _jwtService: JwtService,
-        private _loginOauthService:LoginOauthService,
+        private _authService: AuthService,
+        // private _loginOauthService:LoginOauthService,
         // private _localeService:LocaleService,
         private _router: Router,
         private _platformsService: PlatformService,
@@ -84,7 +86,7 @@ export class AppleLoginComponent
                         this.validateOauthRequest.email = this.clientEmail;
                         return this.validateOauthRequest;
                     }),
-                    switchMap((resp:ValidateOauthRequest)=>this._loginOauthService.loginOauth(resp, "apple comp")),
+                    switchMap((resp:ValidateOauthRequest)=>this._authService.loginOauth(resp, "apple comp")),
                 )
                 .subscribe(() => {
                     this._router.navigate(['/stores' ]);
