@@ -194,7 +194,7 @@ export class AuthSignInComponent implements OnInit
             this.validateOauthRequest.name = userData.name;
             this.validateOauthRequest.token = userData.idToken;
             
-            this._loginOauthService.loginOauth(this.validateOauthRequest).subscribe(
+            this._loginOauthService.loginOauth(this.validateOauthRequest,'sign-in-comp-google').subscribe(
             () => {
               
                 // const redirectURL = this._activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/signed-in-redirect';
@@ -227,7 +227,7 @@ export class AuthSignInComponent implements OnInit
             this.validateOauthRequest.token = userData.authToken;
             this.validateOauthRequest.userId = userData.id;
             
-            this._loginOauthService.loginOauth(this.validateOauthRequest).subscribe(
+            this._loginOauthService.loginOauth(this.validateOauthRequest,'sign-in-comp-facebook').subscribe(
             () => {
               
                 // const redirectURL = this._activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/signed-in-redirect';

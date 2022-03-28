@@ -72,7 +72,5 @@ import { AppConfig } from 'app/config/service.config';
 })
 export class AuthSignInModule
 {
-  constructor(private _apiServer: AppConfig) {
-    console.log('checkingimannn',this._apiServer.settings.apiServer.userService);
-  }
+
 }

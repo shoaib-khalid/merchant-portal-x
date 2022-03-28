@@ -60,7 +60,7 @@ export class AppleLoginComponent
      * On init
      */
      ngOnInit(): void
-     {
+     {  
         this._activatedRoute.queryParams.subscribe(params => {
             this.idToken = params['id_token'];
 
@@ -88,7 +88,7 @@ export class AppleLoginComponent
                 this.validateOauthRequest.email = this.clientEmail;
                 return this.validateOauthRequest;
             }),
-            switchMap((resp:ValidateOauthRequest)=>this._loginOauthService.loginOauth(resp)),
+            switchMap((resp:ValidateOauthRequest)=>this._loginOauthService.loginOauth(resp, "apple comp")),
         )
         .subscribe(
           () => {

@@ -67,8 +67,10 @@ export class LoginOauthService
      }
  
 
-    loginOauth(authRequest:ValidateOauthRequest):Observable<any> {
+    loginOauth(authRequest:ValidateOauthRequest, origin: string):Observable<any> {
         
+      console.log("origin",origin);
+      
       // return this._httpClient
       //     .post<any>(this.userService$ +'/clients/loginoauth', authRequest, this.socialOptions);
 
