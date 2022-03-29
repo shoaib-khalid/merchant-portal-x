@@ -107,6 +107,8 @@ export interface DeliveryProviderDetails
   id: string;
   name: string;
   providerImage: string;
+  dialog: boolean;
+  scheduleDate: boolean;
 }
 
 export interface DeliveryRiderDetails
