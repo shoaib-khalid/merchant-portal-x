@@ -9,6 +9,21 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 export class ChangelogComponent
 {
     changelog: any[] = [
+        //v1.0.2
+          {
+            version    : 'v1.0.2',
+            releaseDate: 'Mar 29, 2022',
+            changes    : [
+                
+                {
+                    type: 'Fix',
+                    list: [
+                        '(Order Management) Read display pop up from backend'
+                    ]
+                }
+                
+            ]
+        },
         //v1.0.1
         {
             version    : 'v1.0.1',
