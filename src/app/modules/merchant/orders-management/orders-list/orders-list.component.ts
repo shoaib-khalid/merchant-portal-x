@@ -433,34 +433,49 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
         if (order.deliveryType === "SCHEDULED" && nextCompletionStatus === "AWAITING_PICKUP") {
             this._orderslistService.getDeliveryProviderDetails(order.orderShipmentDetail.deliveryProviderId, 1)
                 .subscribe(response => {
-                    const dialogRef = this._dialog.open(ChooseProviderDateTimeComponent, { disableClose: true, data: response });
-                    dialogRef.afterClosed().subscribe(result => {
-                        if (result === "cancelled" || !result.date || !result.time){
+
+                    if (response.dialog === true) {
+                        const dialogRef = this._dialog.open(ChooseProviderDateTimeComponent, { disableClose: true, data: response });
+                        dialogRef.afterClosed().subscribe(result => {
+                            if (result === "cancelled" || !result.date || !result.time){
+                                this.orderSubmitted[order.id] = false;
+                                console.warn("Process cancelled");
+    
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
+                            } else {
+                                completionBody["date"] = result.date;
+                                completionBody["time"] = result.time;
+    
+                                // update the order
+                                this._orderslistService.updateOrder(order.id, completionBody)
+                                    .pipe(finalize(() => {
+                                        this.orderSubmitted[order.id] = false;
+                                    }))
+                                    .subscribe((response) => {                
+                                        // re-fetch the completion status    
+                                        this._orderslistService.getCompletionStatus(order.id, nextCompletionStatus).subscribe(() => {
+                                        });
+    
+                                        // Mark for check
+                                        this._changeDetectorRef.markForCheck();
+                                    }
+                                    );
+                            }
+                        });
+                    } else {
+                        // update the order
+                        this._orderslistService.updateOrder(order.id, completionBody).pipe(finalize(() => {
                             this.orderSubmitted[order.id] = false;
-                            console.warn("Process cancelled");
-
-                            // Mark for check
-                            this._changeDetectorRef.markForCheck();
-                        } else {
-                            completionBody["date"] = result.date;
-                            completionBody["time"] = result.time;
-
-                            // update the order
-                            this._orderslistService.updateOrder(order.id, completionBody)
-                                .pipe(finalize(() => {
-                                    this.orderSubmitted[order.id] = false;
-                                }))
-                                .subscribe((response) => {                
-                                    // re-fetch the completion status    
-                                    this._orderslistService.getCompletionStatus(order.id, nextCompletionStatus).subscribe(() => {
-                                    });
-
-                                    // Mark for check
-                                    this._changeDetectorRef.markForCheck();
-                                }
-                                );
-                        }
-                    });
+                            }))
+                            .subscribe((response) => {
+                                // re-fetch the completion status  
+                                this._orderslistService.getCompletionStatus(order.id, nextCompletionStatus).subscribe(() => {
+                                });
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
+                            });
+                    }
                 });
         } else {
             // update the order
