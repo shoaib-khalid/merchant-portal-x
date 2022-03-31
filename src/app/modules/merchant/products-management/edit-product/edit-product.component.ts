@@ -1384,15 +1384,6 @@ export class EditProductComponent implements OnInit, OnDestroy
         }
     }
 
-    // test() {
-    //     console.log('this.imagesWithId', this.imagesWithId);
-    //     console.log('this.addProductForm.get(step1).get(productAssets)', this.addProductForm.get('step1').get('productAssets').value);
-    //     console.log('this.imagesFile', this.imagesFile);
-    //     console.log('this.currentImageIndex', this.currentImageIndex);
-    //     console.log('this.thumbnailIndex', this.thumbnailIndex);
-    //     console.log('this.imagesToBeDeleted', this.imagesToBeDeleted);
-    // }
-
     /**
      * Update the selected product using the form data
      */
@@ -1573,9 +1564,7 @@ export class EditProductComponent implements OnInit, OnDestroy
                         
                 //         let _thumbnailIndex = product.productAssets.findIndex(element => element.isThumbnail === true)
                 //         if (assetIndex > -1) {
-                //             console.log('masuk assetIndex > -1');
                 //             if (!item.url.match(regex)) { // if url is not valid, it mean the data is new data
-                //                 console.log('masuk url not valid');
                                 
         
                 //                 // -----------------
@@ -1616,7 +1605,6 @@ export class EditProductComponent implements OnInit, OnDestroy
                 //                 { // this mean thumbnail index change, diffent from backend
                 //                     // update the image (only thumbnail)
 
-                //                     console.log('masuk url valid');
 
                 //                     let updateItemIndex = item;
                 //                     updateItemIndex.isThumbnail = true;

@@ -46,15 +46,6 @@ export class EditProfileComponent implements OnInit
         // this.checkExistingName = debounce(this.checkExistingName,300);
     }
 
-    /**
-     * Getter for access token
-    */
-
-    get accessToken(): string
-    {
-        return localStorage.getItem('accessToken') ?? '';
-    }    
-
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
     // -----------------------------------------------------------------------------------------------------

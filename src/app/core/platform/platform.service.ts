@@ -9,6 +9,7 @@ import { LogService } from 'app/core/logging/log.service';
 import { FormControl } from '@angular/forms';
 import { PlatformLocation } from '@angular/common';
 import { Platform } from './platform.types';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -33,6 +34,7 @@ export class PlatformService
     constructor(
         private _platformLocation: PlatformLocation,
         private _httpClient: HttpClient,
+        private _authService: AuthService,
         private _apiServer: AppConfig,
         private _jwt: JwtService,
         private _logging: LogService
@@ -84,15 +86,6 @@ export class PlatformService
         this._platforms.next(value);
     }
 
-    /**
-     * Getter for access token
-     */
- 
-    get accessToken(): string
-    {
-        return localStorage.getItem('accessToken') ?? '';
-    }   
-
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
@@ -101,10 +94,7 @@ export class PlatformService
     * Set current platform
     */
     set(): Observable<any>
-    {
-
-        console.log();
-        
+    {        
         // ----------------------
         // Get store by URL
         // ----------------------
@@ -207,8 +197,8 @@ export class PlatformService
     get(): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;        
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;      
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`)
@@ -260,8 +250,8 @@ export class PlatformService
     getPlatformById(id: string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -284,8 +274,8 @@ export class PlatformService
     post(storeBody: any): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -322,8 +312,8 @@ export class PlatformService
     update(id: string, body: any): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -377,8 +367,8 @@ export class PlatformService
     delete(id: string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),

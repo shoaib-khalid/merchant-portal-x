@@ -8,6 +8,7 @@ import { JwtService } from 'app/core/jwt/jwt.service';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { LogService } from 'app/core/logging/log.service';
+import { AuthService } from 'app/core/auth/auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -26,6 +27,7 @@ export class ChooseVerticalService
         private _httpClient: HttpClient,
         private _apiServer: AppConfig,
         private _jwt: JwtService,
+        private _authService: AuthService,
         private _logging: LogService
         )
     {
@@ -51,15 +53,6 @@ export class ChooseVerticalService
         return this._vertical.asObservable();
     }
 
-    /**
-     * Getter for access token
-     */
- 
-     get accessToken(): string
-     {
-         return localStorage.getItem('accessToken') ?? '';
-     } 
-
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
@@ -71,8 +64,8 @@ export class ChooseVerticalService
     getVerticals(): Observable<Vertical[]> {
 
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),

@@ -7,6 +7,7 @@ import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { AuthService } from 'app/core/auth/auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -29,6 +30,7 @@ export class DiscountsService
         private _apiServer: AppConfig,
         private _logging: LogService,
         private _jwt: JwtService,
+        private _authService: AuthService,
         private _fuseConfirmationService: FuseConfirmationService,
     )
     {
@@ -65,36 +67,26 @@ export class DiscountsService
     /**
      * Getter for discount
      */
-     get discountTierList$(): Observable<StoreDiscountTierList[]>
-     {
-         return this._discountTierList.asObservable();
-     }
+    get discountTierList$(): Observable<StoreDiscountTierList[]>
+    {
+        return this._discountTierList.asObservable();
+    }
  
-     /**
-      * Getter for discounts
-      */
-     get discountTier$(): Observable<StoreDiscountTierList>
-     {
-         return this._discountTier.asObservable();
-     }
-
     /**
-     * Getter for access token
+     * Getter for discounts
      */
- 
-     get accessToken(): string
-     {
-         return localStorage.getItem('accessToken') ?? '';
-     }
+    get discountTier$(): Observable<StoreDiscountTierList>
+    {
+        return this._discountTier.asObservable();
+    }
 
     /**
      * Getter for storeId
      */
- 
-     get storeId$(): string
-     {
-         return localStorage.getItem('storeId') ?? '';
-     }
+    get storeId$(): string
+    {
+        return localStorage.getItem('storeId') ?? '';
+    }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
@@ -113,7 +105,7 @@ export class DiscountsService
         Observable<{ pagination: DiscountPagination; discounts: Discount[] }>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -162,7 +154,7 @@ export class DiscountsService
         Observable<{ pagination: DiscountPagination; discounts: Discount[] }>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -234,7 +226,7 @@ export class DiscountsService
     getDiscountByGuid(discountId: string) : Observable<ApiResponseModel<Discount>>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
         
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -254,8 +246,8 @@ export class DiscountsService
     createDiscount(body: Discount): Observable<Discount>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -291,8 +283,8 @@ export class DiscountsService
     updateDiscount(id: string, body: Discount): Observable<Discount>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -342,8 +334,8 @@ export class DiscountsService
     deleteDiscount(discountId: string): Observable<boolean>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -388,7 +380,7 @@ export class DiscountsService
     getDiscountsTier(discountId: string):Observable<ApiResponseModel<StoreDiscountTierList[]>>
      {
          let productService = this._apiServer.settings.apiServer.productService;
-         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
  
          const header = {
              headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -407,8 +399,8 @@ export class DiscountsService
     createDiscountTier(discountId: string, discountTier: StoreDiscountTierList): Observable<StoreDiscountTierList>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -438,8 +430,8 @@ export class DiscountsService
     deleteDiscountTier(discountId: string, discountTierId: string): Observable<boolean>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -465,8 +457,8 @@ export class DiscountsService
     updateDiscountTier(StorediscountId: string, body: StoreDiscountTierList): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -476,7 +468,7 @@ export class DiscountsService
 
     async getExistingDate(body: Discount){
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`)

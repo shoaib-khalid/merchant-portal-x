@@ -17,13 +17,13 @@ export interface StoreDiscountProductPagination
     endIndex: number;
 }
 
-export interface ApiResponseModel<T>
-{
+// export interface ApiResponseModel<T>
+// {
 
-  message?: string;
-  data?: T[];
-  path : string;
-  status: number;
-  timestamp:string;
-}
+//   message?: string;
+//   data?: T[];
+//   path : string;
+//   status: number;
+//   timestamp:string;
+// }
 

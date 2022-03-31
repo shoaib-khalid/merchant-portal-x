@@ -36,15 +36,6 @@ export class StoreTimingComponent implements OnInit
     {
     }
 
-    /**
-    * Getter for access token
-    */
-
-        get accessToken(): string
-        {
-            return localStorage.getItem('accessToken') ?? '';
-        }  
-
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
     // -----------------------------------------------------------------------------------------------------

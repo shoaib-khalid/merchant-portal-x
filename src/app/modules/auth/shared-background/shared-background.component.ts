@@ -1,10 +1,9 @@
-import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
-import { LocaleService } from 'app/core/locale/locale.service';
 import { LogService } from 'app/core/logging/log.service';
 import { PlatformService } from 'app/core/platform/platform.service';
 import { Platform } from 'app/core/platform/platform.types';
@@ -34,9 +33,9 @@ export class SharedBackgroundComponent implements OnInit
         private _authService: AuthService,
         private _formBuilder: FormBuilder,
         private _router: Router,
+        private _changeDetectorRef: ChangeDetectorRef,
         private _platformsService: PlatformService,
         private _storesService:StoresService,
-        private _localeService:LocaleService,
 
     )
     {
@@ -51,33 +50,28 @@ export class SharedBackgroundComponent implements OnInit
      */
     ngOnInit(): void
     {
-        //need to call service for get the latest merchant registered
-
-        this._localeService.get()
-            .pipe(
-                map((resp)=>{
-                    if(resp.status === "success" && (resp.countryCode === 'MY' || resp.countryCode === 'PK')){
-                        this.countryCode = resp.countryCode === 'MY'?'MYS':resp.countryCode === 'PK'?'PAK':null;
-                    } else{
-                        this.countryCode = 'MYS';//ELSE WE RETURN DEFAULT
-                    }
-                    return this.countryCode;
-                }),
-                switchMap(countryCode=>this._storesService.getStoreTop(countryCode)),
-            )
-            .subscribe((resp)=>{
-                this.image = resp.topStoreAsset;
-            })
-
         // Subscribe to platform data
         this._platformsService.platform$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((platform: Platform) => {
-                this.platform = platform;
+                if (platform) {
+                    this.platform = platform;
+                    
+                    if (this.platform.id === "easydukan") {
+                        this.countryCode = "PAK"
+                    } else if (this.platform.id === "symplified") {
+                        this.countryCode = "MYS"
+                    } else {
+                        console.error("Invalid platform id");
+                    }
+
+                    this._storesService.getStoreTop(this.countryCode)
+                        .subscribe((response)=>{
+                            this.image = response.topStoreAsset;
+                        });
+                }
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
             });
-      
     }
-
-
-
 }

@@ -6,6 +6,7 @@ import { Customer, CustomerPagination } from 'app/modules/merchant/customer-supp
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service';
+import { AuthService } from 'app/core/auth/auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -22,6 +23,7 @@ export class CustomersService
      */
     constructor(
         private _httpClient: HttpClient,
+        private _authService: AuthService,
         private _apiServer: AppConfig,
         private _logging: LogService,
         private _jwt: JwtService,
@@ -58,22 +60,13 @@ export class CustomersService
     }
 
     /**
-     * Getter for access token
-     */
- 
-     get accessToken(): string
-     {
-         return localStorage.getItem('accessToken') ?? '';
-     }
-
-    /**
      * Getter for storeId
      */
  
-     get storeId$(): string
-     {
-         return localStorage.getItem('storeId') ?? '';
-     }
+    get storeId$(): string
+    {
+        return localStorage.getItem('storeId') ?? '';
+    }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
@@ -92,7 +85,7 @@ export class CustomersService
         Observable<{ pagination: CustomerPagination; customer: Customer[] }>
     {
         let productService = this._apiServer.settings.apiServer.userService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -164,8 +157,8 @@ export class CustomersService
     createCustomer(categoryId): Observable<Customer>
     {
         let productService = this._apiServer.settings.apiServer.userService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -210,8 +203,8 @@ export class CustomersService
     updateCustomer(id: string, customer: Customer): Observable<Customer>
     {
         let productService = this._apiServer.settings.apiServer.userService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -259,8 +252,8 @@ export class CustomersService
     deleteCustomer(id: string): Observable<boolean>
     {
         let productService = this._apiServer.settings.apiServer.userService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),

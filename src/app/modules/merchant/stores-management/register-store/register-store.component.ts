@@ -3,8 +3,6 @@ import { FormArray, FormBuilder, FormGroup, NgForm, ValidationErrors, Validators
 import { fuseAnimations } from '@fuse/animations';
 import { RegisterStoreValidationService } from 'app/modules/merchant/stores-management/register-store/register-store.validation.service';
 import { Observable, Subject } from 'rxjs';
-import { LocaleService } from 'app/core/locale/locale.service';
-import { Locale } from 'app/core/locale/locale.types';
 import { StoresService } from 'app/core/store/store.service';
 import { Store, StoreRegionCountries, CreateStore, StoreAssets, StoreDeliveryProvider, StoreDeliveryPeriod } from 'app/core/store/store.types';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -23,6 +21,7 @@ import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { takeUntil } from 'rxjs/operators';
 import { Platform } from 'app/core/platform/platform.types';
 import { PlatformService } from 'app/core/platform/platform.service';
+import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
     selector     : 'register-store-page',
@@ -131,13 +130,13 @@ export class RegisterStoreComponent implements OnInit
         private _storesService: StoresService,
         private _jwt: JwtService,
         private _changeDetectorRef: ChangeDetectorRef,
-        private _localeService: LocaleService,
         private _userService: UserService,
         private _chooseVerticalService: ChooseVerticalService,
         private _router: Router,
         private _route: ActivatedRoute,
         private _platformsService: PlatformService,
         private _fuseConfirmationService: FuseConfirmationService,
+        private _authService: AuthService,
         private _domSanitizer: DomSanitizer,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
     )
@@ -145,15 +144,6 @@ export class RegisterStoreComponent implements OnInit
         this.checkExistingURL = debounce(this.checkExistingURL, 300);
         this.checkExistingName = debounce(this.checkExistingName,300);
     }
-
-    /**
-     * Getter for access token
-    */
-
-    get accessToken(): string
-    {
-        return localStorage.getItem('accessToken') ?? '';
-    }    
 
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
@@ -731,7 +721,7 @@ export class RegisterStoreComponent implements OnInit
         });
 
         // set required value that does not appear in register-store.component.html
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
         this.createStoreForm.get('clientId').patchValue(clientId);
     }
 
@@ -1364,12 +1354,7 @@ export class RegisterStoreComponent implements OnInit
         }
         
         let maxSize = 2097152;
-        var maxSizeInMB = (maxSize / (1024*1024)).toFixed(2);
-
-        console.log("sinii",this.files[index].selectedFiles[0]);
-        console.log("here",this.files[index].fileSource);
-        
-        
+        var maxSizeInMB = (maxSize / (1024*1024)).toFixed(2);        
 
         if (this.files[index].selectedFiles[0].size > maxSize ){
             // Show a success message (it can also be an error message)

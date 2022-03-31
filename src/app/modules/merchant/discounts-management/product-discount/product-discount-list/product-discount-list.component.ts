@@ -14,7 +14,7 @@ import { CreateProductDiscountDialogComponent } from '../create-product-discount
 import { Product, ProductCategory, ProductInventory, ProductPagination } from 'app/core/product/inventory.types';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { DiscountsProductService } from './product-discount-list.service';
-import { ApiResponseModel, StoreDiscountProduct } from './product-discount-list.types';
+import { StoreDiscountProduct } from './product-discount-list.types';
 import { ProductListDialogComponent } from '../product-list-dialog/product-list-dialog.component';
 import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dialog/dialog.component';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
@@ -221,11 +221,9 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
             });
 
             this._discountProductService.getProducts()
-            .subscribe((response: ApiResponseModel<Product[]>)=>{
-        
-                this._changeDetectorRef.markForCheck();
-    
-            });
+                .subscribe((response)=>{
+                    this._changeDetectorRef.markForCheck();
+                });
 
             this._fuseMediaWatcherService.onMediaChange$
             .pipe(takeUntil(this._unsubscribeAll))
@@ -684,19 +682,19 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
     openEditPopUp(discountId?:string)    {
 
         this._discountProductService.getDiscountProductByDiscountId(discountId,0,5)
-        .subscribe((response) => {
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
-        });
+            .subscribe((response) => {
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
 
 
         this._discountProductService.getStoreDiscountProduct(discountId)
-        .subscribe((response: ApiResponseModel<StoreDiscountProduct>)=>{
-            this.storeDiscountProduct = response.data;
+            .subscribe((response)=>{
+                this.storeDiscountProduct = response.data;
 
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
-        });
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
 
         // Get the discount by id
         this._discountService.getDiscountById(discountId)

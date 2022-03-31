@@ -5,6 +5,7 @@ import { map, tap } from 'rxjs/operators';
 import { MerchantSetup } from 'app/core/merchant-setup/merchant-setup.status';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
+import { AuthService } from '../auth/auth.service';
 // import { resolve } from 'dns';
 
 @Injectable({
@@ -19,6 +20,7 @@ export class MerchantSetupService
      */
     constructor(
         private _httpClient: HttpClient,
+        private _authService: AuthService,
         private _apiServer: AppConfig,
         private _jwt: JwtService,
     )
@@ -45,15 +47,6 @@ export class MerchantSetupService
         return this._merchantSetup.asObservable();
     }
 
-    /**
-     * Getter for access token
-     */
- 
-     get accessToken(): string
-     {
-         return localStorage.getItem('accessToken') ?? '';
-     }
-
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
@@ -64,8 +57,8 @@ export class MerchantSetupService
     async get(): Promise<Observable<MerchantSetup>>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),

@@ -6,6 +6,7 @@ import { Agent, AgentPagination } from 'app/modules/merchant/customer-support/ma
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service';
+import { AuthService } from 'app/core/auth/auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -22,6 +23,7 @@ export class ManageAgentService
      */
     constructor(
         private _httpClient: HttpClient,
+        private _authService: AuthService,
         private _apiServer: AppConfig,
         private _logging: LogService,
         private _jwt: JwtService,
@@ -58,15 +60,6 @@ export class ManageAgentService
     }
 
     /**
-     * Getter for access token
-     */
- 
-     get accessToken(): string
-     {
-         return localStorage.getItem('accessToken') ?? '';
-     }
-
-    /**
      * Getter for storeId
      */
  
@@ -92,8 +85,8 @@ export class ManageAgentService
      Observable<{ pagination: AgentPagination; stores: Agent[] }>
      {
          let userService = this._apiServer.settings.apiServer.userService;
-         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-         let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+         let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
  
          const header = {
              headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -137,8 +130,8 @@ export class ManageAgentService
      getAgentById(clientsId): Observable<any>
      {
          let userService = this._apiServer.settings.apiServer.userService;
-         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-         let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+         let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
  
          const header = {
              headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -158,8 +151,8 @@ export class ManageAgentService
      createAgent(body: Agent): Observable<Agent>
      {
          let userService = this._apiServer.settings.apiServer.productService;
-         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-         let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+         let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
  
          const header = {
              headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -192,8 +185,8 @@ export class ManageAgentService
      {
          
          let userService = this._apiServer.settings.apiServer.userService;
-         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-         let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+         let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
  
          const header = {
              headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -215,8 +208,8 @@ export class ManageAgentService
     deleteAgent(clientsId: string): Observable<boolean>
     {
         let userService = this._apiServer.settings.apiServer.userService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
