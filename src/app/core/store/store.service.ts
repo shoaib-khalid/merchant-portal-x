@@ -8,6 +8,7 @@ import { JwtService } from 'app/core/jwt/jwt.service';
 import { takeUntil } from 'rxjs/operators';
 import { LogService } from 'app/core/logging/log.service';
 import { FormControl } from '@angular/forms';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -30,6 +31,7 @@ export class StoresService
      */
     constructor(
         private _httpClient: HttpClient,
+        private _authService: AuthService,
         private _apiServer: AppConfig,
         private _jwt: JwtService,
         private _logging: LogService
@@ -109,15 +111,6 @@ export class StoresService
     }
 
     /**
-     * Getter for access token
-     */
- 
-    get accessToken(): string
-    {
-        return localStorage.getItem('accessToken') ?? '';
-    }    
-
-    /**
      * Getter for pagination
      */
     get pagination$(): Observable<StorePagination>
@@ -180,8 +173,8 @@ export class StoresService
         Observable<{ pagination: StorePagination; stores: Store[] }>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         if(search === null) {
             search = ""
@@ -285,8 +278,8 @@ export class StoresService
     getStoreById(id: string): Observable<Store>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -309,8 +302,8 @@ export class StoresService
     post(storeBody: CreateStore): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -355,8 +348,8 @@ export class StoresService
     update(storeId: string, storeBody: Store): Observable<Store>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -411,8 +404,8 @@ export class StoresService
     delete(storeId: string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -468,8 +461,8 @@ export class StoresService
     getStoreRegionCountries(): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        // let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let accessToken = this.accessToken === ''?'accessToken':this._jwt.getJwtPayload(this.accessToken).act;
+        // let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let accessToken = this._authService.jwtAccessToken === ''?'accessToken':this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
 
         const header = {  
@@ -488,7 +481,7 @@ export class StoresService
     getStoreRegionCountryState(regionCountryId: string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = (this.accessToken === '' || this.accessToken === null) ? 'accessToken' : this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = (this._authService.jwtAccessToken === '' || this._authService.jwtAccessToken === null) ? 'accessToken' : this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -513,7 +506,7 @@ export class StoresService
     postTiming(storeId: string, storeTiming: StoreTiming): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -555,7 +548,7 @@ export class StoresService
     putTiming(storeId: string, day: string ,storeTiming: StoreTiming): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -572,7 +565,7 @@ export class StoresService
     {
         
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {  
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`)
@@ -590,8 +583,8 @@ export class StoresService
     putStoreSnooze(result): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`)
@@ -613,7 +606,7 @@ export class StoresService
     async getStoreAssets(storeId: string)
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`)
@@ -633,8 +626,8 @@ export class StoresService
     Observable<{ stores: Store[] }>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -655,7 +648,7 @@ export class StoresService
     postAssets(storeId: string, storeAssetType = null , storeAssets, storeAssetDescription = null): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -705,7 +698,7 @@ export class StoresService
     putAssets(storeId: string, assetsId: string, storeAssets, storeAssetType = null): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -757,7 +750,7 @@ export class StoresService
     deleteAssets(storeId: string, assetsId: string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -773,7 +766,7 @@ export class StoresService
     deleteAssetsLogo(storeId: string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -789,7 +782,7 @@ export class StoresService
     deleteAssetsBanner(storeId: string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -805,7 +798,7 @@ export class StoresService
     deleteAssetsBannerMobile(storeId: string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -825,7 +818,7 @@ export class StoresService
     getStoreDeliveryProvider(query: any): Observable<StoreDeliveryProvider[]>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {  
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -855,7 +848,7 @@ export class StoresService
     getStoreRegionCountryDeliveryProvider(storeId: string, deliveryServiceProviderId: string = ""): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -881,7 +874,7 @@ export class StoresService
     postStoreRegionCountryDeliveryProvider(storeId: string, deliveryServiceProviderId: string, deliveryPeriod: string, deliveryServiceProviderTypeId: string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -897,7 +890,7 @@ export class StoresService
     putStoreRegionCountryDeliveryProvider(storeId: string, id: string, deliveryServiceProviderId: string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -915,7 +908,7 @@ export class StoresService
     deleteStoreRegionCountryDeliveryProviderAll(storeId: string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -935,7 +928,7 @@ export class StoresService
     getStoreDeliveryDetails(storeId: string): Observable<StoreDeliveryDetails>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {  
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`)
@@ -953,7 +946,7 @@ export class StoresService
     postStoreDeliveryDetails(storeId: string, storeDelivery: StoreDeliveryDetails): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -969,7 +962,7 @@ export class StoresService
     putStoreDeliveryDetails(storeId: string, storeDelivery: StoreDeliveryDetails): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -989,7 +982,7 @@ export class StoresService
     getSelfDeliveryStateCharges(storeId: string): Observable<StoreSelfDeliveryStateCharges[]>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {  
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -1007,7 +1000,7 @@ export class StoresService
     postSelfDeliveryStateCharges(storeId: string, stateDeliveryCharge: StoreSelfDeliveryStateCharges): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -1024,7 +1017,7 @@ export class StoresService
     postBulkSelfDeliveryStateCharges(storeId: string, stateDeliveryCharge: StoreSelfDeliveryStateCharges): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -1041,7 +1034,7 @@ export class StoresService
     putSelfDeliveryStateCharges(storeId: string, stateDeliveryId: string, stateDeliveryCharge: StoreSelfDeliveryStateCharges): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -1058,7 +1051,7 @@ export class StoresService
     deleteSelfDeliveryStateCharges(storeId: string, stateDeliveryId: string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -1076,7 +1069,7 @@ export class StoresService
     deleteAllSelfDeliveryStateCharges(storeId: string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -1096,7 +1089,7 @@ export class StoresService
 
     async getExistingName(name:string){
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -1122,7 +1115,7 @@ export class StoresService
 
     async getExistingURL(url: string){
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -1146,7 +1139,7 @@ export class StoresService
     getStoreTop(countryCode:string): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = (this.accessToken === '' || this.accessToken === null) ? 'accessToken' : this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._authService.publicToken;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -1167,7 +1160,7 @@ export class StoresService
     getDeliveryPeriod(storeId: string): Observable<StoreDeliveryPeriod[]>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this.accessToken === this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._authService.jwtAccessToken === this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -1185,7 +1178,7 @@ export class StoresService
     postDeliveryPeriod(storeId: string, deliveryPeriodBody: StoreDeliveryPeriod[]): Observable<StoreDeliveryPeriod[]>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this.accessToken === this._jwt.getJwtPayload(this.accessToken).act;
+        let accessToken = this._authService.jwtAccessToken === this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),

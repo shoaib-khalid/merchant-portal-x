@@ -38,11 +38,11 @@ export class AuthInterceptor implements HttpInterceptor
         // for the protected API routes which our response interceptor will
         // catch and delete the access token from the local storage while logging
         // the user out from the app.
-        if ( this._authService.accessToken && !AuthUtils.isTokenExpired(this._authService.accessToken) )
+        if ( this._authService.jwtAccessToken && !AuthUtils.isTokenExpired(this._authService.jwtAccessToken) )
         {
             // retrive back original access token (not jwt) from generated jwt 
             // act stand for accessToken
-            let accessToken = this._jwt.getJwtPayload(this._authService.accessToken).act;
+            let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
             newReq = req.clone({
                 headers: req.headers.set('Authorization', 'Bearer ' + accessToken)
             });

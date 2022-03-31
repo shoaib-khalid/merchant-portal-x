@@ -7,6 +7,7 @@ import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service';
 import { ChannelsList, ChannelsListPagination } from './channels-list.types';
 import { filter, map, switchMap, take } from 'rxjs/operators';
+import { AuthService } from 'app/core/auth/auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -24,6 +25,7 @@ export class ChannelsListService
         private _httpClient: HttpClient,
         private _apiServer: AppConfig,
         private _jwt: JwtService,
+        private _authService: AuthService,
         private _logging: LogService
     )
     {
@@ -48,16 +50,6 @@ export class ChannelsListService
     {
         return this._channel.asObservable();
     }
-    
-
-    /**
-     * Getter for access token
-     */
- 
-    get accessToken(): string
-    {
-        return localStorage.getItem('accessToken') ?? '';
-    } 
 
     /**
      * Getter for pagination
@@ -88,8 +80,8 @@ export class ChannelsListService
         
 
         let userService = this._apiServer.settings.apiServer.userService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -130,8 +122,8 @@ export class ChannelsListService
     getChannelById(channelId): Observable<any>
     {
         let userService = this._apiServer.settings.apiServer.userService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -153,8 +145,8 @@ export class ChannelsListService
     {
         
         let userService = this._apiServer.settings.apiServer.userService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -186,8 +178,8 @@ export class ChannelsListService
      deleteChannel(channelId: string,): Observable<boolean>
      {
          let userService = this._apiServer.settings.apiServer.userService;
-         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-         let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+         let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
  
          const header = {
              headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -223,8 +215,8 @@ export class ChannelsListService
     {
         
         let userService = this._apiServer.settings.apiServer.userService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),

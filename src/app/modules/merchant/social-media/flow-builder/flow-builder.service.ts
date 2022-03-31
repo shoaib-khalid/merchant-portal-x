@@ -6,6 +6,7 @@ import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service';
 import { FlowBuilder, FlowBuilderPagination } from './flow-builder.types';
+import { AuthService } from 'app/core/auth/auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -27,7 +28,8 @@ export class FlowBuilderService
         private _httpClient: HttpClient,
         private _apiServer: AppConfig,
         private _jwt: JwtService,
-        private _logging: LogService
+        private _logging: LogService,
+        private _authService: AuthService
     )
     {
     }
@@ -51,15 +53,6 @@ export class FlowBuilderService
     {
         return this._order.asObservable();
     }
-
-    /**
-     * Getter for access token
-     */
- 
-    get accessToken(): string
-    {
-        return localStorage.getItem('accessToken') ?? '';
-    } 
 
     /**
      * Getter for pagination
@@ -90,8 +83,8 @@ export class FlowBuilderService
         
 
         let orderService = this._apiServer.settings.apiServer.orderService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -152,8 +145,8 @@ export class FlowBuilderService
     getFlowBuilderById(orderId): Observable<any>
     {
         let orderService = this._apiServer.settings.apiServer.orderService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -172,8 +165,8 @@ export class FlowBuilderService
     {
         
         let orderService = this._apiServer.settings.apiServer.orderService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -194,7 +187,7 @@ export class FlowBuilderService
     // -----------------------------------------------------------------------------------------------------
 
     async getAllflows() {
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
         let flowBuilderService: string = this._apiServer.settings.apiServer.flowBuilderService;
 
         let response = await this._httpClient.get(flowBuilderService + "/flow/getall/" + clientId).toPromise();

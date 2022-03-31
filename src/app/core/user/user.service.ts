@@ -6,6 +6,7 @@ import { Client, ClientPaymentDetails, ClientPagination } from 'app/core/user/us
 import { AppConfig } from 'app/config/service.config';
 import { LogService } from '../logging/log.service';
 import { JwtService } from '../jwt/jwt.service';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -22,6 +23,7 @@ export class UserService
     constructor(
         private _httpClient: HttpClient,
         private _apiServer: AppConfig,
+        private _authService: AuthService,
         private _jwt: JwtService,
         private _logging: LogService
     )
@@ -68,38 +70,16 @@ export class UserService
     {
         return localStorage.getItem('storeId') ?? '';
     }
+
     /**
     * Getter for client payment detail
     *
     */
+   
     get clientPaymentDetails$(): Observable<ClientPaymentDetails>
     {
         return this._clientPaymentdetails.asObservable();
     }
-    // /**
-    // * Setter & getter for user
-    // *
-    // * @param value
-    // */
-    // set user(value: User)
-    // {
-    //     // Store the value
-    //     this._user.next(value);
-    // }
-
-    // get user$(): Observable<User>
-    // {
-    //     return this._user.asObservable();
-    // }
-
-    /**
-     * Getter for access token
-     */
- 
-    get accessToken(): string
-    {
-        return localStorage.getItem('accessToken') ?? '';
-    } 
 
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
@@ -108,45 +88,40 @@ export class UserService
     /**
      * Get the current logged in user data
      */
-    // get(clientId: string = ""): Observable<any>
-    // {
-    //     let userService = this._apiServer.settings.apiServer.userService;
-    //     let token = "accessToken";
-
-    //     const header = {
-    //         headers: new HttpHeaders().set("Authorization", `Bearer ${token}`)
-    //     };
-
-    //     if (clientId !== "") { clientId = "/" + clientId } 
+    get(ownerId: string): Observable<any>
+    {
+        let userService = this._apiServer.settings.apiServer.userService;
+        const header = {
+            headers: new HttpHeaders().set("Authorization", this._authService.publicToken)
+        };
         
-    //     return this._httpClient.get<any>(userService + '/clients' + clientId, header)
-    //     .pipe(
-    //         tap((response) => {
-    //             this._logging.debug("Response from UserService",response);
-    //             return this._user.next(response.data);
-    //         })
-    //     );
-    // }
+        return this._httpClient.get<any>(userService + '/clients/' + ownerId, header)
+            .pipe(
+                tap((response) => {
+                    this._logging.debug("Response from UserService (Get)",response);
+                    return this._client.next(response.data);
+                })
+            );
+    }
 
-    // /**
-    //  * Update the user
-    //  *
-    //  * @param user
-    //  */
-    // update(user: User): Observable<any>
-    // {
-    //     return this._httpClient.patch<User>('api/common/user', {user}).pipe(
-    //         map((response) => {
-    //             this._user.next(response);
-    //         })
-    //     );
-    // }
-
+    /**
+     * Update the user
+     *
+     * @param user
+     */
+    update(user: Client): Observable<any>
+    {
+        return this._httpClient.patch<Client>('api/common/user', {user}).pipe(
+            map((response) => {
+                this._client.next(response);
+            })
+        );
+    }
 
     async getUserChannels() {
 
         let userService = this._apiServer.settings.apiServer.userService;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const httpOptions = {
             params: {
@@ -163,11 +138,11 @@ export class UserService
         Observable<Client>
     {
 
-        let id = this._jwt.getJwtPayload(this.accessToken).uid;
+        let id = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         let userService = this._apiServer.settings.apiServer.userService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`)
@@ -194,11 +169,11 @@ export class UserService
      */
     getClientById():Observable<Client>
     {
-        let id = this._jwt.getJwtPayload(this.accessToken).uid;
+        let id = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         let userService = this._apiServer.settings.apiServer.userService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -244,11 +219,11 @@ export class UserService
         Observable<ClientPaymentDetails>
     {
 
-        let id = this._jwt.getJwtPayload(this.accessToken).uid;
+        let id = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         let userService = this._apiServer.settings.apiServer.userService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`)
@@ -274,8 +249,8 @@ export class UserService
     updateClientProfile(clientBody: Client): Observable<Client>
      {
          let userService = this._apiServer.settings.apiServer.userService;
-         let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-         let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+         let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
  
          const header = {
              headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -310,8 +285,8 @@ export class UserService
     updatePaymentProfile(paymentClientId: string , clientPaymentBody: ClientPaymentDetails): Observable<Client>
     {
         let userService = this._apiServer.settings.apiServer.userService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -346,8 +321,8 @@ export class UserService
     updatePasswordProfile(clientPasswordBody: ClientPaymentDetails): Observable<Client>
     {
         let userService = this._apiServer.settings.apiServer.userService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -379,8 +354,8 @@ export class UserService
      */
          createPaymentProfile( clientPaymentBody: ClientPaymentDetails){
             let userService = this._apiServer.settings.apiServer.userService;            
-            let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-            let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+            let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+            let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
         
     
             const header = {

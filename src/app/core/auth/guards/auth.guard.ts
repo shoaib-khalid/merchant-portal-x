@@ -28,15 +28,6 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanLoad
     // @ Accessors
     // -----------------------------------------------------------------------------------------------------
 
-    /**
-     * Setter & getter for access token
-     */
- 
-     get accessToken(): string
-     {
-         return localStorage.getItem('accessToken') ?? '';
-     }
-
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
@@ -50,7 +41,7 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanLoad
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean
     {
 
-        let currentRole = this._jwt.getJwtPayload(this._authService.accessToken).role;
+        let currentRole = this._jwt.getJwtPayload(this._authService.jwtAccessToken).role;
         if (route.data.roles) {
             // check if route is restricted by role
             this._logging.debug("Required role to access route",route.data.roles.join());

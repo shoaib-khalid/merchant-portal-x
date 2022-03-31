@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
-// import { LocaleService } from 'app/core/locale/locale.service';
 import { PlatformService } from 'app/core/platform/platform.service';
 import { Platform } from 'app/core/platform/platform.types';
 import { StoresService } from 'app/core/store/store.service';
@@ -49,8 +48,6 @@ export class AuthSignUpComponent implements OnInit
         private _router: Router,
         private _platformsService: PlatformService,
         private _storesService: StoresService,
-        // private _localeService:LocaleService,
-
     )
     {
     }
@@ -80,23 +77,18 @@ export class AuthSignUpComponent implements OnInit
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((platform: Platform) => {
                 this.platform = platform;
-
                 switch (this.platform.id) {
                     // set to PAK
                     case 'easydukan':
                         this.signUpForm.get('countryId').patchValue('PAK')
                         break;
-
                     // set to MYS
                     case 'symplified':
                         this.signUpForm.get('countryId').patchValue('MYS')
                         break;
-                
                     default:
                         break;
                 }
-            
-
             });
 
         // get value for country list
@@ -107,23 +99,6 @@ export class AuthSignUpComponent implements OnInit
             });
 
         });
-
-        //get current location
-        // this._localeService.get().subscribe((resp) =>
-        //     {
-        //         //the response status either fail or success
-        //         if(resp.status === "success" && (resp.countryCode === 'MY' || resp.countryCode === 'PK')){
-
-        //             this.displayCountryField = true;
-        //             this.signUpForm.get('countryId').patchValue(resp.countryCode === 'MY'?'MYS':resp.countryCode === 'PK'?'PAK':null);
-
-        //         } else{
-        //             this.displayCountryField = false;
-        //         }
-
-        //         return this.displayCountryField;
-        //     }
-        // );
 
     }
 

@@ -11,6 +11,7 @@ import { DailyTopProducts, DailyTopProductsPagination,
          SettlementPagination, 
          SummarySales, SummarySalesPagination, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly, WeeklyGraph, WeeklySale 
        } from './dashboard.types';
+import { AuthService } from 'app/core/auth/auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -52,6 +53,7 @@ export class DashboardService
     constructor(
         private _httpClient: HttpClient,
         private _apiServer: AppConfig,
+        private _authService: AuthService,
         private _jwt: JwtService,
         private _logging: LogService
     )
@@ -224,15 +226,6 @@ export class DashboardService
         return localStorage.getItem('storeId') ?? '';
     }
 
-    /**
-     * Getter for access token
-     */
-
-    get accessToken(): string
-    {
-        return localStorage.getItem('accessToken') ?? '';
-    }    
-
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
@@ -254,8 +247,8 @@ export class DashboardService
     Observable<{ pagination: DailyTopProductsPagination; dailyTopProducts: DailyTopProducts[] }>
     {
         let reportService = this._apiServer.settings.apiServer.reportService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -299,8 +292,8 @@ export class DashboardService
     Observable<{ pagination: DetailedDailySalesPagination; detailedDailySales: DetailedDailySales[] }>
     {
         let reportService = this._apiServer.settings.apiServer.reportService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -342,8 +335,8 @@ export class DashboardService
     Observable<{ pagination: SummarySalesPagination; summarySales: SummarySales[] }>
     {
         let reportService = this._apiServer.settings.apiServer.reportService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -387,8 +380,8 @@ export class DashboardService
         totalSalesWeekly: TotalSalesWeekly[]; totalSalesMonthly: TotalSalesMonthly[] }>
     {
         let reportService = this._apiServer.settings.apiServer.reportService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -417,8 +410,8 @@ export class DashboardService
     Observable<{ pagination: SettlementPagination; settlement: Settlement[] }>
     {
         let reportService = this._apiServer.settings.apiServer.reportService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -460,8 +453,8 @@ export class DashboardService
     Observable<{ weeklySale: WeeklySale[] }>
     {
         let reportService = this._apiServer.settings.apiServer.reportService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -488,8 +481,8 @@ export class DashboardService
     Observable<{ weeklyGraph: WeeklyGraph[] }>
     {
         let reportService = this._apiServer.settings.apiServer.reportService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),

@@ -6,6 +6,7 @@ import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service';
 import { FlowsList, FlowsListPagination } from './flows-list.types';
+import { AuthService } from 'app/core/auth/auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -23,6 +24,7 @@ export class FlowsListService
         private _httpClient: HttpClient,
         private _apiServer: AppConfig,
         private _jwt: JwtService,
+        private _authService: AuthService,
         private _logging: LogService
     )
     {
@@ -47,15 +49,6 @@ export class FlowsListService
     {
         return this._flow.asObservable();
     }
-
-    /**
-     * Getter for access token
-     */
- 
-    get accessToken(): string
-    {
-        return localStorage.getItem('accessToken') ?? '';
-    } 
 
     /**
      * Getter for pagination
@@ -86,8 +79,8 @@ export class FlowsListService
         
 
         let flowService = this._apiServer.settings.apiServer.flowBuilderService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -125,8 +118,8 @@ export class FlowsListService
     getFlowById(flowId): Observable<any>
     {
         let flowService = this._apiServer.settings.apiServer.flowBuilderService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
@@ -145,8 +138,8 @@ export class FlowsListService
     {
         
         let flowService = this._apiServer.settings.apiServer.flowBuilderService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),

@@ -8,6 +8,7 @@ import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { AuthService } from 'app/core/auth/auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -26,6 +27,7 @@ export class ChooseStoreService
     constructor(
         private _httpClient: HttpClient,
         private _storesService: StoresService,
+        private _authService: AuthService,
         private _apiServer: AppConfig,
         private _jwt: JwtService
         )
@@ -59,15 +61,6 @@ export class ChooseStoreService
     {
         return this._store.asObservable();
     }
-
-    /**
-     * Getter for access token
-     */
- 
-     get accessToken(): string
-     {
-         return localStorage.getItem('accessToken') ?? '';
-     } 
 
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
@@ -141,8 +134,8 @@ export class ChooseStoreService
     getStoreById(id: string): Observable<Store>
     {
         let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this.accessToken).act;
-        let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
