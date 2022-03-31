@@ -2,7 +2,6 @@ import { Component, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { JwtService } from 'app/core/jwt/jwt.service';
-// import { LocaleService } from 'app/core/locale/locale.service';
 import { PlatformService } from 'app/core/platform/platform.service';
 import { map, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { ValidateOauthRequest } from '../sign-in/oauth.types';
@@ -40,13 +39,8 @@ export class AppleLoginComponent
         private _activatedRoute: ActivatedRoute,
         private _jwtService: JwtService,
         private _authService: AuthService,
-        // private _localeService:LocaleService,
         private _router: Router,
         private _platformsService: PlatformService,
-
-
-
-
     )
     {
       

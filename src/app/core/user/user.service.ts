@@ -169,8 +169,6 @@ export class UserService
      */
     getClientById():Observable<Client>
     {
-        let id = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
-
         let userService = this._apiServer.settings.apiServer.userService;
         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
         let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
