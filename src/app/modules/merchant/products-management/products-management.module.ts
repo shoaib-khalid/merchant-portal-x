@@ -23,6 +23,7 @@ import { CategoriesComponent } from './categories/categories.component';
 import { AddCategoryComponent } from './add-category/add-category.component';
 import { MatStepperModule } from '@angular/material/stepper';
 import { EditProductComponent } from './edit-product/edit-product.component';
+import { MatRadioModule } from '@angular/material/radio';
 
 @NgModule({
     declarations: [
@@ -50,7 +51,8 @@ import { EditProductComponent } from './edit-product/edit-product.component';
         MatSlideToggleModule,
         MatTooltipModule,
         SharedModule,
-        MatStepperModule
+        MatStepperModule,
+        MatRadioModule
     ]
 })
 export class ECommerceModule
