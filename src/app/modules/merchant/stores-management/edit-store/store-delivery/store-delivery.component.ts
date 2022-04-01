@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { StoresService } from 'app/core/store/store.service';
@@ -6,11 +6,15 @@ import { EditStoreValidationService } from 'app/modules/merchant/stores-manageme
 import { Store, StoreRegionCountries, CreateStore, StoreAssets, StoreSelfDeliveryStateCharges, StoreDeliveryDetails, StoreDeliveryProvider, StoreDeliveryPeriod } from 'app/core/store/store.types';
 import { ChooseVerticalService } from '../../choose-vertical/choose-vertical.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { Loader } from '@googlemaps/js-api-loader';
+import { BehaviorSubject } from 'rxjs';
+
 
 
 @Component({
     selector       : 'store-delivery',
     templateUrl    : './store-delivery.component.html',
+    styleUrls  : ['./store-delivery.component.scss'],
     encapsulation  : ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -35,6 +39,26 @@ export class StoreDeliveryComponent implements OnInit
     storeStates: string[] = [];
     storeCountries: StoreRegionCountries[] = [];
 
+    private map: google.maps.Map;
+
+    @ViewChild('search')public searchElementRef!: ElementRef;
+    location :any;
+
+    // latitude!: any;
+    // longitude!: any;
+    center!: google.maps.LatLngLiteral;
+    fullAddress:any='';
+  
+    displayLat:any;
+    displayLong:any;
+
+    //string interpolationdoesnt-update-on-eventListener hence need to use behaviour subject
+    displayLatitude: BehaviorSubject<string> = new BehaviorSubject<string>('');
+    displayLongtitude: BehaviorSubject<string> = new BehaviorSubject<string>('');
+
+  
+
+
     /**
      * Constructor
      */
@@ -58,6 +82,7 @@ export class StoreDeliveryComponent implements OnInit
      */
     ngOnInit(): void
     {        
+
         // Create the form
         this.storeDeliveryForm = this._formBuilder.group({
             serviceChargesPercentage    : [0],
@@ -180,6 +205,175 @@ export class StoreDeliveryComponent implements OnInit
                             this._changeDetectorRef.markForCheck();
                         });
 
+                        //======================== Iinsert google maps =========================
+                        // implement google maos
+                        let loader = new Loader({
+                            apiKey: 'AIzaSyCFhf1LxbPWNQSDmxpfQlx69agW-I-xBIw',
+                            libraries: ['places']
+                            
+                            })
+        
+                        //hardcode vakue first
+                        console.log('fetch value from server::::::::::::::',this.store);
+                        
+                        this.displayLat = parseFloat(this.store.latitude) ;
+                        this.displayLong = parseFloat(this.store.longitude);
+                        this.displayLatitude.next(this.store.latitude);
+                        this.displayLongtitude.next(this.store.longitude);
+                        
+                        this.location = {
+                            lat: this.displayLat,
+                            lng: this.displayLong,
+                        };
+                        
+                        loader.load().then(() => {
+                            
+                            this.map = new google.maps.Map(document.getElementById("map"), {
+                                center: this.location,
+                                zoom: 15,
+                                mapTypeControl:false,
+                                streetViewControl:false,//Removing the pegman from map
+                                // styles: styles,
+                                mapTypeId: "roadmap",
+                            })
+                    
+                            const initialMarker = new google.maps.Marker({
+                            position: this.location,
+                            map: this.map,
+                            });
+                    
+                            // Create the search box and link it to the UI element.
+                            const input = document.getElementById("pac-input") as HTMLInputElement;
+                            const searchBox = new google.maps.places.SearchBox(input);
+                            
+                            this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+                    
+                            // Bias the SearchBox results towards current map's viewport.
+                            this.map.addListener("bounds_changed", () => {
+                                searchBox.setBounds(this.map.getBounds() as google.maps.LatLngBounds);
+                            });
+                    
+                            //use for when user mark other location
+                            let markers: google.maps.Marker[] = [];
+                    
+                            // Listen for the event fired when the user selects a prediction and retrieve
+                            // more details for that place.
+                            searchBox.addListener("places_changed", () => {
+                            const places = searchBox.getPlaces();
+                        
+                                if (places.length == 0) {
+                                    return;
+                                }
+                        
+                                // Clear out the old markers.
+                                markers.forEach((marker) => {
+                                    marker.setMap(null);
+                                });
+                                markers = [];
+                    
+                                // Clear out the init markers.
+                                initialMarker.setMap(null);
+                    
+                                // For each place, get the icon, name and location.
+                                const bounds = new google.maps.LatLngBounds();
+                        
+                                places.forEach((place) => {
+                        
+                                    console.log('Place',place);
+                                    let coordinateStringify = JSON.stringify(place?.geometry?.location);
+                                    let coordinateParse = JSON.parse(coordinateStringify);
+                                    console.log('coordinate1',coordinateParse);
+                        
+                                    this.displayLat = coordinateParse.lat;
+                                    this.displayLong = coordinateParse.lng;
+
+                                    this.displayLatitude.next(coordinateParse.lat);
+                                    this.displayLongtitude.next(coordinateParse.lng);
+
+
+                                    this.location = {
+                                    lat: coordinateParse.lat,
+                                    lng: coordinateParse.lng,
+                                    };
+                        
+                                    this.fullAddress = place.address_components.map((data)=>data.long_name)
+                                    console.log('fullAddress ',this.fullAddress)
+                                
+                                    if (!place.geometry || !place.geometry.location) {
+                                    console.log("Returned place contains no geometry");
+                                    return;
+                                    }
+                            
+                                    // const icon = {
+                                    //   url: place.icon as string,
+                                    //   size: new google.maps.Size(71, 71),
+                                    //   origin: new google.maps.Point(0, 0),
+                                    //   anchor: new google.maps.Point(17, 34),
+                                    //   scaledSize: new google.maps.Size(25, 25),
+                                    // };
+                                    console.log('this.map search',this.map);
+                        
+                                    // Create a marker for each place.
+                                    markers.push(
+                                    new google.maps.Marker({
+                                        map:this.map,
+                                        // icon,
+                                        title: place.name,
+                                        position: place.geometry.location,
+                                    })
+                                    );
+                            
+                                    if (place.geometry.viewport) {
+                                    // Only geocodes have viewport.
+                                    bounds.union(place.geometry.viewport);
+                                    } else {
+                                    bounds.extend(place.geometry.location);
+                                    }
+                                });
+                                this.map.fitBounds(bounds);
+                            });
+                    
+                            // Configure the click listener.
+                            this.map.addListener("click", (event) => {
+
+                                //to be display coordinate
+                                let coordinateClickStringify = JSON.stringify(event.latLng);
+                                let coordinateClickParse = JSON.parse(coordinateClickStringify);
+                        
+                                this.location = {
+                                    lat: coordinateClickParse.lat,
+                                    lng: coordinateClickParse.lng,
+                                };
+                                console.log('new location::::',this.location);
+
+                    
+                                // Clear out the old markers.
+                                markers.forEach((marker) => {
+                                marker.setMap(null);
+                                });
+                                markers = [];
+                    
+                                // Clear out the init markers1.
+                                initialMarker.setMap(null);
+                    
+                                // Create a marker for each place.
+                                markers.push(
+                                new google.maps.Marker({
+                                    map:this.map,
+                                    // icon,
+                                    position: event.latLng,
+                                })
+                                );
+                                this.displayLatitude.next(coordinateClickParse.lat);
+                                this.displayLongtitude.next(coordinateClickParse.lng);
+                            
+                            });
+                    
+                    
+                            
+                            
+                        });
+
                         // Mark for check
                         this._changeDetectorRef.markForCheck();
                     });
@@ -284,13 +478,15 @@ export class StoreDeliveryComponent implements OnInit
                 this._changeDetectorRef.markForCheck();
 
             });
+
+    
     }
 
     ngAfterViewInit(): void
     {
-        setTimeout(() => {
-            // this way , we keep _originalAllowedSelfDeliveryStates integrity
-        }, 0);
+        // setTimeout(() => {
+        //     // this way , we keep _originalAllowedSelfDeliveryStates integrity
+        // }, 0);
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -454,7 +650,14 @@ export class StoreDeliveryComponent implements OnInit
         storeBody.postcode = postcode;
         storeBody.regionCountryStateId = regionCountryStateId;
         storeBody.regionCountry = regionCountryId;
+        storeBody.latitude =this.location.lat.toString();
+        storeBody.longitude =this.location.lng.toString();
 
+        
+        console.log('storeBody:::::::::::::',storeBody);
+
+        
+        
         this._storesService.update(storeId, storeBody)
             .subscribe(()=>{
 

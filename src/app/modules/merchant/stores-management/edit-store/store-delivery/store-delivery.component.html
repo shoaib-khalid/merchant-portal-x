@@ -9,6 +9,24 @@
                         <div class="text-xl">Pickup Address</div>
                         <div class="text-secondary">Choose your type of delivery types to provide to the customer of delivery details.</div>
                     </div>
+
+                    <input
+                    id="pac-input"
+                    class="controls"
+                    type="text"
+                    (keydown.enter)="$event.preventDefault()"
+                    placeholder="Search Box"
+                  />
+                  
+                  <div class="full" id="map">
+              
+                  </div>
+                  
+                  <p>Latitude: {{displayLatitude | async}}</p>
+                  <p>Longtitude: {{displayLongtitude | async}}</p>
+
+
+
                     <div class="grid grid-cols-4 gap-6 w-full mt-4">
                         <!-- Pickup Address -->
                         <div class="col-span-4">
