@@ -14,7 +14,37 @@ import { BehaviorSubject } from 'rxjs';
 @Component({
     selector       : 'store-delivery',
     templateUrl    : './store-delivery.component.html',
-    styleUrls  : ['./store-delivery.component.scss'],
+    styles :[`
+    .map {
+        width: 50vw;
+        height: 50vh;
+    }
+    #pac-input {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 400px;
+      }
+      
+      #pac-input:focus {
+        border-color: #4d90fe;
+      }
+    
+      .pac-controls {
+        padding: 5px 11px;
+        display: inline-block;
+    }
+      
+      .pac-controls label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+      }
+    `],
     encapsulation  : ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -56,6 +86,10 @@ export class StoreDeliveryComponent implements OnInit
     displayLatitude: BehaviorSubject<string> = new BehaviorSubject<string>('');
     displayLongtitude: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
+    //get current location
+    currentLat:any=0;
+    currentLong:any=0;
+    
   
 
 
@@ -71,6 +105,7 @@ export class StoreDeliveryComponent implements OnInit
         private _fuseConfirmationService: FuseConfirmationService,
     )
     {
+      
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -81,8 +116,16 @@ export class StoreDeliveryComponent implements OnInit
      * On init
      */
     ngOnInit(): void
-    {        
+    {
+        //to implement get current location first to be display if in db is null
+        navigator.geolocation.getCurrentPosition((position) => {
+            var crd = position.coords;
+            this.currentLat = crd.latitude;
+            this.currentLong= crd.longitude;
 
+        })
+                
+        // navigator.geolocation.getCurrentPosition(success, error, options); 
         // Create the form
         this.storeDeliveryForm = this._formBuilder.group({
             serviceChargesPercentage    : [0],
@@ -206,6 +249,26 @@ export class StoreDeliveryComponent implements OnInit
                         });
 
                         //======================== Iinsert google maps =========================
+                        //if db got null then we need to set the curren location so that it will display the google maps instead of hardcode the value of katitutde and lontitude
+                        if(this.store.latitude === null){
+                       
+                                this.displayLat = this.currentLat;
+                                this.displayLong = this.currentLong;
+
+                                console.log('mahu check',this.currentLat);
+                                
+
+                                this.displayLatitude.next(this.displayLat.toString());
+                                this.displayLongtitude.next(this.displayLong.toString());
+
+                        } else {
+
+                            this.displayLat = parseFloat(this.store.latitude) ;
+                            this.displayLong = parseFloat(this.store.longitude);
+                            this.displayLatitude.next(this.store.latitude);
+                            this.displayLongtitude.next(this.store.longitude);
+
+                        }
                         // implement google maos
                         let loader = new Loader({
                             apiKey: 'AIzaSyCFhf1LxbPWNQSDmxpfQlx69agW-I-xBIw',
@@ -216,16 +279,13 @@ export class StoreDeliveryComponent implements OnInit
                         //hardcode vakue first
                         console.log('fetch value from server::::::::::::::',this.store);
                         
-                        this.displayLat = parseFloat(this.store.latitude) ;
-                        this.displayLong = parseFloat(this.store.longitude);
-                        this.displayLatitude.next(this.store.latitude);
-                        this.displayLongtitude.next(this.store.longitude);
-                        
                         this.location = {
                             lat: this.displayLat,
                             lng: this.displayLong,
                         };
                         
+                        console.log('location value::::::::::::::',this.location);
+
                         loader.load().then(() => {
                             
                             this.map = new google.maps.Map(document.getElementById("map"), {
@@ -873,4 +933,5 @@ export class StoreDeliveryComponent implements OnInit
             return;
         }
     }
+ 
 }
