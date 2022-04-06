@@ -9,11 +9,40 @@
                         <div class="text-xl">Pickup Address</div>
                         <div class="text-secondary">Choose your type of delivery types to provide to the customer of delivery details.</div>
                     </div>
+
+                    <input
+                    id="pac-input"
+                    class="pac-controls"
+                    type="text"
+                    (keydown.enter)="$event.preventDefault()"
+                    placeholder="Search Box"
+                  />
+                  
+                  <div class="map w-full" id="map">
+              
+                  </div>
+
                     <div class="grid grid-cols-4 gap-6 w-full mt-4">
                         <!-- Pickup Address -->
                         <div class="col-span-4">
+                            <div class="flex w-full flex-row justify-between">
+                                <div>
+                                    <mat-label class="font-medium">Address</mat-label>
+                                </div>
+             
+                                <div class="flex flex-row">
+                                    <div>
+                                        Location Code :    
+                                    </div>
+                                    <div class="text-green-700">
+                                        {{displayLatitude | async}} , {{displayLongtitude | async}}
+                                    </div>
+                                </div>
+                        
+                            </div>
                             <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full" floatLabel="always">
-                                <mat-label>Address</mat-label>
+                                
+                    
                                 <textarea
                                     matInput
                                     placeholder="Your customer will be looking for your store, add your store address now !"

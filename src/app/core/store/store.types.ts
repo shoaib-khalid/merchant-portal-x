@@ -50,6 +50,8 @@ export interface Store
         region: string;
         timezone: string;
     }
+    latitude: string,
+    longitude: string,
 }
 
 export interface CreateStore
