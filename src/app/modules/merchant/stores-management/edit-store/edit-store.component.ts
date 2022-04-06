@@ -12,7 +12,7 @@ import { takeUntil } from 'rxjs/operators';
     templateUrl  : './edit-store.component.html',
     styles       : [
         `
-            .ql-container { height: 156px; }
+            :host ::ng-deep .ql-container { height: 156px; }
         `
     ],
     encapsulation: ViewEncapsulation.None,

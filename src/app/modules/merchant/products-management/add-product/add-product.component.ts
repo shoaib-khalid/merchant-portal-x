@@ -54,34 +54,34 @@ import { MatPaginator } from '@angular/material/paginator';
                 height: 80vh;
 
                 @screen sm {
-                    max-height: 455px;
+                    max-height: 560px;
                     height: 75vh;
                 }
                 // overflow-y: auto;
             }
             :host ::ng-deep .ql-container .ql-editor {
-                min-height: 131px;
-                max-height: 131px;
-                height: 131px;
+                min-height: 87px;
+                max-height: 87px;
+                height: 87px;
             }
 
             // variant section
 
             .variant-details-grid {
                 height: 62vh;
-                max-height: 350px;
+                max-height: 468px;
             }
 
             // combo section
             
             .add-product-list {
                 height: 21vh;
-                max-height: 150px;
+                max-height: 194px;
             }
 
             .combo-details-grid {
                 height: 60vh;
-                max-height: 370px;
+                max-height: 470px;
             }
             .option-grid {
                 grid-template-columns: 120px 112px 128px 112px;
@@ -275,6 +275,9 @@ export class AddProductComponent implements OnInit, OnDestroy
                 isPackage        : [false], // combo
                 isBulkItem       : [false],
                 vehicleType      : [''],
+                isCustomNote     : [false],
+                isNoteOptional   : [true],
+                customNote       : [''],
                 // form completion
                 valid            : [false]
             }),
@@ -913,7 +916,7 @@ export class AddProductComponent implements OnInit, OnDestroy
 
         const {valid, ...productBody} = this.addProductForm.get('step1').value
 
-        const { sku, availableStock, price, images, imagefiles, thumbnailIndex, ...newProductBody } = productBody;
+        const { sku, availableStock, price, images, imagefiles, thumbnailIndex, isCustomNote, ...newProductBody } = productBody;
         
         // Get store domain
         let storeFrontURL = 'https://' + this.store$.domain;
@@ -2385,5 +2388,19 @@ export class AddProductComponent implements OnInit, OnDestroy
         if (status === 409){
             this.addProductForm.get('step1').get('name').setErrors({productAlreadyExists: true});
         }
+    }
+
+    variantSkuChanged(event, i) {
+        this.selectedVariantCombos[i].sku = event.target.value;
+    
+    }
+
+    variantStockChanged(event, i) {
+        this.selectedVariantCombos[i].quantity = event.target.value;
+    
+    }
+
+    variantPriceChanged(event, i) {
+        this.selectedVariantCombos[i].price = event.target.value;
     }
 }

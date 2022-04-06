@@ -23,34 +23,103 @@
                     </p> -->
 
                     <!-- Content -->
-                    <div class="content flex flex-col overflow-y-auto lg:overflow-hidden">
+                    <div class="content flex flex-col overflow-y-auto">
 
                         <!-- Main -->
                         <div class="flex px-2 flex-col lg:flex-row mb-4 lg:mb-0 w-full">
                             <!-- Product images and status -->
-                            <div class="flex flex-col items-center w-full lg:w-2/12 sm:items-start">
+                            <div class="flex flex-col items-center w-full lg:w-2/12 sm:items-start lg:pb-1">
                                 <div class="flex flex-col items-center w-full">
-                                    <!-- Image Frame -->
-                                    <div *ngIf="!imagesEditMode" class="w-32 h-40 border rounded overflow-hidden">
-                                        <ng-container *ngIf="images.length; else noImage">
-                                            <img
-                                                class="w-full h-full object-cover"
-                                                [src]="images[currentImageIndex]">
-                                        </ng-container>
-                                        <ng-template #noImage>
-                                            <div
-                                                class="flex items-center justify-center w-full h-full rounded overflow-hidden uppercase text-8xl font-bold leading-none bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200"
-                                            >
-                                                <span class="text-md">NO IMAGE</span> 
+                                    <div class="relative">
+                                        <!-- Image Frame -->
+                                        <div *ngIf="!imagesEditMode" class="w-32 h-32 border rounded overflow-hidden">
+                                            <ng-container *ngIf="images.length; else noImage">
+                                                <img
+                                                    class="w-full h-full object-cover"
+                                                    [src]="images[currentImageIndex]">
+                                            </ng-container>
+                                            <ng-template #noImage>
+                                                <div
+                                                    class="flex items-center justify-center w-full h-full rounded overflow-hidden uppercase text-8xl font-bold leading-none bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                                                >
+                                                    <span class="text-md">NO IMAGE</span> 
+                                                </div>
+                                            </ng-template>
+                                        </div>
+                                        <div class="absolute bottom-0 bg-black rounded-b opacity-50 w-full h-1/4 flex justify-center mt-0 whitespace-nowrap">
+                                            <!-- Add Image  -->
+                                            <div>
+                                                <input
+                                                    id="new-image-file-input"
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="file"
+                                                    [multiple]="false"
+                                                    [accept]="'image/jpeg, image/png'"
+                                                    (change)="uploadImages(imageFileInput.files, []);"
+                                                    #imageFileInput>
+                                                <label
+                                                    class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
+                                                    for="new-image-file-input"
+                                                    matTooltip="Add image"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="icon-size-5 text-white"
+                                                        [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                                                </label>
                                             </div>
-                                        </ng-template>
+                                            <!-- Toggle Image Edit -->
+                                            <div>
+                                                <input
+                                                    id="new-image-edit-button"
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="button"
+                                                    (click)="toggleImagesEditMode()"
+                                                    mat-icon-button
+                                                >
+                                                <label 
+                                                    class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
+                                                    for="new-image-edit-button"
+                                                    matTooltip="Edit image"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        *ngIf="imagesEditMode"
+                                                        class="icon-size-5 text-white"
+                                                        [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                                    <mat-icon
+                                                        *ngIf="!imagesEditMode"
+                                                        class="icon-size-5 text-white"
+                                                        [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                                                </label>
+                                            </div>
+                                            <!-- Set Thumbnail -->
+                                            <div>
+                                                <div *ngIf="images.length && images.length > 1">
+                                                    <input
+                                                        id="new-set-thumbnail-button"
+                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                        type="button"
+                                                        (click)="setThumbnail(currentImageIndex)"
+                                                        mat-icon-button>
+                                                    <label 
+                                                        class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
+                                                        for="new-set-thumbnail-button"
+                                                        [matTooltip]="currentImageIndex !== thumbnailIndex ? 'Set thumbnail' : ''"
+                                                        matRipple>
+                                                        <mat-icon
+                                                            class="icon-size-5 text-white"
+                                                            [svgIcon]="currentImageIndex === thumbnailIndex ? 'heroicons_solid:star' : 'heroicons_outline:star'"></mat-icon>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     </div>
                                     
                                     <!-- Edit Image Frame -->
                                     <div *ngIf="imagesEditMode" class="flex flex-col items-center sm:items-start mb-8 sm:mb-0">
-                                        <div class="relative flex items-center justify-center w-32 h-40 rborder rounded overflow-hidden ring-4 ring-bg-card">
+                                        <div class="relative flex items-center justify-center w-32 h-32 border rounded overflow-hidden ring-4 ring-bg-card">
                                             <!-- Upload / Remove Image to Overide Image -->
-                                            <div class="absolute inset-0 bg-black bg-opacity-50 z-10"></div>
+                                            <div class="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
                                             <div class="absolute inset-0 flex items-center justify-center z-20">
                                                 <!-- Add / Edit Image -->
                                                 <div>
@@ -100,12 +169,38 @@
                                                 *ngIf="!images.length">
                                                 <span class="text-md">NO IMAGE</span> 
                                             </div>
+                                            <div class="absolute bottom-0 bg-black rounded-b opacity-60 w-full h-1/4 flex justify-center mt-0 whitespace-nowrap z-30">
+                                                <!-- Toggle Image Edit -->
+                                                <div>
+                                                    <input
+                                                        id="new-image-edit-button"
+                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                        type="button"
+                                                        (click)="toggleImagesEditMode()"
+                                                        mat-icon-button
+                                                    >
+                                                    <label 
+                                                        class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
+                                                        for="new-image-edit-button"
+                                                        [matTooltip]="imagesEditMode ? 'Close edit image' : 'Edit image'"
+                                                        matRipple>
+                                                        <mat-icon
+                                                            *ngIf="imagesEditMode"
+                                                            class="icon-size-5 text-white"
+                                                            [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                                        <mat-icon
+                                                            *ngIf="!imagesEditMode"
+                                                            class="icon-size-5 text-white"
+                                                            [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                                                    </label>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
                                     <!-- Add New Image, Set Thumbnail -->
-                                    <div class="flex items-center mt-0 whitespace-nowrap">
-                                        <!-- Add Image  -->
+                                    <!-- <div class="flex items-center mt-0 whitespace-nowrap">
+                                        Add Image 
                                         <div>
                                             <input
                                                 id="new-image-file-input"
@@ -125,7 +220,7 @@
                                                     [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
                                             </label>
                                         </div>
-                                        <!-- Toggle Image Edit -->
+                                        Toggle Image Edit
                                         <div>
                                             <input
                                                 id="new-image-edit-button"
@@ -149,7 +244,7 @@
                                                     [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
                                             </label>
                                         </div>
-                                        <!-- Set Thumbnail -->
+                                        Set Thumbnail
                                         <div>
                                             <div *ngIf="images.length && images.length > 1">
                                                 <input
@@ -169,7 +264,7 @@
                                                 </label>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> -->
                                     <!-- Image Cycle -->
                                     <div
                                         class="flex items-center mt-0 whitespace-nowrap"
@@ -214,7 +309,7 @@
                                     </div>
                                 </div>
                                 <!-- Product status -->
-                                <div class="flex flex-col mt-0 w-full">
+                                <div class="flex flex-col mt-4 w-full">
                                     <mat-form-field class="w-full" floatLabel="always">
                                         <mat-label class="font-medium">Product status</mat-label>
                                         <mat-select
@@ -250,7 +345,7 @@
                             </div>
 
                             <!-- Name, Description, SKU, Price , Packing Size-->
-                            <div class="flex flex-col md:flex-row w-full lg:w-7/12 lg:px-4 mt-3 md:mt-0">
+                            <div class="flex flex-col md:flex-row w-full lg:w-7/12 lg:px-4 mt-0 md:mt-0">
                                 <!-- Name, Description -->
                                 <div class="flex flex-col w-full md:pr-2 lg:w-2/3">
 
@@ -274,9 +369,9 @@
                                     </mat-form-field>
 
                                     <!-- Description -->
-                                    <div class="w-full mb-2">
+                                    <div class="w-full mb-0">
                                         <span class="font-medium leading-tight">Description *</span>
-                                        <div class="mt-1.5 flex items-center -my-px w-full">
+                                        <div class="mt-1 flex items-center -my-px w-full">
                                             <quill-editor
                                                 class="w-full rounded-md"
                                                 (focusout)="!this.addProductForm.get('step1').get('description').value ? this.addProductForm.get('step1').get('description').patchValue(null) : ''"
@@ -326,7 +421,7 @@
                                         </mat-error>
                                     </mat-form-field>
 
-                                    <!-- Packing Size -->
+                                    <!-- Packing Size for Ecomm -->
                                     <mat-form-field 
                                         class="w-full"
                                         appearance="fill" floatLabel="always"
@@ -358,6 +453,31 @@
                                             Required
                                         </mat-error>
                                     </mat-form-field>
+
+                                    <!-- Variants Toggle for Fnb -->
+                                    <div 
+                                        *ngIf="(store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK') && (this.addProductForm.get('step1').get('isPackage').value !== true)"
+                                        class="flex flex-col w-full pb-4"
+                                    >
+                                        <span class="pb-1 font-medium leading-tight">Variants 
+                                            <mat-icon
+                                                matTooltip="Does this product have variants?"
+                                                class="transform scale-75"
+                                                [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                            </mat-icon>
+                                        </span>
+                                        <div class="mt-0 flex items-center -my-px w-full">
+                                            <mat-slide-toggle
+                                                class="pr-4"
+                                                [formControlName]="'isVariants'"
+                                                [color]="'primary'"
+                                                (change)="(addProductForm.get('step1').get('isVariants').value === false) ? deleteAllVariantsConfirmation() : return"
+                                                >
+                                                {{addProductForm.get('step1').get('isVariants').value === true ? 'Yes' : 'No'}}
+                                            </mat-slide-toggle>
+                                            
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -370,7 +490,7 @@
                                     [ngClass]="addProductForm.get('step1').get('categoryId').hasError('required') ? 'border-red-600' : 'border-gray-300'"
                                     class="mt-0.5 rounded-md border dark:border-gray-500 shadow-sm overflow-hidden">
                                         <!-- Header -->
-                                        <div class="flex items-center -my-px py-2 px-3">
+                                        <div class="flex items-center -my-px py-0.5 px-3">
                                             <div class="flex items-center flex-auto min-w-0">
                                                 <mat-icon
                                                     class="icon-size-5"
@@ -406,12 +526,12 @@
                                             </label>
                                         </div>
                                         <!-- Available categories -->
-                                        <div class="h-30 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
+                                        <div class="h-[94px] leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
                                             <!-- Categories -->
                                             <ng-container *ngIf="!productCategoriesEditMode">
                                                 <ng-container *ngFor="let category of filteredProductCategories; trackBy: trackByFn;">
                                                     <mat-checkbox
-                                                        class="flex items-center h-10 min-h-10 px-4"
+                                                        class="flex items-center h-9 min-h-9 px-4"
                                                         required
                                                         [color]="'primary'"
                                                         [checked]="addProductForm.get('step1').get('categoryId').value && addProductForm.get('step1').get('categoryId').value.includes(category.id)"
@@ -423,7 +543,7 @@
                                             </ng-container>
                                             <!-- Categories editing -->
                                             <ng-container *ngIf="productCategoriesEditMode">
-                                                <div class="p-4 space-y-2">
+                                                <div class="p-4 space-y-1">
                                                     <ng-container *ngFor="let category of filteredProductCategories; trackBy: trackByFn;">
                                                         <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full">
                                                             <input
@@ -482,7 +602,7 @@
                                                 </div>
                                             </ng-container>
                                             <div
-                                                class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer border-t hover:bg-gray-50 dark:hover:bg-hover"
+                                                class="flex items-center h-8 min-h-8 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer border-t hover:bg-gray-50 dark:hover:bg-hover"
                                                 *ngIf="shouldShowCreateCategoryButton(newCategoryInput.value)"
                                                 (click)="createCategory(newCategoryInput.value); newCategoryInput.value = ''"
                                                 matRipple>
@@ -498,30 +618,6 @@
                                         [ngClass]="addProductForm.get('step1').get('categoryId').hasError('required') ? 'visible' : 'invisible'">
                                         Required
                                     </mat-error>
-                                </div>
-                                <!-- Variants Toggle for Fnb-->
-                                <div 
-                                    *ngIf="(store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK') && (this.addProductForm.get('step1').get('isPackage').value !== true)"
-                                    class="flex flex-col w-full pb-4"
-                                >
-                                    <span class="pb-1 font-medium leading-tight">Variants 
-                                        <mat-icon
-                                            matTooltip="Does this product have variants?"
-                                            class="transform scale-75"
-                                            [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                        </mat-icon>
-                                    </span>
-                                    <div class="mt-0 flex items-center -my-px w-full">
-                                        <mat-slide-toggle
-                                            class="pr-4"
-                                            [formControlName]="'isVariants'"
-                                            [color]="'primary'"
-                                            (change)="(addProductForm.get('step1').get('isVariants').value === false) ? deleteAllVariantsConfirmation() : return"
-                                            >
-                                            {{addProductForm.get('step1').get('isVariants').value === true ? 'Yes' : 'No'}}
-                                        </mat-slide-toggle>
-                                        
-                                    </div>
                                 </div>
                                 <!-- Bulk Item, Vehicle Type  -->
                                 <div class="w-full pt-0 flex flex-row justify-between">
@@ -737,6 +833,69 @@
                                 </div> -->
                             </div>
                         </div>
+
+                        <!-- Special notes  -->
+                        <div class="flex flex-col flex-wrap py-1 border-t px-2 w-full">
+                            <!-- Special notes slider and button & field -->
+                            <div class="w-full sm:w-1/2 py-2 flex flex-row justify-between">
+                                <!-- Slider and radio button  -->
+                                <div class="flex flex-col">
+                                    <span class="mb-2 sm:mb-2 font-medium leading-tight">Customise Special Instruction
+                                        <mat-icon
+                                            matTooltip="Do you want to customise the special instruction?"
+                                            class="transform scale-75"
+                                            [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                        </mat-icon>
+                                    </span>
+                                    <!-- Slider and radio button  -->
+                                    <div class="mt-0 flex items-center justify-between w-full">
+                                        <!-- Slider  -->
+                                        <mat-slide-toggle
+                                            [formControlName]="'isCustomNote'"
+                                            [color]="'primary'"
+                                            class="pr-2"
+                                            (change)="( addProductForm.get('step1').get('isCustomNote').value === true ) ? addProductForm.get('step1').get('isNoteOptional').setValue(true) 
+                                                : addProductForm.get('step1').get('customNote').setValue(null); addProductForm.get('step1').get('isNoteOptional').setValue(true)"
+                                            >
+                                            {{addProductForm.get('step1').get('isCustomNote').value === true ? 'Yes' : 'No'}}
+                                        </mat-slide-toggle>
+                                        <!-- *ngIf="selectedProductForm.get('isVariants').value === true" -->
+                                        <!-- Radio button  -->
+                                        <div *ngIf="addProductForm.get('step1').get('isCustomNote').value === true" class="pl-6">
+                                            <mat-radio-group
+                                                class="flex flex-row"
+                                                [color]="'primary'"
+                                                [formControlName]="'isNoteOptional'">
+                                                <mat-radio-button
+                                                    class="ml-2"
+                                                    [value]="true">
+                                                    Optional
+                                                </mat-radio-button>
+                                                <mat-radio-button
+                                                    class="ml-4"
+                                                    [value]="false">
+                                                    Mandatory
+                                                </mat-radio-button>
+                                            </mat-radio-group>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Custom note field  -->
+                            <div *ngIf="addProductForm.get('step1').get('isCustomNote').value === true">
+                                <mat-form-field class="w-full lg:w-1/2 pt-2" floatLabel="always">
+                                    <textarea
+                                        matInput
+                                        [formControlName]="'customNote'"
+                                        placeholder="Insert the custom special instruction (not more than 100 characters)"
+                                        [rows]="full"
+                                        maxlength="100"
+                                        class="h-8"
+                                        autocomplete="disabled"
+                                        matTextareaAutosize></textarea>
+                                </mat-form-field>
+                            </div>
+                        </div>
                         <!-- <div class="flex flex-col gt-xs:flex-row">
                             <mat-form-field class="flex-auto gt-xs:pr-3">
                                 <mat-select
@@ -944,10 +1103,10 @@
                                             </div>
                                         </div>
                                         <!-- List of variants -->
-                                        <div class="h-44 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
+                                        <div class="h-42 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
                                             <!-- Variants -->
                                             <ng-container>
-                                                <div class="flex flex-col p-4 min-h-30 h-30 mb-2 space-y-2">
+                                                <div class="flex flex-col p-4 min-h-30 h-30 mb-0 space-y-2">
                                                     <ng-container *ngIf="filteredProductVariants.length; else productVariantsBlank">
                                                         <ng-container *ngFor="let variant of filteredProductVariants; let i = index; trackBy: trackByFn">
                                                             <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full">
@@ -1017,7 +1176,7 @@
                                     <span class="mt-2 mb-px font-medium leading-tight">Variant Options</span>
                                     <div class="w-full mt-1 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-auto">
                                         <!-- Variants Available -->
-                                        <div class="h-34 m-2 leading-none overflow-y-auto border-gray-300 dark:border-gray-500">
+                                        <div class="h-34 min-h-8 m-2 leading-none overflow-y-auto border-gray-300 dark:border-gray-500">
                                             <div *ngIf="filteredProductVariants.length > 0">
                                                 <div *ngFor="let variant of filteredProductVariants; let i = index; trackBy: trackVariant">
                                                     <span class="w-full mb-px font-small leading-tight">{{variant.name}}</span>

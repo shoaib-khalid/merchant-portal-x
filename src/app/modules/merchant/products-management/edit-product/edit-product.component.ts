@@ -54,37 +54,34 @@ import { MatPaginator } from '@angular/material/paginator';
                 height: 80vh;
 
                 @screen sm {
-                    max-height: 455px;
+                    max-height: 560px;
                     height: 75vh;
                 }
                 // overflow-y: auto;
             }
-            // .ql-container {
-            // height: 60% !important;
-            // }
             :host ::ng-deep .ql-container .ql-editor {
-                min-height: 131px;
-                max-height: 131px;
-                height: 131px;
+                min-height: 87px;
+                max-height: 87px;
+                height: 87px;
             }
 
             // variant section
 
             .variant-details-grid {
                 height: 62vh;
-                max-height: 350px;
+                max-height: 468px;
             }
 
             // combo section
             
             .add-product-list {
                 height: 21vh;
-                max-height: 150px;
+                max-height: 194px;
             }
 
             .combo-details-grid {
                 height: 60vh;
-                max-height: 370px;
+                max-height: 470px;
             }
 
             .option-grid {
@@ -321,6 +318,9 @@ export class EditProductComponent implements OnInit, OnDestroy
                 productVariants  : this._formBuilder.array([]),
                 isBulkItem       : [false],
                 vehicleType      : [''],
+                isCustomNote     : [false],
+                isNoteOptional   : [true],
+                customNote       : [''],
                 // form completion
                 valid            : [false]
             }),
@@ -605,6 +605,10 @@ export class EditProductComponent implements OnInit, OnDestroy
         this.addProductForm.get('step1').get('price').setValue(product.productInventories[0].price);
         this.addProductForm.get('step1').get('availableStock').setValue(this.totalInventories(product.productInventories));
 
+        if (this.addProductForm.get('step1').get('customNote').value){
+            this.addProductForm.get('step1').get('isCustomNote').setValue(true)
+        }
+        
         // disable the input if product has variants
         if (product.productVariants.length > 0) {
             this.addProductForm.get('step1').get('sku').disable();
@@ -1403,7 +1407,7 @@ export class EditProductComponent implements OnInit, OnDestroy
         const step1FormGroup = this.addProductForm.get('step1') as FormGroup;
         
         // Get the product object
-        const { sku, price, quantity, ...product} = step1FormGroup.getRawValue();
+        const { sku, price, quantity, isCustomNote, ...product} = step1FormGroup.getRawValue();
         
         
         product.seoName = product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
