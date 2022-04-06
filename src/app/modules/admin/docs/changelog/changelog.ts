@@ -9,6 +9,20 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 export class ChangelogComponent
 {
     changelog: any[] = [
+        //v1.0.3
+        {
+            version    : 'v1.0.3',
+            releaseDate: 'Apr 6, 2022',
+            changes    : [
+                {
+                    type: 'Added',
+                    list: [
+                        '(StoreSettings) KB-1364 Add Maps to the delivery details',
+                        '(ProductManagement) KB-1387 Users are now able to customise the special instruction for every product'
+                    ]
+                }
+            ]
+        },
         //v1.0.2
           {
             version    : 'v1.0.2',

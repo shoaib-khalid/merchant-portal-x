@@ -20,7 +20,7 @@ configProdJson:
               "deliveryService"     : "https://api.symplified.it/delivery-service/v1",
               "paymentService"      : "https://api.symplified.it/payment-service/v1"
           },
-          "storeFrontDomain"        : ".symplified.ai",
+          "storeFrontDomain"        : ".symplified.services",
           "logging": 0
       }
   volumeMount:
@@ -35,7 +35,7 @@ fullnameOverride: ""
 image:
   pullPolicy: Always
   repository: kalsym/merchant-portal-x
-  tag: 1.0.2
+  tag: 1.0.3
 imagePullSecrets:
 - name: kalsym-docker-hub
 ingress:
