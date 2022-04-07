@@ -605,8 +605,8 @@ export class EditProductComponent implements OnInit, OnDestroy
         this.addProductForm.get('step1').get('price').setValue(product.productInventories[0].price);
         this.addProductForm.get('step1').get('availableStock').setValue(this.totalInventories(product.productInventories));
 
-        if (this.addProductForm.get('step1').get('customNote').value){
-            this.addProductForm.get('step1').get('isCustomNote').setValue(true)
+        if (this.addProductForm.get('step1').get('customNote').value || this.addProductForm.get('step1').get('isNoteOptional').value === false ){
+            this.addProductForm.get('step1').get('isCustomNote').setValue(true);
         }
         
         // disable the input if product has variants
@@ -1223,10 +1223,10 @@ export class EditProductComponent implements OnInit, OnDestroy
 
 
         // Return and throw warning dialog if image file size is big
-        let maxSize = 2097152;
+        let maxSize = 1048576;
         var maxSizeInMB = (maxSize / (1024*1024)).toFixed(2);
         
-        if (fileList[0].size > maxSize ){
+        if (fileList[0].size > maxSize ) {
             // Show a success message (it can also be an error message)
             const confirmation = this._fuseConfirmationService.open({
                 title  : 'Image size limit',

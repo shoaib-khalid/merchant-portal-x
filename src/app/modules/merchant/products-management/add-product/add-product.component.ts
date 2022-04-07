@@ -791,10 +791,10 @@ export class AddProductComponent implements OnInit, OnDestroy
         
 
         // Return and throw warning dialog if image file size is big
-        let maxSize = 2097152;
+        let maxSize = 1048576;
         var maxSizeInMB = (maxSize / (1024*1024)).toFixed(2);
         
-        if (fileList[0].size > maxSize ){
+        if (fileList[0].size > maxSize ) {
             // Show a success message (it can also be an error message)
             const confirmation = this._fuseConfirmationService.open({
                 title  : 'Image size limit',
