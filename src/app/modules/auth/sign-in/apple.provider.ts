@@ -10,13 +10,16 @@ export class AppleLoginProvider extends BaseLoginProvider {
   public static readonly PROVIDER_ID: string = 'APPLE';
   protected auth2: any;
   userServiceUrl:string;
+  merchantPortal:string;
+
 
   constructor(
     private clientId: string,
     private _initOptions: any = { scope: 'name email' }
   ) {
     super();
-    this.userServiceUrl = AppConfig.settings.apiServer.userService + '/clients/applecallback';
+    this.merchantPortal = AppConfig.settings.merchantDomain;
+    this.userServiceUrl = AppConfig.settings.apiServer.userService + '/clients/applecallback/'+this.merchantPortal;
   }
 
   public initialize(): Promise<void> {

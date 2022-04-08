@@ -10,6 +10,8 @@
         "reportService"         : "https://api.symplified.it/report-service/v1",
         "deliveryService"       : "https://api.symplified.it/delivery-service/v1"
     },
-    "storeFrontDomain": ".symplified.services",
+    "storeFrontDomain"          : ".dev-my.symplified.ai",
+    "marketplaceDomain"         : "customer.dev-my.symplified.ai",
+    "merchantPortalDomain"      : "merchant.symplified.it",
     "logging": 0
 }

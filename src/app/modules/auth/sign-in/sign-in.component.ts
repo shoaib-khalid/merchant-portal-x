@@ -43,7 +43,7 @@ export class AuthSignInComponent implements OnInit
     //validate Payload
     validateOauthRequest : ValidateOauthRequest;
 
-    displaySocialLogin :boolean= false;
+    displaySocialLogin :boolean= true;
 
     /**
      * Constructor
