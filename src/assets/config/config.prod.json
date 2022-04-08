@@ -11,6 +11,6 @@
         "deliveryService"       : "https://api.symplified.biz/delivery-service/v1"
     },
     "storeFrontDomain":".symplified.store",
-    "merchantDomain": "merchant.symplified.biz",
+    "merchantPortalDomain": "merchant.symplified.biz",
     "logging": 0
 }

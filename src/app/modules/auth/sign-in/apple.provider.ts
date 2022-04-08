@@ -18,7 +18,7 @@ export class AppleLoginProvider extends BaseLoginProvider {
     private _initOptions: any = { scope: 'name email' }
   ) {
     super();
-    this.merchantPortal = AppConfig.settings.merchantDomain;
+    this.merchantPortal = AppConfig.settings.merchantPortalDomain;
     this.userServiceUrl = AppConfig.settings.apiServer.userService + '/clients/applecallback/'+this.merchantPortal;
   }
 
