@@ -54,14 +54,8 @@ export class SharedBackgroundComponent implements OnInit
             .subscribe((platform: Platform) => {
                 if (platform) {
                     this.platform = platform;
-                    
-                    if (this.platform.id === "easydukan") {
-                        this.countryCode = "PAK"
-                    } else if (this.platform.id === "symplified") {
-                        this.countryCode = "MYS"
-                    } else {
-                        console.error("Invalid platform id");
-                    }
+           
+                    this.countryCode = this.platform.country;
 
                     this._storesService.getStoreTop(this.countryCode)
                         .subscribe((response)=>{

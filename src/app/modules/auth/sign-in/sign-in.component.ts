@@ -82,13 +82,9 @@ export class AuthSignInComponent implements OnInit
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((platform: Platform) => {
                 this.platform = platform;
-                if (this.platform.id) {
-  
-                    this.countryCode = this.platform.id === 'symplified'?'MYS':this.platform.id === 'easydukan'?'PAK':null;
 
-                } else {
-                    this.countryCode = null
-                }
+                this.countryCode = this.platform.country;
+
             });
         
         // We need to check first the location before we proceed to send the payload

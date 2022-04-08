@@ -113,82 +113,50 @@ export class PlatformService
         let subDomainName = sanatiseUrl.split('.')[0];
         this.url.subDomainName = subDomainName;
         
-        return this._platform.pipe(
-            take(1),
-            map((platform) => {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._authService.publicToken;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;        
 
-                let platformSlug;
-                let platformId;
-                let platformName;
-                let platformLogo;
-                let platformLogoDark;
-                let platformUrl;
-                if (this.url.domain === 'merchant.symplified.it') {
-                    // Staging Symplified
-                    platformId = "symplified";
-                    platformName = "SYMplified.biz";
-                    platformSlug = "symplified-staging";
-                    platformLogo = "logo_symplified_bg-removebg.png";
-                    platformLogoDark = "logo_symplified_bg-removebg.png";
-                } else if (this.url.domain === 'merchant.symplified.biz') {
-                    // Production Symplified
-                    platformId = "symplified";
-                    platformName = "SYMplified.biz";
-                    platformSlug = "symplified-production";
-                    platformLogo = "logo_symplified_bg-removebg.png";
-                    platformLogoDark = "logo_symplified_bg-removebg.png";
-                } else if (this.url.domain === 'merchant.symplified.test') {
-                    // Development Symplified
-                    platformId = "symplified";
-                    platformName = "SYMplified.biz";
-                    platformSlug = "symplified-development";
-                    platformLogo = "logo_symplified_bg-removebg.png";
-                    platformLogoDark = "logo_symplified_bg-removebg.png";
-                } else if (this.url.domain === 'merchant2.symplified.it') {
-                    // Staging Easydukan
-                    platformId = "easydukan";
-                    platformName = "EasyDukan";
-                    platformSlug = "easydukan-staging";
-                    platformLogo = "logo_easydukan_bg-removebg.png";
-                    platformLogoDark = "logo_easydukan_bg-removebg-dark.png";
-                } else if (this.url.domain === 'merchant.easydukan.co') {
-                    // Production Easydukan
-                    platformId = "easydukan";
-                    platformName = "EasyDukan";
-                    platformSlug = "easydukan-production";
-                    platformLogo = "logo_easydukan_bg-removebg.png";
-                    platformLogoDark = "logo_easydukan_bg-removebg-dark.png";
-                } else if (this.url.domain === 'merchant.easydukan.test') {
-                    // Development Easydukan
-                    platformId = "easydukan";
-                    platformName = "EasyDukan";
-                    platformSlug = "easydukan-development";
-                    platformLogo = "logo_easydukan_bg-removebg.png";
-                    platformLogoDark = "logo_easydukan_bg-removebg-dark.png";
-                } else {
-                    console.error("Unregistered domain name", this.url.domainName)
-                }
-                
-                let newPlatform = {
-                    id: platformId,
-                    slug: platformSlug,
-                    name: platformName,
-                    logo: platformLogo,
-                    logoDark: platformLogoDark
-                };
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params:{
+                domain:this.url.domain
+            }
+        };
+        
+        return this._httpClient.get<any>(productService + '/platformconfig', header)
+            .pipe(
+                tap((response) => {
+                    
+                    this._logging.debug("Response from StoresService (Before Reconstruct)",response);
 
-                // set this
-                this.platformControl.setValue(newPlatform);
+                    response["data"].map((res)=>{
+                            let newPlatform = {
+                            id: res.platformId,
+                            name: res.platformName,
+                            logo: res.platformLogo,
+                            logoDark: res.platformLogoDark,
+                            country: res.platformCountry,
+                            favicon16:res.platformFavIcon,
+                            favicon32:res.platformFavIcon32,
+                            gacode:res.gaCode,
+                        };
+                        
+                    // set this
+                    this.platformControl.setValue(newPlatform);
 
-                // Update the store
-                this._platform.next(newPlatform);
+                    // Update the store
+                    this._platform.next(newPlatform);
 
-                this._logging.debug("Response from PlatformsService (Set)", newPlatform);
+                    this._logging.debug("Response from PlatformsService (Set)", newPlatform);
 
-                // Return the store
-                return newPlatform;
-            })
-        );
+                    // Return the store
+                    return newPlatform;
+                    })
+
+               
+                })
+            );
     }
 
     /**

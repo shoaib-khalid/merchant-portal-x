@@ -64,13 +64,9 @@ export class AppleLoginComponent
                 .pipe(
                     map((resp)=>{
                         this.platform = resp;
-                        if(this.platform.id){
-                            this.countryCode = this.platform.id === 'symplified'?'MYS':this.platform.id === 'easydukan'?'PAK':null;
-                        }
-                        else{
-                            this.countryCode = null
-                        }
                         
+                        this.countryCode = this.platform.country;
+
                         this.validateOauthRequest = new ValidateOauthRequest();
                         this.validateOauthRequest.country = this.countryCode;
                         this.validateOauthRequest.loginType = "APPLE";
