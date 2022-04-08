@@ -9,6 +9,25 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 export class ChangelogComponent
 {
     changelog: any[] = [
+        //v1.0.4
+        {
+            version    : 'v1.0.4',
+            releaseDate: 'Apr 8, 2022',
+            changes    : [
+                {
+                    type: 'Added',
+                    list: [
+                        '(Sign In) Enable Google, Facebook, Apple login',
+                    ]
+                },
+                {
+                    type: 'Fix',
+                    list: [
+                        '(Product Management) Change add product image size limit warning dialog from 2MB to 1MB'
+                    ]
+                }
+            ]
+        },
         //v1.0.3
         {
             version    : 'v1.0.3',
