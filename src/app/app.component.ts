@@ -47,26 +47,10 @@ export class AppComponent
                     // set title
                     this._titleService.setTitle(this.platform.name + " - Merchant Portal");
     
-                    if (this.platform.id === "symplified") {
-                        // set icon
-                        this.favIcon16.href = 'assets/branding/symplified/favicon/favicon-16x16.png';
-                        this.favIcon32.href = 'assets/branding/symplified/favicon/favicon-32x32.png';
-
-                        // set GA code
-                        // googleAnalyticId = "";
-                    } else if (this.platform.id === "easydukan") {
-                        // set icon
-                        this.favIcon16.href = 'assets/branding/easydukan/favicon/favicon-16x16.png';
-                        this.favIcon32.href = 'assets/branding/easydukan/favicon/favicon-32x32.png';
-
-                        // set GA code
-                        googleAnalyticId = "UA-216100220-1";
-                    } else {
-                        console.error("Unregistered platform");
-                        
-                        this.favIcon16.href = 'favicon-16x16.png';
-                        this.favIcon32.href = 'favicon-32x32.png';
-                    } 
+                    // set GA code
+                    googleAnalyticId = this.platform.gacode;
+                    this.favIcon16.href = this.platform.favicon16;
+                    this.favIcon32.href = this.platform.favicon32;
 
                     // Set Google Analytic Code
                     if (googleAnalyticId) {

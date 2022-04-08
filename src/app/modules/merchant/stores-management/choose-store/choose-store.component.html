@@ -155,7 +155,7 @@
                                         <img *ngIf="displayStoreLogo(store); else defaultLogo" class="max-h-20 my-4 w-auto" [src]="displayStoreLogo(store)" alt="">
                                     </div>
                                     <ng-template #defaultLogo>
-                                        <img class="max-h-20 my-4 w-auto" [src]="'assets/images/logo/' + platform.logo" alt="">
+                                        <img class="max-h-20 my-4 w-auto" [src]="platform.logo" alt="">
                                     </ng-template>
                                 </div>
                                 <!-- Store title & description -->

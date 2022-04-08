@@ -77,18 +77,9 @@ export class AuthSignUpComponent implements OnInit
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((platform: Platform) => {
                 this.platform = platform;
-                switch (this.platform.id) {
-                    // set to PAK
-                    case 'easydukan':
-                        this.signUpForm.get('countryId').patchValue('PAK')
-                        break;
-                    // set to MYS
-                    case 'symplified':
-                        this.signUpForm.get('countryId').patchValue('MYS')
-                        break;
-                    default:
-                        break;
-                }
+
+                this.signUpForm.get('countryId').patchValue(this.platform.country)
+    
             });
 
         // get value for country list
