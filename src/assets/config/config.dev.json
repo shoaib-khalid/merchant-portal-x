@@ -12,6 +12,6 @@
     },
     "storeFrontDomain"          : ".dev-my.symplified.ai",
     "marketplaceDomain"         : "customer.dev-my.symplified.ai",
-    "merchantPortalDomain"      : "merchant.symplified.it",
+    "merchantPortalDomain"      : "merchant.dev-my.symplified.ai",
     "logging": 0
 }

@@ -22,7 +22,7 @@ configProdJson:
           },
           "storeFrontDomain"          : ".dev-my.symplified.ai",
           "marketplaceDomain"         : "customer.dev-my.symplified.ai",
-          "merchantPortalDomain"      : "merchant.symplified.it",
+          "merchantPortalDomain"      : "merchant.dev-my.symplified.ai",
           "logging": 0
       }
   volumeMount:
@@ -45,14 +45,14 @@ ingress:
   className: ""
   enabled: true
   hosts:
-  - host: merchant.symplified.it
+  - host: merchant.dev-my.symplified.ai
     paths:
     - path: /
       pathType: ImplementationSpecific
   tls:
   - hosts:
-    - merchant.symplified.it
-    secretName: secret-tls-it
+    - merchant.dev-my.symplified.ai
+    secretName: secret-tls-ai
 nameOverride: ""
 nodeSelector: {}
 podAnnotations: {}
