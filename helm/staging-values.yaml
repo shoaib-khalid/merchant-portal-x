@@ -9,7 +9,9 @@ configProdJson:
     config.prod.json: |
       {
           "env": {
-              "name": "dev"
+              "name": "staging",
+              "impersonate": false,
+              "impersonateUrl": null
           },
           "apiServer": {
               "flowBuilderService"  : "https://api.symplified.it/flow-builder/v1",

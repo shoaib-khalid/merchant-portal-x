@@ -1,8 +1,8 @@
 {
     "env": {
-        "name": "prod",
-        "impersonate": false,
-        "impersonateUrl": null
+        "name": "qa",
+        "impersonate": true,
+        "impersonateUrl": ".deliverin.my"
     },
     "apiServer": {
         "flowBuilderService"    : "https://api.symplified.biz/flow-builder/v1",
