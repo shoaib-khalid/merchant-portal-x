@@ -375,7 +375,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 switchMap((query) => {
                     this.closeDetails();
                     this.isLoading = true;
-                    return this._inventoryService.getProducts(0, 10, 'name', 'asc', query, 'ACTIVE,INACTIVE' , this.filterByCatId);
+                    return this._inventoryService.getProducts(0, 10, 'name', 'asc', query, 'ACTIVE,INACTIVE,OUTOFSTOCK' , this.filterByCatId);
                 }),
                 map(() => {
                     this.isLoading = false;
@@ -404,7 +404,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                     this.filterByCatId = catId
                     this.isLoading = true;
                     
-                    return this._inventoryService.getProducts(0, 10, 'name', 'asc', '', 'ACTIVE,INACTIVE', this.filterByCatId);
+                    return this._inventoryService.getProducts(0, 10, 'name', 'asc', '', 'ACTIVE,INACTIVE,OUTOFSTOCK', this.filterByCatId);
                 }),
                 map(() => {
                     this.isLoading = false;
@@ -451,7 +451,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                     switchMap(() => {
                         this.closeDetails();
                         this.isLoading = true;
-                        return this._inventoryService.getProducts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, '', 'ACTIVE,INACTIVE', this.filterByCatId);
+                        return this._inventoryService.getProducts(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, '', 'ACTIVE,INACTIVE,OUTOFSTOCK', this.filterByCatId);
                     }),
                     map(() => {
                         this.isLoading = false;

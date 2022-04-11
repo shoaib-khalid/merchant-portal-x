@@ -7,7 +7,7 @@ import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { ChooseStoreService } from 'app/modules/merchant/stores-management/choose-store/choose-store.service';
 import { StoreCategory, Store, StorePagination } from 'app/core/store/store.types';
-import { InventoryService } from 'app/core/product/inventory.service'
+import { InventoryService } from 'app/core/product/inventory.service';
 import { StoresService } from 'app/core/store/store.service';
 import { MatSort } from '@angular/material/sort';
 import { FormControl } from '@angular/forms';

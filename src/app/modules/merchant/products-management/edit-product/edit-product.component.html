@@ -319,6 +319,8 @@
                                             [formControlName]="'status'"
                                             (selectionChange)="addProductForm.get('step1').get('status').patchValue(statusSelector.value)"
                                             (selectionChange)="statusSelector.value === 'OUTOFSTOCK' ? addProductForm.get('step1').get('availableStock').patchValue(0) : ''"
+                                            (selectionChange)="statusSelector.value === 'ACTIVE' && (store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK') ? 
+                                                addProductForm.get('step1').get('allowOutOfStockPurchases').patchValue(true) : ''"
                                             #statusSelector="matSelect"
                                             >
                                             <mat-select-trigger>
@@ -702,7 +704,10 @@
                                         appearance="fill" floatLabel="always"
                                     >
                                         <input
-                                            (input)="(addProductForm.get('step1').get('availableStock').value > 0 && addProductForm.get('step1').get('status').value === 'OUTOFSTOCK') ? addProductForm.get('step1').get('status').patchValue('ACTIVE') : ''"
+                                            (input)="(addProductForm.get('step1').get('availableStock').value > 0 && addProductForm.get('step1').get('status').value === 'OUTOFSTOCK') ? 
+                                                addProductForm.get('step1').get('status').patchValue('ACTIVE') : ''"
+                                            (input)="(addProductForm.get('step1').get('availableStock').value === 0) ? 
+                                                addProductForm.get('step1').get('status').patchValue('OUTOFSTOCK') : ''"
                                             placeholder="Insert current stock"
                                             [formControlName]="'availableStock'"
                                             type="number"

@@ -178,11 +178,17 @@
                                     <div 
                                         *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'"
                                         class="hidden lg:flex items-center">
-                                        <div class="min-w-4" >{{ totalInventories(product.productInventories) }}</div>
+                                        <div class="flex justify-end min-w-5" >{{ totalInventories(product.productInventories) }}</div>
+                                        <!-- No stock -->
+                                        <div
+                                            class="flex items-end ml-2 w-1 h-4 bg-red-200 rounded overflow-hidden"
+                                            *ngIf="totalInventories(product.productInventories) === 0">
+                                            <!-- <div class="flex w-full h-1/3 bg-red-600"></div> -->
+                                        </div>
                                         <!-- Low stock -->
                                         <div
                                             class="flex items-end ml-2 w-1 h-4 bg-red-200 rounded overflow-hidden"
-                                            *ngIf="totalInventories(product.productInventories) >= 0 && totalInventories(product.productInventories) < 20">
+                                            *ngIf="totalInventories(product.productInventories) >= 1 && totalInventories(product.productInventories) < 20">
                                             <div class="flex w-full h-1/3 bg-red-600"></div>
                                         </div>
                                         <!-- Medium stock -->

@@ -5,7 +5,7 @@
         <!-- Title -->
         <div class="text-2xl sm:text-4xl font-extrabold tracking-tight">Discount Banner Management</div>
     </div>
-    <div class="sm:m-10 px-5 overflow-auto">
+    <div class="sm:m-0 px-5 overflow-auto">
         <div class="w-full">
             <!-- <mat-label class="font-medium">Upload File</mat-label> -->
             <div class="my-2"></div>
@@ -90,7 +90,7 @@
 
                         <!-- For single image -->
                         <div class="p-8 border border-gray-300 rounded h-96">
-                            <div *ngIf="this.files.selectedFiles">
+                            <div class="pb-4" *ngIf="this.files.selectedFiles">
                                 <span *ngIf="this.files.selectedImageWidth && this.files.selectedImageHeight" class="block text-sm"><b>Uploaded Image Size</b>: {{ this.files.selectedImageWidth }} x {{ this.files.selectedImageHeight }} pixel </span>
                                 <span class="block text-sm"><b>Recommended Size</b>: {{ this.files.recommendedImageWidth }} x {{ this.files.recommendedImageHeight }} pixel </span>
                             </div>
@@ -110,7 +110,7 @@
             </div> 
         </div>
         <!-- Actions -->
-        <div class="mt-6 pb-8 sm:pb-0 flex items-center justify-end">
+        <div class="mt-4 pb-8 sm:pb-4 flex items-center justify-end">
             <button
                 class="ml-4"
                 mat-flat-button
