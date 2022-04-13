@@ -15,35 +15,35 @@ import { BehaviorSubject } from 'rxjs';
     selector       : 'store-delivery',
     templateUrl    : './store-delivery.component.html',
     styles :[`
-    .map {
-        width: 50vw;
-        height: 50vh;
-    }
-    #pac-input {
-        background-color: #fff;
-        font-family: Roboto;
-        font-size: 15px;
-        font-weight: 300;
-        margin-left: 12px;
-        padding: 0 11px 0 13px;
-        text-overflow: ellipsis;
-        width: 400px;
-      }
-      
-      #pac-input:focus {
-        border-color: #4d90fe;
-      }
-    
-      .pac-controls {
-        padding: 5px 11px;
-        display: inline-block;
-    }
-      
-      .pac-controls label {
-        font-family: Roboto;
-        font-size: 13px;
-        font-weight: 300;
-      }
+        .map {
+            width: 50vw;
+            height: 50vh;
+        }
+        #pac-input {
+            background-color: #fff;
+            font-family: Roboto;
+            font-size: 15px;
+            font-weight: 300;
+            margin-left: 12px;
+            padding: 0 11px 0 13px;
+            text-overflow: ellipsis;
+            width: 400px;
+        }
+        
+        #pac-input:focus {
+            border-color: #4d90fe;
+        }
+        
+        .pac-controls {
+            padding: 5px 11px;
+            display: inline-block;
+        }
+        
+        .pac-controls label {
+            font-family: Roboto;
+            font-size: 13px;
+            font-weight: 300;
+        }
     `],
     encapsulation  : ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -864,11 +864,7 @@ export class StoreDeliveryComponent implements OnInit
         }
     }
 
-    validateForm() {
-
-        console.info("xxx", this.storeDeliveryForm);
-        console.info("xxx", this.storeDeliveryForm.get('deliveryPeriods')['controls']);        
-
+    validateForm() {     
         // Do nothing if the form is invalid
         let BreakException = {};
         try {
