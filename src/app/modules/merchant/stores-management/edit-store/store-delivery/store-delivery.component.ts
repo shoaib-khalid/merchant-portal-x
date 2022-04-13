@@ -255,9 +255,6 @@ export class StoreDeliveryComponent implements OnInit
                                 this.displayLat = this.currentLat;
                                 this.displayLong = this.currentLong;
 
-                                console.log('mahu check',this.currentLat);
-                                
-
                                 this.displayLatitude.next(this.displayLat.toString());
                                 this.displayLongtitude.next(this.displayLong.toString());
 
@@ -276,16 +273,11 @@ export class StoreDeliveryComponent implements OnInit
                             
                             })
         
-                        //hardcode vakue first
-                        console.log('fetch value from server::::::::::::::',this.store);
-                        
                         this.location = {
                             lat: this.displayLat,
                             lng: this.displayLong,
                         };
                         
-                        console.log('location value::::::::::::::',this.location);
-
                         loader.load().then(() => {
                             
                             this.map = new google.maps.Map(document.getElementById("map"), {
@@ -301,100 +293,13 @@ export class StoreDeliveryComponent implements OnInit
                             position: this.location,
                             map: this.map,
                             });
-                    
-                            // Create the search box and link it to the UI element.
-                            const input = document.getElementById("pac-input") as HTMLInputElement;
-                            const searchBox = new google.maps.places.SearchBox(input);
-                            
-                            this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-                    
-                            // Bias the SearchBox results towards current map's viewport.
-                            this.map.addListener("bounds_changed", () => {
-                                searchBox.setBounds(this.map.getBounds() as google.maps.LatLngBounds);
-                            });
-                    
+            
                             //use for when user mark other location
                             let markers: google.maps.Marker[] = [];
-                    
-                            // Listen for the event fired when the user selects a prediction and retrieve
-                            // more details for that place.
-                            searchBox.addListener("places_changed", () => {
-                            const places = searchBox.getPlaces();
-                        
-                                if (places.length == 0) {
-                                    return;
-                                }
-                        
-                                // Clear out the old markers.
-                                markers.forEach((marker) => {
-                                    marker.setMap(null);
-                                });
-                                markers = [];
-                    
-                                // Clear out the init markers.
-                                initialMarker.setMap(null);
-                    
-                                // For each place, get the icon, name and location.
-                                const bounds = new google.maps.LatLngBounds();
-                        
-                                places.forEach((place) => {
-                        
-                                    console.log('Place',place);
-                                    let coordinateStringify = JSON.stringify(place?.geometry?.location);
-                                    let coordinateParse = JSON.parse(coordinateStringify);
-                                    console.log('coordinate1',coordinateParse);
-                        
-                                    this.displayLat = coordinateParse.lat;
-                                    this.displayLong = coordinateParse.lng;
-
-                                    this.displayLatitude.next(coordinateParse.lat);
-                                    this.displayLongtitude.next(coordinateParse.lng);
-
-
-                                    this.location = {
-                                    lat: coordinateParse.lat,
-                                    lng: coordinateParse.lng,
-                                    };
-                        
-                                    this.fullAddress = place.address_components.map((data)=>data.long_name)
-                                    console.log('fullAddress ',this.fullAddress)
-                                
-                                    if (!place.geometry || !place.geometry.location) {
-                                    console.log("Returned place contains no geometry");
-                                    return;
-                                    }
-                            
-                                    // const icon = {
-                                    //   url: place.icon as string,
-                                    //   size: new google.maps.Size(71, 71),
-                                    //   origin: new google.maps.Point(0, 0),
-                                    //   anchor: new google.maps.Point(17, 34),
-                                    //   scaledSize: new google.maps.Size(25, 25),
-                                    // };
-                                    console.log('this.map search',this.map);
-                        
-                                    // Create a marker for each place.
-                                    markers.push(
-                                    new google.maps.Marker({
-                                        map:this.map,
-                                        // icon,
-                                        title: place.name,
-                                        position: place.geometry.location,
-                                    })
-                                    );
-                            
-                                    if (place.geometry.viewport) {
-                                    // Only geocodes have viewport.
-                                    bounds.union(place.geometry.viewport);
-                                    } else {
-                                    bounds.extend(place.geometry.location);
-                                    }
-                                });
-                                this.map.fitBounds(bounds);
-                            });
-                    
+                          
                             // Configure the click listener.
                             this.map.addListener("click", (event) => {
+                                this.storeDeliveryForm.markAsDirty();
 
                                 //to be display coordinate
                                 let coordinateClickStringify = JSON.stringify(event.latLng);
@@ -404,9 +309,7 @@ export class StoreDeliveryComponent implements OnInit
                                     lat: coordinateClickParse.lat,
                                     lng: coordinateClickParse.lng,
                                 };
-                                console.log('new location::::',this.location);
 
-                    
                                 // Clear out the old markers.
                                 markers.forEach((marker) => {
                                 marker.setMap(null);
@@ -427,6 +330,62 @@ export class StoreDeliveryComponent implements OnInit
                                 this.displayLatitude.next(coordinateClickParse.lat);
                                 this.displayLongtitude.next(coordinateClickParse.lng);
                             
+                            });
+
+                            //Trigger when click Relocate
+                            let geocoder: google.maps.Geocoder;
+                            const relocatebutton = document.getElementById("relocate-button") as HTMLInputElement;
+                            // const submitButton =  document.getElementById("submit-btn");
+                            geocoder = new google.maps.Geocoder();
+                            relocatebutton.addEventListener("click", (e) =>{
+                                geocoder
+                                .geocode({ address: this.storeDeliveryForm.get('address').value})
+                                .then((result) => {
+                                    const { results } = result;
+                        
+                                    //to be display coordinate
+                                    let coordinateAddressStringify = JSON.stringify(results[0].geometry.location);
+                                    let coordinateAddressParse = JSON.parse(coordinateAddressStringify);
+                        
+                                    this.location = {
+                                    lat: coordinateAddressParse.lat,
+                                    lng: coordinateAddressParse.lng,
+                                    };
+
+                                    //to display for location code
+                                    this.displayLatitude.next(coordinateAddressParse.lat);
+                                    this.displayLongtitude.next(coordinateAddressParse.lng);
+                        
+                                    // Clear out the old markers.
+                                    markers.forEach((marker) => {
+                                        marker.setMap(null);
+                                    });
+                                    markers = [];
+                        
+                                    // Clear out the init markers1.
+                                    initialMarker.setMap(null);
+                        
+                                    // Create a marker for each place.
+                                    markers.push(
+                                        new google.maps.Marker({
+                                        map:this.map,
+                                        // icon,
+                                        position: results[0].geometry.location,
+                                        })
+                                    );
+                                    const bounds1 = new google.maps.LatLngBounds();
+                        
+                                    bounds1.extend(results[0].geometry.location);
+                        
+                                    this.map.fitBounds(bounds1);
+                                    
+                                    return results;
+                                })
+                                .catch((e) => {
+                                    alert("Geocode was not successful for the following reason: " + e);
+                                });
+
+                                
                             });
                     
                     
@@ -713,10 +672,6 @@ export class StoreDeliveryComponent implements OnInit
         storeBody.latitude =this.location.lat.toString();
         storeBody.longitude =this.location.lng.toString();
 
-        
-        console.log('storeBody:::::::::::::',storeBody);
-
-        
         
         this._storesService.update(storeId, storeBody)
             .subscribe(()=>{

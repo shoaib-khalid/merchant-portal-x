@@ -10,33 +10,12 @@
                         <div class="text-secondary">Choose your type of delivery types to provide to the customer of delivery details.</div>
                     </div>
 
-                    <input
-                    id="pac-input"
-                    class="pac-controls"
-                    type="text"
-                    (keydown.enter)="$event.preventDefault()"
-                    placeholder="Search Box"
-                  />
-                  
-                  <div class="map w-full" id="map">
-              
-                  </div>
-
                     <div class="grid grid-cols-4 gap-6 w-full mt-4">
                         <!-- Pickup Address -->
                         <div class="col-span-4">
                             <div class="flex w-full flex-row justify-between">
                                 <div>
                                     <mat-label class="font-medium">Address</mat-label>
-                                </div>
-             
-                                <div class="flex flex-row">
-                                    <div>
-                                        Location Code :    
-                                    </div>
-                                    <div class="text-green-700">
-                                        {{displayLatitude | async}} , {{displayLongtitude | async}}
-                                    </div>
                                 </div>
                         
                             </div>
@@ -149,27 +128,56 @@
                                 </mat-error>
                             </mat-form-field>
                         </div>
+               
+                    </div>
+                    <!-- Actions -->
+                    <div class="flex flex-row justify-between my-3 items-center">
+                        <div class="w-full pt-8 sm:pt-0">
+                            <div class="text-xl">Pin Location</div>
+                            <div class="text-secondary">Mark your location.</div>
+                        </div>    
+                        <button
+                            id="relocate-button"
+                            class="p-2 rounded-full"
+                            [ngClass]="storeDeliveryForm.pristine || storeDeliveryForm.invalid?'bg-gray-300 text-gray-400':'bg-primary text-white'"
+                            type="button"
+                            [disabled]="storeDeliveryForm.pristine || storeDeliveryForm.invalid"
+                            >Relocate
+                        </button>
+                    </div>
+   
+                    <div class="map w-full" id="map">
+                
+                    </div>
 
-                        <!-- Store Fullfillment -->
-                        <div class="col-span-4">
-                            <div class="flex flex-col w-full">
-                                <mat-label class="font-medium">Store Fulfilment</mat-label>
-                                <div class="flex flex-col sm:flex-row">
-                                    <div class="flex w-full lg:w-2/4">
-                                        <mat-checkbox class="" [formControlName]="'allowStorePickup'" [checked]="deliveryFulfilment[3].selected">{{deliveryFulfilment[3].label}}</mat-checkbox>
-                                        <mat-icon
-                                            [matTooltip]="deliveryFulfilment[3].tooltip"
-                                            class="flex flex-wrap transform scale-75"
-                                            [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                        </mat-icon>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="flex flex-row mt-2">
+                        <div>
+                            Location Code :    
+                        </div>
+                        <div class="text-green-700">
+                            {{displayLatitude | async}} , {{displayLongtitude | async}}
                         </div>
                     </div>
 
+                    <!-- Store Fullfillment -->
+                    <div class="col-span-4 mt-4">
+                    <div class="flex flex-col w-full">
+                        <mat-label class="font-medium">Store Fulfilment</mat-label>
+                        <div class="flex flex-col sm:flex-row">
+                            <div class="flex w-full lg:w-2/4">
+                                <mat-checkbox class="" [formControlName]="'allowStorePickup'" [checked]="deliveryFulfilment[3].selected">{{deliveryFulfilment[3].label}}</mat-checkbox>
+                                <mat-icon
+                                    [matTooltip]="deliveryFulfilment[3].tooltip"
+                                    class="flex flex-wrap transform scale-75"
+                                    [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                </mat-icon>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                     <!-- Divider -->
-                    <div class="my-10 border-t"></div>
+                    <div class="my-4 border-t"></div>
             
                     <!-- Section -->
                     <div class="w-full">

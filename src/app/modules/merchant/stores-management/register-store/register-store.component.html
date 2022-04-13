@@ -672,6 +672,35 @@
                                             </mat-form-field>
                                         </div>
 
+                                        <!-- Actions -->
+                                        <div class="flex flex-row justify-between my-3 items-center">
+                                            <div class="w-full pt-8 sm:pt-0">
+                                                <div class="text-xl">Pin Location</div>
+                                                <div class="text-secondary">Mark your location.</div>
+                                            </div>    
+                                            <button
+                                                id="relocate-button"
+                                                class="p-2 rounded-full"
+                                                [ngClass]="createStoreForm.get('step3').get('address').value === ''?'bg-gray-300 text-gray-400':'bg-primary text-white'"
+                                                type="button"
+                                                [disabled]="createStoreForm.get('step3').get('address').value === ''"
+                                                >Relocate
+                                            </button>
+                                        </div>
+
+                                        <div class="map w-full" id="map-create">
+                
+                                        </div>
+                    
+                                        <div class="flex flex-row mt-2">
+                                            <div>
+                                                Location Code :    
+                                            </div>
+                                            <div class="text-green-700">
+                                                {{displayLatitude | async}} , {{displayLongtitude | async}}
+                                            </div>
+                                        </div>
+
                                         <!-- Delivery Fullfillment -->
                                         <div class="flex flex-col w-full mb-3">
                                             <div class="flex flex-col w-full">

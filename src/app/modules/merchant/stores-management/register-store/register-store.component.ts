@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnInit, ViewChild, ViewEncapsulation } fr
 import { FormArray, FormBuilder, FormGroup, NgForm, ValidationErrors, Validators } from '@angular/forms';
 import { fuseAnimations } from '@fuse/animations';
 import { RegisterStoreValidationService } from 'app/modules/merchant/stores-management/register-store/register-store.validation.service';
-import { Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { StoresService } from 'app/core/store/store.service';
 import { Store, StoreRegionCountries, CreateStore, StoreAssets, StoreDeliveryProvider, StoreDeliveryPeriod } from 'app/core/store/store.types';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -22,11 +22,19 @@ import { takeUntil } from 'rxjs/operators';
 import { Platform } from 'app/core/platform/platform.types';
 import { PlatformService } from 'app/core/platform/platform.service';
 import { AuthService } from 'app/core/auth/auth.service';
+import { Loader } from '@googlemaps/js-api-loader';
 
 @Component({
     selector     : 'register-store-page',
     templateUrl  : './register-store.component.html',
-    styles       : ['.ql-container { height: 156px; }'],
+    styles       : [
+        `.ql-container { height: 156px; }
+        .map {
+            width: 50vw;
+            height: 50vh;
+        }
+        `
+    ],
     encapsulation: ViewEncapsulation.None,
     animations   : fuseAnimations
 })
@@ -121,6 +129,20 @@ export class RegisterStoreComponent implements OnInit
     countryCode: string;
     currencySymbol: string;
     dialingCode: string;
+
+    //GOOGLE MAPS
+    private map: google.maps.Map;
+    location :any;
+
+    center!: google.maps.LatLngLiteral;
+  
+    displayLat:any;
+    displayLong:any;
+
+    //string interpolationdoesnt-update-on-eventListener hence need to use behaviour subject
+    displayLatitude: BehaviorSubject<string> = new BehaviorSubject<string>('');
+    displayLongtitude: BehaviorSubject<string> = new BehaviorSubject<string>('');
+
     
     /**
      * Constructor
@@ -723,6 +745,139 @@ export class RegisterStoreComponent implements OnInit
         // set required value that does not appear in register-store.component.html
         let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
         this.createStoreForm.get('clientId').patchValue(clientId);
+
+        //Initialise google maps
+        let loader = new Loader({
+            apiKey: 'AIzaSyCFhf1LxbPWNQSDmxpfQlx69agW-I-xBIw',
+            libraries: ['places']
+            
+            })
+
+        //hardcode value
+        this.displayLat = 0;
+        this.displayLong = 0;
+
+        this.location = {
+            lat: this.displayLat,
+            lng: this.displayLong,
+        };
+
+        this.displayLatitude.next(this.displayLat.toString());
+        this.displayLongtitude.next(this.displayLong.toString());
+        
+        loader.load().then(() => {
+            
+            this.map = new google.maps.Map(document.getElementById("map-create"), {
+                center: this.location,
+                zoom: 15,
+                mapTypeControl:false,
+                streetViewControl:false,//Removing the pegman from map
+                // styles: styles,
+                mapTypeId: "roadmap",
+            })
+    
+            const initialMarker = new google.maps.Marker({
+            position: this.location,
+            map: this.map,
+            });
+
+            //use for when user mark other location
+            let markers: google.maps.Marker[] = [];
+          
+            // Configure the click listener.
+            this.map.addListener("click", (event) => {
+                
+                // this.storeDeliveryForm.markAsDirty();
+                //to be display coordinate
+                let coordinateClickStringify = JSON.stringify(event.latLng);
+                let coordinateClickParse = JSON.parse(coordinateClickStringify);
+        
+                this.location = {
+                    lat: coordinateClickParse.lat,
+                    lng: coordinateClickParse.lng,
+                };
+
+                // Clear out the old markers.
+                markers.forEach((marker) => {
+                marker.setMap(null);
+                });
+                markers = [];
+    
+                // Clear out the init markers1.
+                initialMarker.setMap(null);
+    
+                // Create a marker for each place.
+                markers.push(
+                new google.maps.Marker({
+                    map:this.map,
+                    // icon,
+                    position: event.latLng,
+                })
+                );
+                this.displayLatitude.next(coordinateClickParse.lat);
+                this.displayLongtitude.next(coordinateClickParse.lng);
+            
+            });
+
+            //Trigger when click Relocate
+            let geocoder: google.maps.Geocoder;
+            const relocatebutton = document.getElementById("relocate-button") as HTMLInputElement;
+            // const submitButton =  document.getElementById("submit-btn");
+            geocoder = new google.maps.Geocoder();
+            relocatebutton.addEventListener("click", (e) =>{
+                geocoder
+                .geocode({ address: this.createStoreForm.get('step3').get('address').value})
+                .then((result) => {
+                    const { results } = result;
+        
+                    //to be display coordinate
+                    let coordinateAddressStringify = JSON.stringify(results[0].geometry.location);
+                    let coordinateAddressParse = JSON.parse(coordinateAddressStringify);
+        
+                    this.location = {
+                    lat: coordinateAddressParse.lat,
+                    lng: coordinateAddressParse.lng,
+                    };
+
+                    //to be display at front in string
+                    this.displayLatitude.next(coordinateAddressParse.lat);
+                    this.displayLongtitude.next(coordinateAddressParse.lng);
+        
+                    // Clear out the old markers.
+                    markers.forEach((marker) => {
+                        marker.setMap(null);
+                    });
+                    markers = [];
+        
+                    // Clear out the init markers1.
+                    initialMarker.setMap(null);
+        
+                    // Create a marker for each place.
+                    markers.push(
+                        new google.maps.Marker({
+                        map:this.map,
+                        // icon,
+                        position: results[0].geometry.location,
+                        })
+                    );
+                    const bounds1 = new google.maps.LatLngBounds();
+        
+                    bounds1.extend(results[0].geometry.location);
+        
+                    this.map.fitBounds(bounds1);
+                    
+                    return results;
+                })
+                .catch((e) => {
+                    alert("Geocode was not successful for the following reason: " + e);
+                });
+
+                
+            });
+    
+            
+        });
+        
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -759,6 +914,11 @@ export class RegisterStoreComponent implements OnInit
         createStoreBody["regionCountryId"] = this.createStoreForm.get('step3').get('regionCountryId').value;
         createStoreBody["postcode"] = this.createStoreForm.get('step3').get('postcode').value;
         createStoreBody["regionCountryStateId"] = this.createStoreForm.get('step3').get('regionCountryStateId').value;
+
+        createStoreBody["latitude"] = this.location.lat.toString();
+        createStoreBody["longitude"] = this.location.lng.toString();
+
+
 
         // Disable the form
         this.createStoreForm.disable();
@@ -1054,6 +1214,7 @@ export class RegisterStoreComponent implements OnInit
                     storeId: this.storeId,
                     type: _deliveryType // ADHOC or SCHEDULED or SELF
                 };
+
 
                 this._storesService.postStoreDeliveryDetails(this.storeId, deliveryDetailBody).subscribe(
                     (response) => {
