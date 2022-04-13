@@ -27,35 +27,34 @@ export class AuthSignInComponent implements OnInit
     @ViewChild('signInNgForm') signInNgForm: NgForm;
 
     platform: Platform;
+    signInForm: FormGroup;
     
     alert: { type: FuseAlertType; message: string } = {
         type   : 'success',
         message: ''
     };
-    signInForm: FormGroup;
     showAlert: boolean = false;
 
-    private _unsubscribeAll: Subject<any> = new Subject<any>();
     //display field country
     displayCountryField:boolean = false;
     countryCode : string = '';
 
-    //validate Payload
+    // validate Payload
     validateOauthRequest : ValidateOauthRequest;
-
-    displaySocialLogin :boolean= false;
-
+    
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
+    
     /**
      * Constructor
      */
     constructor(
-        private _activatedRoute: ActivatedRoute,
         private _authService: AuthService,
         private _userService: UserService,
         private _platformsService: PlatformService,
+        private _socialAuthService: SocialAuthService,
+        private _activatedRoute: ActivatedRoute,
         private _formBuilder: FormBuilder,
         private _router: Router,
-        private _socialAuthService: SocialAuthService,
     )
     {
     }
@@ -89,22 +88,6 @@ export class AuthSignInComponent implements OnInit
         
         // We need to check first the location before we proceed to send the payload
         this.signInForm.disable();
-
-        //     //get current location
-        //     {
-        //         //the response status either fail or success
-        //         if(resp.status === "success" && (resp.countryCode === 'MY' || resp.countryCode === 'PK')){
-
-        //             this.displayCountryField = true;
-        //             this.countryCode = resp.countryCode === 'MY'?'MYS':resp.countryCode === 'PK'?'PAK':null;
-
-        //         } else{
-        //             this.displayCountryField = false;
-        //         }
-
-        //         return this.displayCountryField;
-        //     }
-        // );
     
     }
     
@@ -169,8 +152,7 @@ export class AuthSignInComponent implements OnInit
                     // Navigate to the redirect url
                     this._router.navigateByUrl(redirectURL);
                 }
-            },
-            (error) => {
+            }, (error) => {
                 // Re-enable the form
                 this.signInForm.enable();
 

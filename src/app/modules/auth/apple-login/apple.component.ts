@@ -23,14 +23,11 @@ export class AppleLoginComponent
 
     countryCode : string = '';
 
-
     //validate Payload
     validateOauthRequest : ValidateOauthRequest;
 
     platform: Platform;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
-
-
 
     /**
      * Constructor
@@ -62,9 +59,8 @@ export class AppleLoginComponent
             
             this._platformsService.platform$
                 .pipe(
-                    map((resp)=>{
-                        this.platform = resp;
-                        
+                    map((response)=>{
+                        this.platform = response;
                         this.countryCode = this.platform.country;
 
                         this.validateOauthRequest = new ValidateOauthRequest();
