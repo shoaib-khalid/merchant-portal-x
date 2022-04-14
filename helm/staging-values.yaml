@@ -9,22 +9,22 @@ configProdJson:
     config.prod.json: |
       {
           "env": {
-              "name": "staging",
-              "impersonate": false,
-              "impersonateUrl": null
+              "name": "qa",
+              "impersonate": true,
+              "impersonateUrl": ".symplified.biz"
           },
           "apiServer": {
-              "flowBuilderService"  : "https://api.symplified.it/flow-builder/v1",
-              "userService"         : "https://api.symplified.it/user-service/v1",
-              "productService"      : "https://api.symplified.it/product-service/v1",
-              "orderService"        : "https://api.symplified.it/order-service/v1",
-              "reportService"       : "https://api.symplified.it/report-service/v1",
-              "deliveryService"     : "https://api.symplified.it/delivery-service/v1",
-              "paymentService"      : "https://api.symplified.it/payment-service/v1"
+              "flowBuilderService"  : "https://api.symplified.biz/flow-builder/v1",
+              "userService"         : "https://api.symplified.biz/user-service/v1",
+              "productService"      : "https://api.symplified.biz/product-service/v1",
+              "orderService"        : "https://api.symplified.biz/order-service/v1",
+              "reportService"       : "https://api.symplified.biz/report-service/v1",
+              "deliveryService"     : "https://api.symplified.biz/delivery-service/v1",
+              "paymentService"      : "https://api.symplified.biz/payment-service/v1"
           },
-          "storeFrontDomain"          : ".dev-my.symplified.ai",
-          "marketplaceDomain"         : "customer.dev-my.symplified.ai",
-          "merchantPortalDomain"      : "merchant.dev-my.symplified.ai",
+          "storeFrontDomain"      : ".deliverin.my",
+          "merchantPortalDomain"  : "merchant.symplified.biz",
+          "marketplaceDomain"     : "customer.deliverin.my",
           "logging": 0
       }
   volumeMount:
@@ -47,13 +47,13 @@ ingress:
   className: ""
   enabled: true
   hosts:
-  - host: merchant.dev-my.symplified.ai
+  - host: merchant.qa-my.symplified.ai
     paths:
     - path: /
       pathType: ImplementationSpecific
   tls:
   - hosts:
-    - merchant.dev-my.symplified.ai
+    - merchant.qa-my.symplified.ai
     secretName: secret-tls-ai
 nameOverride: ""
 nodeSelector: {}
