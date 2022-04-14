@@ -457,7 +457,7 @@
 
                                     <!-- Variants Toggle for Fnb -->
                                     <div 
-                                        *ngIf="(store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK') && (this.addProductForm.get('step1').get('isPackage').value !== true)"
+                                        *ngIf="(store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK') && (productType != 'combo')"
                                         class="flex flex-col w-full pb-4"
                                     >
                                         <span class="pb-1 font-medium leading-tight">Variants 
