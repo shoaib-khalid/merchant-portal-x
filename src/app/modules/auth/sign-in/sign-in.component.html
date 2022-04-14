@@ -106,24 +106,23 @@
                 </button>
 
                 <!-- Separator -->
-                <div *ngIf="displaySocialLogin" class="flex items-center mt-8">
+                <div *ngIf="true" class="flex items-center mt-8">
                     <div class="flex-auto mt-px border-t"></div>
                     <div class="mx-2 text-secondary">Or continue with</div>
                     <div class="flex-auto mt-px border-t"></div>
                 </div>
 
                 <!-- Single sign-on buttons -->
-                <div *ngIf="displaySocialLogin" class="flex items-center mt-8 space-x-4">
+                <div *ngIf="true" class="flex items-center mt-8 space-x-4">
                     <button
-                    class="flex-auto"
-                    type="button"
-                    (click)="signInWithGoogle()"
-                    mat-stroked-button>
-                    <!-- <mat-icon
-                        class="icon-size-5"
-                        [svgIcon]="'iconsmind:google_plus'"></mat-icon> -->
-                    <img src = "assets/images/svgIcon/google-svgrepo.svg" style="width: 20px;height: 20px;" />
-
+                        class="flex-auto"
+                        type="button"
+                        (click)="signInWithGoogle()"
+                        mat-stroked-button>
+                        <!-- <mat-icon
+                            class="icon-size-5"
+                            [svgIcon]="'iconsmind:google_plus'"></mat-icon> -->
+                        <img src="assets/images/svgIcon/google-svgrepo.svg" style="width: 20px;height: 20px;"/>
                     </button>
                     <button
                         class="flex-auto"
@@ -133,28 +132,23 @@
                         <!-- <mat-icon
                             class="icon-size-5"
                             [svgIcon]="'feather:facebook'"></mat-icon> -->
-
-                        <img src = "assets/images/svgIcon/facebook-svgrepo.svg" style="width: 20px;height: 20px;" />
+                        <img src="assets/images/svgIcon/facebook-svgrepo.svg" style="width: 20px;height: 20px;"/>
                     </button>
                     <button
                         class="flex-auto"
                         type="button"
                         (click)="signInWithApple()"
                         mat-stroked-button>
-                        <img src = "assets/images/svgIcon/apple-svgrepo.svg" style="width: 20px;height: 20px;" />
+                        <img src="assets/images/svgIcon/apple-svgrepo.svg" style="width: 20px;height: 20px;"/>
                     </button>
-
                     <!-- <a href="https://appleid.apple.com/auth/authorize?client_id=my.deliverin.symplified.service&redirect_uri=https://merchant.symplified.it/applelogin&response_type=code id_token&state=init&scope=name email&response_mode=form_post"><button
-                        class="flex-auto"
-                        type="button"
-                        id="sign-in-with-apple-button"
-                        mat-stroked-button
-                        >
+                            class="flex-auto"
+                            type="button"
+                            id="sign-in-with-apple-button"
+                            mat-stroked-button>
                         <img src = "assets/images/svgIcon/apple-svgrepo.svg" style="width: 20px;height: 20px;" />
-                        </button></a> -->
-                   
+                    </button></a> -->
                 </div>
-
             </form>
         </div>
     </div>

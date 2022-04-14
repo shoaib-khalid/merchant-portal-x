@@ -6,13 +6,12 @@ import { appleLoginRoutes } from './apple-login.routing';
 
 @NgModule({
     declarations: [
-      AppleLoginComponent,
+        AppleLoginComponent,
     ],
     imports     : [
         RouterModule.forChild(appleLoginRoutes),
         SharedModule,
     ],
-
 })
 export class AppleLoginModule
 {

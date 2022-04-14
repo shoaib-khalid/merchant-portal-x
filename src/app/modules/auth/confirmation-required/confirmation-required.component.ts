@@ -34,13 +34,13 @@ export class AuthConfirmationRequiredComponent
     /**
      * On init
      */
-     ngOnInit(): void
-     {
-         // Subscribe to platform data
-         this._platformsService.platform$
-             .pipe(takeUntil(this._unsubscribeAll))
-             .subscribe((platform: Platform) => {
-                 this.platform = platform;
-             });
-     }
+    ngOnInit(): void
+    {
+        // Subscribe to platform data
+        this._platformsService.platform$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((platform: Platform) => {
+                this.platform = platform;
+            });
+    }
 }
