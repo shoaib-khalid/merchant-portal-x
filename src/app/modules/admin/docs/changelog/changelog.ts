@@ -17,7 +17,7 @@ export class ChangelogComponent
                 {
                     type: 'Removed',
                     list: [
-                        '(Sign In) Re-enable sign in with Apple, Google, Fb'
+                        '(Sign In) Re-enable sign in with Apple, Google, FB'
                     ]
                 }
             ]
@@ -30,7 +30,7 @@ export class ChangelogComponent
             {
                 type: 'Removed',
                 list: [
-                    '(Sign In) Temporarily removed sign in with Apple, Google, Fb'
+                    '(Sign In) Temporarily removed sign in with Apple, Google, FB'
                 ]
             }
         ]
