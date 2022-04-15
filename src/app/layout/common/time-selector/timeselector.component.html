@@ -6,7 +6,7 @@
     <input class="justify-between w-0 h-0 invisible" type="text" readonly="true"/>
     <div class="flex flex-row w-full justify-around">
         <select 
-            class="py-2 text-center w-1/3 border border-gray-300 rounded example-tel-input-element" 
+            class="py-2 text-center w-1/3 border border-gray-300 bg-transparent rounded example-tel-input-element" 
             formControlName="timeHour"
             aria-label="timeHour code"
             (change)="_handleInput(timeSelection.controls.timeHour, timeMinute)"
@@ -26,7 +26,7 @@
             <option value="12">12</option>
         </select>
         <select 
-            class="mx-2 py-2 text-center w-1/3 border border-gray-300 rounded"
+            class="mx-2 py-2 text-center w-1/3 border bg-transparent border-gray-300 rounded"
             formControlName="timeMinute"
             aria-label="timeMinute code"
             (change)="_handleInput(timeSelection.controls.timeMinute, timeAmPm)"
@@ -42,7 +42,7 @@
             <option value="55">55</option>
         </select>
         <select 
-            class="py-2 text-center w-1/3 border border-gray-300 rounded" 
+            class="py-2 text-center w-1/3 border bg-transparent border-gray-300 rounded" 
             formControlName="timeAmPm"
             aria-label="timeAmPm code"
             (change)="_handleInput(timeSelection.controls.timeAmPm)"

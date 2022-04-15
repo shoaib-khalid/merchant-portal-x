@@ -14,6 +14,8 @@ import { InventoryService } from 'app/core/product/inventory.service';
 import {environment} from 'environments/environment';
 import { Platform } from 'app/core/platform/platform.types';
 import { PlatformService } from 'app/core/platform/platform.service';
+import { FuseConfigService } from '@fuse/services/config';
+import { Scheme } from 'app/core/config/app.config';
 
 @Component({
     selector     : 'classy-layout',
@@ -22,6 +24,7 @@ import { PlatformService } from 'app/core/platform/platform.service';
 })
 export class ClassyLayoutComponent implements OnInit, OnDestroy
 {
+    toggleDarkMode: any;
     platform: Platform;
     isScreenSmall: boolean;
     navigation: Navigation;
@@ -46,7 +49,9 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
         private _userService: UserService,
         private _storesService: StoresService,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
-        private _fuseNavigationService: FuseNavigationService
+        private _fuseNavigationService: FuseNavigationService,
+        private _fuseConfigService: FuseConfigService
+
     )
     {
     }
@@ -192,6 +197,15 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
 
+    /**
+    * Set the scheme on the config
+    *
+    * @param scheme
+    */
+    setScheme(scheme: Scheme): void
+    {
+        this._fuseConfigService.config = {scheme};
+    }
     /**
      * Toggle navigation
      *

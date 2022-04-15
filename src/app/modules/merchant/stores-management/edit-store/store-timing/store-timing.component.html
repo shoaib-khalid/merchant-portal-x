@@ -19,7 +19,7 @@
                             <div class="flex flex-auto flex-wrap p-2">
                                 <div class="flex flex-col w-full">
                                     <ng-container formArrayName="storeTiming" *ngFor="let dayList of storeTimingForm.get('storeTiming')['controls']; let i = index;">
-                                        <fieldset [ngClass]="dayList.value.isOpen === true ? '' : 'bg-gray-100 text-gray-500'" class="flex flex-wrap flex-row w-full border border-solid border-gray-300 rounded my-1 px-3" [formGroupName]="i">
+                                        <fieldset [ngClass]="dayList.value.isOpen === true ? '' : 'bg-default text-gray-500'" class="flex flex-wrap flex-row w-full border border-solid border-gray-300 rounded my-1 px-3" [formGroupName]="i">
                                             <!-- Days -->
                                             <legend class="text font-bold ml-2 px-2">{{dayList.value.day | titlecase }}</legend>
                                             <input 
@@ -98,7 +98,7 @@
                                                 </div>
                                                 <!-- Break Time Start -->
                                                 <div class="xl:col-span-2">
-                                                    <mat-form-field [ngClass]="dayList.value.isBreakTime === true ? '' : 'bg-gray-100 text-gray-500'" class="w-full h-20 rounded" floatLabel="always" appearance="outline">
+                                                    <mat-form-field [ngClass]="dayList.value.isBreakTime === true ? '' : 'bg-default text-gray-500'" class="w-full h-20 rounded" floatLabel="always" appearance="outline">
                                                         <mat-label>Start time</mat-label>
                                                         <time-selector
                                                             matInput
@@ -113,7 +113,7 @@
                                                 </div>
                                                 <!-- Break Time End -->
                                                 <div class="xl:col-span-2">
-                                                    <mat-form-field [ngClass]="dayList.value.isBreakTime === true ? '' : 'bg-gray-100 text-gray-500'" class="w-full h-20 rounded" floatLabel="always" appearance="outline">
+                                                    <mat-form-field [ngClass]="dayList.value.isBreakTime === true ? '' : 'bg-default text-gray-500'" class="w-full h-20 rounded" floatLabel="always" appearance="outline">
                                                         <mat-label>End time</mat-label>
                                                         <time-selector
                                                             matInput

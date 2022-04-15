@@ -117,8 +117,8 @@
         <div class="flex items-center pl-2 ml-auto space-x-0.5 sm:space-x-2">
             <!-- <countries></countries> -->
             <!-- <languages></languages> -->
-            <fuse-fullscreen class="hidden md:block"></fuse-fullscreen>
-            <search [appearance]="'bar'"></search>
+            <!-- <fuse-fullscreen class="hidden md:block"></fuse-fullscreen> -->
+            <!-- <search [appearance]="'bar'"></search> -->
             <!-- <shortcuts></shortcuts> -->
             <!-- <messages></messages> -->
             <!-- <button
@@ -127,6 +127,39 @@
                 (click)="quickChat.toggle()">
                 <mat-icon [svgIcon]="'heroicons_outline:chat-alt-2'"></mat-icon>
             </button> -->
+                        <!-- Dark Button -->
+            <input
+                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                type="button"
+                (click)="toggleDarkMode = !toggleDarkMode ;setScheme('dark')"
+                [id]="'night-button'">
+            <label
+                *ngIf="!toggleDarkMode"
+                class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer"
+                [for]="'night-button'"
+                matRipple>
+                <mat-icon
+                    class="icon-size-6"
+                    [svgIcon]="'heroicons_outline:moon'">
+                </mat-icon>
+            </label>
+            
+            <!-- Light Button -->
+            <input
+                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                type="button"
+                (click)="toggleDarkMode = !toggleDarkMode ;setScheme('light')"
+                [id]="'day-button'">
+            <label
+                *ngIf="toggleDarkMode"
+                class="flex items-center justify-center w-7 h-7 rounded-full cursor-pointer"
+                [for]="'day-button'"
+                matRipple>
+                <mat-icon
+                    class="icon-size-6"
+                    [svgIcon]="'mat_outline:light_mode'">
+                </mat-icon>
+            </label>
         </div>
     </div>
 
