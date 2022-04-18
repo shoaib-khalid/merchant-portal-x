@@ -22,6 +22,19 @@ export class ChangelogComponent
                 }
             ]
             },
+        //v1.2.1
+        {
+            version    : 'v1.2.1',
+            releaseDate: 'Apr 14, 2022',
+            changes    : [
+                {
+                    type: 'Fixed',
+                    list: [
+                        '(ProductManagement) Fixed where Variant Toggle visible for Combo product'
+                    ]
+                }
+            ]
+        },
         //v1.2.0
         {
         version    : 'v1.2.0',
