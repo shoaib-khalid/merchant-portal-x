@@ -27,14 +27,6 @@ export class AuthService
     {        
     }
 
-    socialOptions = {
-        headers: new HttpHeaders({
-          "Content-Type": "application/json"
-        }),
-        withCredentials : true
-      
-      };
-
     // -----------------------------------------------------------------------------------------------------
     // @ Accessors
     // -----------------------------------------------------------------------------------------------------
@@ -78,11 +70,6 @@ export class AuthService
     get publicToken(): string
     {
         return "Bearer accessToken";
-    }
-
-    get userService$()
-    {
-        return this._apiServer.settings.apiServer.userService;
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -146,7 +133,8 @@ export class AuthService
 
         let userService = this._apiServer.settings.apiServer.userService;
         const header = {
-            headers: new HttpHeaders().set("Authorization", this.publicToken)
+            headers: new HttpHeaders().set("Authorization", this.publicToken),
+            withCredentials: true
         };
         
         return this._httpClient.post(userService + '/clients/authenticate', credentials, header)
@@ -189,10 +177,10 @@ export class AuthService
      */
     signInUsingToken(): Observable<any>
     {
-        // Renew token
         let userService = this._apiServer.settings.apiServer.userService;
         const header = {
-            headers: new HttpHeaders().set("Authorization", this.publicToken)
+            headers: new HttpHeaders().set("Authorization", this.publicToken),
+            withCredentials: true
         };
         
         return this._httpClient.post(userService + '/clients/session/refresh', this._jwt.getJwtPayload(this.jwtAccessToken).rft ,header).pipe(
@@ -257,8 +245,8 @@ export class AuthService
     signUp(user: { name: string; email: string; password: string; username: string;countryId: string }): Observable<any>
     {
         let userService = this._apiServer.settings.apiServer.userService;
-        const header: any = {
-            headers: new HttpHeaders().set("Authorization", `Bearer accessToken`)
+        const header = {
+            headers: new HttpHeaders().set("Authorization", this.publicToken)
         };
         const body = {
             "deactivated": true,
@@ -326,13 +314,20 @@ export class AuthService
      */
 
     loginOauth(authRequest:ValidateOauthRequest, origin: string):Observable<any> {  
+
+        let userService = this._apiServer.settings.apiServer.userService;
+        const header = {
+            headers: new HttpHeaders().set("Authorization", this.publicToken),
+            withCredentials: true
+        };
+
         // Throw error, if the user is already logged in
         if ( this._authenticated )
         {
             return throwError('User is already logged in.');
         }
   
-        return this._httpClient.post<any>(this.userService$ +'/clients/loginoauth', authRequest, this.socialOptions).pipe(
+        return this._httpClient.post<any>(userService + '/clients/loginoauth', authRequest, header).pipe(
             switchMap(async (response: any) => {
     
                 this._logging.debug("Response from AuthService (loginOauth)",response);
