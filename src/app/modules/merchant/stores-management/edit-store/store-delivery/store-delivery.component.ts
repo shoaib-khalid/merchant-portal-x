@@ -8,6 +8,7 @@ import { ChooseVerticalService } from '../../choose-vertical/choose-vertical.ser
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Loader } from '@googlemaps/js-api-loader';
 import { BehaviorSubject } from 'rxjs';
+import { GoogleKey } from '../edit-store.types';
 
 
 
@@ -268,7 +269,7 @@ export class StoreDeliveryComponent implements OnInit
                         }
                         // implement google maos
                         let loader = new Loader({
-                            apiKey: 'AIzaSyCFhf1LxbPWNQSDmxpfQlx69agW-I-xBIw',
+                            apiKey: GoogleKey.GOOGLE_MAP_API_KEY,
                             libraries: ['places']
                             
                             })
