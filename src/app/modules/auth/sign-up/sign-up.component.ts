@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
+import { FacebookLoginProvider, GoogleLoginProvider, SocialAuthService } from 'angularx-social-login';
 import { AuthService } from 'app/core/auth/auth.service';
 import { PlatformService } from 'app/core/platform/platform.service';
 import { Platform } from 'app/core/platform/platform.types';
@@ -10,6 +11,8 @@ import { StoresService } from 'app/core/store/store.service';
 import { StoreRegionCountries } from 'app/core/store/store.types';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { AppleLoginProvider } from '../sign-in/apple.provider';
+import { ValidateOauthRequest } from '../sign-in/oauth.types';
 
 @Component({
     selector     : 'auth-sign-up',
@@ -37,7 +40,12 @@ export class AuthSignUpComponent implements OnInit
     //display field country
     displayCountryField:boolean = false;
 
+    countryCode : string = '';
+
     private _unsubscribeAll: Subject<any> = new Subject<any>();
+
+    // validate Payload
+    validateOauthRequest : ValidateOauthRequest;
 
     /**
      * Constructor
@@ -48,6 +56,8 @@ export class AuthSignUpComponent implements OnInit
         private _router: Router,
         private _platformsService: PlatformService,
         private _storesService: StoresService,
+        private _socialAuthService: SocialAuthService,
+
     )
     {
     }
@@ -78,7 +88,9 @@ export class AuthSignUpComponent implements OnInit
             .subscribe((platform: Platform) => {
                 this.platform = platform;
 
-                this.signUpForm.get('countryId').patchValue(this.platform.country)
+                this.signUpForm.get('countryId').patchValue(this.platform.country);
+                this.countryCode = this.platform.country;
+
     
             });
 
@@ -150,5 +162,64 @@ export class AuthSignUpComponent implements OnInit
                     this.showAlert = true;
                 }
             );
+    }
+
+    signInWithGoogle(): void {
+        this._socialAuthService.signIn(GoogleLoginProvider.PROVIDER_ID)
+            .then(userData => {
+                this.validateOauthRequest = new ValidateOauthRequest();
+                this.validateOauthRequest.country = this.countryCode;
+                this.validateOauthRequest.email = userData.email;
+                this.validateOauthRequest.loginType = "GOOGLE";
+                this.validateOauthRequest.name = userData.name;
+                this.validateOauthRequest.token = userData.idToken;
+                
+                this._authService.loginOauth(this.validateOauthRequest,'sign-in-comp-google')
+                    .subscribe(() => {
+                        // const redirectURL = this._activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/signed-in-redirect';
+
+                        // // Navigate to the redirect url
+                        // this._router.navigateByUrl(redirectURL);
+
+                        this._router.navigate(['/stores' ]);
+                    },
+                    exception => {
+                        console.error("An error has occured : ",exception);
+                    });
+            });
+    }
+    
+    signInWithFB(): void {
+        this._socialAuthService.signIn(FacebookLoginProvider.PROVIDER_ID)
+            .then(userData => {
+                this.validateOauthRequest = new ValidateOauthRequest();
+                this.validateOauthRequest.country = this.countryCode;
+                this.validateOauthRequest.email = userData.email
+                this.validateOauthRequest.loginType = "FACEBOOK";
+                this.validateOauthRequest.name = userData.name;
+                this.validateOauthRequest.token = userData.authToken;
+                this.validateOauthRequest.userId = userData.id;
+                
+                this._authService.loginOauth(this.validateOauthRequest,'sign-in-comp-facebook')
+                    .subscribe(() => {                    
+                        // const redirectURL = this._activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/signed-in-redirect';
+
+                        // // Navigate to the redirect url
+                        // this._router.navigateByUrl(redirectURL);
+
+                        this._router.navigate(['/stores' ]);
+                    },
+                    exception => {
+                        console.log("exception ::::",exception);
+
+                    });
+            });
+    }
+
+    signInWithApple(): void {
+        this._socialAuthService.signIn(AppleLoginProvider.PROVIDER_ID)
+            .then(userData => {
+
+            });
     }
 }

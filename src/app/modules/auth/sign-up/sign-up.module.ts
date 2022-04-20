@@ -14,6 +14,9 @@ import { authSignupRoutes } from 'app/modules/auth/sign-up/sign-up.routing';
 import { MatSelectModule } from '@angular/material/select';
 
 import { SharedBackgroundModule } from '../shared-background/shared-background.module';
+import { FacebookLoginProvider, GoogleLoginProvider, SocialAuthServiceConfig, SocialLoginModule } from 'angularx-social-login';
+import { SocialLooginClientId } from '../sign-in/oauth.types';
+import { AppleLoginProvider } from '../sign-in/apple.provider';
 
 @NgModule({
     declarations: [
@@ -31,8 +34,35 @@ import { SharedBackgroundModule } from '../shared-background/shared-background.m
         FuseCardModule,
         FuseAlertModule,
         SharedModule,
-        SharedBackgroundModule
+        SharedBackgroundModule,
+        SocialLoginModule
+    ],
+    providers: [
+        {
+            provide: 'SocialAuthServiceConfig',
+            useValue: {
+                autoLogin: false,
+                providers: [
+                    {
+                        id: GoogleLoginProvider.PROVIDER_ID,
+                        provider: new GoogleLoginProvider(SocialLooginClientId.GOOGLE_CLIENT_ID)
+                    },
+                    {
+                        id: AppleLoginProvider.PROVIDER_ID,
+                        provider: new AppleLoginProvider(SocialLooginClientId.APPLE_CLIENT_ID)
+                    },
+                    {
+                        id: FacebookLoginProvider.PROVIDER_ID,
+                        provider: new FacebookLoginProvider(SocialLooginClientId.FACEBOOK_CLIENT_ID)
+                    }
+                ],
+                onError: (err) => {
+                    console.error(err);
+                }
+            } as SocialAuthServiceConfig
+        }
     ]
+    
 })
 export class AuthSignUpModule
 {
