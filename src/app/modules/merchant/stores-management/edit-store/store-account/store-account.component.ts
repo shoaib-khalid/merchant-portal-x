@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { StoresService } from 'app/core/store/store.service';
 import { ChooseVerticalService } from '../../choose-vertical/choose-vertical.service';
 import { EditStoreValidationService } from 'app/modules/merchant/stores-management/edit-store/edit-store.validation.service';
-import { StoreRegionCountries } from 'app/core/store/store.types';
+import { Store, StoreRegionCountries } from 'app/core/store/store.types';
 import { debounce } from 'lodash';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
@@ -21,6 +21,7 @@ export class StoreAccountComponent implements OnInit
 {
     storeAccountForm: FormGroup;
     
+    store: Store;
     storeId: string;
     storeName: string;
 
@@ -29,6 +30,9 @@ export class StoreAccountComponent implements OnInit
     domainName:string;
     subDomainName: string;
     
+    // dialingCode
+    dialingCode: string;
+
     // Fuse Media Watcher
     currentScreenSize: string[] = [];
 
@@ -97,13 +101,32 @@ export class StoreAccountComponent implements OnInit
 
         this._storesService.getStoreById(this.storeId).subscribe(
            (storeResponse) => {
+
+                this.store = storeResponse;
                
-               // Fill the form
-               this.storeAccountForm.patchValue(storeResponse);
+                // Fill the form
+                this.storeAccountForm.patchValue(storeResponse);
 
                 // set store to current store
                 this._storesService.store = storeResponse;
                 this._storesService.storeId = this.storeId;
+
+                // -------------------------
+                // Set Dialing code
+                // -------------------------
+                
+                let countryId = this.store.regionCountry.id;
+                
+                switch (countryId) {
+                    case 'MYS':
+                        this.dialingCode = '60'
+                        break;
+                    case 'PAK':
+                        this.dialingCode = '92'
+                        break;
+                    default:
+                        break;
+                }
 
                 // -------------------------
                 // Choose Vertical service
@@ -171,6 +194,32 @@ export class StoreAccountComponent implements OnInit
             this.storeAccountForm.get('name').setErrors({storeNameAlreadyTaken: true});
         }
 
+    }
+
+    sanitizePhoneNumber(phoneNumber: string) {
+
+        let substring = phoneNumber.substring(0, 1)
+        let countryId = this.store.regionCountry.id;
+        let sanitizedPhoneNo = ''
+        
+        if ( countryId === 'MYS' ) {
+
+                 if (substring === '6') sanitizedPhoneNo = phoneNumber;
+            else if (substring === '0') sanitizedPhoneNo = '6' + phoneNumber;
+            else if (substring === '+') sanitizedPhoneNo = phoneNumber.substring(1);
+            else                        sanitizedPhoneNo = '60' + phoneNumber;
+
+        }
+        else if ( countryId === 'PAK') {
+
+                 if (substring === '9') sanitizedPhoneNo = phoneNumber;
+            else if (substring === '2') sanitizedPhoneNo = '9' + phoneNumber;
+            else if (substring === '+') sanitizedPhoneNo = phoneNumber.substring(1);
+            else                        sanitizedPhoneNo = '92' + phoneNumber;
+
+        }
+
+        return sanitizedPhoneNo;
     }
 
     updateStoreAccount(){
