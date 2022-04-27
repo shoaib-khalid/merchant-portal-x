@@ -182,7 +182,7 @@ export class RegisterStoreComponent implements OnInit
                 storeDescription    : ['', [Validators.required, Validators.maxLength(200)]],
                 displayAddress      : [''],
                 email               : ['', [Validators.required, Validators.email]],
-                phoneNumber         : ['', RegisterStoreValidationService.phonenumberValidator],
+                phoneNumber         : ['', [RegisterStoreValidationService.phonenumberValidator, Validators.minLength(5), Validators.maxLength(30)]],
                 paymentType         : ['', Validators.required],
             }),
             step3: this._formBuilder.group({
