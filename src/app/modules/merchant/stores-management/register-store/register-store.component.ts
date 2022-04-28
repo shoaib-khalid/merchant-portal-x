@@ -23,6 +23,7 @@ import { Platform } from 'app/core/platform/platform.types';
 import { PlatformService } from 'app/core/platform/platform.service';
 import { AuthService } from 'app/core/auth/auth.service';
 import { Loader } from '@googlemaps/js-api-loader';
+import { GoogleKey } from '../edit-store/edit-store.types';
 
 @Component({
     selector     : 'register-store-page',
@@ -748,7 +749,7 @@ export class RegisterStoreComponent implements OnInit
 
         //Initialise google maps
         let loader = new Loader({
-            apiKey: 'AIzaSyCFhf1LxbPWNQSDmxpfQlx69agW-I-xBIw',
+            apiKey: GoogleKey.GOOGLE_MAP_API_KEY,
             libraries: ['places']
             
             })
