@@ -134,9 +134,7 @@ export class RegisterStoreComponent implements OnInit
     //GOOGLE MAPS
     private map: google.maps.Map;
     location :any;
-
     center!: google.maps.LatLngLiteral;
-  
     displayLat:any;
     displayLong:any;
 
@@ -185,7 +183,7 @@ export class RegisterStoreComponent implements OnInit
                 storeDescription    : ['', [Validators.required, Validators.maxLength(200)]],
                 displayAddress      : [''],
                 email               : ['', [Validators.required, Validators.email]],
-                phoneNumber         : ['', RegisterStoreValidationService.phonenumberValidator],
+                phoneNumber         : ['', [RegisterStoreValidationService.phonenumberValidator, Validators.minLength(5), Validators.maxLength(30)]],
                 paymentType         : ['', Validators.required],
             }),
             step3: this._formBuilder.group({
@@ -372,16 +370,13 @@ export class RegisterStoreComponent implements OnInit
                 // -------------------------
                 
                 let countryId = response['data'].countryId;
-                
                 switch (countryId) {
                     case 'MYS':
                         this.dialingCode = '+60'
                         break;
-                
                     case 'PAK':
                         this.dialingCode = '+92'
                         break;
-
                     default:
                         break;
                 }
@@ -1356,6 +1351,33 @@ export class RegisterStoreComponent implements OnInit
         }
 
     }
+    
+    sanitizePhoneNumber(phoneNumber: string) {
+
+        let substring = phoneNumber.substring(0, 1)
+        let countryId = this.createStoreForm.get('step3').get('regionCountryId').value;
+        let sanitizedPhoneNo = ''
+        
+        if ( countryId === 'MYS' ) {
+
+                 if (substring === '6') sanitizedPhoneNo = phoneNumber;
+            else if (substring === '0') sanitizedPhoneNo = '6' + phoneNumber;
+            else if (substring === '+') sanitizedPhoneNo = phoneNumber.substring(1);
+            else                        sanitizedPhoneNo = '60' + phoneNumber;
+
+        }
+        else if ( countryId === 'PAK') {
+
+                 if (substring === '9') sanitizedPhoneNo = phoneNumber;
+            else if (substring === '2') sanitizedPhoneNo = '9' + phoneNumber;
+            else if (substring === '+') sanitizedPhoneNo = phoneNumber.substring(1);
+            else                        sanitizedPhoneNo = '92' + phoneNumber;
+
+        }
+
+        return sanitizedPhoneNo;
+    }
+    
     // ------------------------------------------------------------------------------
     //                            Delivery Public Method
     // ------------------------------------------------------------------------------

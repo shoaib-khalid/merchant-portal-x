@@ -78,7 +78,7 @@
                                                 matInput
                                                 minlength="4"
                                                 maxlength="15"
-                                                placeholder="UrlName"
+                                                placeholder="store-url"
                                                 [formControlName]="'subdomain'"
                                                 [required]="true"
                                                 (input)="checkExistingURL($event.target.value)">
@@ -158,6 +158,7 @@
                                                 <input
                                                     matInput
                                                     [placeholder]="dialingCode + '123456789'"
+                                                    (change)="createStoreForm.get('step1').get('phoneNumber').patchValue(sanitizePhoneNumber(createStoreForm.get('step1').get('phoneNumber').value))"
                                                     [formControlName]="'phoneNumber'"
                                                     [required]="true">
                                                     <mat-icon

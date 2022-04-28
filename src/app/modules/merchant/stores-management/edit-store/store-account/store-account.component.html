@@ -135,7 +135,8 @@
                                 <input
                                     [formControlName]="'phoneNumber'"
                                     [required]="true"
-                                    placeholder="+60123456789"
+                                    [placeholder]="dialingCode + '123456789'"
+                                    (change)="storeAccountForm.get('phoneNumber').patchValue(sanitizePhoneNumber(storeAccountForm.get('phoneNumber').value))"
                                     matInput>
                                 <mat-error *ngIf="storeAccountForm.get('phoneNumber').hasError('required')">
                                     Required
