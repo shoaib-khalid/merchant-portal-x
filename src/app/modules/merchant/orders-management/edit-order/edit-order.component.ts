@@ -12,9 +12,18 @@ import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dialog/dialog.component';
 
 @Component({
-    selector     : 'app-edit-rder',
+    selector     : 'app-edit-order',
     templateUrl  : './edit-order.component.html',
-    encapsulation: ViewEncapsulation.None
+    styles: [
+      `
+      /* to remove visible container when window dialog is opened  */
+      ::ng-deep .edit-order-custom-dialog-class {
+        mat-dialog-container {
+          padding: 0 !important;
+        }
+      }
+      `
+  ]
 })
 export class EditOrderComponent implements OnInit
 {

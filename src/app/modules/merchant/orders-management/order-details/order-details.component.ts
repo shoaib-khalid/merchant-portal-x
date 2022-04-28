@@ -14,7 +14,16 @@ import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dia
 @Component({
     selector     : 'app-order-details',
     templateUrl  : './order-details.component.html',
-    encapsulation: ViewEncapsulation.None
+    styles: [
+        `
+        /* to remove visible container when window dialog is opened  */
+        ::ng-deep .order-details-custom-dialog-class {
+          mat-dialog-container {
+            padding: 0 !important;
+          }
+        }
+        `
+    ]
 })
 export class OrderDetailsComponent implements OnInit
 {
@@ -148,7 +157,7 @@ export class OrderDetailsComponent implements OnInit
                         this.detailsForm.get('storePhoneNumber').setValue(order["data"].store.phone);
                         this.detailsForm.get('storeEmail').setValue(order["data"].store.email);
                         this.detailsForm.get('storeUrl').setValue(""); 
-                        this.detailsForm.get('customerName').setValue(order["data"].orderPaymentDetail.accountName);
+                        this.detailsForm.get('customerName').setValue(order["data"].orderShipmentDetail.receiverName);
                         this.detailsForm.get('customerAddress').setValue(order["data"].orderShipmentDetail.address);
                         this.detailsForm.get('customerPhoneNumber').setValue(order["data"].orderShipmentDetail.phoneNumber);
                         this.detailsForm.get('customerEmail').setValue(order["data"].orderShipmentDetail.email);
