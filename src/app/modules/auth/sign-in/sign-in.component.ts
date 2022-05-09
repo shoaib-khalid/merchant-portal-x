@@ -15,6 +15,8 @@ import { FacebookLoginProvider, GoogleLoginProvider } from "angularx-social-logi
 import { AppleLoginProvider } from './apple.provider';
 import { ValidateOauthRequest } from './oauth.types';
 import { HttpHeaders } from '@angular/common/http';
+import { MatDialog } from '@angular/material/dialog';
+import { AuthModalComponent } from '../auth-modal/auth-modal.component';
 
 @Component({
     selector     : 'auth-sign-in',
@@ -48,6 +50,7 @@ export class AuthSignInComponent implements OnInit
      * Constructor
      */
     constructor(
+        public _dialog: MatDialog,
         private _authService: AuthService,
         private _userService: UserService,
         private _platformsService: PlatformService,
@@ -222,11 +225,33 @@ export class AuthSignInComponent implements OnInit
             });
     }
 
-    signInWithApple(): void {
-        this._socialAuthService.signIn(AppleLoginProvider.PROVIDER_ID)
-            .then(userData => {
+    // signInWithApple(): void {
+    //     this._socialAuthService.signIn(AppleLoginProvider.PROVIDER_ID)
+    //         .then(userData => {
 
+    //         });
+    // }
+
+    signInWithApple(): void {
+
+        const dialogRef = this._dialog.open( 
+            AuthModalComponent,{
+                width : '520px',
+                maxWidth: '80vw',
+                data:{ 
+                    icon : 'heroicons_solid:exclamation',
+                    title : 'Disclaimer',
+                    description : 'While using Apple ID to create your DeliverIn account, please select option to "Share My Email" to ensure your DeliverIn account is created properly.'
+                }
             });
-    }
+        dialogRef.afterClosed().subscribe((result) => {
+            // If the confirm button pressed...
+            this._socialAuthService.signIn(AppleLoginProvider.PROVIDER_ID)
+                .then(userData => {
+
+                });
+        });
+       
+   }
 
 }

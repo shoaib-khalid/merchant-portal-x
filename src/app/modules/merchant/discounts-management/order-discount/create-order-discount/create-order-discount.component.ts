@@ -229,7 +229,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
                     message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
                     actions: {
                         confirm: {
-                            label: 'Ok'
+                            label: 'OK'
                         },
                         cancel : {
                             show : false,
@@ -323,7 +323,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
                 message: 'Please change your discount amount for percentage calculation type',
                 actions: {
                     confirm: {
-                        label: 'Ok'
+                        label: 'OK'
                     },
                     cancel : {
                         show : false,
@@ -366,7 +366,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
                 message: 'Your minimum subtotal entered overlapping with existing amount! Please change your minimum subtotal',
                 actions: {
                     confirm: {
-                        label: 'Ok'
+                        label: 'OK'
                     },
                     cancel : {
                         show : false,

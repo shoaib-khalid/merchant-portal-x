@@ -334,7 +334,7 @@ export class EditOrderComponent implements OnInit
               
               //after that we get the amount of refund by calling OrdersService (getOrderById)
               this._ordersService.getOrderById(this.orderId).subscribe((response=>{
-                const displayRefund = this.displayMessage('Order Updated','The refund will be in the place. Refund Amount :'+response.data.orderRefund[0].refundAmount,'Ok','No',false,false);
+                const displayRefund = this.displayMessage('Order Updated','The refund will be in the place. Refund Amount :'+response.data.orderRefund[0].refundAmount,'OK','No',false,false);
                 displayRefund.afterClosed().subscribe((result) => {                   
                   if(result === 'confirmed' ){
                       this.close();                    
@@ -345,7 +345,7 @@ export class EditOrderComponent implements OnInit
               ))
             },error=>{
          
-              this.displayMessage('Cannot be edit',error.error.message,'Ok','Close',false);
+              this.displayMessage('Cannot be edit',error.error.message,'OK','Close',false);
 
               this.close();
             });

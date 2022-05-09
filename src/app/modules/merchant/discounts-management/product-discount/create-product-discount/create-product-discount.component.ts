@@ -380,7 +380,7 @@ export class CreateProductDiscountDialogComponent implements OnInit {
                     message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
                     actions: {
                         confirm: {
-                            label: 'Ok'
+                            label: 'OK'
                         },
                         cancel : {
                             show : false,
@@ -415,7 +415,7 @@ export class CreateProductDiscountDialogComponent implements OnInit {
 
         if (this.onChangeSelectProductValue.length === 0){
             
-            this.displayMessage('Please select the product','Please select product to add product discount','Ok',false); 
+            this.displayMessage('Please select the product','Please select product to add product discount','OK',false); 
     
         }
         else {
@@ -446,7 +446,7 @@ export class CreateProductDiscountDialogComponent implements OnInit {
             });
             }else{
             //show error message the itemcode exist already
-            this.displayMessage('Selected product already exist','Please select other product','Ok',false); 
+            this.displayMessage('Selected product already exist','Please select other product','OK',false); 
 
             }
 

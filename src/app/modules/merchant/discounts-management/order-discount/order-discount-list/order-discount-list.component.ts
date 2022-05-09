@@ -300,7 +300,7 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
         //                     message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
         //                     actions: {
         //                         confirm: {
-        //                             label: 'Ok'
+        //                             label: 'OK'
         //                         },
         //                         cancel : {
         //                             show : false,

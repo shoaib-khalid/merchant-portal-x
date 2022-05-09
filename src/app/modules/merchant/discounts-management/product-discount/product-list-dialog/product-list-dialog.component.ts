@@ -209,7 +209,7 @@ export class ProductListDialogComponent implements OnInit {
 
    addProductDiscount(){
         if (this.onChangeSelectProductValue.length === 0){
-            this.displayMessage('Please select the product','Please select product to add product discount','Ok',false); 
+            this.displayMessage('Please select the product','Please select product to add product discount','OK',false); 
         } else {
             const itemCodesArr = this.onChangeSelectProductObject.map( el=> el.productInventories.map(el2=>el2.itemCode));//[[a,c,g],[d,e],[f]]
             const itemCodes = Array.prototype.concat.apply([],itemCodesArr);//[a,c,g,d,e,f]
@@ -250,7 +250,7 @@ export class ProductListDialogComponent implements OnInit {
     // Edit discount product
     editStoreProductDiscount(productDiscount){
         if(this.editDiscountAmount>100||this.editDiscountAmount<0){
-            const confirmation = this.displayMessage('Cannot more than 100 or less than 0','Please change the discount amount','Ok',false);
+            const confirmation = this.displayMessage('Cannot more than 100 or less than 0','Please change the discount amount','OK',false);
         } else {
             let payloadProductDiscount = {
                 id: productDiscount.id,
@@ -334,7 +334,7 @@ export class ProductListDialogComponent implements OnInit {
                 this._discountProductService.createProductDiscount(this.discountId,payloadProductDiscount).
                 subscribe((response) => {}
                 , error => {
-                    this.displayMessage('Cannot be add','The selected product already exist','Ok',false);
+                    this.displayMessage('Cannot be add','The selected product already exist','OK',false);
 
                 }
                 )

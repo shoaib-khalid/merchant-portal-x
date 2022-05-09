@@ -81,7 +81,7 @@ export class EditProfileComponent implements OnInit
                 id         : 'security',
                 icon       : 'heroicons_outline:lock-closed',
                 title      : 'Security',
-                description: 'Manage your password and 2-step verification preferences'
+                description: 'Manage your password'
             },
             {
                 id         : 'plan-billing',
@@ -284,7 +284,7 @@ export class EditProfileComponent implements OnInit
             },
             actions: {
                 confirm: {
-                    label: 'Ok',
+                    label: 'OK',
                     color: "primary",
                 },
                 cancel: {

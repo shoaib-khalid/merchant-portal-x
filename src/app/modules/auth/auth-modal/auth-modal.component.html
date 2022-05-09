@@ -1,0 +1,31 @@
+<div class="flex flex-col max-w-110 md:min-w-110 ">
+
+    <div class="flex flex-row items-center justify-center mt-2">
+        <mat-icon
+        class="items-center text-primary icon-size-10"
+        [svgIcon]="icon"></mat-icon>
+    </div>
+    
+    <div class="flex flex-col flex-auto w-full">
+
+        <div class="flex flex-row items-center justify-center py-2">
+            <h1 class="text-lg text-center font-bold">{{title}}</h1>
+        </div>
+
+        <div class="w-full flex flex-col">
+            <!-- description -->
+            <span class="font-medium text-center">{{description}}</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-row w-full items-center justify-center mt-5">
+            <!-- Send -->
+            <button
+                class="p-2 px-8 rounded-lg bg-primary hover:bg-primary-700 font-medium text-black cursor-pointer"
+                (click)="okButton()"
+                >
+                OK
+            </button>
+        </div>
+    </div>
+</div>

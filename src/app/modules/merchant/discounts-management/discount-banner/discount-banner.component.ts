@@ -231,7 +231,7 @@ export class DiscountBannerComponent implements OnInit, AfterViewInit, OnDestroy
     //             },
     //             actions: {
     //                 confirm: {
-    //                     label: 'Ok',
+    //                     label: 'OK',
     //                     color: "primary",
     //                 },
     //                 cancel: {
@@ -303,7 +303,7 @@ export class DiscountBannerComponent implements OnInit, AfterViewInit, OnDestroy
                 },
                 actions: {
                     confirm: {
-                        label: 'Ok',
+                        label: 'OK',
                         color: "primary",
                     },
                     cancel: {
@@ -462,7 +462,7 @@ export class DiscountBannerComponent implements OnInit, AfterViewInit, OnDestroy
             },
             actions: {
                 confirm: {
-                    label: 'Ok',
+                    label: 'OK',
                     color: "primary",
                 },
                 cancel: {

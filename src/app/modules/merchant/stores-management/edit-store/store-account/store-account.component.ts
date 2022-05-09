@@ -246,7 +246,7 @@ export class StoreAccountComponent implements OnInit
                 },
                 actions: {
                     confirm: {
-                        label: 'Ok',
+                        label: 'OK',
                         color: "primary",
                     },
                     cancel: {

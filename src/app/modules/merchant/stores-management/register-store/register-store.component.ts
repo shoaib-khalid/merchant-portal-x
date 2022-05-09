@@ -1303,7 +1303,7 @@ export class RegisterStoreComponent implements OnInit
                     },
                     actions: {
                         confirm: {
-                            label: 'Ok',
+                            label: 'OK',
                             color: "primary",
                         },
                         cancel: {
@@ -1552,7 +1552,7 @@ export class RegisterStoreComponent implements OnInit
                 },
                 actions: {
                     confirm: {
-                        label: 'Ok',
+                        label: 'OK',
                         color: "primary",
                     },
                     cancel: {

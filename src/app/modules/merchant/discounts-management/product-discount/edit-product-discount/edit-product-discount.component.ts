@@ -447,7 +447,7 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
                         message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
                         actions: {
                             confirm: {
-                                label: 'Ok'
+                                label: 'OK'
                             },
                             cancel : {
                                 show : false,
@@ -473,7 +473,7 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
     editStoreProductDiscount(productDiscount){
 
         if(this.editDiscountAmount>100||this.editDiscountAmount<0){
-            const confirmation = this.displayMessage('Cannot more than 100 or less than 0','Please change the discount amount','Ok',false);
+            const confirmation = this.displayMessage('Cannot more than 100 or less than 0','Please change the discount amount','OK',false);
 
         } 
         else{
@@ -502,7 +502,7 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
 
         //check if the there is product disocunt , if yes just show pop up to delete the product level first
         if (this.storeDiscountProduct.length > 0) {
-            this.displayMessage('Cannot delete','Delete the selected product first before delete this.','Ok',false);
+            this.displayMessage('Cannot delete','Delete the selected product first before delete this.','OK',false);
         } else {
             // Open the confirmation dialog
             const confirmation = this.displayMessage('Delete discount','Are you sure you want to remove this discount? This action cannot be undone!','Delete',true);
@@ -546,7 +546,7 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
 
         if (this.onChangeSelectProductValue.length === 0){
             
-            this.displayMessage('Please select the product','Please select product to add product discount','Ok',false); 
+            this.displayMessage('Please select the product','Please select product to add product discount','OK',false); 
     
         }
         else {
@@ -670,7 +670,7 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
                 this._discountProductService.createProductDiscount(this.discountId,payloadProductDiscount).
                 subscribe((response) => {}
                 , error => {
-                    this.displayMessage('Cannot be add','The selected product already exist','Ok',false);
+                    this.displayMessage('Cannot be add','The selected product already exist','OK',false);
 
                 }
                 )

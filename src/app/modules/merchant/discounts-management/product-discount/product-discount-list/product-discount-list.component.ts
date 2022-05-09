@@ -432,7 +432,7 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
 
         //                 if (error.status === 417) {
         //                     // Open the confirmation dialog
-        //                     this.displayMessage('Discount date overlap','Your discount date range entered overlapping with existing discount date! Please change your date range','Ok',false);
+        //                     this.displayMessage('Discount date overlap','Your discount date range entered overlapping with existing discount date! Please change your date range','OK',false);
 
         //                 }
 
@@ -474,11 +474,11 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
                 }, error => {
                     if (error.status === 417) {
                         // Open the confirmation dialog
-                        this.displayMessage('Discount date overlap','Your discount date range entered overlapping with existing discount date! Please change your date range','Ok',false);
+                        this.displayMessage('Discount date overlap','Your discount date range entered overlapping with existing discount date! Please change your date range','OK',false);
                     }
                 });
         } else{
-            this.displayMessage('Date/time range incorrect','Please change your date range or time','Ok',false);
+            this.displayMessage('Date/time range incorrect','Please change your date range or time','OK',false);
         }
     }
 
@@ -490,7 +490,7 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
 
         //check if the there is product disocunt , if yes just show pop up to delete the product level first
         if (this.storeDiscountProduct['content'].length > 0) {
-            this.displayMessage('Cannot delete','Delete the selected product first before delete this.','Ok',false);
+            this.displayMessage('Cannot delete','Delete the selected product first before delete this.','OK',false);
         } else {
             // Open the confirmation dialog
             const confirmation = this.displayMessage('Delete discount','Are you sure you want to remove this discount? This action cannot be undone!','Delete',true);

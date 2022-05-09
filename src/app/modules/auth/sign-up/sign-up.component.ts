@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
@@ -11,6 +12,7 @@ import { StoresService } from 'app/core/store/store.service';
 import { StoreRegionCountries } from 'app/core/store/store.types';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { AuthModalComponent } from '../auth-modal/auth-modal.component';
 import { AppleLoginProvider } from '../sign-in/apple.provider';
 import { ValidateOauthRequest } from '../sign-in/oauth.types';
 
@@ -51,6 +53,7 @@ export class AuthSignUpComponent implements OnInit
      * Constructor
      */
     constructor(
+        public _dialog: MatDialog,
         private _authService: AuthService,
         private _formBuilder: FormBuilder,
         private _router: Router,
@@ -216,10 +219,32 @@ export class AuthSignUpComponent implements OnInit
             });
     }
 
-    signInWithApple(): void {
-        this._socialAuthService.signIn(AppleLoginProvider.PROVIDER_ID)
-            .then(userData => {
+    // signInWithApple(): void {
+    //     this._socialAuthService.signIn(AppleLoginProvider.PROVIDER_ID)
+    //         .then(userData => {
 
+    //         });
+    // }
+    
+    signInWithApple(): void {
+
+        const dialogRef = this._dialog.open( 
+            AuthModalComponent,{
+                width : '520px',
+                maxWidth: '80vw',
+                data:{ 
+                    icon : 'heroicons_solid:exclamation',
+                    title : 'Disclaimer',
+                    description : 'While using Apple ID to create your DeliverIn account, please select option to "Share My Email" to ensure your DeliverIn account is created properly.'
+                }
             });
-    }
+        dialogRef.afterClosed().subscribe((result) => {
+            // If the confirm button pressed...
+            this._socialAuthService.signIn(AppleLoginProvider.PROVIDER_ID)
+                .then(userData => {
+
+                });
+        });
+       
+   }
 }

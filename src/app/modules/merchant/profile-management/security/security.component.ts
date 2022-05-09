@@ -38,11 +38,16 @@ export class EditSecurityComponent implements OnInit
         // Create the form
         this.securityForm = this._formBuilder.group({
             currentPassword    : ['', Validators.required],
-            newPassword        : ['', Validators.required],
-            confirmNewPassword : ['', Validators.required],
+            newPassword        : ['', [Validators.required, Validators.minLength(8)]],
+            confirmNewPassword : ['', [Validators.required, Validators.minLength(8)]],
             twoStep            : [true],
             askPasswordChange  : [false]
-        });
+        }, 
+        {
+            // Use custom form validator name
+            validator: this.checkPasswordMatch("newPassword", "confirmNewPassword")
+        }
+        );
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -86,7 +91,7 @@ export class EditSecurityComponent implements OnInit
                     },
                     actions: {
                         confirm: {
-                            label: 'Ok',
+                            label: 'OK',
                             color: "primary",
                         },
                         cancel: {
@@ -98,6 +103,26 @@ export class EditSecurityComponent implements OnInit
                  // Mark for check
                  this._changeDetectorRef.markForCheck();
 
+            },
+            error => {
+                const confirmation = this._fuseConfirmationService.open({
+                    title  : 'Alert',
+                    message: 'Your current password is invalid',
+                    icon: {
+                        show: true,
+                        name: "heroicons_outline:exclamation",
+                        color: "warn"
+                    },
+                    actions: {
+                        confirm: {
+                            label: 'OK',
+                            color: "primary",
+                        },
+                        cancel: {
+                            show: false,
+                        },
+                    }
+                });
             });
 
         setTimeout(() => {
@@ -106,5 +131,23 @@ export class EditSecurityComponent implements OnInit
 
         // Enable the form
         this.securityForm.enable();
+    }
+
+    checkPasswordMatch(controlName: string,
+        matchingControlName: string){
+        return (formGroup: FormGroup) => {
+          const control = formGroup.controls[controlName];
+          const matchingControl = formGroup.controls[matchingControlName];
+      
+          if (matchingControl.errors && !matchingControl.errors.mustMatch) {
+            return;
+          }
+      
+          if (control.value !== matchingControl.value) {
+            matchingControl.setErrors({ mustMatch: true });
+          } else {
+            matchingControl.setErrors(null);
+          }
+        };
     }
 }

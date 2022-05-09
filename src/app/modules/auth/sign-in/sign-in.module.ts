@@ -18,10 +18,12 @@ import { SocialLoginModule, SocialAuthServiceConfig } from 'angularx-social-logi
 import { GoogleLoginProvider,FacebookLoginProvider } from 'angularx-social-login';
 import { AppleLoginProvider } from './apple.provider';
 import { SocialLooginClientId } from './oauth.types';
+import { AuthModalComponent } from '../auth-modal/auth-modal.component';
 
 @NgModule({
     declarations: [
         AuthSignInComponent,
+        AuthModalComponent
     ],
     imports     : [
         RouterModule.forChild(authSignInRoutes),

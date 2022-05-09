@@ -314,7 +314,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
                     color   : "warn" },
                 actions : {
                     confirm : {
-                        label: 'Ok'
+                        label: 'OK'
                     },
                     cancel  : {
                         show: false,
@@ -348,7 +348,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
                             message: 'The category name inserted is already existed, please create new category with a different name',
                             actions: {
                                 confirm: {
-                                    label: 'Ok'
+                                    label: 'OK'
                                 },
                                 cancel : {
                                     show : false,
