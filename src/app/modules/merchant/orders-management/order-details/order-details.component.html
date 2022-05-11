@@ -286,66 +286,66 @@
                     <div class="border-t border-gray-200">
                     <dl>
                         <div class="bg-white px-4 py-1.5 sm:grid grid-cols-2 sm:gap-4 sm:px-4">
-                        <dt class="text-sm font-medium text-gray-500">
-                            Payment Type
-                        </dt>
-                        <dd class="text-sm text-gray-900 mt-0 text-right">
-                            {{ detailsForm.get('paymentType').value}}
-                        </dd>
+                            <dt class="text-sm font-medium text-gray-500">
+                                Payment Type
+                            </dt>
+                            <dd class="text-sm text-gray-900 mt-0 text-right">
+                                {{ detailsForm.get('paymentType').value}}
+                            </dd>
                         </div>
                         <div class="bg-gray-50 px-4 py-1.5 sm:grid grid-cols-2 sm:gap-4 sm:px-4">
-                        <dt class="text-sm font-medium text-gray-500">
-                            Subtotal
-                        </dt>
-                        <dd class="text-sm text-gray-900 mt-0 text-right">
-                            {{ detailsForm.get('subTotal').value | currency: store$.regionCountry.currencySymbol}}
-                        </dd>
+                            <dt class="text-sm font-medium text-gray-500">
+                                Subtotal
+                            </dt>
+                            <dd class="text-sm text-gray-900 mt-0 text-right">
+                                {{ detailsForm.get('subTotal').value | currency: store$.regionCountry.currencySymbol}}
+                            </dd>
                         </div>
                         <div class="bg-white px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
-                        <dt class="text-sm font-medium text-gray-500">
-                            Order Discount
-                            <span class="font-medium tracking-tight text-secondary" *ngIf="appliedDiscountDescription">({{appliedDiscountDescription}})</span>
-                            <span class="font-bold pl-1 tracking-tight text-secondary" *ngIf="detailsForm.get('discountMaxAmount').value && detailsForm.get('discountMaxAmount').value != 0 && detailsForm.get('appliedDiscount').value >= detailsForm.get('discountMaxAmount').value && detailsForm.get('appliedDiscount').value != 0">
-                                Capped at {{store$.regionCountry.currencySymbol}}{{detailsForm.get('discountMaxAmount').value}}</span>    
-                        </dt>
-                        <dd class="text-sm text-gray-900 mt-0 text-right">
-                            -{{ detailsForm.get('appliedDiscount').value | currency: store$.regionCountry.currencySymbol}}
-                        </dd>
+                            <dt class="text-sm font-medium text-gray-500">
+                                Order Discount
+                                <span class="font-medium tracking-tight text-secondary" *ngIf="appliedDiscountDescription">({{appliedDiscountDescription}})</span>
+                                <span class="font-bold pl-1 tracking-tight text-secondary" *ngIf="detailsForm.get('discountMaxAmount').value && detailsForm.get('discountMaxAmount').value != 0 && detailsForm.get('appliedDiscount').value >= detailsForm.get('discountMaxAmount').value && detailsForm.get('appliedDiscount').value != 0">
+                                    Capped at {{store$.regionCountry.currencySymbol}}{{detailsForm.get('discountMaxAmount').value}}</span>    
+                            </dt>
+                            <dd class="text-sm text-gray-900 mt-0 text-right">
+                                -{{ detailsForm.get('appliedDiscount').value | currency: store$.regionCountry.currencySymbol}}
+                            </dd>
+                        </div>
+                        <div *ngIf="detailsForm.get('storeServiceCharges').value && detailsForm.get('storeServiceCharges').value !== 0" class="bg-gray-50 px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
+                            <dt class="text-sm font-medium text-gray-500">
+                                Service Charge
+                            </dt>
+                            <dd class="text-sm text-gray-900 mt-0 text-right">
+                                {{ detailsForm.get('storeServiceCharges').value | currency: store$.regionCountry.currencySymbol}}
+                            </dd>
+                        </div>
+                        <div class="bg-white px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
+                            <dt class="text-sm font-medium text-gray-500">
+                                Delivery Charge
+                            </dt>
+                            <dd class="text-sm text-gray-900 mt-0 text-right">
+                                {{ detailsForm.get('deliveryCharges').value | currency: store$.regionCountry.currencySymbol}}
+                            </dd>
                         </div>
                         <div class="bg-gray-50 px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
-                        <dt class="text-sm font-medium text-gray-500">
-                            Service Charge
-                        </dt>
-                        <dd class="text-sm text-gray-900 mt-0 text-right">
-                            {{ detailsForm.get('storeServiceCharges').value | currency: store$.regionCountry.currencySymbol}}
-                        </dd>
+                            <dt class="text-sm font-medium text-gray-500">
+                                Delivery Discount
+                                <span class="font-medium tracking-tight text-secondary" *ngIf="deliveryDiscountDescription">({{deliveryDiscountDescription}})</span>  
+                                <span class="font-bold pl-1 tracking-tight text-secondary" *ngIf="detailsForm.get('deliveryDiscountMaxAmount').value && detailsForm.get('deliveryDiscountMaxAmount').value != 0 && detailsForm.get('deliveryDiscount').value >= detailsForm.get('deliveryDiscountMaxAmount').value && detailsForm.get('deliveryDiscount').value != 0">
+                                    Capped at {{store$.regionCountry.currencySymbol}}{{detailsForm.get('deliveryDiscountMaxAmount').value}}</span>    
+                            </dt>
+                            <dd class="text-sm text-gray-900 mt-0 text-right">
+                                -{{ detailsForm.get('deliveryDiscount').value | currency: store$.regionCountry.currencySymbol}}
+                            </dd>
                         </div>
                         <div class="bg-white px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
-                        <dt class="text-sm font-medium text-gray-500">
-                            Delivery Charge
-                        </dt>
-                        <dd class="text-sm text-gray-900 mt-0 text-right">
-                            {{ detailsForm.get('deliveryCharges').value | currency: store$.regionCountry.currencySymbol}}
-                        </dd>
-                        </div>
-                        <div class="bg-gray-50 px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
-                        <dt class="text-sm font-medium text-gray-500">
-                            Delivery Discount
-                            <span class="font-medium tracking-tight text-secondary" *ngIf="deliveryDiscountDescription">({{deliveryDiscountDescription}})</span>  
-                            <span class="font-bold pl-1 tracking-tight text-secondary" *ngIf="detailsForm.get('deliveryDiscountMaxAmount').value && detailsForm.get('deliveryDiscountMaxAmount').value != 0 && detailsForm.get('deliveryDiscount').value >= detailsForm.get('deliveryDiscountMaxAmount').value && detailsForm.get('deliveryDiscount').value != 0">
-                                Capped at {{store$.regionCountry.currencySymbol}}{{detailsForm.get('deliveryDiscountMaxAmount').value}}</span>    
-                        </dt>
-                        <dd class="text-sm text-gray-900 mt-0 text-right">
-                            -{{ detailsForm.get('deliveryDiscount').value | currency: store$.regionCountry.currencySymbol}}
-                        </dd>
-                        </div>
-                        <div class="bg-white px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
-                        <dt class="text-sm font-medium text-gray-500">
-                            Total
-                        </dt>
-                        <dd class="text-sm text-gray-900 mt-0 text-right">
-                            {{ detailsForm.get('total').value | currency: store$.regionCountry.currencySymbol}}
-                        </dd>
+                            <dt class="text-sm font-medium text-gray-500">
+                                Total
+                            </dt>
+                            <dd class="text-sm text-gray-900 mt-0 text-right">
+                                {{ detailsForm.get('total').value | currency: store$.regionCountry.currencySymbol}}
+                            </dd>
                         </div>
                     </dl>
                     </div>
