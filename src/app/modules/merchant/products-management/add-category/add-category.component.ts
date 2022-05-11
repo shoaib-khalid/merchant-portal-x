@@ -4,8 +4,8 @@ import { JwtService } from 'app/core/jwt/jwt.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { InventoryService } from 'app/core/product/inventory.service';
-import { takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
+import { ApiResponseModel, ProductCategory } from 'app/core/product/inventory.types';
 
 
 @Component({
@@ -38,6 +38,13 @@ export class AddCategoryComponent implements OnInit {
     imagesFile: any = [];
     currentImageIndex: number = 0;
 
+    filteredOptions: Observable<string[]>;
+    options: string[] = ['One', 'Two', 'Three'];
+    parentCategoriesOptions: ProductCategory[];
+
+    parentSelectedCategory:string='';
+
+
   constructor(
     public dialogRef: MatDialogRef<AddCategoryComponent>,
     private _jwt: JwtService,
@@ -60,9 +67,16 @@ export class AddCategoryComponent implements OnInit {
       // Create the selected product form
       this.addCategoryForm = this._formBuilder.group({
         name             : ['',[Validators.required]],
+        parentCategoryId : ['',[Validators.required]],
         thumbnailUrl     : [[]],
         imagefiles:[[]],
-    });
+      });
+
+      //get all values for parent categories with specied vertical code
+      this._inventoryService.getParentCategories(0, 20, 'name', 'asc', '','E-Commerce')
+      .subscribe((response:ApiResponseModel<ProductCategory[]>)=>{
+        this.parentCategoriesOptions = response.data["content"];
+      })
 
   }
 
@@ -73,7 +87,7 @@ export class AddCategoryComponent implements OnInit {
   addNewCategory() {
     this.addCategoryForm.get('thumbnailUrl').patchValue(this.thumbnailUrl);
     this.addCategoryForm.get('imagefiles').patchValue(this.imagesFile);
-
+    
     this.dialogRef.close(this.addCategoryForm.value);
   }
 

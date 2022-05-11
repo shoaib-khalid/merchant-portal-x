@@ -108,6 +108,7 @@ storeId: string;
 parentCategoryId: string;
 name: string;
 thumbnailUrl: string;
+verticalCode?: string;
 }
 
 /**
@@ -174,4 +175,14 @@ export interface DeliveryVehicleType
 {
     vehicleType?: string;
     name?: string;      
+}
+
+export interface ApiResponseModel<T>
+{
+
+  message?: string;
+  data?: T;
+  path : string;
+  status: number;
+  timestamp:string;
 }

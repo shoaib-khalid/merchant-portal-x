@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { catchError, filter, map, switchMap, take, tap } from 'rxjs/operators';
-import { Product, ProductVariant, ProductInventory, ProductCategory, ProductPagination, ProductVariantAvailable, ProductPackageOption, ProductAssets, ProductCategoryPagination, DeliveryVehicleType } from 'app/core/product/inventory.types';
+import { Product, ProductVariant, ProductInventory, ProductCategory, ProductPagination, ProductVariantAvailable, ProductPackageOption, ProductAssets, ProductCategoryPagination, DeliveryVehicleType, ApiResponseModel } from 'app/core/product/inventory.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from '../logging/log.service';
@@ -1160,7 +1160,8 @@ export class InventoryService
     getCategories(name: string = null, id: string = "", page: number = 0, size: number = 30, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc'): Observable<ProductCategory[]>
     {
 
-        let productService = this._apiServer.settings.apiServer.productService;
+          // let productService = this._apiServer.settings.apiServer.productService;//https://api.symplified.it/product-service/v1
+          let productService = 'http://localhost:4000';
         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
           const header = {
@@ -1204,7 +1205,8 @@ export class InventoryService
     getByQueryCategories(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = ''):
     Observable<{ pagination: ProductCategoryPagination; products: ProductCategory[] }>
     {
-        let productService = this._apiServer.settings.apiServer.productService;
+        // let productService = this._apiServer.settings.apiServer.productService;//https://api.symplified.it/product-service/v1
+        let productService = 'http://localhost:4000';
         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
@@ -1237,6 +1239,34 @@ export class InventoryService
             })
         );
     }
+
+    getParentCategories(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '',verticalcode:string=''):
+    Observable<ApiResponseModel<ProductCategory[]>>
+     {
+        // let productService = this._apiServer.settings.apiServer.productService;//https://api.symplified.it/product-service/v1
+        let productService = 'http://localhost:4000';
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+ 
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                page        : '' + page,
+                pageSize    : '' + size,
+                sortByCol   : '' + sort,
+                sortingOrder: '' + order.toUpperCase(),
+                name        : '' + search,
+                verticalCode        : '' + verticalcode,
+
+            }
+        };
+ 
+         return this._httpClient.get<ApiResponseModel<ProductCategory[]>>(productService  + '/store-categories',header).pipe(
+             tap((response) => {
+ 
+                 this._logging.debug("Response from getParentCategories (getParentCategories)",response);
+             })
+         );
+     }
 
     /**
      * Get ctegory by id
@@ -1278,14 +1308,16 @@ export class InventoryService
       */
     createCategory(category: ProductCategory, formData: FormData = null): Observable<ProductCategory>
     {
-        let productService = this._apiServer.settings.apiServer.productService;
+        // let productService = this._apiServer.settings.apiServer.productService;//https://api.symplified.it/product-service/v1
+        let productService = 'http://localhost:4000';
         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
             params: {
                 name: category.name,
-                storeId: this.storeId$
+                storeId: this.storeId$,
+                parentCategoryId:category.parentCategoryId
             }
         };
 
@@ -1322,14 +1354,15 @@ export class InventoryService
     updateCategory(id: string, category: ProductCategory, formdata: FormData = null, fileSource = null): Observable<ProductCategory>
     {
 
-        let productService = this._apiServer.settings.apiServer.productService;
+        // let productService = this._apiServer.settings.apiServer.productService;//https://api.symplified.it/product-service/v1
+        let productService = 'http://localhost:4000';
         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
 
-        let queryParam = "?storeId=" + this.storeId$ + "&name=" + category.name;
+        let queryParam = "?storeId=" + this.storeId$ + "&name=" + category.name +"&parentCategoryId=" + category.parentCategoryId;
 
         // product-service/v1/swagger-ui.html#/store-category-controller/putStoreProductAssetsByIdUsingPUT
         return this.categories$.pipe(
