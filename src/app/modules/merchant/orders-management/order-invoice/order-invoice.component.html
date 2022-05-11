@@ -118,12 +118,15 @@
                     </div>
                     <div class="col-span-2 text-right text-lg">-{{ invoiceForm.get('appliedDiscount').value | currency: store$.regionCountry.currencySymbol}}</div>
     
-                    <!-- Divider -->
-                    <div class="col-span-12 my-3 border-b"></div>
-    
                     <!-- Service Charges -->
-                    <div class="col-span-10 self-center font-medium tracking-tight text-secondary">SERVICE CHARGE</div>
-                    <div class="col-span-2 text-right text-lg">{{ invoiceForm.get('storeServiceCharges').value | currency: store$.regionCountry.currencySymbol}}</div>
+                    <ng-container *ngIf="invoiceForm.get('storeServiceCharges').value && invoiceForm.get('storeServiceCharges').value !== 0">
+                        <!-- Divider -->
+                        <div class="col-span-12 my-3 border-b"></div>
+        
+                        <!-- Service Charges -->
+                        <div class="col-span-10 self-center font-medium tracking-tight text-secondary">SERVICE CHARGE</div>
+                        <div class="col-span-2 text-right text-lg">{{ invoiceForm.get('storeServiceCharges').value | currency: store$.regionCountry.currencySymbol}}</div>
+                    </ng-container>
     
                     <!-- Divider -->
                     <div class="col-span-12 my-3 border-b"></div>
