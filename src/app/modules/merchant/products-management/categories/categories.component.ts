@@ -109,7 +109,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
             id                    : [''],
             name                  : ['', [Validators.required]],
             thumbnailUrl          : [''],
-            parentCategoryId      : [''],
+            parentCategoryId      : ['',[Validators.required]],
             storeId               : [''], // not used
         });
 
@@ -137,11 +137,18 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
             this._changeDetectorRef.markForCheck();
         });
 
-        //get all values for parent categories with specied vertical code
-        this._inventoryService.getParentCategories(0, 20, 'name', 'asc', '','E-Commerce')
-        .subscribe((response:ApiResponseModel<ProductCategory[]>)=>{
-            this.parentCategoriesOptions = response.data["content"];
-        })
+        //Get the vertical code for this store id first then we get the parent categories
+        this._storesService.getStoreById(this.storeId$)
+        .pipe(
+            map((response)=>{
+                return response.verticalCode;
+            }),
+            switchMap((storeVerticalCode:string)=>this._inventoryService.getParentCategories(0, 20, 'name', 'asc', '',storeVerticalCode)
+            ),
+        )
+        .subscribe((categories) => {
+            this.parentCategoriesOptions = categories.data["content"];
+        });
         
         // Subscribe to search input field value changes
         this.searchInputControl.valueChanges
@@ -376,6 +383,10 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
      */
     updateCategory(): void
     {
+        if(this.categoriesForm.invalid){
+            return;
+        }
+        
         let formData = null;
         let fileSource = null;
         if (this.files[0].selectedFiles) {

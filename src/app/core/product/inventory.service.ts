@@ -1160,8 +1160,7 @@ export class InventoryService
     getCategories(name: string = null, id: string = "", page: number = 0, size: number = 30, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc'): Observable<ProductCategory[]>
     {
 
-          // let productService = this._apiServer.settings.apiServer.productService;//https://api.symplified.it/product-service/v1
-          let productService = 'http://localhost:4000';
+        let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
           const header = {
@@ -1205,8 +1204,7 @@ export class InventoryService
     getByQueryCategories(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = ''):
     Observable<{ pagination: ProductCategoryPagination; products: ProductCategory[] }>
     {
-        // let productService = this._apiServer.settings.apiServer.productService;//https://api.symplified.it/product-service/v1
-        let productService = 'http://localhost:4000';
+        let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
@@ -1243,8 +1241,7 @@ export class InventoryService
     getParentCategories(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '',verticalcode:string=''):
     Observable<ApiResponseModel<ProductCategory[]>>
      {
-        // let productService = this._apiServer.settings.apiServer.productService;//https://api.symplified.it/product-service/v1
-        let productService = 'http://localhost:4000';
+        let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
  
         const header = {
@@ -1308,8 +1305,7 @@ export class InventoryService
       */
     createCategory(category: ProductCategory, formData: FormData = null): Observable<ProductCategory>
     {
-        // let productService = this._apiServer.settings.apiServer.productService;//https://api.symplified.it/product-service/v1
-        let productService = 'http://localhost:4000';
+        let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {
@@ -1354,8 +1350,7 @@ export class InventoryService
     updateCategory(id: string, category: ProductCategory, formdata: FormData = null, fileSource = null): Observable<ProductCategory>
     {
 
-        // let productService = this._apiServer.settings.apiServer.productService;//https://api.symplified.it/product-service/v1
-        let productService = 'http://localhost:4000';
+        let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
         const header = {

@@ -91,6 +91,9 @@
                                 </mat-option>
                             </div>
                         </mat-select>
+                        <mat-error *ngIf="addCategoryForm.get('parentCategoryId').hasError('required')">
+                            Parent category is required
+                        </mat-error>
                     </mat-form-field>
                 </div>
                 <div class="flex flex-wrap w-2/3">
@@ -102,7 +105,10 @@
                             matInput
                             placeholder="Insert category name"
                             [formControlName] = "'name'"
-                        >
+                        >  
+                        <mat-error *ngIf="addCategoryForm.get('name').hasError('required')">
+                            Category name is required
+                        </mat-error>
                     </mat-form-field>
                 </div>
             </div>
