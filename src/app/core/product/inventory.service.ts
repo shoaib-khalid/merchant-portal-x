@@ -1313,10 +1313,14 @@ export class InventoryService
             params: {
                 name: category.name,
                 storeId: this.storeId$,
-                parentCategoryId:category.parentCategoryId
+                parentCategoryId:category.parentCategoryId 
             }
         };
 
+        if (!category.parentCategoryId || category.parentCategoryId === "") {
+            delete header.params['parentCategoryId'];
+        }
+        
         // product-service/v1/swagger-ui.html#/store-category-controller/postStoreCategoryByStoreIdUsingPOST
         return this.categories$.pipe(
             take(1),
@@ -1355,14 +1359,21 @@ export class InventoryService
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                name: category.name,
+                storeId: this.storeId$,
+                parentCategoryId:category.parentCategoryId 
+            }
         };
 
-        let queryParam = "?storeId=" + this.storeId$ + "&name=" + category.name +"&parentCategoryId=" + category.parentCategoryId;
-
+        if (!category.parentCategoryId || category.parentCategoryId === "") {
+            delete header.params['parentCategoryId'];
+        }
+        
         // product-service/v1/swagger-ui.html#/store-category-controller/putStoreProductAssetsByIdUsingPUT
         return this.categories$.pipe(
             take(1),
-            switchMap(categories => this._httpClient.put<any>(productService + '/store-categories/' + id + queryParam, formdata , header).pipe(
+            switchMap(categories => this._httpClient.put<any>(productService + '/store-categories/' + id , formdata , header).pipe(
                 map((newCategory) => {
 
                     this._logging.debug("Response from ProductsService (updateCategory)",newCategory);

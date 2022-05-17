@@ -105,7 +105,7 @@ export interface ProductCategory
 {
 id?: string;
 storeId: string;
-parentCategoryId: string;
+parentCategoryId?: string;
 name: string;
 thumbnailUrl: string;
 verticalCode?: string;

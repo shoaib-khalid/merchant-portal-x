@@ -482,6 +482,24 @@
                                 </div>
                             </div>
 
+                            <!-- Parent categories -->
+                            <div class="w-full">
+                                <mat-form-field class="w-50">
+                                    <mat-label>Top Tier Category</mat-label>
+                                    <mat-select
+                                        class="w-full"
+                                        [(ngModel)]="selectedParentCategory"
+                                        [ngModelOptions]="{standalone: true}"
+                                        disabled
+                                    >
+                                        <div>
+                                            <mat-option *ngFor="let listing of parentCategoriesOptions;" [value]="listing.id">
+                                                {{listing.name}}
+                                            </mat-option>
+                                        </div>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
                             <!-- Category, Variant Toggle, Bulk Item, Vehicle Type -->
                             <div class="flex flex-col w-full lg:w-3/12">
                                 <!-- Category -->

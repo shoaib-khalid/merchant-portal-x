@@ -109,7 +109,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
             id                    : [''],
             name                  : ['', [Validators.required]],
             thumbnailUrl          : [''],
-            parentCategoryId      : ['',[Validators.required]],
+            parentCategoryId      : [''],
             storeId               : [''], // not used
         });
 

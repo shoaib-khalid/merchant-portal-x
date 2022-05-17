@@ -6,7 +6,7 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { fromEvent, merge, Observable, of, Subject } from 'rxjs';
 import { concatMap, debounceTime, delay, finalize, map, mergeMap, switchMap, take, takeUntil } from 'rxjs/operators';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, ProductCategory, ProductPagination, ProductPackageOption, ProductAssets, DeliveryVehicleType } from 'app/core/product/inventory.types';
+import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, ProductCategory, ProductPagination, ProductPackageOption, ProductAssets, DeliveryVehicleType, ApiResponseModel } from 'app/core/product/inventory.types';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { Store } from 'app/core/store/store.types';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -250,6 +250,11 @@ export class EditProductComponent implements OnInit, OnDestroy
     onChangeSelectProductValue: any = []; // for product checkbox in combo section
     totalAllowed: number = 0;
 
+    storeVerticalCode : string = '';
+    parentCategoriesOptions: ProductCategory[];
+    selectedParentCategory: string ='';
+
+
 
     /**
      * Constructor
@@ -375,6 +380,7 @@ export class EditProductComponent implements OnInit, OnDestroy
 
                 // Update the pagination
                 this.store$ = store;
+                this.storeVerticalCode =this.store$.verticalCode;
 
                 // set packingSize to S if verticalCode FnB
                 if (this.store$.verticalCode === "FnB" || this.store$.verticalCode === "FnB_PK"){
@@ -385,6 +391,14 @@ export class EditProductComponent implements OnInit, OnDestroy
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
+
+        //get all values for parent categories with specied vertical code
+        this._inventoryService.getParentCategories(0, 20, 'name', 'asc', '',this.storeVerticalCode)
+        .subscribe((response:ApiResponseModel<ProductCategory[]>)=>{
+            
+             this.parentCategoriesOptions = response.data["content"];
+             return this.parentCategoriesOptions;
+        })
 
         // Get delivery vehicle type
         this._inventoryService.getDeliveryVehicleType()
@@ -407,6 +421,7 @@ export class EditProductComponent implements OnInit, OnDestroy
                 // Update the categories
                 this.productCategories$ = categories;
                 this.filteredProductCategories = categories;
+                
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -749,6 +764,12 @@ export class EditProductComponent implements OnInit, OnDestroy
 
         // Update the selected product form
         this.addProductForm.get('step1').get('categoryId').patchValue(this.selectedProduct.categoryId);
+
+        //to get the details of catgeory and show the tier category
+        this._inventoryService.getCategoriesById(product.categoryId).subscribe((res:ProductCategory)=>{
+            this.selectedParentCategory = res.parentCategoryId;
+
+        })
 
         // Sort the filtered categories, put selected category on top
         // First get selected array index by using this.selectedProduct.categoryId
@@ -1096,6 +1117,9 @@ export class EditProductComponent implements OnInit, OnDestroy
     addCategoryToProduct(category: ProductCategory): void
     {
 
+        //to display the tier category
+        this.selectedParentCategory = category.parentCategoryId;
+        
         // Update the selected product form
         this.addProductForm.get('step1').get('categoryId').patchValue(category.id);
 
