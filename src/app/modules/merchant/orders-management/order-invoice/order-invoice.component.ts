@@ -111,8 +111,8 @@ export class OrderInvoiceComponent implements OnInit {
       discountMaxAmount   :[0],
       appliedDiscountDescription : [0],
       deliveryDiscountMaxAmount : [0],
-      customerNotes: [''] //order level
-
+      customerNotes: [''], //order level
+      voucherDiscount: [0]
     });
 
     this._storesService.store$

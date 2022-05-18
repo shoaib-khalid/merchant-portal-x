@@ -49,20 +49,20 @@
                     </div>
                 </div>
     
-                <div class="grid grid-cols-12 gap-x-1 mt-16">
+                <div class="grid grid-cols-11 gap-x-2 mt-16">
                     <!-- Columns -->
-                    <div class="col-span-5 font-medium text-md text-secondary">ITEMS</div>
-                    <div class="font-medium text-md text-right text-secondary">RATE</div>
-                    <div class="col-span-3 font-medium text-md text-right text-secondary">ORIGINAL QUANTITY</div>
-                    <div class="col-span-2 font-medium text-md text-right text-secondary">QUANTITY</div>
-                    <div class="font-medium text-md text-right text-secondary">TOTAL</div>
+                    <div class="col-span-4 font-medium text-md text-secondary">ITEMS</div>
+                    <div class="col-span-2 font-medium text-md text-right text-secondary">RATE</div>
+                    <div class="col-span-2 font-medium text-md text-right text-secondary">ORIGINAL QUANTITY</div>
+                    <div class="col-span-1 font-medium text-md text-right text-secondary">QUANTITY</div>
+                    <div class="col-span-2 font-medium text-md text-right text-secondary">TOTAL</div>
     
                     <ng-container *ngFor="let item of invoiceForm.get('items').value">
                         <!-- Divider -->
-                        <div class="col-span-12 my-4 border-b"></div>
+                        <div class="col-span-11 my-4 border-b"></div>
         
                         <!-- Item -->
-                        <div class="col-span-5">
+                        <div class="col-span-4">
                             <div class="mb-1 text-lg font-medium">{{ item.productName }}</div>
                             <div class="flex flex-wrap text-secondary" *ngIf="item.productVariant">
                                 <span class="mr-1 mb-1" *ngFor="let variant of item.productVariant">
@@ -87,10 +87,14 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="self-center text-right">{{ item.productPrice | currency: store$.regionCountry.currencySymbol }}</div>
-                        <div class="col-span-3 self-center text-center">{{ item.originalQuantity===null?item.quantity:item.originalQuantity }}</div>
-                        <div class="col-span-2 self-center text-center">{{ item.quantity }}</div>
-                        <div class="self-center text-right">{{ (item.productPrice * item.quantity) | currency: store$.regionCountry.currencySymbol }}</div>
+                        <!-- Rate -->
+                        <div class="col-span-2 self-center text-right">{{ item.productPrice | currency: store$.regionCountry.currencySymbol }}</div>
+                        <!-- Original Qty -->
+                        <div class="col-span-2 self-center text-center">{{ item.originalQuantity===null?item.quantity:item.originalQuantity }}</div>
+                        <!-- Qty -->
+                        <div class="col-span-1 self-center text-center">{{ item.quantity }}</div>
+                        <!-- Total -->
+                        <div class="col-span-2 self-center text-right">{{ (item.productPrice * item.quantity) | currency: store$.regionCountry.currencySymbol }}</div>
                     </ng-container>
     
                     <!-- Spacer -->
@@ -145,6 +149,14 @@
                             Capped at {{store$.regionCountry.currencySymbol}}{{invoiceForm.get('deliveryDiscountMaxAmount').value}}</span>
                     </div>
                     <div class="col-span-2 text-right text-lg">-{{ invoiceForm.get('deliveryDiscount').value | currency: store$.regionCountry.currencySymbol}}</div>
+    
+                    <!-- Divider -->
+                    <div class="col-span-12 my-3 border-b"></div>
+
+                    <!-- Voucher Discount -->
+                    <div class="col-span-10 self-center font-medium tracking-tight text-secondary">VOUCHER DISCOUNT
+                    </div>
+                    <div class="col-span-2 text-right text-lg">-{{ (invoiceForm.get('voucherDiscount').value ? invoiceForm.get('voucherDiscount').value : 0) | currency: store$.regionCountry.currencySymbol}}</div>
     
                     <!-- Divider -->
                     <div class="col-span-12 my-3 border-b"></div>

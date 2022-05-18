@@ -126,7 +126,8 @@ export class EditOrderComponent implements OnInit
         deliveryDiscountMaxAmount : [],
         customerNotes: [''], //order level
         paymentType: [''],
-        completionStatus: ['']
+        completionStatus: [''],
+        voucherDiscount: [0]
       });
   
       this._storesService.store$

@@ -308,15 +308,15 @@
                             -{{ detailsForm.get('appliedDiscount').value | currency: store$.regionCountry.currencySymbol}}
                         </dd>
                         </div>
-                        <div class="bg-gray-50 px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
-                        <dt class="text-sm font-medium text-gray-500">
-                            Service Charge
-                        </dt>
-                        <dd class="text-sm text-gray-900 mt-0 text-right">
-                            {{ detailsForm.get('storeServiceCharges').value | currency: store$.regionCountry.currencySymbol}}
-                        </dd>
+                        <div *ngIf="detailsForm.get('storeServiceCharges').value && detailsForm.get('storeServiceCharges').value !== 0" class="bg-gray-50 px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
+                            <dt class="text-sm font-medium text-gray-500">
+                                Service Charge
+                            </dt>
+                            <dd class="text-sm text-gray-900 mt-0 text-right">
+                                {{ detailsForm.get('storeServiceCharges').value | currency: store$.regionCountry.currencySymbol}}
+                            </dd>
                         </div>
-                        <div class="bg-white px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
+                        <div class="bg-gray-50 px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
                         <dt class="text-sm font-medium text-gray-500">
                             Delivery Charge
                         </dt>
@@ -324,7 +324,7 @@
                             {{ detailsForm.get('deliveryCharges').value | currency: store$.regionCountry.currencySymbol}}
                         </dd>
                         </div>
-                        <div class="bg-gray-50 px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
+                        <div class="bg-white px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
                         <dt class="text-sm font-medium text-gray-500">
                             Delivery Discount
                             <span class="font-medium tracking-tight text-secondary" *ngIf="deliveryDiscountDescription">({{deliveryDiscountDescription}})</span>  
@@ -334,6 +334,14 @@
                         <dd class="text-sm text-gray-900 mt-0 text-right">
                             -{{ detailsForm.get('deliveryDiscount').value | currency: store$.regionCountry.currencySymbol}}
                         </dd>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
+                            <dt class="text-sm font-medium text-gray-500">
+                                Voucher Discount
+                            </dt>
+                            <dd class="text-sm text-gray-900 mt-0 text-right">
+                                -{{ (detailsForm.get('voucherDiscount').value ? detailsForm.get('voucherDiscount').value : 0) | currency: store$.regionCountry.currencySymbol}}
+                            </dd>
                         </div>
                         <div class="bg-white px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
                         <dt class="text-sm font-medium text-gray-500">

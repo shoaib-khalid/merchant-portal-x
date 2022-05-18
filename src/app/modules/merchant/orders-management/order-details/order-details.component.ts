@@ -125,7 +125,8 @@ export class OrderDetailsComponent implements OnInit
                 id: [''],
                 name: [''],
                 description: [''],
-            })
+            }),
+            voucherDiscount: [0]
         });
     
         this._storesService.store$
