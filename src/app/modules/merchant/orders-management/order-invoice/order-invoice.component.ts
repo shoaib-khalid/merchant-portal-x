@@ -8,7 +8,7 @@ import { Store } from 'app/core/store/store.types';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { OrdersListService } from '../orders-list/orders-list.service';
-import { Order, OrderItem } from '../orders-list/orders-list.types';
+import { Order, OrderItem, Voucher } from '../orders-list/orders-list.types';
 
 @Component({
   selector: 'app-order-invoice',
@@ -38,6 +38,8 @@ export class OrderInvoiceComponent implements OnInit {
   dateUpdated: Date;
   deliveryDiscountDescription: any;
   appliedDiscountDescription: any;
+  voucherDetail: Voucher;
+  voucherDiscount = {platform: 0, store: 0}
   
   constructor(
     private _changeDetectorRef: ChangeDetectorRef,
@@ -134,10 +136,20 @@ export class OrderInvoiceComponent implements OnInit {
   
             // Update the pagination
             this.order = order["data"];
+            this.voucherDetail = order["data"].voucherDetail;
 
             // patch the value from order to invoice form
             this.invoiceForm.patchValue(order["data"]);
 
+            // get the value for voucher type
+            if (this.invoiceForm.get('voucherDiscount').value && this.voucherDetail != null) {
+              if (this.voucherDetail.voucherType === 'PLATFORM') {
+                this.voucherDiscount.platform = this.invoiceForm.get('voucherDiscount').value
+              }
+              else if (this.voucherDetail.voucherType === 'STORE') {
+                this.voucherDiscount.store = this.invoiceForm.get('voucherDiscount').value
+              }
+            }
             this.invoiceForm.get('storeName').setValue(order["data"].store.name);
             
             const merchantAddress = () => {
@@ -297,6 +309,5 @@ export class OrderInvoiceComponent implements OnInit {
     window.print();
   }
 
- 
 
 }
