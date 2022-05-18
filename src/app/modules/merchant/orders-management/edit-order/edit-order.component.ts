@@ -7,7 +7,7 @@ import { Store } from 'app/core/store/store.types';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { OrdersListService } from '../orders-list/orders-list.service';
-import { DeliveryRiderDetails, Order, OrderItem } from '../orders-list/orders-list.types';
+import { DeliveryRiderDetails, Order, OrderItem, Voucher } from '../orders-list/orders-list.types';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dialog/dialog.component';
 
@@ -40,6 +40,8 @@ export class EditOrderComponent implements OnInit
     dateUpdated: Date;
     deliveryDiscountDescription: any;
     appliedDiscountDescription: any;
+    voucherDetail: Voucher;
+    voucherDiscount = {platform: 0, store: 0}
 
     payloadEditOrder : any=[];
     
@@ -152,6 +154,17 @@ export class EditOrderComponent implements OnInit
   
               // patch the value from order to invoice form
               this.detailsForm.patchValue(order["data"]);
+
+              // get the value for voucher type
+              this.voucherDetail = order["data"].voucherDetail;
+              if (this.detailsForm.get('voucherDiscount').value && this.voucherDetail != null) {
+                  if (this.voucherDetail.voucherType === 'PLATFORM') {
+                  this.voucherDiscount.platform = this.detailsForm.get('voucherDiscount').value
+                  }
+                  else if (this.voucherDetail.voucherType === 'STORE') {
+                  this.voucherDiscount.store = this.detailsForm.get('voucherDiscount').value
+                  }
+              }
   
               this.detailsForm.get('storeName').setValue(order["data"].store.name);
               this.detailsForm.get('storeAddress').setValue(order["data"].store.address);
