@@ -80,7 +80,7 @@
                                         </span>
                                     </mat-select-trigger>
                                     <div *ngFor="let state of storeStates">
-                                        <mat-option [value]="state.id">{{state.name}}</mat-option>
+                                        <mat-option [value]="state.name">{{state.name}}</mat-option>
                                     </div>
                                 </mat-select>
                                 <mat-error *ngIf="storeDeliveryForm.get('regionCountryStateId').hasError('required')">
