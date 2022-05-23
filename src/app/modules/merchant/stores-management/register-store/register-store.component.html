@@ -636,7 +636,7 @@
                                         </div>
                                         <div class="flex flex-col sm:flex-row w-full">
                                             <!-- City -->
-                                            <mat-form-field class="w-full sm:w-1/2 sm:pr-3" floatLabel="always">
+                                            <!-- <mat-form-field class="w-full sm:w-1/2 sm:pr-3" floatLabel="always">
                                                 <input
                                                     matInput
                                                     maxlength="100"
@@ -647,6 +647,30 @@
                                                 <mat-error *ngIf="createStoreForm.get('step3').get('city').hasError('required')">
                                                     Required
                                                 </mat-error>
+                                            </mat-form-field> -->
+                                            <mat-form-field class="w-full sm:w-1/2 sm:pr-3" floatLabel="always">
+                                                <mat-label>City</mat-label>
+                                                <mat-select 
+                                                    [formControlName]="'city'"
+                                                    [required]="true"
+                                                    [value]="'city'"
+                                                    [placeholder]="'Select State'"
+                                                    (selectionChange)="storeDeliveryForm.get('city').patchValue($event.value);"
+                                                    #stateCitySelector="matSelect">
+                                                    <mat-select-trigger>
+                                                        <span class="flex items-center">
+                                                            <span>{{ stateCitySelector.triggerValue }}</span>
+                                                        </span>
+                                                    </mat-select-trigger>
+                                                    <ngx-mat-select-search [placeholderLabel]="'Search City'" [noEntriesFoundLabel]="'No matching records found'" [formControl]="regionCountryStateCities"
+                                                     ngDefaultControl></ngx-mat-select-search>
+                                                    <!-- <div *ngFor="let city of storeStateCities">
+                                                        <mat-option class="m-t" [value]="city.city">{{city.city}}</mat-option>
+                                                    </div> -->
+                                                    <mat-option class="m-t" *ngFor="let city of storeStateCities$ | async" [value]="city.city">
+                                                        {{city.city}}
+                                                    </mat-option>
+                                                </mat-select>
                                             </mat-form-field>
                                             <!-- Postcode -->
                                             <mat-form-field class="w-full sm:w-1/2 sm:pl-3" floatLabel="always">

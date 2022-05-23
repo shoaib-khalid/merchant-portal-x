@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { StoresService } from 'app/core/store/store.service';
 import { EditStoreValidationService } from 'app/modules/merchant/stores-management/edit-store/edit-store.validation.service';
@@ -7,8 +7,11 @@ import { Store, StoreRegionCountries, CreateStore, StoreAssets, StoreSelfDeliver
 import { ChooseVerticalService } from '../../choose-vertical/choose-vertical.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Loader } from '@googlemaps/js-api-loader';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject, Subject, take, takeUntil } from 'rxjs';
 import { GoogleKey } from '../edit-store.types';
+import { MatSelect } from '@angular/material/select';
+import { City } from './store-delivery.types';
+import { StoresDeliveryService } from './store-delivery.service';
 
 
 
@@ -51,6 +54,27 @@ import { GoogleKey } from '../edit-store.types';
 })
 export class StoreDeliveryComponent implements OnInit
 {
+    cities: any[] = [
+        "Agriculture and Mining",
+        "Business Services"
+        , "Computer and Electronics"
+        , "Consumer Services"
+        , "Education"
+        , "Energy and Utilities"
+        , "Financial Services"
+        , "Government"
+        , "Health, Pharmaceuticals, and Biotech"
+    ];
+
+
+    /** control for the selected bank for multi-selection */
+    public regionCountryStateCities: FormControl = new FormControl();
+
+    private _onDestroy = new Subject<void>();
+    public filteredCities: ReplaySubject<any[]> = new ReplaySubject<any[]>(1);
+
+    @ViewChild('stateCitySelector') stateCitySelector: MatSelect;
+    
     storeDeliveryForm: FormGroup;
     
     store: Store;
@@ -68,6 +92,9 @@ export class StoreDeliveryComponent implements OnInit
     allowedSelfDeliveryStates: FormArray;
 
     storeStates: string[] = [];
+    storeStateCities: string[] = [];
+    storeStateCities$: Observable<City[]>;
+
     storeCountries: StoreRegionCountries[] = [];
 
     private map: google.maps.Map;
@@ -104,6 +131,8 @@ export class StoreDeliveryComponent implements OnInit
         private _changeDetectorRef: ChangeDetectorRef,
         private _chooseVerticalService: ChooseVerticalService,
         private _fuseConfirmationService: FuseConfirmationService,
+        private _storeDeliveryService: StoresDeliveryService
+
     )
     {
       
@@ -118,14 +147,6 @@ export class StoreDeliveryComponent implements OnInit
      */
     ngOnInit(): void
     {
-        //to implement get current location first to be display if in db is null
-        navigator.geolocation.getCurrentPosition((position) => {
-            var crd = position.coords;
-            this.currentLat = crd.latitude;
-            this.currentLong= crd.longitude;
-
-        })
-                
         // navigator.geolocation.getCurrentPosition(success, error, options); 
         // Create the form
         this.storeDeliveryForm = this._formBuilder.group({
@@ -146,7 +167,51 @@ export class StoreDeliveryComponent implements OnInit
             regionCountryStateId        : ['', Validators.required],
             regionCountryId             : ['', Validators.required],
         });
-        
+
+        this.setInitialValue();
+
+        // set initial selection
+        this.regionCountryStateCities.setValue([]);
+        // load the initial bank list
+        // this.filteredCities.next(this.cities.slice());
+
+        this.regionCountryStateCities.valueChanges
+            .pipe(takeUntil(this._onDestroy))
+            .subscribe((result) => {                
+                // Get states by country Z(using symplified backend)
+                this._storeDeliveryService.getStoreRegionCountryStateCity(this.storeDeliveryForm.get('regionCountryStateId').value, result )
+                .subscribe((response)=>{
+                    // Get the products
+                    this.storeStateCities$ = this._storeDeliveryService.cities$;                    
+
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                });
+            });
+
+        this.storeDeliveryForm.get('regionCountryStateId').valueChanges
+            .pipe(takeUntil(this._onDestroy))
+            .subscribe((result) => {
+                
+                // Get states by country Z(using symplified backend)
+                this._storeDeliveryService.getStoreRegionCountryStateCity(result)
+                .subscribe((response)=>{
+                    // Get the products
+                    this.storeStateCities$ = this._storeDeliveryService.cities$;                    
+
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                });
+            });
+
+        //to implement get current location first to be display if in db is null
+        navigator.geolocation.getCurrentPosition((position) => {
+            var crd = position.coords;
+            this.currentLat = crd.latitude;
+            this.currentLong= crd.longitude;
+
+        })
+                 
         this.deliveryFulfilment = [
             { selected: false, option: "INSTANT_DELIVERY", label: "Instant Delivery", tooltip: "This store support instant delivery. (Provided by store own logistic or delivery partners)" }, 
             { selected: false, option: "REGULAR_DELIVERY", label: "Regular Delivery", tooltip: "This store support regular delivery. (Provided by store own logistic or delivery partners)" },
@@ -478,6 +543,8 @@ export class StoreDeliveryComponent implements OnInit
                     });
                     
                 let symplifiedCountryId = this.storeDeliveryForm.get('regionCountryId').value;
+                let symplifiedCountryStateId = this.storeDeliveryForm.get('regionCountryStateId').value;
+
                     
                 // state (using component variable)
                 // INITIALLY (refer below section updateStates(); for changes), get states from symplified backed by using the 3rd party api
@@ -486,6 +553,16 @@ export class StoreDeliveryComponent implements OnInit
                 this._storesService.getStoreRegionCountryState(symplifiedCountryId)
                     .subscribe((response)=>{
                         this.storeStates = response.data.content; 
+
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    });
+
+                // Get city by state
+                this._storeDeliveryService.getStoreRegionCountryStateCity(symplifiedCountryStateId)
+                    .subscribe((response)=>{
+                        // Get the products
+                        this.storeStateCities$ = this._storeDeliveryService.cities$;                        
 
                         // Mark for check
                         this._changeDetectorRef.markForCheck();
@@ -662,7 +739,7 @@ export class StoreDeliveryComponent implements OnInit
 
         // ---------------------------
         // Update store Delivery Address
-        // ---------------------------
+        // ---------------------------        
 
         let storeBody = this.store;
         storeBody.address = address;
@@ -828,6 +905,8 @@ export class StoreDeliveryComponent implements OnInit
         // reset current regionCountryStateId
         this.storeDeliveryForm.get('regionCountryStateId').patchValue("");
 
+        // this.storeDeliveryForm.get('city').patchValue("");
+
         // Get states by country (using symplified backend)
         this._storesService.getStoreRegionCountryState(countryId).subscribe((response)=>{
             this.storeStates = response.data.content;
@@ -885,5 +964,33 @@ export class StoreDeliveryComponent implements OnInit
             return;
         }
     }
+
+    private setInitialValue() {
+        this.filteredCities
+            .pipe(take(1), takeUntil(this._onDestroy))
+            .subscribe(() => {
+                this.stateCitySelector.compareWith = (a: any, b: any) => a === b;
+            });
+    }
+    
+    // private filterBanksMulti() {
+    //     if (!this.cities) {
+    //         return;
+    //     }
+    //     // get the search keyword
+    //     let search = this.control.value;
+    //     if (!search) {
+    //         this.filteredCities.next(this.cities.slice());
+    //         return;
+    //     } else {
+    //         search = search.toLowerCase();
+    //     }
+    //     if (search.length >= 3) {
+    //     // filter the banks
+    //         this.filteredCities.next(
+    //         this.cities.filter(item => item.toLowerCase().indexOf(search) > -1)
+    //         );
+    //     }
+    // }
  
 }

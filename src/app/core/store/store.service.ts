@@ -44,8 +44,8 @@ export class StoresService
     // -----------------------------------------------------------------------------------------------------
 
     /**
-     * Getter for store
-     *
+    * Getter for store
+    *
     */
     get store$(): Observable<Store>
     {
@@ -498,6 +498,28 @@ export class StoresService
                 })
             );
     }
+
+    // getStoreRegionCountryStateCity(state: string): Observable<any>
+    // {
+    //     let productService = this._apiServer.settings.apiServer.productService;
+    //     let accessToken = (this._authService.jwtAccessToken === '' || this._authService.jwtAccessToken === null) ? 'accessToken' : this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+    //     const header = {
+    //         headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+    //         params: {
+    //             "state": state
+    //         }
+    //     };
+
+    //     return this._httpClient.get<any>(productService + '/region-country-state-city', header)
+    //         .pipe(
+    //             tap((response) => {
+    //                 this._logging.debug("Response from StoresService (getStoreRegionCountryStateCity)",response);
+
+    //                 return response;
+    //             })
+    //         );
+    // }
 
     // ---------------------------
     // Store Timing Section

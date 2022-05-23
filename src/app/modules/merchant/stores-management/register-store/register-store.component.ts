@@ -1,8 +1,8 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, NgForm, ValidationErrors, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, NgForm, ValidationErrors, Validators } from '@angular/forms';
 import { fuseAnimations } from '@fuse/animations';
 import { RegisterStoreValidationService } from 'app/modules/merchant/stores-management/register-store/register-store.validation.service';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject, Subject, take } from 'rxjs';
 import { StoresService } from 'app/core/store/store.service';
 import { Store, StoreRegionCountries, CreateStore, StoreAssets, StoreDeliveryProvider, StoreDeliveryPeriod } from 'app/core/store/store.types';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -24,6 +24,9 @@ import { PlatformService } from 'app/core/platform/platform.service';
 import { AuthService } from 'app/core/auth/auth.service';
 import { Loader } from '@googlemaps/js-api-loader';
 import { GoogleKey } from '../edit-store/edit-store.types';
+import { City } from '../edit-store/store-delivery/store-delivery.types';
+import { StoresDeliveryService } from '../edit-store/store-delivery/store-delivery.service';
+import { MatSelect } from '@angular/material/select';
 
 @Component({
     selector     : 'register-store-page',
@@ -67,7 +70,16 @@ export class RegisterStoreComponent implements OnInit
     /** for selected country refer form builder */ 
 
     regionsList: any;
-    /** for selected country refer form builder */ 
+    /** for selected country refer form builder */
+    
+    storeStateCities$: Observable<City[]>;
+    storeStateCities: string[] = [];
+
+    /** control for the selected bank for multi-selection */
+    public regionCountryStateCities: FormControl = new FormControl();
+    private _onDestroy = new Subject<void>();
+    public filteredCities: ReplaySubject<any[]> = new ReplaySubject<any[]>(1);
+    @ViewChild('stateCitySelector') stateCitySelector: MatSelect;
 
     deliveryFulfilment: any;
     deliveryPartners: StoreDeliveryProvider[] = [];
@@ -160,6 +172,7 @@ export class RegisterStoreComponent implements OnInit
         private _authService: AuthService,
         private _domSanitizer: DomSanitizer,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
+        private _storeDeliveryService: StoresDeliveryService
     )
     {
         this.checkExistingURL = debounce(this.checkExistingURL, 300);
@@ -221,6 +234,41 @@ export class RegisterStoreComponent implements OnInit
             verticalCode            : [''],
             isBranch                : [false],
         });
+
+        this.setInitialValue();
+
+        // set initial selection
+        this.regionCountryStateCities.setValue([]);
+        // load the initial bank list
+        // this.filteredCities.next(this.cities.slice());
+
+        this.regionCountryStateCities.valueChanges
+            .pipe(takeUntil(this._onDestroy))
+            .subscribe((result) => {                
+                // Get states by country Z(using symplified backend)
+                this._storeDeliveryService.getStoreRegionCountryStateCity(this.createStoreForm.get('step3.regionCountryStateId').value, result )
+                .subscribe((response)=>{
+                    // Get the products
+                    this.storeStateCities$ = this._storeDeliveryService.cities$;                    
+
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                });
+            });
+
+        this.createStoreForm.get('step3.regionCountryStateId').valueChanges
+            .pipe(takeUntil(this._onDestroy))
+            .subscribe((result) => {                
+                // Get states by country Z(using symplified backend)
+                this._storeDeliveryService.getStoreRegionCountryStateCity(result)
+                .subscribe((response)=>{
+                    // Get the products
+                    this.storeStateCities$ = this._storeDeliveryService.cities$;                    
+
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                });
+            });
                 
         // Reason why we put everyting under get vertical code by paramMap is because
         // we need the verticalCode before we need to query getStoreDeliveryProvider which require verticalCode
@@ -255,6 +303,8 @@ export class RegisterStoreComponent implements OnInit
 
                     let symplifiedCountryId = response['data'].regionCountry.id;
 
+                    let symplifiedCountryStateId = this.createStoreForm.get('step3.regionCountryStateId').value;
+
                     this.countryCode = symplifiedCountryId;
 
     
@@ -280,6 +330,16 @@ export class RegisterStoreComponent implements OnInit
                     // Get states by country (using symplified backend)
                     this._storesService.getStoreRegionCountryState(symplifiedCountryId).subscribe((response)=>{
                         this.statesByCountry = response.data.content;
+                    });
+
+                    // Get city by state
+                    this._storeDeliveryService.getStoreRegionCountryStateCity(symplifiedCountryStateId)
+                    .subscribe((response)=>{
+                        // Get the products
+                        this.storeStateCities$ = this._storeDeliveryService.cities$;                        
+
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
                     });
         
                     // country (using form builder variable)
@@ -1889,5 +1949,13 @@ export class RegisterStoreComponent implements OnInit
             // this.storeDeliveryForm.get('deliveryPeriods').get('validation').setErrors({requiredAtLeastOne: true});
             this.createStoreForm.get('step3').get('deliveryPeriods').get('validation').patchValue(null);
         }
+    }
+
+    private setInitialValue() {
+        this.filteredCities
+            .pipe(take(1), takeUntil(this._onDestroy))
+            .subscribe(() => {
+                this.stateCitySelector.compareWith = (a: any, b: any) => a === b;
+            });
     }
 }

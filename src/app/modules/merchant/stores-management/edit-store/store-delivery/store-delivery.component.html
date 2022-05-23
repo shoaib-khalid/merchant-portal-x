@@ -36,71 +36,6 @@
                                 </mat-error>
                             </mat-form-field>
                         </div>
-                        <!-- City -->
-                        <div class="col-span-2">
-                            <mat-form-field class="w-full" floatLabel="always">
-                                <mat-label>City</mat-label>
-                                <input
-                                    maxlength="100"
-                                    placeholder="Enter city"
-                                    [required]="true"
-                                    [formControlName]="'city'"
-                                    matInput>
-                                <mat-error *ngIf="storeDeliveryForm.get('city').hasError('required')">
-                                    Required
-                                </mat-error>
-                            </mat-form-field>
-                        </div>
-                        <!-- Postcode -->
-                        <div class="col-span-2">
-                            <mat-form-field class="w-full" floatLabel="always">
-                                <mat-label>Postcode</mat-label>
-                                <input
-                                    [formControlName]="'postcode'"
-                                    placeholder="XXXXX"
-                                    minlength="5"
-                                    maxlength="10"
-                                    [required]="true"
-                                    matInput>
-                                <mat-error *ngIf="storeDeliveryForm.get('postcode').hasError('required')">
-                                    Required
-                                </mat-error>
-                                <mat-error *ngIf="storeDeliveryForm.get('postcode').hasError('invalidPostcode')">
-                                    Invalid postcode
-                                </mat-error>
-                                <mat-error *ngIf="storeDeliveryForm.get('postcode').hasError('minlength')">
-                                    Minimum length of postcode not meet
-                                </mat-error>
-                                <mat-error *ngIf="storeDeliveryForm.get('postcode').hasError('maxlength')">
-                                    Exceed maximum length of postcode
-                                </mat-error>
-                            </mat-form-field>
-                        </div>
-                        <!-- State -->
-                        <div class="col-span-2">
-                            <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
-                                <mat-label>State</mat-label>
-                                <mat-select 
-                                    [formControlName]="'regionCountryStateId'"
-                                    [required]="true"
-                                    [value]="'regionCountryStateId'"
-                                    [placeholder]="'Select State'"
-                                    (selectionChange)="storeDeliveryForm.get('regionCountryStateId').patchValue($event.value);"
-                                    #stateSelector="matSelect">
-                                    <mat-select-trigger>
-                                        <span class="flex items-center">
-                                            <span>{{ stateSelector.triggerValue }}</span>
-                                        </span>
-                                    </mat-select-trigger>
-                                    <div *ngFor="let state of storeStates">
-                                        <mat-option [value]="state.id">{{state.name}}</mat-option>
-                                    </div>
-                                </mat-select>
-                                <mat-error *ngIf="storeDeliveryForm.get('regionCountryStateId').hasError('required')">
-                                    Required
-                                </mat-error>
-                            </mat-form-field>
-                        </div>
                         <!-- Country -->
                         <div class="col-span-2">
                             <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
@@ -128,7 +63,83 @@
                                 </mat-error>
                             </mat-form-field>
                         </div>
-               
+                        <!-- State -->
+                        <div class="col-span-2">
+                            <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
+                                <mat-label>State</mat-label>
+                                <mat-select 
+                                    [formControlName]="'regionCountryStateId'"
+                                    [required]="true"
+                                    [value]="'regionCountryStateId'"
+                                    [placeholder]="'Select State'"
+                                    (selectionChange)="storeDeliveryForm.get('regionCountryStateId').patchValue($event.value);"
+                                    #stateSelector="matSelect">
+                                    <mat-select-trigger>
+                                        <span class="flex items-center">
+                                            <span>{{ stateSelector.triggerValue }}</span>
+                                        </span>
+                                    </mat-select-trigger>
+                                    <div *ngFor="let state of storeStates">
+                                        <mat-option [value]="state.id">{{state.name}}</mat-option>
+                                    </div>
+                                </mat-select>
+                                <mat-error *ngIf="storeDeliveryForm.get('regionCountryStateId').hasError('required')">
+                                    Required
+                                </mat-error>
+                            </mat-form-field>
+                        </div>  
+                        <!-- City -->
+                        <div class="col-span-2">
+                            <mat-form-field class="w-full" floatLabel="always">
+                                <mat-label>City</mat-label>
+                                <mat-select 
+                                    [formControlName]="'city'"
+                                    [required]="true"
+                                    [value]="'city'"
+                                    [placeholder]="'Select State'"
+                                    (selectionChange)="storeDeliveryForm.get('city').patchValue($event.value);"
+                                    #stateCitySelector="matSelect">
+                                    <mat-select-trigger>
+                                        <span class="flex items-center">
+                                            <span>{{ stateCitySelector.triggerValue }}</span>
+                                        </span>
+                                    </mat-select-trigger>
+                                    <ngx-mat-select-search [placeholderLabel]="'Search City'" [noEntriesFoundLabel]="'No matching records found'" [formControl]="regionCountryStateCities"
+                                     ngDefaultControl></ngx-mat-select-search>
+                                    <!-- <div *ngFor="let city of storeStateCities">
+                                        <mat-option class="m-t" [value]="city.city">{{city.city}}</mat-option>
+                                    </div> -->
+                                    <mat-option class="m-t" *ngFor="let city of storeStateCities$ | async" [value]="city.city">
+                                        {{city.city}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        <!-- Postcode -->
+                        <div class="col-span-2">
+                            <mat-form-field class="w-full" floatLabel="always">
+                                <mat-label>Postcode</mat-label>
+                                <input
+                                    [formControlName]="'postcode'"
+                                    placeholder="XXXXX"
+                                    minlength="5"
+                                    maxlength="10"
+                                    [required]="true"
+                                    matInput>
+                                <mat-error *ngIf="storeDeliveryForm.get('postcode').hasError('required')">
+                                    Required
+                                </mat-error>
+                                <mat-error *ngIf="storeDeliveryForm.get('postcode').hasError('invalidPostcode')">
+                                    Invalid postcode
+                                </mat-error>
+                                <mat-error *ngIf="storeDeliveryForm.get('postcode').hasError('minlength')">
+                                    Minimum length of postcode not meet
+                                </mat-error>
+                                <mat-error *ngIf="storeDeliveryForm.get('postcode').hasError('maxlength')">
+                                    Exceed maximum length of postcode
+                                </mat-error>
+                            </mat-form-field>
+                        </div>             
                     </div>
                     <!-- Actions -->
                     <div class="flex flex-row justify-between my-3 items-center">

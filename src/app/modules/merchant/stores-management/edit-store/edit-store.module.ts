@@ -24,6 +24,8 @@ import { QuillModule } from 'ngx-quill';
 import { TimeSelectorInputModule } from 'app/layout/common/time-selector/timeselector.module';
 import { NgxGalleryModule } from 'ngx-gallery-9';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
+
 
 @NgModule({
     declarations: [
@@ -51,7 +53,8 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
         QuillModule,
         TimeSelectorInputModule,
         NgxGalleryModule,
-        FontAwesomeModule
+        FontAwesomeModule,
+        NgxMatSelectSearchModule 
 
     ],
     exports     : [
