@@ -54,19 +54,6 @@ import { StoresDeliveryService } from './store-delivery.service';
 })
 export class StoreDeliveryComponent implements OnInit
 {
-    cities: any[] = [
-        "Agriculture and Mining",
-        "Business Services"
-        , "Computer and Electronics"
-        , "Consumer Services"
-        , "Education"
-        , "Energy and Utilities"
-        , "Financial Services"
-        , "Government"
-        , "Health, Pharmaceuticals, and Biotech"
-    ];
-
-
     /** control for the selected bank for multi-selection */
     public regionCountryStateCities: FormControl = new FormControl();
 
@@ -117,9 +104,6 @@ export class StoreDeliveryComponent implements OnInit
     //get current location
     currentLat:any=0;
     currentLong:any=0;
-    
-  
-
 
     /**
      * Constructor

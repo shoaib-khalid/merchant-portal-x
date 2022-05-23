@@ -104,11 +104,10 @@
                                             <span>{{ stateCitySelector.triggerValue }}</span>
                                         </span>
                                     </mat-select-trigger>
-                                    <ngx-mat-select-search [placeholderLabel]="'Search City'" [noEntriesFoundLabel]="'No matching records found'" [formControl]="regionCountryStateCities"
-                                     ngDefaultControl></ngx-mat-select-search>
-                                    <!-- <div *ngFor="let city of storeStateCities">
-                                        <mat-option class="m-t" [value]="city.city">{{city.city}}</mat-option>
-                                    </div> -->
+                                    <mat-option>
+                                        <ngx-mat-select-search [placeholderLabel]="'Search City'" [noEntriesFoundLabel]="'No matching records found'" [formControl]="regionCountryStateCities"
+                                         ngDefaultControl></ngx-mat-select-search>
+                                    </mat-option>
                                     <mat-option class="m-t" *ngFor="let city of storeStateCities$ | async" [value]="city.city">
                                         {{city.city}}
                                     </mat-option>
