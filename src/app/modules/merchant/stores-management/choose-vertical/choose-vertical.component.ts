@@ -79,7 +79,7 @@ export class ChooseVerticalComponent
 
         // check total of stores this account have
         this._storesService.stores$.subscribe((response)=>{
-            if (response.length && response.length > 4) {
+            if (response.length && response.length > 11) {
                 
                 this.createStoreCondition.error = "MAX-STORES";
                 this.createStoreCondition.errorTitle = "Maximum store creation has been reached";
