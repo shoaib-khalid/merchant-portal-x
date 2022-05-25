@@ -4,6 +4,7 @@ import { AppConfig } from "app/config/service.config";
 import { AuthService } from "app/core/auth/auth.service";
 import { JwtService } from "app/core/jwt/jwt.service";
 import { LogService } from "app/core/logging/log.service";
+import { identity } from "lodash";
 import { BehaviorSubject, Observable } from "rxjs";
 import { switchMap, take, map, tap, catchError, filter } from 'rxjs/operators';
 import { City } from "./store-delivery.types";
@@ -73,7 +74,7 @@ export class StoresDeliveryService
         this._cities.next(value);
     }
 
-    getStoreRegionCountryStateCity(state: string, city: string = null): Observable<any>
+    getStoreRegionCountryStateCity(city: string = null, stateId: string ): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = (this._authService.jwtAccessToken === '' || this._authService.jwtAccessToken === null) ? 'accessToken' : this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
@@ -81,8 +82,8 @@ export class StoresDeliveryService
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
             params: {
-                "state": state,
-                "city" : city
+                "city"      : city,
+                "stateId"   : stateId,
             }
         };
 

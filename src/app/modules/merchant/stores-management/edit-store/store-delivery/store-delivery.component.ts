@@ -178,7 +178,7 @@ export class StoreDeliveryComponent implements OnInit
             .subscribe((result) => {
                 
                 // Get states by country Z(using symplified backend)
-                this._storeDeliveryService.getStoreRegionCountryStateCity(result)
+                this._storeDeliveryService.getStoreRegionCountryStateCity(null,result)
                 .subscribe((response)=>{
                     // Get the products
                     this.storeStateCities$ = this._storeDeliveryService.cities$;                    
@@ -546,7 +546,7 @@ export class StoreDeliveryComponent implements OnInit
                     });
 
                 // Get city by state
-                this._storeDeliveryService.getStoreRegionCountryStateCity(symplifiedCountryStateId)
+                this._storeDeliveryService.getStoreRegionCountryStateCity(null,symplifiedCountryStateId)
                     .subscribe((response)=>{
                         // Get the products
                         this.storeStateCities$ = this._storeDeliveryService.cities$;    
