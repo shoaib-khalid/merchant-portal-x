@@ -166,7 +166,7 @@ export class StoreDeliveryComponent implements OnInit
                 this._storeDeliveryService.getStoreRegionCountryStateCity(this.storeDeliveryForm.get('regionCountryStateId').value, result )
                 .subscribe((response)=>{
                     // Get the products
-                    this.storeStateCities$ = this._storeDeliveryService.cities$;                    
+                    this.storeStateCities$ = this._storeDeliveryService.cities$;                     
 
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
@@ -538,6 +538,9 @@ export class StoreDeliveryComponent implements OnInit
                     .subscribe((response)=>{
                         this.storeStates = response.data.content; 
 
+                        console.log("sinadu", response);
+                        
+
                         // Mark for check
                         this._changeDetectorRef.markForCheck();
                     });
@@ -546,7 +549,10 @@ export class StoreDeliveryComponent implements OnInit
                 this._storeDeliveryService.getStoreRegionCountryStateCity(symplifiedCountryStateId)
                     .subscribe((response)=>{
                         // Get the products
-                        this.storeStateCities$ = this._storeDeliveryService.cities$;                        
+                        this.storeStateCities$ = this._storeDeliveryService.cities$;    
+                        
+                        console.log("ssusus",  this.storeStateCities$);
+
 
                         // Mark for check
                         this._changeDetectorRef.markForCheck();
