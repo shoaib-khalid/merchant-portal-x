@@ -7,7 +7,7 @@ import { Store, StoreRegionCountries, CreateStore, StoreAssets, StoreSelfDeliver
 import { ChooseVerticalService } from '../../choose-vertical/choose-vertical.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Loader } from '@googlemaps/js-api-loader';
-import { BehaviorSubject, Observable, ReplaySubject, Subject, take, takeUntil } from 'rxjs';
+import { BehaviorSubject, debounceTime, Observable, ReplaySubject, Subject, take, takeUntil } from 'rxjs';
 import { GoogleKey } from '../edit-store.types';
 import { MatSelect } from '@angular/material/select';
 import { City } from './store-delivery.types';
@@ -160,7 +160,7 @@ export class StoreDeliveryComponent implements OnInit
         // this.filteredCities.next(this.cities.slice());
 
         this.regionCountryStateCities.valueChanges
-            .pipe(takeUntil(this._onDestroy))
+            .pipe(takeUntil(this._onDestroy), debounceTime(300))
             .subscribe((result) => {                
                 // Get states by country Z(using symplified backend)
                 this._storeDeliveryService.getStoreRegionCountryStateCity(result, this.storeDeliveryForm.get('regionCountryStateId').value)
@@ -174,7 +174,7 @@ export class StoreDeliveryComponent implements OnInit
             });
 
         this.storeDeliveryForm.get('regionCountryStateId').valueChanges
-            .pipe(takeUntil(this._onDestroy))
+            .pipe(takeUntil(this._onDestroy), debounceTime(300))
             .subscribe((result) => {
                 
                 // Get states by country Z(using symplified backend)
@@ -538,9 +538,6 @@ export class StoreDeliveryComponent implements OnInit
                     .subscribe((response)=>{
                         this.storeStates = response.data.content; 
 
-                        console.log("sinadu", response);
-                        
-
                         // Mark for check
                         this._changeDetectorRef.markForCheck();
                     });
@@ -551,9 +548,6 @@ export class StoreDeliveryComponent implements OnInit
                         // Get the products
                         this.storeStateCities$ = this._storeDeliveryService.cities$;    
                         
-                        console.log("ssusus",  this.storeStateCities$);
-
-
                         // Mark for check
                         this._changeDetectorRef.markForCheck();
                     });

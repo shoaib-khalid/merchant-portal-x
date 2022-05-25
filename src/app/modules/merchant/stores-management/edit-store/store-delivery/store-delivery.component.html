@@ -96,7 +96,7 @@
                                     [formControlName]="'city'"
                                     [required]="true"
                                     [value]="'city'"
-                                    [placeholder]="'Select State'"
+                                    [placeholder]="'Select City'"
                                     (selectionChange)="storeDeliveryForm.get('city').patchValue($event.value);"
                                     #stateCitySelector="matSelect">
                                     <mat-select-trigger>
@@ -120,7 +120,7 @@
                                 <mat-label>Postcode</mat-label>
                                 <input
                                     [formControlName]="'postcode'"
-                                    placeholder="XXXXX"
+                                    placeholder="12345"
                                     minlength="5"
                                     maxlength="10"
                                     [required]="true"
@@ -148,7 +148,7 @@
                         </div>    
                         <button
                             id="relocate-button"
-                            class="p-2 rounded-full"
+                            class="p-2 rounded-full tracking-tight"
                             [ngClass]="storeDeliveryForm.pristine || storeDeliveryForm.invalid?'bg-gray-300 text-gray-400':'bg-primary text-white'"
                             type="button"
                             [disabled]="storeDeliveryForm.pristine || storeDeliveryForm.invalid"
