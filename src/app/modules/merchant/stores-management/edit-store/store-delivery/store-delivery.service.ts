@@ -74,7 +74,7 @@ export class StoresDeliveryService
         this._cities.next(value);
     }
 
-    getStoreRegionCountryStateCity(city: string = null, stateId: string ): Observable<any>
+    getStoreRegionCountryStateCity(city: string = '', stateId: string, country: string = '' ): Observable<any>
     {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = (this._authService.jwtAccessToken === '' || this._authService.jwtAccessToken === null) ? 'accessToken' : this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
@@ -84,6 +84,7 @@ export class StoresDeliveryService
             params: {
                 "city"      : city,
                 "stateId"   : stateId,
+                "country"   : country
             }
         };
 

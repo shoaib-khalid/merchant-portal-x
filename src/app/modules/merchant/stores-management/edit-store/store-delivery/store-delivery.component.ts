@@ -163,7 +163,7 @@ export class StoreDeliveryComponent implements OnInit
             .pipe(takeUntil(this._onDestroy), debounceTime(300))
             .subscribe((result) => {                
                 // Get states by country Z(using symplified backend)
-                this._storeDeliveryService.getStoreRegionCountryStateCity(result, this.storeDeliveryForm.get('regionCountryStateId').value)
+                this._storeDeliveryService.getStoreRegionCountryStateCity(result, this.storeDeliveryForm.get('regionCountryStateId').value, this.store? this.store.regionCountry.id : '')
                 .subscribe((response)=>{
                     // Get the products
                     this.storeStateCities$ = this._storeDeliveryService.cities$;                     
@@ -178,7 +178,7 @@ export class StoreDeliveryComponent implements OnInit
             .subscribe((result) => {
                 
                 // Get states by country Z(using symplified backend)
-                this._storeDeliveryService.getStoreRegionCountryStateCity(null,this.storeDeliveryForm.get('regionCountryStateId').value)
+                this._storeDeliveryService.getStoreRegionCountryStateCity(null,this.storeDeliveryForm.get('regionCountryStateId').value, this.store? this.store.regionCountry.id : '')
                 .subscribe((response)=>{
                     // Get the products
                     this.storeStateCities$ = this._storeDeliveryService.cities$;                    
@@ -543,7 +543,7 @@ export class StoreDeliveryComponent implements OnInit
                     });
 
                 // Get city by state
-                this._storeDeliveryService.getStoreRegionCountryStateCity(null,symplifiedCountryStateId)
+                this._storeDeliveryService.getStoreRegionCountryStateCity(null,symplifiedCountryStateId, this.store? this.store.regionCountry.id : '')
                     .subscribe((response)=>{
                         // Get the products
                         this.storeStateCities$ = this._storeDeliveryService.cities$;    

@@ -18,7 +18,7 @@ import { NgxGalleryOptions, NgxGalleryImage, NgxGalleryAnimation } from 'ngx-gal
 import { UserService } from 'app/core/user/user.service';
 import { Client } from 'app/core/user/user.types';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
-import { takeUntil } from 'rxjs/operators';
+import { debounceTime, takeUntil } from 'rxjs/operators';
 import { Platform } from 'app/core/platform/platform.types';
 import { PlatformService } from 'app/core/platform/platform.service';
 import { AuthService } from 'app/core/auth/auth.service';
@@ -243,10 +243,10 @@ export class RegisterStoreComponent implements OnInit
         // this.filteredCities.next(this.cities.slice());
 
         this.regionCountryStateCities.valueChanges
-            .pipe(takeUntil(this._onDestroy))
+            .pipe(takeUntil(this._onDestroy), debounceTime(300))
             .subscribe((result) => {                
                 // Get states by country Z(using symplified backend)
-                this._storeDeliveryService.getStoreRegionCountryStateCity(result , this.createStoreForm.get('step3.regionCountryStateId').value)
+                this._storeDeliveryService.getStoreRegionCountryStateCity(result , this.createStoreForm.get('step3.regionCountryStateId').value, this.countryCode)
                 .subscribe((response)=>{
                     // Get the products
                     this.storeStateCities$ = this._storeDeliveryService.cities$;                    
@@ -257,10 +257,10 @@ export class RegisterStoreComponent implements OnInit
             });
 
         this.createStoreForm.get('step3.regionCountryStateId').valueChanges
-            .pipe(takeUntil(this._onDestroy))
+            .pipe(takeUntil(this._onDestroy), debounceTime(300))
             .subscribe((result) => {                
                 // Get states by country Z(using symplified backend)
-                this._storeDeliveryService.getStoreRegionCountryStateCity(null,this.createStoreForm.get('step3.regionCountryStateId').value)
+                this._storeDeliveryService.getStoreRegionCountryStateCity(null,this.createStoreForm.get('step3.regionCountryStateId').value, this.countryCode)
                 .subscribe((response)=>{
                     // Get the products
                     this.storeStateCities$ = this._storeDeliveryService.cities$;                    
@@ -334,7 +334,7 @@ export class RegisterStoreComponent implements OnInit
                     });
 
                     // Get city by state
-                    this._storeDeliveryService.getStoreRegionCountryStateCity(null,symplifiedCountryStateId)
+                    this._storeDeliveryService.getStoreRegionCountryStateCity(null,symplifiedCountryStateId, this.countryCode)
                     .subscribe((response)=>{
                         // Get the products
                         this.storeStateCities$ = this._storeDeliveryService.cities$;                        
