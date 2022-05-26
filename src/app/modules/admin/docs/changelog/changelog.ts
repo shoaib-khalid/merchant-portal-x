@@ -17,6 +17,19 @@ export class ChangelogComponent
                 {
                     type: 'Fixed',
                     list: [
+                        '(ProductManagement) Fix product assets not provisioned'
+                    ]
+                }
+            ]
+        },
+        //v1.3.2
+        {
+            version    : 'v1.3.2',
+            releaseDate: 'May 25, 2022',
+            changes    : [
+                {
+                    type: 'Fixed',
+                    list: [
                         '(StoreManagement) Change state value from name to id'
                     ]
                 }
