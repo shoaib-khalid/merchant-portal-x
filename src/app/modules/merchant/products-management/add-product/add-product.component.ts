@@ -182,27 +182,21 @@ export class AddProductComponent implements OnInit, OnDestroy
     };
 
     // product variant section
-
     filteredProductVariants: any[] = []; // used in html to loop variant
     productVariants: any[] = []; // (variantComboOptions)
     variantToBeCreated: any[] = []; // use for creating on BE 
     selectedVariantCombos: any = []; // this is the list of combinations generated
     selectedProductVariant: ProductVariant;
     // variantImagesToBeDeleted: any = []; // image to be deleted from BE
-
     variantIndex: number = 0; // set index when open overlay panel in variant available section
 
-
     // variant available section
-
     filteredProductVariantAvailable: any[] = []; // used in html to loop variant available
     productVariantAvailable: ProductVariantAvailable[] = []; 
     variantAvailableToBeCreated: any = []; // use for creating on BE 
     // variantAvailableToBeDeleted: any = []; // use for deleting on BE 
     productVariantAvailableEditMode: boolean = false;
     productVariantAvailableValueEditMode:any = [];
-
-
 
     variantComboItems: any = []; // this is used for generating combinations
     variantComboOptions: any = []; //
@@ -215,7 +209,6 @@ export class AddProductComponent implements OnInit, OnDestroy
     selectedCategory:string ='';
     onChangeSelectProductValue: any = []; // for product checkbox in combo section
     totalAllowed: number = 0;
-
 
     /**
      * Constructor
@@ -970,32 +963,33 @@ export class AddProductComponent implements OnInit, OnDestroy
             
                         }
 
+                        // Update the assets product on the server (backend kena enable update)
+                        if (imagefiles) {
+                            for (var i = 0; i < imagefiles.length; i++) {
+                                // create a new one
+                                let formData = new FormData();
+                                formData.append('file',imagefiles[i]);
+                                this._inventoryService.addProductAssets(newProduct["data"].id, formData, (i === thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
+                                    .pipe(takeUntil(this._unsubscribeAll))
+                                    .subscribe((response)=>{
+                                        if (response.isThumbnail){
+                                            this.selectedProduct.thumbnailUrl = response.url;
+                                        }
+
+                                        // Mark for check
+                                        this._changeDetectorRef.markForCheck();
+                                    });
+                            }
+
+                            // load images
+                            this.currentImageIndex = 0;
+                            this.imagesFile = imagefiles;
+                            this.images = images;
+                            this.thumbnailIndex = thumbnailIndex;
+                        }
+
                     });
 
-                // Update the assets product on the server (backend kena enable update)
-                if (imagefiles) {
-                    for (var i = 0; i < imagefiles.length; i++) {
-                        // create a new one
-                        let formData = new FormData();
-                        formData.append('file',imagefiles[i]);
-                        this._inventoryService.addProductAssets(newProduct["data"].id, formData, (i === thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
-                            .pipe(takeUntil(this._unsubscribeAll))
-                            .subscribe((response)=>{
-                                if (response.isThumbnail){
-                                    this.selectedProduct.thumbnailUrl = response.url;
-                                }
-
-                                // Mark for check
-                                this._changeDetectorRef.markForCheck();
-                            });
-                    }
-
-                    // load images
-                    this.currentImageIndex = 0;
-                    this.imagesFile = imagefiles;
-                    this.images = images;
-                    this.thumbnailIndex = thumbnailIndex;
-                }
 
                 // Go to new product
                 // this.selectedProduct = newProduct["data"];
