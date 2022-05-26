@@ -9,8 +9,8 @@ import { Subject } from 'rxjs';
 
 
 @Component({
-  selector: 'dialog-add-category',
-  templateUrl: './add-category.component.html'
+    selector: 'dialog-add-category',
+    templateUrl: './add-category.component.html'
 })
 export class AddCategoryComponent implements OnInit {
   
@@ -28,24 +28,23 @@ export class AddCategoryComponent implements OnInit {
   
     message: string = "";
     referenceId: any;
-
     addCategoryForm: FormGroup;
-    private _unsubscribeAll: Subject<any> = new Subject<any>();
-
-
+    
     // product assets
     thumbnailUrl: any = [];
     imagesFile: any = [];
     currentImageIndex: number = 0;
 
-  constructor(
-    public dialogRef: MatDialogRef<AddCategoryComponent>,
-    private _jwt: JwtService,
-    private _changeDetectorRef: ChangeDetectorRef,
-    private _inventoryService: InventoryService,
-    private _formBuilder: FormBuilder,
-    @Inject(MAT_DIALOG_DATA) public data: MatDialog
-  ) { }
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
+    
+    constructor(
+        public dialogRef: MatDialogRef<AddCategoryComponent>,
+        private _jwt: JwtService,
+        private _changeDetectorRef: ChangeDetectorRef,
+        private _inventoryService: InventoryService,
+        private _formBuilder: FormBuilder,
+        @Inject(MAT_DIALOG_DATA) public data: MatDialog
+    ) { }
 
 // -----------------------------------------------------------------------------------------------------
 // @ Accessors
@@ -55,31 +54,29 @@ export class AddCategoryComponent implements OnInit {
 // @ Lifecycle hooks
 // -----------------------------------------------------------------------------------------------------
 
-  ngOnInit(): void {
+    ngOnInit(): void {
+        // Create the selected product form
+        this.addCategoryForm = this._formBuilder.group({
+            name             : ['',[Validators.required]],
+            thumbnailUrl     : [[]],
+            imagefiles:[[]],
+        });
+    }
 
-      // Create the selected product form
-      this.addCategoryForm = this._formBuilder.group({
-        name             : ['',[Validators.required]],
-        thumbnailUrl     : [[]],
-        imagefiles:[[]],
-    });
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------  
 
-  }
+    addNewCategory() {
+        this.addCategoryForm.get('thumbnailUrl').patchValue(this.thumbnailUrl);
+        this.addCategoryForm.get('imagefiles').patchValue(this.imagesFile);
 
-// -----------------------------------------------------------------------------------------------------
-// @ Public methods
-// -----------------------------------------------------------------------------------------------------  
+        this.dialogRef.close(this.addCategoryForm.value);
+    }
 
-  addNewCategory() {
-    this.addCategoryForm.get('thumbnailUrl').patchValue(this.thumbnailUrl);
-    this.addCategoryForm.get('imagefiles').patchValue(this.imagesFile);
-
-    this.dialogRef.close(this.addCategoryForm.value);
-  }
-
-  cancelCreateCategory(){
-    this.dialogRef.close({ status: false });
-  }
+    cancelCreateCategory(){
+        this.dialogRef.close({ status: false });
+    }
 
     // --------------------------------------
     // Product Assets/Images Section
