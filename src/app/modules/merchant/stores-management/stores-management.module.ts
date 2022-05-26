@@ -34,6 +34,7 @@ import { TimeSelectorInputModule } from 'app/layout/common/time-selector/timesel
 import { NgxGalleryModule } from 'ngx-gallery-9';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatMenuModule } from '@angular/material/menu';
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 
 
 @NgModule({
@@ -70,7 +71,9 @@ import { MatMenuModule } from '@angular/material/menu';
         QuillModule,
         NgxGalleryModule,
         FontAwesomeModule,
-        MatMenuModule
+        MatMenuModule,
+        NgxMatSelectSearchModule 
+
     ],
     providers: [
         // GraphHelper

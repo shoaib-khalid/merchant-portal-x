@@ -655,7 +655,7 @@
                                                     [required]="true"
                                                     [value]="'city'"
                                                     [placeholder]="'Select State'"
-                                                    (selectionChange)="storeDeliveryForm.get('city').patchValue($event.value);"
+                                                    (selectionChange)="createStoreForm.get('step3.city').patchValue($event.value);"
                                                     #stateCitySelector="matSelect">
                                                     <mat-select-trigger>
                                                         <span class="flex items-center">
@@ -667,8 +667,8 @@
                                                     <!-- <div *ngFor="let city of storeStateCities">
                                                         <mat-option class="m-t" [value]="city.city">{{city.city}}</mat-option>
                                                     </div> -->
-                                                    <mat-option class="m-t" *ngFor="let city of storeStateCities$ | async" [value]="city.city">
-                                                        {{city.city}}
+                                                    <mat-option class="m-t" *ngFor="let city of storeStateCities$ | async" [value]="city.id">
+                                                        {{city.name}}
                                                     </mat-option>
                                                 </mat-select>
                                             </mat-form-field>

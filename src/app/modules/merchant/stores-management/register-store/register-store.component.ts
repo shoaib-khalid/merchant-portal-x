@@ -246,7 +246,7 @@ export class RegisterStoreComponent implements OnInit
             .pipe(takeUntil(this._onDestroy))
             .subscribe((result) => {                
                 // Get states by country Z(using symplified backend)
-                this._storeDeliveryService.getStoreRegionCountryStateCity(this.createStoreForm.get('step3.regionCountryStateId').value, result )
+                this._storeDeliveryService.getStoreRegionCountryStateCity(result , this.createStoreForm.get('step3.regionCountryStateId').value)
                 .subscribe((response)=>{
                     // Get the products
                     this.storeStateCities$ = this._storeDeliveryService.cities$;                    
@@ -260,7 +260,7 @@ export class RegisterStoreComponent implements OnInit
             .pipe(takeUntil(this._onDestroy))
             .subscribe((result) => {                
                 // Get states by country Z(using symplified backend)
-                this._storeDeliveryService.getStoreRegionCountryStateCity(null,result)
+                this._storeDeliveryService.getStoreRegionCountryStateCity(null,this.createStoreForm.get('step3.regionCountryStateId').value)
                 .subscribe((response)=>{
                     // Get the products
                     this.storeStateCities$ = this._storeDeliveryService.cities$;                    
@@ -330,6 +330,7 @@ export class RegisterStoreComponent implements OnInit
                     // Get states by country (using symplified backend)
                     this._storesService.getStoreRegionCountryState(symplifiedCountryId).subscribe((response)=>{
                         this.statesByCountry = response.data.content;
+                        
                     });
 
                     // Get city by state
@@ -432,10 +433,12 @@ export class RegisterStoreComponent implements OnInit
                 let countryId = response['data'].countryId;
                 switch (countryId) {
                     case 'MYS':
-                        this.dialingCode = '+60'
+                        this.dialingCode = '+60';
+                        this.createStoreForm.get('step3').get('regionCountryStateId').patchValue('Selangor');
                         break;
                     case 'PAK':
-                        this.dialingCode = '+92'
+                        this.dialingCode = '+92';
+                        this.createStoreForm.get('step3').get('regionCountryStateId').patchValue('Federal');
                         break;
                     default:
                         break;
