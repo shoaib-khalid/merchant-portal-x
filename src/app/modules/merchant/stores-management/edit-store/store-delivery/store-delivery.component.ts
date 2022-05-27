@@ -177,6 +177,11 @@ export class StoreDeliveryComponent implements OnInit
             .pipe(takeUntil(this._onDestroy), debounceTime(300))
             .subscribe((result) => {
                 
+                if (this.store.regionCountryStateId !== result) {
+                    // reset city form
+                    this.storeDeliveryForm.get('city').patchValue(null);
+                }
+
                 // Get states by country Z(using symplified backend)
                 this._storeDeliveryService.getStoreRegionCountryStateCity(null,this.storeDeliveryForm.get('regionCountryStateId').value, this.store? this.store.regionCountry.id : '')
                 .subscribe((response)=>{

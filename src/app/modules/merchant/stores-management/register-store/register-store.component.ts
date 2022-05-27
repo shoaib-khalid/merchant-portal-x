@@ -258,7 +258,11 @@ export class RegisterStoreComponent implements OnInit
 
         this.createStoreForm.get('step3.regionCountryStateId').valueChanges
             .pipe(takeUntil(this._onDestroy), debounceTime(300))
-            .subscribe((result) => {                
+            .subscribe((result) => {
+                
+                // reset city form
+                this.createStoreForm.get('step3.city').patchValue(null);
+
                 // Get states by country Z(using symplified backend)
                 this._storeDeliveryService.getStoreRegionCountryStateCity(null,this.createStoreForm.get('step3.regionCountryStateId').value, this.countryCode)
                 .subscribe((response)=>{
