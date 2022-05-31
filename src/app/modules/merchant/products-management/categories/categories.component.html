@@ -32,7 +32,7 @@
                 mat-flat-button
                 [color]="'primary'">
                 <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
-                <span class="ml-2 mr-1">Add</span>
+                <span class="hidden sm:block ml-2 mr-1">Add</span>
             </button>
         </div>
     </div>
@@ -164,7 +164,7 @@
                                                 </label>
                                             </div>
                                             <!-- remove image -->
-                                            <div>
+                                            <!-- <div>
                                                 <input
                                                     id="image-edit-button"
                                                     class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -174,12 +174,13 @@
                                                 <label 
                                                     class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
                                                     for="image-edit-button"
+                                                    (click)="deleteImage()"
                                                     matRipple>
                                                     <mat-icon
                                                         class="icon-size-5"
                                                         [svgIcon]="'heroicons_solid:trash'"></mat-icon>
                                                 </label>
-                                            </div>
+                                            </div> -->
                                         </div>    
                                     </div>
 

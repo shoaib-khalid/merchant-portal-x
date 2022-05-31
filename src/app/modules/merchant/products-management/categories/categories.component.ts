@@ -405,6 +405,16 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
             .pipe(debounceTime(300))
             .subscribe(()=>{
                 this.showFlashMessage('success');
+                
+                // Set delay before closing the window
+                setTimeout(() => {
+
+                    // Close the details
+                    this.closeDetails();
+        
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                }, 1000);
             });
     }
 
