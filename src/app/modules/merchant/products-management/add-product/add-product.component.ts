@@ -6,7 +6,7 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { fromEvent, merge, Observable, of, Subject } from 'rxjs';
 import { debounceTime, delay, finalize, map, switchMap, take, takeUntil } from 'rxjs/operators';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, ProductCategory, ProductPagination, ProductPackageOption } from 'app/core/product/inventory.types';
+import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, ProductCategory, ProductPagination, ProductPackageOption, ApiResponseModel } from 'app/core/product/inventory.types';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { Store } from 'app/core/store/store.types';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -210,6 +210,12 @@ export class AddProductComponent implements OnInit, OnDestroy
     onChangeSelectProductValue: any = []; // for product checkbox in combo section
     totalAllowed: number = 0;
 
+    //for tier category
+    selectedParentCategory: string ='';
+    parentCategoriesOptions: ProductCategory[];
+    storeVerticalCode : string = '';
+
+
     /**
      * Constructor
      */
@@ -333,6 +339,7 @@ export class AddProductComponent implements OnInit, OnDestroy
 
                 // Update the pagination
                 this.store$ = store;
+                this.storeVerticalCode =this.store$.verticalCode;
 
                 // set packingSize to S if verticalCode FnB
                 if (this.store$.verticalCode === "FnB" || this.store$.verticalCode === "FnB_PK"){
@@ -354,6 +361,14 @@ export class AddProductComponent implements OnInit, OnDestroy
         //         this.filterProductOptionsMethod(this._products);
 
         //     });
+
+        //get all values for parent categories with specied vertical code
+        this._inventoryService.getParentCategories(0, 20, 'name', 'asc', '',this.storeVerticalCode)
+        .subscribe((response:ApiResponseModel<ProductCategory[]>)=>{
+            
+                this.parentCategoriesOptions = response.data["content"];
+                return this.parentCategoriesOptions;
+        })
             
         // Get the categories
         this._inventoryService.categories$
@@ -657,6 +672,9 @@ export class AddProductComponent implements OnInit, OnDestroy
     addCategoryToProduct(category: ProductCategory): void
     {
 
+        //to display the tier category
+        this.selectedParentCategory = category.parentCategoryId;
+        
         // Update the selected product form
         this.addProductForm.get('step1').get('categoryId').patchValue(category.id);
 

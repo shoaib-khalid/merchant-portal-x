@@ -4,8 +4,9 @@ import { JwtService } from 'app/core/jwt/jwt.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { InventoryService } from 'app/core/product/inventory.service';
-import { takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { map, Observable, Subject, switchMap } from 'rxjs';
+import { ApiResponseModel, ProductCategory } from 'app/core/product/inventory.types';
+import { StoresService } from 'app/core/store/store.service';
 
 
 @Component({
@@ -34,17 +35,32 @@ export class AddCategoryComponent implements OnInit {
     thumbnailUrl: any = [];
     imagesFile: any = [];
     currentImageIndex: number = 0;
+    filteredOptions: Observable<string[]>;
+    options: string[] = ['One', 'Two', 'Three'];
+    parentCategoriesOptions: ProductCategory[];
+
+    parentSelectedCategory:string='';
+    storeVerticalCode: string = '';
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
-    
-    constructor(
-        public dialogRef: MatDialogRef<AddCategoryComponent>,
-        private _jwt: JwtService,
-        private _changeDetectorRef: ChangeDetectorRef,
-        private _inventoryService: InventoryService,
-        private _formBuilder: FormBuilder,
-        @Inject(MAT_DIALOG_DATA) public data: MatDialog
-    ) { }
+
+  constructor(
+    public dialogRef: MatDialogRef<AddCategoryComponent>,
+    private _jwt: JwtService,
+    private _changeDetectorRef: ChangeDetectorRef,
+    private _inventoryService: InventoryService,
+    private _formBuilder: FormBuilder,
+    private _storesService: StoresService,
+    @Inject(MAT_DIALOG_DATA) public data: MatDialog
+  ) { }
+
+/**
+ * Getter for storeId
+ */
+    get storeId(): string
+    {
+        return localStorage.getItem('storeId') ?? '';
+    } 
 
 // -----------------------------------------------------------------------------------------------------
 // @ Accessors
@@ -61,6 +77,28 @@ export class AddCategoryComponent implements OnInit {
             thumbnailUrl     : [[]],
             imagefiles:[[]],
         });
+
+      // Create the selected product form
+      this.addCategoryForm = this._formBuilder.group({
+        name             : ['',[Validators.required]],
+        parentCategoryId : [''],
+        thumbnailUrl     : [[]],
+        imagefiles:[[]],
+      });
+
+      //Get the vertical code for this store id first then we get the parent categories
+        this._storesService.getStoreById(this.storeId)
+        .pipe(
+            map((response)=>{
+                return this.storeVerticalCode = response.verticalCode;
+            }),
+            switchMap((storeVerticalCode:string)=>this._inventoryService.getParentCategories(0, 20, 'name', 'asc', '',storeVerticalCode)
+            ),
+        )
+        .subscribe((categories) => {
+            this.parentCategoriesOptions = categories.data["content"];
+        });
+  
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -70,6 +108,11 @@ export class AddCategoryComponent implements OnInit {
     addNewCategory() {
         this.addCategoryForm.get('thumbnailUrl').patchValue(this.thumbnailUrl);
         this.addCategoryForm.get('imagefiles').patchValue(this.imagesFile);
+
+        if (this.addCategoryForm.invalid)
+        {
+            return;
+        }
 
         this.dialogRef.close(this.addCategoryForm.value);
     }

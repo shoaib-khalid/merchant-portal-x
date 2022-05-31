@@ -16,7 +16,7 @@
 
             <div class="flex flex-wrap flex-auto items-center justify-center w-full">
                 <!-- Image frame-->
-                <div class="flex flex-col justify-center items-center w-1/3">
+                <div class="flex flex-col justify-center items-center w-full">
                     <!-- Image Frame -->
                     <div class="w-20 h-20 border rounded overflow-hidden">
                         <ng-container *ngIf="thumbnailUrl.length; else noImage">
@@ -74,8 +74,26 @@
                         </div>
                     </div>
                 </div>
-        
-                <div class="flex flex-wrap mb-6 w-2/3">
+      
+                <div class="flex flex-wrap w-2/3">
+
+                    <mat-form-field class="w-full">
+                        <!-- Select Parent Category -->
+                        <mat-label>Parent Category Name</mat-label>
+                        <mat-select
+                            class="w-full"
+                            placeholder="Choose Parent Category"
+                            [formControlName] = "'parentCategoryId'"
+                        >
+                            <div>
+                                <mat-option *ngFor="let listing of parentCategoriesOptions;" [value]="listing.id">
+                                    {{listing.name}}
+                                </mat-option>
+                            </div>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="flex flex-wrap w-2/3">
                     <mat-form-field 
                         appearance="fill"
                         class="w-full">
@@ -84,7 +102,10 @@
                             matInput
                             placeholder="Insert category name"
                             [formControlName] = "'name'"
-                        >
+                        >  
+                        <mat-error *ngIf="addCategoryForm.get('name').hasError('required')">
+                            Category name is required
+                        </mat-error>
                     </mat-form-field>
                 </div>
             </div>

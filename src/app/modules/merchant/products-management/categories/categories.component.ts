@@ -8,7 +8,7 @@ import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { MatDialog } from '@angular/material/dialog';
 import { InventoryService } from 'app/core/product/inventory.service';
-import { ProductCategory, ProductCategoryPagination } from 'app/core/product/inventory.types';
+import { ApiResponseModel, ProductCategory, ProductCategoryPagination } from 'app/core/product/inventory.types';
 import { AddCategoryComponent } from '../add-category/add-category.component';
 import { Store, StoreAsset } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
@@ -64,6 +64,9 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     totalCategories: number;
+
+    parentCategoriesOptions: ProductCategory[];
+
 
     /**
      * Constructor
@@ -134,6 +137,18 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
             this._changeDetectorRef.markForCheck();
         });
 
+        //Get the vertical code for this store id first then we get the parent categories
+        this._storesService.getStoreById(this.storeId$)
+        .pipe(
+            map((response)=>{
+                return response.verticalCode;
+            }),
+            switchMap((storeVerticalCode:string)=>this._inventoryService.getParentCategories(0, 20, 'name', 'asc', '',storeVerticalCode)
+            ),
+        )
+        .subscribe((categories) => {
+            this.parentCategoriesOptions = categories.data["content"];
+        });
         
         // Subscribe to search input field value changes
         this.searchInputControl.valueChanges
@@ -328,9 +343,10 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
                 let category = {
                     name:result.name,
                     storeId: this.storeId$,
-                    parentCategoryId: null,
+                    parentCategoryId: result.parentCategoryId,
                     thumbnailUrl:null,
                 };
+                
                 const formData = new FormData();
                 formData.append("file", result.imagefiles[0]);
         
@@ -367,6 +383,10 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
      */
     updateCategory(): void
     {
+        if(this.categoriesForm.invalid){
+            return;
+        }
+        
         let formData = null;
         let fileSource = null;
         if (this.files[0].selectedFiles) {

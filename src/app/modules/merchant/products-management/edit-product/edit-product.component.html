@@ -485,9 +485,27 @@
 
                             <!-- Category, Bulk Item, Vehicle Type -->
                             <div class="flex flex-col w-full lg:w-3/12">
+                                <!-- Parent categories -->
+                                <div class="w-full">
+                                    <mat-form-field class="w-50">
+                                        <mat-label>Top Tier Category</mat-label>
+                                        <mat-select
+                                            class="w-full"
+                                            [(ngModel)]="selectedParentCategory"
+                                            [ngModelOptions]="{standalone: true}"
+                                            disabled
+                                        >
+                                            <div> 
+                                                <mat-option *ngFor="let listing of parentCategoriesOptions;" [value]="listing.id">
+                                                    {{listing.name}}
+                                                </mat-option>
+                                            </div>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
                                 <!-- Category -->
                                 <div class="w-full">
-                                    <span class="mb-px font-medium leading-tight">Category *</span>
+                                    <span class="mb-px font-medium leading-tight">Sub-Category *</span>
                                     <div 
                                     [ngClass]="addProductForm.get('step1').get('categoryId').hasError('required') ? 'border-red-600' : 'border-gray-300'"
                                     class="mt-0.5 rounded-md border dark:border-gray-500 shadow-sm overflow-hidden">
