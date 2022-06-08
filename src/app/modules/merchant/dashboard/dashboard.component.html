@@ -56,6 +56,80 @@
                 <div class="flex flex-col flex-auto xl:col-span-2 w-full max-w-screen-xl mx-auto">
                     <div class="sm:px-6">
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0">
+                            <!-- Orders summary -->
+                            <div class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                                <!-- Header -->
+                                <div class="text-lg font-medium tracking-tight leading-6 truncate">Orders Summary</div>
+                                <div class="grid grid-cols-1 md:grid-cols-4 grid-flow-row gap-4 w-full mt-4">
+                                    <!-- Container -->
+                                    <div class="flex flex-col flex-auto col-span-2 lg:col-span-1">
+                                        <div class="flex-auto grid grid-cols-2 gap-4">
+                                            <!-- New -->
+                                            <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-green-50 text-green-500 dark:bg-white dark:bg-opacity-5 dark:text-green-400">
+                                                <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                    {{_orderCountSummary[0].count}}
+                                                </div>
+                                                <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[0].label}}</div>
+                                            </div>
+                                            <!-- Sent Out -->
+                                            <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-blue-50 text-blue-500 dark:bg-white dark:bg-opacity-5 dark:text-blue-400">
+                                                <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                    {{_orderCountSummary[3].count}}
+                                                </div>
+                                                <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[3].label}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col flex-auto col-span-2 lg:col-span-1">
+                                        <div class="flex-auto grid grid-cols-2 gap-4">
+                                            <!-- Process -->
+                                            <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-amber-50 text-amber-500 dark:bg-white dark:bg-opacity-5 dark:text-amber-400">
+                                                <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                    {{_orderCountSummary[1].count}}
+                                                </div>
+                                                <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[1].label}}</div>
+                                            </div>
+                                            <!-- Cancelled -->
+                                            <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-pink-50 text-pink-500 dark:bg-white dark:bg-opacity-5 dark:text-pink-400">
+                                                <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                    {{_orderCountSummary[5].count}}
+                                                </div>
+                                                <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[5].label}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col flex-auto col-span-2 lg:col-span-1">
+                                        <div class="flex-auto grid grid-cols-2 gap-4">
+                                            <!-- Awaiting Pickup -->
+                                            <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-gray-50 text-black dark:bg-white dark:bg-opacity-5 dark:text-gray-400">
+                                                <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                    {{_orderCountSummary[2].count}}
+                                                </div>
+                                                <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[2].label}}</div>
+                                            </div>
+                                            <!-- Out of Stock -->
+                                            <!-- <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-red-50 text-red-500 dark:bg-white dark:bg-opacity-5 dark:text-red-400">
+                                                <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                    0
+                                                </div>
+                                                <div class="mt-1 text-sm sm:text-lg font-medium">Out Of Stock</div>
+                                            </div> -->
+                                        </div>
+                                    </div>
+                                    <!-- Overview -->
+                                    <div class="flex flex-col flex-auto col-span-2 lg:col-span-1">
+                                        <div class="flex-auto grid grid-cols-2 gap-4">
+                                            <!-- Completed -->
+                                            <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-violet-50 text-violet-500 dark:bg-white dark:bg-opacity-5 dark:text-violet-400">
+                                                <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                    {{_orderCountSummary[4].count}}
+                                                </div>
+                                                <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[4].label}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <!-- Today Sales -->
                             <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
                                 <div class="flex items-start justify-between">
