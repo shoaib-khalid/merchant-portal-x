@@ -12,6 +12,8 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { formatDate } from '@angular/common';
 import * as XLSX from 'xlsx';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
+import { OrdersCountSummary } from '../orders-management/orders-list/orders-list.types';
+import { OrdersListService } from '../orders-management/orders-list/orders-list.service';
 
 @Component({
     selector       : 'dashboard',
@@ -52,6 +54,10 @@ export class DashboardComponent implements OnInit, OnDestroy
     seriesChart: any;
     overviewChart: any;
     weeklyGraph: boolean = true;
+    
+    orderCountSummary: OrdersCountSummary[];
+    _orderCountSummary: any;
+
     // topProductChart:any;
     
     // ------------------------
@@ -206,7 +212,7 @@ export class DashboardComponent implements OnInit, OnDestroy
         private _storesService: StoresService,
         private _router: Router,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
-
+        private _orderslistService: OrdersListService,
     )
     {
     }
@@ -233,6 +239,40 @@ export class DashboardComponent implements OnInit, OnDestroy
      */
     ngOnInit(): void
     {   
+        this._orderCountSummary = [
+            { id: "NEW", label: "New", completionStatus: ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE"], count: 0 },
+            { id: "PROCESS", label: "Process", completionStatus: "BEING_PREPARED", count: 0 },
+            { id: "AWAITING_PICKUP", label: "Awaiting Pickup", completionStatus: "AWAITING_PICKUP", count: 0 },
+            { id: "SENT_OUT", label: "Sent Out", completionStatus: "BEING_DELIVERED", count: 0 },
+            { id: "DELIVERED", label: "Delivered", completionStatus: "DELIVERED_TO_CUSTOMER", count: 0 },
+            { id: "CANCELLED", label: "Cancelled", completionStatus: "CANCELED_BY_MERCHANT", count: 0 },
+            { id: "HISTORY", label: "History", completionStatus: ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE", "BEING_PREPARED", "AWAITING_PICKUP", "BEING_DELIVERED", "DELIVERED_TO_CUSTOMER", "CANCELED_BY_MERCHANT"], count: 0 }
+        ];
+
+        this._orderslistService.ordersCountSummary$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe((response) => {       
+            
+            this.orderCountSummary = response;
+
+            this._orderCountSummary.forEach((item,i) => {
+
+                // if have multiple completionStatus
+                if (Array.isArray(item.completionStatus) && item.completionStatus.length > 1) {
+                    item.completionStatus.forEach((element, j) => {
+                        let index = this.orderCountSummary.findIndex((obj => obj.completionStatus === item.completionStatus[j]));
+                        if (index > -1) {
+                            this._orderCountSummary[i].count = this._orderCountSummary[i].count + this.orderCountSummary[index].count;
+                        }
+                    });
+                } else {
+                    let index = this.orderCountSummary.findIndex((obj => obj.completionStatus === item.completionStatus));
+                    if (index > -1) {
+                        this._orderCountSummary[i].count = this.orderCountSummary[index].count;
+                    }
+                }
+            });
+        });        
         
         this._fuseMediaWatcherService.onMediaChange$
             .pipe(takeUntil(this._unsubscribeAll))

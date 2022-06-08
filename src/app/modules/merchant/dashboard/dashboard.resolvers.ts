@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
-import { Observable } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 import { DashboardService } from 'app/modules/merchant/dashboard/dashboard.service';
+import { OrdersListService } from '../orders-management/orders-list/orders-list.service';
 
 @Injectable({
     providedIn: 'root'
@@ -276,5 +277,36 @@ export class WeeklySaleResolver implements Resolve<any>
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
     {
         return this._dashboardService.getWeeklySale(this.storeId$);
+    }
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class OrdersListResolver implements Resolve<any>
+{
+    /**
+     * Constructor
+     */
+    constructor(private _ordersListService: OrdersListService)
+    {
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Resolver
+     *
+     * @param route
+     * @param state
+     */
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
+    {
+        return forkJoin([
+            this._ordersListService.getOrders(),
+            this._ordersListService.getOrdersCountSummary()
+        ]);
     }
 }
