@@ -7,6 +7,7 @@ import { InventoryService } from 'app/core/product/inventory.service';
 import { map, Observable, Subject, switchMap } from 'rxjs';
 import { ApiResponseModel, ProductCategory } from 'app/core/product/inventory.types';
 import { StoresService } from 'app/core/store/store.service';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 
 @Component({
@@ -51,7 +52,9 @@ export class AddCategoryComponent implements OnInit {
     private _inventoryService: InventoryService,
     private _formBuilder: FormBuilder,
     private _storesService: StoresService,
-    @Inject(MAT_DIALOG_DATA) public data: MatDialog
+    @Inject(MAT_DIALOG_DATA) public data: MatDialog,
+    private _fuseConfirmationService: FuseConfirmationService,
+
   ) { }
 
 /**
@@ -147,6 +150,34 @@ export class AddCategoryComponent implements OnInit {
             return;
         }
         
+        // Return and throw warning dialog if image file size is big
+        let maxSize = 1048576;
+        var maxSizeInMB = (maxSize / (1024*1024)).toFixed(2);
+        
+        if (fileList[0].size > maxSize ) {
+            // Show a success message (it can also be an error message)
+            const confirmation = this._fuseConfirmationService.open({
+                title  : 'Image size limit',
+                message: 'Your uploaded image exceeds the maximum size of ' + maxSizeInMB + ' MB!',
+                icon: {
+                    show: true,
+                    name: "image_not_supported",
+                    color: "warn"
+                },
+                actions: {
+                    
+                    cancel: {
+                        label: 'OK',
+                        show: true
+                        },
+                    confirm: {
+                        show: false,
+                    }
+                    }
+            });
+            return;
+        }
+
         var reader = new FileReader();
         reader.readAsDataURL(file); 
         reader.onload = (_event)  => {

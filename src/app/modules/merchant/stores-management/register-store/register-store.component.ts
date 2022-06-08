@@ -1611,7 +1611,7 @@ export class RegisterStoreComponent implements OnInit
             // Show a success message (it can also be an error message)
             const confirmation = this._fuseConfirmationService.open({
                 title  : 'Image size limit',
-                message: 'Your uploaded image exceeds the maximum size of ' + maxSizeInMB + ' MB !',
+                message: 'Your uploaded image exceeds the maximum size of ' + maxSizeInMB + ' MB!',
                 icon: {
                     show: true,
                     name: "image_not_supported",

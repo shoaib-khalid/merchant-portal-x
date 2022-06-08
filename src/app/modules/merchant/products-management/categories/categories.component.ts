@@ -340,39 +340,42 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
         } else {
             const dialogRef = this._dialog.open(AddCategoryComponent, { disableClose: true });
             dialogRef.afterClosed().subscribe(result => {
-                let category = {
-                    name:result.name,
-                    storeId: this.storeId$,
-                    parentCategoryId: result.parentCategoryId,
-                    thumbnailUrl:null,
-                };
                 
-                const formData = new FormData();
-                formData.append("file", result.imagefiles[0]);
-        
-                // Create category on the server
-                this._inventoryService.createCategory(category, formData)
-                .pipe(takeUntil(this._unsubscribeAll))
-                .subscribe((response) => {
-                    response["data"]; 
-                },(error) => {
-
-                    if (error.status === 409) {
-                        // Open the confirmation dialog
-                        const confirmation = this._fuseConfirmationService.open({
-                            title  : 'Name already existed',
-                            message: 'The category name inserted is already existed, please create new category with a different name',
-                            actions: {
-                                confirm: {
-                                    label: 'OK'
-                                },
-                                cancel : {
-                                    show : false,
+                if (result.status === true) {
+                    let category = {
+                        name:result.name,
+                        storeId: this.storeId$,
+                        parentCategoryId: result.parentCategoryId,
+                        thumbnailUrl:null,
+                    };
+                    
+                    const formData = new FormData();
+                    formData.append("file", result.imagefiles[0]);
+            
+                    // Create category on the server
+                    this._inventoryService.createCategory(category, formData)
+                    .pipe(takeUntil(this._unsubscribeAll))
+                    .subscribe((response) => {
+                        response["data"]; 
+                    },(error) => {
+    
+                        if (error.status === 409) {
+                            // Open the confirmation dialog
+                            const confirmation = this._fuseConfirmationService.open({
+                                title  : 'Name already existed',
+                                message: 'The category name inserted is already existed, please create new category with a different name',
+                                actions: {
+                                    confirm: {
+                                        label: 'OK'
+                                    },
+                                    cancel : {
+                                        show : false,
+                                    }
                                 }
-                            }
-                        });
-                    }
-                });
+                            });
+                        }
+                    });
+                }
             });
             
         }        
@@ -493,7 +496,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
     * 
     * @param event 
     */
-    selectFiles(fileType,event: any): void {
+    selectFiles(fileType, event: any): void {
         
         // find index of object this.files
         let index = this.files.findIndex(preview => preview.type === fileType);
@@ -502,6 +505,34 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
         this.files[index].fileSource = null;
         this.files[index].selectedFileName = "";
         this.files[index].selectedFiles = event.target.files;
+
+        // Return and throw warning dialog if image file size is big
+        let maxSize = 1048576;
+        var maxSizeInMB = (maxSize / (1024*1024)).toFixed(2);
+        
+        if (this.files[index].selectedFiles[0].size > maxSize ) {
+            // Show a success message (it can also be an error message)
+            const confirmation = this._fuseConfirmationService.open({
+                title  : 'Image size limit',
+                message: 'Your uploaded image exceeds the maximum size of ' + maxSizeInMB + ' MB!',
+                icon: {
+                    show: true,
+                    name: "image_not_supported",
+                    color: "warn"
+                },
+                actions: {
+                    
+                    cancel: {
+                        label: 'OK',
+                        show: true
+                        },
+                    confirm: {
+                        show: false,
+                    }
+                    }
+            });
+            return;
+        }
         
         if (this.files[index].selectedFiles && this.files[index].selectedFiles[0]) {
             const numberOfFiles = this.files[index].selectedFiles.length;

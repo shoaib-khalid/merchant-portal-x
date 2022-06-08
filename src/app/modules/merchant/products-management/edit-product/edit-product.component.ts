@@ -1123,6 +1123,9 @@ export class EditProductComponent implements OnInit, OnDestroy
         // Update the selected product form
         this.addProductForm.get('step1').get('categoryId').patchValue(category.id);
 
+        // set as dirty to remove pristine condition of the form control
+        this.addProductForm.get('step1').markAsDirty();
+
         // Mark for check
         this._changeDetectorRef.markForCheck();
     }
@@ -1254,7 +1257,7 @@ export class EditProductComponent implements OnInit, OnDestroy
             // Show a success message (it can also be an error message)
             const confirmation = this._fuseConfirmationService.open({
                 title  : 'Image size limit',
-                message: 'Your uploaded image exceeds the maximum size of ' + maxSizeInMB + ' MB !',
+                message: 'Your uploaded image exceeds the maximum size of ' + maxSizeInMB + ' MB!',
                 icon: {
                     show: true,
                     name: "image_not_supported",
@@ -1445,14 +1448,6 @@ export class EditProductComponent implements OnInit, OnDestroy
         await this._inventoryService.updateProduct(this.selectedProduct.id, productToUpdate)
         .pipe(takeUntil(this._unsubscribeAll))
         .subscribe(async () => {
-
-            // this.products$
-            // .pipe(take(1)) 
-            // .subscribe(products => {
-
-            //     // filter after update
-            //     this.filterProductOptionsMethod(products);
-            // })
 
             
             // if got variants
