@@ -9,15 +9,22 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 export class ChangelogComponent
 {
     changelog: any[] = [
-        //v1.3.2
+        //v1.4.0
         {
-            version    : 'v1.3.2',
-            releaseDate: 'May 25, 2022',
+            version    : 'v1.4.0',
+            releaseDate: 'June 8, 2022',
             changes    : [
+                {
+                    type: 'Added',
+                    list: [
+                        '(Dashboard) Added Orders Summary section',
+                    ]
+                },
                 {
                     type: 'Fixed',
                     list: [
-                        '(ProductManagement) Fix product assets not provisioned'
+                        '(ProductManagement) Set size limit for category image',
+                        '(ProductManagement) Fixed unable to update product when change the product category'
                     ]
                 }
             ]
@@ -30,7 +37,8 @@ export class ChangelogComponent
                 {
                     type: 'Fixed',
                     list: [
-                        '(StoreManagement) Change state value from name to id'
+                        '(StoreManagement) Change state value from name to id',
+                        '(ProductManagement) Fix product assets not provisioned'
                     ]
                 }
             ]
