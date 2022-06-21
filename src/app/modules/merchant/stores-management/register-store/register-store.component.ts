@@ -192,7 +192,7 @@ export class RegisterStoreComponent implements OnInit
         this.createStoreForm = this._formBuilder.group({
             step1: this._formBuilder.group({
                 name                : ['', Validators.required],
-                subdomain           : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), RegisterStoreValidationService.domainValidator]],
+                subdomain           : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(63), RegisterStoreValidationService.domainValidator]],
                 storeDescription    : ['', [Validators.required, Validators.maxLength(200)]],
                 displayAddress      : [''],
                 email               : ['', [Validators.required, Validators.email]],

@@ -77,7 +77,7 @@
                                             <input
                                                 matInput
                                                 minlength="4"
-                                                maxlength="15"
+                                                maxlength="63"
                                                 placeholder="store-url"
                                                 [formControlName]="'subdomain'"
                                                 [required]="true"
@@ -97,7 +97,7 @@
                                                 Minimum character length not meet (mininum 4 character)
                                             </mat-error>
                                             <mat-error *ngIf="createStoreForm.get('step1').get('subdomain').hasError('maxlength')">
-                                                Maximum character length reached (maximum 15 character)
+                                                Maximum character length reached (maximum 63 character)
                                             </mat-error>
                                             <mat-error *ngIf="createStoreForm.get('step1').get('subdomain').hasError('domainAlreadyTaken')">
                                                 The domain name entered is already taken

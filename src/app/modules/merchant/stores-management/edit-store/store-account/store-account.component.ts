@@ -85,7 +85,7 @@ export class StoreAccountComponent implements OnInit
         // Create the form
         this.storeAccountForm = this._formBuilder.group({
             name                : ['', Validators.required],
-            subdomain           : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(15), EditStoreValidationService.domainValidator]],
+            subdomain           : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(63), EditStoreValidationService.domainValidator]],
             storeDescription    : ['', [Validators.required, Validators.maxLength(200)]],
             email               : ['', [Validators.required, Validators.email]],
             phoneNumber         : ['', EditStoreValidationService.phonenumberValidator],
