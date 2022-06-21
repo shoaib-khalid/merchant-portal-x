@@ -108,12 +108,14 @@
                                                 <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[2].label}}</div>
                                             </div>
                                             <!-- Out of Stock -->
-                                            <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-red-50 text-red-500 dark:bg-white dark:bg-opacity-5 dark:text-red-400">
-                                                <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
-                                                    {{outOfStockProducts}}
+                                            <ng-container *ngIf="verticalCode === 'E-Commerce'">
+                                                <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-red-50 text-red-500 dark:bg-white dark:bg-opacity-5 dark:text-red-400">
+                                                    <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                        {{outOfStockProducts}}
+                                                    </div>
+                                                    <div class="mt-1 text-sm sm:text-lg font-medium">Out Of Stock</div>
                                                 </div>
-                                                <div class="mt-1 text-sm sm:text-lg font-medium">Out Of Stock</div>
-                                            </div>
+                                            </ng-container>
                                         </div>
                                     </div>
                                     <!-- Overview -->

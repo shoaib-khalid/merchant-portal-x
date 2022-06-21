@@ -60,6 +60,7 @@ export class DashboardComponent implements OnInit, OnDestroy
     _orderCountSummary: any;
 
     outOfStockProducts: string;
+    verticalCode: string;
 
     // topProductChart:any;
     
@@ -304,6 +305,7 @@ export class DashboardComponent implements OnInit, OnDestroy
                 if (store) {                    
                     this.storeName = store.name;
                     this.currencySymbol = store.regionCountry.currencySymbol;
+                    this.verticalCode = store.verticalCode
                 }
 
                 // Mark for check
