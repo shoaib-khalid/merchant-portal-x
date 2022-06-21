@@ -14,6 +14,7 @@ import * as XLSX from 'xlsx';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { OrdersCountSummary } from '../orders-management/orders-list/orders-list.types';
 import { OrdersListService } from '../orders-management/orders-list/orders-list.service';
+import { InventoryService } from 'app/core/product/inventory.service';
 
 @Component({
     selector       : 'dashboard',
@@ -57,6 +58,8 @@ export class DashboardComponent implements OnInit, OnDestroy
     
     orderCountSummary: OrdersCountSummary[];
     _orderCountSummary: any;
+
+    outOfStockProducts: string;
 
     // topProductChart:any;
     
@@ -213,6 +216,7 @@ export class DashboardComponent implements OnInit, OnDestroy
         private _router: Router,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
         private _orderslistService: OrdersListService,
+        private _inventoryService: InventoryService,
     )
     {
     }
@@ -248,6 +252,14 @@ export class DashboardComponent implements OnInit, OnDestroy
             { id: "CANCELLED", label: "Cancelled", completionStatus: "CANCELED_BY_MERCHANT", count: 0 },
             { id: "HISTORY", label: "History", completionStatus: ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE", "BEING_PREPARED", "AWAITING_PICKUP", "BEING_DELIVERED", "DELIVERED_TO_CUSTOMER", "CANCELED_BY_MERCHANT"], count: 0 }
         ];
+
+        this._inventoryService.getProducts(0,100,'name','asc','','OUTOFSTOCK','')
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe((response) => {
+            
+            this.outOfStockProducts = response['data'].totalElements;
+
+        });
 
         this._orderslistService.ordersCountSummary$
         .pipe(takeUntil(this._unsubscribeAll))
