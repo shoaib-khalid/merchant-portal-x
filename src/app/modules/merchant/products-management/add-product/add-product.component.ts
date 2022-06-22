@@ -363,7 +363,7 @@ export class AddProductComponent implements OnInit, OnDestroy
         //     });
 
         //get all values for parent categories with specied vertical code
-        this._inventoryService.getParentCategories(0, 20, 'name', 'asc', '',this.storeVerticalCode)
+        this._inventoryService.getParentCategories(0, 50, 'name', 'asc', '',this.storeVerticalCode)
         .subscribe((response:ApiResponseModel<ProductCategory[]>)=>{
             
                 this.parentCategoriesOptions = response.data["content"];

@@ -143,7 +143,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
             map((response)=>{
                 return response.verticalCode;
             }),
-            switchMap((storeVerticalCode:string)=>this._inventoryService.getParentCategories(0, 20, 'name', 'asc', '',storeVerticalCode)
+            switchMap((storeVerticalCode:string)=>this._inventoryService.getParentCategories(0, 50, 'name', 'asc', '',storeVerticalCode)
             ),
         )
         .subscribe((categories) => {
