@@ -1900,7 +1900,7 @@ export class RegisterStoreComponent implements OnInit
                 // Show a success message (it can also be an error message)
                 const confirmation = this._fuseConfirmationService.open({
                     title  : 'Store Created',
-                    message: 'Your have successfully create store',
+                    message: 'You have successfully created a new store',
                     icon: {
                         show: true,
                         name: "heroicons_outline:clipboard-check",
