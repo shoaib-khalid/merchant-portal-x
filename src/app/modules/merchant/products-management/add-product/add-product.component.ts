@@ -954,32 +954,9 @@ export class AddProductComponent implements OnInit, OnDestroy
                 this.newProductId = newProduct["data"].id;
                 this.selectedProduct = newProduct["data"];    
                 
-                // this.products$
-                //     .pipe(take(1)) 
-                //     .subscribe(products => {
-
-                //         // filter after update
-                //         this.filterProductOptionsMethod(products);
-                //     })
-
                 // Add Inventory to product
                 this._inventoryService.addInventoryToProduct(newProduct["data"], { sku: sku, quantity: availableStock, price:price, itemCode:newProduct["data"].id + "aa" } )
                     .subscribe((response)=>{
-                        // update sku, price, quantity display since it's not part of product but product inventory
-                        // this.displayPrice = response.price;
-                        // this.displayQuantity = response.quantity;
-                        // this.displaySku = response.sku;
-
-                        // if type is combo..
-                        if (this.productType === "combo"){
-
-                            // open the details window..
-                            // this.toggleDetails(newProduct["data"].id);
-
-                            // then, open the combo section
-                            // this.showCombosSection = true;
-            
-                        }
 
                         // Update the assets product on the server (backend kena enable update)
                         if (imagefiles) {
@@ -1007,25 +984,9 @@ export class AddProductComponent implements OnInit, OnDestroy
                         }
 
                     });
-
-
-                // Go to new product
-                // this.selectedProduct = newProduct["data"];
-                                        
-                // Update current form with new product data
-                // this.createdProductForm.patchValue(newProduct["data"]);
-
-                // Set image & isVariants to false ...
-                // this.selectedProductForm.get('isVariants').patchValue(false);
                 
                 // Set filtered variants to empty array
                 this.filteredProductVariants = [];
-                
-                // // Set variants to empty array
-                // this.variants = [];
-
-                // // Set selectedProduct variants to empty array
-                // this.selectedProduct.variants = [];
 
                 if (this.addProductForm.get('step1').get('isVariants').value === false && this.productType !== 'combo') {
                     
@@ -1089,34 +1050,10 @@ export class AddProductComponent implements OnInit, OnDestroy
                 
             }
     
-            // VARIANT
-            // Delete the variant from the BE
-            // if (this.variantToBeDeleted.length > 0){
-    
-            //     this.variantToBeDeleted.forEach(variant => {
-            //         this._inventoryService.deleteVariant(this.selectedProduct.id, variant.id , variant)
-            //             .pipe(takeUntil(this._unsubscribeAll))
-            //             .subscribe((response)=>{
-            //                 // this.removeVariantFromProduct(response)
-            //             });
-            //     })
-            // }
     
             // create new variants
             const variantIds = await this.createVariantInBE()
-    
-            // Delete the variant available from the BE
-            // if (this.variantAvailableToBeDeleted.length > 0){
-                
-            //     this.variantAvailableToBeDeleted.forEach(options => {
-            //         this._inventoryService.deleteVariantAvailable(options, this.selectedProduct.id)
-            //             .pipe(takeUntil(this._unsubscribeAll))
-            //             .subscribe((response)=>{
-                            
-            //             });
-    
-            //     })
-            // }
+            
             let variantAvailablesCreated = [];
             // if got new variant availables, pass the variantIds from the createVariant endpoint
             if (this.variantAvailableToBeCreated.length > 0){

@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnInit, ViewChild, ViewEncapsulation } fr
 import { FormArray, FormBuilder, FormControl, FormGroup, NgForm, ValidationErrors, Validators } from '@angular/forms';
 import { fuseAnimations } from '@fuse/animations';
 import { RegisterStoreValidationService } from 'app/modules/merchant/stores-management/register-store/register-store.validation.service';
-import { BehaviorSubject, Observable, ReplaySubject, Subject, take } from 'rxjs';
+import { BehaviorSubject, forkJoin, Observable, ReplaySubject, Subject, take } from 'rxjs';
 import { StoresService } from 'app/core/store/store.service';
 import { Store, StoreRegionCountries, CreateStore, StoreAssets, StoreDeliveryProvider, StoreDeliveryPeriod } from 'app/core/store/store.types';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -18,7 +18,7 @@ import { NgxGalleryOptions, NgxGalleryImage, NgxGalleryAnimation } from 'ngx-gal
 import { UserService } from 'app/core/user/user.service';
 import { Client } from 'app/core/user/user.types';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
-import { debounceTime, takeUntil } from 'rxjs/operators';
+import { debounceTime, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { Platform } from 'app/core/platform/platform.types';
 import { PlatformService } from 'app/core/platform/platform.service';
 import { AuthService } from 'app/core/auth/auth.service';
@@ -27,6 +27,7 @@ import { GoogleKey } from '../edit-store/edit-store.types';
 import { City } from '../edit-store/store-delivery/store-delivery.types';
 import { StoresDeliveryService } from '../edit-store/store-delivery/store-delivery.service';
 import { MatSelect } from '@angular/material/select';
+import { MatStepper } from '@angular/material/stepper';
 
 @Component({
     selector     : 'register-store-page',
@@ -45,6 +46,7 @@ import { MatSelect } from '@angular/material/select';
 export class RegisterStoreComponent implements OnInit
 {
     @ViewChild('supportNgForm') supportNgForm: NgForm;
+    @ViewChild('verticalStepper') stepper: MatStepper;
 
     platform: Platform;
 
@@ -153,6 +155,7 @@ export class RegisterStoreComponent implements OnInit
     //string interpolationdoesnt-update-on-eventListener hence need to use behaviour subject
     displayLatitude: BehaviorSubject<string> = new BehaviorSubject<string>('');
     displayLongtitude: BehaviorSubject<string> = new BehaviorSubject<string>('');
+    storeCreationError: boolean = false;
 
     
     /**
@@ -981,15 +984,97 @@ export class RegisterStoreComponent implements OnInit
         createStoreBody["latitude"] = this.location.lat.toString();
         createStoreBody["longitude"] = this.location.lng.toString();
 
-
-
         // Disable the form
         this.createStoreForm.disable();
 
         // -------------------------------------
         //        Register Store Section
         // -------------------------------------
+        this._storesService.post(createStoreBody)
+            .subscribe(async (response) => {
 
+                this.storeId = response.data.id;
+                this.storeCreationError = false;
+
+                // ---------------------------
+                //    Create Store Timing
+                // --------------------------- 
+                await this.createStoreTiming(storeTimingBody)
+                    .then(result => {
+                    })
+                    .catch(err => { 
+                        console.error('FAILED [create store timing]- ', err);
+                        this.storeCreationError = true;
+                    })
+
+                // ---------------------------
+                //    Create Store Assets
+                // ---------------------------
+                await this.createStoreAssets(this.files)
+                    .then(result => {
+                    })
+                    .catch(err => { 
+                        console.error('FAILED [create store assets]- ', err);
+                        this.storeCreationError = true;
+                    })
+
+                // ---------------------------
+                //    Create Store Provider
+                // ---------------------------
+                await this.createStoreProvider(deliveryType, allowStorePickup)
+                    .then(result => {
+                    })
+                    .catch(err => { 
+                        console.error('FAILED [create store provider]- ', err);
+                        this.storeCreationError = true;
+                    })
+
+                // ---------------------------
+                //     Provision SELF 
+                // ---------------------------
+                if (deliveryType === "SELF") {
+                    await this.provisionSELF(allowedSelfDeliveryStates)
+                        .then(result => {
+                        })
+                        .catch(err => { 
+                            console.error('FAILED [provision SELF]- ', err);
+                            this.storeCreationError = true;
+                        })
+                } 
+
+                // ---------------------------
+                // Provision ADHOC 
+                // ---------------------------
+                if (deliveryType === "ADHOC") {
+                    await this.provisionADHOC(deliverySpType)
+                        .then(result => {
+                        })
+                        .catch(err => { 
+                            console.error('FAILED [provision ADHOC]- ', err);
+                            this.storeCreationError = true;
+                        })
+                }
+
+                // ---------------------------
+                // Provision SCHEDULED
+                // ---------------------------
+                if (deliveryType === "SCHEDULED") {
+                    await this.provisionSCHEDULED()
+                        .then(result => {
+                        })
+                        .catch(err => { 
+                            console.error('FAILED [provision SCHEDULED]- ', err);
+                            this.storeCreationError = true;
+                        })
+                }
+
+                await this.storeCreationStatus(this.storeCreationError);
+
+            })
+            
+
+        // LAMA
+        /*
         this._storesService.post(createStoreBody)
             .subscribe((response) => {
 
@@ -1002,99 +1087,98 @@ export class RegisterStoreComponent implements OnInit
                 storeTimingBody.forEach(item => {
                     let { isOpen, isBreakTime,  ...filteredItem } = item;
 
-                // Start Time if PM read 24hrs format
-                let startTime = filteredItem.openTime;
-                let _startTime;
-        
-                if (startTime.timeAmPm === "PM" && startTime.timeHour !== "12") {
-                    _startTime = parseInt(startTime.timeHour) + 12;
-                } else if (startTime.timeAmPm === "AM" && startTime.timeHour === "12") {
-                    _startTime = parseInt(startTime.timeHour) - 12;
-                } else {
-                    _startTime = startTime.timeHour;
-                }
-
-                // End Time if PM read 24hrs format
-                let endTime = filteredItem.closeTime;
-                let _endTime;
-
-                if (endTime.timeAmPm === "PM" && endTime.timeHour !== "12") {
-                    _endTime = parseInt(endTime.timeHour) + 12;
-                } else if (endTime.timeAmPm === "AM" && endTime.timeHour === "12") {
-                    _endTime = parseInt(endTime.timeHour) - 12;
-                } else {
-                    _endTime = endTime.timeHour;
-                }
-
-                // Break Start Time if PM read 24hrs format
-                let breakStartTime = filteredItem.breakStartTime;
-                let _breakStartTime;
-        
-                if (breakStartTime.timeAmPm === "PM" && breakStartTime.timeHour !== "12") {
-                    _breakStartTime = parseInt(breakStartTime.timeHour) + 12;
-                } else if (breakStartTime.timeAmPm === "AM" && breakStartTime.timeHour === "12") {
-                    _breakStartTime = parseInt(breakStartTime.timeHour) - 12;
-                } else {
-                    _breakStartTime = breakStartTime.timeHour;
-                }
-
-                // Break End Time if PM read 24hrs format
-                let breakEndTime = filteredItem.breakEndTime;
-                let _breakendTime;
-        
-                if (breakEndTime.timeAmPm === "PM" && breakEndTime.timeHour !== "12") {
-                    _breakendTime = parseInt(breakEndTime.timeHour) + 12;
-                } else if (breakEndTime.timeAmPm === "AM" && breakEndTime.timeHour === "12") {
-                    _breakendTime = parseInt(breakEndTime.timeHour) - 12;
-                } else {
-                    _breakendTime = breakEndTime.timeHour;
-                }
-                
-                const _filteredItem = { 
-                    breakEndTime: _breakendTime + ":" + filteredItem.breakEndTime.timeMinute,
-                    breakStartTime: _breakStartTime + ":" + filteredItem.breakStartTime.timeMinute,
-                    closeTime: _endTime + ":" + filteredItem.closeTime.timeMinute,
-                    day: filteredItem.day,
-                    isOff: filteredItem.isOff,
-                    openTime: _startTime + ":" + filteredItem.openTime.timeMinute,
-                    storeId: filteredItem.storeId
-                }
-                _filteredItem.isOff = !isOpen;
-                
-                if (isBreakTime === false) {
-                    _filteredItem.breakStartTime = null;
-                    _filteredItem.breakEndTime = null;
-                    filteredItem.breakStartTime.timeAmPm = null;
-                    filteredItem.breakEndTime.timeAmPm = null;
-                    
-                    this.createStoreForm.get('step4').get('storeTiming').value.breakStartTime = null;
-                    this.createStoreForm.get('step4').get('storeTiming').value.breakEndTime = null;
-                    
-                } else {
-                    this.createStoreForm.get('step4').get('storeTiming').value.breakStartTime = _filteredItem.breakStartTime;
-                    this.createStoreForm.get('step4').get('storeTiming').value.breakEndTime = _filteredItem.breakEndTime;
-                }
-
-                // ---------------------------
-                //    Create Store Timing
-                // ---------------------------
-
-                this._storesService.postTiming(this.storeId, _filteredItem)
-                    .subscribe((response)=>{
-
-                    },
-                    (err: any) => {
-                        console.error('Error postTiming: ', err);
-                        // throw BreakException;
+                    // Start Time if PM read 24hrs format
+                    let startTime = filteredItem.openTime;
+                    let _startTime;
+            
+                    if (startTime.timeAmPm === "PM" && startTime.timeHour !== "12") {
+                        _startTime = parseInt(startTime.timeHour) + 12;
+                    } else if (startTime.timeAmPm === "AM" && startTime.timeHour === "12") {
+                        _startTime = parseInt(startTime.timeHour) - 12;
+                    } else {
+                        _startTime = startTime.timeHour;
                     }
-                    
-                    );
+
+                    // End Time if PM read 24hrs format
+                    let endTime = filteredItem.closeTime;
+                    let _endTime;
+
+                    if (endTime.timeAmPm === "PM" && endTime.timeHour !== "12") {
+                        _endTime = parseInt(endTime.timeHour) + 12;
+                    } else if (endTime.timeAmPm === "AM" && endTime.timeHour === "12") {
+                        _endTime = parseInt(endTime.timeHour) - 12;
+                    } else {
+                        _endTime = endTime.timeHour;
+                    }
+
+                    // Break Start Time if PM read 24hrs format
+                    let breakStartTime = filteredItem.breakStartTime;
+                    let _breakStartTime;
+            
+                    if (breakStartTime.timeAmPm === "PM" && breakStartTime.timeHour !== "12") {
+                        _breakStartTime = parseInt(breakStartTime.timeHour) + 12;
+                    } else if (breakStartTime.timeAmPm === "AM" && breakStartTime.timeHour === "12") {
+                        _breakStartTime = parseInt(breakStartTime.timeHour) - 12;
+                    } else {
+                        _breakStartTime = breakStartTime.timeHour;
+                    }
+
+                    // Break End Time if PM read 24hrs format
+                    let breakEndTime = filteredItem.breakEndTime;
+                    let _breakendTime;
+            
+                    if (breakEndTime.timeAmPm === "PM" && breakEndTime.timeHour !== "12") {
+                        _breakendTime = parseInt(breakEndTime.timeHour) + 12;
+                    } else if (breakEndTime.timeAmPm === "AM" && breakEndTime.timeHour === "12") {
+                        _breakendTime = parseInt(breakEndTime.timeHour) - 12;
+                    } else {
+                        _breakendTime = breakEndTime.timeHour;
+                    }
+                
+                    const _filteredItem = { 
+                        breakEndTime: _breakendTime + ":" + filteredItem.breakEndTime.timeMinute,
+                        breakStartTime: _breakStartTime + ":" + filteredItem.breakStartTime.timeMinute,
+                        closeTime: _endTime + ":" + filteredItem.closeTime.timeMinute,
+                        day: filteredItem.day,
+                        isOff: filteredItem.isOff,
+                        openTime: _startTime + ":" + filteredItem.openTime.timeMinute,
+                        storeId: filteredItem.storeId
+                    }
+                    _filteredItem.isOff = !isOpen;
+                
+                    if (isBreakTime === false) {
+                        _filteredItem.breakStartTime = null;
+                        _filteredItem.breakEndTime = null;
+                        filteredItem.breakStartTime.timeAmPm = null;
+                        filteredItem.breakEndTime.timeAmPm = null;
+                        
+                        this.createStoreForm.get('step4').get('storeTiming').value.breakStartTime = null;
+                        this.createStoreForm.get('step4').get('storeTiming').value.breakEndTime = null;
+                        
+                    } else {
+                        this.createStoreForm.get('step4').get('storeTiming').value.breakStartTime = _filteredItem.breakStartTime;
+                        this.createStoreForm.get('step4').get('storeTiming').value.breakEndTime = _filteredItem.breakEndTime;
+                    }
+
+                    // ---------------------------
+                    //    Create Store Timing
+                    // ---------------------------
+
+                    this._storesService.postTiming(this.storeId, _filteredItem)
+                        .subscribe((response)=>{
+
+                        },
+                        (err: any) => {
+                            console.error('Error postTiming: ', err);
+                            this.storeCreationError = true;
+                            // throw BreakException;
+                        }
+                        
+                        );
                 });
 
                 // manual set store timing to new created store at service (ngarut)
-                this._storesService.setTimingToStore(this.storeId, this._storeTiming).subscribe(()=>{
-        
-                });
+                this._storesService.setTimingToStore(this.storeId, this._storeTiming).subscribe(()=>{});
 
                 // ---------------------------
                 //    Create Store Assets
@@ -1123,6 +1207,7 @@ export class RegisterStoreComponent implements OnInit
                             },
                             (err: any) => {
                                 console.error('Error in postAssets');
+                                this.storeCreationError = true;
                                 // throw BreakException;
                             });
                     }
@@ -1149,6 +1234,7 @@ export class RegisterStoreComponent implements OnInit
                             },
                             (err: any) => {
                                 console.error('Error in postAssets');
+                                this.storeCreationError = true;
                                 // throw BreakException;
                             });
                     }
@@ -1166,6 +1252,7 @@ export class RegisterStoreComponent implements OnInit
                                 },
                                 (err: any) => {
                                     console.error('Error in deleteAssets');
+                                    this.storeCreationError = true;
                                     // throw BreakException;
                             });
                         });
@@ -1190,6 +1277,7 @@ export class RegisterStoreComponent implements OnInit
                                 },
                                 (err: any) => {
                                     console.error('Error in postAssets');
+                                    this.storeCreationError = true;
                                     // throw BreakException;
                                 });
                         });
@@ -1209,6 +1297,7 @@ export class RegisterStoreComponent implements OnInit
                                 },
                                 (err: any) => {
                                     console.error('Error in deleteAssets');
+                                    this.storeCreationError = true;
                                     // throw BreakException;
                             });
                         });
@@ -1233,6 +1322,7 @@ export class RegisterStoreComponent implements OnInit
                                 },
                                 (err: any) => {
                                     console.error('Error in postAssets');
+                                    this.storeCreationError = true;
                                     // throw BreakException;
                                 });
                         });
@@ -1285,6 +1375,7 @@ export class RegisterStoreComponent implements OnInit
                     },
                     (err: any) => {
                         console.error('Error in postStoreDeliveryDetails');
+                        this.storeCreationError = true;
                         // throw BreakException;
                     }
                 );
@@ -1308,6 +1399,7 @@ export class RegisterStoreComponent implements OnInit
                             },
                             (err: any) => {
                                 console.error('Error in postSelfDeliveryStateCharges');
+                                this.storeCreationError = true;
                                 // throw BreakException;
                             }
                         );
@@ -1329,6 +1421,7 @@ export class RegisterStoreComponent implements OnInit
                             },
                             (err: any) => {
                                 console.error('Error in postStoreRegionCountryDeliveryProvider');
+                                this.storeCreationError = true;
                                 // throw BreakException;
                             }
                             );
@@ -1354,11 +1447,456 @@ export class RegisterStoreComponent implements OnInit
                         },
                         (err: any) => {
                             console.error('Error in postDeliveryPeriod');
+                            this.storeCreationError = true;
                             // throw BreakException;
                         }
                         );
                 }
                 
+                if ( this.storeCreationError === false ) {
+                    // Show a success message (it can also be an error message)
+                    const confirmation = this._fuseConfirmationService.open({
+                        title  : 'Store Created',
+                        message: 'Your have successfully create store',
+                        icon: {
+                            show: true,
+                            name: "heroicons_outline:clipboard-check",
+                            color: "success"
+                        },
+                        actions: {
+                            confirm: {
+                                label: 'OK',
+                                color: "primary",
+                            },
+                            cancel: {
+                                show: false,
+                            },
+                        }
+                    });
+        
+                    setTimeout(() => {
+                        this.isDisplayStatus = false;
+        
+                        // Navigate to the confirmation required page
+                        this._router.navigateByUrl('/stores');
+                    }, 1000);
+
+                }
+                else if ( this.storeCreationError === true ) {
+                    // Show a failed message (it can also be an error message)
+                    const confirmation = this._fuseConfirmationService.open({
+                        title  : 'Store Creation Failed',
+                        message: 'Something is wrong while creating your store. Please try again',
+                        icon: {
+                            show: true,
+                            name: "heroicons_outline:exclamation",
+                            color: "error"
+                        },
+                        actions: {
+                            confirm: {
+                                label: 'OK',
+                                color: "primary",
+                            },
+                            cancel: {
+                                show: false,
+                            },
+                        }
+                    });
+                }
+                
+            },
+            (err: any) => {
+                console.error('Error in post (create store): ', err);
+                this.storeCreationError = true;
+                // throw 'StoreCreationError';
+            }
+
+        );
+
+        */
+        
+    }
+
+    async createStoreTiming(storeTimingBody) {
+        let promise = new Promise(async (resolve, reject) => {
+
+            let error = false;
+
+            for (let index = 0; index < storeTimingBody.length && (error === false); index++) {
+                const item = storeTimingBody[index];
+
+                let { isOpen, isBreakTime,  ...filteredItem } = item;
+
+                // Start Time if PM read 24hrs format
+                let startTime = filteredItem.openTime;
+                let _startTime;
+        
+                if (startTime.timeAmPm === "PM" && startTime.timeHour !== "12") {
+                    _startTime = parseInt(startTime.timeHour) + 12;
+                } else if (startTime.timeAmPm === "AM" && startTime.timeHour === "12") {
+                    _startTime = parseInt(startTime.timeHour) - 12;
+                } else {
+                    _startTime = startTime.timeHour;
+                }
+
+                // End Time if PM read 24hrs format
+                let endTime = filteredItem.closeTime;
+                let _endTime;
+
+                if (endTime.timeAmPm === "PM" && endTime.timeHour !== "12") {
+                    _endTime = parseInt(endTime.timeHour) + 12;
+                } else if (endTime.timeAmPm === "AM" && endTime.timeHour === "12") {
+                    _endTime = parseInt(endTime.timeHour) - 12;
+                } else {
+                    _endTime = endTime.timeHour;
+                }
+
+                // Break Start Time if PM read 24hrs format
+                let breakStartTime = filteredItem.breakStartTime;
+                let _breakStartTime;
+        
+                if (breakStartTime.timeAmPm === "PM" && breakStartTime.timeHour !== "12") {
+                    _breakStartTime = parseInt(breakStartTime.timeHour) + 12;
+                } else if (breakStartTime.timeAmPm === "AM" && breakStartTime.timeHour === "12") {
+                    _breakStartTime = parseInt(breakStartTime.timeHour) - 12;
+                } else {
+                    _breakStartTime = breakStartTime.timeHour;
+                }
+
+                // Break End Time if PM read 24hrs format
+                let breakEndTime = filteredItem.breakEndTime;
+                let _breakendTime;
+        
+                if (breakEndTime.timeAmPm === "PM" && breakEndTime.timeHour !== "12") {
+                    _breakendTime = parseInt(breakEndTime.timeHour) + 12;
+                } else if (breakEndTime.timeAmPm === "AM" && breakEndTime.timeHour === "12") {
+                    _breakendTime = parseInt(breakEndTime.timeHour) - 12;
+                } else {
+                    _breakendTime = breakEndTime.timeHour;
+                }
+            
+                const _filteredItem = { 
+                    breakEndTime: _breakendTime + ":" + filteredItem.breakEndTime.timeMinute,
+                    breakStartTime: _breakStartTime + ":" + filteredItem.breakStartTime.timeMinute,
+                    closeTime: _endTime + ":" + filteredItem.closeTime.timeMinute,
+                    day: filteredItem.day,
+                    isOff: filteredItem.isOff,
+                    openTime: _startTime + ":" + filteredItem.openTime.timeMinute,
+                    storeId: filteredItem.storeId
+                }
+                _filteredItem.isOff = !isOpen;
+            
+                if (isBreakTime === false) {
+                    _filteredItem.breakStartTime = null;
+                    _filteredItem.breakEndTime = null;
+                    filteredItem.breakStartTime.timeAmPm = null;
+                    filteredItem.breakEndTime.timeAmPm = null;
+                    
+                    this.createStoreForm.get('step4').get('storeTiming').value.breakStartTime = null;
+                    this.createStoreForm.get('step4').get('storeTiming').value.breakEndTime = null;
+                    
+                } else {
+                    this.createStoreForm.get('step4').get('storeTiming').value.breakStartTime = _filteredItem.breakStartTime;
+                    this.createStoreForm.get('step4').get('storeTiming').value.breakEndTime = _filteredItem.breakEndTime;
+                }
+
+                // ---------------------------
+                //    Create Store Timing
+                // ---------------------------
+
+                await this._storesService.postTiming(this.storeId, _filteredItem).toPromise()
+                    .catch(err => {
+                        reject('Error in postTiming')
+                        error = true;
+                    })
+                
+            }
+                
+            // manual set store timing to new created store at service (ngarut)
+            this._storesService.setTimingToStore(this.storeId, this._storeTiming).subscribe(()=>{});
+            resolve("done")
+        });
+        return promise;
+    }
+
+    async createStoreAssets(files) {
+        let promise = new Promise(async (resolve, reject) => {
+
+            let error = false;
+
+            for (let index = 0; index < files.length && (error === false); index++) {
+                const item = files[index];
+
+                //Logo update using item.selected files
+                if ( item.type === 'LogoUrl' && item.selectedFiles ){
+
+                    let formData = new FormData();
+                    formData.append('assetFile', item.selectedFiles[0]);
+                    formData.append('assetType',item.type);
+                    formData.append('assetDescription',item.description);
+
+
+                    await this._storesService.postAssets(this.storeId, "LogoUrl", formData,"Logo").toPromise()
+                        .then( event => {
+                            if (event instanceof HttpResponse) {
+                                console.info('Uploaded the file successfully');
+    
+                                this.files[3].assetId = event["id"];
+    
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
+                            }
+                        })
+                        .catch(err => {
+                            reject('Error in postAssets (LogoUrl)')
+                            error = true;
+                        })
+                }
+
+                // Favicon update using item.selectedFiles
+                if ( item.type === 'FaviconUrl' && item.selectedFiles ){
+                    
+                    let formData = new FormData();
+                    formData.append('assetFile',item.selectedFiles[0]);
+                    formData.append('assetType',item.type);
+                    formData.append('assetDescription',item.description);
+
+                    await this._storesService.postAssets(this.storeId, "FaviconUrl", formData,"Favicon").toPromise()
+                        .then( event => {
+                            if (event instanceof HttpResponse) {
+                                console.info('Uploaded the file successfully');
+    
+                                this.files[3].assetId = event["id"];
+    
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
+                            }
+                        })
+                        .catch(err => {
+                            reject('Error in postAssets (FaviconUrl)')
+                            error = true;
+                        })
+                }
+                // BannerDesktopUrl update using item.selectedFiles
+                if ( item.type === 'BannerDesktopUrl' ) {
+                    // toDelete
+                    for (let index = 0; index < item.toDelete.length; index++) {
+                        const assetId = item.toDelete[index];
+
+                        await this._storesService.deleteAssets(this.storeId, assetId).toPromise()
+                            .then( event => {
+                                if (event instanceof HttpResponse) {
+                                    console.info('Uploaded the file successfully');
+            
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                }
+                            })
+                            .catch(err => {
+                                reject('Error in deleteAssets (BannerDesktopUrl)')
+                                error = true;
+                            })
+                    }
+                    // toAdd
+                    for (let index = 0; index < item.toAdd.length; index++) {
+                        const selectedFiles = item.toAdd[index];
+
+                        let formData = new FormData();
+                        formData.append('assetFile', selectedFiles[0]);
+                        formData.append('assetType', item.type);
+                        formData.append('assetDescription', item.description);
+
+                        await this._storesService.postAssets(this.storeId, "BannerDesktopUrl", formData,"BannerDesktop").toPromise()
+                            .then( event => {
+                                if (event instanceof HttpResponse) {
+                                    console.info('Uploaded the file successfully');
+
+                                    this.files[1].assetId = event["id"];
+            
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                }
+                            })
+                            .catch(err => {
+                                reject('Error in postAssets (BannerDesktopUrl)')
+                                error = true;
+                            })
+                        
+                    }
+                }
+                if ( item.type === 'BannerMobileUrl' ) {
+                    // toDelete
+                    for (let index = 0; index < item.toDelete.length; index++) {
+                        const assetId = item.toDelete[index];
+
+                        await this._storesService.deleteAssets(this.storeId, assetId).toPromise()
+                            .then( event => {
+                                if (event instanceof HttpResponse) {
+                                    console.info('Uploaded the file successfully');
+            
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                }
+                            })
+                            .catch(err => {
+                                reject('Error in deleteAssets (BannerMobileUrl)')
+                                error = true;
+                            })
+                    }
+  
+                    // toAdd
+                    for (let index = 0; index < item.toAdd.length; index++) {
+                        const selectedFiles = item.toAdd[index];
+
+                        let formData = new FormData();
+                        formData.append('assetFile', selectedFiles[0]);
+                        formData.append('assetType', item.type);
+                        formData.append('assetDescription', item.description);
+
+                        await this._storesService.postAssets(this.storeId, "BannerMobileUrl", formData,"BannerMobile").toPromise()
+                            .then( event => {
+                                if (event instanceof HttpResponse) {
+                                    console.info('Uploaded the file successfully');
+
+                                    this.files[1].assetId = event["id"];
+            
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                }
+                            })
+                            .catch(err => {
+                                reject('Error in postAssets (BannerMobileUrl)')
+                                error = true;
+                            })
+                        
+                    }
+                }
+            }
+            resolve("done")
+        });
+        return promise;
+    }
+
+    async createStoreProvider(deliveryType, allowStorePickup) {
+        let promise = new Promise(async (resolve, reject) => {
+            let error = false;
+            let _itemType;
+            let _deliveryType;
+            if (this.createStoreForm.get('verticalCode').value === "E-Commerce" || this.createStoreForm.get('verticalCode').value === "e-commerce-b2b2c" || this.createStoreForm.get('verticalCode').value === "ECommerce_PK") {
+                // this is actually handled by front end (but incase of hacking)
+                if (deliveryType === "SELF") { 
+                    _itemType = null;
+                    _deliveryType = deliveryType;
+                } else {
+                    _itemType="PARCEL";
+                    _deliveryType = "SCHEDULED";
+                    console.warn("E-Commerce deliveryType should be SCHEDULED. Current selected deliveryType " + deliveryType) 
+                } 
+            } else if (this.createStoreForm.get('verticalCode').value === "FnB" || this.createStoreForm.get('verticalCode').value === "FnB_PK") {
+                // this is actually handled by front end (but incase of hacking)
+                if (deliveryType === "SELF") { 
+                    _itemType = null;
+                    _deliveryType = deliveryType;
+                } else {
+                    _itemType="FOOD";
+                    _deliveryType = "ADHOC";
+                    console.warn("E-Commerce deliveryType should be ADHOC. Current selected deliveryType " + deliveryType) 
+                } 
+            } else {
+                _itemType = null;
+                _deliveryType = "SELF";
+            }
+    
+            const deliveryDetailBody = {
+                allowsStorePickup: allowStorePickup,
+                itemType: _itemType,
+                maxOrderQuantityForBike: 7,
+                storeId: this.storeId,
+                type: _deliveryType // ADHOC or SCHEDULED or SELF
+            };
+    
+            await this._storesService.postStoreDeliveryDetails(this.storeId, deliveryDetailBody).toPromise()
+                .catch(err => {
+                    reject('Error in postStoreDeliveryDetails')
+                    error = true;
+                })
+            resolve("done")
+        });
+        return promise;
+    }
+
+    async provisionSELF(allowedSelfDeliveryStates) {
+        let promise = new Promise(async (resolve, reject) => {
+            let error = false;
+
+            // Create State Delivery Charges    
+            for (let i = 0; i < allowedSelfDeliveryStates.length && (error === false); i++) {
+    
+                let selfDeliveryStateBody = {
+                    region_country_state_id: allowedSelfDeliveryStates[i].deliveryStates,
+                    delivery_charges: allowedSelfDeliveryStates[i].deliveryCharges
+                };
+
+                await this._storesService.postSelfDeliveryStateCharges(this.storeId, selfDeliveryStateBody).toPromise()
+                    .catch(err => {
+                        reject('Error in postSelfDeliveryStateCharges')
+                        error = true;
+                    })
+            }
+                
+            resolve("done")
+        });
+        return promise;
+    }
+
+    async provisionADHOC(deliverySpType) {
+        let promise = new Promise(async (resolve, reject) => {
+            let error = false;
+
+            let index = this.deliveryPartners.findIndex(item => item.id === deliverySpType + "");
+
+            if (index > -1){
+
+                await this._storesService.postStoreRegionCountryDeliveryProvider(this.storeId, this.deliveryPartners[index].deliverySpId, this.deliveryPartners[index].fulfilment, this.deliveryPartners[index].id).toPromise()
+                    .catch(err => {
+                        reject('Error in postStoreRegionCountryDeliveryProvider')
+                        error = true;
+                    })
+
+            } else {
+                console.error("Provision ADHOC delivery failed")
+            }
+                
+            resolve("done")
+        });
+        return promise;
+    }
+
+    async provisionSCHEDULED() {
+        let promise = new Promise(async (resolve, reject) => {
+            let error = false;
+
+            let deliveryPeriodBody = this.createStoreForm.get('step3').get('deliveryPeriods').get('values').value;
+
+            deliveryPeriodBody.map(item => {
+                item.storeId = this.storeId;
+            });
+
+            await this._storesService.postDeliveryPeriod(this.storeId, deliveryPeriodBody).toPromise()
+                .catch(err => {
+                    reject('Error in postDeliveryPeriod')
+                    error = true;
+                })
+                
+            resolve("done")
+        });
+        return promise;
+    }
+
+    async storeCreationStatus(status) {
+        let promise = new Promise(async (resolve, reject) => {
+
+            if ( status === false ) {
                 // Show a success message (it can also be an error message)
                 const confirmation = this._fuseConfirmationService.open({
                     title  : 'Store Created',
@@ -1385,22 +1923,50 @@ export class RegisterStoreComponent implements OnInit
                     // Navigate to the confirmation required page
                     this._router.navigateByUrl('/stores');
                 }, 1000);
-            },
-            (err: any) => {
-                console.error('Error in post (create store): ', err);
-                // throw 'StoreCreationError';
+
             }
-        );
-        // try {
+            else if ( status === true ) {
+                // Show a failed message (it can also be an error message)
+                const confirmation = this._fuseConfirmationService.open({
+                    title  : 'Store Creation Failed',
+                    message: 'Something is wrong while creating your store. Please try again',
+                    icon: {
+                        show: true,
+                        name: "heroicons_outline:exclamation",
+                        color: "error"
+                    },
+                    actions: {
+                        confirm: {
+                            label: 'OK',
+                            color: "primary",
+                        },
+                        cancel: {
+                            show: false,
+                        },
+                    }
+                });
 
-            
-        // } catch (error) {
+                // Delete the product on the server
+                this._storesService.delete(this.storeId).subscribe(() => {
 
-            
-        // }
+                    // enable back the form
+                    this.createStoreForm.enable();
 
+                    // set the stepper back to step 1
+                    this.stepper.selectedIndex = 0;
+                    
+                    // empty out storeId
+                    this.storeId = '';
 
-        
+                    // set selected store to null anyway
+                    this._storesService.store = null;
+                    
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                });
+            }
+        });
+        return promise;
     }
 
     async checkExistingURL(subdomain: string){
