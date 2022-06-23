@@ -143,7 +143,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
             map((response)=>{
                 return response.verticalCode;
             }),
-            switchMap((storeVerticalCode:string)=>this._inventoryService.getParentCategories(0, 20, 'name', 'asc', '',storeVerticalCode)
+            switchMap((storeVerticalCode:string)=>this._inventoryService.getParentCategories(0, 50, 'name', 'asc', '',storeVerticalCode)
             ),
         )
         .subscribe((categories) => {
@@ -318,7 +318,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
     {
         let categoriesLimit = this.pagination;
         
-        if(categoriesLimit.length >= 30) {
+        if(categoriesLimit.length >= 30) {            
             // Open the confirmation dialog
             const confirmation = this._fuseConfirmationService.open({
                 title   : "Categories Limit",
@@ -338,10 +338,11 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
                     }
             });
         } else {
+
             const dialogRef = this._dialog.open(AddCategoryComponent, { disableClose: true });
             dialogRef.afterClosed().subscribe(result => {
                 
-                if (result.status === true) {
+                if (result) {
                     let category = {
                         name:result.name,
                         storeId: this.storeId$,
