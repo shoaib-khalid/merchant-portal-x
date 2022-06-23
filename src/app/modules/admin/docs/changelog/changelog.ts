@@ -9,6 +9,27 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 export class ChangelogComponent
 {
     changelog: any[] = [
+        //v1.4.1
+        {
+            version    : 'v1.4.1',
+            releaseDate: 'June 23, 2022',
+            changes    : [
+                {
+                    type: 'Added',
+                    list: [
+                        '(Dashboard) Added Out-of-Stock counter',
+                    ]
+                },
+                {
+                    type: 'Fixed',
+                    list: [
+                        '(StoreManagement) Increased domain URL characters',
+                        '(ProductManagement) Fixed unable to create new category',
+                        '(ProductManagement) Fixed parent categories selection dropdown'
+                    ]
+                }
+            ]
+        },
         //v1.4.0
         {
             version    : 'v1.4.0',
