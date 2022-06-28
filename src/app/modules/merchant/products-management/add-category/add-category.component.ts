@@ -84,7 +84,7 @@ export class AddCategoryComponent implements OnInit {
       // Create the selected product form
       this.addCategoryForm = this._formBuilder.group({
         name             : ['',[Validators.required]],
-        parentCategoryId : [''],
+        parentCategoryId : ['',[Validators.required]],
         thumbnailUrl     : [[]],
         imagefiles:[[]],
       });
