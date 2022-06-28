@@ -1,6 +1,6 @@
 {
     "name": "merchant-portal-x",
-    "version": "1.4.2",
+    "version": "1.4.3",
     "description": "Online Merchant Portal",
     "author": "https://themeforest.net/user/srcn",
     "license": "https://themeforest.net/licenses/standard",
@@ -45,7 +45,7 @@
         "hammerjs": "^2.0.8",
         "highlight.js": "11.4.0",
         "lodash-es": "4.17.21",
-        "moment": "2.29.1",
+        "moment": "2.29.3",
         "ng-apexcharts": "1.7.0",
         "ngx-gallery-9": "^1.0.6",
         "ngx-markdown": "13.1.0",
