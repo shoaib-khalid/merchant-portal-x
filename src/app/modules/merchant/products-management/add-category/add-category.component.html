@@ -2,9 +2,7 @@
 
     <div [formGroup]="addCategoryForm">
         <!-- Compose form -->
-        <div
-            class="flex flex-col flex-auto p-6 sm:p-8 overflow-y-auto"
-        >
+        <div class="flex flex-col max-w-100 w-full p-6 sm:p-8 overflow-y-auto">
             <div class="flex items-center flex-auto min-w-0 justify-center  mb-4">
                 <span class="pl-4 text-2xl font-bold text-primary">Create New Category</span> <br>
             </div>
@@ -75,39 +73,37 @@
                     </div>
                 </div>
       
-                <div class="flex flex-wrap w-2/3">
-
-                    <mat-form-field class="w-full">
-                        <!-- Select Parent Category -->
-                        <mat-label>Parent Category Name</mat-label>
-                        <mat-select
-                            class="w-full"
-                            placeholder="Choose Parent Category"
-                            [formControlName] = "'parentCategoryId'"
-                        >
-                            <div>
-                                <mat-option *ngFor="let listing of parentCategoriesOptions;" [value]="listing.id">
-                                    {{listing.name}}
-                                </mat-option>
-                            </div>
-                        </mat-select>
-                    </mat-form-field>
-                </div>
-                <div class="flex flex-wrap w-2/3">
-                    <mat-form-field 
-                        appearance="fill"
-                        class="w-full">
-                        <mat-label>Category Name</mat-label>
-                        <input 
-                            matInput
-                            placeholder="Insert category name"
-                            [formControlName] = "'name'"
-                        >  
-                        <mat-error *ngIf="addCategoryForm.get('name').hasError('required')">
-                            Category name is required
-                        </mat-error>
-                    </mat-form-field>
-                </div>
+                <mat-form-field class="w-full">
+                    <!-- Select Parent Category -->
+                    <mat-label>Parent Category Name</mat-label>
+                    <mat-select
+                        class="w-full"
+                        placeholder="Choose Parent Category"
+                        [formControlName] = "'parentCategoryId'"
+                    >
+                        <div>
+                            <mat-option *ngFor="let listing of parentCategoriesOptions;" [value]="listing.id">
+                                {{listing.name}}
+                            </mat-option>
+                        </div>
+                    </mat-select>
+                    <mat-error *ngIf="addCategoryForm.get('parentCategoryId').hasError('required')">
+                        Please Select Parent Category Name
+                    </mat-error>
+                </mat-form-field>
+                <mat-form-field 
+                    appearance="fill"
+                    class="w-full">
+                    <mat-label>Category Name</mat-label>
+                    <input 
+                        matInput
+                        placeholder="Insert category name"
+                        [formControlName] = "'name'"
+                    >  
+                    <mat-error *ngIf="addCategoryForm.get('name').hasError('required')">
+                        Category name is required
+                    </mat-error>
+                </mat-form-field>
             </div>
 
             <!-- Actions -->
@@ -131,6 +127,7 @@
                         mat-flat-button
                         [color]="'gray'"
                         (click)="addNewCategory()"
+                        [disabled]="addCategoryForm.pristine || addCategoryForm.invalid"
                         >
                         OK
                     </button>
