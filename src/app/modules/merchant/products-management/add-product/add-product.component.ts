@@ -65,14 +65,32 @@ import { MatPaginator } from '@angular/material/paginator';
                 height: 87px;
             }
 
+            //-----------------
             // variant section
+            //-----------------
 
             .variant-details-grid {
                 height: 62vh;
                 max-height: 468px;
             }
 
+            .variant-grid {
+                // grid-template-columns: 68px auto 40px;
+                grid-template-columns: 64px 110px 205px 128px 80px 94px;
+
+                // @screen sm {
+                //     grid-template-columns: 68px auto auto 128px 84px 96px;
+                // }
+
+                @screen md {
+                    grid-template-columns: 64px 110px 205px 128px 80px 94px;
+                }
+
+            }
+            
+            //-----------------
             // combo section
+            //-----------------
             
             .add-product-list {
                 height: 21vh;
@@ -88,20 +106,6 @@ import { MatPaginator } from '@angular/material/paginator';
                 @screen lg {
                     grid-template-columns: 120px 112px auto 112px;
                 }
-            }
-
-            .variant-grid {
-                // grid-template-columns: 68px auto 40px;
-                grid-template-columns: 68px 120px 120px 128px 80px 96px;
-
-                // @screen sm {
-                //     grid-template-columns: 68px auto auto 128px 84px 96px;
-                // }
-
-                @screen md {
-                    grid-template-columns: 68px 120px auto 128px 80px 96px;
-                }
-
             }
 
         `

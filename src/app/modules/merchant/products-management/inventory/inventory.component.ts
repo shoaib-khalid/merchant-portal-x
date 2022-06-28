@@ -490,7 +490,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         
         const dialogRef = this._dialog.open(AddProductComponent, { 
             panelClass: 'custom-add-product-dialog',
-            width: '1030px',
+            width: '1150px',
             maxWidth: '100vw',
             // maxWidth:'70vw',
             // height: '70vh',
@@ -511,7 +511,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         
         const dialogRef = this._dialog.open(EditProductComponent, { 
             panelClass: 'custom-edit-product-dialog',
-            width: '1030px',
+            width: '1150px',
             maxWidth: '100vw',
             // height: '90vh',
             // maxHeight: '70vh',

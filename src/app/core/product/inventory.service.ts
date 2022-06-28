@@ -437,6 +437,8 @@ export class InventoryService
             switchMap(products => this._httpClient.delete(productService +'/stores/'+this.storeId$+'/products/'+id, header).pipe(
                 map((status: number) => {
 
+                    this._logging.debug("Response from ProductsService (deleteProduct)", status);
+
                     // Find the index of the deleted product
                     const index = products.findIndex(item => item.id === id);
 
@@ -474,7 +476,7 @@ export class InventoryService
 
         let response = await this._httpClient.get<any>(productService + '/stores/' + this.storeId$ + '/products/' + productId + '/assets').toPromise();
 
-        this._logging.debug("Response from ProductsService (getProductAssetsById)",response);
+        this._logging.debug("Response from ProductsService (getProductAssetsById)", response);
 
         return response.data;
     }

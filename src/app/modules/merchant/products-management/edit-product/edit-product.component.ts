@@ -13,6 +13,7 @@ import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dial
 import { StoresService } from 'app/core/store/store.service';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { MatPaginator } from '@angular/material/paginator';
+import { CartService } from 'app/core/cart/cart.service';
 
 
 
@@ -65,14 +66,32 @@ import { MatPaginator } from '@angular/material/paginator';
                 height: 87px;
             }
 
+            //-----------------
             // variant section
+            //-----------------
 
             .variant-details-grid {
                 height: 62vh;
                 max-height: 468px;
             }
 
+            .variant-grid {
+                // grid-template-columns: 68px auto 40px;
+                grid-template-columns: 64px 110px 205px 128px 80px 94px;
+
+                // @screen sm {
+                //     grid-template-columns: 68px auto auto 128px 84px 96px;
+                // }
+
+                @screen md {
+                    grid-template-columns: 64px 110px 205px 128px 80px 94px;
+                }
+
+            }
+
+            //-----------------
             // combo section
+            //-----------------
             
             .add-product-list {
                 height: 21vh;
@@ -91,19 +110,7 @@ import { MatPaginator } from '@angular/material/paginator';
                 }
             }
 
-            .variant-grid {
-                // grid-template-columns: 68px auto 40px;
-                grid-template-columns: 68px 120px 120px 128px 80px 96px;
 
-                // @screen sm {
-                //     grid-template-columns: 68px auto auto 128px 84px 96px;
-                // }
-
-                @screen md {
-                    grid-template-columns: 68px 120px auto 128px 80px 96px;
-                }
-
-            }
 
         `
     ],
@@ -253,6 +260,9 @@ export class EditProductComponent implements OnInit, OnDestroy
     storeVerticalCode : string = '';
     parentCategoriesOptions: ProductCategory[];
     selectedParentCategory: string ='';
+    product: Product;
+    oriPriceNoVariants: number;
+    oriPriceVariants: number[] = [];
 
 
 
@@ -271,8 +281,8 @@ export class EditProductComponent implements OnInit, OnDestroy
         private _viewContainerRef: ViewContainerRef,
         public dialogRef: MatDialogRef<EditProductComponent>,
         @Inject(MAT_DIALOG_DATA) public data: MatDialog,
-        private _fuseMediaWatcherService: FuseMediaWatcherService
-
+        private _fuseMediaWatcherService: FuseMediaWatcherService,
+        private _cartService: CartService
     )
     {
     }
@@ -619,6 +629,14 @@ export class EditProductComponent implements OnInit, OnDestroy
         this.addProductForm.get('step1').get('sku').setValue(product.productInventories[0].sku);
         this.addProductForm.get('step1').get('price').setValue(product.productInventories[0].price);
         this.addProductForm.get('step1').get('availableStock').setValue(this.totalInventories(product.productInventories));
+
+        // Set original price (No Variants)
+        this.oriPriceNoVariants = product.productInventories[0].price;
+
+        // Set original price (Variants)
+        if (product.productInventories.length > 1) {
+            this.oriPriceVariants = product.productInventories.map(x => x.price);
+        }
 
         if (this.addProductForm.get('step1').get('customNote').value || this.addProductForm.get('step1').get('isNoteOptional').value === false ){
             this.addProductForm.get('step1').get('isCustomNote').setValue(true);
@@ -1496,8 +1514,12 @@ export class EditProductComponent implements OnInit, OnDestroy
                         }
     
                         await this._inventoryService.updateInventoryToProduct(this.selectedProduct.id, this.productInventories$[i].itemCode, body).toPromise()
-                        .then((response)=>{
-    
+                        .then((item)=>{
+
+                            // Update cart item price
+                            if (this.oriPriceVariants[i] !== this.selectedVariantCombos[i].price) {
+                                this._cartService.updateItemPrice(null, item.itemCode).subscribe()
+                            }
                         });
                     }
 
@@ -1564,153 +1586,15 @@ export class EditProductComponent implements OnInit, OnDestroy
                     status: "AVAILABLE"
                 } 
                 
-                await this._inventoryService.updateInventoryToProduct(this.selectedProduct.id, this.productInventories$[0].itemCode, _productInventories).toPromise().then(() => {
-                    // Show a success message
-                    // this.showFlashMessage('success');
+                await this._inventoryService.updateInventoryToProduct(this.selectedProduct.id, this.productInventories$[0].itemCode, _productInventories).toPromise().then((item) => {
+                    
+                    // Update cart item price
+                    if (this.oriPriceNoVariants !== this.addProductForm.get('step1').get('price').value) {
+                        this._cartService.updateItemPrice(null, item.itemCode).subscribe()
+                    }
+                    
                 });
     
-                
-
-                
-
-                //////////////////////////////////////////////////////////////////////
-
-                // // If got product assets
-                // if (product.productAssets) {
-                //     let expression = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
-                //     let regex = new RegExp(expression);
-                //     let iteration = 0; // this iteration used by new product added to existing old product (not update tau)
-                    
-                //     this.addProductForm.get('step1').get('productAssets').value.forEach((item, i) => {
-                //     // this.images.forEach((item, i) => {
-                //         let assetIndex = product.productAssets.findIndex(element => element.id === item.id)                        
-                        
-                //         let _thumbnailIndex = product.productAssets.findIndex(element => element.isThumbnail === true)
-                //         if (assetIndex > -1) {
-                //             if (!item.url.match(regex)) { // if url is not valid, it mean the data is new data
-                                
-        
-                //                 // -----------------
-                //                 // delete old one
-                //                 // -----------------
-        
-                //                 this._inventoryService.deleteProductAssets(this.selectedProduct.id, item.id)
-                //                 .pipe(takeUntil(this._unsubscribeAll))
-                //                 .subscribe((deleteResponse)=>{
-        
-                //                     // -----------------
-                //                     // create a new one
-                //                     // ----------------
-        
-                //                     let formData = new FormData();
-                //                     formData.append('file',this.imagesFile[i]);
-                //                     this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false }, i)
-                //                         .pipe(takeUntil(this._unsubscribeAll))
-                //                         .subscribe((addResponse)=>{
-        
-                //                             // update the deleted product assets
-                //                             let _updatedProduct = product.productAssets;
-                //                             _updatedProduct[assetIndex] = addResponse;
-        
-                //                             // patch the value
-                //                             this.addProductForm.get('step1').get('productAssets').patchValue(_updatedProduct);
-        
-                //                             // Mark for check
-                //                             this._changeDetectorRef.markForCheck();
-                //                         });
-        
-                //                     // Mark for check
-                //                     this._changeDetectorRef.markForCheck();
-                //                 });
-        
-        
-                //             } else if (i === this.thumbnailIndex)
-                //                 { // this mean thumbnail index change, diffent from backend
-                //                     // update the image (only thumbnail)
-
-
-                //                     let updateItemIndex = item;
-                //                     updateItemIndex.isThumbnail = true;
-            
-                //                     this._inventoryService.updateProductAssets(this.selectedProduct.id, updateItemIndex, item.id)
-                //                         .pipe(takeUntil(this._unsubscribeAll))
-                //                         .subscribe((response)=>{
-                //                             // Mark for check
-                //                             this._changeDetectorRef.markForCheck();
-                //                         });
-
-                //                 } 
-                //             else {
-                                
-                //             }
-                //         } else {
-        
-                //             // -----------------
-                //             // create a new one
-                //             // ----------------
-        
-                //             iteration = iteration + 1;
-        
-                //             let formData = new FormData();
-                //             formData.append('file',this.imagesFile[i]);
-
-                //             this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false }, i)
-                //                 .pipe(takeUntil(this._unsubscribeAll))
-                //                 .subscribe((addResponse)=>{
-        
-                //                     // update the deleted product assets
-                //                     // let _updatedProduct = this.selectedProductForm.get('productAssets').value;
-                //                     // _updatedProduct[i + iteration -1] = addResponse;
-        
-                //                     // if (this.selectedProductForm.get('productAssets').value.length > 0 ){
-                //                     //     // patch the value if have existing value 
-                //                         this.addProductForm.get('step1').get('productAssets').value[i] = addResponse;
-                //                     // } else {
-                //                         // patch the value if empty 
-                //                         // this.selectedProductForm.get('productAssets').patchValue(_updatedProduct);
-                //                     // }
-        
-                //                     // Mark for check
-                //                     this._changeDetectorRef.markForCheck();
-                //                 });
-                //         }
-                //     })
-
-                //     // if new images added and got old one as well 
-                //     this.imagesFile.forEach((item, i )=> {
-                        
-                //         if (item){
-                //             let formData = new FormData();
-                //             formData.append('file',this.imagesFile[i]);
-                //             this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
-                //                 .pipe(takeUntil(this._unsubscribeAll))
-                //                 .subscribe((response)=>{
-
-                //                     this.addProductForm.get('step1').get('productAssets').value[i] = response;
-                //                     // Mark for check
-                //                     this._changeDetectorRef.markForCheck();
-                //                 });
-                //             }
-                //     })
-
-                // } 
-                // else {
-                //     for (let i = 0; i < this.imagesFile.length; i++) {
-                //         // create a new one
-                //         let formData = new FormData();
-                //         formData.append('file',this.imagesFile[i]);
-                //         this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
-                //             .pipe(takeUntil(this._unsubscribeAll))
-                //             .subscribe((response)=>{
-
-                //                 this.addProductForm.get('step1').get('productAssets').value[i] = response;
-                //                 // Mark for check
-                //                 this._changeDetectorRef.markForCheck();
-                //             });
-                //     }
-                // }
-
-                
             }
             // Show a success message
             this.showFlashMessage('success');
@@ -3250,14 +3134,12 @@ export class EditProductComponent implements OnInit, OnDestroy
                 // Delete the product on the server
                 this._inventoryService.deleteProduct(this.selectedProduct.id).subscribe(() => {
 
-                //  this.products$
-                //      .pipe(take(1)) 
-                //      .subscribe(products => {
+                    // Delete cart items
+                    for (let index = 0; index < this.selectedProduct.productInventories.length; index++) {
 
-                //          // filter after delete
-                //          this.filterProductOptionsMethod(products);
-                //      })
-
+                        const element = this.selectedProduct.productInventories[index];
+                        this._cartService.deleteItem(null, element.itemCode).subscribe();
+                    }
                     // Close the details
                     this.cancelAddProduct();
                 });
