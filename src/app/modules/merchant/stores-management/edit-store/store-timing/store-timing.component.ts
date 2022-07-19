@@ -398,9 +398,12 @@ export class StoreTimingComponent implements OnInit
         const storeTiming = this.storeTimingForm.value.storeTiming;
 
         let storeId = this.storeId;
+
         // ---------------------------
         // Update Store Timing
         // ---------------------------
+
+        let filteredItemsArr = [];
         
         storeTiming.forEach((item,i) => {
 
@@ -502,33 +505,33 @@ export class StoreTimingComponent implements OnInit
                 this.storeTimingForm.get('storeTiming').value[i].breakStartTime = _filteredItem.breakStartTime;
                 this.storeTimingForm.get('storeTiming').value[i].breakEndTime = _filteredItem.breakEndTime;
             }
+            filteredItemsArr.push(_filteredItem);
+        });
 
-            this._storesService.putTiming(storeId, item.day, _filteredItem)
+        this._storesService.postTimingBulk(storeId, filteredItemsArr)
             .subscribe((response)=>{
+                // Show a success message (it can also be an error message)
+                const confirmation = this._fuseConfirmationService.open({
+                    title  : 'Success',
+                    message: 'Your store timing has been updated successfully!',
+                    icon: {
+                        show: true,
+                        name: "heroicons_outline:check",
+                        color: "success"
+                    },
+                    actions: {
+                        confirm: {
+                            label: 'OK',
+                            color: "primary",
+                        },
+                        cancel: {
+                            show: false,
+                        },
+                    }
+                });
+
+                // Enable the form
+                this.storeTimingForm.enable();
             });
-        });
-
-        // Show a success message (it can also be an error message)
-        const confirmation = this._fuseConfirmationService.open({
-            title  : 'Success',
-            message: 'Your store account has been updated successfully!',
-            icon: {
-                show: true,
-                name: "heroicons_outline:check",
-                color: "success"
-            },
-            actions: {
-                confirm: {
-                    label: 'OK',
-                    color: "primary",
-                },
-                cancel: {
-                    show: false,
-                },
-            }
-        });
-
-        // Enable the form
-        this.storeTimingForm.enable();
     }
 }

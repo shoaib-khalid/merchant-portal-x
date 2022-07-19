@@ -1522,6 +1522,8 @@ export class RegisterStoreComponent implements OnInit
 
             let error = false;
 
+            let filteredItemsArr = [];
+
             for (let index = 0; index < storeTimingBody.length && (error === false); index++) {
                 const item = storeTimingBody[index];
 
@@ -1600,17 +1602,18 @@ export class RegisterStoreComponent implements OnInit
                     this.createStoreForm.get('step4').get('storeTiming').value.breakEndTime = _filteredItem.breakEndTime;
                 }
 
-                // ---------------------------
-                //    Create Store Timing
-                // ---------------------------
-
-                await this._storesService.postTiming(this.storeId, _filteredItem).toPromise()
-                    .catch(err => {
-                        reject('Error in postTiming')
-                        error = true;
-                    })
-                
+                filteredItemsArr.push(_filteredItem);
             }
+
+            // ---------------------------
+            //    Create Store Timing
+            // ---------------------------
+
+            await this._storesService.postTimingBulk(this.storeId, filteredItemsArr).toPromise()
+                .catch(err => {
+                    reject('Error in postTiming')
+                    error = true;
+                })
                 
             // manual set store timing to new created store at service (ngarut)
             this._storesService.setTimingToStore(this.storeId, this._storeTiming).subscribe(()=>{});

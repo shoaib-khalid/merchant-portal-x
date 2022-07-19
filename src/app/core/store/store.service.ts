@@ -541,6 +541,22 @@ export class StoresService
         );
     }
 
+    postTimingBulk(storeId: string, storeTiming: StoreTiming[]): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.post<any>(productService + '/stores/' + storeId + '/timings/bulk', storeTiming , header ).pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (postTimingBulk)",response);
+            })
+        );
+    }
+
     setTimingToStore(storeId: string, storeTiming: StoreTiming): Observable<any>
     {
         return this.stores$.pipe(
