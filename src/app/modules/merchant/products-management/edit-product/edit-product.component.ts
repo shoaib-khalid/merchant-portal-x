@@ -3209,6 +3209,20 @@ export class EditProductComponent implements OnInit, OnDestroy
         }
 
     }
+    changeProductStatus(value: string) {
 
+        this.addProductForm.get('step1').get('status').patchValue(value);
+
+        if (value === 'OUTOFSTOCK') {
+            this.addProductForm.get('step1').get('availableStock').patchValue(0);
+
+            if (this.store$.verticalCode === 'FnB' || this.store$.verticalCode === 'FnB_PK') {
+                this.addProductForm.get('step1').get('allowOutOfStockPurchases').patchValue(false);
+            }
+        }
+        else if (value === 'ACTIVE' && (this.store$.verticalCode === 'FnB' || this.store$.verticalCode === 'FnB_PK')) {
+            this.addProductForm.get('step1').get('allowOutOfStockPurchases').patchValue(true);
+        }
+    }
     
 }

@@ -315,10 +315,7 @@
                                             floatLabel="always"
                                             placeholder="Select one option"
                                             [formControlName]="'status'"
-                                            (selectionChange)="addProductForm.get('step1').get('status').patchValue(statusSelector.value)"
-                                            (selectionChange)="statusSelector.value === 'OUTOFSTOCK' ? addProductForm.get('step1').get('availableStock').patchValue(0) : ''"
-                                            (selectionChange)="statusSelector.value === 'ACTIVE' && (store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK') ? 
-                                                addProductForm.get('step1').get('allowOutOfStockPurchases').patchValue(true) : ''"
+                                            (selectionChange)="changeProductStatus(statusSelector.value)"
                                             #statusSelector="matSelect"
                                             >
                                             <mat-select-trigger>
