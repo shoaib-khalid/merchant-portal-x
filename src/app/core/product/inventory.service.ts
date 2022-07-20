@@ -33,6 +33,7 @@ export class InventoryService
 
     private _productPaginationForCombo: BehaviorSubject<ProductPagination | null> = new BehaviorSubject(null);
     private _productsForCombo: BehaviorSubject<Product[] | null> = new BehaviorSubject(null);
+  resources$: any;
     /**
      * Constructor
      */

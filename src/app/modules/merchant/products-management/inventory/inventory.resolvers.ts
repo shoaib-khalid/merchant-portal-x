@@ -6,6 +6,8 @@ import { InventoryService } from 'app/core/product/inventory.service';
 import { Product, ProductCategory, ProductCategoryPagination, ProductPagination, ProductVariant } from 'app/core/product/inventory.types';
 import { StoresService } from 'app/core/store/store.service';
 import { Store } from 'app/core/store/store.types';
+import { ResourceService } from 'app/core/resource/resource.service';
+import { Resource, ResourceAvailability, ResourceSlotReservationDetails } from 'app/core/resource/resource.types';
 
 @Injectable({
     providedIn: 'root'
@@ -15,8 +17,7 @@ export class InventoryCategoriesResolver implements Resolve<any>
     /**
      * Constructor
      */
-    constructor(private _inventoryService: InventoryService)
-    {
+    constructor(private _inventoryService: InventoryService) {
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -29,9 +30,7 @@ export class InventoryCategoriesResolver implements Resolve<any>
      * @param route
      * @param state
      */
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<{ pagination: ProductCategoryPagination; products: ProductCategory[] }>
-    
-    {
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<{ pagination: ProductCategoryPagination; products: ProductCategory[] }> {
         return this._inventoryService.getByQueryCategories();
     }
 }
@@ -47,8 +46,7 @@ export class InventoryProductResolver implements Resolve<any>
     constructor(
         private _inventoryService: InventoryService,
         private _router: Router
-    )
-    {
+    ) {
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -61,27 +59,27 @@ export class InventoryProductResolver implements Resolve<any>
      * @param route
      * @param state
      */
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Product>
-    {
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Product> {
         return this._inventoryService.getProductsById(route.paramMap.get('id'))
-                   .pipe(
-                       // Error here means the requested product is not available
-                       catchError((error) => {
+            .pipe(
+                // Error here means the requested product is not available
+                catchError((error) => {
 
-                           // Log the error
-                           console.error(error);
+                    // Log the error
+                    console.error(error);
 
-                           // Get the parent url
-                           const parentUrl = state.url.split('/').slice(0, -1).join('/');
+                    // Get the parent url
+                    const parentUrl = state.url.split('/').slice(0, -1).join('/');
 
-                           // Navigate to there
-                           this._router.navigateByUrl(parentUrl);
+                    // Navigate to there
+                    this._router.navigateByUrl(parentUrl);
 
-                           // Throw an error
-                           return throwError(error);
-                       })
-                   );
+                    // Throw an error
+                    return throwError(error);
+                })
+            );
     }
+
 }
 
 @Injectable({
@@ -92,8 +90,7 @@ export class InventoryProductsResolver implements Resolve<any>
     /**
      * Constructor
      */
-    constructor(private _inventoryService: InventoryService)
-    {
+    constructor(private _inventoryService: InventoryService) {
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -106,12 +103,77 @@ export class InventoryProductsResolver implements Resolve<any>
      * @param route
      * @param state
      */
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<{ pagination: ProductPagination; products: Product[] }>
-    {
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<{ pagination: ProductPagination; products: Product[] }> {
         return this._inventoryService.getProducts();
     }
 }
 
+@Injectable({
+    providedIn: 'root'
+})
+export class ResourceResolver implements Resolve<any>
+{
+    /**
+     * Constructor
+     */
+
+    /**
+ * Getter for storeId
+ */
+
+    get storeId$(): string {
+        return localStorage.getItem('storeId') ?? '';
+    }
+    constructor(private _resourceService: ResourceService) {
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Resolver
+     *
+     * @param route
+     * @param state
+     */
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<{ resources: Resource[] }> {
+        return this._resourceService.getAllResources();
+    }
+}
+@Injectable({
+    providedIn: 'root'
+})
+export class ResourceAvailabilityResolver implements Resolve<any>
+{
+    /**
+     * Constructor
+     */
+
+    /**
+ * Getter for storeId
+ */
+
+    get storeId$(): string {
+        return localStorage.getItem('storeId') ?? '';
+    }
+    constructor(private _resourceService: ResourceService) {
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Resolver
+     *
+     * @param route
+     * @param state
+     */
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<{ resourceAvailabilites: ResourceAvailability[] }> {
+        return this._resourceService.getAllResourceAvailabilites();
+    }
+}
 // @Injectable({
 //     providedIn: 'root'
 // })
@@ -148,8 +210,7 @@ export class GetStoreByIdResolver implements Resolve<any>
     /**
      * Constructor
      */
-    constructor(private _storesService: StoresService)
-    {
+    constructor(private _storesService: StoresService) {
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -159,11 +220,10 @@ export class GetStoreByIdResolver implements Resolve<any>
     /**
      * Getter for storeId
      */
- 
-     get storeId$(): string
-     {
-         return localStorage.getItem('storeId') ?? '';
-     }    
+
+    get storeId$(): string {
+        return localStorage.getItem('storeId') ?? '';
+    }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
@@ -175,8 +235,7 @@ export class GetStoreByIdResolver implements Resolve<any>
      * @param route
      * @param state
      */
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Store>
-    {
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Store> {
         return this._storesService.getStoresById(this.storeId$);
     }
 }
@@ -189,8 +248,7 @@ export class ProductCategoriesResolver implements Resolve<any>
     /**
      * Constructor
      */
-    constructor(private _inventoryService: InventoryService)
-    {
+    constructor(private _inventoryService: InventoryService) {
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -203,9 +261,7 @@ export class ProductCategoriesResolver implements Resolve<any>
      * @param route
      * @param state
      */
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<{ pagination: ProductCategoryPagination; products: ProductCategory[] }>
-    
-    {
-        return this._inventoryService.getByQueryCategories( 0 , 30, 'name', 'asc');
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<{ pagination: ProductCategoryPagination; products: ProductCategory[] }> {
+        return this._inventoryService.getByQueryCategories(0, 30, 'name', 'asc');
     }
 }

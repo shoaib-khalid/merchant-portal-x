@@ -1,29 +1,30 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef, Inject } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, Renderer2, ViewContainerRef, Inject, ElementRef, TemplateRef, ViewChild } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
-import { TemplatePortal } from '@angular/cdk/portal';
-import { fromEvent, merge, Observable, of, Subject } from 'rxjs';
-import { debounceTime, delay, finalize, map, switchMap, take, takeUntil } from 'rxjs/operators';
+import { fromEvent, Observable, of, Subject } from 'rxjs';
+import { debounceTime, finalize, map, switchMap, takeUntil } from 'rxjs/operators';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, ProductCategory, ProductPagination, ProductPackageOption, ApiResponseModel } from 'app/core/product/inventory.types';
+import { Product, ProductVariant, ProductVariantAvailable, ProductCategory, ProductPagination, ProductPackageOption, ApiResponseModel } from 'app/core/product/inventory.types';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { Store } from 'app/core/store/store.types';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { StoresService } from 'app/core/store/store.service';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
-import { AddProductValidationService } from './add-product.validation.service';
-import { MatPaginator } from '@angular/material/paginator';
+import { AddProductValidationService } from '../../products-management/add-product/add-product.validation.service';
+import { ResourceService } from 'app/core/resource/resource.service';
+import { Resource, ResourceAvailability } from 'app/core/resource/resource.types';
+import { Time } from '@angular/common';
 
 
 
 @Component({
-    selector: 'dialog-add-product',
-    templateUrl: './add-product.component.html',
-    styles         : [
+    selector: 'dialog-add-resource',
+    templateUrl: './add-resource.component.html',
+    styles: [
         /* language=SCSS */
         `
-            .custom-add-product-dialog {
+            .custom-add-resource-dialog {
 
                 :host ::ng-deep .mat-horizontal-content-container {
                     // max-height: 90vh;
@@ -106,23 +107,39 @@ import { MatPaginator } from '@angular/material/paginator';
 
         `
     ],
-  })
-  
-export class AddProductComponent implements OnInit, OnDestroy
-{
-    @ViewChild('variantsPanelOrigin') private _variantsPanelOrigin: ElementRef;
-    @ViewChild('variantsPanel') private _variantsPanel: TemplateRef<any>;
-    @ViewChild('productPaginationCombo', {read: MatPaginator}) private _productPaginator: MatPaginator;
+})
 
+export class AddResourceComponent implements OnInit, OnDestroy {
+
+    utcTimezones = require('./utc_timzones.json');
+
+    counter: number[] = [1];
 
     // get current store
     store$: Store;
 
     message: string = "";
 
+
+    //Resource
+    resource: Resource;
+    selectedResource: Resource | null = null;
+    resourcePrice: number;
+    numberOfWeeks: number;
+    resourceName: string;
+    creatingResource: boolean; // use to disable next button until resource is created
+    newResourceId: string = null;
+
+
+    //Resource availability
+    
+    resourceAvailability: ResourceAvailability;
+    newResourceAvailabilityId: string = null;
+    selectedResourceAvailability: ResourceAvailability | null = null;
+
     // product
     selectedProduct: Product | null = null;
-    addProductForm: FormGroup;
+    addResourceForm: FormGroup;
     products$: Observable<Product[]>;
     createdProductForm: FormGroup;
     productType: string;
@@ -150,9 +167,9 @@ export class AddProductComponent implements OnInit, OnDestroy
     productCategories$: ProductCategory[];
     filteredProductCategories: ProductCategory[];
     selectedProductCategory: ProductCategory;
-    
+
     productCategoriesEditMode: boolean = false;
-    productCategoriesValueEditMode:any = [];
+    productCategoriesValueEditMode: any = [];
 
     // product assets
     images: any = [];
@@ -167,17 +184,18 @@ export class AddProductComponent implements OnInit, OnDestroy
     quillModules: any = {
         toolbar: [
             ['bold', 'italic', 'underline'],
-            [{align: []}, {list: 'ordered'}, {list: 'bullet'}],
-            [{link: function(value) {
+            [{ align: [] }, { list: 'ordered' }, { list: 'bullet' }],
+            [{
+                link: function (value) {
                     if (value) {
-                      var href = prompt('Enter the URL');
-                      this.quill.format('link', href);
+                        var href = prompt('Enter the URL');
+                        this.quill.format('link', href);
                     } else {
-                      this.quill.format('link', false);
+                        this.quill.format('link', false);
                     }
-                  }
+                }
             }],
-            ['blockquote','clean']
+            ['blockquote', 'clean']
         ]
     };
 
@@ -192,11 +210,11 @@ export class AddProductComponent implements OnInit, OnDestroy
 
     // variant available section
     filteredProductVariantAvailable: any[] = []; // used in html to loop variant available
-    productVariantAvailable: ProductVariantAvailable[] = []; 
+    productVariantAvailable: ProductVariantAvailable[] = [];
     variantAvailableToBeCreated: any = []; // use for creating on BE 
     // variantAvailableToBeDeleted: any = []; // use for deleting on BE 
     productVariantAvailableEditMode: boolean = false;
-    productVariantAvailableValueEditMode:any = [];
+    productVariantAvailableValueEditMode: any = [];
 
     variantComboItems: any = []; // this is used for generating combinations
     variantComboOptions: any = []; //
@@ -205,16 +223,37 @@ export class AddProductComponent implements OnInit, OnDestroy
     currentScreenSize: string[];
     deliveryVehicle: any;
 
-    inputSearchProducts : string = '';
-    selectedCategory:string ='';
+    inputSearchProducts: string = '';
+    selectedCategory: string = '';
     onChangeSelectProductValue: any = []; // for product checkbox in combo section
     totalAllowed: number = 0;
 
     //for tier category
-    selectedParentCategory: string ='';
+    selectedParentCategory: string = '';
     parentCategoriesOptions: ProductCategory[];
-    storeVerticalCode : string = '';
+    storeVerticalCode: string = '';
 
+    confirmationMethod = [
+        "DEFAULT",
+        "MERCHANT",
+        "PAYMENT",
+        "EMAIL",
+        "PHONE"
+    ];
+
+    availabilityDays = [
+        "EVERYDAY",
+        "Monday-Friday",
+        "Friday-Sunday",
+        "Saturday-Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+    ];
 
     /**
      * Constructor
@@ -229,11 +268,11 @@ export class AddProductComponent implements OnInit, OnDestroy
         private _overlay: Overlay,
         private _renderer2: Renderer2,
         private _viewContainerRef: ViewContainerRef,
-        public dialogRef: MatDialogRef<AddProductComponent>,
+        public dialogRef: MatDialogRef<AddResourceComponent>,
         @Inject(MAT_DIALOG_DATA) public data: MatDialog,
-        private _fuseMediaWatcherService: FuseMediaWatcherService
-    )
-    {
+        private _fuseMediaWatcherService: FuseMediaWatcherService,
+        private _resourceService: ResourceService
+    ) {
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -251,44 +290,44 @@ export class AddProductComponent implements OnInit, OnDestroy
     /**
      * On init
      */
-    ngOnInit(): void
-    {
+    ngOnInit(): void {
+
+
         // Horizontol stepper
-        this.addProductForm = this._formBuilder.group({
+        this.addResourceForm = this._formBuilder.group({
             step1: this._formBuilder.group({
-                name             : ['', [Validators.required]],
-                description      : ['', AddProductValidationService.requiredValidator],
-                categoryId       : ['', AddProductValidationService.requiredValidator],
-                status           : ['ACTIVE', [Validators.required]],
-                trackQuantity    : [false],
+                name: ['', [Validators.required]],
+                description: ['', AddProductValidationService.requiredValidator],
+                categoryId: ['', AddProductValidationService.requiredValidator],
+                status: ['ACTIVE', [Validators.required]],
+                trackQuantity: [false],
                 allowOutOfStockPurchases: [false],
                 minQuantityForAlarm: [-1],
-                packingSize      : ['',],
-                availableStock   : [1, [Validators.required]],
-                sku              : ['', [Validators.required]],
-                price            : ['', [Validators.required]],
-                images           : [[]],
-                imagefiles       : [[]],
-                thumbnailIndex   : [0],
-                isVariants       : [false],
-                isPackage        : [false], // combo
-                isBulkItem       : [false],
-                vehicleType      : [''],
-                isCustomNote     : [false],
-                isNoteOptional   : [true],
-                customNote       : [''],
+                packingSize: ['',],
+                availableStock: [, [Validators.required]],
+                sku: ['', [Validators.required]],
+                price: ['', [Validators.required]],
+                images: [[]],
+                imagefiles: [[]],
+                thumbnailIndex: [0],
+                isVariants: [false],
+                isPackage: [false], // combo
+                isBulkItem: [false],
+                vehicleType: [''],
+                isCustomNote: [false],
+                isNoteOptional: [true],
+                customNote: [''],
+                isAvailability: false,
                 // form completion
-                valid            : [false]
+                valid: [false]
             }),
-            variantsSection: this._formBuilder.group({
-                firstName: ['', Validators.required],
-                lastName : ['', Validators.required],
-                userName : ['', Validators.required],
-                about    : ['']
-            }),
-            comboSection : this._formBuilder.group({
-                optionName       : ['', [Validators.required]],
-                categoryId       : [''],
+            step2: this._formBuilder.group({
+                availabilityDay: [''],
+                startTime: [''],
+                endTime: [''],
+                offsetHours: [''],
+                durationInMinutes: [Number],
+                confirmationMethod: ['DEFAULT']
             })
         });
 
@@ -296,7 +335,7 @@ export class AddProductComponent implements OnInit, OnDestroy
 
         // get the product type
         this.productType = this.data['productType'];
-        
+
         // Get the products
         // this.products$ = this._inventoryService.products$;
 
@@ -308,7 +347,7 @@ export class AddProductComponent implements OnInit, OnDestroy
             .subscribe((products: Product[]) => {
 
                 this.filteredProductsOptions = products;
-                
+
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
@@ -320,7 +359,7 @@ export class AddProductComponent implements OnInit, OnDestroy
 
                 // Update the pagination
                 this.productPaginationForCombo = pagination;
-                
+
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
@@ -331,7 +370,7 @@ export class AddProductComponent implements OnInit, OnDestroy
         //     .subscribe(products => {
         //         this.allProducts = products;
         //     })
-            
+
         // Get the stores
         this._storesService.store$
             .pipe(takeUntil(this._unsubscribeAll))
@@ -339,11 +378,11 @@ export class AddProductComponent implements OnInit, OnDestroy
 
                 // Update the pagination
                 this.store$ = store;
-                this.storeVerticalCode =this.store$.verticalCode;
+                this.storeVerticalCode = this.store$.verticalCode;
 
                 // set packingSize to S if verticalCode FnB
-                if (this.store$.verticalCode === "FnB" || this.store$.verticalCode === "FnB_PK"){
-                    this.addProductForm.get('step1').get('packingSize').patchValue('S');
+                if (this.store$.verticalCode === "FnB" || this.store$.verticalCode === "FnB_PK") {
+                    this.addResourceForm.get('step1').get('packingSize').patchValue('S');
                 }
 
                 // Mark for check
@@ -356,20 +395,20 @@ export class AddProductComponent implements OnInit, OnDestroy
         //     .subscribe((response)=>{
 
         //         this._products = response["data"].content
-                
+
         //         // filter the product
         //         this.filterProductOptionsMethod(this._products);
 
         //     });
 
         //get all values for parent categories with specied vertical code
-        this._inventoryService.getParentCategories(0, 20, 'name', 'asc', '',this.storeVerticalCode)
-        .subscribe((response:ApiResponseModel<ProductCategory[]>)=>{
-            
+        this._inventoryService.getParentCategories(0, 20, 'name', 'asc', '', this.storeVerticalCode)
+            .subscribe((response: ApiResponseModel<ProductCategory[]>) => {
+
                 this.parentCategoriesOptions = response.data["content"];
                 return this.parentCategoriesOptions;
-        })
-            
+            })
+
         // Get the categories
         this._inventoryService.categories$
             .pipe(takeUntil(this._unsubscribeAll))
@@ -383,7 +422,7 @@ export class AddProductComponent implements OnInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             });
 
-        
+
         // Get delivery vehicle type
         this._inventoryService.getDeliveryVehicleType()
             .pipe(takeUntil(this._unsubscribeAll))
@@ -391,11 +430,11 @@ export class AddProductComponent implements OnInit, OnDestroy
 
                 // Get the vehicles except MOTORCYCLE
                 this.deliveryVehicle = vehicles.filter(veh => veh.vehicleType !== 'MOTORCYCLE')
-                
+
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
-        
+
 
         // Filter by category dropdown in combo section
         this.localCategoryFilterControl.valueChanges
@@ -403,12 +442,12 @@ export class AddProductComponent implements OnInit, OnDestroy
                 takeUntil(this._unsubscribeAll),
                 debounceTime(300),
                 switchMap((catId) => {
-                    
-                    if (catId == ''){
+
+                    if (catId == '') {
                         this.filteredProductsOptions = this._filteredProductsOptions
                     }
                     else {
-                        this.filteredProductsOptions = this._filteredProductsOptions.filter(item => item.categoryId === catId );
+                        this.filteredProductsOptions = this._filteredProductsOptions.filter(item => item.categoryId === catId);
                     }
 
 
@@ -425,16 +464,16 @@ export class AddProductComponent implements OnInit, OnDestroy
             )
             .subscribe();
 
-            
+
         this._fuseMediaWatcherService.onMediaChange$
-        .pipe(takeUntil(this._unsubscribeAll))
-        .subscribe(({matchingAliases}) => {               
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(({ matchingAliases }) => {
 
-            this.currentScreenSize = matchingAliases;                
+                this.currentScreenSize = matchingAliases;
 
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
-        });       
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
         // Mark for check
         this._changeDetectorRef.markForCheck();
     }
@@ -442,42 +481,39 @@ export class AddProductComponent implements OnInit, OnDestroy
     /**
      * On destroy
      */
-    ngOnDestroy(): void
-    {
+    ngOnDestroy(): void {
         // Unsubscribe from all subscriptions
         this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
 
         // Dispose the overlays if they are still on the DOM
-        if ( this._variantsPanelOverlayRef )
-        {
+        if (this._variantsPanelOverlayRef) {
             this._variantsPanelOverlayRef.dispose();
         }
     }
 
-    ngAfterViewInit(): void
-    {
+    ngAfterViewInit(): void {
         // Mark for check
         this._changeDetectorRef.markForCheck();
 
         setTimeout(() => {
 
             // Mark for check
-            this._changeDetectorRef.markForCheck();        
+            this._changeDetectorRef.markForCheck();
 
-            
-            
-            if ( this._productPaginator )
+
+
+            /* if ( this._productPaginator )
             {
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
-        
+         
                 merge(this._productPaginator.page).pipe(
                     switchMap(() => {                    
-
+         
                         // set loading to true
                         this.isLoading = true;
-
+         
                         return this._inventoryService.getProductsForCombo(this._productPaginator.pageIndex, this._productPaginator.pageSize, 'name', 'asc',this.inputSearchProducts,'ACTIVE,INACTIVE',this.selectedCategory);
                     
                     }),
@@ -486,7 +522,7 @@ export class AddProductComponent implements OnInit, OnDestroy
                         this.isLoading = false;
                     })
                 ).subscribe();
-            }
+            } */
 
             // Mark for check
             this._changeDetectorRef.markForCheck();
@@ -513,9 +549,9 @@ export class AddProductComponent implements OnInit, OnDestroy
     //     }
     // }
 
-    generateSku(value: string){
+    generateSku(value: string) {
 
-        this.addProductForm.get('step1').get('sku').patchValue(value.trim().toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''));
+        this.addResourceForm.get('step1').get('sku').patchValue(value.trim().toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, ''));
     }
 
     // --------------------------------------
@@ -525,8 +561,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     /**
      * Toggle the categories edit mode
      */
-    toggleCategoriesEditMode(): void
-    {
+    toggleCategoriesEditMode(): void {
         this.productCategoriesEditMode = !this.productCategoriesEditMode;
     }
 
@@ -535,53 +570,47 @@ export class AddProductComponent implements OnInit, OnDestroy
      *
      * @param event
      */
-    filterCategories(event): void
-    {
+    filterCategories(event): void {
         // Get the value
         const value = event.target.value.toLowerCase();
 
         // Filter the categories
         this.filteredProductCategories = this.productCategories$.filter(category => category.name.toLowerCase().includes(value));
     }
- 
+
     /**
      * Filter category input key down event
      *
      * @param event
      */
-    filterCategoriesInputKeyDown(event): void
-    {
+    filterCategoriesInputKeyDown(event): void {
         // Return if the pressed key is not 'Enter'
-        if ( event.key !== 'Enter' )
-        {
+        if (event.key !== 'Enter') {
             return;
         }
 
         // If there is no category available...
-        if ( this.filteredProductCategories.length === 0 )
-        {
-        //  // Create the category
-        //  this.createCategory(event.target.value);
+        if (this.filteredProductCategories.length === 0) {
+            //  // Create the category
+            //  this.createCategory(event.target.value);
 
-        //  // Clear the input
-        //  event.target.value = '';
+            //  // Clear the input
+            //  event.target.value = '';
 
-        //  // Return
-        //  return;
+            //  // Return
+            //  return;
         }
 
         // If there is a category...
         const category = this.filteredProductCategories[0];
-        const isCategoryApplied = this.addProductForm.get('step1').get('categoryId').value;
+        const isCategoryApplied = this.addResourceForm.get('step1').get('categoryId').value;
 
         // If the found category is already applied to the product...
-        if ( isCategoryApplied )
-        {
+        if (isCategoryApplied) {
             // Remove the category from the product
             this.removeCategoryFromProduct();
         }
-        else
-        {
+        else {
             // Otherwise add the category to the product
             this.addCategoryToProduct(category);
         }
@@ -592,8 +621,7 @@ export class AddProductComponent implements OnInit, OnDestroy
      *
      * @param title
      */
-    createCategory(name: string, parentCategoryId: string, thumbnailUrl: string): void
-    {
+    createCategory(name: string, parentCategoryId: string, thumbnailUrl: string): void {
         const category = {
             name,
             storeId: this._storesService.storeId$,
@@ -610,38 +638,35 @@ export class AddProductComponent implements OnInit, OnDestroy
                 this.addCategoryToProduct(response["data"]);
             });
     }
- 
-     /**
-      * Update the category title
-      *
-      * @param category
-      * @param event
-      */
-    updateLocalCategoryTitle(category: ProductCategory, event): void
-    {
+
+    /**
+     * Update the category title
+     *
+     * @param category
+     * @param event
+     */
+    updateLocalCategoryTitle(category: ProductCategory, event): void {
         // Update the title on the category
         category.name = event.target.value;
     }
 
-    updateServerCategoryTitle(category: ProductCategory, event): void
-    {
+    updateServerCategoryTitle(category: ProductCategory, event): void {
         // Update the category on the server
         this._inventoryService.updateCategory(category.id, category)
             .pipe(debounceTime(300))
             .subscribe();
     }
- 
-     /**
-      * Delete the category
-      *
-      * @param category
-      */
-    deleteCategory(category: ProductCategory): void
-    {
+
+    /**
+     * Delete the category
+     *
+     * @param category
+     */
+    deleteCategory(category: ProductCategory): void {
 
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title  : 'Delete category',
+            title: 'Delete category',
             message: 'Are you sure you want to delete this category? This action cannot be undone!',
             actions: {
                 confirm: {
@@ -653,11 +678,10 @@ export class AddProductComponent implements OnInit, OnDestroy
         // Subscribe to the confirmation dialog closed action
         confirmation.afterClosed().subscribe((result) => {
             // If the confirm button pressed...
-            if ( result === 'confirmed' )
-            {
+            if (result === 'confirmed') {
                 // Delete the category from the server
                 this._inventoryService.deleteCategory(category.id).subscribe();
-        
+
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             }
@@ -669,42 +693,39 @@ export class AddProductComponent implements OnInit, OnDestroy
      *
      * @param category
      */
-    addCategoryToProduct(category: ProductCategory): void
-    {
+    addCategoryToProduct(category: ProductCategory): void {
 
         //to display the tier category
         this.selectedParentCategory = category.parentCategoryId;
-        
+
         // Update the selected product form
-        this.addProductForm.get('step1').get('categoryId').patchValue(category.id);
+        this.addResourceForm.get('step1').get('categoryId').patchValue(category.id);
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
     }
- 
-     /**
-      * Remove category from the product
-      *
-      * @param category
-      */
-    removeCategoryFromProduct(): void
-    {
+
+    /**
+     * Remove category from the product
+     *
+     * @param category
+     */
+    removeCategoryFromProduct(): void {
 
         // Update the selected product form
-        this.addProductForm.get('step1').get('categoryId').patchValue(null);
+        this.addResourceForm.get('step1').get('categoryId').patchValue(null);
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
     }
- 
+
     /**
      * Toggle product category
      *
      * @param category
      * @param change
      */
-    toggleProductCategory(category: ProductCategory, change: MatCheckboxChange): void
-    {
+    toggleProductCategory(category: ProductCategory, change: MatCheckboxChange): void {
         if (change.checked) {
             this.addCategoryToProduct(category);
 
@@ -714,14 +735,14 @@ export class AddProductComponent implements OnInit, OnDestroy
 
             // Sort the filtered categories, put selected category on top
             // First get selected array index by using this.selectedProduct.categoryId
-            let selectedProductCategoryIndex = this.filteredProductCategories.findIndex(item => item.id === this.addProductForm.get('step1').get('categoryId').value);
+            let selectedProductCategoryIndex = this.filteredProductCategories.findIndex(item => item.id === this.addResourceForm.get('step1').get('categoryId').value);
             // if selectedProductCategoryIndex < -1 // category not selected
             // if selectedProductCategoryIndex = 0 // category selected already in first element
             if (selectedProductCategoryIndex > 0) {
                 // if index exists get the object of selectedProductCategory
                 this.selectedProductCategory = this.filteredProductCategories[selectedProductCategoryIndex];
                 // remove the object from this.filteredProductCategories
-                this.filteredProductCategories.splice(selectedProductCategoryIndex,1);
+                this.filteredProductCategories.splice(selectedProductCategoryIndex, 1);
                 // re add this.selectedProductCategory in front
                 this.filteredProductCategories.unshift(this.selectedProductCategory);
             }
@@ -735,8 +756,7 @@ export class AddProductComponent implements OnInit, OnDestroy
      *
      * @param inputValue
      */
-    shouldShowCreateCategoryButton(inputValue: string): boolean
-    {
+    shouldShowCreateCategoryButton(inputValue: string): boolean {
         return !!!(inputValue === '' || this.productCategories$.findIndex(category => category.name.toLowerCase() === inputValue.toLowerCase()) > -1);
     }
 
@@ -747,21 +767,18 @@ export class AddProductComponent implements OnInit, OnDestroy
     /**
      * Toggle the categories edit mode
      */
-    toggleImagesEditMode(): void
-    {
+    toggleImagesEditMode(): void {
         this.imagesEditMode = !this.imagesEditMode;
     }
-     
+
     /**
      * Upload avatar
      *
      * @param fileList
      */
-    uploadImages(fileList: FileList, images): Promise<void>
-    {
+    uploadImages(fileList: FileList, images): Promise<void> {
         // Return if canceled
-        if ( !fileList.length )
-        {
+        if (!fileList.length) {
             return;
         }
 
@@ -769,46 +786,44 @@ export class AddProductComponent implements OnInit, OnDestroy
         const file = fileList[0];
 
         // Return if the file is not allowed
-        if ( !allowedTypes.includes(file.type) )
-        {
+        if (!allowedTypes.includes(file.type)) {
             return;
         }
 
         // Return and throw warning dialog if image filename is more than 100 characters
-        if ( fileList[0].name.length > 100 )
-        {
+        if (fileList[0].name.length > 100) {
             this._fuseConfirmationService.open({
-                title  : 'The file name is too long',
+                title: 'The file name is too long',
                 message: 'The file name cannot exceed 100 characters (including spaces).',
-                icon       : {
-                    show : true,
-                    name : 'heroicons_outline:exclamation',
+                icon: {
+                    show: true,
+                    name: 'heroicons_outline:exclamation',
                     color: 'warning'
                 },
                 actions: {
-                    
+
                     cancel: {
                         label: 'OK',
                         show: true
-                        },
+                    },
                     confirm: {
                         show: false,
                     }
-                    }
+                }
             });
 
             return;
         }
-        
+
 
         // Return and throw warning dialog if image file size is big
         let maxSize = 1048576;
-        var maxSizeInMB = (maxSize / (1024*1024)).toFixed(2);
-        
-        if (fileList[0].size > maxSize ) {
+        var maxSizeInMB = (maxSize / (1024 * 1024)).toFixed(2);
+
+        if (fileList[0].size > maxSize) {
             // Show a success message (it can also be an error message)
             const confirmation = this._fuseConfirmationService.open({
-                title  : 'Image size limit',
+                title: 'Image size limit',
                 message: 'Your uploaded image exceeds the maximum size of ' + maxSizeInMB + ' MB !',
                 icon: {
                     show: true,
@@ -816,23 +831,23 @@ export class AddProductComponent implements OnInit, OnDestroy
                     color: "warn"
                 },
                 actions: {
-                    
+
                     cancel: {
                         label: 'OK',
                         show: true
-                        },
+                    },
                     confirm: {
                         show: false,
                     }
-                    }
+                }
             });
             return;
         }
-        
+
         var reader = new FileReader();
-        reader.readAsDataURL(file); 
-        reader.onload = (_event)  => {
-            if(!images.length === true) {
+        reader.readAsDataURL(file);
+        reader.onload = (_event) => {
+            if (!images.length === true) {
                 this.images.push(reader.result);
                 this.imagesFile.push(file);
                 this.currentImageIndex = this.images.length - 1;
@@ -840,7 +855,7 @@ export class AddProductComponent implements OnInit, OnDestroy
                 this.images[this.currentImageIndex] = reader.result + "";
             }
 
-            this.imagesEditMode = false; 
+            this.imagesEditMode = false;
             this._changeDetectorRef.markForCheck();
         }
     }
@@ -848,8 +863,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     /**
      * Remove the image
      */
-    removeImage(): void
-    {
+    removeImage(): void {
         const index = this.currentImageIndex;
         if (index > -1) {
             this.images.splice(index, 1);
@@ -861,8 +875,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     /**
      * Cycle through images of selected product
      */
-    cycleImages(forward: boolean = true): void
-    {
+    cycleImages(forward: boolean = true): void {
         // Get the image count and current image index
         const count = this.images.length;
         const currentIndex = this.currentImageIndex;
@@ -872,18 +885,16 @@ export class AddProductComponent implements OnInit, OnDestroy
         const prevIndex = currentIndex - 1 < 0 ? count - 1 : currentIndex - 1;
 
         // If cycling forward...
-        if ( forward )
-        {
+        if (forward) {
             this.currentImageIndex = nextIndex;
         }
         // If cycling backwards...
-        else
-        {
+        else {
             this.currentImageIndex = prevIndex;
         }
     }
 
-    resetCycleImages(){
+    resetCycleImages() {
         this.currentImageIndex = 0;
     }
 
@@ -897,8 +908,7 @@ export class AddProductComponent implements OnInit, OnDestroy
      * @param index
      * @param item
      */
-    trackByFn(index: number, item: any): any
-    {
+    trackByFn(index: number, item: any): any {
         return item.id || index;
     }
 
@@ -906,29 +916,31 @@ export class AddProductComponent implements OnInit, OnDestroy
     textChanged($event) {
         const MAX_LENGTH = 500;
         if ($event.editor.getLength() > MAX_LENGTH) {
-           $event.editor.deleteText(MAX_LENGTH, $event.editor.getLength());
+            $event.editor.deleteText(MAX_LENGTH, $event.editor.getLength());
         }
     }
 
     /**
      * Create product
      */
-    addNewProductMethod(): void
-    {
+    /**
+     * Create product
+     */
+    addNewProductMethod(): void {
         this.creatingProduct = true;
 
-        this.addProductForm.get('step1').get('images').patchValue(this.images);
-        this.addProductForm.get('step1').get('imagefiles').patchValue(this.imagesFile);
+        this.addResourceForm.get('step1').get('images').patchValue(this.images);
+        this.addResourceForm.get('step1').get('imagefiles').patchValue(this.imagesFile);
 
         // if the bulk item toggle stays close, then set to 'motorcycle'
-        if (this.addProductForm.get('step1').get('isBulkItem').value === false){
-            this.addProductForm.get('step1').get('vehicleType').setValue('MOTORCYCLE')
+        if (this.addResourceForm.get('step1').get('isBulkItem').value === false) {
+            this.addResourceForm.get('step1').get('vehicleType').setValue('MOTORCYCLE')
         }
 
-        const {valid, ...productBody} = this.addProductForm.get('step1').value
+        const { valid, ...productBody } = this.addResourceForm.get('step1').value
 
         const { sku, availableStock, price, images, imagefiles, thumbnailIndex, isCustomNote, ...newProductBody } = productBody;
-        
+
         // Get store domain
         let storeFrontURL = 'https://' + this.store$.domain;
 
@@ -952,8 +964,8 @@ export class AddProductComponent implements OnInit, OnDestroy
             .subscribe(async (newProduct) => {
 
                 this.newProductId = newProduct["data"].id;
-                this.selectedProduct = newProduct["data"];    
-                
+                this.selectedProduct = newProduct["data"];
+
                 // this.products$
                 //     .pipe(take(1)) 
                 //     .subscribe(products => {
@@ -963,22 +975,22 @@ export class AddProductComponent implements OnInit, OnDestroy
                 //     })
 
                 // Add Inventory to product
-                this._inventoryService.addInventoryToProduct(newProduct["data"], { sku: sku, quantity: availableStock, price:price, itemCode:newProduct["data"].id + "aa" } )
-                    .subscribe((response)=>{
+                this._inventoryService.addInventoryToProduct(newProduct["data"], { sku: sku, quantity: availableStock, price: price, itemCode: newProduct["data"].id + "aa" })
+                    .subscribe((response) => {
                         // update sku, price, quantity display since it's not part of product but product inventory
                         // this.displayPrice = response.price;
                         // this.displayQuantity = response.quantity;
                         // this.displaySku = response.sku;
 
                         // if type is combo..
-                        if (this.productType === "combo"){
+                        if (this.productType === "combo") {
 
                             // open the details window..
                             // this.toggleDetails(newProduct["data"].id);
 
                             // then, open the combo section
                             // this.showCombosSection = true;
-            
+
                         }
 
                         // Update the assets product on the server (backend kena enable update)
@@ -986,11 +998,11 @@ export class AddProductComponent implements OnInit, OnDestroy
                             for (var i = 0; i < imagefiles.length; i++) {
                                 // create a new one
                                 let formData = new FormData();
-                                formData.append('file',imagefiles[i]);
+                                formData.append('file', imagefiles[i]);
                                 this._inventoryService.addProductAssets(newProduct["data"].id, formData, (i === thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
                                     .pipe(takeUntil(this._unsubscribeAll))
-                                    .subscribe((response)=>{
-                                        if (response.isThumbnail){
+                                    .subscribe((response) => {
+                                        if (response.isThumbnail) {
                                             this.selectedProduct.thumbnailUrl = response.url;
                                         }
 
@@ -1005,39 +1017,41 @@ export class AddProductComponent implements OnInit, OnDestroy
                             this.images = images;
                             this.thumbnailIndex = thumbnailIndex;
                         }
-                        
+
 
                     });
 
 
                 // Go to new product
                 // this.selectedProduct = newProduct["data"];
-                                        
+
                 // Update current form with new product data
                 // this.createdProductForm.patchValue(newProduct["data"]);
 
                 // Set image & isVariants to false ...
                 // this.selectedProductForm.get('isVariants').patchValue(false);
-                
+
                 // Set filtered variants to empty array
                 this.filteredProductVariants = [];
-                
+
                 // // Set variants to empty array
                 // this.variants = [];
 
                 // // Set selectedProduct variants to empty array
                 // this.selectedProduct.variants = [];
 
-                if (this.addProductForm.get('step1').get('isVariants').value === false && this.productType !== 'combo') {
-                    
+                if (this.addResourceForm.get('step1').get('isVariants').value === false
+                    && this.productType !== 'combo') {
+
                     // Show a success message
                     this.showFlashMessage('success');
                     // Set delay before closing the window
                     setTimeout(() => {
 
+                        this.addNewResource();
                         // close the window
                         this.dialogRef.close({ valid: false });
-            
+
                         // Mark for check
                         this._changeDetectorRef.markForCheck();
                     }, 1000);
@@ -1047,9 +1061,9 @@ export class AddProductComponent implements OnInit, OnDestroy
                 if (this.productType === "combo") {
                     this._inventoryService.getProductPackageOptions(this.selectedProduct.id)
                         .pipe(takeUntil(this._unsubscribeAll))
-                        .subscribe((response)=>{
+                        .subscribe((response) => {
                             this.productsCombos$ = response["data"];
-                            
+
                         });
                 }
 
@@ -1059,132 +1073,119 @@ export class AddProductComponent implements OnInit, OnDestroy
     }
 
 
-    async postVariantMethod(){
-        
-        // if it is variants
-        if (this.addProductForm.get('step1').get('isVariants').value === true) {
+    async postVariantMethod() {
 
-            // DELETE ENTIRE INVENTORY
-            await this.deleteEntireInventory()
-                    
-            // INVENTORY
-            if (this.selectedVariantCombos.length > 0){
-                for (var i = 0; i < this.selectedVariantCombos.length; i++) {
-            
-                    // }
-                    const body = {
-                        // itemCode: this.selectedProduct.id + "-" + i,
-                        itemCode: this.selectedProduct.id + i,
-                        price: this.selectedVariantCombos[i].price,
-                        compareAtPrice: 0,
-                        quantity: this.selectedVariantCombos[i].quantity,
-                        sku: this.selectedVariantCombos[i].sku,
-                        status: this.selectedVariantCombos[i].status
-                    }
-    
-                    await this._inventoryService.addInventoryToProduct(this.selectedProduct, body).toPromise()
-                    .then((response)=>{
-    
-                    });
-                }
-                
-            }
-    
-            // VARIANT
-            // Delete the variant from the BE
-            // if (this.variantToBeDeleted.length > 0){
-    
-            //     this.variantToBeDeleted.forEach(variant => {
-            //         this._inventoryService.deleteVariant(this.selectedProduct.id, variant.id , variant)
-            //             .pipe(takeUntil(this._unsubscribeAll))
-            //             .subscribe((response)=>{
-            //                 // this.removeVariantFromProduct(response)
-            //             });
-            //     })
-            // }
-    
-            // create new variants
-            const variantIds = await this.createVariantInBE()
-    
-            // Delete the variant available from the BE
-            // if (this.variantAvailableToBeDeleted.length > 0){
-                
-            //     this.variantAvailableToBeDeleted.forEach(options => {
-            //         this._inventoryService.deleteVariantAvailable(options, this.selectedProduct.id)
-            //             .pipe(takeUntil(this._unsubscribeAll))
-            //             .subscribe((response)=>{
-                            
-            //             });
-    
-            //     })
-            // }
-            let variantAvailablesCreated = [];
-            // if got new variant availables, pass the variantIds from the createVariant endpoint
-            if (this.variantAvailableToBeCreated.length > 0){
-                
-                variantAvailablesCreated = await this.createVariantAvailableInBE(variantIds);
-    
-                
-            }
-            else {
-    
-                await this._inventoryService.getVariantAvailable(this.selectedProduct.id).then((response) => {
-    
-                    variantAvailablesCreated = response;
-                    
+        this.creatingProduct = true;
+
+        this.addResourceForm.get('step1').get('images').patchValue(this.images);
+        this.addResourceForm.get('step1').get('imagefiles').patchValue(this.imagesFile);
+
+        const { valid, ...productBody } = this.addResourceForm.get('step1').value
+
+        const { sku, availableStock, price, images, imagefiles, thumbnailIndex, isCustomNote, ...newProductBody } = productBody;
+
+        // Get store domain
+        let storeFrontURL = 'https://' + this.store$.domain;
+
+        // newProductBody["categoryId"] = categoryId;
+        newProductBody["seoName"] = newProductBody.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
+        newProductBody["seoUrl"] = storeFrontURL + "/product/" + newProductBody.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
+        newProductBody["storeId"] = this.store$.id;
+        newProductBody["minQuantityForAlarm"] = newProductBody.minQuantityForAlarm === false ? -1 : newProductBody.minQuantityForAlarm;
+        newProductBody["packingSize"] = newProductBody.packagingSize ? newProductBody.packagingSize : "S";
+        newProductBody["isPackage"] = (this.productType === "combo") ? true : false;
+        newProductBody["allowOutOfStockPurchases"] = ((this.store$.verticalCode === "FnB" || this.store$.verticalCode === "FnB_PK") && (newProductBody.status !== "OUTOFSTOCK")) ? true : false;
+        newProductBody["name"] = newProductBody.name.trim();
+
+        // Create the product
+        this._inventoryService.createProduct(newProductBody)
+            .pipe(
+                finalize(() => {
+                    this.creatingProduct = false;
                 })
-    
-            }
-    
-            await this.addInventoryItem(variantAvailablesCreated);
+            )
+            .subscribe(async (newProduct) => {
 
-            // CREATE VARIANT IMAGES
-            for (let i = 0; i < this.selectedVariantCombos.length; i++) {
-                
-                // if new, create new asset
-                if (this.selectedVariantCombos[i].newAsset == true) {
-                
-                    let formdata = new FormData();
-                    formdata.append("file", this.selectedVariantCombos[i].file);
-                    await this._inventoryService.addProductAssets(this.selectedProduct.id, formdata, (i === this.thumbnailIndex) ? { isThumbnail: true , itemCode: this.selectedProduct.id + i } : { isThumbnail: false, itemCode: this.selectedProduct.id + i }, i)
-                    .toPromise().then(data => {
+                this.newProductId = newProduct["data"].id;
+                this.selectedProduct = newProduct["data"];
+                this.resourceName = newProduct["data"].name;
+
+                // Add Inventory to product
+                this._inventoryService.addInventoryToProduct(newProduct["data"], { sku: sku, quantity: availableStock, price: price, itemCode: newProduct["data"].id + "aa" })
+                    .subscribe((response) => {
+                        // update sku, price, quantity display since it's not part of product but product inventory
+                        // this.displayPrice = response.price;
+                        // this.displayQuantity = response.quantity;
+                        // this.displaySku = response.sku;
+
+                        this.resourcePrice = response.price;
+                        this.numberOfWeeks = response.quantity;
+
+                        // Update the assets product on the server (backend kena enable update)
+                        if (imagefiles) {
+                            for (var i = 0; i < imagefiles.length; i++) {
+                                // create a new one
+                                let formData = new FormData();
+                                formData.append('file', imagefiles[i]);
+                                this._inventoryService.addProductAssets(newProduct["data"].id, formData, (i === thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
+                                    .pipe(takeUntil(this._unsubscribeAll))
+                                    .subscribe((response) => {
+                                        if (response.isThumbnail) {
+                                            this.selectedProduct.thumbnailUrl = response.url;
+                                        }
+
+                                        // Mark for check
+                                        this._changeDetectorRef.markForCheck();
+                                    });
+                            }
+
+                            // load images
+                            this.currentImageIndex = 0;
+                            this.imagesFile = imagefiles;
+                            this.images = images;
+                            this.thumbnailIndex = thumbnailIndex;
+                        }
+
+
+                    });
+
+
+                this.filteredProductVariants = [];
+
+                if (this.addResourceForm.get('step1').get('isAvailability').value === true) {
+
+                    // Show a success message
+                    this.showFlashMessage('success');
+                    // Set delay before closing the window
+                    setTimeout(() => {
+
+                        // close the window
+                        //this.dialogRef.close({ valid: false });
+
+                        // Mark for check
                         this._changeDetectorRef.markForCheck();
-                        // Show a success message
-                        this.showFlashMessage('success');
-                        // Set delay before closing the window
-                        setTimeout(() => {
-
-                            // close the window
-                            this.dialogRef.close({ valid: false });
-                
-                            // Mark for check
-                            this._changeDetectorRef.markForCheck();
-                        }, 1000);
-
-                    });
+                        this.addNewResource();
+                    }, 1000);
                 }
-                // if it is an old one, update it (update thumbnail)
-                else if ((i === this.thumbnailIndex) && (this.selectedVariantCombos[i].newAsset == false) && (this.selectedVariantCombos[i].file != '')) {
-                    await this._inventoryService.updateProductAssets(this.selectedProduct.id, { isThumbnail: true , itemCode: this.selectedProduct.id + i }, this.selectedVariantCombos[i].assetId)
-                    .toPromise().then(data => {
-                    // Mark for check
-                    this._changeDetectorRef.markForCheck();
-                    });
-                }
-            }
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+
+        // if it is variants
+        if (this.addResourceForm.get('step1').get('isAvailability').value === true) {
 
             // Show a success message
             this.showFlashMessage('success');
             // Set delay before closing the window
             setTimeout(() => {
-    
+
                 // close the window
                 this.dialogRef.close({ valid: false });
-    
+
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             }, 1000);
-    
+
         }
         // else means combo
         else {
@@ -1192,10 +1193,10 @@ export class AddProductComponent implements OnInit, OnDestroy
             this.showFlashMessage('success');
             // Set delay before closing the window
             setTimeout(() => {
-    
+
                 // close the window
                 this.dialogRef.close({ valid: false });
-    
+
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             }, 1000);
@@ -1206,7 +1207,7 @@ export class AddProductComponent implements OnInit, OnDestroy
      * Create variant
      */
     async createVariantInBE() {
-        
+
 
         let m = 0;
         let variantIds = [];
@@ -1214,13 +1215,13 @@ export class AddProductComponent implements OnInit, OnDestroy
         for (const variant of this.filteredProductVariants) {
 
             // if variant.id is null, means it is new, so, call POST method
-            if(!variant.id) {
+            if (!variant.id) {
 
                 let variantBody = {
-                    name : variant.name,
-                    sequenceNumber : m
+                    name: variant.name,
+                    sequenceNumber: m
                 }
-                
+
                 let response = await this._inventoryService.createVariant(variantBody, this.selectedProduct.id).toPromise();
 
                 variantIds.push(response)
@@ -1242,19 +1243,19 @@ export class AddProductComponent implements OnInit, OnDestroy
         let variantAvailablesCreated = [];
 
         // loop the newly created variant ids
-        for (let i = 0; i < newVariant.length; i++){
+        for (let i = 0; i < newVariant.length; i++) {
 
             // loop the list of variant availables that need to be created to BE
-            for (let j = 0; j < this.variantAvailableToBeCreated.length; j++){
+            for (let j = 0; j < this.variantAvailableToBeCreated.length; j++) {
 
                 // if name is same..
-                if (newVariant[i].name ===  this.variantAvailableToBeCreated[j].variantName){
+                if (newVariant[i].name === this.variantAvailableToBeCreated[j].variantName) {
 
                     // .. set the variant id to the new variant available
                     this.variantAvailableToBeCreated[j].productVariantId = newVariant[i].id;
-                    
+
                 }
-                
+
             }
         }
 
@@ -1264,28 +1265,28 @@ export class AddProductComponent implements OnInit, OnDestroy
             // then push into bodies
             bodies.push(
                 {
-                    productId : options.productId,
-                    productVariantId : options.productVariantId,
-                    value : options.value,
-                    sequenceNumber : options.sequenceNumber
+                    productId: options.productId,
+                    productVariantId: options.productVariantId,
+                    value: options.value,
+                    sequenceNumber: options.sequenceNumber
                 })
         })
-        
+
         // call api
         await this._inventoryService.createVariantAvailableBulk(bodies, this.selectedProduct.id)
             .toPromise()
-            .then((response) => { 
+            .then((response) => {
 
                 variantAvailablesCreated = response['data'];
-                
+
                 // Add the variant to the product
                 // this.addVariantAvailableToVariant(response,this.selectedProductVariants.id);
 
                 // reset current filteredProductVariantAvailable
                 // this.filteredProductVariantAvailable = this.productVariantAvailable$;
             });
-            
-            return variantAvailablesCreated;
+
+        return variantAvailablesCreated;
     }
 
     /**
@@ -1293,13 +1294,13 @@ export class AddProductComponent implements OnInit, OnDestroy
      * 
      * @returns promise
      */
-     async deleteEntireInventory() {
+    async deleteEntireInventory() {
         var promise = new Promise(async (resolve, reject) => {
-          for (var j = 0; j < this.selectedProduct.productInventories.length; j++) {
-            await this._inventoryService.deleteInventoryToProduct(this.selectedProduct.id, this.selectedProduct.productInventories[j].itemCode).toPromise();
-          }
-          this.selectedProduct.productInventories = [];
-          resolve("done")
+            for (var j = 0; j < this.selectedProduct.productInventories.length; j++) {
+                await this._inventoryService.deleteInventoryToProduct(this.selectedProduct.id, this.selectedProduct.productInventories[j].itemCode).toPromise();
+            }
+            this.selectedProduct.productInventories = [];
+            resolve("done")
         });
         return promise;
     }
@@ -1314,13 +1315,13 @@ export class AddProductComponent implements OnInit, OnDestroy
         var k = 0;
         for (let i = 0; i < this.selectedVariantCombos.length; i++) {
             const combosSplitted = this.selectedVariantCombos[i].variant.split("/");
-        
+
             for (let j = 0; j < combosSplitted.length; j++) {
-                
-                for (let m = 0; m < productVariantAvailableIds.length; m++){
-                                    
-                    if (combosSplitted[j].trim() == productVariantAvailableIds[m].value.trim()){
-                        
+
+                for (let m = 0; m < productVariantAvailableIds.length; m++) {
+
+                    if (combosSplitted[j].trim() == productVariantAvailableIds[m].value.trim()) {
+
                         await this._inventoryService.addInventoryItemToProduct(this.selectedProduct, {
                             itemCode: this.selectedProduct.id + i,
                             productVariantAvailableId: productVariantAvailableIds[m].id,
@@ -1330,13 +1331,13 @@ export class AddProductComponent implements OnInit, OnDestroy
                     }
                 }
 
-            
+
             }
         }
     }
-    
-    cancelAddProduct(){
-        
+
+    cancelAddProduct() {
+
         this.dialogRef.close({ valid: false });
     }
 
@@ -1345,24 +1346,23 @@ export class AddProductComponent implements OnInit, OnDestroy
      * 
      * @param products 
      */
-     filterProductOptionsMethod(products)
-     {
- 
-         // remove object for array of object where item.isPackage !== true
-         this._filteredProductsOptions = products.filter(item => item.isPackage !== true );
-         
-         this.filteredProductsOptions = this._filteredProductsOptions;
- 
-     }
+    filterProductOptionsMethod(products) {
+
+        // remove object for array of object where item.isPackage !== true
+        this._filteredProductsOptions = products.filter(item => item.isPackage !== true);
+
+        this.filteredProductsOptions = this._filteredProductsOptions;
+
+    }
 
     disabledTrackStock(isTrackStock: boolean) {
-        if (isTrackStock === false){
-            this.addProductForm.get('step1').get('allowOutOfStockPurchases').patchValue(false);
-            this.addProductForm.get('step1').get('minQuantityForAlarm').patchValue(-1);
+        if (isTrackStock === false) {
+            this.addResourceForm.get('step1').get('allowOutOfStockPurchases').patchValue(false);
+            this.addResourceForm.get('step1').get('minQuantityForAlarm').patchValue(-1);
         }
     }
 
-    setThumbnail(currentImageIndex: number){
+    setThumbnail(currentImageIndex: number) {
         this.thumbnailIndex = currentImageIndex;
     }
 
@@ -1375,38 +1375,36 @@ export class AddProductComponent implements OnInit, OnDestroy
      *
      * @param event
      */
-    filterVariants(event): void
-    {
+    filterVariants(event): void {
         // Get the value
         const value = event.target.value.toLowerCase();
 
         // Filter the variants
-    //  this.productVariants = this.variantComboOptions.filter(variant => variant.name.toLowerCase().includes(value));
+        //  this.productVariants = this.variantComboOptions.filter(variant => variant.name.toLowerCase().includes(value));
 
 
     }
- 
-     /**
-      * Filter variants input key down event
-      *
-      * @param event
-      */
-    filterVariantsInputKeyDown(event): void
-    {
+
+    /**
+     * Filter variants input key down event
+     *
+     * @param event
+     */
+    filterVariantsInputKeyDown(event): void {
         // Return if the pressed key is not 'Enter'
-    //  if ( event.key !== 'Enter' )
-    //  {
-    //      return;
-    //  }
+        //  if ( event.key !== 'Enter' )
+        //  {
+        //      return;
+        //  }
 
         // If there is no variant...
-    //  if ( this.filteredProductVariants.length === 0 )
-    //  { 
-    //      // Clear the input
-    //      event.target.value = '';
+        //  if ( this.filteredProductVariants.length === 0 )
+        //  { 
+        //      // Clear the input
+        //      event.target.value = '';
 
-    //      return;
-    //  }
+        //      return;
+        //  }
 
         // // If there is a variant...
         // const variant = this.filteredProductVariants[0];
@@ -1430,8 +1428,7 @@ export class AddProductComponent implements OnInit, OnDestroy
      *
      * @param event
      */
-    filterProductVariantAvailable(event): void
-    {
+    filterProductVariantAvailable(event): void {
         // Get the value
         const value = event.target.value.toLowerCase();
 
@@ -1439,14 +1436,13 @@ export class AddProductComponent implements OnInit, OnDestroy
         this.filteredProductVariantAvailable = this.productVariantAvailable?.filter(variantAvailable => variantAvailable.value.toLowerCase().includes(value));
 
     }
-  
+
     /**
      * Filter variants input key down event
      *
      * @param event
      */
-    filterProductVariantAvailableInputKeyDown(event): void
-    {
+    filterProductVariantAvailableInputKeyDown(event): void {
         // // Return if the pressed key is not 'Enter'
         // if ( event.key !== 'Enter' )
         // {
@@ -1482,19 +1478,18 @@ export class AddProductComponent implements OnInit, OnDestroy
         //     let variantId
         //     this.addVariantAvailableToVariant(variantTag, variantId);
         // }
-    } 
+    }
 
     /**
      * Should the create variant button be visible
      *
      * @param inputValue
      */
-    shouldShowCreateVariantButton(inputValue: string): boolean
-    {
-        
+    shouldShowCreateVariantButton(inputValue: string): boolean {
+
         // return !!!(inputValue === '' || this.productVariants$.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
         return !!!(inputValue === '' || this.productVariants.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
-    //  return !!!(inputValue === '' || this.variantComboOptions.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
+        //  return !!!(inputValue === '' || this.variantComboOptions.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
 
     }
 
@@ -1503,10 +1498,9 @@ export class AddProductComponent implements OnInit, OnDestroy
       *
       * @param inputValue
       */
-    shouldShowCreateVariantAvailableButton(inputValue: string): boolean
-    {
+    shouldShowCreateVariantAvailableButton(inputValue: string): boolean {
         // conditional when we click the variant that was recently created it will has null value so we need to handle this issue in order to display create button for variant available
-        if(this.productVariantAvailable === null){
+        if (this.productVariantAvailable === null) {
             this.productVariantAvailable = [];
         }
 
@@ -1521,39 +1515,37 @@ export class AddProductComponent implements OnInit, OnDestroy
      *
      * @param title
      */
-    createVariantMethod(name: string): void
-    {
+    createVariantMethod(name: string): void {
 
-    // push to the array loop
+        // push to the array loop
         let item = {
-            id:null,
+            id: null,
             name: name,
             productVariantsAvailable: [],
         };
-        this.productVariants.push(item);    
-        this.filteredProductVariants= this.productVariants;    
-        
+        this.productVariants.push(item);
+        this.filteredProductVariants = this.productVariants;
+
         // push to array to be created to BE
         this.variantToBeCreated.push(item);
 
-    //  this.variantComboOptions.push(item);
-    //  this.filteredProductVariants= this.variantComboOptions;
+        //  this.variantComboOptions.push(item);
+        //  this.filteredProductVariants= this.variantComboOptions;
 
-     // add new empty array for variantComboItems
-     this.variantComboItems.push({ values: [], ids: [] })
-    
+        // add new empty array for variantComboItems
+        this.variantComboItems.push({ values: [], ids: [] })
+
     }
 
-     /**
-     * Delete the variant
-     *
-     * @param variant
-     */
-    deleteVariantMethod(variant: ProductVariant, variantIdx): void
-    {
+    /**
+    * Delete the variant
+    *
+    * @param variant
+    */
+    deleteVariantMethod(variant: ProductVariant, variantIdx): void {
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title  : 'Delete variant',
+            title: 'Delete variant',
             message: 'Are you sure you want to delete this variant? This variant will be removed permenantly!',
             actions: {
                 confirm: {
@@ -1567,8 +1559,7 @@ export class AddProductComponent implements OnInit, OnDestroy
         confirmation.afterClosed().subscribe((result) => {
 
             // If the confirm button pressed...
-            if ( result === 'confirmed' )
-            {
+            if (result === 'confirmed') {
 
                 // Remove from array to be created
                 this.variantToBeCreated.splice(variantIdx, 1);
@@ -1577,14 +1568,14 @@ export class AddProductComponent implements OnInit, OnDestroy
                 this.productVariants.splice(variantIdx, 1);
                 this.filteredProductVariants = this.productVariants;
                 //  this.variantComboOptions = this.productVariants.value;
-                
+
                 // Delete the variant from variantComboItems
                 this.variantComboItems.splice(variantIdx, 1);
                 // this.variantComboOptions.splice(variantIdx, 1);
-                
+
                 // this.filteredProductVariants = this.variantComboOptions;
                 this.selectedVariantCombos = []
-             
+
                 this.getallCombinations(this.variantComboItems)
 
                 // remove variant available to be created, if not, api will return error    
@@ -1601,8 +1592,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     /**
      * Toggle the variants Available edit mode
      */
-    toggleVariantsAvailableEditMode(): void
-    {
+    toggleVariantsAvailableEditMode(): void {
         this.productVariantAvailableEditMode = !this.productVariantAvailableEditMode;
     }
 
@@ -1611,12 +1601,11 @@ export class AddProductComponent implements OnInit, OnDestroy
      *
      * @param value
      */
-    createVariantAvailableMethod(value: string, variantIdx: number): void
-    {
-        
+    createVariantAvailableMethod(value: string, variantIdx: number): void {
+
         // push new variant option (available) value to variant items array 
         this.variantComboItems[variantIdx].values.push(value);
-        
+
         // if variant recently created then need to create the variant then push the variant available listing
         const variant = {
             value,
@@ -1624,7 +1613,7 @@ export class AddProductComponent implements OnInit, OnDestroy
             productVariantId: this.selectedProductVariant.id !== null ? this.selectedProductVariant.id : '',
             sequenceNumber: this.variantComboItems[variantIdx].values.length - 1,
             variantName: this.selectedProductVariant.name
-        }; 
+        };
 
         this.productVariantAvailable.push(variant);
         this.filteredProductVariantAvailable = this.productVariantAvailable;
@@ -1634,7 +1623,7 @@ export class AddProductComponent implements OnInit, OnDestroy
 
 
         // if this is the first variant available to be added to the variant, set selectedVariantCombos to empty
-        if (variantIdx > 0 && this.variantComboItems[variantIdx].values.length < 2){
+        if (variantIdx > 0 && this.variantComboItems[variantIdx].values.length < 2) {
             this.selectedVariantCombos = []
         }
 
@@ -1653,11 +1642,10 @@ export class AddProductComponent implements OnInit, OnDestroy
      *
      * @param variant
      */
-    deleteVariantAvailableMethod(variantAvailable: ProductVariantAvailable, variantIdx): void
-    {
+    deleteVariantAvailableMethod(variantAvailable: ProductVariantAvailable, variantIdx): void {
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title  : 'Delete variant',
+            title: 'Delete variant',
             message: 'Are you sure you want to delete this variant value ? This variant value will be removed permenantly!',
             actions: {
                 confirm: {
@@ -1665,13 +1653,12 @@ export class AddProductComponent implements OnInit, OnDestroy
                 }
             }
         });
-        
+
         // Subscribe to the confirmation dialog closed action
         confirmation.afterClosed().subscribe((result) => {
 
             // If the confirm button pressed...
-            if ( result === 'confirmed' )
-            {
+            if (result === 'confirmed') {
 
                 //----------------------------
                 // variantAvailableToBeCreated
@@ -1705,7 +1692,7 @@ export class AddProductComponent implements OnInit, OnDestroy
                 const indexVariantItems = this.variantComboItems[variantIdx].values.indexOf(variantAvailable.value);
 
                 // Delete the variant available from variantComboItems array
-                if(indexVariantItems > -1) {
+                if (indexVariantItems > -1) {
                     this.variantComboItems[variantIdx].values.splice(indexVariantItems, 1);
                 }
 
@@ -1735,13 +1722,13 @@ export class AddProductComponent implements OnInit, OnDestroy
                 //             temp = temp.filter(x => x.variant !== v.variant);
                 //         }
                 // })
-                
+
                 // this.selectedVariantCombos = temp;
 
                 //----------------------------
                 // variantimages
                 //----------------------------
-                
+
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             }
@@ -1749,31 +1736,28 @@ export class AddProductComponent implements OnInit, OnDestroy
 
     }
 
-    editVariantAvailableTitleMethod(variantsAvailable: ProductVariantAvailable, event){
+    editVariantAvailableTitleMethod(variantsAvailable: ProductVariantAvailable, event) {
         // Update the title on the category
         variantsAvailable.value = event.target.value;
     }
 
-    uploadVariantImagesMethod(fileList: FileList, images, idx): Promise<void>
-    {
+    uploadVariantImagesMethod(fileList: FileList, images, idx): Promise<void> {
         // Return if canceled
-        if ( !fileList.length )
-        {
+        if (!fileList.length) {
             return;
         }
-        
+
         const file = fileList[0];
         const allowedTypes = ['image/jpeg', 'image/png'];
 
-        
+
 
         // Return if the file is not allowed
-        if ( !allowedTypes.includes(file.type) )
-        {
+        if (!allowedTypes.includes(file.type)) {
             return;
-        }           
+        }
 
-        
+
 
         // get the image id if any, then push into variantImagesToBeDeleted to be deleted BE
         if (this.selectedVariantCombos[idx]?.assetId) {
@@ -1797,11 +1781,11 @@ export class AddProductComponent implements OnInit, OnDestroy
 
     previewImage(file) {
         var promise = new Promise(async (resolve, reject) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = (_event) => {
-            resolve(reader.result)
-          }
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (_event) => {
+                resolve(reader.result)
+            }
         });
         this._changeDetectorRef.markForCheck();
         return promise;
@@ -1811,12 +1795,11 @@ export class AddProductComponent implements OnInit, OnDestroy
     /**
      * Remove variant image
      */
-    removeVariantImageMethod(imageIdx): void
-    {
-        
+    removeVariantImageMethod(imageIdx): void {
+
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title  : 'Delete image',
+            title: 'Delete image',
             message: 'Are you sure you want to remove this image? This action cannot be undone!',
             actions: {
                 confirm: {
@@ -1827,17 +1810,16 @@ export class AddProductComponent implements OnInit, OnDestroy
 
         // Subscribe to the confirmation dialog closed action
         confirmation.afterClosed().subscribe((result) => {
-            
+
             // If the confirm button pressed...
-            if ( result === 'confirmed' )
-            {
+            if (result === 'confirmed') {
                 if (imageIdx > -1) {
 
                     // get the image id if any, then push into variantImagesToBeDeleted to be deleted BE
                     if (this.selectedVariantCombos[imageIdx]?.assetId) {
                         // this.variantImagesToBeDeleted.push(this.selectedVariantCombos[imageIdx].assetId)
                     }
-                    
+
                     // // get the image id if any, then push into variantImagesToBeDeleted to be deleted BE
                     // if (this.variantimages[imageIdx].id) {
                     //     this.variantImagesToBeDeleted.push(this.variantimages[imageIdx].id)
@@ -1848,7 +1830,7 @@ export class AddProductComponent implements OnInit, OnDestroy
 
                     // set newAsset to false
                     this.selectedVariantCombos[imageIdx].newAsset = false;
-                                    
+
                 }
                 this._changeDetectorRef.markForCheck();
             }
@@ -1858,18 +1840,17 @@ export class AddProductComponent implements OnInit, OnDestroy
     /**
      * Open variants panel
      */
-    openVariantsPanel(variant:any, idx): void
-    {
+    openVariantsPanel(variant: any, idx): void {
 
         this.selectedProductVariant = variant;
-        
-        if (this.selectedProductVariant){
+
+        if (this.selectedProductVariant) {
 
             // get index of filteredVariants that have same id with variantId
             // let index = this.filteredProductVariants.findIndex(x => x.id === variant.id);
 
             this.variantIndex = idx;
-    
+
             // get the object of filteredVariantsTag in filteredVariants
             this.productVariantAvailable = this.filteredProductVariants[idx].productVariantsAvailable;
             this.filteredProductVariantAvailable = this.filteredProductVariants[idx].productVariantsAvailable;
@@ -1878,7 +1859,7 @@ export class AddProductComponent implements OnInit, OnDestroy
             this.filteredProductVariantAvailable = [];
         }
 
-        // Create the overlay
+        /* // Create the overlay
         this._variantsPanelOverlayRef = this._overlay.create({
             backdropClass   : '',
             hasBackdrop     : true,
@@ -1896,52 +1877,52 @@ export class AddProductComponent implements OnInit, OnDestroy
                                         overlayY: 'top'
                                     }
                                 ])
-        });
-
-        // Subscribe to the attachments observable
-        this._variantsPanelOverlayRef.attachments().subscribe(() => {
-
-            // Add a class to the origin
-            this._renderer2.addClass(this._variantsPanelOrigin.nativeElement, 'panel-opened');
-
-            // Focus to the search input once the overlay has been attached
-            this._variantsPanelOverlayRef.overlayElement.querySelector('input').focus();
-        });
-
-        // Create a portal from the template
-        const templatePortal = new TemplatePortal(this._variantsPanel, this._viewContainerRef);
-
-        // Attach the portal to the overlay
-        this._variantsPanelOverlayRef.attach(templatePortal);
-
-        // Subscribe to the backdrop click
-        this._variantsPanelOverlayRef.backdropClick().subscribe(() => {
-
-            // Remove the class from the origin
-            this._renderer2.removeClass(this._variantsPanelOrigin.nativeElement, 'panel-opened');
-
-            // If overlay exists and attached...
-            if ( this._variantsPanelOverlayRef && this._variantsPanelOverlayRef.hasAttached() )
-            {
-
-                // Detach it
-                this._variantsPanelOverlayRef.detach();
-
-                // Reset the variant filter
-                this.filteredProductVariantAvailable = this.productVariantAvailable;
-
-                // // Toggle the edit mode off
-                this.productVariantAvailableEditMode = false;
-            }
-
-            // If template portal exists and attached...
-            if ( templatePortal && templatePortal.isAttached )
-            {
-                // Detach it
-                templatePortal.detach();
-            }
-        });
-
+        }); */
+        /* 
+                // Subscribe to the attachments observable
+                this._variantsPanelOverlayRef.attachments().subscribe(() => {
+         
+                    // Add a class to the origin
+                    this._renderer2.addClass(this._variantsPanelOrigin.nativeElement, 'panel-opened');
+         
+                    // Focus to the search input once the overlay has been attached
+                    this._variantsPanelOverlayRef.overlayElement.querySelector('input').focus();
+                });
+         
+                // Create a portal from the template
+                const templatePortal = new TemplatePortal(this._variantsPanel, this._viewContainerRef);
+         
+                // Attach the portal to the overlay
+                this._variantsPanelOverlayRef.attach(templatePortal);
+         
+                // Subscribe to the backdrop click
+                this._variantsPanelOverlayRef.backdropClick().subscribe(() => {
+         
+                    // Remove the class from the origin
+                    this._renderer2.removeClass(this._variantsPanelOrigin.nativeElement, 'panel-opened');
+         
+                    // If overlay exists and attached...
+                    if ( this._variantsPanelOverlayRef && this._variantsPanelOverlayRef.hasAttached() )
+                    {
+         
+                        // Detach it
+                        this._variantsPanelOverlayRef.detach();
+         
+                        // Reset the variant filter
+                        this.filteredProductVariantAvailable = this.productVariantAvailable;
+         
+                        // // Toggle the edit mode off
+                        this.productVariantAvailableEditMode = false;
+                    }
+         
+                    // If template portal exists and attached...
+                    if ( templatePortal && templatePortal.isAttached )
+                    {
+                        // Detach it
+                        templatePortal.detach();
+                    }
+                });
+         */
         // Mark for check
         this._changeDetectorRef.markForCheck();
     }
@@ -1959,46 +1940,45 @@ export class AddProductComponent implements OnInit, OnDestroy
         var nameCombo = "";
         if (n == combos.length) {
             if (nameComboOutput.substring(1) != "") {
-            // this.selectedVariantCombos.push({ itemCode: itemCode, variant: nameComboOutput.substring(1), price: 0, quantity: 0, sku: 0, status: "NOTAVAILABLE" })
-            this.selectedVariantCombos.push({ itemCode: itemCode, variant: nameComboOutput.substring(1), price: 0, quantity: 0, sku: nameComboOutput.substring(1).toLowerCase().replace(" / ", "-"), status: "NOTAVAILABLE" })
-            // this.variantimages.push([])
-          }
-          return nameComboOutput.substring(1);
+                // this.selectedVariantCombos.push({ itemCode: itemCode, variant: nameComboOutput.substring(1), price: 0, quantity: 0, sku: 0, status: "NOTAVAILABLE" })
+                this.selectedVariantCombos.push({ itemCode: itemCode, variant: nameComboOutput.substring(1), price: 0, quantity: 0, sku: nameComboOutput.substring(1).toLowerCase().replace(" / ", "-"), status: "NOTAVAILABLE" })
+                // this.variantimages.push([])
+            }
+            return nameComboOutput.substring(1);
         }
-    
-        for (var i = 0; i < combos[n].values.length; i++) {
-          if (nameComboOutput != "") {
-            nameCombo = nameComboOutput + " / " + combos[n].values[i];
-          }
-          else {
-            nameCombo = nameComboOutput + " " + combos[n].values[i];
-          }
 
-          this.getallCombinations(combos, itemCode, nameCombo, n + 1)
+        for (var i = 0; i < combos[n].values.length; i++) {
+            if (nameComboOutput != "") {
+                nameCombo = nameComboOutput + " / " + combos[n].values[i];
+            }
+            else {
+                nameCombo = nameComboOutput + " " + combos[n].values[i];
+            }
+
+            this.getallCombinations(combos, itemCode, nameCombo, n + 1)
         }
 
         // get unique values from object array. 
         // This is to avoid duplicate variants in selectedVariantCombos array
         let resArr = [];
-        this.selectedVariantCombos.filter(function(item){
+        this.selectedVariantCombos.filter(function (item) {
 
             let i = resArr.findIndex(x => (x.variant == item.variant));
 
-            if (i <= -1){
+            if (i <= -1) {
                 resArr.push(item);
             }
             return null;
-            });
+        });
 
         this.selectedVariantCombos = resArr;
-        
+
     }
 
     /**
      * Show flash message
      */
-    showFlashMessage(type: 'success' | 'error'): void
-    {
+    showFlashMessage(type: 'success' | 'error'): void {
         // Show the message
         this.flashMessage = type;
 
@@ -2027,8 +2007,7 @@ export class AddProductComponent implements OnInit, OnDestroy
      * @param event
      */
 
-    filterProducts(event): void
-    {
+    filterProducts(event): void {
         // Get the value
         const value = event.target.value.toLowerCase();
 
@@ -2037,55 +2016,51 @@ export class AddProductComponent implements OnInit, OnDestroy
 
         this.inputSearchProducts = value;
 
-        fromEvent(event.target,'keyup')
-        .pipe(
-            takeUntil(this._unsubscribeAll),
-            debounceTime(500),
-            switchMap((event:any) => {
-                        
-                return this._inventoryService.getProductsForCombo(0, 10, 'name', 'asc', event.target.value,'ACTIVE,INACTIVE')
-            }),
-            map(() => {
-                this.isLoading = false;
-            })
-        )
-        .subscribe();
+        fromEvent(event.target, 'keyup')
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(500),
+                switchMap((event: any) => {
+
+                    return this._inventoryService.getProductsForCombo(0, 10, 'name', 'asc', event.target.value, 'ACTIVE,INACTIVE')
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
     }
 
     onSelectCategoryList(event) {
 
         this.selectedCategory = event.value;
 
-        if (this.selectedCategory )
-        {
-            return this._inventoryService.getProductsForCombo(0, 10, 'name', 'asc', this.inputSearchProducts,'ACTIVE,INACTIVE',this.selectedCategory).subscribe();
-        } 
+        if (this.selectedCategory) {
+            return this._inventoryService.getProductsForCombo(0, 10, 'name', 'asc', this.inputSearchProducts, 'ACTIVE,INACTIVE', this.selectedCategory).subscribe();
+        }
         else {
-            return this._inventoryService.getProductsForCombo(0, 10, 'name', 'asc', this.inputSearchProducts,'ACTIVE,INACTIVE').subscribe();
+            return this._inventoryService.getProductsForCombo(0, 10, 'name', 'asc', this.inputSearchProducts, 'ACTIVE,INACTIVE').subscribe();
 
         }
 
     }
- 
-    filterProductsInputKeyDown(event): void
-    {
+
+    filterProductsInputKeyDown(event): void {
         // Return if the pressed key is not 'Enter'
-        if ( event.key !== 'Enter' )
-        {
+        if (event.key !== 'Enter') {
             return;
         }
 
         // If there is no category available...
-        if ( this.filteredProductsOptions.length === 0 )
-        {
-        //  // Create the category
-        //  this.createCategory(event.target.value);
+        if (this.filteredProductsOptions.length === 0) {
+            //  // Create the category
+            //  this.createCategory(event.target.value);
 
-        //  // Clear the input
-        //  event.target.value = '';
+            //  // Clear the input
+            //  event.target.value = '';
 
-        //  // Return
-        //  return;
+            //  // Return
+            //  return;
         }
 
         // If there is a category...
@@ -2093,13 +2068,11 @@ export class AddProductComponent implements OnInit, OnDestroy
         const isProductApplied = this.selectedProduct.id;
 
         // If the found category is already applied to the product...
-        if ( isProductApplied )
-        {
+        if (isProductApplied) {
             // Remove the category from the product
             this.removeProductFromOption(product);
         }
-        else
-        {
+        else {
             // Otherwise add the category to the product
             this.addProductToOption(product);
         }
@@ -2110,13 +2083,12 @@ export class AddProductComponent implements OnInit, OnDestroy
      *
      * @param category
      */
-    removeProductFromOption(product: Product): void
-    {
+    removeProductFromOption(product: Product): void {
         // Update the selected product form
         this.selectedProductsOptions.push(product)
 
         // Update the selected product form
-        this.addProductForm.get('step1').get('categoryId').patchValue(this.selectedProduct.categoryId);
+        this.addResourceForm.get('step1').get('categoryId').patchValue(this.selectedProduct.categoryId);
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -2127,8 +2099,7 @@ export class AddProductComponent implements OnInit, OnDestroy
      *
      * @param category
      */
-    addProductToOption(product: Product): void
-    {
+    addProductToOption(product: Product): void {
         // Update the selected product form
         this.selectedProductsOptions.push(product)
 
@@ -2136,11 +2107,10 @@ export class AddProductComponent implements OnInit, OnDestroy
         this._changeDetectorRef.markForCheck();
     }
 
-    selectProductOption(optionId){
+    selectProductOption(optionId) {
 
         // If the product is already selected...
-        if ( this.selectedProductsOption && this.selectedProductsOption.id === optionId )
-        {
+        if (this.selectedProductsOption && this.selectedProductsOption.id === optionId) {
             // Clear the form
             this.selectedProductsOption = null;
             this.onChangeSelectProductValue.length = 0;
@@ -2157,15 +2127,15 @@ export class AddProductComponent implements OnInit, OnDestroy
                 this.onChangeSelectProductValue = this.selectedProductsOption["productPackageOptionDetail"].map(x => x.productId);
 
                 // this is for Total Allowed input field, to make it dirty
-                this.addProductForm.get('comboSection').get('categoryId').setValue(this.onChangeSelectProductValue);
-                
+                this.addResourceForm.get('comboSection').get('categoryId').setValue(this.onChangeSelectProductValue);
+
             });
     }
 
-    deleteProductOption(optionId){
+    deleteProductOption(optionId) {
+
         // If the product is already selected...
-        if ( this.selectedProductsOption && this.selectedProductsOption.id === optionId )
-        {
+        if (this.selectedProductsOption && this.selectedProductsOption.id === optionId) {
             // Clear the form
             this.selectedProductsOption = null;
             this.onChangeSelectProductValue.length = 0;
@@ -2175,7 +2145,7 @@ export class AddProductComponent implements OnInit, OnDestroy
 
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title  : 'Delete option',
+            title: 'Delete option',
             message: 'Are you sure you want to delete this option? This option will be removed permenantly!',
             actions: {
                 confirm: {
@@ -2188,18 +2158,17 @@ export class AddProductComponent implements OnInit, OnDestroy
         confirmation.afterClosed().subscribe((result) => {
 
             // If the confirm button pressed...
-            if ( result === 'confirmed' )
-            {
+            if (result === 'confirmed') {
                 // Delete the variant from the server
                 this._inventoryService.deleteProductsOptionById(optionId, this.selectedProduct.id)
                     .pipe(takeUntil(this._unsubscribeAll))
-                    .subscribe((response)=>{
+                    .subscribe((response) => {
 
                         // Find the index of the deleted product
                         const index = this.productsCombos$.findIndex(item => item.id === optionId);
 
                         // Delete the product
-                        if(index > -1) {
+                        if (index > -1) {
                             this.productsCombos$.splice(index, 1);
                         }
 
@@ -2212,13 +2181,13 @@ export class AddProductComponent implements OnInit, OnDestroy
 
     updateSelectedProductsOption(optionId = "") {
 
-        
+
         this.clearOptName = true;
 
         // add / update _selectedProductsOption["packageId"] value 
-        this._selectedProductsOption["packageId"] = this.selectedProduct.id;   
-        
-        if (optionId !== ""){
+        this._selectedProductsOption["packageId"] = this.selectedProduct.id;
+
+        if (optionId !== "") {
             // update
 
             // this is to remove all other element except productId when updating
@@ -2229,8 +2198,8 @@ export class AddProductComponent implements OnInit, OnDestroy
                 });
             });
             this._selectedProductsOption["productPackageOptionDetail"] = updateProductPackageOptionDetail;
-            
-            this._inventoryService.updateProductsOption(this.selectedProduct.id, this._selectedProductsOption, optionId )
+
+            this._inventoryService.updateProductsOption(this.selectedProduct.id, this._selectedProductsOption, optionId)
                 .pipe(takeUntil(this._unsubscribeAll))
                 .subscribe((response) => {
 
@@ -2269,7 +2238,7 @@ export class AddProductComponent implements OnInit, OnDestroy
         // for(let i=0;i < this.filteredProductsOptions.length;i++){
         //     this.optionChecked[i] = false;
         // }
-        
+
     }
 
 
@@ -2277,14 +2246,14 @@ export class AddProductComponent implements OnInit, OnDestroy
         this.selectedProductsOption = null;
         // Clear checkbox
         this.onChangeSelectProductValue.length = 0;
-        this.addProductForm.get('comboSection').get('categoryId').reset;
+        this.addResourceForm.get('comboSection').get('categoryId').reset;
         this.totalAllowed = 0;
         this._selectedProductsOption = {};
-        
+
     }
 
-    validateProductsOptionName(value){
-        
+    validateProductsOptionName(value) {
+
         // if this.selectedProductsOption have value // for update
         if (this.selectedProductsOption) {
             this._selectedProductsOption = this.selectedProductsOption;
@@ -2345,47 +2314,45 @@ export class AddProductComponent implements OnInit, OnDestroy
         }
 
         this.onChangeSelectProductValue = this._selectedProductsOption["productPackageOptionDetail"].map(x => x.productId);
-        this.addProductForm.get('comboSection').get('categoryId').patchValue(this.onChangeSelectProductValue);
+        this.addResourceForm.get('comboSection').get('categoryId').patchValue(this.onChangeSelectProductValue);
 
 
     }
 
     validateProductsInOption(productId) {
         let index;
-        
+
         // this is mostly triggered by [checked]="validateProductsInOption(product.id)"
         // this is trigger when updating, since selectedProductsOption have values
-        if (this.selectedProductsOption){
+        if (this.selectedProductsOption) {
             index = this.selectedProductsOption.productPackageOptionDetail.findIndex(item => item.product.id === productId);
         }
 
         return (index > -1) ? true : false;
     }
 
-    validateProductsOptionTotalAllowed(value){
+    validateProductsOptionTotalAllowed(value) {
         // if this.selectedProductsOption have value // for update
         if (this.selectedProductsOption) {
             this._selectedProductsOption = this.selectedProductsOption;
         }
-        
+
         this._selectedProductsOption["totalAllow"] = value;
         this.totalAllowed = value;
 
     }
 
-    
-    trackVariantAvailable(index: number, item: any)
-    {
+
+    trackVariantAvailable(index: number, item: any) {
         return item ? item.id : undefined;
     }
 
-    trackVariant(index: number, item: any)
-    {
-        
+    trackVariant(index: number, item: any) {
+
         return item ? item.id : undefined;
     }
 
-    openProductPreview(){
+    openProductPreview() {
         // window.open(this.selectedProductForm.get('seoUrl').value, '_blank');
     }
 
@@ -2395,25 +2362,277 @@ export class AddProductComponent implements OnInit, OnDestroy
      * 
      * @param value 
      */
-    async checkProductName(name: string){
+    async checkProductName(name: string) {
 
         let status = await this._inventoryService.getExistingProductName(name.trim());
-        if (status === 409){
-            this.addProductForm.get('step1').get('name').setErrors({productAlreadyExists: true});
+        if (status === 409) {
+            this.addResourceForm.get('step1').get('name').setErrors({ productAlreadyExists: true });
         }
     }
 
     variantSkuChanged(event, i) {
         this.selectedVariantCombos[i].sku = event.target.value;
-    
+
     }
 
     variantStockChanged(event, i) {
         this.selectedVariantCombos[i].quantity = event.target.value;
-    
+
     }
 
     variantPriceChanged(event, i) {
         this.selectedVariantCombos[i].price = event.target.value;
     }
+
+    setAvailability(e) {
+        this.addResourceForm.get("step1").get("isAvailability").setValue(e.checked)
+    }
+
+    addDiv() {
+        this.counter.push(1);
+    }
+    removeDiv() {
+        this.counter.pop();
+    }
+
+
+    /**
+    * Create new Resource
+    */
+
+    async addNewResource() {
+
+        this.resource = {
+            name: this.resourceName,
+            productId: this.newProductId,
+            numberOfWeeksReservable: this.addResourceForm.get('step1').get('availableStock').value,
+            price: this.addResourceForm.get('step1').get('price').value,
+            status: this.selectedProduct.status
+        }
+
+        this._resourceService.createResource(this.resource, this.store$.id, this.newProductId).pipe(
+            finalize(() => {
+                this.creatingResource = false;
+            })
+        ).subscribe(async (newResource) => {
+            this.newResourceId = newResource['data'].id;
+            this.selectedResource = newResource['data'];
+
+            this._changeDetectorRef.markForCheck();
+        });
+    }
+
+    xyz() {
+        let time: Time = this.addResourceForm.get('step2').get('startTime').value;
+        /* let hours = Number(time.match(/^(\d+)/)[1]);
+        let minutes = Number(time.match(/:(\d+)/)[1]);
+        let AMPM = time.match(/\s(.*)$/)[1];
+        if (AMPM == "PM" && hours < 12) hours = hours + 12;
+        if (AMPM == "AM" && hours == 12) hours = hours - 12;
+        var sHours = hours.toString();
+        var sMinutes = minutes.toString();
+        if (hours < 10) sHours = "0" + sHours;
+        if (minutes < 10) sMinutes = "0" + sMinutes; */
+
+        console.log('startTime :' + this.addResourceForm.get('step2').get('startTime').value.toString());
+    }
+    addNewResourceAvailability() {
+        this.creatingProduct = true;
+
+        this.addResourceForm.get('step1').get('images').patchValue(this.images);
+        this.addResourceForm.get('step1').get('imagefiles').patchValue(this.imagesFile);
+
+        // if the bulk item toggle stays close, then set to 'motorcycle'
+        if (this.addResourceForm.get('step1').get('isBulkItem').value === false) {
+            this.addResourceForm.get('step1').get('vehicleType').setValue('MOTORCYCLE')
+        }
+
+        const { valid, ...productBody } = this.addResourceForm.get('step1').value
+
+        const { sku, availableStock, price, images, imagefiles, thumbnailIndex, isCustomNote, ...newProductBody } = productBody;
+
+        // Get store domain
+        let storeFrontURL = 'https://' + this.store$.domain;
+
+        // newProductBody["categoryId"] = categoryId;
+        newProductBody["seoName"] = newProductBody.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
+        newProductBody["seoUrl"] = storeFrontURL + "/product/" + newProductBody.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
+        newProductBody["storeId"] = this.store$.id;
+        newProductBody["minQuantityForAlarm"] = newProductBody.minQuantityForAlarm === false ? -1 : newProductBody.minQuantityForAlarm;
+        newProductBody["packingSize"] = newProductBody.packagingSize ? newProductBody.packagingSize : "S";
+        newProductBody["isPackage"] = (this.productType === "combo") ? true : false;
+        newProductBody["allowOutOfStockPurchases"] = ((this.store$.verticalCode === "FnB" || this.store$.verticalCode === "FnB_PK") && (newProductBody.status !== "OUTOFSTOCK")) ? true : false;
+        newProductBody["name"] = newProductBody.name.trim();
+
+        // Create the product
+        this._inventoryService.createProduct(newProductBody)
+            .pipe(
+                finalize(() => {
+                    this.creatingProduct = false;
+                })
+            )
+            .subscribe(async (newProduct) => {
+
+                this.newProductId = newProduct["data"].id;
+                this.selectedProduct = newProduct["data"];
+
+                // this.products$
+                //     .pipe(take(1)) 
+                //     .subscribe(products => {
+
+                //         // filter after update
+                //         this.filterProductOptionsMethod(products);
+                //     })
+
+                // Add Inventory to product
+                this._inventoryService.addInventoryToProduct(newProduct["data"], { sku: sku, quantity: availableStock, price: price, itemCode: newProduct["data"].id + "aa" })
+                    .subscribe((response) => {
+                        // update sku, price, quantity display since it's not part of product but product inventory
+                        // this.displayPrice = response.price;
+                        // this.displayQuantity = response.quantity;
+                        // this.displaySku = response.sku;
+
+                        // if type is combo..
+                        if (this.productType === "combo") {
+
+                            // open the details window..
+                            // this.toggleDetails(newProduct["data"].id);
+
+                            // then, open the combo section
+                            // this.showCombosSection = true;
+
+                        }
+
+                        // Update the assets product on the server (backend kena enable update)
+                        if (imagefiles) {
+                            for (var i = 0; i < imagefiles.length; i++) {
+                                // create a new one
+                                let formData = new FormData();
+                                formData.append('file', imagefiles[i]);
+                                this._inventoryService.addProductAssets(newProduct["data"].id, formData, (i === thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
+                                    .pipe(takeUntil(this._unsubscribeAll))
+                                    .subscribe((response) => {
+                                        if (response.isThumbnail) {
+                                            this.selectedProduct.thumbnailUrl = response.url;
+                                        }
+
+                                        // Mark for check
+                                        this._changeDetectorRef.markForCheck();
+                                    });
+                            }
+
+                            // load images
+                            this.currentImageIndex = 0;
+                            this.imagesFile = imagefiles;
+                            this.images = images;
+                            this.thumbnailIndex = thumbnailIndex;
+                        }
+
+
+                    });
+
+
+                // Go to new product
+                // this.selectedProduct = newProduct["data"];
+
+                // Update current form with new product data
+                // this.createdProductForm.patchValue(newProduct["data"]);
+
+                // Set image & isVariants to false ...
+                // this.selectedProductForm.get('isVariants').patchValue(false);
+
+                // Set filtered variants to empty array
+                this.filteredProductVariants = [];
+
+                // // Set variants to empty array
+                // this.variants = [];
+
+                // // Set selectedProduct variants to empty array
+                // this.selectedProduct.variants = [];
+
+                if (this.addResourceForm.get('step1').get('isVariants').value === false
+                    && this.productType !== 'combo'
+                    && this.addResourceForm.get('step1').get('isAvailability').value === true) {
+
+                    // Show a success message
+                    this.showFlashMessage('success');
+                    // Set delay before closing the window
+                    setTimeout(() => {
+
+                        this.addNewResource();
+                        // close the window
+                        //this.dialogRef.close({ valid: false });
+
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    }, 1000);
+                }
+
+                // get product combo list
+                if (this.productType === "combo") {
+                    this._inventoryService.getProductPackageOptions(this.selectedProduct.id)
+                        .pipe(takeUntil(this._unsubscribeAll))
+                        .subscribe((response) => {
+                            this.productsCombos$ = response["data"];
+
+                        });
+                }
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+    }
+
+    createNewResourceAvailability() {
+        
+        let startTime = this.addResourceForm.get('step2').get('startTime').value;
+        let endTime = this.addResourceForm.get('step2').get('endTime').value;
+        let strStart = startTime.timeHour + ":" + startTime.timeMinute + " " + startTime.timeAmPm;
+        let strEnd = endTime.timeHour + ":" + endTime.timeMinute + " " + endTime.timeAmPm;
+        const convertTime = timeStr => {
+            const [time, modifier] = timeStr.split(' ');
+            let [hours, minutes] = time.split(':');
+            if (hours === '12') {
+                hours = '00';
+            }
+            if (modifier === 'PM') {
+                hours = parseInt(hours, 10) + 12;
+            }
+            return `${hours}:${minutes}`;
+        };
+        let start24 = convertTime(strStart);
+        let end24 = convertTime(strEnd);
+
+        console.log("startTime:" , start24);
+        console.log("endTime:" , end24);
+        this.resourceAvailability = {
+            startTime: start24,
+            endTime: end24,
+            durationInMinutes: this.addResourceForm.get('step2').get('durationInMinutes').value,
+            offsetHours: this.addResourceForm.get('step2').get('offsetHours').value.offset,
+            availabilityDay: this.addResourceForm.get('step2').get('availabilityDay').value,
+            confirmationMethod: this.addResourceForm.get('step2').get('confirmationMethod').value
+        }
+
+        console.log("resourceAvailability: " + this.resourceAvailability.toString());
+    
+        this._resourceService.createResourceAvailability(this.resourceAvailability, this.store$.id, this.newResourceId).pipe(
+            finalize(() => {
+                this.creatingResource = false;
+            })
+        ).subscribe(async (newResource) => {
+            this.newResourceAvailabilityId = newResource['data'].id;
+            this.selectedResourceAvailability = newResource['data'];
+
+            this._changeDetectorRef.markForCheck();
+        });
+    }
+    abc() {
+		console.log("Availadility Day:", this.addResourceForm.get('step2').get('availabilityDay').value);
+		console.log("startTime", this.addResourceForm.get('step2').get('startTime').value);
+		console.log("endTIme:", this.addResourceForm.get('step2').get('endTime').value);
+		console.log("Duration in minutes:", this.addResourceForm.get('step2').get('durationInMinutes').value);
+		console.log("offset:", this.addResourceForm.get('step2').get('offsetHours').value.text);
+		console.log("Method:", this.addResourceForm.get('step2').get('confirmationMethod').value);
+	}
 }

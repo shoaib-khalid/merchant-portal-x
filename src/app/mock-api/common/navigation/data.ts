@@ -3,62 +3,91 @@ import { FuseNavigationItem } from '@fuse/components/navigation';
 
 export const defaultNavigation: FuseNavigationItem[] = [
     {
-        id   : 'dashboard',
+        id: 'dashboard',
         title: 'Dashboard',
-        type : 'basic',
-        icon : 'heroicons_outline:chart-pie',
-        link : '/dashboard'
+        type: 'basic',
+        icon: 'heroicons_outline:chart-pie',
+        link: '/dashboard'
     },
     {
-        id   : 'store-management',
+        id: 'store-management',
         title: 'Store Management',
-        type : 'collapsable',
-        icon : 'heroicons_outline:office-building',
+        type: 'collapsable',
+        icon: 'heroicons_outline:office-building',
         children: [
             {
-                id   : 'app.create-store',
+                id: 'app.create-store',
                 title: 'Create Store',
-                type : 'basic',
-                link : '/stores/choose-vertical',
+                type: 'basic',
+                link: '/stores/choose-vertical',
                 exactMatch: true
             },
             {
-                id   : 'app.manage-store',
+                id: 'app.manage-store',
                 title: 'Manage Store',
-                type : 'basic',
-                link : '/stores',
+                type: 'basic',
+                link: '/stores',
                 exactMatch: true
             }
         ],
     },
     {
-        id   : 'product-management',
+        id: 'product-management',
         title: 'Product Management',
-        type : 'collapsable',
-        icon : 'heroicons_outline:cube',
+        type: 'collapsable',
+        icon: 'heroicons_outline:cube',
         children: [
             {
-                id   : 'app.manage-category',
+                id: 'app.manage-category',
                 title: 'Manage Category',
-                type : 'basic',
-                link : '/products/categories',
+                type: 'basic',
+                link: '/products/categories',
                 exactMatch: true
             },
             {
-                id   : 'app.manage-product',
+                id: 'app.manage-product',
                 title: 'Manage Product',
-                type : 'basic',
-                link : '/products/inventory',
+                type: 'basic',
+                link: '/products/inventory',
                 exactMatch: true
             }
         ],
     },
     {
-        id   : 'order-management',
+        id: 'resource-management',
+        title: 'Resource Management',
+        type: 'collapsable',
+        icon: 'heroicons_outline:cube',
+        children: [
+            {
+                id: 'resource',
+                title: 'Manage Resource',
+                type: 'basic',
+                link: '/resource',
+                exactMatch: true
+            },
+            {
+                id: 'app.manage-category',
+                title: 'Manage Category',
+                type: 'basic',
+                link: '/resource/categories',
+                exactMatch: true
+            },
+            {
+                id: 'app.reserved-slots',
+                title: 'Reserved Slots',
+                type: 'basic',
+                link: '/resource/reserved',
+                exactMatch: true
+            }
+        ],
+    },
+    {
+        id: 'order-management',
         title: 'Order Management',
-        type : 'basic',
-        icon : 'heroicons_outline:shopping-cart',
-        link : '/orders'
+        type: 'basic',
+        icon: 'heroicons_outline:shopping-cart',
+        link: '/orders'
     },
     // {
     //     id   : 'discount-management',
@@ -68,30 +97,30 @@ export const defaultNavigation: FuseNavigationItem[] = [
     //     link : '/discounts'
     // },   
     {
-        id   : 'discount-management',
+        id: 'discount-management',
         title: 'Discount Management',
-        type : 'collapsable',
-        icon : 'heroicons_outline:gift',
+        type: 'collapsable',
+        icon: 'heroicons_outline:gift',
         children: [
             {
-                id   : 'app.manage-product',
+                id: 'app.manage-product',
                 title: 'Manage Order Discount',
-                type : 'basic',
-                link : '/discounts/list',
+                type: 'basic',
+                link: '/discounts/list',
                 exactMatch: true
             },
             {
-                id   : 'app.manage-category',
+                id: 'app.manage-category',
                 title: 'Manage Product Discount',
-                type : 'basic',
-                link : '/discounts/product-list',
+                type: 'basic',
+                link: '/discounts/product-list',
                 exactMatch: true
             },
             {
-                id   : 'app.manage-banner',
+                id: 'app.manage-banner',
                 title: 'Manage Discount Banner',
-                type : 'basic',
-                link : '/discounts/discount-banner',
+                type: 'basic',
+                link: '/discounts/discount-banner',
                 exactMatch: true
             }
         ],
@@ -143,28 +172,28 @@ export const defaultNavigation: FuseNavigationItem[] = [
 ];
 export const compactNavigation: FuseNavigationItem[] = [
     {
-        id   : 'example',
+        id: 'example',
         title: 'Example',
-        type : 'basic',
-        icon : 'heroicons_outline:chart-pie',
-        link : '/example'
+        type: 'basic',
+        icon: 'heroicons_outline:chart-pie',
+        link: '/example'
     }
 ];
 export const futuristicNavigation: FuseNavigationItem[] = [
     {
-        id   : 'example',
+        id: 'example',
         title: 'Example',
-        type : 'basic',
-        icon : 'heroicons_outline:chart-pie',
-        link : '/example'
+        type: 'basic',
+        icon: 'heroicons_outline:chart-pie',
+        link: '/example'
     }
 ];
 export const horizontalNavigation: FuseNavigationItem[] = [
     {
-        id   : 'example',
+        id: 'example',
         title: 'Example',
-        type : 'basic',
-        icon : 'heroicons_outline:chart-pie',
-        link : '/example'
+        type: 'basic',
+        icon: 'heroicons_outline:chart-pie',
+        link: '/example'
     }
 ];

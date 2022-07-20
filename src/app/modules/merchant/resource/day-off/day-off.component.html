@@ -1,0 +1,190 @@
+<div class="flex flex-col max-w-260 md:min-w-160 -m-6 h-90">
+	<div class="flex px-4">
+		<!-- Selected resource form -->
+		<form class="flex flex-col w-full" [formGroup]="dayoffForm" *ngIf="!isLoading">
+
+			<div
+				class="content flex flex-col h-full sm:h-auto sm:flex-row mb-3 w-full overflow-hidden sm:overflow-y-auto">
+				<!-- Add discount Tier -->
+				<fieldset class="border border-solid border-gray-300 rounded p-2 w-full sm:w-1/3 sm:mr-2 mb-2 sm:mb-0">
+					<legend class="text font-bold px-2"> Set Resource Day off </legend>
+					<!-- Insert discount tier -->
+					<div class="flex flex-col">
+
+						<!-- Min Sub Total, Discount Amount -->
+						<div class="flex flex-row sm:flex-col">
+							<!--Availabilites-->
+							<div class="w-full flex flex-col">
+								<div class="w-full flex flex-col sm:flex-row">
+									<mat-form-field class="w-full" appearance="fill" floatLabel="always">
+										<mat-label>Select Availability</mat-label>
+										<mat-select [(ngModel)]="selectedAvailability"
+											[ngModelOptions]="{standalone: true}"
+											(selectedChange)="validate('availability',$event.value)">
+											<mat-option [value]="availability"
+												*ngFor="let availability of listOfResourceAvailabilities">
+												{{availability.availabilityDay}}
+											</mat-option>
+										</mat-select>
+									</mat-form-field>
+								</div>
+							</div>
+							<!-- Date -->
+							<div class="w-full flex flex-col">
+								<div class="font-semibold mb-2 w-full">Select Date</div>
+								<div class="w-full flex flex-col sm:flex-row">
+									<mat-form-field floatLabel="always" class="w-full fuse-mat-emphasized-affix"
+										appearance="fill">
+										<input matInput [required]="true" type="date" [formControlName]="'date'">
+										<mat-icon matPrefix [svgIcon]="'heroicons_outline:calendar'">
+										</mat-icon>
+										<mat-error *ngIf="dayoffForm.get('date').hasError('required')">
+											Required
+										</mat-error>
+									</mat-form-field>
+								</div>
+							</div>
+							<!-- Confirm Day Off Button-->
+							<div class="flex flex-row w-full justify-end">
+								<button (click)="setDayoff()" class="text-white" type="button" mat-flat-button
+									[color]="'primary'">
+									<span class="pr-2">Confirm</span>
+									<mat-icon class="text-white icon-size-5"
+										[svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+								</button>
+							</div>
+						</div>
+					</div>
+				</fieldset>
+
+				<!-- Day Off list -->
+				<fieldset class="border border-solid border-gray-300 rounded p-2 w-full sm:w-2/3">
+					<legend class="text font-bold px-2">Days Off List</legend>
+
+					<div class="flex flex-col w-full">
+						<ng-container>
+							<div class="grid overflow-auto rounded">
+								<!-- Header -->
+								<div class="edit-daysoff-grid sticky grid gap-1 sm:gap-4 py-4 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+									matSort matSortDisableClear>
+									<div class="hidden lg:block"></div>
+									<div [mat-sort-header]="'date'">
+										Date
+									</div>
+									<div>
+										Action
+									</div>
+								</div>
+								<!-- Rows -->
+								<div class="h-auto overflow-y-auto">
+									<div *ngFor="let dayoff of daysoffListForm.get(); let i = index;"
+										[formGroupName]="i">
+										<!-- Variant Header -->
+										<div class="edit-daysoff-grid grid items-center gap-4 mt-4 border-b">
+											<div class="hidden sm:block"></div>
+											<!-- Date -->
+											<mat-form-field floatLabel="always" class="w-full fuse-mat-emphasized-affix"
+												appearance="fill">
+												<input matInput [required]="true" type="date" [formControlName]="'date'"
+													[readonly]="!storeDiscountTierListValueEditMode[i]"
+													[ngClass]="{'text-gray-400' : !storeDiscountTierListValueEditMode[i]}"
+													change="validate('availability',$event.value)">
+												<mat-icon matPrefix [svgIcon]="'heroicons_outline:calendar'">
+												</mat-icon>
+												<mat-error *ngIf="dayoffForm.get('date').hasError('required')">
+													Required
+												</mat-error>
+											</mat-form-field>
+											<!-- Action Button -->
+											<div>
+												<div class="flex flex-wrap items-center justify-center ">
+													<div class="flex flex-row w-full items-center justify-center">
+
+														<input
+															class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+															type="button"
+															[id]="'edit-discount-tier-btn' + dayoff.value.id"
+															(click)="storeDiscountTierListValueEditMode[i] = !storeDiscountTierListValueEditMode[i]">
+														<label *ngIf="!storeDiscountTierListValueEditMode[i]"
+															class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
+															[for]="'edit-discount-tier-btn' + dayoff.value.id"
+															matRipple>
+															<mat-icon class="text-white icon-size-5"
+																[svgIcon]="'heroicons_outline:pencil-alt'">
+															</mat-icon>
+														</label>
+
+														<input
+															class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+															type="button"
+															[id]="'update-discount-tier-btn' + dayoff.value.id"
+															(click)="storeDiscountTierListValueEditMode[i] = !storeDiscountTierListValueEditMode[i]">
+														<!--(click)="updateSelectedResourceAvailability(resourceAvailability)"-->
+														<label *ngIf="storeDiscountTierListValueEditMode[i]"
+															class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-blue-600 hover:bg-blue-400  mr-3 mb-3"
+															[for]="'update-discount-tier-btn' + dayoff.value.id"
+															matRipple>
+															<mat-icon class="text-white icon-size-5"
+																[svgIcon]="'heroicons_outline:check'">
+															</mat-icon>
+														</label>
+
+
+														<input
+															class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+															type="button"
+															[id]="'delete-discount-tier-btn' + dayoff.value.id">
+														<!--(click)="deleteSelectedResourceAvailability(resourceAvailability.value.id)"-->
+														<label
+															class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-warn hover:bg-warn-700 mb-3"
+															[for]="'delete-discount-tier-btn' + dayoff.value.id"
+															matRipple>
+															<mat-icon class="text-white icon-size-5"
+																[svgIcon]="'heroicons_outline:trash'">
+															</mat-icon>
+														</label>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</ng-container>
+					</div>
+				</fieldset>
+			</div>
+			<div class="flex justify-end mt-3">
+				<!-- Flash message -->
+				<!-- <div class="flex items-center mr-4" *ngIf="flashMessage">
+					<ng-container *ngIf="flashMessage === 'success'">
+						<mat-icon class="text-green-500" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+						<span class="ml-2">Product created</span>
+					</ng-container>
+					<ng-container *ngIf="flashMessage === 'error'">
+						<mat-icon class="text-red-500" [svgIcon]="'heroicons_outline:x'"></mat-icon>
+						<span class="ml-2">An error occurred, try again!</span>
+					</ng-container>
+				</div> -->
+				<!-- Cancel button -->
+				<button mat-flat-button class="sm:w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
+					[color]="'gray'" (click)="closeDialog()">
+					<mat-icon class="text-white icon-size-5" [svgIcon]="'heroicons_outline:x'">
+					</mat-icon>
+					<span class="hidden sm:block justify-center">
+						Cancel
+					</span>
+				</button>
+
+				<!-- Create button -->
+				<button class="sm:w-24" mat-flat-button [color]="'primary'" type="button">
+					<mat-icon class="text-white icon-size-5" [svgIcon]="'heroicons_outline:check'">
+					</mat-icon>
+					<span class="hidden sm:block justify-center">
+						Okay
+					</span>
+				</button>
+			</div>
+		</form>
+	</div>
+</div>

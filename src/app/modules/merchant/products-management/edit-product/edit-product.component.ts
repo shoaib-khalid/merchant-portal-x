@@ -208,11 +208,11 @@ export class EditProductComponent implements OnInit, OnDestroy
 
     filteredProductVariants: any[] = []; // used in html to loop variant
     // productVariants: any[] = []; // (variantComboOptions)
-    variantToBeCreated: any[] = []; // use for creating on BE 
-    variantToBeDeleted: any[] = []; // use for deleting on BE 
     selectedVariantCombos: any = []; // this is the list of combinations generated
     selectedProductVariant: ProductVariant;
     variantImagesToBeDeleted: any = []; // image to be deleted from BE
+    variantToBeCreated: any[] = []; // use for creating on BE 
+    variantToBeDeleted: any[] = []; // use for deleting on BE 
     productVariantsFA: FormArray;
     productVariants$: ProductVariant[] = [];
 

@@ -513,7 +513,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             panelClass: 'custom-edit-product-dialog',
             width: '1030px',
             maxWidth: '100vw',
-            // height: '90vh',
+            //height: '90vh',
             // maxHeight: '70vh',
             disableClose: true, 
             data: { productId: productId } 

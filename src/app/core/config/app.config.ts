@@ -12,6 +12,7 @@ export type Themes = { id: string; name: string }[];
  */
 export interface AppConfig
 {
+    [x: string]: any;
     layout: Layout;
     scheme: Scheme;
     screens: Screens;

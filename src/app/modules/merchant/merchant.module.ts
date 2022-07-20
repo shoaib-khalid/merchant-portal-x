@@ -5,8 +5,8 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
 @NgModule({
     declarations: [
-    
-    ],
+      
+  ],
     imports     : [
         RouterModule.forChild(merchantRoutes),
     ],

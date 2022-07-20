@@ -1,0 +1,178 @@
+<div class="sm:absolute sm:inset-0 flex flex-col flex-auto min-w-0 sm:overflow-hidden bg-card dark:bg-transparent">
+
+  <!-- Header -->
+  <div class="relative flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between py-8 px-6 md:px-8 border-b">
+    <!-- Loader -->
+    <div class="absolute inset-x-0 bottom-0" *ngIf="isLoading">
+      <mat-progress-bar [mode]="'indeterminate'"></mat-progress-bar>
+    </div>
+    <!-- Title -->
+    <div class="text-4xl font-extrabold tracking-tight">Resources</div>
+    <!-- Filter and actions -->
+    <div class="sm:flex flex-shrink-0 items-center mt-6 sm:mt-0 sm:ml-4">
+
+      <!-- Filter by category -->
+      <div class="mb-2 sm:mb-0 sm:mr-2">
+        <mat-form-field class="fuse-mat-dense fuse-mat-rounded fuse-mat-no-subscript w-30 sm:w-30">
+          <mat-select [formControl]="categoryFilterControl" [value]="filterByCatId" placeholder="Category"
+            #categorySelector="matSelect">
+            <mat-select-trigger>
+              <span class="flex items-center">
+                <span>{{ categorySelector.triggerValue }}</span>
+              </span>
+            </mat-select-trigger>
+            <mat-option [value]="''">All</mat-option>
+            <ng-container *ngFor="let category of productCategories$; trackBy: trackByFn">
+              <mat-option [value]="category.id">{{category.name}}</mat-option>
+            </ng-container>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <!-- Actions -->
+      <div>
+        <!-- Search -->
+        <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded pr-2 pb-2 min-w-60 sm:pb-0">
+          <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:search'"></mat-icon>
+          <input matInput [formControl]="searchInputControl" [autocomplete]="'off'" [placeholder]="'Search resources'">
+        </mat-form-field>
+        <ng-container>
+          <button [matMenuTriggerFor]="addProductMenu" class="ml-0" mat-flat-button [color]="'primary'">
+            <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+            <span class="hidden sm:block ml-2 mr-1">Add</span>
+          </button>
+          <mat-menu #addProductMenu="matMenu">
+            <button mat-menu-item (click)="initCreateProduct('normal')">Resource</button>
+          </mat-menu>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="flex flex-auto overflow-hidden">
+
+    <!-- Resource list -->
+    <div class="flex flex-col flex-auto sm:mb-18 overflow-hidden sm:overflow-y-auto">
+      <ng-container *ngIf="(resources$ | async) as resources">
+        <ng-container *ngIf="resources.length > 0; else noResources">
+          <div class="grid">
+            <!-- Header -->
+            <div
+              class="inventory-grid z-10 sticky top-0 grid gap-4 py-4 px-6 md:px-8 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+              [ngClass]="(store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c') ? 'inventory-grid' : 'inventory-grid-fnb'"
+              matSort matSortDisableClear>
+              <div></div>
+
+              <div [mat-sort-header]="'name'" class="hidden lg:block">Name</div>
+              <div
+                *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'"
+                class="hidden sm:block" [mat-sort-header]="'quantity'">
+                Number Of Weeks Reservable
+              </div>
+              <div class="hidden md:block">
+                Category
+              </div>
+              <div class="hidden sm:block" [mat-sort-header]="'price'">
+                Fee/Rate
+              </div>
+              <div class="hidden lg:block" [mat-sort-header]="'status'">
+                Active
+              </div>
+              <div class="hidden sm:block">Edit</div>
+              <div class="hidden sm:block">Day Off</div>
+            </div>
+            <!-- Rows -->
+            <ng-container *ngIf="(resources$ | async) as resources">
+              <ng-container *ngFor="let resource of resources; trackBy: trackByFn">
+                <div class="inventory-grid grid items-center gap-4 py-3 px-6 md:px-8 border-b"
+                  [ngClass]="(store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c') ? 'inventory-grid' : 'inventory-grid-fnb'">
+
+                  <!-- Image -->
+                  <div class="flex items-center">
+                    <div
+                      class="relative flex flex-0 items-center justify-center w-12 h-12 mr-6 rounded overflow-hidden border">
+                      <img class="w-8" *ngIf="resource.resourceProduct.thumbnailUrl" [alt]="'Product thumbnail image'"
+                        [src]="resource.resourceProduct.thumbnailUrl">
+                      <div
+                        class="flex items-center justify-center w-full h-full text-xs font-semibold leading-none text-center uppercase"
+                        *ngIf="!resource.resourceProduct.thumbnailUrl">
+                        NO THUMB
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- SKU -->
+                  <!-- <div class="hidden md:block truncate">
+                    {{ product.productInventories.length > 0 ? product.productInventories[0].sku : '' }}
+                  </div> -->
+
+                  <!-- Name -->
+                  <div class="hidden lg:block">
+                    {{ resource.name }}
+                  </div>
+
+                  <!-- Number Of Weeks Reservable -->
+                  <div class="truncate">
+                    {{ resource.numberOfWeeksReservable }}
+                  </div>
+
+                  <!-- Category -->
+                  <div class="hidden md:block">
+                    {{getProductCategoryName(resource.resourceProduct.categoryId)}}
+                  </div>
+
+                  <!-- Rate/Fee -->
+                  <div class="hidden sm:block">
+                    {{(resource.price | currency:store$.regionCountry.currencySymbol:'symbol':'1.2-2')}}
+                  </div>
+
+                  <!-- Active -->
+                  <div class="hidden lg:block">
+                    <ng-container *ngIf="resource.status === 'ACTIVE'">
+                      <mat-icon class="text-green-400 icon-size-5" [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                    </ng-container>
+                    <ng-container *ngIf="resource.status !== 'ACTIVE'">
+                      <mat-icon class="text-gray-400 icon-size-5" [svgIcon]="'heroicons_solid:x'"></mat-icon>
+                    </ng-container>
+                  </div>
+
+                  <!-- Details button -->
+                  <div>
+                    <button class="min-w-10 min-h-7 h-7 px-2 leading-6" mat-stroked-button mat-button
+                      (click)="editProduct(resource.resourceProduct.id,resource.id); resetCycleImages()">
+                      <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:dots-horizontal'"></mat-icon>
+                    </button>
+                  </div>
+
+                  <!-- Day Off button -->
+                  <div>
+                    <button class="min-w-10 min-h-7 h-7 px-2 leading-6" mat-stroked-button mat-button
+                      (click)="openDayOff(resource.id); resetCycleImages()">
+                      <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
+                    </button>
+                  </div>
+                </div>
+              </ng-container>
+            </ng-container>
+          </div>
+
+          <mat-paginator
+            class="sm:absolute sm:inset-x-0 sm:bottom-0 border-b sm:border-t sm:border-b-0 z-10 bg-gray-50 dark:bg-transparent"
+            [ngClass]="{'pointer-events-none': isLoading}" [length]="pagination.length" [pageIndex]="pagination.page"
+            [pageSize]="pagination.size" [pageSizeOptions]="[5, 10, 25, 100]" [showFirstLastButtons]="true"
+            [hidePageSize]="currentScreenSize.includes('sm') ? false : true"></mat-paginator>
+
+        </ng-container>
+      </ng-container>
+
+
+      <ng-template #noResources>
+        <div class="p-8 sm:p-16 border-t text-4xl font-semibold tracking-tight text-center">There are no Resources!
+        </div>
+      </ng-template>
+
+    </div>
+
+  </div>
+
+</div>

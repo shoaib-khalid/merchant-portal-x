@@ -10,6 +10,7 @@ export interface IAppConfig {
         reportService:string;
         deliveryService:string;
         paymentService:string;
+        serviceVertical:string;
 
     };
     storeFrontDomain:string;

@@ -24,14 +24,13 @@ import { AddCategoryComponent } from './add-category/add-category.component';
 import { MatStepperModule } from '@angular/material/stepper';
 import { EditProductComponent } from './edit-product/edit-product.component';
 import { MatRadioModule } from '@angular/material/radio';
-
 @NgModule({
     declarations: [
         InventoryComponent,
         AddProductComponent,
         CategoriesComponent,
         AddCategoryComponent,
-        EditProductComponent
+        EditProductComponent,
     ],
     imports     : [
         RouterModule.forChild(productsManagementRoutes),
