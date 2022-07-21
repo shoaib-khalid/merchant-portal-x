@@ -20,6 +20,7 @@ export const merchantRoutes: Route[] = [
                 {path: 'products', loadChildren: () => import('app/modules/merchant/products-management/products-management.module').then(m => m.ECommerceModule)},
                 {path: 'orders', loadChildren: () => import('app/modules/merchant/orders-management/orders-management.module').then(m => m.OrdersManagementModule)},
                 {path: 'discounts', loadChildren: () => import('app/modules/merchant/discounts-management/discounts-management.module').then(m => m.DiscountsManagementModule)},
+                {path: 'reservation', loadChildren: () => import('app/modules/merchant/reservation-management/reservation-management.module').then(m => m.ReservationManagementModule)},
                 {path: 'social-media', loadChildren: () => import('app/modules/merchant/social-media/social-media.module').then(m => m.SocialMediaModule)},
             ]
         },

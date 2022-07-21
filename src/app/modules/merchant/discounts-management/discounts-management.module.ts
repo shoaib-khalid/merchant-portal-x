@@ -31,6 +31,8 @@ import { DiscountBannerComponent } from './discount-banner/discount-banner.compo
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { NgxGalleryModule } from 'ngx-gallery-9';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { DineInDiscountListComponent } from './dine-in-discount/dine-in-discount-list/dine-in-discount-list.component';
+import { EditDineInDiscountDialogComponent } from './dine-in-discount/edit-dine-in-discount/edit-dine-in-discount.component';
 
 @NgModule({
     declarations: [
@@ -43,7 +45,10 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
         ProductDiscountListComponent,
         CreateProductDiscountDialogComponent,
         EditProductDiscountDialogComponent,
-        DiscountBannerComponent
+        DiscountBannerComponent,
+
+        DineInDiscountListComponent,
+        EditDineInDiscountDialogComponent
     ],
     imports     : [
         RouterModule.forChild(discountsManagementRoutes),

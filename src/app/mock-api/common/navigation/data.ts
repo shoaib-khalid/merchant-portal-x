@@ -60,13 +60,13 @@ export const defaultNavigation: FuseNavigationItem[] = [
         icon : 'heroicons_outline:shopping-cart',
         link : '/orders'
     },
-    // {
-    //     id   : 'discount-management',
-    //     title: 'Discount Management',
-    //     type : 'basic',
-    //     icon : 'heroicons_outline:gift',
-    //     link : '/discounts'
-    // },   
+    {
+        id   : 'reservation-management',
+        title: 'Reservation Management',
+        type : 'basic',
+        icon : 'mat_outline:dining',
+        link : '/reservation'
+    },   
     {
         id   : 'discount-management',
         title: 'Discount Management',
@@ -92,6 +92,13 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 title: 'Manage Discount Banner',
                 type : 'basic',
                 link : '/discounts/discount-banner',
+                exactMatch: true
+            },
+            {
+                id   : 'app.manage-dine-in',
+                title: 'Manage Dine-in Discount',
+                type : 'basic',
+                link : '/discounts/dine-in-list',
                 exactMatch: true
             }
         ],

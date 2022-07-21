@@ -2,6 +2,7 @@ import { Route } from '@angular/router';
 import { OrderDiscountListComponent } from 'app/modules/merchant/discounts-management/order-discount/order-discount-list/order-discount-list.component';
 import { DiscountsProductResolver, DiscountsResolver, InventoryProductsResolver } from 'app/modules/merchant/discounts-management/order-discount/order-discount-list/order-discount-list.resolvers';
 import { InventoryCategoriesResolver } from '../products-management/inventory/inventory.resolvers';
+import { DineInDiscountListComponent } from './dine-in-discount/dine-in-discount-list/dine-in-discount-list.component';
 import { DiscountBannerComponent } from './discount-banner/discount-banner.component';
 import { ProductDiscountListComponent } from './product-discount/product-discount-list/product-discount-list.component';
 
@@ -57,6 +58,24 @@ export const discountsManagementRoutes: Route[] = [
             {
                 path     : '',
                 component: DiscountBannerComponent,
+                resolve  : {
+                    discounts  : DiscountsResolver
+                }
+            }
+        ]
+    },
+    {
+        path      : '',
+        pathMatch : 'full',
+        redirectTo: 'dine-in-list'
+    },
+    {
+        path     : 'dine-in-list',
+        component: DineInDiscountListComponent,
+        children : [
+            {
+                path     : '',
+                component: DineInDiscountListComponent,
                 resolve  : {
                     discounts  : DiscountsResolver
                 }
