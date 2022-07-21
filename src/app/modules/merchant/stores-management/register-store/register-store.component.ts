@@ -105,6 +105,7 @@ export class RegisterStoreComponent implements OnInit
     
     files: any;
     timeAlert: any = [];
+    invalidTime: boolean = false;
     disableForm: boolean = false;
 
     /** Quil Modules */
@@ -942,8 +943,7 @@ export class RegisterStoreComponent implements OnInit
             });
     
             
-        });
-        
+        });        
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -2447,8 +2447,10 @@ export class RegisterStoreComponent implements OnInit
         //working Hour Display Error
         if( workingHourStartTime >= workingHourEndTime ){            
             this.timeAlert[i] ="End time range incorrect" ;
+            this.invalidTime = true;
         }else{
             this.timeAlert[i] = " " ;
+            this.invalidTime = false;
         }      
     }
 
@@ -2486,8 +2488,10 @@ export class RegisterStoreComponent implements OnInit
         //Display Error
         if( breakHourStartTime >= breakHourEndTime ){
             this.timeAlert[i] ="Break Hour End time range incorrect" ;
+            this.invalidTime = true;
         }else{
             this.timeAlert[i] = " " ;
+            this.invalidTime = false;
         }      
     }
 

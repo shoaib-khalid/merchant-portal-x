@@ -236,6 +236,7 @@ export class StoreTimingComponent implements OnInit
             this.disabledProcced = true;
         }else{
             this.timeAlert[i] = " " ;
+            this.disabledProcced = false;
         }  
     }
 

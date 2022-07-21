@@ -1042,7 +1042,7 @@
                                 [stepControl]="createStoreForm.get('step4')">
                                 <ng-template matStepLabel>Store Timing</ng-template>
                                 <p class="mt-2 mb-4 font-medium">
-                                    Choose your type of delivery types to provide to the customer of delivery details.
+                                    Set your store timing to provide to the customer of timing details.
                                 </p>
                                 <!-- Opening Hour -->
                                 <div class="flex flex-col w-full">
@@ -1188,6 +1188,7 @@
                                     <button
                                         class="px-8"
                                         mat-flat-button
+                                        [disabled]="invalidTime"
                                         [color]="'primary'"
                                         type="button"
                                         matStepperNext>
