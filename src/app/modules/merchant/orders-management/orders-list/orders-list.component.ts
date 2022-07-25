@@ -646,7 +646,9 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
 
     viewDetails(orderId){
         // this._router.navigateByUrl('/orders/'+orderId)
-        const dialogRef = this._dialog.open(OrderInvoiceComponent, { panelClass: 'order-invoice-custom-dialog-class', data: orderId });
+        const dialogRef = this._dialog.open(OrderInvoiceComponent, { 
+            panelClass: 'order-invoice-custom-dialog-class', 
+            data: orderId });
         
         dialogRef.afterClosed()
         .subscribe((result) => {
@@ -679,7 +681,14 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                     // If the confirm button pressed...
                     if ( result === 'confirmed' ){
                     // Open the dialog
-                    const dialogRef = this._dialog.open(EditOrderComponent, { panelClass: 'edit-order-custom-dialog-class', data: orderId });
+                    const dialogRef = this._dialog.open(EditOrderComponent, { 
+                        width: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
+                        height: this.currentScreenSize.includes('sm') ? 'auto' : 'auto',
+                        maxWidth: this.currentScreenSize.includes('sm') ? 'auto' : '100vw',  
+                        maxHeight: this.currentScreenSize.includes('sm') ? 'auto' : '100vh',
+                    
+                        panelClass: 'edit-order-custom-dialog-class', 
+                        data: orderId });
 
                     dialogRef.afterClosed()
                                 .subscribe((result) => {
@@ -698,7 +707,13 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     openDetailsDialog(orderId){
         
             // Open the dialog
-            const dialogRef = this._dialog.open(OrderDetailsComponent, { panelClass: 'order-details-custom-dialog-class', data: orderId });
+            const dialogRef = this._dialog.open(OrderDetailsComponent, { 
+                width: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
+                height: this.currentScreenSize.includes('sm') ? 'auto' : 'auto',
+                maxWidth: this.currentScreenSize.includes('sm') ? 'auto' : '100vw',  
+                maxHeight: this.currentScreenSize.includes('sm') ? 'auto' : '100vh',
+                panelClass: 'order-details-custom-dialog-class', 
+                data: orderId });
             
             dialogRef.afterClosed()
             .subscribe((result) => {

@@ -290,7 +290,7 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
 
     async pageRedirect(storeId: string, pageType: string = null) {
         this.storeId = storeId;
-        await this._storesService.getStoresById(storeId)
+        await this._storesService.getStoreById(storeId)
             .subscribe((store: Store)=>{
                 this._storesService.store = store;
 

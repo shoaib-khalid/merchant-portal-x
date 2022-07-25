@@ -1,14 +1,10 @@
-import { HttpResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { StoresService } from 'app/core/store/store.service';
-import { StoreAsset } from 'app/core/store/store.types';
-
-import { NgxGalleryOptions, NgxGalleryImage, NgxGalleryAnimation } from 'ngx-gallery-9';
-import { Observable, Subject } from 'rxjs';
+import { NgxGalleryOptions, NgxGalleryAnimation } from 'ngx-gallery-9';
 
 @Component({
     selector       : 'store-asset',
@@ -35,12 +31,10 @@ export class StoreAssetComponent implements OnInit
      * Constructor
      */
     constructor(
-        private _formBuilder: FormBuilder,
         private _changeDetectorRef: ChangeDetectorRef,
         private _route: ActivatedRoute,
         private _storesService: StoresService,
         private _fuseConfirmationService: FuseConfirmationService,
-        private _domSanitizer: DomSanitizer
     )
     {
     }

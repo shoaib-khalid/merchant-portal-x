@@ -2,21 +2,21 @@
     class="absolute inset-0 flex flex-col min-w-0 overflow-y-auto"
     cdkScrollable>
     <div class="flex flex-col flex-auto w-full">
-        <div class="flex flex-wrap item-center justify-center w-full max-w-screen-xl mx-auto p-6 md:p-8">
+        <div class="flex flex-wrap item-center justify-center w-full max-w-screen-xl mx-auto p-0 md:p-8">
 
-            <div class="max-w-160 min-w-160 p-10 rounded-2xl shadow bg-card print:w-auto print:p-0 print:rounded-none print:shadow-none print:bg-transparent text-sm">
+            <div class="lg:max-w-160 p-2 lg:p-10 rounded-2xl shadow bg-card print:w-auto print:p-0 print:rounded-none print:shadow-none print:bg-transparent text-sm">
                 <div>
 
-                <div class="grid grid-cols-2 gap-x-4">
+                <div class="grid grid-cols-2 gap-x-4 px-2 pt-2 lg:pt-0 lg:px-0">
 
                     <div class="grid grid-cols-4 gap-x-4">
-                        <div class="col-span-4 justify-self-start text-3xl tracking-tight text-secondary mb-4 -ml-1">ORDER DETAILS</div>
+                        <span class="col-span-4 justify-self-start text-2xl lg:text-3xl tracking-tight text-secondary mb-4 -ml-1">ORDER DETAILS</span>
                     </div>
                     <div class="grid grid-cols-2 gap-x-4">
-                        <div class="font-medium tracking-tight text-secondary ml-1 justify-self-end">CREATED DATE</div>
-                        <div class="font-medium justify-self-end">{{ detailsForm.get('invoiceCreatedDate').value | date:'MMM dd, h:mm a' }}</div>
-                        <div class="font-medium tracking-tight text-secondary ml-1 justify-self-end">UPDATED DATE</div>
-                        <div class="font-medium justify-self-end">{{ detailsForm.get('invoiceUpdatedDate').value | date:'MMM dd, h:mm a'}}</div>
+                        <span class="font-medium tracking-tight text-secondary ml-1 justify-self-end">CREATED DATE</span>
+                        <span class="font-medium justify-self-end">{{ detailsForm.get('invoiceCreatedDate').value | date:'MMM dd, h:mm a' }}</span>
+                        <span class="font-medium tracking-tight text-secondary ml-1 justify-self-end">UPDATED DATE</span>
+                        <span class="font-medium justify-self-end">{{ detailsForm.get('invoiceUpdatedDate').value | date:'MMM dd, h:mm a'}}</span>
                     </div>
                     
                 </div>
@@ -24,88 +24,70 @@
                 <!-- Spacer -->
                 <div class="col-span-12 mt-3"></div>
 
-                <!-- Status Details -->
-
-                <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-                    <div class="px-4 py-1.5 ">
-                    <h3 class="text-base leading-6 font-medium text-gray-900">
-                        Status Details
-                    </h3>
-                    <!-- <p class="mt-1 max-w-2xl text-sm text-gray-500">
-                        Personal details and application.
-                    </p> -->
-                    </div>
+                <!-- Completion Status -->
+                <div class="bg-white shadow overflow-hidden rounded-lg">
                     <div class="border-t border-gray-200">
-                    <dl>
-                        <div class="bg-gray-50 px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
-                        <dt class="text-sm font-medium text-gray-500">
-                            Completion Status
-                        </dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                            {{ detailsForm.get('completionStatus').value }}
-                        </dd>
-                        </div>
-                        <div class="bg-white px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
-                        <dt class="text-sm font-medium text-gray-500">
-                            Delivery Type
-                        </dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                            {{ detailsForm.get('deliveryType').value }}
-                        </dd>
-                        </div>
-                        <div class="bg-gray-50 px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
-                        <dt class="text-sm font-medium text-gray-500">
-                            Delivery Service
-                        </dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                            {{ detailsForm.get('deliveryPeriodDetails').value.name }}
-                        </dd>
-                        </div>
-                    </dl>
+                        <dl>
+                            <div class="bg-white px-4 py-1.5 grid grid-cols-3 sm:gap-4 sm:px-4">
+                                <dt class="text-base font-medium text-gray-900">
+                                    Completion Status
+                                </dt>
+                                <dd 
+                                [ngClass]="{'text-green-400 dark:text-green-50': detailsForm.get('completionStatus').value === 'PAYMENT_CONFIRMED',
+                                'text-yellow-400 dark:text-yellow-50': detailsForm.get('completionStatus').value === 'BEING_PREPARED',
+                                'text-orange-400 dark:text-orange-50': detailsForm.get('completionStatus').value === 'AWAITING_PICKUP',
+                                'text-purple-400 dark:text-purple-50': detailsForm.get('completionStatus').value === 'BEING_DELIVERED',
+                                'text-red-400 dark:text-red-50': detailsForm.get('completionStatus').value === 'CANCELED_BY_MERCHANT',
+                                'text-blue-400 dark:text-blue-50': detailsForm.get('completionStatus').value === 'DELIVERED_TO_CUSTOMER'}"
+                                class="mt-1 text-sm self-center text-gray-900 sm:mt-0 sm:col-span-2">
+                                    {{ detailsForm.get('completionStatus').value }}
+                                </dd>
+                            </div>
+                            
+                        </dl>
                     </div>
+                    
                 </div>
 
                 <!-- Spacer -->
                 <div class="col-span-12 mt-3"></div>
 
-
-
                 <!-- Customer Details -->
 
-                <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                <div class="bg-white shadow overflow-hidden rounded-lg">
                     <div class="px-4 py-1.5 ">
-                    <h3 class="text-base leading-6 font-medium text-gray-900">
+                    <span class="text-base leading-6 font-medium text-gray-900">
                         Customer Details
-                    </h3>
+                    </span>
                     <!-- <p class="mt-1 max-w-2xl text-sm text-gray-500">
                         Personal details and application.
                     </p> -->
                     </div>
                     <div class="border-t border-gray-200">
                     <dl>
-                        <div class="bg-gray-50 px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
-                        <dt class="text-sm font-medium text-gray-500">
-                            Name
-                        </dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                            {{ detailsForm.get('customerName').value }}
-                        </dd>
+                        <div class="bg-gray-50 px-4 py-1.5 grid grid-cols-3 sm:gap-4 sm:px-4">
+                            <dt class="text-sm font-medium text-gray-500">
+                                Name
+                            </dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {{ detailsForm.get('customerName').value }}
+                            </dd>
                         </div>
-                        <div class="bg-white px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
-                        <dt class="text-sm font-medium text-gray-500">
-                            Transaction ID
-                        </dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                            {{ detailsForm.get('invoiceId').value }}
-                        </dd>
+                        <div class="bg-white px-4 py-1.5 grid grid-cols-3 sm:gap-4 sm:px-4">
+                            <dt class="text-sm font-medium text-gray-500">
+                                Transaction ID
+                            </dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {{ detailsForm.get('invoiceId').value }}
+                            </dd>
                         </div>
-                        <div class="bg-gray-50 px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
-                        <dt class="text-sm font-medium text-gray-500">
-                            Customer Notes
-                        </dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                            {{ detailsForm.get('customerNotes').value }}
-                        </dd>
+                        <div class="bg-gray-50 px-4 py-1.5 grid grid-cols-3 sm:gap-4 sm:px-4">
+                            <dt class="text-sm font-medium text-gray-500">
+                                Customer Notes
+                            </dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {{ detailsForm.get('customerNotes').value }}
+                            </dd>
                         </div>
                     </dl>
                     </div>
@@ -116,42 +98,42 @@
 
                 <!-- Rider Details -->
 
-                <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                <div class="bg-white shadow overflow-hidden rounded-lg">
                     <div class="px-4 py-1.5 ">
-                    <h3 class="text-base leading-6 font-medium text-gray-900">
-                        Rider Details
-                    </h3>
-                    <!-- <p class="mt-1 max-w-2xl text-sm text-gray-500">
-                        Personal details and application.
-                    </p> -->
+                        <span class="text-base leading-6 font-medium text-gray-900">
+                            Rider Details
+                        </span>
+                        <!-- <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                            Personal details and application.
+                        </p> -->
                     </div>
                     <div class="border-t border-gray-200">
                     <dl>
-                        <div class="bg-gray-50 px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
-                        <dt class="text-sm font-medium text-gray-500">
-                            Name
-                        </dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                            {{ detailsForm.get('riderDetails').value.name }}
-                        </dd>
+                        <div class="bg-gray-50 px-4 py-1.5 grid grid-cols-3 sm:gap-4 sm:px-4">
+                            <dt class="text-sm font-medium text-gray-500">
+                                Name
+                            </dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {{ detailsForm.get('riderDetails').value.name }}
+                            </dd>
                         </div>
-                        <div class="bg-white px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
-                        <dt class="text-sm font-medium text-gray-500">
-                            Phone Number
-                        </dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                            {{ detailsForm.get('riderDetails').value.phoneNumber }}
-                        </dd>
+                        <div class="bg-white px-4 py-1.5 grid grid-cols-3 sm:gap-4 sm:px-4">
+                            <dt class="text-sm font-medium text-gray-500">
+                                Phone Number
+                            </dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {{ detailsForm.get('riderDetails').value.phoneNumber }}
+                            </dd>
                         </div>
-                        <div class="bg-gray-50 px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
-                        <dt class="text-sm font-medium text-gray-500">
-                            Vehicle Number
-                        </dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                            {{ detailsForm.get('riderDetails').value.plateNumber }}
-                        </dd>
+                        <div class="bg-gray-50 px-4 py-1.5 grid grid-cols-3 sm:gap-4 sm:px-4">
+                            <dt class="text-sm font-medium text-gray-500">
+                                Vehicle Number
+                            </dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {{ detailsForm.get('riderDetails').value.plateNumber }}
+                            </dd>
                         </div>
-                        <div class="bg-white-50 px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
+                        <div class="bg-white-50 px-4 py-1.5 grid grid-cols-3 sm:gap-4 sm:px-4">
                             <dt class="text-sm font-medium text-gray-500">
                                 Order Number
                             </dt>
@@ -159,20 +141,20 @@
                                 {{ detailsForm.get('riderDetails').value.orderNumber }}
                             </dd>
                         </div>
-                        <div class="bg-gray-50 px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
-                        <dt class="text-sm font-medium text-gray-500">
-                            Provider
-                        </dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-1">
-                            {{ detailsForm.get('riderDetails').value.provider }}
-                        </dd>
-                        <img
-                                    *ngIf = "detailsForm.get('riderDetails').value.providerImage != ''"
-                                    matSuffix
-                                    class="w-15 justify-self-center"
-                                    [src]= "detailsForm.get('riderDetails').value.providerImage">
+                        <div class="bg-gray-50 px-4 py-1.5 grid grid-cols-3 sm:gap-4 sm:px-4">
+                            <dt class="text-sm font-medium text-gray-500">
+                                Provider
+                            </dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-1">
+                                {{ detailsForm.get('riderDetails').value.provider }}
+                            </dd>
+                            <img
+                                        *ngIf = "detailsForm.get('riderDetails').value.providerImage != ''"
+                                        matSuffix
+                                        class="w-15 justify-self-center"
+                                        [src]= "detailsForm.get('riderDetails').value.providerImage">
                         </div>
-                        <div class="bg-white-50 px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
+                        <div class="bg-white-50 px-4 py-1.5 grid grid-cols-3 sm:gap-4 sm:px-4">
                             <dt class="text-sm font-medium text-gray-500">
                                 Tracking URL
                             </dt>
@@ -187,7 +169,7 @@
                                 {{ detailsForm.get('riderDetails').value.trackingUrl }}
                             </dd> -->
                         </div>
-                        <div class="bg-gray-50 px-4 py-1.5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
+                        <div class="bg-gray-50 px-4 py-1.5 grid grid-cols-3 sm:gap-4 sm:px-4">
                             <dt class="text-sm font-medium text-gray-500">
                                 Airway Bill
                             </dt>
@@ -211,22 +193,25 @@
 
                 <!-- Items -->
 
-                <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-                    <div class="py-1.5 grid grid-cols-10">
-                    <h3 class="px-4 text-sm leading-6 font-medium text-gray-900 col-span-5">
-                        Items
-                    </h3>
-                    <h3 class="text-sm leading-6 font-medium text-gray-900 col-span-2 text-right ">
-                        Original Quantity
-                    </h3>
-                    <h3 class="px-4 text-sm leading-6 font-medium text-gray-900 col-span-1 text-right">
-                        Quantity
-                    </h3> 
-                    <h3 class="px-4 text-sm leading-6 font-medium text-gray-900 col-span-2 text-right">
-                        Total
-                    </h3>
+                <div class="bg-white shadow overflow-hidden rounded-lg">
+                    <div class="py-1.5 grid grid-cols-6 lg:grid-cols-10">
+                        <span class="px-4 text-base leading-6 font-medium text-gray-900 col-span-3 lg:col-span-5">
+                            Items
+                        </span>
+                        <!-- <span class="text-base leading-6 font-medium text-gray-900 text-right">
+                            Rate
+                        </span>-->
+                        <span class="text-sm leading-6 font-medium text-gray-900 col-span-1 lg:col-span-2 text-center ">
+                            Original Quantity
+                        </span>
+                        <span class="px-0 text-sm leading-6 font-medium text-gray-900 col-span-1 lg:col-span-1 text-center">
+                            Quantity
+                        </span> 
+                        <span class="px-0 text-sm leading-6 font-medium text-gray-900 col-span-1 lg:col-span-2 text-center">
+                            Total
+                        </span>
                     </div>
-                    <div class="grid grid-cols-10 border-t border-gray-200">
+                    <div class="grid grid-cols-6 lg:grid-cols-10 border-t border-gray-200">
                         <!-- <div class="col-span-6"></div>
                         <div class="font-medium text-md text-right text-secondary pt-2">RATE</div>
                         <div class="font-medium text-md text-right text-secondary pt-2">QTY</div>
@@ -235,8 +220,8 @@
                         <ng-container *ngFor="let item of detailsForm.get('items').value">
 
                             <!-- Item -->
-                            <div class="col-span-3 px-4 py-1.5">
-                                <div class="mb-1 font-medium ">{{ item.productName }}</div>
+                            <div class="col-span-2 lg:col-span-3 px-4 py-1.5">
+                                <div class="mb-1 ">{{ item.productName }}</div>
                                 <div class="flex flex-wrap text-secondary" *ngIf="item.productVariant">
                                     <span class="mr-1 mb-1" *ngFor="let variant of item.productVariant">
                                         <span class="py-0.5 px-1.5 bg-gray-200 text-secondary rounded-full text-sm" >
@@ -260,10 +245,10 @@
                                     </span>
                                 </div>
                             </div>
-                            <div class="col-span-2 self-center text-right">{{ item.productPrice | currency: store$.regionCountry.currencySymbol }}</div>
-                            <div class="col-span-2 self-center text-center">{{ item.originalQuantity===null?item.quantity:item.originalQuantity }}</div>
-                            <div class="self-center text-right">{{ item.quantity }}</div>
-                            <div class="col-span-2 self-center text-right pr-2">{{ (item.productPrice * item.quantity) | currency: store$.regionCountry.currencySymbol }}</div>
+                            <div class="col-span-1 lg:col-span-2 self-center text-right">{{ item.productPrice | currency: store$.regionCountry.currencySymbol }}</div>
+                            <div class="col-span-1 lg:col-span-2 self-center text-center">{{ item.originalQuantity===null?item.quantity:item.originalQuantity }}</div>
+                            <div class="col-span-1 lg:col-span-1 self-center text-center">{{ item.quantity }}</div>
+                            <div class="col-span-1 lg:col-span-2 self-center text-center">{{ (item.productPrice * item.quantity) | currency: store$.regionCountry.currencySymbol }}</div>
                         </ng-container>
                     </div>
                 </div>
@@ -274,103 +259,104 @@
 
                 <!-- Payment Details -->
 
-                <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                <div class="bg-white shadow overflow-hidden rounded-lg">
                     <div class="px-4 py-1.5 sm:px-4">
-                    <h3 class="text-base leading-6 font-medium text-gray-900">
+                    <span class="text-base leading-6 font-medium text-gray-900">
                         Payment Details
-                    </h3>
+                    </span>
                     <!-- <p class="mt-1 max-w-2xl text-sm text-gray-500">
                         Personal details and application.
                     </p> -->
                     </div>
                     <div class="border-t border-gray-200">
-                    <dl>
-                        <div class="bg-white px-4 py-1.5 sm:grid grid-cols-2 sm:gap-4 sm:px-4">
-                            <dt class="text-sm font-medium text-gray-500">
-                                Payment Type
-                            </dt>
-                            <dd class="text-sm text-gray-900 mt-0 text-right">
-                                {{ detailsForm.get('paymentType').value}}
-                            </dd>
-                        </div>
-                        <div class="bg-gray-50 px-4 py-1.5 sm:grid grid-cols-2 sm:gap-4 sm:px-4">
-                            <dt class="text-sm font-medium text-gray-500">
-                                Subtotal
-                            </dt>
-                            <dd class="text-sm text-gray-900 mt-0 text-right">
-                                {{ detailsForm.get('subTotal').value | currency: store$.regionCountry.currencySymbol}}
-                            </dd>
-                        </div>
-                        <div class="bg-white px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
-                            <dt class="text-sm font-medium text-gray-500">
-                                Order Discount
-                                <span class="font-medium tracking-tight text-secondary" *ngIf="appliedDiscountDescription">({{appliedDiscountDescription}})</span>
-                                <span class="font-bold pl-1 tracking-tight text-secondary" *ngIf="detailsForm.get('discountMaxAmount').value && detailsForm.get('discountMaxAmount').value != 0 && detailsForm.get('appliedDiscount').value >= detailsForm.get('discountMaxAmount').value && detailsForm.get('appliedDiscount').value != 0">
-                                    Capped at {{store$.regionCountry.currencySymbol}}{{detailsForm.get('discountMaxAmount').value}}</span>    
-                            </dt>
-                            <dd class="text-sm text-gray-900 mt-0 text-right">
-                                -{{ detailsForm.get('appliedDiscount').value | currency: store$.regionCountry.currencySymbol}}
-                            </dd>
-                        </div>
-                        <div *ngIf="detailsForm.get('storeServiceCharges').value && detailsForm.get('storeServiceCharges').value !== 0" class="bg-gray-50 px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
-                            <dt class="text-sm font-medium text-gray-500">
-                                Service Charge
-                            </dt>
-                            <dd class="text-sm text-gray-900 mt-0 text-right">
-                                {{ detailsForm.get('storeServiceCharges').value | currency: store$.regionCountry.currencySymbol}}
-                            </dd>
-                        </div>
-                        <div class="bg-gray-50 px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
-                            <dt class="text-sm font-medium text-gray-500">
-                                Delivery Charge
-                            </dt>
-                            <dd class="text-sm text-gray-900 mt-0 text-right">
-                                {{ detailsForm.get('deliveryCharges').value | currency: store$.regionCountry.currencySymbol}}
-                            </dd>
-                        </div>
-                        <div class="bg-white px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
-                            <dt class="text-sm font-medium text-gray-500">
-                                Delivery Discount
-                                <span class="font-medium tracking-tight text-secondary" *ngIf="deliveryDiscountDescription">({{deliveryDiscountDescription}})</span>  
-                                <span class="font-bold pl-1 tracking-tight text-secondary" *ngIf="detailsForm.get('deliveryDiscountMaxAmount').value && detailsForm.get('deliveryDiscountMaxAmount').value != 0 && detailsForm.get('deliveryDiscount').value >= detailsForm.get('deliveryDiscountMaxAmount').value && detailsForm.get('deliveryDiscount').value != 0">
-                                    Capped at {{store$.regionCountry.currencySymbol}}{{detailsForm.get('deliveryDiscountMaxAmount').value}}</span>    
-                            </dt>
-                            <dd class="text-sm text-gray-900 mt-0 text-right">
-                                -{{ detailsForm.get('deliveryDiscount').value | currency: store$.regionCountry.currencySymbol}}
-                            </dd>
-                        </div>
-                        <div class="bg-gray-50 px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
-                            <dt class="text-sm font-medium text-gray-500">
-                                Platform Voucher (subsidised by DeliverIn)
-                            </dt>
-                            <dd class="text-sm text-gray-900 mt-0 text-right">
-                                -{{ voucherDiscount.platform | currency: store$.regionCountry.currencySymbol}}
-                            </dd>
-                        </div>
-                        <!-- <div class="bg-white px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
-                            <dt class="text-sm font-medium text-gray-500">
-                                Store Voucher
-                            </dt>
-                            <dd class="text-sm text-gray-900 mt-0 text-right">
-                                -{{ voucherDiscount.store | currency: store$.regionCountry.currencySymbol}}
-                            </dd>
-                        </div> -->
-                        <div class="bg-white px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
-                            <dt class="text-sm font-medium text-gray-500">
-                                Total
-                            </dt>
-                            <dd class="text-sm text-gray-900 mt-0 text-right">
-                                {{ detailsForm.get('total').value | currency: store$.regionCountry.currencySymbol}}
-                            </dd>
-                        </div>
-                    </dl>
+                        <dl>
+                            <div class="bg-white px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
+                                <dt class="text-sm font-medium text-gray-500">
+                                    Payment Type
+                                </dt>
+                                <dd class="text-sm text-gray-900 mt-0 text-right">
+                                    {{ detailsForm.get('paymentType').value}}
+                                </dd>
+                            </div>
+                            <div class="bg-gray-50 px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
+                                <dt class="text-sm font-medium text-gray-500">
+                                    Subtotal
+                                </dt>
+                                <dd class="text-sm text-gray-900 mt-0 text-right">
+                                    {{ detailsForm.get('subTotal').value | currency: store$.regionCountry.currencySymbol}}
+                                </dd>
+                            </div>
+                            <div class="bg-white px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
+                                <dt class="text-sm font-medium text-gray-500">
+                                    Order Discount
+                                    <span class="font-medium tracking-tight text-secondary" *ngIf="appliedDiscountDescription">({{appliedDiscountDescription}})</span>
+                                    <span class="font-bold pl-1 tracking-tight text-secondary" *ngIf="detailsForm.get('discountMaxAmount').value && detailsForm.get('discountMaxAmount').value != 0 && detailsForm.get('appliedDiscount').value >= detailsForm.get('discountMaxAmount').value && detailsForm.get('appliedDiscount').value != 0">
+                                        Capped at {{store$.regionCountry.currencySymbol}}{{detailsForm.get('discountMaxAmount').value}}</span>    
+                                </dt>
+                                <dd class="text-sm text-gray-900 mt-0 text-right">
+                                    -{{ detailsForm.get('appliedDiscount').value | currency: store$.regionCountry.currencySymbol}}
+                                </dd>
+                            </div>
+                            <div *ngIf="detailsForm.get('storeServiceCharges').value && detailsForm.get('storeServiceCharges').value !== 0" 
+                                class="bg-gray-50 px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
+                                <dt class="text-sm font-medium text-gray-500">
+                                    Service Charge
+                                </dt>
+                                <dd class="text-sm text-gray-900 mt-0 text-right">
+                                    {{ detailsForm.get('storeServiceCharges').value | currency: store$.regionCountry.currencySymbol}}
+                                </dd>
+                            </div>
+                            <div class="bg-gray-50 px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
+                                <dt class="text-sm font-medium text-gray-500">
+                                    Delivery Charge
+                                </dt>
+                                <dd class="text-sm text-gray-900 mt-0 text-right">
+                                    {{ detailsForm.get('deliveryCharges').value | currency: store$.regionCountry.currencySymbol}}
+                                </dd>
+                            </div>
+                            <div class="bg-white px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
+                                <dt class="text-sm font-medium text-gray-500">
+                                    Delivery Discount
+                                    <span class="font-medium tracking-tight text-secondary" *ngIf="deliveryDiscountDescription">({{deliveryDiscountDescription}})</span>  
+                                    <span class="font-bold pl-1 tracking-tight text-secondary" *ngIf="detailsForm.get('deliveryDiscountMaxAmount').value && detailsForm.get('deliveryDiscountMaxAmount').value != 0 && detailsForm.get('deliveryDiscount').value >= detailsForm.get('deliveryDiscountMaxAmount').value && detailsForm.get('deliveryDiscount').value != 0">
+                                        Capped at {{store$.regionCountry.currencySymbol}}{{detailsForm.get('deliveryDiscountMaxAmount').value}}</span>    
+                                </dt>
+                                <dd class="text-sm text-gray-900 mt-0 text-right">
+                                    -{{ detailsForm.get('deliveryDiscount').value | currency: store$.regionCountry.currencySymbol}}
+                                </dd>
+                            </div>
+                            <div class="bg-gray-50 px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
+                                <dt class="text-sm font-medium text-gray-500">
+                                    Platform Voucher (subsidised by DeliverIn)
+                                </dt>
+                                <dd class="text-sm text-gray-900 mt-0 text-right">
+                                    -{{ voucherDiscount.platform | currency: store$.regionCountry.currencySymbol}}
+                                </dd>
+                            </div>
+                            <!-- <div class="bg-white px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
+                                <dt class="text-sm font-medium text-gray-500">
+                                    Store Voucher
+                                </dt>
+                                <dd class="text-sm text-gray-900 mt-0 text-right">
+                                    -{{ voucherDiscount.store | currency: store$.regionCountry.currencySymbol}}
+                                </dd>
+                            </div> -->
+                            <div class="bg-white px-4 py-1.5 grid grid-cols-2 sm:gap-4 sm:px-4">
+                                <dt class="text-sm font-medium text-gray-500">
+                                    Total
+                                </dt>
+                                <dd class="text-sm text-gray-900 mt-0 text-right">
+                                    {{ detailsForm.get('total').value | currency: store$.regionCountry.currencySymbol}}
+                                </dd>
+                            </div>
+                        </dl>
                     </div>
                 </div>
 
             
     
                 </div>
-            <div class="flex items-center justify-end mt-4 print:hidden">
+            <div class="mb-2 lg:mb-0 px-2 lg:px-0 flex items-center justify-end mt-4 print:hidden">
                 <button
                     (click)="close()"
                     mat-stroked-button>

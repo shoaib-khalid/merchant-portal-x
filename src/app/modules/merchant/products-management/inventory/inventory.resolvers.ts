@@ -177,7 +177,7 @@ export class GetStoreByIdResolver implements Resolve<any>
      */
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Store>
     {
-        return this._storesService.getStoresById(this.storeId$);
+        return this._storesService.getStoreById(this.storeId$);
     }
 }
 

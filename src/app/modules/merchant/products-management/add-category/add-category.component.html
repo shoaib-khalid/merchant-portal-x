@@ -75,7 +75,7 @@
       
                 <mat-form-field class="w-full">
                     <!-- Select Parent Category -->
-                    <mat-label>Parent Category Name</mat-label>
+                    <mat-label>Parent Category</mat-label>
                     <mat-select
                         class="w-full"
                         placeholder="Choose Parent Category"
@@ -88,7 +88,7 @@
                         </div>
                     </mat-select>
                     <mat-error *ngIf="addCategoryForm.get('parentCategoryId').hasError('required')">
-                        Please Select Parent Category Name
+                        Please select Parent Category
                     </mat-error>
                 </mat-form-field>
                 <mat-form-field 

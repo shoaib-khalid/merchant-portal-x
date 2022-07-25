@@ -90,7 +90,7 @@ export class AddCategoryComponent implements OnInit {
       });
 
       //Get the vertical code for this store id first then we get the parent categories
-        this._storesService.getStoreById(this.storeId)
+        this._storesService.store$
         .pipe(
             map((response)=>{
                 return this.storeVerticalCode = response.verticalCode;
@@ -117,11 +117,11 @@ export class AddCategoryComponent implements OnInit {
             return;
         }
 
-        this.dialogRef.close(this.addCategoryForm.value);
+        this.dialogRef.close({ value: this.addCategoryForm.value, status: true });
     }
 
     cancelCreateCategory(){
-        this.dialogRef.close({ status: false });
+        this.dialogRef.close({ value: null, status: false });
     }
 
     // --------------------------------------

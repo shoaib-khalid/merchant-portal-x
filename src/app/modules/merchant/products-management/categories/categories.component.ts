@@ -116,11 +116,19 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
         // Get the categories
         this.categories$ = this._inventoryService.categories$;
 
+        //Get the vertical code for this store id first then we get the parent categories
         this._storesService.store$
-        .pipe(takeUntil(this._unsubscribeAll))
-        .subscribe((response: Store) => {
-            this.store = response;
-
+        .pipe(
+            map((response)=>{
+                this.store = response;
+                return response.verticalCode;
+            }),
+            switchMap((storeVerticalCode:string)=>this._inventoryService.getParentCategories(0, 50, 'name', 'asc', '',storeVerticalCode)
+            ),
+            takeUntil(this._unsubscribeAll)
+        )
+        .subscribe((categories) => {
+            this.parentCategoriesOptions = categories.data["content"];
             // Mark for check
             this._changeDetectorRef.markForCheck();
         });
@@ -135,19 +143,6 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
 
             // Mark for check
             this._changeDetectorRef.markForCheck();
-        });
-
-        //Get the vertical code for this store id first then we get the parent categories
-        this._storesService.getStoreById(this.storeId$)
-        .pipe(
-            map((response)=>{
-                return response.verticalCode;
-            }),
-            switchMap((storeVerticalCode:string)=>this._inventoryService.getParentCategories(0, 50, 'name', 'asc', '',storeVerticalCode)
-            ),
-        )
-        .subscribe((categories) => {
-            this.parentCategoriesOptions = categories.data["content"];
         });
         
         // Subscribe to search input field value changes
@@ -342,16 +337,16 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
             const dialogRef = this._dialog.open(AddCategoryComponent, { disableClose: true });
             dialogRef.afterClosed().subscribe(result => {
                 
-                if (result) {
+                if (result.status === true) {
                     let category = {
-                        name:result.name,
+                        name:result.value.name,
                         storeId: this.storeId$,
-                        parentCategoryId: result.parentCategoryId,
+                        parentCategoryId: result.value.parentCategoryId,
                         thumbnailUrl:null,
                     };
                     
                     const formData = new FormData();
-                    formData.append("file", result.imagefiles[0]);
+                    formData.append("file", result.value.imagefiles[0]);
             
                     // Create category on the server
                     this._inventoryService.createCategory(category, formData)

@@ -9,7 +9,6 @@ import { MatDrawer } from '@angular/material/sidenav';
 @Component({
     selector     : 'edit-profile-page',
     templateUrl  : './edit-profile.component.html',
-    styles       : ['.ql-container { height: 156px; }'],
     encapsulation: ViewEncapsulation.None,
     animations   : fuseAnimations
 })
