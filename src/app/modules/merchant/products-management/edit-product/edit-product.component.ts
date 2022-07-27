@@ -1479,7 +1479,6 @@ export class EditProductComponent implements OnInit, OnDestroy
                     if (this.selectedVariantCombos.length > 0){
                         for (let i = 0; i < this.selectedVariantCombos.length; i++) {
                     
-                            // }
                             const body = {
                                 // itemCode: this.selectedProduct.id + "-" + i,
                                 itemCode: this.selectedProduct.id + i,
@@ -1503,7 +1502,6 @@ export class EditProductComponent implements OnInit, OnDestroy
 
                     for (let i = 0; i < this.selectedVariantCombos.length; i++) {
                     
-                        // }
                         const body = {
                             price: this.selectedVariantCombos[i].price,
                             compareAtPrice: 0,
@@ -1521,7 +1519,6 @@ export class EditProductComponent implements OnInit, OnDestroy
                             }
                         });
                     }
-
                 }
         
                 // VARIANT
@@ -1549,7 +1546,6 @@ export class EditProductComponent implements OnInit, OnDestroy
                             .subscribe((response)=>{
                                 
                             });
-    
                     })
                 }
                 let variantAvailablesCreated = [];
@@ -1569,7 +1565,6 @@ export class EditProductComponent implements OnInit, OnDestroy
                     })
 
                 }
-
                 await this.addInventoryItem(variantAvailablesCreated);
     
             }
