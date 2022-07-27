@@ -392,12 +392,6 @@ export class EditProductComponent implements OnInit, OnDestroy
                 this.store$ = store;
                 this.storeVerticalCode =this.store$.verticalCode;
 
-                // set packingSize to S if verticalCode FnB
-                if (this.store$.verticalCode === "FnB" || this.store$.verticalCode === "FnB_PK"){
-                    this.addProductForm.get('step1').get('packingSize').patchValue('S');
-                    this.checkinput.packingSize = true;
-                }
-
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
@@ -649,6 +643,12 @@ export class EditProductComponent implements OnInit, OnDestroy
             this.addProductForm.get('step1').get('availableStock').disable();    
         }
 
+        // set packingSize to S if verticalCode FnB
+        if (this.store$.verticalCode === "FnB" || this.store$.verticalCode === "FnB_PK"){
+            this.addProductForm.get('step1').get('packingSize').patchValue('S');
+            this.checkinput.packingSize = true;            
+        }
+
         // ---------------------
         // IsBulkItem Toggle
         // --------------------
@@ -828,7 +828,6 @@ export class EditProductComponent implements OnInit, OnDestroy
                     this.productsCombos$ = response["data"];
                 });
         }
-        
     }
 
     generateVariantCombo() {

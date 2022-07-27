@@ -1154,42 +1154,6 @@ export class InventoryService
     //     );
     // }
 
-    /**
-     * Get categories
-     * 
-     * @param name
-     */
-    getCategories(name: string = null, id: string = "", page: number = 0, size: number = 30, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc'): Observable<ProductCategory[]>
-    {
-
-        let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
-
-          const header = {
-            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
-            params: {
-                name        : '' + name,
-                storeId     : this.storeId$,
-                page        : '' + page,
-                pageSize    : '' + size,
-                sortByCol   : '' + sort,
-                sortingOrder: '' + order.toUpperCase(),
-            }
-        };        
-        
-        if (name !== null) {
-            header.params["name"] = name;
-        }
-
-        // product-service/v1/swagger-ui.html#/store-controller/putStoreCategoryByStoreIdUsingGET
-        return this._httpClient.get<any>(productService + '/store-categories',header).pipe(
-            tap((categories) => {
-                this._logging.debug("Response from ProductsService (getCategories)",categories);
-                this._categories.next(categories["data"].content);
-            })
-        );
-    }
-
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
