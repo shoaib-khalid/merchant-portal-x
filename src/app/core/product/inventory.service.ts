@@ -702,23 +702,10 @@ export class InventoryService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
 
-
         return this.products$.pipe(
             take(1),
             switchMap(products => this._httpClient.post<ProductInventory>(productService +'/stores/'+this.storeId$+'/products/' + productId + "/inventory/bulk", bodies , header).pipe(
                 map((newInventory) => {
-
-
-                    // // Find the index of the updated product
-                    // const index = products.findIndex(item => item.id === product.id);
-                    // let updatedProduct = products[index];
-                    // updatedProduct.productInventories = [newInventory["data"]];
-                    
-                    // // Update the product
-                    // products[index] = { ...products[index], ...updatedProduct};
-
-                    // // Update the products
-                    // this._products.next(products);
 
                     this._logging.debug("Response from ProductsService (addInventoryToProduct- Bulk)", newInventory);
 
@@ -1112,7 +1099,6 @@ export class InventoryService
 
         return this.products$.pipe(
             take(1),
-            // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
             switchMap(products => this._httpClient.post<ProductVariantAvailable>(productService + '/stores/' + this.storeId$ + '/products/' + productId + "/variants-available/bulk", variantAvailable , header).pipe(
                 map((newProduct) => {
 
@@ -1152,7 +1138,6 @@ export class InventoryService
         // return of()
         return this.products$.pipe(
             take(1),
-            // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
             switchMap(products => this._httpClient.put<ProductVariantAvailable>(productService + '/stores/' + this.storeId$ + '/products/' + productId + "/variants-available/bulk", variantAvailable , header).pipe(
                 map((newProduct) => {
 
