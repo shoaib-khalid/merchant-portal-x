@@ -1220,20 +1220,20 @@
                                                                         </div>
                                                                     </ng-container>
                                                                 </div>
-                                                                <div class="flex items-center h-14 sm:h-12 min-h-10 -ml-0.5 pl-4 pr-3 leading-none">
+                                                                <!-- <div class="flex items-center h-14 sm:h-12 min-h-10 -ml-0.5 pl-4 pr-3 leading-none">
                                                                     <mat-icon
                                                                         class="mr-2 icon-size-5"
                                                                         [svgIcon]="'heroicons_outline:exclamation-circle'"></mat-icon>
                                                                     <span class="text-sm md:text-xs">
                                                                         Adding/deleting variant option will reset the variant list values
                                                                     </span>
-                                                                </div>
+                                                                </div> -->
                                                             </div>
                                                         </ng-container>
                                                         <!-- Create variant options-->
                                                         <div
                                                             class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer hover:bg-hover"
-                                                            *ngIf="shouldShowCreateVariantAvailableButton(newVariantAvailableInput.value) && productVariantAvailable.length < 5"
+                                                            *ngIf="shouldShowCreateVariantAvailableButton(newVariantAvailableInput.value) && productVariantAvailable.length < 10"
                                                             (click)="createVariantAvailableMethod(newVariantAvailableInput.value, variantIndex); newVariantAvailableInput.value = ''"
                                                             matRipple>
                                                             <mat-icon 
@@ -1243,12 +1243,12 @@
                                                         </div>
                                                         <div
                                                             class="flex items-center h-12 sm:h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-default border-t hover:bg-gray-50 dark:hover:bg-hover"
-                                                            *ngIf="productVariantAvailable?.length >= 5"
+                                                            *ngIf="productVariantAvailable?.length >= 10"
                                                         >
                                                             <mat-icon
                                                                 class="mr-2 icon-size-5"
                                                                 [svgIcon]="'heroicons_outline:exclamation-circle'"></mat-icon>
-                                                            <div class="text-sm md:text-xs">You can only create maximum of 5 variant options</div>
+                                                            <div class="text-sm md:text-xs">You can only create maximum of 10 variant options</div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1401,6 +1401,7 @@
                                                                     <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full">
                                                                         <input
                                                                             type="text"
+                                                                            readonly
                                                                             matInput
                                                                             (input)="variantSkuChanged($event,i)"
                                                                             [value]="variantCombo.sku">

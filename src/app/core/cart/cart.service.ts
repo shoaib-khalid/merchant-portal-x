@@ -400,7 +400,7 @@ export class CartService
         );
     }
 
-    updateItemPrice(cartId: string = null, itemCode: string): Observable<CartItem>
+    updateItemPriceBulk(cartId: string = null, itemCodes: string[]): Observable<CartItem>
     {
         let orderService = this._apiServer.settings.apiServer.orderService;
 
@@ -408,7 +408,7 @@ export class CartService
             headers: new HttpHeaders().set("Authorization", `${this._authService.publicToken}`)
         };
 
-        return this._httpClient.post<CartItem>( orderService + '/carts/' + cartId + '/items/updateprice/' + itemCode, header ).pipe(
+        return this._httpClient.post<CartItem>( orderService + '/carts/' + cartId + '/items/updateprice', itemCodes, header ).pipe(
             tap((response) => {
                 this._logging.debug("Response from OrderService (updateItemPrice)", response);
             })

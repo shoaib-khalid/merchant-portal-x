@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { catchError, filter, map, switchMap, take, tap } from 'rxjs/operators';
-import { Product, ProductVariant, ProductInventory, ProductCategory, ProductPagination, ProductVariantAvailable, ProductPackageOption, ProductAssets, ProductCategoryPagination, DeliveryVehicleType, ApiResponseModel } from 'app/core/product/inventory.types';
+import { Product, ProductVariant, ProductInventory, ProductCategory, ProductPagination, ProductVariantAvailable, ProductPackageOption, ProductAssets, ProductCategoryPagination, DeliveryVehicleType, ApiResponseModel, ProductInventoryItem } from 'app/core/product/inventory.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from '../logging/log.service';
@@ -688,6 +688,48 @@ export class InventoryService
     }
 
     /**
+     * Add Inventory to the product
+     *
+     * @param product
+     */
+    addInventoryToProductBulk(productId: string, bodies): Observable<any>{
+
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+
+        return this.products$.pipe(
+            take(1),
+            switchMap(products => this._httpClient.post<ProductInventory>(productService +'/stores/'+this.storeId$+'/products/' + productId + "/inventory/bulk", bodies , header).pipe(
+                map((newInventory) => {
+
+
+                    // // Find the index of the updated product
+                    // const index = products.findIndex(item => item.id === product.id);
+                    // let updatedProduct = products[index];
+                    // updatedProduct.productInventories = [newInventory["data"]];
+                    
+                    // // Update the product
+                    // products[index] = { ...products[index], ...updatedProduct};
+
+                    // // Update the products
+                    // this._products.next(products);
+
+                    this._logging.debug("Response from ProductsService (addInventoryToProduct- Bulk)", newInventory);
+
+                    // Return the new product
+                    return newInventory["data"];
+                })
+            ))
+        );
+    }
+
+    /**
      * Add Inventory item to the product
      *
      * @param product
@@ -710,33 +752,25 @@ export class InventoryService
         };
 
         return this._httpClient.post<any>(productService +'/stores/'+this.storeId$+'/products/' + product.id + "/inventory-item", body , header).toPromise();
+    }
 
-        // return of();
+    addInventoryItemToProductBulk( productId: string, storeId: string, bodies: ProductInventoryItem[]) : Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
-        // return this.products$.pipe(
-        //     take(1),
-        //     switchMap(products => this._httpClient.post<Product>(productService +'/stores/'+this.storeId$+'/products/' + product.id + "/inventory-item", body , header).pipe(
-        //         map((newInventoryItem) => {
+        const header = {  
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
 
+        return this._httpClient.post<any>(productService + '/stores/' + this.storeId$ + '/products/' + productId + "/inventory-item/bulk-item", bodies , header)
+            .pipe(
+                map((response) => {
+                    this._logging.debug("Response from ProductsService (addInventoryItemToProduct- Bulk)", response);
 
-        //             // // Find the index of the updated product
-        //             // const index = products.findIndex(item => item.id === product.id);
-        //             // let updatedProduct = products[index];
-        //             // updatedProduct.productInventories = [newInventory["data"]];
-                    
-        //             // // Update the product
-        //             // products[index] = { ...products[index], ...updatedProduct};
-
-        //             // // Update the products
-        //             // this._products.next(products);
-
-        //             this._logging.debug("Response from ProductsService (addInventoryItemToProduct)", newInventoryItem);
-
-        //             // Return the new product
-        //             return newInventoryItem["data"];
-        //         })
-        //     ))
-        // );
+                    return response["data"];
+                })
+            );
     }
 
     /**
@@ -835,7 +869,7 @@ export class InventoryService
     }
 
 
-    getVariants(){
+    getVariants(): Observable<ProductVariant[]>{
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
@@ -896,7 +930,7 @@ export class InventoryService
      * @param variant
      * @param productId
      */
-    createVariant(variant: ProductVariant, productId: string){
+    createVariant(variant: ProductVariant, productId: string): Observable<ProductVariant>{
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
         let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
@@ -992,20 +1026,43 @@ export class InventoryService
     }
 
 
-    async getVariantAvailable(productId)
-    {
-        let productService = this._apiServer.settings.apiServer.productService;
-        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+    // async getVariantAvailable(productId: string)
+    // {
+    //     let productService = this._apiServer.settings.apiServer.productService;
+    //     let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
 
-        const header = {
-            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+    //     const header = {
+    //         headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
             
-        };
+    //     };
 
-        let response = await this._httpClient.get<any>(productService +'/stores/'+ this.storeId$ +'/products/' + productId + '/variants-available', header).toPromise();
+    //     let response = await this._httpClient.get<any>(productService +'/stores/'+ this.storeId$ +'/products/' + productId + '/variants-available', header).toPromise();
         
-        return response.data;
+    //     return response.data;
             
+    // }
+
+    /**
+     * Get Variant available
+     * 
+     * @param productId
+     */
+    getVariantAvailable(productId: string): Observable<ProductVariantAvailable[]>
+    {
+
+    let productService = this._apiServer.settings.apiServer.productService;
+    let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+    const header = {
+        headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`)
+    };
+
+    return this._httpClient.get<ProductVariantAvailable[]>(productService +'/stores/'+ this.storeId$ +'/products/' + productId + '/variants-available', header).pipe(
+        map((response) => {
+            this._logging.debug("Response from ProductsService (getVariantAvailable)", response);
+            return response['data']
+        })
+    );
     }
 
     /**

@@ -76,6 +76,7 @@ export interface ProductVariantAvailable
     productId?: string;
     productVariantId?: string;
     sequenceNumber?: number;
+    variantName?: string;
 }
 
 /**
