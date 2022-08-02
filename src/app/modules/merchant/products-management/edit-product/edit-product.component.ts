@@ -76,15 +76,17 @@ import { CartService } from 'app/core/cart/cart.service';
             }
 
             .variant-grid {
-                // grid-template-columns: 68px auto 40px;
-                grid-template-columns: 64px 110px 205px 128px 80px 94px;
+                // grid-template-columns: 64px 110px 205px 128px 80px 94px;
 
-                // @screen sm {
-                //     grid-template-columns: 68px auto auto 128px 84px 96px;
+                // @screen md {
+                //     grid-template-columns: 64px 110px 205px 128px 80px 94px;
                 // }
 
+                // No status (temporary!)
+                grid-template-columns: 64px 86px 340px 128px 80px;
+
                 @screen md {
-                    grid-template-columns: 64px 110px 205px 128px 80px 94px;
+                    grid-template-columns: 64px 86px 340px 128px 80px;
                 }
 
             }
@@ -110,7 +112,16 @@ import { CartService } from 'app/core/cart/cart.service';
                 }
             }
 
+            /** Custom input number **/
+            input[type='number']::-webkit-inner-spin-button,
+            input[type='number']::-webkit-outer-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
 
+            input[type='number'] {
+                -moz-appearance:textfield;
+            }
 
         `
     ],
@@ -184,12 +195,22 @@ export class EditProductComponent implements OnInit, OnDestroy
     currentImageIndex: number = 0;
     imagesEditMode: boolean = false;
     productAssets$: ProductAssets[] = [];
-    variantimages: any = [];
+    variantimages: {
+        itemCode: string, 
+        preview: string, 
+        assetId: string, 
+        isThumbnail: boolean 
+    }[] = [];
     productAssetsFA: FormArray;
-    imagesToBeDeleted: any = []; // images to be deleted from BE
-    imagesWithId: any = [];
-
-
+    imagesToBeDeleted: {
+        id: string,
+        index: number
+    }[] = []; // images to be deleted from BE
+    imagesWithId: {
+        id: string,
+        url: string,
+        isThumbnail?: boolean
+    }[] = [];
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     private _variantsPanelOverlayRef: OverlayRef;
@@ -236,10 +257,7 @@ export class EditProductComponent implements OnInit, OnDestroy
     variantImagesToBeDeleted: any = []; // image to be deleted from BE
     productVariantsFA: FormArray;
     productVariants$: ProductVariant[] = [];
-
-
     variantIndex: number = 0; // set index when open overlay panel in variant available section
-
 
     // variant available section
 
@@ -249,8 +267,6 @@ export class EditProductComponent implements OnInit, OnDestroy
     variantAvailableToBeDeleted: ProductVariantAvailable[] = []; // use for deleting on BE 
     productVariantAvailableEditMode: boolean = false;
     productVariantAvailableValueEditMode: ProductVariantAvailable[] = [];
-
-
 
     variantComboItems: {
         values: string[],
@@ -590,7 +606,7 @@ export class EditProductComponent implements OnInit, OnDestroy
                 // check for product that does not have product inventories, and add them
                 if (product.productInventories.length < 1) {
                     // tempSku is generated automatically since there are no product inventory
-                    let tempSku = product.name.substring(1).toLowerCase().replace(" / ", "-");
+                    let tempSku = product.name.substring(0).toLowerCase().replace(" / ", "-").replace(" ", "-");
                     // Add Inventory to product
                     this._inventoryService.addInventoryToProduct(product, { sku: tempSku, quantity: 0, price: 0, itemCode: productId + "aa" } )
                         .subscribe((response)=>{
@@ -882,14 +898,10 @@ export class EditProductComponent implements OnInit, OnDestroy
         // set inventory
         this.setInventoriesDetails();                
 
-        // get selectedVariantCombos
-        const arr1 = this.selectedVariantCombos;
-
+        
         // remove images that does not have itemCode 
         // so this means arr2 will contains images that related to variants only 
-        // const arr2 = (this.selectedProduct.productAssets).filter((item) => 
-        //     item.itemCode !== null
-        // );
+        const arr1 = this.selectedVariantCombos;
         const arr2 = this.variantimages;
 
         const map = new Map();
@@ -901,9 +913,8 @@ export class EditProductComponent implements OnInit, OnDestroy
         let clean = mergedArr.filter(element => {
             if (Object.keys(element).length !== 0) {
                 return true;
-              }
-            
-              return false;
+            }
+            else return false;
         })
         
         this.selectedVariantCombos = clean;
@@ -934,8 +945,12 @@ export class EditProductComponent implements OnInit, OnDestroy
         
         this.selectedProduct.productAssets.forEach(element => {
             if (element.itemCode) {
-                this.variantimages[parseInt(element.itemCode.substring(pIdLen))] = ({ itemCode: element.itemCode, preview: element.url, assetId: element.id, isThumbnail: element.isThumbnail })
-                
+                let index = parseInt(element.itemCode.substring(pIdLen));
+                this.variantimages[index] = ({ itemCode: element.itemCode, preview: element.url, assetId: element.id, isThumbnail: element.isThumbnail })
+
+                if (this.selectedVariantCombos[index]) {
+                    this.selectedVariantCombos[index].preview = element.url;
+                }
             }
         });
     }
@@ -1542,7 +1557,7 @@ export class EditProductComponent implements OnInit, OnDestroy
                     compareAtprice: 0,
                     quantity: step1FormGroup.value.availableStock,
                     sku: step1FormGroup.value.sku,
-                    status: "AVAILABLE"
+                    status: 'AVAILABLE'
                 } 
                 
                 await this._inventoryService.updateInventoryToProduct(this.selectedProduct.id, this.productInventories$[0].itemCode, _productInventories).toPromise().then((item) => {
@@ -1565,7 +1580,7 @@ export class EditProductComponent implements OnInit, OnDestroy
                 this.isLoading = false;
 
                 // close the window
-                this.cancelAddProduct()
+                this.cancelAddProduct(true)
     
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -1770,12 +1785,12 @@ export class EditProductComponent implements OnInit, OnDestroy
             });
     }
     
-    cancelAddProduct(){
+    cancelAddProduct(valid: boolean = false){
         this.selectedProduct = null;
         (this.addProductForm.get('step1').get('productInventories') as FormArray).clear();
         (this.addProductForm.get('step1').get('productVariants') as FormArray).clear();
         (this.addProductForm.get('step1').get('productAssets') as FormArray).clear();
-        this.dialogRef.close({ valid: false });
+        this.dialogRef.close({ valid: valid });
      
     }
 
@@ -1965,10 +1980,10 @@ export class EditProductComponent implements OnInit, OnDestroy
                 });
 
                 // go through the assets and delete them
-                this.selectedVariantCombos.forEach(asset => {
+                this.selectedVariantCombos.forEach(item => {
                     // if have itemCode means it is for variants
-                    if (asset.itemCode){
-                        this._inventoryService.deleteProductAssets(this.selectedProduct.id, asset.assetId).toPromise().then(data => {
+                    if (item.itemCode && item.assetId){
+                        lastValueFrom(this._inventoryService.deleteProductAssets(this.selectedProduct.id, item.assetId)).then(data => {
                             this._changeDetectorRef.markForCheck();
                         });
 
@@ -1976,7 +1991,7 @@ export class EditProductComponent implements OnInit, OnDestroy
                 })
 
                 // INVENTORY - create back main product inventory using bulk to delete other inventories from variants
-                let tempSku = this.selectedProduct.name.substring(1).toLowerCase().replace(" / ", "-");
+                let tempSku = this.selectedProduct.name.trim().toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
                 let inventoryBodies = [{
                     itemCode: this.selectedProduct.id + 'aa',
                     price: 0,
@@ -1985,9 +2000,14 @@ export class EditProductComponent implements OnInit, OnDestroy
                     status: 'AVAILABLE',
                     SKU: tempSku,
                     productId: this.selectedProduct.id
-                }]
+                }];
                 this._inventoryService.addInventoryToProductBulk(this.selectedProduct.id, inventoryBodies)
-                    .subscribe(() => {});
+                    .subscribe((inventories) => {
+                        this.productInventories$ = inventories;
+                    });
+
+                this.addProductForm.get('step1').get('price').patchValue(this.selectedVariantCombos[0].price);
+                this.addProductForm.get('step1').get('sku').patchValue(tempSku);
 
                 // set the variant combinations array to empty
                 this.selectedVariantCombos = [];
@@ -2322,7 +2342,33 @@ export class EditProductComponent implements OnInit, OnDestroy
             return;
         }           
 
+        // Return and throw warning dialog if image file size is big
+        let maxSize = 1048576;
+        var maxSizeInMB = (maxSize / (1024*1024)).toFixed(2);
         
+        if (fileList[0].size > maxSize ) {
+            // Show a success message (it can also be an error message)
+            const confirmation = this._fuseConfirmationService.open({
+                title  : 'Image size limit',
+                message: 'Your uploaded image exceeds the maximum size of ' + maxSizeInMB + ' MB!',
+                icon: {
+                    show: true,
+                    name: "image_not_supported",
+                    color: "warn"
+                },
+                actions: {
+                    
+                    cancel: {
+                        label: 'OK',
+                        show: true
+                        },
+                    confirm: {
+                        show: false,
+                    }
+                    }
+            });
+            return;
+        }
 
         // get the image id if any, then push into variantImagesToBeDeleted to be deleted BE
         if (this.selectedVariantCombos[idx]?.assetId) {
@@ -2546,6 +2592,9 @@ export class EditProductComponent implements OnInit, OnDestroy
         });
 
         this.selectedVariantCombos = resArr;
+        
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
         
     }
 

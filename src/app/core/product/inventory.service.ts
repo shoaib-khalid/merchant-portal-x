@@ -382,7 +382,6 @@ export class InventoryService
 
         return this.products$.pipe(
             take(1),
-            // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
             switchMap(products => this._httpClient.put<Product>(productService + '/stores/' + this.storeId$ + '/products/' + id, product , header).pipe(
                 map((updatedProduct) => {
 

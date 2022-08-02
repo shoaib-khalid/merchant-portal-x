@@ -75,15 +75,17 @@ import { MatPaginator } from '@angular/material/paginator';
             }
 
             .variant-grid {
-                // grid-template-columns: 68px auto 40px;
-                grid-template-columns: 64px 110px 205px 128px 80px 94px;
+                // grid-template-columns: 64px 110px 205px 128px 80px 94px;
 
-                // @screen sm {
-                //     grid-template-columns: 68px auto auto 128px 84px 96px;
+                // @screen md {
+                //     grid-template-columns: 64px 110px 205px 128px 80px 94px;
                 // }
 
+                // No status (temporary!)
+                grid-template-columns: 64px 86px 340px 128px 80px;
+
                 @screen md {
-                    grid-template-columns: 64px 110px 205px 128px 80px 94px;
+                    grid-template-columns: 64px 86px 340px 128px 80px;
                 }
 
             }
@@ -1646,14 +1648,39 @@ export class AddProductComponent implements OnInit, OnDestroy
         const file = fileList[0];
         const allowedTypes = ['image/jpeg', 'image/png'];
 
-        
-
         // Return if the file is not allowed
         if ( !allowedTypes.includes(file.type) )
         {
             return;
         }           
 
+        // Return and throw warning dialog if image file size is big
+        let maxSize = 1048576;
+        var maxSizeInMB = (maxSize / (1024*1024)).toFixed(2);
+        
+        if (fileList[0].size > maxSize ) {
+            // Show a success message (it can also be an error message)
+            const confirmation = this._fuseConfirmationService.open({
+                title  : 'Image size limit',
+                message: 'Your uploaded image exceeds the maximum size of ' + maxSizeInMB + ' MB!',
+                icon: {
+                    show: true,
+                    name: "image_not_supported",
+                    color: "warn"
+                },
+                actions: {
+                    
+                    cancel: {
+                        label: 'OK',
+                        show: true
+                        },
+                    confirm: {
+                        show: false,
+                    }
+                    }
+            });
+            return;
+        }
         
 
         // get the image id if any, then push into variantImagesToBeDeleted to be deleted BE

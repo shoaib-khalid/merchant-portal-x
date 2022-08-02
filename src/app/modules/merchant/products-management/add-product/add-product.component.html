@@ -1308,9 +1308,9 @@
                                                             [mat-sort-header]="'active'">
                                                             Publish
                                                         </div> -->
-                                                        <div>
+                                                        <!-- <div>
                                                             Variant Status
-                                                        </div>
+                                                        </div> -->
                                                     </div>
                                                     <!-- Rows -->
                                                     <div 
@@ -1397,21 +1397,22 @@
                                                                     
                                                                 </div>                                 
                                                                 <!-- SKU -->
-                                                                <div class="truncate">
-                                                                    <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full">
+                                                                <span class="truncate text-slate-400 font-light">
+                                                                    {{variantCombo.sku}}
+                                                                    <!-- <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full">
                                                                         <input
                                                                             type="text"
                                                                             readonly
                                                                             matInput
                                                                             (input)="variantSkuChanged($event,i)"
                                                                             [value]="variantCombo.sku">
-                                                                    </mat-form-field>
-                                                                </div>
+                                                                    </mat-form-field> -->
+                                                                </span>
                             
                                                                 <!-- Name -->
-                                                                <div class="truncate">
+                                                                <span class="truncate">
                                                                     {{variantCombo.variant}}
-                                                                </div>
+                                                                </span>
 
                             
                                                                 <!-- Price -->
@@ -1452,7 +1453,7 @@
                                                                 </div> -->
 
                                                                 <!-- Variant Status -->
-                                                                <div>
+                                                                <!-- <div>
                                                                     <mat-select
                                                                         class="border border-gray-300 px-2 py-2 rounded"
                                                                         [value]="variantCombo.status"
@@ -1470,7 +1471,7 @@
                                                                             <mat-option [value]="'NOTAVAILABLE'">Not Available</mat-option>
                                                                         </div>
                                                                     </mat-select>
-                                                                </div>
+                                                                </div> -->
                                                                 <!-- Details button -->
                                                                 <!-- <div>
                                                                     <button
