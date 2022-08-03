@@ -165,7 +165,7 @@
                                         <!-- {{ productType(product) }} -->
                                         {{ 
                                             ( product.isPackage === true ) ? 'Combo' : 
-                                            ( product.productInventories.length > 1 && product.isPackage === false ) ? 'Variant' : 'Normal' 
+                                            ( product.productVariants.length > 0 && product.isPackage === false ) ? 'Variant' : 'Normal' 
                                         }}
                                     </div>
 
