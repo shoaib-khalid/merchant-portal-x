@@ -507,7 +507,7 @@
                                         [ngClass]="addProductForm.get('step1').get('categoryId').hasError('required') ? 'border-red-600' : 'border-gray-300'"
                                         class="mt-0.5 rounded-md border dark:border-gray-500 shadow-sm overflow-hidden">
                                         <!-- Header -->
-                                        <div class="flex items-center -my-px py-0.5 px-3">
+                                        <div class="flex items-center -my-px py-0.5 px-3 h-11">
                                             <div class="flex items-center flex-auto min-w-0">
                                                 <mat-icon
                                                     class="icon-size-5"
@@ -521,7 +521,7 @@
                                                     [maxLength]="20"
                                                     #newCategoryInput>
                                             </div>
-                                            <input
+                                            <!-- <input
                                                 id="category-edit-button"
                                                 class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                 type="button"
@@ -540,7 +540,7 @@
                                                     *ngIf="productCategoriesEditMode"
                                                     class="icon-size-5"
                                                     [svgIcon]="'heroicons_solid:check'"></mat-icon>
-                                            </label>
+                                            </label> -->
                                         </div>
                                         <!-- Available categories -->
                                         <div class="h-[94px] leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
@@ -617,7 +617,7 @@
                                                     </ng-container>
                                                 </div>
                                             </ng-container>
-                                            <div
+                                            <!-- <div
                                                 class="flex items-center h-8 min-h-8 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer border-t hover:bg-gray-50 dark:hover:bg-hover"
                                                 *ngIf="shouldShowCreateCategoryButton(newCategoryInput.value)"
                                                 (click)="createCategory(newCategoryInput.value); newCategoryInput.value = ''"
@@ -626,7 +626,7 @@
                                                     class="mr-2 icon-size-5"
                                                     [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
                                                 <div class="break-all">Create "<b>{{newCategoryInput.value}}</b>"</div>
-                                            </div>
+                                            </div> -->
                                         </div>
                                     </div>
                                     <mat-error 
