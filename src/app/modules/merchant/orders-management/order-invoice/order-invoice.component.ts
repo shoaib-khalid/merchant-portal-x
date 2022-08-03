@@ -153,25 +153,25 @@ export class OrderInvoiceComponent implements OnInit {
             this.invoiceForm.get('storeName').setValue(order["data"].store.name);
             
             const merchantAddress = () => {
-                const address1 = order["data"].store.address === null ? ' ' : order["data"].store.address+' , ';
-                const city1 = order["data"].store.city === null ? ' ' : order["data"].store.city+' , ';
-                const state1 = order["data"].store.state === null ? ' ' : order["data"].store.state+' , ';
-                const postcode1 = order["data"].store.postcode === null ? ' ' : order["data"].store.postcode+'  ';
+                const address1 = order["data"].store.address === null ? ' ' : order["data"].store.address + ', ';
+                const city1 = order["data"].store.city === null ? ' ' : order["data"].store.city + ', ';
+                const state1 = order["data"].store.regionCountryStateId === null ? ' ' : order["data"].store.regionCountryStateId + ', ';
+                const postcode1 = order["data"].store.postcode === null ? ' ' : order["data"].store.postcode;
   
                 return `${address1}${city1}${state1}${postcode1}`;
             }
 
             this.invoiceForm.get('storeAddress').setValue(merchantAddress());
-            this.invoiceForm.get('storePhoneNumber').setValue(order["data"].store.phone);
-            this.invoiceForm.get('storeEmail').setValue(order["data"].store.email);
-            this.invoiceForm.get('storeUrl').setValue(""); 
+            this.invoiceForm.get('storePhoneNumber').setValue(order["data"].store.phoneNumber);
+            // this.invoiceForm.get('storeEmail').setValue(order["data"].store.email);
+            // this.invoiceForm.get('storeUrl').setValue(""); 
             this.invoiceForm.get('customerName').setValue(order["data"].orderShipmentDetail.receiverName);
 
             const detailCustomerAddress = () => {
-              const address2 = order["data"].orderShipmentDetail.address === null ? ' ' : order["data"].orderShipmentDetail.address+' , ';
-              const city2 = order["data"].orderShipmentDetail.city === null ? ' ' : order["data"].orderShipmentDetail.city+' , ';
-              const state2 = order["data"].orderShipmentDetail.state === null ? ' ' : order["data"].orderShipmentDetail.state+' , ';
-              const postcode2 = order["data"].orderShipmentDetail.zipcode === null ? ' ' : order["data"].orderShipmentDetail.zipcode+'  ';
+              const address2 = order["data"].orderShipmentDetail.address === null ? ' ' : order["data"].orderShipmentDetail.address+', ';
+              const city2 = order["data"].orderShipmentDetail.city === null ? ' ' : order["data"].orderShipmentDetail.city+', ';
+              const state2 = order["data"].orderShipmentDetail.state === null ? ' ' : order["data"].orderShipmentDetail.state+', ';
+              const postcode2 = order["data"].orderShipmentDetail.zipcode === null ? ' ' : order["data"].orderShipmentDetail.zipcode+'';
 
               return `${address2}${city2}${state2}${postcode2}`;
             }
