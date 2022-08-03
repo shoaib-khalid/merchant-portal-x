@@ -244,12 +244,12 @@ export class DiscountsProductService
         return this.discounts$.pipe(
             take(1),
             switchMap(discounts => this._httpClient.delete(productService +'/stores/'+this.storeId$+'/discount/'+discountId + '/product/'+discountProductId, header).pipe(
-                map((status: number) => {
+                map((response) => {
                     
-                    this._logging.debug("Response from ProductDiscountsService (deleteDiscountProduct)", status);
+                    this._logging.debug("Response from ProductDiscountsService (deleteDiscountProduct)", response);
 
                     let isDeleted:boolean = false;
-                    if (status === 200) {
+                    if (response['status'] === 200) {
                         isDeleted = true
                     }
 

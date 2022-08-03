@@ -511,7 +511,7 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
             this.displayMessage('Cannot delete','Delete the selected product first before delete this.','OK',false);
         } else {
             // Open the confirmation dialog
-            const confirmation = this.displayMessage('Delete discount','Are you sure you want to remove this discount? This action cannot be undone!','Delete',true);
+            const confirmation = this.displayMessage('Delete Discount','Are you sure you want to remove this discount? This action cannot be undone!','Delete',true);
             
             // Subscribe to the confirmation dialog closed action
             confirmation.afterClosed().subscribe((result) => {
@@ -627,9 +627,9 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
     }
 
     //Delete discount product
-    deleteStoreProductDiscount(productDiscount){
+    deleteStoreProductDiscount(productDiscount){        
 
-        const confirmation = this.displayMessage('Delete discount','Are you sure you want to remove this discount? This action cannot be undone!','Delete',true);
+        const confirmation = this.displayMessage('Delete Discount','Are you sure you want to remove this discount? This action cannot be undone!','Delete',true);
 
         //after user choose either delete or cancel
         confirmation.afterClosed().subscribe((result) => {
@@ -638,7 +638,11 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
             if ( result === 'confirmed' )
             {
                 // Delete the store discount product from server //param (main discount id, product discount id)
-                this._discountProductService.deleteDiscountProduct(this.discountId, productDiscount.id).subscribe(() => {
+                this._discountProductService.deleteDiscountProduct(this.discountId, productDiscount.id).subscribe((response) => {
+                    
+                    if (response) {
+                        this._cartService.updateItemPriceBulk(null, [productDiscount.itemCode]).subscribe()
+                    }
                                 
                     this._changeDetectorRef.markForCheck();
 
@@ -676,7 +680,7 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
                 this._discountProductService.createProductDiscount(this.discountId,payloadProductDiscount).
                 subscribe((response) => {}
                 , error => {
-                    this.displayMessage('Cannot be add','The selected product already exist','OK',false);
+                    this.displayMessage('Cannot be added','The selected product already exist','OK',false);
 
                 }
                 )

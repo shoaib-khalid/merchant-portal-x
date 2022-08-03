@@ -352,7 +352,7 @@
                                             class="overflow-y-auto">
                                             <div *ngFor="let selectedProduct of productDiscountStepperForm.get('step2')['controls']; let i = index;" [formGroupName]="i">
                                                 <!-- Selected Product Header -->
-                                                <div class="create-product-discount-grid grid items-center gap-4 py-1 border-b">      
+                                                <div class="create-product-discount-grid grid items-center gap-4 py-2 border-b">      
                                                     <!-- Product Name (SKU) -->
                                                     <div class="truncate">
                                                         {{ selectedProduct.value.sku }}
