@@ -679,16 +679,7 @@
                                                     </span>
                                                 </mat-select-trigger>
                                                 <div>
-                                                    <!-- <mat-option [value]="'MOTORCYCLE'">Motorcycle</mat-option> -->
-                                                    <!-- <mat-option [value]="'CAR'">Car</mat-option>
-                                                    <mat-option disabled="true" [value]="'VAN'">Van</mat-option>
-                                                    <mat-option disabled="true" [value]="'PICKUP'">Pickup Truck</mat-option>
-                                                    <mat-option disabled="true" [value]="'LARGEVAN'">Large Van</mat-option>
-                                                    <mat-option disabled="true" [value]="'SMALLLORRY'">Small Lorry</mat-option>
-                                                    <mat-option disabled="true" [value]="'MEDIUMLORRY'">Medium Lorry</mat-option>
-                                                    <mat-option disabled="true" [value]="'LARGELORRY'">Large Lorry</mat-option> -->
                                                     <mat-option *ngFor="let vehicle of deliveryVehicle" [value]="vehicle.vehicleType">{{vehicle.name}}</mat-option>
-
                                                 </div>
                                             </mat-select>
                                             <mat-error *ngIf="addProductForm.get('step1').get('vehicleType').hasError('required')">

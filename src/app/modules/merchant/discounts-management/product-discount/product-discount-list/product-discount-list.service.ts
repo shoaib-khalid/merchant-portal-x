@@ -217,16 +217,16 @@ export class DiscountsProductService
                     // Return the updated discount
                     return updatedDiscount["data"];
                 }),
-                switchMap(updatedDiscount => this.discount$.pipe(
-                    take(1),
-                    filter(el => el && el.id === body.id),
-                    tap(() => {
+                // switchMap(updatedDiscount => this.discount$.pipe(
+                //     take(1),
+                //     filter(el => el && el.id === body.id),
+                //     tap(() => {
 
-                        this._discountProduct.next(updatedDiscount["data"]);
+                //         this._discountProduct.next(updatedDiscount["data"]);
 
-                        return updatedDiscount["data"];
-                    })
-                ))
+                //         return updatedDiscount["data"];
+                //     })
+                // ))
             ))
         );
     }

@@ -17,6 +17,7 @@ import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { Store } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
+import { CartService } from 'app/core/cart/cart.service';
 
 @Component({
     selector: 'app-edit-product-discount',
@@ -112,7 +113,8 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
         private _fuseMediaWatcherService: FuseMediaWatcherService,
         private _storesService: StoresService,
         // private createOrderDiscount:CreateOrderDiscount,
-        @Inject(MAT_DIALOG_DATA) public data: MatDialog
+        @Inject(MAT_DIALOG_DATA) public data: MatDialog,
+        private _cartService: CartService
     ) { }
 
     // ----------------------------------------------------------------------------------
@@ -444,7 +446,7 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
                     // Open the confirmation dialog
                     const confirmation = this._fuseConfirmationService.open({
                         title  : 'Discount date overlap',
-                        message: 'Your discount date range entered overlapping with existing discount date! Please change your date range',
+                        message: 'The entered discount date range overlapping with existing discount date! Please change your date range',
                         actions: {
                             confirm: {
                                 label: 'OK'
@@ -477,22 +479,26 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
 
         } 
         else{
-        let payloadProductDiscount = {
-            
-                id: productDiscount.id,
-                storeDiscountId: productDiscount.storeDiscountId,
-                itemCode:productDiscount.itemCode,
-                calculationType:'PERCENT',
-                discountAmount:this.editDiscountAmount?this.editDiscountAmount:productDiscount.discountAmount
-            
-        }
+            let payloadProductDiscount = {
+                
+                    id: productDiscount.id,
+                    storeDiscountId: productDiscount.storeDiscountId,
+                    itemCode:productDiscount.itemCode,
+                    calculationType:'PERCENT',
+                    discountAmount:this.editDiscountAmount?this.editDiscountAmount:productDiscount.discountAmount
+                
+            }
 
-        this._discountProductService.updateProductDiscount(productDiscount.storeDiscountId,payloadProductDiscount).
-                subscribe((response) => {
-                    
-                    // Mark for check
-                    this._changeDetectorRef.markForCheck();
-                });
+            this._discountProductService.updateProductDiscount(productDiscount.storeDiscountId,payloadProductDiscount).
+                    subscribe((response) => {
+
+                        if (response) {
+                            this._cartService.updateItemPriceBulk(null, [response.itemCode]).subscribe()
+                        }
+                        
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    });
         }
         
     }
