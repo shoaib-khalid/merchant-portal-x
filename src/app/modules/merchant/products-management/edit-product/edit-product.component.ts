@@ -133,6 +133,9 @@ export class EditProductComponent implements OnInit, OnDestroy
     @ViewChild('variantsPanel') private _variantsPanel: TemplateRef<any>;
     // @ViewChildren(MatPaginator) private _productPaginator2: QueryList<MatPaginator>;
     @ViewChild('productPaginationCombo', {read: MatPaginator}) private _productPaginator: MatPaginator;
+    @ViewChild('imageSearchPanelOrigin') private _imageSearchPanelOrigin: ElementRef;
+    @ViewChild('imageSearchPanel') private _imageSearchPanel: TemplateRef<any>;
+    @ViewChild('searchImageInput') public searchImageElement: ElementRef;
 
     // get current store
     store$: Store;
@@ -154,7 +157,6 @@ export class EditProductComponent implements OnInit, OnDestroy
     selectedProduct: Product | null = null;
     addProductForm: FormGroup;
     products$: Observable<Product[]>;
-    productType: string;
     newProductId: string = null; // product id after it is created
     creatingProduct: boolean; // use to disable next button until product is created
     allProductsFiltered: Product[]; // used for checking if product name already exist 
@@ -189,12 +191,31 @@ export class EditProductComponent implements OnInit, OnDestroy
     productCategoriesValueEditMode:any = [];
 
     // product assets
-    images: any = [];
-    imagesFile: any = [];
-    thumbnailIndex: number = 0;
+    // images: any = [];
+    // imagesFile: any = [];
+    productImages: {
+        preview: string | ArrayBuffer,
+        file: File,
+        isThumbnail: boolean,
+        assetId: string,
+        itemCode: string
+    }[] = [];
+    // thumbnailIndex: number = 0;
     currentImageIndex: number = 0;
-    imagesEditMode: boolean = false;
-    productAssets$: ProductAssets[] = [];
+    // imagesEditMode: boolean = false;
+    imagesChangeMode: {
+        isOn: boolean,
+        mode: {
+            create: boolean,
+            edit: boolean
+        }
+    } = {
+        isOn: false,
+        mode: {
+            create: false,
+            edit: false
+        }
+    };
     variantimages: {
         itemCode: string, 
         preview: string, 
@@ -206,14 +227,21 @@ export class EditProductComponent implements OnInit, OnDestroy
         id: string,
         index: number
     }[] = []; // images to be deleted from BE
-    imagesWithId: {
-        id: string,
-        url: string,
-        isThumbnail?: boolean
+    updateThumbnailArray: { 
+        assetId: string,
+        isThumbnail: boolean, 
+        itemCode: string
     }[] = [];
+
+    // imagesWithId: {
+    //     id: string,
+    //     url: string,
+    //     isThumbnail: boolean
+    // }[] = [];
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     private _variantsPanelOverlayRef: OverlayRef;
+    private _imageSearchPanelOverlayRef: OverlayRef;
 
     quillModules: any = {
         toolbar: [
@@ -240,12 +268,14 @@ export class EditProductComponent implements OnInit, OnDestroy
     variantToBeDeleted: ProductVariant[] = []; // use for deleting on BE 
     
     selectedVariantCombos: {
-        file?: any,
-        isThumbnail?: boolean,
+        image: {
+            preview?: string | ArrayBuffer,
+            file?: File,
+            isThumbnail?: boolean,
+            newAsset?: boolean,
+            assetId?: string,
+        },
         itemCode: string,
-        newAsset?: boolean,
-        assetId?: string,
-        preview?: any,
         price: number,
         quantity: number,
         sku: string,
@@ -254,7 +284,6 @@ export class EditProductComponent implements OnInit, OnDestroy
     }[]
 
     selectedProductVariant: ProductVariant;
-    variantImagesToBeDeleted: any = []; // image to be deleted from BE
     productVariantsFA: FormArray;
     productVariants$: ProductVariant[] = [];
     variantIndex: number = 0; // set index when open overlay panel in variant available section
@@ -303,6 +332,9 @@ export class EditProductComponent implements OnInit, OnDestroy
         price: number,
         itemCode: string
     }[] = [];
+
+    searchImageControl: FormControl = new FormControl();
+    autoCompleteList: {url: string, name: string}[] = [];
 
 
 
@@ -514,6 +546,15 @@ export class EditProductComponent implements OnInit, OnDestroy
             this._changeDetectorRef.markForCheck();
         });    
 
+        // Subscribe to search control reactive form
+        this.searchImageControl.valueChanges
+            .pipe(
+                debounceTime(500),
+                takeUntil(this._unsubscribeAll)
+            ).subscribe(userInput => {                
+                this.autoCompleteSetList(userInput);
+            });
+
         // Mark for check
         this._changeDetectorRef.markForCheck();
     }
@@ -705,13 +746,20 @@ export class EditProductComponent implements OnInit, OnDestroy
 
         // Sort productAssets and place itemCode null in front, after that variants image
         let imagesObjSorted = product.productAssets.sort(this.dynamicSort("itemCode"));
-        let imageArr = imagesObjSorted.map(item => item.url);
 
-        imagesObjSorted.forEach(item => {
-            this.imagesWithId.push({id: item.id, url: item.url})
-        })
+        // imagesObjSorted.forEach(item => {
+        //     this.imagesWithId.push({id: item.id, url: item.url, isThumbnail: item.isThumbnail})
+        // })
         
-        this.images = imageArr;
+        this.productImages = imagesObjSorted.map(item => {
+            return {
+                preview: item.url,
+                file: null,
+                isThumbnail: item.isThumbnail,
+                assetId: item.id,
+                itemCode: item.itemCode
+            }
+        });
 
         // get thumbnail index
         let _thumbnailIndex = null;
@@ -740,23 +788,18 @@ export class EditProductComponent implements OnInit, OnDestroy
             _thumbnailIndex = imagesObjSorted.findIndex(item => item.isThumbnail === true)
         }
 
-        this.thumbnailIndex = _thumbnailIndex === -1 ? 0 : _thumbnailIndex;
+        // this.thumbnailIndex = _thumbnailIndex === -1 ? 0 : _thumbnailIndex;
 
         // ---------------------
         // Product Assets
         // ---------------------
 
-        this.productAssets$ = product.productAssets;
-
         this.productAssetsFA = this.addProductForm.get('step1').get('productAssets') as FormArray;
-        // this.productAssets.clear();
+        // this.imagesFile = [];
 
-
-        this.imagesFile = [];
-
-        this.productAssets$.forEach(item => {
+        product.productAssets.forEach(item => {
             this.productAssetsFA.push(this._formBuilder.group(item));
-            this.imagesFile.push(null) // push imagesFile with null to defined now many array in imagesFile
+            // this.imagesFile.push(null) // push imagesFile with null to defined now many array in imagesFile
         });
 
         // ---------------------
@@ -935,10 +978,10 @@ export class EditProductComponent implements OnInit, OnDestroy
                 this.selectedVariantCombos[comboIndex].sku = item.sku;
                 this.selectedVariantCombos[comboIndex].quantity = item.quantity;
                 this.selectedVariantCombos[comboIndex].status = item.status;
-                this.selectedVariantCombos[comboIndex].preview = '';
-                this.selectedVariantCombos[comboIndex].newAsset = false;
-                this.selectedVariantCombos[comboIndex].isThumbnail = false;
-                this.selectedVariantCombos[comboIndex].file = '';
+                this.selectedVariantCombos[comboIndex].image.preview = '';
+                this.selectedVariantCombos[comboIndex].image.newAsset = false;
+                this.selectedVariantCombos[comboIndex].image.isThumbnail = false;
+                this.selectedVariantCombos[comboIndex].image.file = null;
             }
         });        
         const pIdLen = this.selectedProduct.id.length;
@@ -949,7 +992,9 @@ export class EditProductComponent implements OnInit, OnDestroy
                 this.variantimages[index] = ({ itemCode: element.itemCode, preview: element.url, assetId: element.id, isThumbnail: element.isThumbnail })
 
                 if (this.selectedVariantCombos[index]) {
-                    this.selectedVariantCombos[index].preview = element.url;
+                    this.selectedVariantCombos[index].image.preview = element.url;
+                    this.selectedVariantCombos[index].image.isThumbnail = element.isThumbnail;
+                    this.selectedVariantCombos[index].image.assetId = element.id;
                 }
             }
         });
@@ -1031,19 +1076,6 @@ export class EditProductComponent implements OnInit, OnDestroy
         if ( event.key !== 'Enter' )
         {
             return;
-        }
-
-        // If there is no category available...
-        if ( this.filteredProductCategories.length === 0 )
-        {
-        //  // Create the category
-        //  this.createCategory(event.target.value);
-
-        //  // Clear the input
-        //  event.target.value = '';
-
-        //  // Return
-        //  return;
         }
 
         // If there is a category...
@@ -1226,9 +1258,20 @@ export class EditProductComponent implements OnInit, OnDestroy
     /**
      * Toggle the categories edit mode
      */
-    toggleImagesEditMode(): void
+    toggleImagesEditMode(isOn: boolean, type: string): void
     {
-        this.imagesEditMode = !this.imagesEditMode;
+        this.imagesChangeMode.isOn = isOn;
+        if (type === 'Edit') {
+            this.imagesChangeMode.mode.edit = isOn;
+            
+        }
+        else if (type === 'Add') {
+            this.imagesChangeMode.mode.create = isOn;
+        }
+        else {
+            this.imagesChangeMode.mode.edit = isOn;
+            this.imagesChangeMode.mode.create = isOn;
+        }
     }
      
     /**
@@ -1279,7 +1322,6 @@ export class EditProductComponent implements OnInit, OnDestroy
             return;
         }
 
-
         // Return and throw warning dialog if image file size is big
         let maxSize = 1048576;
         var maxSizeInMB = (maxSize / (1024*1024)).toFixed(2);
@@ -1314,24 +1356,20 @@ export class EditProductComponent implements OnInit, OnDestroy
         reader.onload = (_event)  => {
             // add new image
             if(!images.length === true) {
-                this.images.push(reader.result);
-                this.imagesFile.push(file);
-                this.currentImageIndex = this.images.length - 1;
-                
+                this.productImages.push({preview: reader.result, file: file, isThumbnail: false, assetId: null, itemCode: null})
+                this.currentImageIndex = this.productImages.length - 1;
             } 
             // replace current image
             else {
-                this.images[this.currentImageIndex] = reader.result + "";
-                this.imagesFile[this.currentImageIndex] = file;
+                this.productImages[this.currentImageIndex].preview = reader.result + "";
                 this.imagesToBeDeleted.push({id: this.addProductForm.get('step1').get('productAssets').value[this.currentImageIndex].id, index: this.currentImageIndex})
-
-                this.imagesWithId[this.currentImageIndex] = { id: null, url: reader.result + ""}
             }
             
             // set as dirty to remove pristine condition of the form control
             this.addProductForm.get('step1').markAsDirty();
 
-            this.imagesEditMode = false; 
+            // Close edit mode
+            this.toggleImagesEditMode(false, '')
             this._changeDetectorRef.markForCheck();
         }
     }
@@ -1342,51 +1380,19 @@ export class EditProductComponent implements OnInit, OnDestroy
     removeImage(): void
     {
         const index = this.currentImageIndex;
-
-        // if (index === this.thumbnailIndex){
-
-        //     this._fuseConfirmationService.open({
-        //     title  : 'Reminder',
-        //     message: 'You cannot delete a thumbnail image.',
-        //     icon       : {
-        //         show : true,
-        //         name : 'heroicons_outline:exclamation',
-        //         color: 'warning'
-        //     },
-        //     actions: {
-                
-        //         cancel: {
-        //             label: 'OK',
-        //             show: true
-        //             },
-        //         confirm: {
-        //             show: false,
-        //         }
-        //         }
-        //     });
-
-        // }
-        // else {
-
-
-        // }
         if (index > -1) {
-            this.images.splice(index, 1);
-            this.imagesFile.splice(index, 1);
+
+            // Reset current index
             this.currentImageIndex = 0;
-            if (this.imagesWithId[index]) {
+            if (this.productImages[index].assetId) {
                 
-                this.imagesToBeDeleted.push({id: this.imagesWithId[index].id, index: index})
+                this.imagesToBeDeleted.push({id: this.productImages[index].assetId, index: index})
             }
-            this.imagesWithId.splice(index, 1);
+            this.productImages.splice(index, 1);
         }
 
-        if (this.images.length == 0) {
-            this.thumbnailIndex = -1;
-        }
-        else if (this.images.length == 1) {
-            this.thumbnailIndex = 0;
-        }
+        // Close edit mode
+        this.toggleImagesEditMode(false, '')
 
         this._changeDetectorRef.markForCheck();
         
@@ -1400,7 +1406,7 @@ export class EditProductComponent implements OnInit, OnDestroy
     cycleImages(forward: boolean = true): void
     {
         // Get the image count and current image index
-        const count = this.images.length;
+        const count = this.productImages.length;
         const currentIndex = this.currentImageIndex;
 
         // Calculate the next and previous index
@@ -1417,10 +1423,15 @@ export class EditProductComponent implements OnInit, OnDestroy
         {
             this.currentImageIndex = prevIndex;
         }
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
 
     resetCycleImages(){
         this.currentImageIndex = 0;
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
 
     // --------------------------------------
@@ -1472,8 +1483,20 @@ export class EditProductComponent implements OnInit, OnDestroy
         product.name = product.name.trim();
 
         // Get the product object for updating the product
-        const { productAssets, productInventories, productReviews, productVariants, ...productToUpdate} = product;
+        const { productAssets, productInventories, productReviews, productVariants, images, imagefiles, thumbnailIndex, ...productToUpdate} = product;
+
+        // HANDLE ASSETS
+        await this.postProductImages();
+
+        // Delete product images
+        for (let i = 0; i < this.imagesToBeDeleted.length; i++) {
+            await lastValueFrom(this._inventoryService.deleteProductAssets(this.selectedProduct.id, this.imagesToBeDeleted[i].id)).then(data => {
+                this._changeDetectorRef.markForCheck();
+            });
+        }
         
+        this.imagesToBeDeleted = [];
+
         // Update the product
         await this._inventoryService.updateProduct(this.selectedProduct.id, productToUpdate)
         .pipe(takeUntil(this._unsubscribeAll))
@@ -1502,8 +1525,6 @@ export class EditProductComponent implements OnInit, OnDestroy
                         // Update cart item price
 
                         this._cartService.updateItemPriceBulk(null, this.variantsPriceChange.map(item => item.itemCode)).subscribe()
-                        // this.variantsPriceChange.filter(y => y.itemCode !== '').forEach(x => {
-                        // })
                     }
                 });
         
@@ -1566,9 +1587,7 @@ export class EditProductComponent implements OnInit, OnDestroy
                     if (this.oriPriceNoVariants !== this.addProductForm.get('step1').get('price').value) {
                         this._cartService.updateItemPriceBulk(null, [item.itemCode]).subscribe()
                     }
-                    
                 });
-    
             }
             // Show a success message
             this.showFlashMessage('success');
@@ -1588,85 +1607,7 @@ export class EditProductComponent implements OnInit, OnDestroy
 
         });
 
-        // create image
-        this.imagesFile.forEach((item, i ) => {
-            if (item){
-                let formData = new FormData();
-                formData.append('file',this.imagesFile[i]);
-                this._inventoryService.addProductAssets(this.selectedProduct.id, formData, (i === this.thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
-                    .pipe(takeUntil(this._unsubscribeAll))
-                    .subscribe((response)=>{
-
-                        this.addProductForm.get('step1').get('productAssets').value[i] = response;
-                        // Mark for check
-                        this._changeDetectorRef.markForCheck();
-                    });
-                }
-        })
-
-        // update the image (only thumbnail)
-        this.imagesWithId.forEach((asset, i) => {
-                
-            if (i === this.thumbnailIndex && asset.id) {
-                
-                let updateItemIndex = asset;
-                updateItemIndex.isThumbnail = true;
-
-                this._inventoryService.updateProductAssets(this.selectedProduct.id, updateItemIndex, asset.id)
-                    .pipe(takeUntil(this._unsubscribeAll))
-                    .subscribe((response)=>{
-                        // Mark for check
-                        this._changeDetectorRef.markForCheck();
-                    });
-            }
-
-        })
-
-        // Delete main product images
-        for (let i = 0; i < this.imagesToBeDeleted.length; i++) {
-            
-            await this._inventoryService.deleteProductAssets(this.selectedProduct.id, this.imagesToBeDeleted[i].id).toPromise().then(data => {
-
-                this.thumbnailIndex
-                this._changeDetectorRef.markForCheck();
-            });
-        }
-
-
-        // DELETE VARIANT IMAGES
-        for (let i = 0; i < this.variantImagesToBeDeleted.length; i++) {
-            await this._inventoryService.deleteProductAssets(this.selectedProduct.id, this.variantImagesToBeDeleted[i]).toPromise().then(data => {
-                this._changeDetectorRef.markForCheck();
-            });
-        }
-
-        // set the array to null
-        this.variantImagesToBeDeleted = [];
-        this.imagesToBeDeleted = [];
-
-
-        // CREATE VARIANT IMAGES
-        for (let i = 0; i < this.selectedVariantCombos.length; i++) {
-                
-            // if new, create new asset
-            if (this.selectedVariantCombos[i].newAsset == true) {
-            
-                let formdata = new FormData();
-                formdata.append("file", this.selectedVariantCombos[i].file);
-                await this._inventoryService.addProductAssets(this.selectedProduct.id, formdata, (i === this.thumbnailIndex) ? { isThumbnail: true , itemCode: this.selectedProduct.id + i } : { isThumbnail: false, itemCode: this.selectedProduct.id + i }, i)
-                .toPromise().then(data => {
-                    this._changeDetectorRef.markForCheck();
-                });
-            }
-            // if it is an old one, update it (update thumbnail)
-            else if (i === this.thumbnailIndex && this.selectedVariantCombos[i].newAsset == false && this.selectedVariantCombos[i].assetId) {
-                await this._inventoryService.updateProductAssets(this.selectedProduct.id, { isThumbnail: true , itemCode: this.selectedProduct.id + i }, this.selectedVariantCombos[i].assetId)
-                .toPromise().then(data => {
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            });
-            }
-        }
+        
         
     }
 
@@ -1827,12 +1768,78 @@ export class EditProductComponent implements OnInit, OnDestroy
         }
     }
 
-    setThumbnail(currentImageIndex: number){
-        this.thumbnailIndex = currentImageIndex;
+    setThumbnail(currentImageIndex: number, isVariant: boolean = false){
 
+        // set all image thumbnail to false first
+        this.productImages.map(item => item.isThumbnail = false);
+        if (this.selectedVariantCombos.length > 0) {
+            this.selectedVariantCombos.map(item => item.image.isThumbnail = false);
+        }
+        if (this.updateThumbnailArray.length > 0) {
+            this.updateThumbnailArray.map(item => item.isThumbnail = false);
+        }
+
+        // For variant
+        if (isVariant) {
+            // set isThumbnail for variant
+            this.selectedVariantCombos[currentImageIndex].image.isThumbnail = true;
+            
+            // if the image has assetId, push to array to be updated
+            if (this.selectedVariantCombos[currentImageIndex].image.assetId) {
+                let index = this.updateThumbnailArray.findIndex(item => item.assetId === this.selectedVariantCombos[currentImageIndex].image.assetId);
+                let indexForNormal = this.productImages.findIndex(item => item.assetId === this.selectedVariantCombos[currentImageIndex].image.assetId);
+
+                // update the array of images in the stepper 1 
+                if ( indexForNormal > -1 ) {
+                    this.productImages[indexForNormal].isThumbnail = true;
+                }
+
+                // if the asset id already exist in update thumbnail array, just update the value, else push
+                if ( index > -1) {
+                    this.updateThumbnailArray[index].isThumbnail = true;
+                }
+                else {
+                    this.updateThumbnailArray.push(
+                        {
+                            assetId     : this.selectedVariantCombos[currentImageIndex].image.assetId,
+                            itemCode    : this.selectedVariantCombos[currentImageIndex].itemCode,
+                            isThumbnail : true,    
+                        })
+                }
+            }
+        }
+        else {
+            // set isThumbnail for images in stepper 1
+            this.productImages[currentImageIndex].isThumbnail = true;
+            // if the image has assetId, push to array to be updated
+            if (this.productImages[currentImageIndex].assetId) {
+                let index = this.updateThumbnailArray.findIndex(item => item.assetId === this.productImages[currentImageIndex].assetId);
+                let indexForVariant = this.selectedVariantCombos.findIndex(item => item.image.assetId === this.productImages[currentImageIndex].assetId);
+
+                // update the array of images in the stepper 2 
+                if ( indexForVariant > -1 ) {
+                    this.selectedVariantCombos[indexForVariant].image.isThumbnail = true;
+                }
+
+                // if the asset id already exist in update thumbnail array, just update the value, else push
+                if ( index > -1) {
+                    this.updateThumbnailArray[index].isThumbnail = true;
+                }
+                else {
+                    this.updateThumbnailArray.push(
+                        {
+                            assetId     : this.productImages[currentImageIndex].assetId,
+                            itemCode    : this.productImages[currentImageIndex].itemCode,
+                            isThumbnail : true,    
+                        })
+                }
+            }
+        }
+        
         // set as dirty to remove pristine condition of the form control
         this.addProductForm.get('step1').markAsDirty();
-    
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
 
     // --------------------------------------
@@ -1982,8 +1989,8 @@ export class EditProductComponent implements OnInit, OnDestroy
                 // go through the assets and delete them
                 this.selectedVariantCombos.forEach(item => {
                     // if have itemCode means it is for variants
-                    if (item.itemCode && item.assetId){
-                        lastValueFrom(this._inventoryService.deleteProductAssets(this.selectedProduct.id, item.assetId)).then(data => {
+                    if (item.itemCode && item.image.assetId){
+                        lastValueFrom(this._inventoryService.deleteProductAssets(this.selectedProduct.id, item.image.assetId)).then(data => {
                             this._changeDetectorRef.markForCheck();
                         });
 
@@ -2371,21 +2378,17 @@ export class EditProductComponent implements OnInit, OnDestroy
         }
 
         // get the image id if any, then push into variantImagesToBeDeleted to be deleted BE
-        if (this.selectedVariantCombos[idx]?.assetId) {
-            this.variantImagesToBeDeleted.push(this.selectedVariantCombos[idx].assetId)
+        if (this.selectedVariantCombos[idx]?.image.assetId) {
+            this.imagesToBeDeleted.push({ id: this.selectedVariantCombos[idx].image.assetId, index: idx})
         }
 
-        // if (this.variantimages[idx].id) {
-        //     this.variantImagesToBeDeleted.push(this.variantimages[idx].id)
-        // }
-
         // call previewImage to assign 'preview' field with image url 
-        this.previewImage(file).then(data => {
+        this.previewImage(file).then((data: string | ArrayBuffer)  => {
             // this.variantimages[idx] = { file: file, preview: data, new: true };
 
-            this.selectedVariantCombos[idx].file = file;
-            this.selectedVariantCombos[idx].preview = data;
-            this.selectedVariantCombos[idx].newAsset = true;
+            this.selectedVariantCombos[idx].image.file = file;
+            this.selectedVariantCombos[idx].image.preview = data;
+            this.selectedVariantCombos[idx].image.newAsset = true;
 
             this._changeDetectorRef.markForCheck();
         })
@@ -2433,8 +2436,8 @@ export class EditProductComponent implements OnInit, OnDestroy
                 if (imageIdx > -1) {
 
                     // get the image id if any, then push into variantImagesToBeDeleted to be deleted BE
-                    if (this.selectedVariantCombos[imageIdx]?.assetId) {
-                        this.variantImagesToBeDeleted.push(this.selectedVariantCombos[imageIdx].assetId)
+                    if (this.selectedVariantCombos[imageIdx]?.image.assetId) {
+                        this.imagesToBeDeleted.push({ id: this.selectedVariantCombos[imageIdx].image.assetId, index: imageIdx})
                     }
                     
                     // // get the image id if any, then push into variantImagesToBeDeleted to be deleted BE
@@ -2443,10 +2446,10 @@ export class EditProductComponent implements OnInit, OnDestroy
                     // }
 
                     // empty preview for that index to simulate 'delete'
-                    this.selectedVariantCombos[imageIdx].preview = '';
+                    this.selectedVariantCombos[imageIdx].image.preview = '';
 
                     // set newAsset to false
-                    this.selectedVariantCombos[imageIdx].newAsset = false;
+                    this.selectedVariantCombos[imageIdx].image.newAsset = false;
                                     
                 }
                 this._changeDetectorRef.markForCheck();
@@ -2559,10 +2562,15 @@ export class EditProductComponent implements OnInit, OnDestroy
         let nameCombo = "";
         if (n == combos.length) {
             if (nameComboOutput.substring(1) != "") {
-                // this.selectedVariantCombos.push({ itemCode: itemCode, variant: nameComboOutput.substring(1), price: 0, quantity: 0, sku: 0, status: "NOTAVAILABLE" })
-                this.selectedVariantCombos.push({ itemCode: itemCode, variant: nameComboOutput.substring(1), price: 0, quantity: 0, sku: nameComboOutput.substring(1).toLowerCase().replace(" / ", "-"), status: "NOTAVAILABLE" })
-            }
-        
+            this.selectedVariantCombos.push({ 
+                image: { preview: null, file: null, isThumbnail: false, newAsset: false, assetId: null}, 
+                itemCode: itemCode, 
+                variant: nameComboOutput.substring(1), 
+                price: 0, quantity: 0, 
+                sku: nameComboOutput.substring(1).toLowerCase().replace(" / ", "-"), 
+                status: "NOTAVAILABLE" 
+            })
+          }
           return nameComboOutput.substring(1);
         }
     
@@ -3142,6 +3150,218 @@ export class EditProductComponent implements OnInit, OnDestroy
         }
         else if (value === 'ACTIVE' && (this.store$.verticalCode === 'FnB' || this.store$.verticalCode === 'FnB_PK')) {
             this.addProductForm.get('step1').get('allowOutOfStockPurchases').patchValue(true);
+        }
+    }
+
+    
+    /**
+     * Open search image panel
+     */
+    openSearchImagePanel(): void
+    {
+        // Create the overlay
+        this._imageSearchPanelOverlayRef = this._overlay.create({
+            backdropClass   : '',
+            hasBackdrop     : true,
+            scrollStrategy  : this._overlay.scrollStrategies.block(),
+            positionStrategy: this._overlay.position()
+                                .flexibleConnectedTo(this._imageSearchPanelOrigin.nativeElement)
+                                .withFlexibleDimensions(true)
+                                .withViewportMargin(64)
+                                .withLockedPosition(true)
+                                .withPositions([
+                                    {
+                                        originX : 'start',
+                                        originY : 'bottom',
+                                        overlayX: this.currentScreenSize.includes('sm') ? 'start' : 'end',
+                                        overlayY: 'top',
+                                        // offsetY : 32,
+                                        // offsetX : this.currentScreenSize.includes('sm') ? -81 : 64
+                                    }
+                                ])
+        });
+
+        // Subscribe to the attachments observable
+        this._imageSearchPanelOverlayRef.attachments().subscribe(() => {
+
+            // Add a class to the origin
+            this._renderer2.addClass(this._imageSearchPanelOrigin.nativeElement, 'panel-opened');
+
+            // Focus to the search input once the overlay has been attached
+            this._imageSearchPanelOverlayRef.overlayElement.querySelector('input').focus();
+        });
+
+        // Create a portal from the template
+        const templatePortal = new TemplatePortal(this._imageSearchPanel, this._viewContainerRef);
+
+        // Attach the portal to the overlay
+        this._imageSearchPanelOverlayRef.attach(templatePortal);
+
+        // Subscribe to the backdrop click
+        this._imageSearchPanelOverlayRef.backdropClick().subscribe(() => {
+
+            // Remove the class from the origin
+            this._renderer2.removeClass(this._imageSearchPanelOrigin.nativeElement, 'panel-opened');
+
+            // If overlay exists and attached...
+            if ( this._imageSearchPanelOverlayRef && this._imageSearchPanelOverlayRef.hasAttached() )
+            {
+                // Detach it
+                this._imageSearchPanelOverlayRef.detach();
+            }
+            // If template portal exists and attached...
+            if ( templatePortal && templatePortal.isAttached )
+            {
+                // Detach it
+                templatePortal.detach();
+            }
+            this.searchImageControl.patchValue('');
+        });
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+    }
+
+    selectImage(value: {name: string, url: string}) {
+
+        this.productImages.push({preview: value.url, file: null, isThumbnail: false, assetId: null, itemCode: null})
+
+        this.currentImageIndex = this.productImages.length - 1;
+
+        // Close edit mode
+        this.toggleImagesEditMode(false, '')
+        
+        //----------------------------
+        // To simulate backdrop click
+        //----------------------------
+        // Create a portal from the template
+        const templatePortal = new TemplatePortal(this._imageSearchPanel, this._viewContainerRef);
+
+        // Remove the class from the origin
+        this._renderer2.removeClass(this._imageSearchPanelOrigin.nativeElement, 'panel-opened');
+
+        // If overlay exists and attached...
+        if ( this._imageSearchPanelOverlayRef && this._imageSearchPanelOverlayRef.hasAttached() )
+        {
+            // Detach it
+            this._imageSearchPanelOverlayRef.detach();
+        }
+
+        // If template portal exists and attached...
+        if ( templatePortal && templatePortal.isAttached )
+        {
+            // Detach it
+            templatePortal.detach();
+        }
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+
+        // set as dirty to remove pristine condition of the form control
+        this.addProductForm.get('step1').markAsDirty();
+        
+    }
+    /**
+     * Set the filtered value to an array to be displayed
+     * 
+     * @param input 
+     */
+    autoCompleteSetList(input: string) {
+        if (input && input !== '') {
+            this._inventoryService.searchProduct(input)
+                .subscribe((products: Product[]) => {
+                    
+                    this.autoCompleteList = products.map(product => {
+                        return {
+                            url: product.thumbnailUrl,
+                            name: product.name
+                        }
+                    });
+                })
+        }
+        else {
+            this.autoCompleteList = [];
+        }
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+    }
+
+    blurInput() {
+        // Remove focus
+        setTimeout(() => this.searchImageElement.nativeElement.blur());
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+    }
+
+    async postProductImages(){
+
+        // let variantImagesArr = []
+        let newVariantImagesArr = []
+
+        if (this.selectedVariantCombos) {
+
+            // Map then filter out new assets
+            newVariantImagesArr = this.selectedVariantCombos.map((item, i) => {
+                return {
+                    file: item.image.file,
+                    isThumbnail: item.image.isThumbnail,
+                    preview: null,
+                    itemCode: this.selectedProduct.id + i,
+                    newAsset: item.image.newAsset
+                }
+            }).filter(item => item.newAsset);
+        }
+
+        // Filter out asset id null
+        let newNormalImagesArr = this.productImages.filter(item => item.assetId === null);
+
+        // let normalImagesArr = this.productImages;
+
+        // If one of the variant images is thumbnail, set all normal images thumbnail to false
+        // if (variantImagesArr.some(item => item.isThumbnail === true)) {
+        //     normalImagesArr.map(item => item.isThumbnail = false)
+        // }
+
+        let mergedImagesToBeCreated = [...newNormalImagesArr, ...newVariantImagesArr].filter(item => ((item.file !== null) || (item.preview !== null)))
+        // let mergedImagesToBeUpdated = [...normalImagesArr, ...variantImagesArr].filter(item => ((item.file !== null) || (item.preview !== null)))
+        
+        if (mergedImagesToBeCreated.length > 0) {
+            
+            for (let index = 0; index < mergedImagesToBeCreated.length; index++) {
+                const element = mergedImagesToBeCreated[index];
+
+                // create a new one
+                let formData = new FormData();
+                
+                if (element.file) {
+                    formData.append('file', element.file);
+                }
+                else formData = null;
+
+                this._inventoryService.addProductAssets( this.selectedProduct.id, formData, { isThumbnail: element.isThumbnail, itemCode: element.itemCode }, null, 
+                    (element.file === null && element.preview !== null) ? element.preview : null)
+                    .pipe(takeUntil(this._unsubscribeAll))
+                    .subscribe((assetResponse: ProductAssets)=> {
+                        if (assetResponse.isThumbnail){
+                            this.selectedProduct.thumbnailUrl = assetResponse.url;
+                        }
+
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    });
+            }
+        }
+        if (this.updateThumbnailArray.length > 0) {
+            // Update thumbnail
+            for (let i = 0; i < this.updateThumbnailArray.length; i++) {
+                    
+                this._inventoryService.updateProductAssets(this.selectedProduct.id, { isThumbnail: this.updateThumbnailArray[i].isThumbnail }, this.updateThumbnailArray[i].assetId)
+                .subscribe(data => {
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+           
+                })
+            }
         }
     }
     

@@ -358,7 +358,7 @@ export class InventoryService
                     this._products.next([_newProduct, ...products]);
 
                     // Return the new product
-                    return newProduct;
+                    return _newProduct;
                 })
             ))
         );
@@ -389,6 +389,10 @@ export class InventoryService
 
                     // Find the index of the updated product
                     const index = products.findIndex(item => item.id === id);
+
+                    if (!updatedProduct["data"].thumbnailUrl){
+                        updatedProduct["data"]["thumbnailUrl"] = null;
+                    }
                     
                     // Update the product
                     products[index] = { ...products[index], ...updatedProduct["data"]};
@@ -485,7 +489,7 @@ export class InventoryService
      *
      * @param product
      */
-     addProductAssets(productId: string, formData: FormData, productAssets: ProductAssets, assetIndex: number = null): Observable<ProductAssets>{
+    addProductAssets(productId: string, formData: FormData = null, productAssets: ProductAssets, assetIndex: number = null, url: any = null): Observable<ProductAssets>{
 
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
@@ -495,20 +499,24 @@ export class InventoryService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
             params: {
                 itemCode: productAssets.itemCode,
-                isThumbnail: productAssets.isThumbnail
+                isThumbnail: productAssets.isThumbnail,
+                url
             }
         };
 
         if (!productAssets.itemCode || productAssets.itemCode == "") {
-            delete header.params['itemCode'];
+            delete header.params.itemCode;
+        }
+        if (!url || url === "") {
+            delete header.params.url;
         }
 
         return this.products$.pipe(
             take(1),
-            switchMap(products => this._httpClient.post<Product>(productService +'/stores/'+this.storeId$+'/products/' + productId + "/assets", formData , header).pipe(
+            switchMap(products => this._httpClient.post<Product>(productService +'/stores/' + this.storeId$ + '/products/' + productId + "/assets", formData , header).pipe(
                 map((response) => {
 
-                    this._logging.debug("Response from ProductsService (addProductAssets)",response);
+                    this._logging.debug("Response from ProductsService (addProductAssets)", response);
                     
                     // Find the index of the updated product
                     const index = products.findIndex(item => item.id === productId);
@@ -536,7 +544,7 @@ export class InventoryService
                         
                     }
                     
-                    if (productAssets.isThumbnail === true) {
+                    if (response["data"].isThumbnail === true) {
                         updatedProduct.thumbnailUrl = response["data"].url;
                     }
                     
@@ -1172,29 +1180,6 @@ export class InventoryService
         );
     }
 
-    // deleteVariantAvailableInBulk(variantAvailable: ProductVariantAvailable[], productId:string){
-    //     let productService = this._apiServer.settings.apiServer.productService;
-    //     let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
-    //     let clientId = this._jwt.getJwtPayload(this.accessToken).uid;
-
-    //     const header = {
-    //         headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
-    //     };
-      
-    //     return this.products$.pipe(
-    //         take(1),
-    //         switchMap(products => this._httpClient.delete(productService + '/stores/' + this.storeId$ + '/products/' + productId + '/variants-available/bulk', variantAvailable, header).pipe(
-    //             map((response) => {
-
-    //                 this._logging.debug("Response from ProductsService (Delete Variant Available in Bulk)", response);
-
-    //                 // Return the deleted variant available
-    //                 return variantAvailable;
-    //             })
-    //         ))
-    //     );
-    // }
-
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
@@ -1689,4 +1674,28 @@ export class InventoryService
             );
     }
 
+    searchProduct(name: string, page: number = 0, size: number = 10,):  Observable<Product[]>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                page        : '' + page,
+                pageSize    : '' + size,
+                name        : '' + name,
+            }
+        };
+
+        return this._httpClient.get<any>(productService + '/products/search/', header).pipe(
+            map((response) => {
+
+                this._logging.debug("Response from ProductsService (searchProduct)", response);
+
+                return response.data.content;
+            })
+        );
+    }
 }

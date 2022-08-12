@@ -6,7 +6,7 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { fromEvent, lastValueFrom, merge, Observable, of, Subject } from 'rxjs';
 import { debounceTime, delay, finalize, map, switchMap, take, takeUntil } from 'rxjs/operators';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, ProductCategory, ProductPagination, ProductPackageOption, ApiResponseModel, ProductInventoryItem } from 'app/core/product/inventory.types';
+import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, ProductCategory, ProductPagination, ProductPackageOption, ApiResponseModel, ProductInventoryItem, ProductAssets } from 'app/core/product/inventory.types';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { Store } from 'app/core/store/store.types';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -110,6 +110,17 @@ import { MatPaginator } from '@angular/material/paginator';
                 }
             }
 
+            /** Custom input number **/
+            input[type='number']::-webkit-inner-spin-button,
+            input[type='number']::-webkit-outer-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+
+            input[type='number'] {
+                -moz-appearance:textfield;
+            }
+
         `
     ],
   })
@@ -119,6 +130,9 @@ export class AddProductComponent implements OnInit, OnDestroy
     @ViewChild('variantsPanelOrigin') private _variantsPanelOrigin: ElementRef;
     @ViewChild('variantsPanel') private _variantsPanel: TemplateRef<any>;
     @ViewChild('productPaginationCombo', {read: MatPaginator}) private _productPaginator: MatPaginator;
+    @ViewChild('imageSearchPanelOrigin') private _imageSearchPanelOrigin: ElementRef;
+    @ViewChild('imageSearchPanel') private _imageSearchPanel: TemplateRef<any>;
+    @ViewChild('searchImageInput') public searchImageElement: ElementRef;
 
 
     // get current store
@@ -131,7 +145,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     addProductForm: FormGroup;
     products$: Observable<Product[]>;
     createdProductForm: FormGroup;
-    productType: string;
+    productType: 'combo' | 'normal';
     newProductId: string = null; // product id after it is created
     creatingProduct: boolean; // use to disable next button until product is created
     allProducts: Product[]; // used for checking if product name already exist 
@@ -161,14 +175,31 @@ export class AddProductComponent implements OnInit, OnDestroy
     productCategoriesValueEditMode:any = [];
 
     // product assets
-    images: any = [];
-    imagesFile: any = [];
-    thumbnailIndex: number = 0;
+    productImages: {
+        preview: string | ArrayBuffer,
+        file: File,
+        isThumbnail: boolean
+    }[] = [];
+    // thumbnailIndex: number = 0;
     currentImageIndex: number = 0;
-    imagesEditMode: boolean = false;
+    // imagesEditMode: boolean = false;
+    imagesChangeMode: {
+        isOn: boolean,
+        mode: {
+            create: boolean,
+            edit: boolean
+        }
+    } = {
+        isOn: false,
+        mode: {
+            create: false,
+            edit: false
+        }
+    };
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     private _variantsPanelOverlayRef: OverlayRef;
+    private _imageSearchPanelOverlayRef: OverlayRef;
 
     quillModules: any = {
         toolbar: [
@@ -192,12 +223,14 @@ export class AddProductComponent implements OnInit, OnDestroy
     productVariants: ProductVariant[] = []; // (variantComboOptions)
     variantToBeCreated: ProductVariant[] = []; // use for creating on BE 
     selectedVariantCombos: {
-        file?: any,
-        isThumbnail?: boolean,
+        image: {
+            preview?: string | ArrayBuffer,
+            file?: File,
+            isThumbnail?: boolean,
+            newAsset?: boolean,
+            assetId?: string,
+        },
         itemCode: string,
-        newAsset?: boolean,
-        assetId?: string,
-        preview?: any,
         price: number,
         quantity: number,
         sku: string,
@@ -219,7 +252,6 @@ export class AddProductComponent implements OnInit, OnDestroy
         values: string[],
         ids: string[]
     }[] = []; // this is used for generating combinations
-    variantComboOptions: ProductVariant[];
     flashMessage: 'success' | 'error' | null = null;
     isLoading: boolean = false;
     currentScreenSize: string[];
@@ -234,6 +266,10 @@ export class AddProductComponent implements OnInit, OnDestroy
     selectedParentCategory: string ='';
     parentCategoriesOptions: ProductCategory[];
     storeVerticalCode : string = '';
+
+    searchImageControl: FormControl = new FormControl();
+    autoCompleteList: {url: string, name: string}[] = [];
+
 
     /**
      * Constructor
@@ -432,6 +468,15 @@ export class AddProductComponent implements OnInit, OnDestroy
             // Mark for check
             this._changeDetectorRef.markForCheck();
         });       
+        
+        // Subscribe to search control reactive form
+        this.searchImageControl.valueChanges
+        .pipe(
+            debounceTime(500),
+            takeUntil(this._unsubscribeAll)
+            ).subscribe(userInput => {                
+                this.autoCompleteSetList(userInput);
+            });
         // Mark for check
         this._changeDetectorRef.markForCheck();
     }
@@ -450,6 +495,11 @@ export class AddProductComponent implements OnInit, OnDestroy
         {
             this._variantsPanelOverlayRef.dispose();
         }
+        // Dispose the overlays if they are still on the DOM
+        if ( this._imageSearchPanelOverlayRef )
+        {
+            this._imageSearchPanelOverlayRef.dispose();
+        }
     }
 
     ngAfterViewInit(): void
@@ -459,11 +509,6 @@ export class AddProductComponent implements OnInit, OnDestroy
 
         setTimeout(() => {
 
-            // Mark for check
-            this._changeDetectorRef.markForCheck();        
-
-            
-            
             if ( this._productPaginator )
             {
                 // Mark for check
@@ -484,9 +529,6 @@ export class AddProductComponent implements OnInit, OnDestroy
                     })
                 ).subscribe();
             }
-
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
 
         }, 150);
 
@@ -736,9 +778,22 @@ export class AddProductComponent implements OnInit, OnDestroy
     /**
      * Toggle the categories edit mode
      */
-    toggleImagesEditMode(): void
+    toggleImagesEditMode(isOn: boolean, type: string): void
     {
-        this.imagesEditMode = !this.imagesEditMode;
+        this.imagesChangeMode.isOn = isOn;
+        if (type === 'Edit') {
+            // this.imagesEditMode = !this.imagesEditMode;
+            this.imagesChangeMode.mode.edit = isOn;
+            
+        }
+        else if (type === 'Add') {
+            // this.imagesAddMode = !this.imagesAddMode;
+            this.imagesChangeMode.mode.create = isOn;
+        }
+        else {
+            this.imagesChangeMode.mode.edit = isOn;
+            this.imagesChangeMode.mode.create = isOn;
+        }
     }
      
     /**
@@ -822,14 +877,15 @@ export class AddProductComponent implements OnInit, OnDestroy
         reader.readAsDataURL(file); 
         reader.onload = (_event)  => {
             if(!images.length === true) {
-                this.images.push(reader.result);
-                this.imagesFile.push(file);
-                this.currentImageIndex = this.images.length - 1;
+                this.productImages.push({preview: reader.result, file: file, isThumbnail: false})
+                this.currentImageIndex = this.productImages.length - 1;
             } else {
-                this.images[this.currentImageIndex] = reader.result + "";
+                this.productImages[this.currentImageIndex].preview = reader.result + "";
             }
 
-            this.imagesEditMode = false; 
+            // Close edit mode
+            this.toggleImagesEditMode(false, '')
+            // this.imagesAddMode = false;
             this._changeDetectorRef.markForCheck();
         }
     }
@@ -841,9 +897,15 @@ export class AddProductComponent implements OnInit, OnDestroy
     {
         const index = this.currentImageIndex;
         if (index > -1) {
-            this.images.splice(index, 1);
-            this.imagesFile.splice(index, 1);
+            // this.images.splice(index, 1);
+            // this.imagesFile.splice(index, 1);
+            this.productImages.splice(index, 1);
+
+            // Reset current index
             this.currentImageIndex = 0;
+
+            // Close edit mode
+            this.toggleImagesEditMode(false, '')
         }
     }
 
@@ -853,7 +915,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     cycleImages(forward: boolean = true): void
     {
         // Get the image count and current image index
-        const count = this.images.length;
+        const count = this.productImages.length;
         const currentIndex = this.currentImageIndex;
 
         // Calculate the next and previous index
@@ -870,10 +932,15 @@ export class AddProductComponent implements OnInit, OnDestroy
         {
             this.currentImageIndex = prevIndex;
         }
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
 
     resetCycleImages(){
         this.currentImageIndex = 0;
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
 
     // --------------------------------------
@@ -906,9 +973,6 @@ export class AddProductComponent implements OnInit, OnDestroy
     {
         this.creatingProduct = true;
 
-        this.addProductForm.get('step1').get('images').patchValue(this.images);
-        this.addProductForm.get('step1').get('imagefiles').patchValue(this.imagesFile);
-
         // if the bulk item toggle stays close, then set to 'motorcycle'
         if (this.addProductForm.get('step1').get('isBulkItem').value === false){
             this.addProductForm.get('step1').get('vehicleType').setValue('MOTORCYCLE')
@@ -938,40 +1002,20 @@ export class AddProductComponent implements OnInit, OnDestroy
                     this.creatingProduct = false;
                 })
             )
-            .subscribe(async (newProduct) => {
+            .subscribe(async (newProduct: Product) => {
 
-                this.newProductId = newProduct["data"].id;
-                this.selectedProduct = newProduct["data"];    
+                this.newProductId = newProduct.id;
+                this.selectedProduct = newProduct;    
                 
                 // Add Inventory to product
-                this._inventoryService.addInventoryToProduct(newProduct["data"], { sku: sku, quantity: availableStock, price:price, itemCode:newProduct["data"].id + "aa" } )
-                    .subscribe((response)=>{
+                this._inventoryService.addInventoryToProduct(newProduct, { sku: sku, quantity: availableStock, price: price, itemCode: newProduct.id + "aa" } )
+                    .subscribe((inventoryResponse: ProductInventory)=>{
 
-                        // Update the assets product on the server (backend kena enable update)
-                        if (imagefiles) {
-                            for (var i = 0; i < imagefiles.length; i++) {
-                                // create a new one
-                                let formData = new FormData();
-                                formData.append('file',imagefiles[i]);
-                                this._inventoryService.addProductAssets(newProduct["data"].id, formData, (i === thumbnailIndex) ? { isThumbnail: true } : { isThumbnail: false })
-                                    .pipe(takeUntil(this._unsubscribeAll))
-                                    .subscribe((response)=>{
-                                        if (response.isThumbnail){
-                                            this.selectedProduct.thumbnailUrl = response.url;
-                                        }
-
-                                        // Mark for check
-                                        this._changeDetectorRef.markForCheck();
-                                    });
-                            }
-
-                            // load images
-                            this.currentImageIndex = 0;
-                            this.imagesFile = imagefiles;
-                            this.images = images;
-                            this.thumbnailIndex = thumbnailIndex;
+                        if ( this.addProductForm.get('step1').get('isVariants').value === false ) {
+                            // Post assets
+                            this.postProductImages();
                         }
-
+                        
                     });
                 
                 // Set filtered variants to empty array
@@ -1006,7 +1050,6 @@ export class AddProductComponent implements OnInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             });
     }
-
 
     async postVariantMethod(){
         
@@ -1047,40 +1090,8 @@ export class AddProductComponent implements OnInit, OnDestroy
             }
             await this.addInventoryItem(variantAvailablesCreated);
 
-            // CREATE VARIANT IMAGES
-            for (let i = 0; i < this.selectedVariantCombos.length; i++) {
-                
-                // if new, create new asset
-                if (this.selectedVariantCombos[i].newAsset == true) {
-                
-                    let formdata = new FormData();
-                    formdata.append("file", this.selectedVariantCombos[i].file);
-                    await this._inventoryService.addProductAssets(this.selectedProduct.id, formdata, (i === this.thumbnailIndex) ? { isThumbnail: true , itemCode: this.selectedProduct.id + i } : { isThumbnail: false, itemCode: this.selectedProduct.id + i }, i)
-                    .toPromise().then(data => {
-                        this._changeDetectorRef.markForCheck();
-                        // Show a success message
-                        this.showFlashMessage('success');
-                        // Set delay before closing the window
-                        setTimeout(() => {
-
-                            // close the window
-                            this.dialogRef.close({ valid: false });
-                
-                            // Mark for check
-                            this._changeDetectorRef.markForCheck();
-                        }, 1000);
-
-                    });
-                }
-                // if it is an old one, update it (update thumbnail)
-                else if ((i === this.thumbnailIndex) && (this.selectedVariantCombos[i].newAsset == false) && (this.selectedVariantCombos[i].file != '')) {
-                    await this._inventoryService.updateProductAssets(this.selectedProduct.id, { isThumbnail: true , itemCode: this.selectedProduct.id + i }, this.selectedVariantCombos[i].assetId)
-                    .toPromise().then(data => {
-                    // Mark for check
-                    this._changeDetectorRef.markForCheck();
-                    });
-                }
-            }
+            // Post assets
+            this.postProductImages();
 
             // Show a success message
             this.showFlashMessage('success');
@@ -1249,8 +1260,22 @@ export class AddProductComponent implements OnInit, OnDestroy
         }
     }
 
-    setThumbnail(currentImageIndex: number){
-        this.thumbnailIndex = currentImageIndex;
+    setThumbnail(currentImageIndex: number, isVariant: boolean = false){
+        // this.thumbnailIndex = currentImageIndex;
+
+        // set all image thumbnail to false first
+        this.productImages.map(item => item.isThumbnail = false);
+        if (this.selectedVariantCombos.length > 0) {
+            this.selectedVariantCombos.map(item => item.image.isThumbnail = false);
+        }
+
+        // For variant
+        if (isVariant) {
+            this.selectedVariantCombos[currentImageIndex].image.isThumbnail = true;
+        }
+        else {
+            this.productImages[currentImageIndex].isThumbnail = true;
+        }
     }
 
     // --------------------------------------
@@ -1681,20 +1706,18 @@ export class AddProductComponent implements OnInit, OnDestroy
             });
             return;
         }
-        
 
         // get the image id if any, then push into variantImagesToBeDeleted to be deleted BE
-        if (this.selectedVariantCombos[idx]?.assetId) {
-            // this.variantImagesToBeDeleted.push(this.selectedVariantCombos[idx].assetId)
-        }
+        // if (this.selectedVariantCombos[idx]?.image.assetId) {
+        //     // this.variantImagesToBeDeleted.push(this.selectedVariantCombos[idx].assetId)
+        // }
 
         // call previewImage to assign 'preview' field with image url 
-        this.previewImage(file).then(data => {
-            // this.variantimages[idx] = { file: file, preview: data, new: true };
+        this.previewImage(file).then((data: string | ArrayBuffer) => {
 
-            this.selectedVariantCombos[idx].file = file;
-            this.selectedVariantCombos[idx].preview = data;
-            this.selectedVariantCombos[idx].newAsset = true;
+            this.selectedVariantCombos[idx].image.file = file;
+            this.selectedVariantCombos[idx].image.preview = data;
+            this.selectedVariantCombos[idx].image.newAsset = true;
 
             this._changeDetectorRef.markForCheck();
         })
@@ -1719,7 +1742,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     /**
      * Remove variant image
      */
-    removeVariantImageMethod(imageIdx): void
+    removeVariantImageMethod(imageIdx: number): void
     {
         
         // Open the confirmation dialog
@@ -1742,20 +1765,14 @@ export class AddProductComponent implements OnInit, OnDestroy
                 if (imageIdx > -1) {
 
                     // get the image id if any, then push into variantImagesToBeDeleted to be deleted BE
-                    if (this.selectedVariantCombos[imageIdx]?.assetId) {
+                    if (this.selectedVariantCombos[imageIdx]?.image.assetId) {
                         // this.variantImagesToBeDeleted.push(this.selectedVariantCombos[imageIdx].assetId)
                     }
-                    
-                    // // get the image id if any, then push into variantImagesToBeDeleted to be deleted BE
-                    // if (this.variantimages[imageIdx].id) {
-                    //     this.variantImagesToBeDeleted.push(this.variantimages[imageIdx].id)
-                    // }
-
                     // empty preview for that index to simulate 'delete'
-                    this.selectedVariantCombos[imageIdx].preview = '';
+                    this.selectedVariantCombos[imageIdx].image.preview = '';
 
                     // set newAsset to false
-                    this.selectedVariantCombos[imageIdx].newAsset = false;
+                    this.selectedVariantCombos[imageIdx].image.newAsset = false;
                                     
                 }
                 this._changeDetectorRef.markForCheck();
@@ -1766,7 +1783,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     /**
      * Open variants panel
      */
-    openVariantsPanel(variant:any, idx): void
+    openVariantsPanel(variant:any, idx: number): void
     {
 
         this.selectedProductVariant = variant;
@@ -1831,7 +1848,6 @@ export class AddProductComponent implements OnInit, OnDestroy
             // If overlay exists and attached...
             if ( this._variantsPanelOverlayRef && this._variantsPanelOverlayRef.hasAttached() )
             {
-
                 // Detach it
                 this._variantsPanelOverlayRef.detach();
 
@@ -1841,7 +1857,6 @@ export class AddProductComponent implements OnInit, OnDestroy
                 // // Toggle the edit mode off
                 this.productVariantAvailableEditMode = false;
             }
-
             // If template portal exists and attached...
             if ( templatePortal && templatePortal.isAttached )
             {
@@ -1867,9 +1882,14 @@ export class AddProductComponent implements OnInit, OnDestroy
         let nameCombo = "";
         if (n == combos.length) {
             if (nameComboOutput.substring(1) != "") {
-            // this.selectedVariantCombos.push({ itemCode: itemCode, variant: nameComboOutput.substring(1), price: 0, quantity: 0, sku: 0, status: "NOTAVAILABLE" })
-            this.selectedVariantCombos.push({ itemCode: itemCode, variant: nameComboOutput.substring(1), price: 0, quantity: 0, sku: nameComboOutput.substring(1).toLowerCase().replace(" / ", "-"), status: "NOTAVAILABLE" })
-            // this.variantimages.push([])
+            this.selectedVariantCombos.push({ 
+                image: { preview: null, file: null, isThumbnail: false, newAsset: false, assetId: null}, 
+                itemCode: itemCode, 
+                variant: nameComboOutput.substring(1), 
+                price: 0, quantity: 0, 
+                sku: nameComboOutput.substring(1).toLowerCase().replace(" / ", "-"), 
+                status: "NOTAVAILABLE" 
+            })
           }
           return nameComboOutput.substring(1);
         }
@@ -2246,9 +2266,6 @@ export class AddProductComponent implements OnInit, OnDestroy
                 // this mean this._selectedProductsOption["productPackageOptionDetail"] is empty
                 if (this._selectedProductsOption["productPackageOptionDetail"].length < 1) {
                 }
-            } else {
-                // if this._selectedProductsOption["productPackageOptionDetail"] have no value, 
-                // dis should not happen                
             }
         }
 
@@ -2339,5 +2356,236 @@ export class AddProductComponent implements OnInit, OnDestroy
         else if (value === 'ACTIVE' && (this.store$.verticalCode === 'FnB' || this.store$.verticalCode === 'FnB_PK')) {
             this.addProductForm.get('step1').get('allowOutOfStockPurchases').patchValue(true);
         }
+    }
+
+    /**
+     * Open search image panel
+     */
+    openSearchImagePanel(): void
+    {
+        // Create the overlay
+        this._imageSearchPanelOverlayRef = this._overlay.create({
+            backdropClass   : '',
+            hasBackdrop     : true,
+            scrollStrategy  : this._overlay.scrollStrategies.block(),
+            positionStrategy: this._overlay.position()
+                                .flexibleConnectedTo(this._imageSearchPanelOrigin.nativeElement)
+                                .withFlexibleDimensions(true)
+                                .withViewportMargin(64)
+                                .withLockedPosition(true)
+                                .withPositions([
+                                    {
+                                        originX : 'start',
+                                        originY : 'bottom',
+                                        overlayX: this.currentScreenSize.includes('sm') ? 'start' : 'end',
+                                        overlayY: 'top',
+                                        // offsetY : 32,
+                                        // offsetX : this.currentScreenSize.includes('sm') ? -81 : 64
+                                    }
+                                ])
+        });
+
+        // Subscribe to the attachments observable
+        this._imageSearchPanelOverlayRef.attachments().subscribe(() => {
+
+            // Add a class to the origin
+            this._renderer2.addClass(this._imageSearchPanelOrigin.nativeElement, 'panel-opened');
+
+            // Focus to the search input once the overlay has been attached
+            this._imageSearchPanelOverlayRef.overlayElement.querySelector('input').focus();
+        });
+
+        // Create a portal from the template
+        const templatePortal = new TemplatePortal(this._imageSearchPanel, this._viewContainerRef);
+
+        // Attach the portal to the overlay
+        this._imageSearchPanelOverlayRef.attach(templatePortal);
+
+        // Subscribe to the backdrop click
+        this._imageSearchPanelOverlayRef.backdropClick().subscribe(() => {
+
+            // Remove the class from the origin
+            this._renderer2.removeClass(this._imageSearchPanelOrigin.nativeElement, 'panel-opened');
+
+            // If overlay exists and attached...
+            if ( this._imageSearchPanelOverlayRef && this._imageSearchPanelOverlayRef.hasAttached() )
+            {
+                // Detach it
+                this._imageSearchPanelOverlayRef.detach();
+            }
+            // If template portal exists and attached...
+            if ( templatePortal && templatePortal.isAttached )
+            {
+                // Detach it
+                templatePortal.detach();
+            }
+            this.searchImageControl.patchValue('');
+        });
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+    }
+
+    selectImage(value: {name: string, url: string}) {
+
+        // this.productImages[this.currentImageIndex].preview = value.url;
+        this.productImages.push({preview: value.url, file: null, isThumbnail: false})
+
+        this.currentImageIndex = this.productImages.length - 1;
+
+        // Close edit mode
+        this.toggleImagesEditMode(false, '')
+        
+        //----------------------------
+        // To simulate backdrop click
+        //----------------------------
+        // Create a portal from the template
+        const templatePortal = new TemplatePortal(this._imageSearchPanel, this._viewContainerRef);
+
+        // Remove the class from the origin
+        this._renderer2.removeClass(this._imageSearchPanelOrigin.nativeElement, 'panel-opened');
+
+        // If overlay exists and attached...
+        if ( this._imageSearchPanelOverlayRef && this._imageSearchPanelOverlayRef.hasAttached() )
+        {
+            // Detach it
+            this._imageSearchPanelOverlayRef.detach();
+        }
+
+        // If template portal exists and attached...
+        if ( templatePortal && templatePortal.isAttached )
+        {
+            // Detach it
+            templatePortal.detach();
+        }
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+        
+    }
+    /**
+     * Set the filtered value to an array to be displayed
+     * 
+     * @param input 
+     */
+    autoCompleteSetList(input: string) {
+        if (input && input !== '') {
+            this._inventoryService.searchProduct(input)
+                .subscribe((products: Product[]) => {
+                    
+                    this.autoCompleteList = products.map(product => {
+                        return {
+                            url: product.thumbnailUrl,
+                            name: product.name
+                        }
+                    });
+                })
+        }
+        else {
+            this.autoCompleteList = [];
+        }
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+    }
+
+    blurInput() {
+        // Remove focus
+        setTimeout(() => this.searchImageElement.nativeElement.blur());
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+    }
+
+    postProductImages(){
+
+        let variantImagesArr = []
+
+        if (this.selectedVariantCombos) {
+            variantImagesArr = this.selectedVariantCombos.map((item, i) => {
+                return {
+                    file: item.image.file,
+                    isThumbnail: item.image.isThumbnail,
+                    preview: null,
+                    itemCode: this.selectedProduct.id + i
+                }
+            });
+        }
+
+        let normalImagesArr = this.productImages;
+
+        // If one of the variant images is thumbnail, set all normal images thumbnail to false
+        if (variantImagesArr.some(item => item.isThumbnail === true)) {
+            normalImagesArr.map(item => item.isThumbnail = false)
+        }
+
+        // Filter out elements with file
+        let mergedImages = [...normalImagesArr, ...variantImagesArr].filter(item => ((item.file !== null) || (item.preview !== null)))
+        
+        if (mergedImages.length > 0) {
+            for (let index = 0; index < mergedImages.length; index++) {
+                const element = mergedImages[index];
+
+                // create a new one
+                let formData = new FormData();
+                
+                if (element.file) {
+                    formData.append('file', element.file);
+                }
+                else formData = null;
+
+                this._inventoryService.addProductAssets( this.selectedProduct.id, formData, { isThumbnail: element.isThumbnail, itemCode: element.itemCode }, null, 
+                    (element.file === null && element.preview !== null) ? element.preview : null)
+                    .pipe(takeUntil(this._unsubscribeAll))
+                    .subscribe((assetResponse: ProductAssets)=> {
+                        if (assetResponse.isThumbnail){
+                            this.selectedProduct.thumbnailUrl = assetResponse.url;
+                        }
+
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    });
+            }
+        }
+    }
+
+    deleteAllVariantsConfirmation(){
+
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title  : 'Delete variants',
+            message: 'Are you sure you want to disable this variants? Current variants of this product will be removed permenantly!',
+            actions: {
+                confirm: {
+                    label: 'Delete'
+                }
+            }
+        });
+
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+
+            // If the confirm button pressed...
+            if ( result === 'confirmed' )
+            {
+                // Delete the product on the server
+                this._inventoryService.deleteProduct(this.selectedProduct.id).subscribe(() => {
+                    this.newProductId = null;
+                });
+
+                // Reset variant related values
+                this.selectedVariantCombos = []; 
+                this.variantComboItems = [];
+                this.productVariants = [];
+                this.filteredProductVariants = [];
+                this.variantToBeCreated = [];
+
+            } else {
+                // Update the selected product form
+                this.addProductForm.get('step1').get('isVariants').patchValue(true);
+                
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            }
+        });
+        
     }
 }

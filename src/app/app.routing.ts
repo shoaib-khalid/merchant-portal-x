@@ -90,7 +90,7 @@ export const appRoutes: Route[] = [
             roles: [UserRole.Admin, UserRole.Merchant]
         },
         resolve    : {
-            initialData: InitialDataResolver,
+            // initialData: InitialDataResolver,
             platformSetup: PlatformSetupResolver
         },
         children   : [
@@ -109,7 +109,7 @@ export const appRoutes: Route[] = [
             roles: [UserRole.Admin]
         },
         resolve    : {
-            initialData: InitialDataResolver,
+            // initialData: InitialDataResolver,
         },
         children   : [
             {path: 'example', loadChildren: () => import('app/modules/admin/example/example.module').then(m => m.ExampleModule)},

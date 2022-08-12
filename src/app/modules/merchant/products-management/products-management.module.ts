@@ -24,6 +24,8 @@ import { AddCategoryComponent } from './add-category/add-category.component';
 import { MatStepperModule } from '@angular/material/stepper';
 import { EditProductComponent } from './edit-product/edit-product.component';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatAutocompleteModule, MAT_AUTOCOMPLETE_SCROLL_STRATEGY } from '@angular/material/autocomplete';
+import { Overlay, RepositionScrollStrategy } from '@angular/cdk/overlay';
 
 @NgModule({
     declarations: [
@@ -52,7 +54,15 @@ import { MatRadioModule } from '@angular/material/radio';
         MatTooltipModule,
         SharedModule,
         MatStepperModule,
-        MatRadioModule
+        MatRadioModule,
+        MatAutocompleteModule
+    ],
+    providers   : [
+        {
+            provide   : MAT_AUTOCOMPLETE_SCROLL_STRATEGY,
+            useFactory: (overlay: Overlay) => (): RepositionScrollStrategy => overlay.scrollStrategies.reposition(),
+            deps      : [Overlay]
+        }
     ]
 })
 export class ECommerceModule

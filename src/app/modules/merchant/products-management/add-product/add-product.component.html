@@ -30,13 +30,14 @@
                             <!-- Product images and status -->
                             <div class="flex flex-col items-center w-full lg:w-2/12 sm:items-start lg:pb-1">
                                 <div class="flex flex-col items-center w-full">
-                                    <div class="relative">
+                                    <!-- Image Section  -->
+                                    <div class="relative" #imageSearchPanelOrigin>
                                         <!-- Image Frame -->
-                                        <div *ngIf="!imagesEditMode" class="w-32 h-32 border rounded overflow-hidden">
-                                            <ng-container *ngIf="images.length; else noImage">
+                                        <div class="w-32 h-32 border rounded overflow-hidden">
+                                            <ng-container *ngIf="productImages.length; else noImage">
                                                 <img
                                                     class="w-full h-full object-cover"
-                                                    [src]="images[currentImageIndex]">
+                                                    [src]="productImages[currentImageIndex].preview">
                                             </ng-container>
                                             <ng-template #noImage>
                                                 <div
@@ -46,90 +47,18 @@
                                                 </div>
                                             </ng-template>
                                         </div>
-                                        <div class="absolute bottom-0 bg-black rounded-b opacity-50 w-full h-1/4 flex justify-center mt-0 whitespace-nowrap">
-                                            <!-- Add Image  -->
-                                            <div>
-                                                <input
-                                                    id="new-image-file-input"
-                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                    type="file"
-                                                    [multiple]="false"
-                                                    [accept]="'image/jpeg, image/png'"
-                                                    (change)="uploadImages(imageFileInput.files, []);"
-                                                    #imageFileInput>
-                                                <label
-                                                    class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
-                                                    for="new-image-file-input"
-                                                    matTooltip="Add image"
-                                                    matRipple>
-                                                    <mat-icon
-                                                        class="icon-size-5 text-white"
-                                                        [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
-                                                </label>
-                                            </div>
-                                            <!-- Toggle Image Edit -->
-                                            <div>
-                                                <input
-                                                    id="new-image-edit-button"
-                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                    type="button"
-                                                    (click)="toggleImagesEditMode()"
-                                                    mat-icon-button
-                                                >
-                                                <label 
-                                                    class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
-                                                    for="new-image-edit-button"
-                                                    matTooltip="Edit image"
-                                                    matRipple>
-                                                    <mat-icon
-                                                        *ngIf="imagesEditMode"
-                                                        class="icon-size-5 text-white"
-                                                        [svgIcon]="'heroicons_solid:check'"></mat-icon>
-                                                    <mat-icon
-                                                        *ngIf="!imagesEditMode"
-                                                        class="icon-size-5 text-white"
-                                                        [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
-                                                </label>
-                                            </div>
-                                            <!-- Set Thumbnail -->
-                                            <div>
-                                                <div *ngIf="images.length && images.length > 1">
-                                                    <input
-                                                        id="new-set-thumbnail-button"
-                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                        type="button"
-                                                        (click)="setThumbnail(currentImageIndex)"
-                                                        mat-icon-button>
-                                                    <label 
-                                                        class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
-                                                        for="new-set-thumbnail-button"
-                                                        [matTooltip]="currentImageIndex !== thumbnailIndex ? 'Set thumbnail' : ''"
-                                                        matRipple>
-                                                        <mat-icon
-                                                            class="icon-size-5 text-white"
-                                                            [svgIcon]="currentImageIndex === thumbnailIndex ? 'heroicons_solid:star' : 'heroicons_outline:star'"></mat-icon>
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                    
-                                    <!-- Edit Image Frame -->
-                                    <div *ngIf="imagesEditMode" class="flex flex-col items-center sm:items-start mb-8 sm:mb-0">
-                                        <div class="relative flex items-center justify-center w-32 h-32 border rounded overflow-hidden ring-4 ring-bg-card">
-                                            <!-- Upload / Remove Image to Overide Image -->
-                                            <div class="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
-                                            <div class="absolute inset-0 flex items-center justify-center z-20">
+                                        <!-- Edit/Add mode on body-->
+                                        <div *ngIf="imagesChangeMode.isOn" class="absolute top-0 bg-black rounded bg-opacity-50 inset-0 flex justify-center items-center">
+                                            <ng-container *ngIf="imagesChangeMode.mode.edit">
                                                 <!-- Add / Edit Image -->
-                                                <div>
+                                                <!-- <div>
                                                     <input
                                                         id="new-image-file-input"
                                                         class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                         type="file"
                                                         [multiple]="false"
                                                         [accept]="'image/jpeg, image/png'"
-                                                        (change)="uploadImages(imageFileInput.files, images, $event);"
+                                                        (change)="uploadImages(imageFileInput.files, productImages.preview, $event);"
                                                         #imageFileInput>
                                                     <label
                                                         class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
@@ -139,9 +68,9 @@
                                                             class="text-white"
                                                             [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
                                                     </label>
-                                                </div>
+                                                </div> -->
                                                 <!-- Remove Image -->
-                                                <div *ngIf="images.length">
+                                                <div *ngIf="productImages.length">
                                                     <input
                                                         id="new-image-remove-button"
                                                         class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -151,124 +80,143 @@
                                                     <label 
                                                         class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
                                                         for="new-image-remove-button"
+                                                        [matTooltip]="'Delete this image'"
                                                         matRipple>
                                                         <mat-icon
                                                             class="text-white"
                                                             [svgIcon]="'heroicons_outline:trash'"></mat-icon>
                                                     </label>
                                                 </div>
-                                            </div>
-                                            <!-- View Image -->
-                                            <img
-                                                class="object-cover w-full h-full"
-                                                *ngIf="images.length"
-                                                [src]="images[currentImageIndex]">
-                                            <!-- View No Image -->
-                                            <div
-                                                class="flex items-center justify-center w-full h-full rounded overflow-hidden uppercase text-8xl font-bold leading-none bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200"
-                                                *ngIf="!images.length">
-                                                <span class="text-md">NO IMAGE</span> 
-                                            </div>
-                                            <div class="absolute bottom-0 bg-black rounded-b opacity-60 w-full h-1/4 flex justify-center mt-0 whitespace-nowrap z-30">
-                                                <!-- Toggle Image Edit -->
+                                            </ng-container>
+                                            <ng-container *ngIf="imagesChangeMode.mode.create">
+                                                <!-- Add Image  -->
                                                 <div>
                                                     <input
-                                                        id="new-image-edit-button"
+                                                        id="new-image-file-input"
                                                         class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                        type="button"
-                                                        (click)="toggleImagesEditMode()"
-                                                        mat-icon-button
-                                                    >
-                                                    <label 
+                                                        type="file"
+                                                        [multiple]="false"
+                                                        [accept]="'image/jpeg, image/png'"
+                                                        (change)="uploadImages(imageFileInput.files, []);"
+                                                        #imageFileInput>
+                                                    <label
                                                         class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
-                                                        for="new-image-edit-button"
-                                                        [matTooltip]="imagesEditMode ? 'Close edit image' : 'Edit image'"
+                                                        for="new-image-file-input"
+                                                        matTooltip="Upload image"
                                                         matRipple>
                                                         <mat-icon
-                                                            *ngIf="imagesEditMode"
                                                             class="icon-size-5 text-white"
-                                                            [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                                            [svgIcon]="'heroicons_solid:upload'"></mat-icon>
+                                                    </label>
+                                                </div>
+                                                <!-- Search Image  -->
+                                                <div>
+                                                    <input
+                                                    id="search-image-button"
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="button"
+                                                    (click)="openSearchImagePanel()"
+                                                    mat-icon-button>
+                                                    <label 
+                                                        class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
+                                                        for="search-image-button"
+                                                        [matTooltip]="'Search image'"
+                                                        matRipple>
                                                         <mat-icon
-                                                            *ngIf="!imagesEditMode"
                                                             class="icon-size-5 text-white"
-                                                            [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                                                            [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                                    </label>
+                                                </div>
+                                            </ng-container>
+                                        </div>
+                                        <!-- Edit mode off footer-->
+                                        <div *ngIf="!imagesChangeMode.isOn" class="absolute bottom-0 bg-black rounded-b bg-opacity-50 w-full h-1/4 flex justify-center mt-0 whitespace-nowrap">
+                                            <!-- Add Image  -->
+                                            <div>
+                                                <input
+                                                    id="new-image-file-input"
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="button"
+                                                    (click)="toggleImagesEditMode(true, 'Add')"
+                                                    mat-icon-button>
+                                                <label
+                                                    class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
+                                                    for="new-image-file-input"
+                                                    matTooltip="Add"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="icon-size-5 text-white"
+                                                        [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                                                </label>
+                                            </div>
+                                            <!-- Toggle Image Edit -->
+                                            <div *ngIf="productImages.length">
+                                                <input
+                                                    id="new-image-edit-button"
+                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                    type="button"
+                                                    (click)="toggleImagesEditMode(true, 'Edit')"
+                                                    mat-icon-button
+                                                >
+                                                <label 
+                                                    class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
+                                                    for="new-image-edit-button"
+                                                    matTooltip="Edit"
+                                                    matRipple>
+                                                    <mat-icon
+                                                        class="icon-size-5 text-white"
+                                                        [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                                                </label>
+                                            </div>
+                                            <!-- Set Thumbnail -->
+                                            <div>
+                                                <div *ngIf="productImages.length && productImages.length > 1">
+                                                    <input
+                                                        id="new-set-thumbnail-button"
+                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                        type="button"
+                                                        (click)="setThumbnail(currentImageIndex)"
+                                                        mat-icon-button>
+                                                    <label 
+                                                        class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
+                                                        for="new-set-thumbnail-button"
+                                                        [matTooltip]="productImages[currentImageIndex].isThumbnail !== true? 'Set thumbnail' : ''"
+                                                        matRipple>
+                                                        <mat-icon
+                                                            class="icon-size-5 text-white"
+                                                            [svgIcon]="productImages[currentImageIndex].isThumbnail === true ? 'heroicons_solid:star' : 'heroicons_outline:star'"></mat-icon>
                                                     </label>
                                                 </div>
                                             </div>
+                                            
                                         </div>
-                                    </div>
-
-                                    <!-- Add New Image -->
-                                    <!-- <div class="flex items-center mt-0 whitespace-nowrap">
-                                        <div>
-                                            <input
-                                                id="new-image-file-input"
-                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                type="file"
-                                                [multiple]="false"
-                                                [accept]="'image/jpeg, image/png'"
-                                                (change)="uploadImages(imageFileInput.files, []);"
-                                                #imageFileInput>
-                                            <label
-                                                class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
-                                                for="new-image-file-input"
-                                                matTooltip="Add image"
-                                                matRipple>
-                                                <mat-icon
-                                                    class="icon-size-5"
-                                                    [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
-                                            </label>
-                                        </div>
-                                        Toggle Image Edit
-                                        <div>
-                                            <input
-                                                id="new-image-edit-button"
-                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                type="button"
-                                                (click)="toggleImagesEditMode()"
-                                                mat-icon-button
-                                            >
-                                            <label 
-                                                class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
-                                                for="new-image-edit-button"
-                                                matTooltip="Edit image"
-                                                matRipple>
-                                                <mat-icon
-                                                    *ngIf="imagesEditMode"
-                                                    class="icon-size-5"
-                                                    [svgIcon]="'heroicons_outline:check'"></mat-icon>
-                                                <mat-icon
-                                                    *ngIf="!imagesEditMode"
-                                                    class="icon-size-5"
-                                                    [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
-                                            </label>
-                                        </div>
-                                        <div>
-                                            Set Thumbnail
-                                            <div *ngIf="images.length && images.length > 1">
+                                        <!-- Edit mode on footer-->
+                                        <div *ngIf="imagesChangeMode.isOn" class="absolute bottom-0 bg-black rounded-b bg-opacity-50 w-full h-1/4 flex justify-center mt-0 whitespace-nowrap">
+                                            <!-- Toggle Image Edit -->
+                                            <div>
                                                 <input
-                                                    id="new-set-thumbnail-button"
+                                                    id="new-image-edit-button"
                                                     class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                     type="button"
-                                                    (click)="setThumbnail(currentImageIndex)"
-                                                    mat-icon-button>
+                                                    (click)="toggleImagesEditMode(false, '')"
+                                                    mat-icon-button
+                                                >
                                                 <label 
                                                     class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover"
-                                                    for="new-set-thumbnail-button"
-                                                    [matTooltip]="currentImageIndex !== thumbnailIndex ? 'Set thumbnail' : ''"
+                                                    for="new-image-edit-button"
+                                                    [matTooltip]="'Done'"
                                                     matRipple>
                                                     <mat-icon
-                                                        class="icon-size-5"
-                                                        [svgIcon]="currentImageIndex === thumbnailIndex ? 'heroicons_solid:star' : 'heroicons_outline:star'"></mat-icon>
+                                                        class="icon-size-5 text-white"
+                                                        [svgIcon]="'heroicons_solid:check'"></mat-icon>
                                                 </label>
                                             </div>
                                         </div>
-                                    </div> -->
+                                    </div>
                                     <!-- Image Cycle -->
                                     <div
                                         class="flex items-center mt-0 whitespace-nowrap"
-                                        [ngClass]="images.length ? 'visible' : 'invisible'">
-                                        
+                                        [ngClass]="productImages.length ? 'visible' : 'invisible'">
                                         <input
                                             id="image-cycle-left"
                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -284,11 +232,9 @@
                                                 class="icon-size-5"
                                                 [svgIcon]="'heroicons_solid:arrow-narrow-left'"></mat-icon>
                                         </label>
-
                                         <span class="font-sm mx-2">
-                                            {{currentImageIndex + 1}} of {{images.length}}
+                                            {{currentImageIndex + 1}} of {{productImages.length}}
                                         </span>
-
                                         <input
                                             id="image-cycle-right"
                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -305,6 +251,55 @@
                                                 [svgIcon]="'heroicons_solid:arrow-narrow-right'"></mat-icon>
                                         </label>
                                     </div>
+                                    <!-- Image search panel  -->
+                                    <ng-template #imageSearchPanel>
+                                        <div class="w-60 md:w-72 rounded border shadow-md bg-card">
+                                            <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-emphasized-affix w-full" floatLabel="always" #autocompleteField>
+                                                <mat-icon class="text-primary" svgIcon="heroicons_outline:search"></mat-icon>
+                                                <!-- <mat-label>Search</mat-label> -->
+                                                <input
+                                                    #searchImageInput
+                                                    id="inputElement"
+                                                    class="pl-4 text-sm"
+                                                    matInput
+                                                    [formControl]="searchImageControl"
+                                                    [autocomplete]="'off'"
+                                                    [placeholder]="'Search for product image'"
+                                                    [matAutocomplete]="matAutocomplete"
+                                                    >
+                                                <!-- Search button -->
+                                                <!-- <div *ngIf="currentScreenSize.includes('sm')" class="text-white font-semibold" matSuffix>
+                                                    <button class="p-2.5 font-bold" (click)="goToSearch(searchControl.value);">Search</button>
+                                                </div> -->
+                                            </mat-form-field>
+                                            <mat-autocomplete
+                                                class="max-h-50 mt-1 rounded"
+                                                [disableRipple]="true"
+                                                #matAutocomplete="matAutocomplete">
+                                                <ng-container *ngFor="let result of autoCompleteList; trackBy: trackByFn">
+                                                    <mat-option
+                                                        class="group relative h-10 px-3 text-sm hover:bg-gray-100 dark:hover:bg-hover"
+                                                        (click)="selectImage(result);">
+                                                        <ng-container *ngTemplateOutlet="imageResult; context: {$implicit: result}"></ng-container>
+                                                    </mat-option>
+                                                </ng-container>
+                                            </mat-autocomplete>
+                                            <!-- Image result template -->
+                                            <ng-template
+                                                #imageResult
+                                                let-result>
+                                                <div class="flex flex-row items-center justify-between gap-1">
+                                                    <span class="truncate">{{result.name}}</span>
+                                                    <img
+                                                        matSuffix
+                                                        class="w-auto max-h-9 rounded"
+                                                        *ngIf="result.url"
+                                                        [alt]="'Image'"
+                                                        [src]="result.url">
+                                                </div>
+                                            </ng-template>
+                                        </div>
+                                    </ng-template>
                                 </div>
                                 <!-- Product status -->
                                 <div class="flex flex-col mt-4 w-full">
@@ -808,28 +803,6 @@
                                         <!-- *ngIf="selectedProductForm.get('isVariants').value === true" -->
                                     </div>
                                 </div>
-                                <!-- Combo Toggle -->
-                                <!-- <div 
-                                    *ngIf="productType === 'combo'"
-                                    class="flex flex-col w-full sm:w-1/5 sm:pl-2 py-2 sm:py-0"
-                                >
-                                    <span class="mb-0 sm:mb-3 font-medium leading-tight">Combo 
-                                        <mat-icon
-                                            matTooltip="Does this product have combo?"
-                                            class="transform scale-75"
-                                            [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                        </mat-icon>
-                                    </span>
-                                    <div class="mt-0 flex items-center justify-between -my-px w-full">
-                                        <mat-slide-toggle
-                                            [formControlName]="'isPackage'"
-                                            [color]="'primary'"
-                                            (change)="(addProductForm.get('step1').get('isPackage').value === false) ? deleteAllVariantsConfirmation() : return"
-                                            >
-                                            {{addProductForm.get('step1').get('isPackage').value === true ? 'Yes' : 'No'}}
-                                        </mat-slide-toggle>
-                                    </div>
-                                </div> -->
                             </div>
                         </div>
 
@@ -1314,69 +1287,69 @@
                                                                 <!-- Image -->
                                                                 <div  class="flex items-center">
                                                                     <div>
-                                                                            <div>
-                                                                                <input
-                                                                                    [id]="'image-add-input-variant' + variantCombo.variant"
-                                                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                                                    type="file"
-                                                                                    [multiple]="false"
-                                                                                    [accept]="'image/jpeg, image/png'"
-                                                                                    [disabled]="imagesEditMode"
-                                                                                    (change)="uploadVariantImagesMethod(imageFileInput.files, [], i);"
-                                                                                    #imageFileInput>
-                                                                                <label
-                                                                                    class="flex items-center justify-center w-6 h-6 rounded-full cursor-pointer hover:bg-hover"
-                                                                                    [ngClass]="imagesEditMode ? 'cursor-not-allowed' : 'cursor-pointer'"
-                                                                                    [matTooltip]="variantCombo.preview ? 'Change image' : 'Add image'"
-                                                                                    [for]="'image-add-input-variant' + variantCombo.variant"
-                                                                                    matRipple>
-                                                                                    <mat-icon
-                                                                                        class="icon-size-3"
-                                                                                        [svgIcon]="variantCombo.preview ? 'heroicons_solid:pencil-alt' : 'heroicons_outline:plus-circle'"></mat-icon>
-                                                                                </label>
-                                                                            </div>
-                                                                            <!-- Remove Image -->
-                                                                            <div *ngIf="variantCombo.preview">
-                                                                                <input
-                                                                                    [id]="'image-remove-button-variant'+ variantCombo.variant"
-                                                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                                                    type="button"
-                                                                                    (click)="removeVariantImageMethod(i)"
-                                                                                    mat-icon-button>
-                                                                                <label 
-                                                                                    class="flex items-center justify-center w-6 h-6 rounded-full cursor-pointer hover:bg-hover"
-                                                                                    [for]="'image-remove-button-variant'+ variantCombo.variant"
-                                                                                    matTooltip="Remove image"
-                                                                                    matRipple>
-                                                                                    <mat-icon
-                                                                                        class="icon-size-3"
-                                                                                        [svgIcon]="'heroicons_outline:trash'"></mat-icon>
-                                                                                </label>
-                                                                            </div>
-                                                                            <!-- Set Thumbnail -->
-                                                                            <div *ngIf="variantCombo.preview">
-                                                                                <input
-                                                                                    [id]="'new-set-thumbnail-button'+ variantCombo.variant"
-                                                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                                                    type="button"
-                                                                                    (click)="setThumbnail(i)"
-                                                                                    mat-icon-button>
-                                                                                <label 
-                                                                                    class="flex items-center justify-center w-6 h-6 rounded-full cursor-pointer hover:bg-hover"
-                                                                                    [for]="'new-set-thumbnail-button'+ variantCombo.variant"
-                                                                                    [matTooltip]="i !== thumbnailIndex ? 'Set thumbnail' : ''"
-                                                                                    matRipple>
-                                                                                    <mat-icon
-                                                                                        class="icon-size-3"
-                                                                                        [svgIcon]="i === thumbnailIndex ? 'heroicons_solid:star' : 'heroicons_outline:star'"></mat-icon>
-                                                                                </label>
-                                                                            </div>
+                                                                        <div>
+                                                                            <input
+                                                                                [id]="'image-add-input-variant' + variantCombo.variant"
+                                                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                                type="file"
+                                                                                [multiple]="false"
+                                                                                [accept]="'image/jpeg, image/png'"
+                                                                                [disabled]="imagesEditMode"
+                                                                                (change)="uploadVariantImagesMethod(imageFileInput.files, [], i);"
+                                                                                #imageFileInput>
+                                                                            <label
+                                                                                class="flex items-center justify-center w-6 h-6 rounded-full cursor-pointer hover:bg-hover"
+                                                                                [ngClass]="imagesEditMode ? 'cursor-not-allowed' : 'cursor-pointer'"
+                                                                                [matTooltip]="variantCombo.image.preview ? 'Change image' : 'Add image'"
+                                                                                [for]="'image-add-input-variant' + variantCombo.variant"
+                                                                                matRipple>
+                                                                                <mat-icon
+                                                                                    class="icon-size-3"
+                                                                                    [svgIcon]="variantCombo.image.preview ? 'heroicons_solid:pencil-alt' : 'heroicons_outline:plus-circle'"></mat-icon>
+                                                                            </label>
+                                                                        </div>
+                                                                        <!-- Remove Image -->
+                                                                        <div *ngIf="variantCombo.image.preview">
+                                                                            <input
+                                                                                [id]="'image-remove-button-variant'+ variantCombo.variant"
+                                                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                                type="button"
+                                                                                (click)="removeVariantImageMethod(i)"
+                                                                                mat-icon-button>
+                                                                            <label 
+                                                                                class="flex items-center justify-center w-6 h-6 rounded-full cursor-pointer hover:bg-hover"
+                                                                                [for]="'image-remove-button-variant'+ variantCombo.variant"
+                                                                                matTooltip="Remove image"
+                                                                                matRipple>
+                                                                                <mat-icon
+                                                                                    class="icon-size-3"
+                                                                                    [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                                                            </label>
+                                                                        </div>
+                                                                        <!-- Set Thumbnail -->
+                                                                        <div *ngIf="variantCombo.image.preview">
+                                                                            <input
+                                                                                [id]="'new-set-thumbnail-button'+ variantCombo.variant"
+                                                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                                type="button"
+                                                                                (click)="setThumbnail(i, true)"
+                                                                                mat-icon-button>
+                                                                            <label 
+                                                                                class="flex items-center justify-center w-6 h-6 rounded-full cursor-pointer hover:bg-hover"
+                                                                                [for]="'new-set-thumbnail-button'+ variantCombo.variant"
+                                                                                [matTooltip]="!variantCombo.image.isThumbnail ? 'Set thumbnail' : ''"
+                                                                                matRipple>
+                                                                                <mat-icon
+                                                                                    class="icon-size-3"
+                                                                                    [svgIcon]="variantCombo.image.isThumbnail ? 'heroicons_solid:star' : 'heroicons_outline:star'"></mat-icon>
+                                                                            </label>
+                                                                        </div>
                                                                     </div>
                                                                     <div class="relative flex flex-0 items-center justify-center w-12 h-12 rounded overflow-hidden border">
-                                                                        <ng-container *ngIf="variantCombo.preview; else noImage">
+                                                                        <ng-container *ngIf="variantCombo.image.preview; else noImage">
                                                                             <img
                                                                                 class="w-full h-full object-cover" 
-                                                                                [src]="variantCombo.preview">
+                                                                                [src]="variantCombo.image.preview">
                                                                         </ng-container>
                                                                         <ng-template #noImage>
                                                                             <div
@@ -1481,8 +1454,6 @@
                                                 </div>
                                             </ng-container>
                                         </ng-container>
-
-
                                         <ng-template #noVariants>
                                             <div class="p-8 sm:p-16 border-t text-2xl font-semibold tracking-tight text-center">There are no Variants! Add them now.</div>
                                         </ng-template>
