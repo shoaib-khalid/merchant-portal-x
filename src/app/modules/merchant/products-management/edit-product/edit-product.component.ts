@@ -3301,29 +3301,36 @@ export class EditProductComponent implements OnInit, OnDestroy
         if (this.selectedVariantCombos) {
 
             // Map then filter out new assets
-            newVariantImagesArr = this.selectedVariantCombos.map((item, i) => {
-                return {
-                    file: item.image.file,
-                    isThumbnail: item.image.isThumbnail,
-                    preview: null,
-                    itemCode: this.selectedProduct.id + i,
-                    newAsset: item.image.newAsset
+            // newVariantImagesArr = this.selectedVariantCombos.map((item, i) => {
+            //     return {
+            //         file: item.image.file,
+            //         isThumbnail: item.image.isThumbnail,
+            //         preview: null,
+            //         itemCode: this.selectedProduct.id + i,
+            //         newAsset: item.image.newAsset
+            //     }
+            // }).filter(item => item.newAsset);
+
+            newVariantImagesArr = this.selectedVariantCombos.reduce((previousValue, currentValue, index) => {
+                if (currentValue.image.newAsset) {
+
+                    const mapped = {
+                        file: currentValue.image.file,
+                        isThumbnail: currentValue.image.isThumbnail,
+                        preview: null,
+                        itemCode: this.selectedProduct.id + index,
+                        newAsset: currentValue.image.newAsset
+                    }
+                    previousValue.push(mapped);
                 }
-            }).filter(item => item.newAsset);
+                return previousValue;
+            }, []);
         }
 
         // Filter out asset id null
         let newNormalImagesArr = this.productImages.filter(item => item.assetId === null);
 
-        // let normalImagesArr = this.productImages;
-
-        // If one of the variant images is thumbnail, set all normal images thumbnail to false
-        // if (variantImagesArr.some(item => item.isThumbnail === true)) {
-        //     normalImagesArr.map(item => item.isThumbnail = false)
-        // }
-
         let mergedImagesToBeCreated = [...newNormalImagesArr, ...newVariantImagesArr].filter(item => ((item.file !== null) || (item.preview !== null)))
-        // let mergedImagesToBeUpdated = [...normalImagesArr, ...variantImagesArr].filter(item => ((item.file !== null) || (item.preview !== null)))
         
         if (mergedImagesToBeCreated.length > 0) {
             

@@ -56,10 +56,10 @@ export class InitialDataResolver implements Resolve<any>
             this._notificationsService.getAll(),
             this._quickChatService.getChats(),
             this._shortcutsService.getAll(),
-            // this._merchantSetupService.get(),
-            // this._storesService.getStores(),
-            // this._storesService.getStoreRegionCountries(),
-            // this._userService.get(this._jwtService.getJwtPayload(this._authService.jwtAccessToken).uid)
+            this._merchantSetupService.get(),
+            this._storesService.getStores(),
+            this._storesService.getStoreRegionCountries(),
+            this._userService.get(this._jwtService.getJwtPayload(this._authService.jwtAccessToken).uid)
         ]);
     }
 }
@@ -73,13 +73,7 @@ export class PlatformSetupResolver implements Resolve<any>
      * Constructor
      */
     constructor(
-        private _navigationService: NavigationService,
-        private _platformsService: PlatformService,
-        private _merchantSetupService: MerchantSetupService,
-        private _storesService: StoresService,
-        private _jwtService: JwtService,
-        private _authService: AuthService,
-        private _userService: UserService
+        private _platformsService: PlatformService
     )
     {
     }
@@ -96,13 +90,6 @@ export class PlatformSetupResolver implements Resolve<any>
      */
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
     {
-        return forkJoin([
-            this._navigationService.get(),
-            this._merchantSetupService.get(),
-            this._storesService.getStores(),
-            this._storesService.getStoreRegionCountries(),
-            this._userService.get(this._jwtService.getJwtPayload(this._authService.jwtAccessToken).uid),
-            this._platformsService.set()
-        ]) 
+        return this._platformsService.set();
     }
 }
