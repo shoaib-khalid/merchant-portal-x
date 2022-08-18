@@ -74,7 +74,7 @@ export class EditStoreComponent implements OnInit
                 id         : 'timing',
                 icon       : 'mat_outline:access_time',
                 title      : 'Store Timing',
-                description: 'Manage when your store timing'
+                description: "Manage your store's opening and closing time"
             },
             {
                 id         : 'analytics',

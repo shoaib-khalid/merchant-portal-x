@@ -103,7 +103,22 @@ export class RegisterStoreComponent implements OnInit
     progressInfos: any[] = [];
     message: string[] = [];
     
-    files: any;
+    files: {
+        description: string,
+        type: string,
+        fileSource: any,
+        selectedFileName: string, 
+        selectedFiles: any, 
+        recommendedImageWidth: string, 
+        recommendedImageHeight: string, 
+        selectedImageWidth: string, 
+        selectedImageHeight: string,
+        toDelete: any,
+        toAdd:any[],
+        isMultiple: boolean,
+        galleryImages: any[],
+        assetId: string
+    }[];
     timeAlert: any = [];
     invalidTime: boolean = false;
     disableForm: boolean = false;
@@ -158,7 +173,6 @@ export class RegisterStoreComponent implements OnInit
     displayLongtitude: BehaviorSubject<string> = new BehaviorSubject<string>('');
     storeCreationError: boolean = false;
 
-    
     /**
      * Constructor
      */
@@ -639,7 +653,8 @@ export class RegisterStoreComponent implements OnInit
                 toDelete: [],
                 toAdd:[],
                 isMultiple: false,
-                galleryImages: []
+                galleryImages: [],
+                assetId: null
             },
             { 
                 description: "BannerDesktop",
@@ -654,7 +669,8 @@ export class RegisterStoreComponent implements OnInit
                 toDelete: [],
                 toAdd:[],
                 isMultiple: true,
-                galleryImages: []
+                galleryImages: [],
+                assetId: null
             },
             { 
                 description: "BannerMobile",
@@ -669,7 +685,8 @@ export class RegisterStoreComponent implements OnInit
                 toDelete: [],
                 toAdd:[],
                 isMultiple: true,
-                galleryImages: []
+                galleryImages: [],
+                assetId: null
             },
             { 
                 description: "Favicon",
@@ -684,21 +701,39 @@ export class RegisterStoreComponent implements OnInit
                 toDelete: [],
                 toAdd:[],
                 isMultiple: false,
-                galleryImages: []
+                galleryImages: [],
+                assetId: null
             },
+            { 
+                description: "CoverImage",
+                type: "CoverImageUrl",
+                fileSource: null, 
+                selectedFileName: "", 
+                selectedFiles: null, 
+                recommendedImageWidth: "500", 
+                recommendedImageHeight: "500", 
+                selectedImageWidth: "", 
+                selectedImageHeight: "",
+                toDelete: [],
+                toAdd:[],
+                isMultiple: false,
+                galleryImages: [],
+                assetId: null
+            }
         ];
         
         // initialise gallery
         // set galleryOptions
         this.galleryOptionsBannerDesktop = [
             {
-                width: '290px',
-                height: '290px',
+                preview: false,
+                imageArrows: true,
+                width: '780px',
+                height: '210px',
                 thumbnailsColumns: 3,
                 imageAnimation: NgxGalleryAnimation.Slide,
                 thumbnailsArrows: true,
-                // previewDownload: true,
-                imageArrowsAutoHide: true, 
+                imageArrowsAutoHide: false, 
                 thumbnailsArrowsAutoHide: true,
                 thumbnailsAutoHide: false,
                 thumbnailActions: [
@@ -720,8 +755,8 @@ export class RegisterStoreComponent implements OnInit
                 breakpoint: 767,
                 thumbnailsColumns: 3,
                 thumbnailsAutoHide: false,
-                width: '290px',
-                height: '290px',
+                width: '280px',
+                height: '210px',
                 imagePercent: 100,
                 thumbnailsPercent: 30,
                 thumbnailsMargin: 10,
@@ -737,13 +772,14 @@ export class RegisterStoreComponent implements OnInit
 
         this.galleryOptionsBannerMobile = [
             {
-                width: '290px',
-                height: '290px',
+                preview: false,
+                imageArrows: true,
+                width: '310px',
+                height: '210px',
                 thumbnailsColumns: 3,
                 imageAnimation: NgxGalleryAnimation.Slide,
                 thumbnailsArrows: true,
-                // previewDownload: true,
-                imageArrowsAutoHide: true, 
+                imageArrowsAutoHide: false, 
                 thumbnailsArrowsAutoHide: true,
                 thumbnailsAutoHide: false,
                 thumbnailActions: [
@@ -764,9 +800,9 @@ export class RegisterStoreComponent implements OnInit
             {
                 breakpoint: 767,
                 thumbnailsColumns: 3,
-                thumbnailsAutoHide: true,
-                width: '290px',
-                height: '290px',
+                thumbnailsAutoHide: false,
+                width: '280px',
+                height: '210px',
                 imagePercent: 100,
                 thumbnailsPercent: 30,
                 thumbnailsMargin: 10,
@@ -1655,7 +1691,6 @@ export class RegisterStoreComponent implements OnInit
                             error = true;
                         })
                 }
-
                 // Favicon update using item.selectedFiles
                 if ( item.type === 'FaviconUrl' && item.selectedFiles ){
                     
@@ -1683,23 +1718,23 @@ export class RegisterStoreComponent implements OnInit
                 // BannerDesktopUrl update using item.selectedFiles
                 if ( item.type === 'BannerDesktopUrl' ) {
                     // toDelete
-                    for (let index = 0; index < item.toDelete.length; index++) {
-                        const assetId = item.toDelete[index];
+                    // for (let index = 0; index < item.toDelete.length; index++) {
+                    //     const assetId = item.toDelete[index];
 
-                        await this._storesService.deleteAssets(this.storeId, assetId).toPromise()
-                            .then( event => {
-                                if (event instanceof HttpResponse) {
-                                    console.info('Uploaded the file successfully');
+                    //     await this._storesService.deleteAssets(this.storeId, assetId).toPromise()
+                    //         .then( event => {
+                    //             if (event instanceof HttpResponse) {
+                    //                 console.info('Uploaded the file successfully');
             
-                                    // Mark for check
-                                    this._changeDetectorRef.markForCheck();
-                                }
-                            })
-                            .catch(err => {
-                                reject('Error in deleteAssets (BannerDesktopUrl)')
-                                error = true;
-                            })
-                    }
+                    //                 // Mark for check
+                    //                 this._changeDetectorRef.markForCheck();
+                    //             }
+                    //         })
+                    //         .catch(err => {
+                    //             reject('Error in deleteAssets (BannerDesktopUrl)')
+                    //             error = true;
+                    //         })
+                    // }
                     // toAdd
                     for (let index = 0; index < item.toAdd.length; index++) {
                         const selectedFiles = item.toAdd[index];
@@ -1729,23 +1764,23 @@ export class RegisterStoreComponent implements OnInit
                 }
                 if ( item.type === 'BannerMobileUrl' ) {
                     // toDelete
-                    for (let index = 0; index < item.toDelete.length; index++) {
-                        const assetId = item.toDelete[index];
+                    // for (let index = 0; index < item.toDelete.length; index++) {
+                    //     const assetId = item.toDelete[index];
 
-                        await this._storesService.deleteAssets(this.storeId, assetId).toPromise()
-                            .then( event => {
-                                if (event instanceof HttpResponse) {
-                                    console.info('Uploaded the file successfully');
+                    //     await this._storesService.deleteAssets(this.storeId, assetId).toPromise()
+                    //         .then( event => {
+                    //             if (event instanceof HttpResponse) {
+                    //                 console.info('Uploaded the file successfully');
             
-                                    // Mark for check
-                                    this._changeDetectorRef.markForCheck();
-                                }
-                            })
-                            .catch(err => {
-                                reject('Error in deleteAssets (BannerMobileUrl)')
-                                error = true;
-                            })
-                    }
+                    //                 // Mark for check
+                    //                 this._changeDetectorRef.markForCheck();
+                    //             }
+                    //         })
+                    //         .catch(err => {
+                    //             reject('Error in deleteAssets (BannerMobileUrl)')
+                    //             error = true;
+                    //         })
+                    // }
   
                     // toAdd
                     for (let index = 0; index < item.toAdd.length; index++) {
@@ -1773,6 +1808,30 @@ export class RegisterStoreComponent implements OnInit
                             })
                         
                     }
+                }
+                if ( item.type === 'CoverImageUrl' && item.selectedFiles ){
+
+                    let formData = new FormData();
+                    formData.append('assetFile', item.selectedFiles[0]);
+                    formData.append('assetType',item.type);
+                    formData.append('assetDescription',item.description);
+
+
+                    await this._storesService.postAssets(this.storeId, "CoverImageUrl", formData,"CoverImage").toPromise()
+                        .then( event => {
+                            if (event instanceof HttpResponse) {
+                                console.info('Uploaded the file successfully');
+    
+                                this.files[4].assetId = event["id"];
+    
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
+                            }
+                        })
+                        .catch(err => {
+                            reject('Error in postAssets (CoverImageUrl)')
+                            error = true;
+                        })
                 }
             }
             resolve("done")
@@ -2279,7 +2338,7 @@ export class RegisterStoreComponent implements OnInit
 
     deleteBannerMobile(e, index){
         let assetId = this.files[2].galleryImages[index].assetId;
-
+        
         this.files[2].toDelete.push(assetId);
         this.files[2].galleryImages.splice(index,1)
         if(this.files[2].galleryImages.length < 1){
@@ -2289,15 +2348,22 @@ export class RegisterStoreComponent implements OnInit
 
     deleteLogo() {
         this.files[0].toDelete = true;        
-        this.files[0].fileSource = '';
-        this.files[0].selectedFiles = '';
+        this.files[0].fileSource = null;
+        this.files[0].selectedFiles = null;
         this._changeDetectorRef.markForCheck();
     }
 
     deleteFavicon(){
         this.files[3].toDelete = true;        
-        this.files[3].fileSource = '';
-        this.files[3].selectedFiles = '';
+        this.files[3].fileSource = null;
+        this.files[3].selectedFiles = null;
+        this._changeDetectorRef.markForCheck();
+    }
+
+    deleteCoverImage(){
+        this.files[4].toDelete = true;        
+        this.files[4].fileSource = null;
+        this.files[4].selectedFiles = null;
         this._changeDetectorRef.markForCheck();
     }
 

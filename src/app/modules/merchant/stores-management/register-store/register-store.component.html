@@ -220,40 +220,52 @@
                             <mat-step
                                 #verticalStepperStep2>
                                 <ng-template matStepLabel>Store Assets</ng-template>
-                                <p class="mt-2 mb-4 font-medium">
-                                    Simply manage you own store logo and banners
-                                </p>
-                                <!-- Logo and Banner -->
-                                <div class="grid sm:grid-cols-8 gap-6 w-full mt-8">
-                                    <!-- Logo -->
-                                    <div class="sm:col-span-4">
-                                        <mat-form-field class="w-full fuse-mat-emphasized-affix">
-                                            <mat-label class="font-medium">Store Logo</mat-label>
-                                            <span class="hidden sm:block truncate w-15 leading-3 text-sm font-bold">Add <br> Image</span>
-                                                <div class="flex flex-row w-full items-center ">
-                                                    <div class="sm:col-span-2 truncate flex flex-col w-full h-12 p-0 m-0 leading-3 justify-center items-center">
-                                                        <span class="text-xs text-gray-400 p-0 m-0">Image Size : Max 2MB,</span>
-                                                        <span class="text-xs text-gray-400 p-0 m-0">Resolution: 500 x 500 px</span>
+                                <span class="mt-2 mb-4 font-medium">
+                                    Manage your own store logo and banners
+                                </span>
+                                <ng-container *ngIf="true">
+                                    <div class="grid sm:grid-cols-3 gap-4 w-full mt-8">
+                                        <!-- Logo  -->
+                                        <div class="relative flex flex-col border border-dashed rounded h-50 w-auto border-slate-300 hover:border-slate-500 hover:cursor-pointer items-center justify-center p-1">
+                                            <!-- Preview  -->
+                                            <div *ngIf="this.files[0].fileSource" class="h-full w-full bg-slate-50 justify-center items-center flex rounded">
+                                                <img [src]="this.files[0].fileSource" class="object-cover h-full w-auto" />
+                                            </div>
+                                            <!-- Add Button -->
+                                            <ng-container *ngIf="this.files[0].fileSource !== '' && this.files[0].selectedFiles === null || this.files[0].fileSource === null">
+                                                <div class="flex justify-center items-center w-full h-full">
+                                                    <input
+                                                        id="add-logo-btn"
+                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                        type="file"
+                                                        accept="image/*" multiple 
+                                                        [multiple]="false"
+                                                        (change)="selectFiles('LogoUrl',$event)"
+                                                        >
+                                                    <label
+                                                        class="ease-in-out duration-300 hover:scale-105 flex items-center justify-center w-full h-full rounded-full cursor-pointer flex-col text-sm"
+                                                        for="add-logo-btn"
+                                                        matRipple>
+                                                        <mat-icon
+                                                            class="icon-size-8"
+                                                            [svgIcon]="'heroicons_outline:plus'"></mat-icon>Add Store Logo
+                                                    </label>    
+                                                </div>
+                                                <span class="text-xs tracking-tight text-gray-400">
+                                                    *Recommended size: {{files[0].recommendedImageWidth}} x {{files[0].recommendedImageHeight}}px 
+                                                </span>   
+                                            </ng-container>
+                                            <!-- Edit/Delete Button -->
+                                            <ng-container *ngIf="this.files[0].fileSource !== null && this.files[0].selectedFiles !== null">
+                                                <div class="absolute gap-4 z-99 rounded-b bg-black bg-opacity-30 w-full bottom-0 h-1/4 flex flex-row justify-center items-center">
+                                                    <div>
+                                                        <mat-icon
+                                                            class="flex items-center justify-center icon-size-6 text-white"
+                                                            (click)="deleteLogo();"
+                                                            [svgIcon]="'heroicons_outline:x'">
+                                                        </mat-icon>
                                                     </div>
-                                                    <div *ngIf="this.files[0].fileSource !== '' && this.files[0].selectedFiles === null || this.files[0].fileSource === null">
-                                                        <input
-                                                            id="add-logo-btn"
-                                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                            type="file"
-                                                            accept="image/*" multiple 
-                                                            [multiple]="false"
-                                                            (change)="selectFiles('LogoUrl',$event)"
-                                                            >
-                                                        <label
-                                                            class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
-                                                            for="add-logo-btn"
-                                                            matRipple>
-                                                            <mat-icon
-                                                                class="icon-size-5"
-                                                                [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
-                                                        </label>    
-                                                    </div>
-                                                    <div *ngIf="this.files[0].fileSource !== null && this.files[0].selectedFiles !== null">
+                                                    <!-- <div>
                                                         <input
                                                             id="edit-logo-btn"
                                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -267,71 +279,54 @@
                                                             for="edit-logo-btn"
                                                             matRipple>
                                                             <mat-icon
-                                                                class="icon-size-5"
+                                                                class="icon-size-6 text-white"
                                                                 [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
                                                         </label>
-                                                    </div>
+                                                    </div> -->
                                                 </div>
-                                            <mat-toolbar class="hidden w-0 h-0">
-                                                <input                                        
-                                                    matInput 
-                                                    type="text" 
-                                                    readonly 
-                                                    />
-                                            </mat-toolbar>
-                                            <mat-icon
-                                                matPrefix
-                                                [svgIcon]="'mat_solid:image'">
-                                            </mat-icon>
-                                        </mat-form-field>
-                                        <div class="w-full">
-                                            <mat-label class="font-medium">Preview</mat-label>
-                                            <div class="my-2"></div>
-                                            <div class="p-8 border border-gray-300 rounded h-96">
-                                                <div *ngIf="this.files[0].fileSource">
-                                                    <span class="block"><b>Image Size</b> : {{ this.files[0].selectedImageWidth }} x {{ this.files[0].selectedImageHeight }} pixel</span>
-                                                    <span class="block"><b>Recommended Size</b> : {{ this.files[0].recommendedImageWidth }} x {{ this.files[0].recommendedImageHeight }} pixel</span>
-                                                    <div class="flex w-full flex-auto">
-                                                        <img [src]="this.files[0].fileSource" class="object-scale-down h-52" />
+                                            </ng-container>
+                                        </div>
+                                        <!-- Favicon  -->
+                                        <div class="relative flex flex-col border border-dashed rounded h-50 w-auto border-slate-300 hover:border-slate-500 hover:cursor-pointer items-center justify-center p-1">
+                                            <!-- Preview  -->
+                                            <div *ngIf="this.files[3].fileSource" class="h-full w-full bg-slate-50 justify-center items-center flex rounded">
+                                                <img [src]="this.files[3].fileSource" class="object-cover h-full w-auto" />
+                                            </div>
+                                            <!-- Add Button -->
+                                            <ng-container *ngIf="this.files[3].fileSource !== '' && this.files[3].selectedFiles === null || this.files[3].fileSource === null">
+                                                <div class="flex justify-center items-center w-full h-full">
+                                                    <input
+                                                        id="add-favicon-btn"
+                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                        type="file"
+                                                        accept="image/*" multiple 
+                                                        [multiple]="false"
+                                                        (change)="selectFiles('FaviconUrl',$event)"
+                                                        >
+                                                    <label
+                                                        class="ease-in-out duration-300 hover:scale-105 flex items-center justify-center w-full h-full rounded-full cursor-pointer flex-col text-sm"
+                                                        for="add-favicon-btn"
+                                                        matRipple>
                                                         <mat-icon
-                                                            class="top-0 right-0 cursor-pointer"
-                                                            (click)="deleteLogo();"
-                                                            [svgIcon]="'heroicons_solid:x-circle'">
+                                                            class="icon-size-8"
+                                                            [svgIcon]="'heroicons_outline:plus'"></mat-icon>Add Favicon
+                                                    </label> 
+                                                </div>
+                                                <span class="text-xs tracking-tight text-gray-400">
+                                                    *Recommended size: {{files[3].recommendedImageWidth}} x {{files[3].recommendedImageHeight}}px 
+                                                </span>   
+                                            </ng-container>
+                                            <!-- Edit/Delete Button -->
+                                            <ng-container *ngIf="this.files[3].fileSource !== null && this.files[3].selectedFiles !== null">
+                                                <div class="absolute mx-1 gap-4 z-99 rounded-b bg-black bg-opacity-30 w-full bottom-0 h-1/4 flex flex-row justify-center items-center">
+                                                    <div>
+                                                        <mat-icon
+                                                            class="flex items-center justify-center icon-size-6 text-white"
+                                                            (click)="deleteFavicon();"
+                                                            [svgIcon]="'heroicons_outline:x'">
                                                         </mat-icon>
                                                     </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- Favicon -->
-                                    <div class="sm:col-span-4">
-                                        <mat-form-field class="w-full fuse-mat-emphasized-affix">
-                                            <mat-label class="font-medium">Favicon</mat-label>
-                                            <span class="hidden sm:block truncate w-15 leading-3 text-sm font-bold">Add <br> Image</span>
-                                                <div class="flex flex-row w-full items-center ">
-                                                    <div class="sm:col-span-2 truncate flex flex-col w-full h-12 p-0 m-0 leading-3 justify-center items-center">
-                                                        <span class="text-xs text-gray-400 p-0 m-0">Image Size : Max 2MB,</span>
-                                                        <span class="text-xs text-gray-400 p-0 m-0">Resolution: 500 x 500 px</span>
-                                                    </div>
-                                                    <div *ngIf="this.files[3].fileSource !== '' && this.files[3].selectedFiles === null">
-                                                        <input
-                                                            id="add-favicon-btn"
-                                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                            type="file"
-                                                            accept="image/*" multiple 
-                                                            [multiple]="false"
-                                                            (change)="selectFiles('FaviconUrl',$event)"
-                                                            >
-                                                        <label
-                                                            class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
-                                                            for="add-favicon-btn"
-                                                            matRipple>
-                                                            <mat-icon
-                                                                class="icon-size-5"
-                                                                [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
-                                                        </label>    
-                                                    </div>
-                                                    <div *ngIf="this.files[3].fileSource !== null && this.files[3].selectedFiles !== null">
+                                                    <!-- <div>
                                                         <input
                                                             id="edit-favicon-btn"
                                                             class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
@@ -345,193 +340,538 @@
                                                             for="edit-favicon-btn"
                                                             matRipple>
                                                             <mat-icon
-                                                                class="icon-size-5"
+                                                                class="icon-size-6 text-white"
                                                                 [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
                                                         </label>
-                                                    </div>
+                                                    </div> -->
                                                 </div>
-                                            <mat-toolbar class="hidden w-0 h-0">
-                                                <input                                        
-                                                    matInput 
-                                                    type="text" 
-                                                    readonly 
-                                                    />
-                                            </mat-toolbar>
-                                            <mat-icon
-                                                matPrefix
-                                                [svgIcon]="'mat_solid:image'">
-                                            </mat-icon>
-                                        </mat-form-field>
-                                        <div class="w-full">
-                                            <mat-label class="font-medium">Preview</mat-label>
-                                            <div class="my-2"></div>
-                                            <div class="p-8 border border-gray-300 rounded h-96">
-                                                <div *ngIf="this.files[3].fileSource">
-                                                    <span class="block"><b>Image Size</b> : {{ this.files[3].selectedImageWidth }} x {{ this.files[3].selectedImageHeight }} pixel</span>
-                                                    <span class="block"><b>Recommended Size</b> : {{ this.files[3].recommendedImageWidth }} x {{ this.files[3].recommendedImageHeight }} pixel</span>
-                                                    <div class="flex w-full flex-auto">
-                                                        <img [src]="this.files[3].fileSource" class="object-scale-down h-52" />
+                                            </ng-container>
+                                        </div>
+                                        <!-- Cover Image (required)-->
+                                        <div class="relative flex flex-col border border-dashed rounded h-50 w-auto border-slate-300 hover:border-slate-500 hover:cursor-pointer items-center justify-center p-1">
+                                            <!-- Preview  -->
+                                            <div *ngIf="this.files[4].fileSource" class="h-full w-full bg-slate-50 justify-center items-center flex rounded">
+                                                <img [src]="this.files[4].fileSource" class="object-cover h-full w-auto" />
+                                            </div>
+                                            <!-- Add Button -->
+                                            <ng-container *ngIf="this.files[4].fileSource !== '' && this.files[4].selectedFiles === null || this.files[4].fileSource === null">
+                                                <div class="flex justify-center items-center w-full h-full">
+                                                    <input
+                                                        id="add-cover-image-btn"
+                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                        type="file"
+                                                        accept="image/*" multiple 
+                                                        [multiple]="false"
+                                                        (change)="selectFiles('CoverImageUrl',$event)"
+                                                        >
+                                                    <label
+                                                        class="ease-in-out duration-300 hover:scale-105 flex items-center justify-center w-full h-full rounded-full cursor-pointer flex-col text-sm"
+                                                        for="add-cover-image-btn"
+                                                        matRipple>
                                                         <mat-icon
-                                                            class="top-0 right-0 cursor-pointer"
-                                                            (click)="deleteFavicon();"
-                                                            [svgIcon]="'heroicons_solid:x-circle'">
+                                                            class="icon-size-8"
+                                                            [svgIcon]="'heroicons_outline:plus'"></mat-icon>Add Cover Image
+                                                    </label>    
+                                                </div>
+                                                <span class="text-xs tracking-tight text-gray-400">
+                                                    *Recommended size: {{files[4].recommendedImageWidth}} x {{files[4].recommendedImageHeight}}px 
+                                                </span>   
+                                                <span class="absolute top-0 left-0 m-2 text-xs tracking-tight text-gray-400">
+                                                    *Required
+                                                </span>   
+                                            </ng-container>
+                                            <!-- Edit/Delete Button -->
+                                            <ng-container *ngIf="this.files[4].fileSource !== null && this.files[4].selectedFiles !== null">
+                                                <div class="absolute gap-4 z-99 rounded-b bg-black bg-opacity-30 w-full bottom-0 h-1/4 flex flex-row justify-center items-center">
+                                                    <div>
+                                                        <mat-icon
+                                                            class="flex items-center justify-center icon-size-6 text-white"
+                                                            (click)="deleteCoverImage();"
+                                                            [svgIcon]="'heroicons_outline:x'">
                                                         </mat-icon>
                                                     </div>
+                                                    <!-- <div>
+                                                        <input
+                                                            id="edit-cover-image-btn"
+                                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                            type="file"
+                                                            accept="image/*" multiple 
+                                                            [multiple]="false"
+                                                            (change)="selectFiles('CoverImageUrl',$event)"
+                                                            >
+                                                        <label
+                                                            class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
+                                                            for="edit-cover-image-btn"
+                                                            matRipple>
+                                                            <mat-icon
+                                                                class="icon-size-6 text-white"
+                                                                [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
+                                                        </label>
+                                                    </div> -->
                                                 </div>
-                                            </div>
+                                            </ng-container>
                                         </div>
-                                    </div>
-                                    <!-- Banner -->
-                                    <div class="sm:col-span-8">
-                                        <!-- Store Banner(Desktop) & Store Banner(Mobile) -->
-                                        <div class="grid sm:grid-cols-4 gap-6">
-                                            <!-- Store Banner (Desktop) -->
-                                            <div class="sm:col-span-2">
-                                                <mat-form-field class="w-full fuse-mat-emphasized-affix">
-                                                    <mat-label class="font-medium">Store Banner (Desktop)</mat-label>
-                                                    <span class="hidden sm:block truncate w-15 leading-3 text-sm font-bold">Add <br> Image</span>
-                                                    <div class="flex flex-row w-full items-center ">
-                                                        <div class="sm:col-span-2 truncate flex flex-col w-full h-12 p-0 m-0 leading-3 justify-center items-center">
-                                                            <span class="text-xs text-gray-400 p-0 m-0">Image Size : Max 2MB,</span>
-                                                            <span class="text-xs text-gray-400 p-0 m-0">Resolution: 500 x 500 px</span>
-                                                        </div>
-                                                        <div *ngIf="this.files[1].galleryImages.length < 1">
-                                                            <input
-                                                                id="add-BannerDesktop-btn"
-                                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                                type="file"
-                                                                accept="image/*" multiple 
-                                                                [multiple]="false"
-                                                                (change)="selectFiles('BannerDesktopUrl',$event)"
-                                                                >
-                                                            <label
-                                                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
-                                                                for="add-BannerDesktop-btn"
-                                                                matRipple>
-                                                                <mat-icon
-                                                                    class="icon-size-5"
-                                                                    [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
-                                                            </label>    
-                                                        </div>
-                                                        <div *ngIf="this.files[1].galleryImages.length > 0">
-                                                            <input
-                                                                id="edit-BannerDesktop-btn"
-                                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                                type="file"
-                                                                accept="image/*" multiple 
-                                                                [multiple]="false"
-                                                                (change)="selectFiles('BannerDesktopUrl',$event)"
-                                                                >
-                                                            <label
-                                                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
-                                                                for="edit-BannerDesktop-btn"
-                                                                matRipple>
-                                                                <mat-icon
-                                                                    class="icon-size-5"
-                                                                    [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                    <mat-toolbar class="hidden w-0 h-0">
-                                                        <input matInput type="text" readonly/>
-                                                    </mat-toolbar>
-                                                    <mat-icon
-                                                        matPrefix
-                                                        [svgIcon]="'mat_solid:image'">
-                                                    </mat-icon>
-                                                </mat-form-field>
-                                            </div>
-                                            <!-- Store Banner (Mobile) -->
-                                            <div class="sm:col-span-2">
-                                                <mat-form-field class="w-full fuse-mat-emphasized-affix">
-                                                    <mat-label class="font-medium">Store Banner (Mobile)</mat-label>
-                                                    <span class="hidden sm:block truncate w-15 leading-3 text-sm font-bold">Add <br> Image</span>
-                                                    <div class="flex flex-row w-full items-center ">
-                                                        <div class="sm:col-span-2 truncate flex flex-col w-full h-12 p-0 m-0 leading-3 justify-center items-center">
-                                                            <span class="text-xs text-gray-400 p-0 m-0">Image Size : Max 2MB,</span>
-                                                            <span class="text-xs text-gray-400 p-0 m-0">Resolution: 500 x 500 px</span>
-                                                        </div>
-                                                        <div *ngIf="this.files[2].galleryImages.length < 1">
-                                                            <input
-                                                                id="add-BannerMobile-btn"
-                                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                                type="file"
-                                                                accept="image/*" multiple 
-                                                                [multiple]="false"
-                                                                (change)="selectFiles('BannerMobileUrl',$event)"
-                                                                >
-                                                            <label
-                                                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
-                                                                for="add-BannerMobile-btn"
-                                                                matRipple>
-                                                                <mat-icon
-                                                                    class="icon-size-5"
-                                                                    [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
-                                                            </label>    
-                                                        </div>
-                                                        <div *ngIf="this.files[2].galleryImages.length > 0">
-                                                            <input
-                                                                id="edit-BannerMobile-btn"
-                                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                                type="file"
-                                                                accept="image/*" multiple 
-                                                                [multiple]="false"
-                                                                (change)="selectFiles('BannerMobileUrl',$event)"
-                                                                >
-                                                            <label
-                                                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
-                                                                for="edit-BannerMobile-btn"
-                                                                matRipple>
-                                                                <mat-icon
-                                                                    class="icon-size-5"
-                                                                    [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                    <mat-toolbar class="hidden w-0 h-0">
-                                                        <input matInput type="text" readonly/>
-                                                    </mat-toolbar>
-                                                    <mat-icon
-                                                        matPrefix
-                                                        [svgIcon]="'mat_solid:image'">
-                                                    </mat-icon>
-                                                </mat-form-field>
-                                            </div>
-                                        </div>
-                                        <div class="w-full ">
-                                            <mat-label class="font-medium">Preview</mat-label>
-                                            <div class="my-2"></div>
-                                            <div class="grid grid-cols-4 gap-6 w-full border border-gray-300 rounded h-96">
-                                                <div class="col-span-4 sm:col-span-2 p-5" *ngIf="this.files[1].fileSource">
-                                                    <span class="block">Banner for <b>Desktop</b> View </span> 
-                                                    <span *ngIf="this.files[1].selectedImageWidth && this.files[1].selectedImageHeight" class="block"><b>Image Size</b> : {{ this.files[1].selectedImageWidth }} x {{ this.files[1].selectedImageHeight }} pixel</span>
-                                                    <span class="block"><b>Recommended Size</b> : {{ this.files[1].recommendedImageWidth }} x {{ this.files[1].recommendedImageHeight }} pixel</span> 
+                                        <!-- Banner DESKTOP  -->
+                                        <div class="col-span-1 sm:col-span-3 group relative flex flex-col border border-dashed rounded h-80 w-auto border-slate-300 hover:border-slate-500 hover:cursor-pointer items-center justify-center">
+                                            <!-- Preview  -->
+                                            <div class="w-full h-3/4 rounded-t px-1 pt-1">
+                                                <div *ngIf="this.files[1].fileSource" class="h-full w-full bg-slate-50 justify-center items-center flex">
+                                                    <!-- <img [src]="this.files[1].fileSource" class="object-cover h-full w-auto" /> -->
                                                     <div class="flex justify-center w-full">
                                                         <ngx-gallery id="BannerDesktop-NgxGallery" [options]="galleryOptionsBannerDesktop" [images]="this.files[1].galleryImages"></ngx-gallery>
                                                     </div>
                                                 </div>
-                                                <!-- <div class="p-8 border border-gray-300 rounded h-auto">
-                                                    <ng-container *ngIf="this.files[1].fileSource">
-                                                        <span *ngIf="this.files[1].selectedImageWidth && this.files[1].selectedImageHeight" class="block"><b>Uploaded Image Size</b>: {{ this.files[1].selectedImageWidth }} x {{ this.files[1].selectedImageHeight }} pixel </span>
-                                                        <span class="block"><b>Recommended Size</b>: {{ this.files[1].recommendedImageWidth }} x {{ this.files[1].recommendedImageHeight }} pixel </span>
-                                                    </ng-container>
-                                                    <div class="flex justify-center w-full">
-                                                        <ngx-gallery id="taik1" [options]="galleryOptionsBannerDesktop" [images]="this.files[1].galleryImages"></ngx-gallery>
-                                                    </div>
-                                                </div>  -->
-                                                <div class="col-span-4 sm:col-span-2 p-5" *ngIf="this.files[2].fileSource">
-                                                    <span>Banner for <b>Mobile</b> View </span> 
-                                                    <span *ngIf="this.files[2].selectedImageWidth && this.files[2].selectedImageHeight" class="block"><b>Image Size</b> : {{ this.files[2].selectedImageWidth }} x {{ this.files[2].selectedImageHeight }} pixel</span>
-                                                    <span class="block"><b>Recommended Size</b> : {{ this.files[2].recommendedImageWidth }} x {{ this.files[2].recommendedImageHeight }} pixel</span>  
+                                            </div>
+                                            <div class="w-full h-1/4 rounded-b border-t flex flex-col items-center justify-center p-1">
+                                                <div class="flex justify-center items-center w-full h-full">
+                                                    <input
+                                                        id="add-banner-desktop-btn"
+                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                        type="file"
+                                                        accept="image/*" multiple 
+                                                        [multiple]="false"
+                                                        (change)="selectFiles('BannerDesktopUrl',$event)"
+                                                        >
+                                                    <label
+                                                        class="ease-in-out duration-300 group-hover:scale-105 flex items-center justify-center w-full h-full rounded-full cursor-pointer flex-col text-sm"
+                                                        for="add-banner-desktop-btn"
+                                                        matRipple>
+                                                        <mat-icon
+                                                            class="icon-size-6"
+                                                            [svgIcon]="'heroicons_outline:plus'"></mat-icon>Add Store Banner (Desktop)
+                                                    </label>    
+                                                </div>
+                                                <span class="text-xs tracking-tight text-gray-400">
+                                                    *Recommended size: {{files[1].recommendedImageWidth}} x {{files[1].recommendedImageHeight}}px 
+                                                </span> 
+                                            </div>
+                                        </div>
+                                        <!-- Banner MOBILE  -->
+                                        <div class="col-span-1 sm:col-span-3 group relative flex flex-col border border-dashed rounded h-80 w-auto border-slate-300 hover:border-slate-500 hover:cursor-pointer items-center justify-center">
+                                            <!-- Preview  -->
+                                            <div class="w-full h-3/4 rounded-t px-1 pt-1">
+                                                <div *ngIf="this.files[2].fileSource" class="h-full w-full bg-slate-50 justify-center items-center flex">
+                                                    <!-- <img [src]="this.files[1].fileSource" class="object-cover h-full w-auto" /> -->
                                                     <div class="flex justify-center w-full">
                                                         <ngx-gallery id="BannerMobile-NgxGallery" [options]="galleryOptionsBannerMobile" [images]="this.files[2].galleryImages"></ngx-gallery>
                                                     </div>
                                                 </div>
-                                                &nbsp;
-                                            </div> 
+                                            </div>
+                                            <div class="w-full h-1/4 rounded-b border-t flex flex-col items-center justify-center p-1">
+                                                <div class="flex justify-center items-center w-full h-full">
+                                                    <input
+                                                        id="add-banner-mobile-btn"
+                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                        type="file"
+                                                        accept="image/*" multiple 
+                                                        [multiple]="false"
+                                                        (change)="selectFiles('BannerMobileUrl',$event)"
+                                                        >
+                                                    <label
+                                                        class="ease-in-out duration-300 group-hover:scale-105 flex items-center justify-center w-full h-full rounded-full cursor-pointer flex-col text-sm"
+                                                        for="add-banner-mobile-btn"
+                                                        matRipple>
+                                                        <mat-icon
+                                                            class="icon-size-6"
+                                                            [svgIcon]="'heroicons_outline:plus'"></mat-icon>Add Store Banner (Mobile)
+                                                    </label>    
+                                                </div>
+                                                <span class="text-xs tracking-tight text-gray-400">
+                                                    *Recommended size: {{files[2].recommendedImageWidth}} x {{files[2].recommendedImageHeight}}px 
+                                                </span> 
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </ng-container>
+                                <ng-container *ngIf="false">
+                                    <!-- Logo and Banner -->
+                                    <div class="grid sm:grid-cols-8 gap-6 w-full mt-8">
+                                        <!-- Logo -->
+                                        <div class="sm:col-span-4">
+                                            <mat-form-field class="w-full fuse-mat-emphasized-affix">
+                                                <mat-label class="font-medium">Store Logo</mat-label>
+                                                <span class="hidden sm:block truncate w-15 leading-3 text-sm font-bold">Add <br> Image</span>
+                                                    <div class="flex flex-row w-full items-center ">
+                                                        <div class="sm:col-span-2 truncate flex flex-col w-full h-12 p-0 m-0 leading-3 justify-center items-center">
+                                                            <span class="text-xs text-gray-400 p-0 m-0">Image Size : Max 2MB,</span>
+                                                            <span class="text-xs text-gray-400 p-0 m-0">Resolution: 500 x 500 px</span>
+                                                        </div>
+                                                        <div *ngIf="this.files[0].fileSource !== '' && this.files[0].selectedFiles === null || this.files[0].fileSource === null">
+                                                            <input
+                                                                id="add-logo-btn"
+                                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                type="file"
+                                                                accept="image/*" multiple 
+                                                                [multiple]="false"
+                                                                (change)="selectFiles('LogoUrl',$event)"
+                                                                >
+                                                            <label
+                                                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
+                                                                for="add-logo-btn"
+                                                                matRipple>
+                                                                <mat-icon
+                                                                    class="icon-size-5"
+                                                                    [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                                                            </label>    
+                                                        </div>
+                                                        <div *ngIf="this.files[0].fileSource !== null && this.files[0].selectedFiles !== null">
+                                                            <input
+                                                                id="edit-logo-btn"
+                                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                type="file"
+                                                                accept="image/*" multiple 
+                                                                [multiple]="false"
+                                                                (change)="selectFiles('LogoUrl',$event)"
+                                                                >
+                                                            <label
+                                                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
+                                                                for="edit-logo-btn"
+                                                                matRipple>
+                                                                <mat-icon
+                                                                    class="icon-size-5"
+                                                                    [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                <mat-toolbar class="hidden w-0 h-0">
+                                                    <input                                        
+                                                        matInput 
+                                                        type="text" 
+                                                        readonly 
+                                                        />
+                                                </mat-toolbar>
+                                                <mat-icon
+                                                    matPrefix
+                                                    [svgIcon]="'mat_solid:image'">
+                                                </mat-icon>
+                                            </mat-form-field>
+                                            <div class="w-full">
+                                                <mat-label class="font-medium">Preview</mat-label>
+                                                <div class="my-2"></div>
+                                                <div class="p-8 border border-gray-300 rounded h-96">
+                                                    <div *ngIf="this.files[0].fileSource">
+                                                        <span class="block"><b>Image Size</b> : {{ this.files[0].selectedImageWidth }} x {{ this.files[0].selectedImageHeight }} pixel</span>
+                                                        <span class="block"><b>Recommended Size</b> : {{ this.files[0].recommendedImageWidth }} x {{ this.files[0].recommendedImageHeight }} pixel</span>
+                                                        <div class="flex w-full flex-auto">
+                                                            <img [src]="this.files[0].fileSource" class="object-scale-down h-52" />
+                                                            <mat-icon
+                                                                class="top-0 right-0 cursor-pointer"
+                                                                (click)="deleteLogo();"
+                                                                [svgIcon]="'heroicons_solid:x-circle'">
+                                                            </mat-icon>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Favicon -->
+                                        <div class="sm:col-span-4">
+                                            <mat-form-field class="w-full fuse-mat-emphasized-affix">
+                                                <mat-label class="font-medium">Favicon</mat-label>
+                                                <span class="hidden sm:block truncate w-15 leading-3 text-sm font-bold">Add <br> Image</span>
+                                                    <div class="flex flex-row w-full items-center ">
+                                                        <div class="sm:col-span-2 truncate flex flex-col w-full h-12 p-0 m-0 leading-3 justify-center items-center">
+                                                            <span class="text-xs text-gray-400 p-0 m-0">Image Size : Max 2MB,</span>
+                                                            <span class="text-xs text-gray-400 p-0 m-0">Resolution: 500 x 500 px</span>
+                                                        </div>
+                                                        <div *ngIf="this.files[3].fileSource !== '' && this.files[3].selectedFiles === null">
+                                                            <input
+                                                                id="add-favicon-btn"
+                                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                type="file"
+                                                                accept="image/*" multiple 
+                                                                [multiple]="false"
+                                                                (change)="selectFiles('FaviconUrl',$event)"
+                                                                >
+                                                            <label
+                                                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
+                                                                for="add-favicon-btn"
+                                                                matRipple>
+                                                                <mat-icon
+                                                                    class="icon-size-5"
+                                                                    [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                                                            </label>    
+                                                        </div>
+                                                        <div *ngIf="this.files[3].fileSource !== null && this.files[3].selectedFiles !== null">
+                                                            <input
+                                                                id="edit-favicon-btn"
+                                                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                type="file"
+                                                                accept="image/*" multiple 
+                                                                [multiple]="false"
+                                                                (change)="selectFiles('FaviconUrl',$event)"
+                                                                >
+                                                            <label
+                                                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
+                                                                for="edit-favicon-btn"
+                                                                matRipple>
+                                                                <mat-icon
+                                                                    class="icon-size-5"
+                                                                    [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                <mat-toolbar class="hidden w-0 h-0">
+                                                    <input                                        
+                                                        matInput 
+                                                        type="text" 
+                                                        readonly 
+                                                        />
+                                                </mat-toolbar>
+                                                <mat-icon
+                                                    matPrefix
+                                                    [svgIcon]="'mat_solid:image'">
+                                                </mat-icon>
+                                            </mat-form-field>
+                                            <div class="w-full">
+                                                <mat-label class="font-medium">Preview</mat-label>
+                                                <div class="my-2"></div>
+                                                <div class="p-8 border border-gray-300 rounded h-96">
+                                                    <div *ngIf="this.files[3].fileSource">
+                                                        <span class="block"><b>Image Size</b> : {{ this.files[3].selectedImageWidth }} x {{ this.files[3].selectedImageHeight }} pixel</span>
+                                                        <span class="block"><b>Recommended Size</b> : {{ this.files[3].recommendedImageWidth }} x {{ this.files[3].recommendedImageHeight }} pixel</span>
+                                                        <div class="flex w-full flex-auto">
+                                                            <img [src]="this.files[3].fileSource" class="object-scale-down h-52" />
+                                                            <mat-icon
+                                                                class="top-0 right-0 cursor-pointer"
+                                                                (click)="deleteFavicon();"
+                                                                [svgIcon]="'heroicons_solid:x-circle'">
+                                                            </mat-icon>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Banner -->
+                                        <div class="sm:col-span-8">
+                                            <!-- Store Banner(Desktop) & Store Banner(Mobile) -->
+                                            <div class="grid sm:grid-cols-4 gap-6">
+                                                <!-- Store Banner (Desktop) -->
+                                                <div class="sm:col-span-2">
+                                                    <mat-form-field class="w-full fuse-mat-emphasized-affix">
+                                                        <mat-label class="font-medium">Store Banner (Desktop)</mat-label>
+                                                        <span class="hidden sm:block truncate w-15 leading-3 text-sm font-bold">Add <br> Image</span>
+                                                        <div class="flex flex-row w-full items-center ">
+                                                            <div class="sm:col-span-2 truncate flex flex-col w-full h-12 p-0 m-0 leading-3 justify-center items-center">
+                                                                <span class="text-xs text-gray-400 p-0 m-0">Image Size : Max 2MB,</span>
+                                                                <span class="text-xs text-gray-400 p-0 m-0">Resolution: 500 x 500 px</span>
+                                                            </div>
+                                                            <div *ngIf="this.files[1].galleryImages.length < 1">
+                                                                <input
+                                                                    id="add-BannerDesktop-btn"
+                                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                    type="file"
+                                                                    accept="image/*" multiple 
+                                                                    [multiple]="false"
+                                                                    (change)="selectFiles('BannerDesktopUrl',$event)"
+                                                                    >
+                                                                <label
+                                                                    class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
+                                                                    for="add-BannerDesktop-btn"
+                                                                    matRipple>
+                                                                    <mat-icon
+                                                                        class="icon-size-5"
+                                                                        [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                                                                </label>    
+                                                            </div>
+                                                            <div *ngIf="this.files[1].galleryImages.length > 0">
+                                                                <input
+                                                                    id="edit-BannerDesktop-btn"
+                                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                    type="file"
+                                                                    accept="image/*" multiple 
+                                                                    [multiple]="false"
+                                                                    (change)="selectFiles('BannerDesktopUrl',$event)"
+                                                                    >
+                                                                <label
+                                                                    class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
+                                                                    for="edit-BannerDesktop-btn"
+                                                                    matRipple>
+                                                                    <mat-icon
+                                                                        class="icon-size-5"
+                                                                        [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        <mat-toolbar class="hidden w-0 h-0">
+                                                            <input matInput type="text" readonly/>
+                                                        </mat-toolbar>
+                                                        <mat-icon
+                                                            matPrefix
+                                                            [svgIcon]="'mat_solid:image'">
+                                                        </mat-icon>
+                                                    </mat-form-field>
+                                                </div>
+                                                <!-- Store Banner (Mobile) -->
+                                                <div class="sm:col-span-2">
+                                                    <mat-form-field class="w-full fuse-mat-emphasized-affix">
+                                                        <mat-label class="font-medium">Store Banner (Mobile)</mat-label>
+                                                        <span class="hidden sm:block truncate w-15 leading-3 text-sm font-bold">Add <br> Image</span>
+                                                        <div class="flex flex-row w-full items-center ">
+                                                            <div class="sm:col-span-2 truncate flex flex-col w-full h-12 p-0 m-0 leading-3 justify-center items-center">
+                                                                <span class="text-xs text-gray-400 p-0 m-0">Image Size : Max 2MB,</span>
+                                                                <span class="text-xs text-gray-400 p-0 m-0">Resolution: 500 x 500 px</span>
+                                                            </div>
+                                                            <div *ngIf="this.files[2].galleryImages.length < 1">
+                                                                <input
+                                                                    id="add-BannerMobile-btn"
+                                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                    type="file"
+                                                                    accept="image/*" multiple 
+                                                                    [multiple]="false"
+                                                                    (change)="selectFiles('BannerMobileUrl',$event)"
+                                                                    >
+                                                                <label
+                                                                    class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
+                                                                    for="add-BannerMobile-btn"
+                                                                    matRipple>
+                                                                    <mat-icon
+                                                                        class="icon-size-5"
+                                                                        [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                                                                </label>    
+                                                            </div>
+                                                            <div *ngIf="this.files[2].galleryImages.length > 0">
+                                                                <input
+                                                                    id="edit-BannerMobile-btn"
+                                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                    type="file"
+                                                                    accept="image/*" multiple 
+                                                                    [multiple]="false"
+                                                                    (change)="selectFiles('BannerMobileUrl',$event)"
+                                                                    >
+                                                                <label
+                                                                    class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
+                                                                    for="edit-BannerMobile-btn"
+                                                                    matRipple>
+                                                                    <mat-icon
+                                                                        class="icon-size-5"
+                                                                        [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        <mat-toolbar class="hidden w-0 h-0">
+                                                            <input matInput type="text" readonly/>
+                                                        </mat-toolbar>
+                                                        <mat-icon
+                                                            matPrefix
+                                                            [svgIcon]="'mat_solid:image'">
+                                                        </mat-icon>
+                                                    </mat-form-field>
+                                                </div>
+                                            </div>
+                                            <div class="w-full ">
+                                                <mat-label class="font-medium">Preview</mat-label>
+                                                <div class="my-2"></div>
+                                                <div class="grid grid-cols-4 gap-6 w-full border border-gray-300 rounded h-96">
+                                                    <div class="col-span-4 sm:col-span-2 p-5" *ngIf="this.files[1].fileSource">
+                                                        <span class="block">Banner for <b>Desktop</b> View </span> 
+                                                        <span *ngIf="this.files[1].selectedImageWidth && this.files[1].selectedImageHeight" class="block"><b>Image Size</b> : {{ this.files[1].selectedImageWidth }} x {{ this.files[1].selectedImageHeight }} pixel</span>
+                                                        <span class="block"><b>Recommended Size</b> : {{ this.files[1].recommendedImageWidth }} x {{ this.files[1].recommendedImageHeight }} pixel</span> 
+                                                        <div class="flex justify-center w-full">
+                                                            <ngx-gallery id="BannerDesktop-NgxGallery" [options]="galleryOptionsBannerDesktop" [images]="this.files[1].galleryImages"></ngx-gallery>
+                                                        </div>
+                                                    </div>
+                                                    <!-- <div class="p-8 border border-gray-300 rounded h-auto">
+                                                        <ng-container *ngIf="this.files[1].fileSource">
+                                                            <span *ngIf="this.files[1].selectedImageWidth && this.files[1].selectedImageHeight" class="block"><b>Uploaded Image Size</b>: {{ this.files[1].selectedImageWidth }} x {{ this.files[1].selectedImageHeight }} pixel </span>
+                                                            <span class="block"><b>Recommended Size</b>: {{ this.files[1].recommendedImageWidth }} x {{ this.files[1].recommendedImageHeight }} pixel </span>
+                                                        </ng-container>
+                                                        <div class="flex justify-center w-full">
+                                                            <ngx-gallery id="taik1" [options]="galleryOptionsBannerDesktop" [images]="this.files[1].galleryImages"></ngx-gallery>
+                                                        </div>
+                                                    </div>  -->
+                                                    <div class="col-span-4 sm:col-span-2 p-5" *ngIf="this.files[2].fileSource">
+                                                        <span>Banner for <b>Mobile</b> View </span> 
+                                                        <span *ngIf="this.files[2].selectedImageWidth && this.files[2].selectedImageHeight" class="block"><b>Image Size</b> : {{ this.files[2].selectedImageWidth }} x {{ this.files[2].selectedImageHeight }} pixel</span>
+                                                        <span class="block"><b>Recommended Size</b> : {{ this.files[2].recommendedImageWidth }} x {{ this.files[2].recommendedImageHeight }} pixel</span>  
+                                                        <div class="flex justify-center w-full">
+                                                            <ngx-gallery id="BannerMobile-NgxGallery" [options]="galleryOptionsBannerMobile" [images]="this.files[2].galleryImages"></ngx-gallery>
+                                                        </div>
+                                                    </div>
+                                                    &nbsp;
+                                                </div> 
+                                            </div>
+                                        </div>
+                                        <!-- Cover -->
+                                        <div class="sm:col-span-8">
+                                            <div class="grid sm:grid-cols-4 gap-6">
+                                                <div class="sm:col-span-4">
+                                                    <mat-form-field class="w-full fuse-mat-emphasized-affix">
+                                                        <mat-label class="font-medium">Cover Image</mat-label>
+                                                        <span class="hidden sm:block truncate w-15 leading-3 text-sm font-bold">Add <br> Image</span>
+                                                        <div class="flex flex-row w-full items-center ">
+                                                            <div class="sm:col-span-2 truncate flex flex-col w-full h-12 p-0 m-0 leading-3 justify-center items-center">
+                                                                <span class="text-xs text-gray-400 p-0 m-0">Image Size: Max 2MB,</span>
+                                                                <span class="text-xs text-gray-400 p-0 m-0">Resolution: 500 x 500 px</span>
+                                                            </div>
+                                                            <div *ngIf="this.files[4].galleryImages.length < 1">
+                                                                <input
+                                                                    id="add-cover-btn"
+                                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                    type="file"
+                                                                    accept="image/*" multiple 
+                                                                    [multiple]="false"
+                                                                    (change)="selectFiles('CoverImageUrl',$event)"
+                                                                    >
+                                                                <label
+                                                                    class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
+                                                                    for="add-cover-btn"
+                                                                    matRipple>
+                                                                    <mat-icon
+                                                                        class="icon-size-5"
+                                                                        [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                                                                </label>    
+                                                            </div>
+                                                            <div *ngIf="this.files[4].galleryImages.length > 0">
+                                                                <input
+                                                                    id="edit-cover-btn"
+                                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                    type="file"
+                                                                    accept="image/*" multiple 
+                                                                    [multiple]="false"
+                                                                    (change)="selectFiles('CoverImageUrl',$event)"
+                                                                    >
+                                                                <label
+                                                                    class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
+                                                                    for="edit-cover-btn"
+                                                                    matRipple>
+                                                                    <mat-icon
+                                                                        class="icon-size-5"
+                                                                        [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        <mat-toolbar class="hidden w-0 h-0">
+                                                            <input matInput type="text" readonly/>
+                                                        </mat-toolbar>
+                                                        <mat-icon
+                                                            matPrefix
+                                                            [svgIcon]="'mat_solid:image'">
+                                                        </mat-icon>
+                                                    </mat-form-field>
+                                                </div>
+                                            </div>
+                                            <div class="w-full">
+                                                <mat-label class="font-medium">Preview</mat-label>
+                                                <div class="my-2"></div>
+                                                <div class="p-8 border border-gray-300 rounded h-96">
+                                                    <div *ngIf="this.files[4].fileSource">
+                                                        <span class="block"><b>Image Size</b> : {{ this.files[4].selectedImageWidth }} x {{ this.files[4].selectedImageHeight }} pixel</span>
+                                                        <span class="block"><b>Recommended Size</b> : {{ this.files[4].recommendedImageWidth }} x {{ this.files[4].recommendedImageHeight }} pixel</span>
+                                                        <div class="flex w-full flex-auto">
+                                                            <img [src]="this.files[4].fileSource" class="object-scale-down h-52" />
+                                                            <mat-icon
+                                                                class="top-0 right-0 cursor-pointer"
+                                                                (click)="deleteFavicon();"
+                                                                [svgIcon]="'heroicons_solid:x-circle'">
+                                                            </mat-icon>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-container>
                                 <div class="mt-4 flex justify-end">
                                     <button
                                         class="px-8 mr-2"
@@ -546,6 +886,7 @@
                                         mat-flat-button
                                         [color]="'primary'"
                                         type="button"
+                                        [disabled]="files[4].fileSource === null"
                                         matStepperNext>
                                         Next
                                     </button>
@@ -662,8 +1003,10 @@
                                                             <span>{{ stateCitySelector.triggerValue }}</span>
                                                         </span>
                                                     </mat-select-trigger>
-                                                    <ngx-mat-select-search [placeholderLabel]="'Search City'" [noEntriesFoundLabel]="'No matching records found'" [formControl]="regionCountryStateCities"
-                                                     ngDefaultControl></ngx-mat-select-search>
+                                                    <mat-option>
+                                                        <ngx-mat-select-search [placeholderLabel]="'Search City'" [noEntriesFoundLabel]="'No matching records found'" [formControl]="regionCountryStateCities"
+                                                         ngDefaultControl></ngx-mat-select-search>
+                                                    </mat-option>
                                                     <!-- <div *ngFor="let city of storeStateCities">
                                                         <mat-option class="m-t" [value]="city.city">{{city.city}}</mat-option>
                                                     </div> -->

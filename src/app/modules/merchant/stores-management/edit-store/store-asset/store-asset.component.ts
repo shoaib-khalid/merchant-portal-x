@@ -19,13 +19,29 @@ export class StoreAssetComponent implements OnInit
     storeBannerMobile: any = [];
 
     imageCollection:any = [];
-    galleryOptions: NgxGalleryOptions[] = [];
+    galleryOptionsBannerDesktop: NgxGalleryOptions[] = [];
     galleryOptionsBannerMobile: NgxGalleryOptions[] = [];
 
     storeAssetForm: FormGroup;
     plans: any[];
     // Image part    
-    files: any;
+    files: {
+        description: string,
+        type: string,
+        fileSource: any,
+        selectedFileName: string, 
+        selectedFiles: any, 
+        recommendedImageWidth: string, 
+        recommendedImageHeight: string, 
+        selectedImageWidth: string, 
+        selectedImageHeight: string,
+        toDelete: string[],
+        toAdd:any[],
+        isMultiple: boolean,
+        galleryImages: any[],
+        assetId: string,
+        toDeleted: boolean
+    }[];
 
     /**
      * Constructor
@@ -53,7 +69,6 @@ export class StoreAssetComponent implements OnInit
             { 
                 description: "Logo",
                 type: "LogoUrl",
-                assetId: null, 
                 fileSource: null,
                 selectedFileName: "", 
                 selectedFiles: null, 
@@ -61,70 +76,95 @@ export class StoreAssetComponent implements OnInit
                 recommendedImageHeight: "500", 
                 selectedImageWidth: "", 
                 selectedImageHeight: "",
-                toDeleted: false,
+                toDelete: [],
+                toAdd:[],
                 isMultiple: false,
-                galleryImages: [] 
+                galleryImages: [],
+                assetId: null,
+                toDeleted: false
             },
             { 
                 description: "BannerDesktop",
-                type: "BannerDesktopUrl",
-                assetId: null, 
+                type: "BannerDesktopUrl", 
                 fileSource: null,
                 selectedFileName: "", 
                 selectedFiles: null, 
-                recommendedImageWidth: "1440", 
-                recommendedImageHeight: "563", 
-                selectedImageWidth: [], 
-                selectedImageHeight: [],
+                recommendedImageWidth: "1110", 
+                recommendedImageHeight: "250", 
+                selectedImageWidth: "", 
+                selectedImageHeight: "",
                 toDelete: [],
                 toAdd:[],
                 isMultiple: true,
-                galleryImages: []
+                galleryImages: [],
+                assetId: null,
+                toDeleted: false
             },
             { 
                 description: "BannerMobile",
                 type: "BannerMobileUrl",
-                assetId: null, 
-                fileSource: null,
+                fileSource: null, 
                 selectedFileName: "", 
                 selectedFiles: null, 
-                recommendedImageWidth: "375", 
-                recommendedImageHeight: "362", 
+                recommendedImageWidth: "950", 
+                recommendedImageHeight: "260", 
                 selectedImageWidth: "", 
                 selectedImageHeight: "",
                 toDelete: [],
                 toAdd:[],
                 isMultiple: true,
-                galleryImages: []
+                galleryImages: [],
+                assetId: null,
+                toDeleted: false
             },
             { 
                 description: "Favicon",
-                type: "FaviconUrl", 
-                assetId: null,
-                fileSource: null,
+                type: "FaviconUrl",
+                fileSource: null, 
                 selectedFileName: "", 
                 selectedFiles: null, 
-                recommendedImageWidth: "100", 
-                recommendedImageHeight: "100", 
+                recommendedImageWidth: "950", 
+                recommendedImageHeight: "260", 
                 selectedImageWidth: "", 
                 selectedImageHeight: "",
-                toDeleted: false,
+                toDelete: [],
+                toAdd:[],
                 isMultiple: false,
-                galleryImages: []
+                galleryImages: [],
+                assetId: null,
+                toDeleted: false
             },
+            { 
+                description: "CoverImage",
+                type: "CoverImageUrl",
+                fileSource: null, 
+                selectedFileName: "", 
+                selectedFiles: null, 
+                recommendedImageWidth: "500", 
+                recommendedImageHeight: "500", 
+                selectedImageWidth: "", 
+                selectedImageHeight: "",
+                toDelete: [],
+                toAdd:[],
+                isMultiple: false,
+                galleryImages: [],
+                assetId: null,
+                toDeleted: false
+            }
         ];
 
         // initialise gallery
         // set galleryOptions
-        this.galleryOptions = [
+        this.galleryOptionsBannerDesktop = [
             {
-                width: '350px',
-                height: '350px',
+                preview: false,
+                imageArrows: true,
+                width: '780px',
+                height: '210px',
                 thumbnailsColumns: 3,
                 imageAnimation: NgxGalleryAnimation.Slide,
                 thumbnailsArrows: true,
-                // previewDownload: true,
-                imageArrowsAutoHide: true, 
+                imageArrowsAutoHide: false, 
                 thumbnailsArrowsAutoHide: true,
                 thumbnailsAutoHide: false,
                 thumbnailActions: [
@@ -146,8 +186,8 @@ export class StoreAssetComponent implements OnInit
                 breakpoint: 767,
                 thumbnailsColumns: 3,
                 thumbnailsAutoHide: false,
-                width: '350px',
-                height: '350px',
+                width: '280px',
+                height: '210px',
                 imagePercent: 100,
                 thumbnailsPercent: 30,
                 thumbnailsMargin: 10,
@@ -163,13 +203,14 @@ export class StoreAssetComponent implements OnInit
 
         this.galleryOptionsBannerMobile = [
             {
-                width: '350px',
-                height: '350px',
+                preview: false,
+                imageArrows: true,
+                width: '310px',
+                height: '210px',
                 thumbnailsColumns: 3,
                 imageAnimation: NgxGalleryAnimation.Slide,
                 thumbnailsArrows: true,
-                // previewDownload: true,
-                imageArrowsAutoHide: true, 
+                imageArrowsAutoHide: false, 
                 thumbnailsArrowsAutoHide: true,
                 thumbnailsAutoHide: false,
                 thumbnailActions: [
@@ -190,9 +231,9 @@ export class StoreAssetComponent implements OnInit
             {
                 breakpoint: 767,
                 thumbnailsColumns: 3,
-                thumbnailsAutoHide: true,
-                width: '350px',
-                height: '350px',
+                thumbnailsAutoHide: false,
+                width: '280px',
+                height: '210px',
                 imagePercent: 100,
                 thumbnailsPercent: 30,
                 thumbnailsMargin: 10,
@@ -253,6 +294,11 @@ export class StoreAssetComponent implements OnInit
                         this.files[3].fileSource = item.assetUrl;
                         this.files[3].assetId = item.id;
                     } 
+                    else if (item.assetType === "CoverImageUrl") {
+                        this.files[4].fileSource = item.assetUrl;
+                        this.files[4].assetId = item.id;
+                    } 
+                    
 
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
@@ -401,7 +447,7 @@ export class StoreAssetComponent implements OnInit
             this.files[index].selectedFileName = this.files[index].selectedFiles[i].name;
             }
         }
-        if(this.files[0].selectedFiles) {
+        if (this.files[0].selectedFiles) {
             this.files[0].toDeleted = false
         } else if (this.files[3].selectedFiles) {
             this.files[3].toDeleted = false
@@ -438,22 +484,21 @@ export class StoreAssetComponent implements OnInit
 
     deleteLogo() {
         this.files[0].toDeleted = true;        
-        this.files[0].fileSource = '';
+        this.files[0].fileSource = null;
         this._changeDetectorRef.markForCheck();
     }
 
     deleteFavicon(){
         this.files[3].toDeleted = true;        
-        this.files[3].fileSource = '';
+        this.files[3].fileSource = null;
         this._changeDetectorRef.markForCheck();
     }
     
-    // deletefiles(i) { 
-        
-    //     this.files[i].toDelete = true;        
-    //     this.files[i].fileSource = '';
-    //     this._changeDetectorRef.markForCheck();
-    // }
+    deleteCoverImage(){
+        this.files[4].toDeleted = true;        
+        this.files[4].fileSource = null;
+        this._changeDetectorRef.markForCheck();
+    }
 
     updateStoreAsset(): void
     {
@@ -651,6 +696,59 @@ export class StoreAssetComponent implements OnInit
                             });
                     }
                 });
+            }
+            // Favicon update using item.selectedFiles
+            if (item.type === 'CoverImageUrl'){
+
+                let formData = new FormData();
+
+                if (item.selectedFiles && item.selectedFiles !== null){
+                    formData.append('assetFile',item.selectedFiles[0]);
+                    formData.append('assetType',item.type);
+                    formData.append('assetDescription',item.description);
+                }
+
+                if (item.selectedFiles && this.files[4].assetId !== null && this.files[4].toDeleted === false) {
+                    this._storesService.putAssets(this.storeId, this.files[4].assetId, formData)
+                        .subscribe(response => {
+                                console.info('File updated the file successfully');
+
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
+                            },
+                            (err: any) => {
+                                console.error('Could not upload the file');
+                            });
+                } else if (this.files[4].toDeleted === true && this.files[4].assetId !== null) {
+                    this._storesService.deleteAssets(this.storeId, this.files[4].assetId)
+                        .subscribe(response => {
+                            console.info('File deleted the file successfully');
+
+                            this.files[4].toDeleted = false;
+                            // Mark for check
+                            this._changeDetectorRef.markForCheck();
+                        },
+                        (err: any) => {
+                            console.error('Could not upload the file');
+                        });
+                } else {
+                    if (item.selectedFiles && item.selectedFiles !== null) {
+                        this._storesService.postAssets(this.storeId, "CoverImageUrl", formData,"CoverImage")
+                            .subscribe(response => {
+                                console.info('File uploaded the file successfully');
+    
+    
+                                this.files[4].assetId = event["id"];
+    
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
+                            },
+                            (err: any) => {
+                                console.error('Could not upload the file');
+                            });
+                    }
+                }
+
             }
         });
 
