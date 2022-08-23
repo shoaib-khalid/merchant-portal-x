@@ -296,7 +296,8 @@ export class StoreTimingComponent implements OnInit
         let index = this._storeTiming.findIndex(dayList => dayList.day === day);
         this._storeTiming[index].isOpen = !this._storeTiming[index].isOpen;
         this._storeTiming[index].isOff = !this._storeTiming[index].isOff;
-        this._storeTiming[index].isBreakTime = this._storeTiming[index].isOpen;
+
+        // this._storeTiming[index].isBreakTime = this._storeTiming[index].isOpen;
         if( this._storeTiming[index].isBreakTime === false){
             this._storeTiming[index].breakStartTime.timeHour = "--";
             this._storeTiming[index].breakStartTime.timeMinute = "--";
