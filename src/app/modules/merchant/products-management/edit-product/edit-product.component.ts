@@ -227,6 +227,9 @@ export class EditProductComponent implements OnInit, OnDestroy
         id: string,
         index: number
     }[] = []; // images to be deleted from BE
+    variantImagesToBeDeleted: {
+        id: string,
+    }[] = [];
     updateThumbnailArray: { 
         assetId: string,
         isThumbnail: boolean, 
@@ -939,28 +942,27 @@ export class EditProductComponent implements OnInit, OnDestroy
 
         this.getallCombinations(this.variantComboItems)
         // set inventory
-        this.setInventoriesDetails();                
-
+        this.setInventoriesDetails();          
         
         // remove images that does not have itemCode 
         // so this means arr2 will contains images that related to variants only 
-        const arr1 = this.selectedVariantCombos;
-        const arr2 = this.variantimages;
+        // const arr1 = this.selectedVariantCombos;
+        // const arr2 = this.variantimages;
 
-        const map = new Map();
-        arr1.forEach(item => map.set(item.itemCode, item));
-        arr2.forEach(item => map.set(item.itemCode, {...map.get(item.itemCode), ...item}));
-        const mergedArr = Array.from(map.values());
-
-        // remove empty object if any
-        let clean = mergedArr.filter(element => {
-            if (Object.keys(element).length !== 0) {
-                return true;
-            }
-            else return false;
-        })
+        // const map = new Map();
+        // arr1.forEach(item => map.set(item.itemCode, item));
+        // arr2.forEach(item => map.set(item.itemCode, {...map.get(item.itemCode), ...item}));
+        // const mergedArr = Array.from(map.values());
+        // console.log('mergedArr', mergedArr);
+        // // remove empty object if any
+        // let clean = mergedArr.filter(element => {
+        //     if (Object.keys(element).length !== 0) {
+        //         return true;
+        //     }
+        //     else return false;
+        // })
         
-        this.selectedVariantCombos = clean;
+        // this.selectedVariantCombos = clean;
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -1487,15 +1489,25 @@ export class EditProductComponent implements OnInit, OnDestroy
 
         // HANDLE ASSETS
         await this.postProductImages();
+        
+        let mergedImagesToBeDeleted = [...this.imagesToBeDeleted.map(item => item.id), ...this.variantImagesToBeDeleted.map(item => item.id)]
+
+        const mergedImagesToBeDeletedNoDups = mergedImagesToBeDeleted.reduce((previousValue, currentValue) => {
+            if (previousValue.indexOf(currentValue) === -1) {
+              previousValue.push(currentValue);
+            }
+            return previousValue;
+        }, []);
 
         // Delete product images
-        for (let i = 0; i < this.imagesToBeDeleted.length; i++) {
-            await lastValueFrom(this._inventoryService.deleteProductAssets(this.selectedProduct.id, this.imagesToBeDeleted[i].id)).then(data => {
+        for (let i = 0; i < mergedImagesToBeDeletedNoDups.length; i++) {
+            await lastValueFrom(this._inventoryService.deleteProductAssets(this.selectedProduct.id, mergedImagesToBeDeletedNoDups[i])).then(data => {
                 this._changeDetectorRef.markForCheck();
             });
         }
         
         this.imagesToBeDeleted = [];
+        this.variantImagesToBeDeleted = [];
 
         // Update the product
         await this._inventoryService.updateProduct(this.selectedProduct.id, productToUpdate)
@@ -2152,6 +2164,26 @@ export class EditProductComponent implements OnInit, OnDestroy
                 // remove variant available to be created, if not, api will return error    
                 this.variantAvailableToBeCreated = this.variantAvailableToBeCreated.filter(y => !y.variantName.includes(variant.name));
 
+                //----------------------------
+                // variantimages
+                //----------------------------
+
+                if (this.selectedProduct.productAssets.length > this.selectedVariantCombos.length) {
+
+                    // First, filter out product assets with itemCode, then use .reduce to filter array this.selectedProduct.productAssets to contain only itemCode
+                    // that are NOT present in array this.selectedVariantCombos
+                    this.variantImagesToBeDeleted = this.selectedProduct.productAssets.filter(x => x.itemCode).reduce((previousValue, currentValue, index) => {
+                        
+                        if (this.selectedVariantCombos.map(combo => combo.itemCode).indexOf(currentValue.itemCode) === -1) {
+                            previousValue.push({
+                                id: currentValue.id,
+                                itemCode: currentValue.itemCode
+                            });
+                        }
+                        return previousValue;
+                      }, []);
+                }
+
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             }
@@ -2317,6 +2349,22 @@ export class EditProductComponent implements OnInit, OnDestroy
                 //----------------------------
                 // variantimages
                 //----------------------------
+
+                if (this.selectedProduct.productAssets.length > this.selectedVariantCombos.length) {
+
+                    // First, filter out product assets with itemCode, then use .reduce to filter array this.selectedProduct.productAssets to contain only itemCode
+                    // that are NOT present in array this.selectedVariantCombos
+                    this.variantImagesToBeDeleted = this.selectedProduct.productAssets.filter(x => x.itemCode).reduce((previousValue, currentValue, index) => {
+                        
+                        if (this.selectedVariantCombos.map(combo => combo.itemCode).indexOf(currentValue.itemCode) === -1) {
+                            previousValue.push({
+                                id: currentValue.id,
+                                itemCode: currentValue.itemCode
+                            });
+                        }
+                        return previousValue;
+                      }, []);
+                }
                 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();

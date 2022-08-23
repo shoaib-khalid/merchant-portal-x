@@ -226,7 +226,7 @@ export class StoresService
                     this._currentStores[index] = Object.assign(this._currentStores[index],{duration: 30});
                     this._currentStores[index] = Object.assign(this._currentStores[index],{totalSteps: 3});
                     this._currentStores[index] = Object.assign(this._currentStores[index],{featured: true});
-                    this._currentStores[index] = Object.assign(this._currentStores[index],{progress: { completed: 2, currentStep: 2  }});
+                    this._currentStores[index] = Object.assign(this._currentStores[index],{progress: { completed: 3, currentStep: 3  }});
                     this._currentStores[index] = Object.assign(this._currentStores[index],{category: item.type});
                     this._currentStores[index] = Object.assign(this._currentStores[index],{completed: 2});
                     this._currentStores[index] = Object.assign(this._currentStores[index],{currentStep: 3});
