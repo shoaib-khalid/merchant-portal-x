@@ -135,6 +135,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     @ViewChild('imageSearchPanelOrigin') private _imageSearchPanelOrigin: ElementRef;
     @ViewChild('imageSearchPanel') private _imageSearchPanel: TemplateRef<any>;
     @ViewChild('searchImageInput') public searchImageElement: ElementRef;
+    @ViewChild('newVariantAvailableInput') public _newVariantAvailableInput: ElementRef;
 
 
     // get current store
@@ -1358,50 +1359,6 @@ export class AddProductComponent implements OnInit, OnDestroy
         this.filteredProductVariantAvailable = this.productVariantAvailable?.filter(variantAvailable => variantAvailable.value.toLowerCase().includes(value));
 
     }
-  
-    /**
-     * Filter variants input key down event
-     *
-     * @param event
-     */
-    filterProductVariantAvailableInputKeyDown(event): void
-    {
-        // // Return if the pressed key is not 'Enter'
-        // if ( event.key !== 'Enter' )
-        // {
-        //     return;
-        // }
-
-        // // If there is no variant available...
-        // if ( this.filteredProductVariantAvailable.length === 0 )
-        // {
-        //     // Create the variant
-        // //  this.createVariantTag(event.target.value);
-
-        //     // Clear the input
-        //     event.target.value = '';
-
-        //     // Return
-        //     return;
-        // }
-
-        // // If there is a variant...
-        // const variantTag = this.filteredProductVariantAvailable[0];
-        // const isVariantTagApplied = this.selectedProduct.productVariants.find(item => item.id === variantTag.id);
-
-        // // If the found variant is already applied to the product...
-        // if ( isVariantTagApplied )
-        // {
-        //     // Remove the variant from the product
-        // //  this.removeVariantTagFromProduct(variantTag);
-        // }
-        // else
-        // {
-        //     // Otherwise add the variant to the product
-        //     let variantId
-        //     this.addVariantAvailableToVariant(variantTag, variantId);
-        // }
-    } 
 
     /**
      * Should the create variant button be visible
@@ -1587,6 +1544,7 @@ export class AddProductComponent implements OnInit, OnDestroy
             // If the confirm button pressed...
             if ( result === 'confirmed' )
             {
+                this._newVariantAvailableInput.nativeElement.value = '';
 
                 //----------------------------
                 // variantAvailableToBeCreated
@@ -1610,6 +1568,7 @@ export class AddProductComponent implements OnInit, OnDestroy
                 // Delete the variant available from productVariantAvailable
                 if (index > -1) {
                     this.productVariantAvailable.splice(index, 1);
+                    this.filteredProductVariantAvailable = this.productVariantAvailable;
                 }
 
                 //----------------------------
