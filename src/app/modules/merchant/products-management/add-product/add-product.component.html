@@ -1658,7 +1658,7 @@
                                                 matInput
                                                 type="number"
                                                 [disabled]="addProductForm.get('comboSection').get('categoryId').value.length == 0"
-                                                (change)="validateProductsOptionTotalAllowed($event.target.value)"
+                                                (keyup)="validateProductsOptionTotalAllowed($event.target.value)"
                                                 [value]="(selectedProductsOption) ? selectedProductsOption.totalAllow : ''"
                                                 #optionTotalAllow
                                                 >
