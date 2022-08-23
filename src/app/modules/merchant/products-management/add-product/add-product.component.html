@@ -1294,12 +1294,10 @@
                                                                                 type="file"
                                                                                 [multiple]="false"
                                                                                 [accept]="'image/jpeg, image/png'"
-                                                                                [disabled]="imagesEditMode"
                                                                                 (change)="uploadVariantImagesMethod(imageFileInput.files, [], i);"
                                                                                 #imageFileInput>
                                                                             <label
                                                                                 class="flex items-center justify-center w-6 h-6 rounded-full cursor-pointer hover:bg-hover"
-                                                                                [ngClass]="imagesEditMode ? 'cursor-not-allowed' : 'cursor-pointer'"
                                                                                 [matTooltip]="variantCombo.image.preview ? 'Change image' : 'Add image'"
                                                                                 [for]="'image-add-input-variant' + variantCombo.variant"
                                                                                 matRipple>

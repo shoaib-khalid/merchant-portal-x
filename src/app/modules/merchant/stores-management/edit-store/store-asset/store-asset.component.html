@@ -57,10 +57,10 @@
                                     <div class="text-white tracking-tight text-sm absolute gap-4 z-99 rounded-t bg-black bg-opacity-30 w-full top-0 h-1/6 flex flex-row justify-center items-center">
                                         Logo
                                     </div>
-                                    <div class="absolute gap-4 z-99 rounded-b bg-black bg-opacity-30 w-full bottom-0 h-1/5 flex flex-row justify-center items-center">
+                                    <div class="absolute gap-4 z-99 rounded-b bg-black bg-opacity-30 w-full bottom-0 h-1/6 flex flex-row justify-center items-center">
                                         <div>
                                             <mat-icon
-                                                class="flex items-center justify-center icon-size-6 text-white"
+                                                class="flex items-center justify-center icon-size-5 text-white"
                                                 (click)="deleteLogo();"
                                                 [svgIcon]="'heroicons_outline:x'">
                                             </mat-icon>
@@ -75,11 +75,11 @@
                                                 (change)="selectFiles('LogoUrl',$event)"
                                                 >
                                             <label
-                                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
+                                                class="flex items-center justify-center w-10 h-auto rounded-full cursor-pointer"
                                                 for="edit-logo-btn"
                                                 matRipple>
                                                 <mat-icon
-                                                    class="icon-size-6 text-white"
+                                                    class="icon-size-5 text-white"
                                                     [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
                                             </label>
                                         </div>
@@ -121,10 +121,10 @@
                                     <div class="text-white tracking-tight text-sm absolute gap-4 z-99 rounded-t bg-black bg-opacity-30 w-full top-0 h-1/6 flex flex-row justify-center items-center">
                                         Favicon
                                     </div>
-                                    <div class="absolute mx-1 gap-4 z-99 rounded-b bg-black bg-opacity-30 w-full bottom-0 h-1/5 flex flex-row justify-center items-center">
+                                    <div class="absolute mx-1 gap-4 z-99 rounded-b bg-black bg-opacity-30 w-full bottom-0 h-1/6 flex flex-row justify-center items-center">
                                         <div>
                                             <mat-icon
-                                                class="flex items-center justify-center icon-size-6 text-white"
+                                                class="flex items-center justify-center icon-size-5 text-white"
                                                 (click)="deleteFavicon();"
                                                 [svgIcon]="'heroicons_outline:x'">
                                             </mat-icon>
@@ -139,11 +139,11 @@
                                                 (change)="selectFiles('FaviconUrl',$event)"
                                                 >
                                             <label
-                                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
+                                                class="flex items-center justify-center w-10 h-auto rounded-full cursor-pointer"
                                                 for="edit-favicon-btn"
                                                 matRipple>
                                                 <mat-icon
-                                                    class="icon-size-6 text-white"
+                                                    class="icon-size-5 text-white"
                                                     [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
                                             </label>
                                         </div>
@@ -188,12 +188,12 @@
                                     <div class="text-white tracking-tight text-sm absolute gap-4 z-99 rounded-t bg-black bg-opacity-30 w-full top-0 h-1/6 flex flex-row justify-center items-center">
                                         Cover Image
                                     </div>
-                                    <div class="absolute gap-4 z-99 rounded-b bg-black bg-opacity-30 w-full bottom-0 h-1/5 flex flex-row justify-center items-center">
+                                    <div class="absolute gap-4 z-99 rounded-b bg-black bg-opacity-30 w-full bottom-0 h-1/6 flex flex-row justify-center items-center">
                                         <div>
                                             <mat-icon
-                                                class="flex items-center justify-center icon-size-6 text-white"
+                                                class="flex items-center justify-center icon-size-5 text-white"
                                                 (click)="deleteCoverImage();"
-                                                [svgIcon]="'heroicons_outline:x'">
+                                                [svgIcon]="'heroicons_outline:trash'">
                                             </mat-icon>
                                         </div>
                                         <div>
@@ -206,11 +206,11 @@
                                                 (change)="selectFiles('CoverImageUrl',$event)"
                                                 >
                                             <label
-                                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer"
+                                                class="flex items-center justify-center w-10 h-auto rounded-full cursor-pointer"
                                                 for="edit-cover-image-btn"
                                                 matRipple>
                                                 <mat-icon
-                                                    class="icon-size-6 text-white"
+                                                    class="icon-size-5 text-white"
                                                     [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
                                             </label>
                                         </div>
