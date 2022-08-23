@@ -1079,147 +1079,193 @@
                                     <div class="w-full mt-1 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-auto">
                                         <!-- Variants Available -->
                                         <div class="h-34 min-h-8 m-2 leading-none overflow-y-auto border-gray-300 dark:border-gray-500">
-                                            <div *ngIf="filteredProductVariants.length > 0">
-                                                <div *ngFor="let variant of filteredProductVariants; let i = index; trackBy: trackVariant">
-                                                    <span class="w-full mb-px font-small leading-tight">{{variant.name}}</span>
-                                                    <div class="flex items-center rounded-full w-full">
-                                                        <div class="ml-0 m-1.5">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <input
-                                                                    [id]="'variant-available-edit-button-' + variant.name"
-                                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                                    type="button"
-                                                                    (click)="openVariantsPanel(variant, i)"
-                                                                    mat-icon-button
-                                                                    #variantsPanelOrigin>
-                                                                <label 
-                                                                    class="flex items-center justify-center p-3 h-7 w-7 cursor-pointer rounded-full leading-9 bg-primary"
-                                                                    [for]="'variant-available-edit-button-' + variant.name"
-                                                                    matRipple>
-                                                                    <mat-icon
-                                                                        [svgIcon]="'heroicons_outline:plus'"
-                                                                        class="text-white icon-size-5"></mat-icon>
-                                                                </label>
-                                                            </span>
+                                            <ng-container *ngIf="filteredProductVariants.length > 0">
+                                                <ng-container *ngFor="let variant of filteredProductVariants; let i = index; trackBy: trackVariant">
+                                                    <span class="w-full mb-px font-small leading-tight sticky left-0">{{variant.name}}</span>
+                                                    <div class="flex gap-1 items-center rounded-full w-full">
+                                                        <!-- Buttons -->
+                                                        <div class="flex flex-row sticky left-0 rounded-r-full bg-white gap-1 p-0.5 pl-0">
+                                                            <!-- Add variant option button -->
+                                                            <div class="m-0">
+                                                                <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                    <input
+                                                                        [id]="'variant-available-edit-button-' + variant.name"
+                                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                        type="button"
+                                                                        (click)="openVariantsPanel(variant, i)"
+                                                                        mat-icon-button
+                                                                        #variantsPanelOrigin>
+                                                                    <label 
+                                                                        class="flex items-center justify-center p-3 h-7 w-7 cursor-pointer rounded-full leading-9 border border-primary"
+                                                                        [for]="'variant-available-edit-button-' + variant.name"
+                                                                        matRipple>
+                                                                        <mat-icon
+                                                                            [svgIcon]="'heroicons_outline:plus'"
+                                                                            class="text-primary icon-size-4"></mat-icon>
+                                                                    </label>
+                                                                </span>
+                                                            </div>
+                                                            <!-- Delete variant option button -->
+                                                            <div class="m-0">
+                                                                <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                    <input
+                                                                        [id]="'variant-available-delete-button-' + variant.name"
+                                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                        type="button"
+                                                                        (click)="openVariantsPanelDelete(variant, i)"
+                                                                        mat-icon-button
+                                                                        #variantsPanelDeleteOrigin>
+                                                                    <label 
+                                                                        class="flex items-center justify-center p-3 h-7 w-7 cursor-pointer rounded-full leading-9 border border-red-500"
+                                                                        [for]="'variant-available-delete-button-' + variant.name"
+                                                                        matRipple>
+                                                                        <mat-icon
+                                                                            [svgIcon]="'heroicons_outline:trash'"
+                                                                            class="text-red-500 icon-size-4"></mat-icon>
+                                                                    </label>
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                        <!-- <span>{{variant.productVariantsAvailable}}</span> -->
-                                                        <div *ngFor="let variantsAvailable of variant.productVariantsAvailable; trackBy: trackVariantAvailable" class="px-2 ml-0 m-1 rounded-full leading-7 text-gray-500 bg-gray-300 dark:text-gray-300 dark:bg-gray-700">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
-                                                                <span class="ml-0.5 text-md font-medium whitespace-nowrap">{{variantsAvailable.value}}</span>
-                                                            </span>
+                                                        <!-- Options -->
+                                                        <div class="flex flex-row">
+                                                            <div *ngFor="let variantsAvailable of variant.productVariantsAvailable; trackBy: trackVariantAvailable" 
+                                                                class="px-2 ml-0 m-1 rounded-full leading-7 text-gray-500 bg-gray-300 dark:text-gray-300 dark:bg-gray-700">
+                                                                <span class="text-md font-small whitespace-nowrap flex items-center justify-center">
+                                                                    <span class="ml-0.5 text-md font-medium whitespace-nowrap">{{variantsAvailable.value}}</span>
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                        <!-- <div *ngFor="let variantsAvailable of variant.productVariantsAvailable; trackBy: trackByFn">
-                                                            <span class="text-md font-small whitespace-nowrap flex items-center justify-center comma-list">
-                                                                <span class="ml-1 text-md font-medium whitespace-nowrap">{{variantsAvailable.value}}</span>
-                                                            </span>
-                                                        </div> -->
+                                                    </div>
+                                                </ng-container>
+                                            </ng-container>
+                                        </div>
+                                        <!-- Variants panel and its button -->
+                                        <!-- Variants panel -->
+                                        <ng-template #variantsPanel>
+                                            <div class="w-60 rounded border shadow-md bg-card">
+                                                <!-- Variants panel header -->
+                                                <div class="flex items-center m-3 mr-2">
+                                                    <div class="flex items-center">
+                                                        <mat-icon
+                                                            class="icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                                        <div class="ml-2">
+                                                            <input
+                                                                class="w-full min-w-0 py-1 border-0"
+                                                                type="text"
+                                                                placeholder="Enter variant option"
+                                                                (input)="filterProductVariantAvailable($event)"
+                                                                (keydown)="filterProductVariantAvailableInputKeyDown($event)"
+                                                                [maxLength]="30"
+                                                                #newVariantAvailableInput>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div
+                                                    class="flex flex-col max-h-70 py-2 border-t">
+                                                    <!-- Variant Available -->
+                                                    <ng-container *ngIf="!productVariantAvailableEditMode">
+                                                        <div class="pt-2 space-y-2">
+                                                            <div class="overflow-y-auto space-y-2 max-h-48">
+                                                                <ng-container *ngFor="let variantAvailable of filteredProductVariantAvailable; let i = index; trackBy: trackByFn">
+                                                                    <div class="flex items-center">
+                                                                        <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full mx-4">
+                                                                            <input
+                                                                                matInput 
+                                                                                [value]="variantAvailable.value"
+                                                                                (input)="editVariantAvailableTitleMethod(variant, $event)"
+                                                                                [readonly]="!productVariantAvailableValueEditMode[i]"
+                                                                            >
+                                                                            <!-- <button
+                                                                                mat-icon-button
+                                                                                (click)="deleteVariantAvailableMethod(variantAvailable, variantIndex)"
+                                                                                matSuffix>
+                                                                                <mat-icon
+                                                                                    class="icon-size-5 ml-2"
+                                                                                    [svgIcon]="'heroicons_solid:trash'"></mat-icon>
+                                                                            </button> -->
+                                                                        </mat-form-field>
+                                                                    </div>
+                                                                </ng-container>
+                                                            </div>
+                                                        </div>
+                                                    </ng-container>
+                                                    <!-- Create variant options-->
+                                                    <div
+                                                        class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer hover:bg-hover"
+                                                        *ngIf="shouldShowCreateVariantAvailableButton(newVariantAvailableInput.value) && productVariantAvailable.length < 10"
+                                                        (click)="createVariantAvailableMethod(newVariantAvailableInput.value, variantIndex); newVariantAvailableInput.value = ''"
+                                                        matRipple>
+                                                        <mat-icon 
+                                                            class="mr-2 icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                                                        <div class="break-all">Create "<b>{{newVariantAvailableInput.value}}</b>"</div>
+                                                    </div>
+                                                    <div
+                                                        class="flex items-center h-12 sm:h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-default border-t hover:bg-gray-50 dark:hover:bg-hover"
+                                                        *ngIf="productVariantAvailable?.length >= 10"
+                                                    >
+                                                        <mat-icon
+                                                            class="mr-2 icon-size-5"
+                                                            [svgIcon]="'heroicons_outline:exclamation-circle'"></mat-icon>
+                                                        <div class="text-sm md:text-xs">You can only create maximum of 10 variant options</div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <!-- Variants panel and its button -->
-                                        <div>
-                                            <!-- Variants panel -->
-                                            <ng-template #variantsPanel>
-                                                <div class="w-60 rounded border shadow-md bg-card">
-                                                    <!-- Variants panel header -->
-                                                    <div class="flex items-center m-3 mr-2">
-                                                        <div class="flex items-center">
-                                                            <mat-icon
-                                                                class="icon-size-5"
-                                                                [svgIcon]="'heroicons_solid:search'"></mat-icon>
-                                                            <div class="ml-2">
-                                                                <input
-                                                                    class="w-full min-w-0 py-1 border-0"
-                                                                    type="text"
-                                                                    placeholder="Enter variant option"
-                                                                    (input)="filterProductVariantAvailable($event)"
-                                                                    (keydown)="filterProductVariantAvailableInputKeyDown($event)"
-                                                                    [maxLength]="30"
-                                                                    #newVariantAvailableInput>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div
-                                                        class="flex flex-col max-h-70 py-2 border-t">
-                                                        <!-- Variant Available -->
-                                                        <ng-container *ngIf="!productVariantAvailableEditMode">
-                                                            <div class="pt-2 space-y-2">
-                                                                <div class="overflow-y-auto space-y-2 max-h-48">
-                                                                    <ng-container *ngFor="let variantAvailable of filteredProductVariantAvailable; let i = index; trackBy: trackByFn">
-                                                                        <div class="flex items-center">
-                                                                            <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full mx-4">
-                                                                                <input
-                                                                                    matInput 
-                                                                                    [value]="variantAvailable.value"
-                                                                                    (input)="editVariantAvailableTitleMethod(variant, $event)"
-                                                                                    [readonly]="!productVariantAvailableValueEditMode[i]"
-                                                                                >
-                                                                                <!-- <button
-                                                                                    mat-icon-button
-                                                                                    *ngIf="productVariantAvailableValueEditMode[i]"
-                                                                                    (click)="productVariantAvailableValueEditMode[i] = !productVariantAvailableValueEditMode[i]; updateVariantAvailableTitle(variant, $event)"
-                                                                                    matSuffix>
-                                                                                    <mat-icon
-                                                                                        class="icon-size-5 ml-2"
-                                                                                        [svgIcon]="'heroicons_solid:check'"></mat-icon>
-                                                                                </button>
-                                                                                <button
-                                                                                    mat-icon-button
-                                                                                    *ngIf="!productVariantAvailableValueEditMode[i]"
-                                                                                    (click)="productVariantAvailableValueEditMode[i] = !productVariantAvailableValueEditMode[i]"
-                                                                                    matSuffix>
-                                                                                    <mat-icon
-                                                                                        class="icon-size-5 ml-2"
-                                                                                        [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
-                                                                                </button> -->
-                                                                                <button
-                                                                                    mat-icon-button
-                                                                                    (click)="deleteVariantAvailableMethod(variantAvailable, variantIndex)"
-                                                                                    matSuffix>
-                                                                                    <mat-icon
-                                                                                        class="icon-size-5 ml-2"
-                                                                                        [svgIcon]="'heroicons_solid:trash'"></mat-icon>
-                                                                                </button>
-                                                                            </mat-form-field>
-                                                                        </div>
-                                                                    </ng-container>
-                                                                </div>
-                                                                <!-- <div class="flex items-center h-14 sm:h-12 min-h-10 -ml-0.5 pl-4 pr-3 leading-none">
-                                                                    <mat-icon
-                                                                        class="mr-2 icon-size-5"
-                                                                        [svgIcon]="'heroicons_outline:exclamation-circle'"></mat-icon>
-                                                                    <span class="text-sm md:text-xs">
-                                                                        Adding/deleting variant option will reset the variant list values
-                                                                    </span>
-                                                                </div> -->
-                                                            </div>
-                                                        </ng-container>
-                                                        <!-- Create variant options-->
-                                                        <div
-                                                            class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer hover:bg-hover"
-                                                            *ngIf="shouldShowCreateVariantAvailableButton(newVariantAvailableInput.value) && productVariantAvailable.length < 10"
-                                                            (click)="createVariantAvailableMethod(newVariantAvailableInput.value, variantIndex); newVariantAvailableInput.value = ''"
-                                                            matRipple>
-                                                            <mat-icon 
-                                                                class="mr-2 icon-size-5"
-                                                                [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
-                                                            <div class="break-all">Create "<b>{{newVariantAvailableInput.value}}</b>"</div>
-                                                        </div>
-                                                        <div
-                                                            class="flex items-center h-12 sm:h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-default border-t hover:bg-gray-50 dark:hover:bg-hover"
-                                                            *ngIf="productVariantAvailable?.length >= 10"
-                                                        >
-                                                            <mat-icon
-                                                                class="mr-2 icon-size-5"
-                                                                [svgIcon]="'heroicons_outline:exclamation-circle'"></mat-icon>
-                                                            <div class="text-sm md:text-xs">You can only create maximum of 10 variant options</div>
+                                        </ng-template>
+                                        <!-- Variants delete panel -->
+                                        <ng-template #variantsPanelDelete>
+                                            <div class="w-60 rounded border shadow-md bg-card">
+                                                <!-- Variants panel header -->
+                                                <div class="flex items-center m-3 mr-2">
+                                                    <div class="flex items-center">
+                                                        <mat-icon
+                                                            class="icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                                        <div class="ml-2">
+                                                            <input
+                                                                class="w-full min-w-0 py-1 border-0"
+                                                                type="text"
+                                                                placeholder="Enter variant option"
+                                                                (input)="filterProductVariantAvailable($event)"
+                                                                (keydown)="filterProductVariantAvailableInputKeyDown($event)"
+                                                                [maxLength]="30"
+                                                                #newVariantAvailableInput>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </ng-template>
-                                        </div>
-                                        
+                                                <div
+                                                    class="flex flex-col max-h-70 py-2 border-t">
+                                                    <!-- Variant Available -->
+                                                    <ng-container *ngIf="!productVariantAvailableEditMode">
+                                                        <div class="pt-2 space-y-2">
+                                                            <div class="overflow-y-auto space-y-2 max-h-48">
+                                                                <ng-container *ngFor="let variantAvailable of filteredProductVariantAvailable; let i = index; trackBy: trackByFn">
+                                                                    <div class="flex items-center">
+                                                                        <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full mx-4">
+                                                                            <input
+                                                                                matInput 
+                                                                                [value]="variantAvailable.value"
+                                                                                (input)="editVariantAvailableTitleMethod(variant, $event)"
+                                                                                [readonly]="!productVariantAvailableValueEditMode[i]"
+                                                                            >
+                                                                            <button
+                                                                                mat-icon-button
+                                                                                (click)="deleteVariantAvailableMethod(variantAvailable, variantIndex)"
+                                                                                matSuffix>
+                                                                                <mat-icon
+                                                                                    class="icon-size-5 ml-2"
+                                                                                    [svgIcon]="'heroicons_solid:trash'"></mat-icon>
+                                                                            </button>
+                                                                        </mat-form-field>
+                                                                    </div>
+                                                                </ng-container>
+                                                            </div>
+                                                        </div>
+                                                    </ng-container>
+                                                </div>
+                                            </div>
+                                        </ng-template>
                                     </div>
                                 </div>
                             </div>

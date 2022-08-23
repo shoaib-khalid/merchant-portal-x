@@ -129,6 +129,8 @@ export class AddProductComponent implements OnInit, OnDestroy
 {
     @ViewChild('variantsPanelOrigin') private _variantsPanelOrigin: ElementRef;
     @ViewChild('variantsPanel') private _variantsPanel: TemplateRef<any>;
+    @ViewChild('variantsPanelDeleteOrigin') private _variantsPanelDeleteOrigin: ElementRef;
+    @ViewChild('variantsPanelDelete') private _variantsPanelDelete: TemplateRef<any>;
     @ViewChild('productPaginationCombo', {read: MatPaginator}) private _productPaginator: MatPaginator;
     @ViewChild('imageSearchPanelOrigin') private _imageSearchPanelOrigin: ElementRef;
     @ViewChild('imageSearchPanel') private _imageSearchPanel: TemplateRef<any>;
@@ -199,6 +201,7 @@ export class AddProductComponent implements OnInit, OnDestroy
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     private _variantsPanelOverlayRef: OverlayRef;
+    private _variantsPanelDeleteOverlayRef: OverlayRef;
     private _imageSearchPanelOverlayRef: OverlayRef;
 
     quillModules: any = {
@@ -499,6 +502,10 @@ export class AddProductComponent implements OnInit, OnDestroy
         if ( this._imageSearchPanelOverlayRef )
         {
             this._imageSearchPanelOverlayRef.dispose();
+        }
+        if ( this._variantsPanelDeleteOverlayRef )
+        {
+            this._variantsPanelDeleteOverlayRef.dispose();
         }
     }
 
@@ -1857,6 +1864,94 @@ export class AddProductComponent implements OnInit, OnDestroy
                 // // Toggle the edit mode off
                 this.productVariantAvailableEditMode = false;
             }
+            // If template portal exists and attached...
+            if ( templatePortal && templatePortal.isAttached )
+            {
+                // Detach it
+                templatePortal.detach();
+            }
+        });
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+    }
+
+    /**
+     * Open variants panel
+     */
+    openVariantsPanelDelete(variant:any, idx): void
+    {
+
+        this.selectedProductVariant = variant;
+        
+        if (this.selectedProductVariant){
+
+            this.variantIndex = idx;
+    
+            // get the object of filteredVariantsTag in filteredVariants
+            this.productVariantAvailable = this.filteredProductVariants[idx].productVariantsAvailable;
+            this.filteredProductVariantAvailable = this.filteredProductVariants[idx].productVariantsAvailable;
+
+        } else {
+            this.filteredProductVariantAvailable = [];
+        }
+
+        // Create the overlay
+        this._variantsPanelDeleteOverlayRef = this._overlay.create({
+            backdropClass   : '',
+            hasBackdrop     : true,
+            scrollStrategy  : this._overlay.scrollStrategies.block(),
+            positionStrategy: this._overlay.position()
+                                .flexibleConnectedTo(this._variantsPanelDeleteOrigin.nativeElement)
+                                .withFlexibleDimensions(true)
+                                .withViewportMargin(64)
+                                .withLockedPosition(true)
+                                .withPositions([
+                                    {
+                                        originX : 'start',
+                                        originY : 'bottom',
+                                        overlayX: 'start',
+                                        overlayY: 'top'
+                                    }
+                                ])
+        });
+
+        // Subscribe to the attachments observable
+        this._variantsPanelDeleteOverlayRef.attachments().subscribe(() => {
+
+            // Add a class to the origin
+            this._renderer2.addClass(this._variantsPanelDeleteOrigin.nativeElement, 'panel-opened');
+
+            // Focus to the search input once the overlay has been attached
+            this._variantsPanelDeleteOverlayRef.overlayElement.querySelector('input').focus();
+        });
+
+        // Create a portal from the template
+        const templatePortal = new TemplatePortal(this._variantsPanelDelete, this._viewContainerRef);
+
+        // Attach the portal to the overlay
+        this._variantsPanelDeleteOverlayRef.attach(templatePortal);
+
+        // Subscribe to the backdrop click
+        this._variantsPanelDeleteOverlayRef.backdropClick().subscribe(() => {
+
+            // Remove the class from the origin
+            this._renderer2.removeClass(this._variantsPanelDeleteOrigin.nativeElement, 'panel-opened');
+
+            // If overlay exists and attached...
+            if ( this._variantsPanelDeleteOverlayRef && this._variantsPanelDeleteOverlayRef.hasAttached() )
+            {
+
+                // Detach it
+                this._variantsPanelDeleteOverlayRef.detach();
+
+                // Reset the variant filter
+                this.filteredProductVariantAvailable = this.productVariantAvailable;
+
+                // // Toggle the edit mode off
+                this.productVariantAvailableEditMode = false;
+            }
+
             // If template portal exists and attached...
             if ( templatePortal && templatePortal.isAttached )
             {
