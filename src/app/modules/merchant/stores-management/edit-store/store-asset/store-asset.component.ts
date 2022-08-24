@@ -344,7 +344,7 @@ export class StoreAssetComponent implements OnInit
             this.files[index].selectedFiles = event.target.files;
         }
         
-        let maxSize = 2097152;
+        let maxSize = 1048576;
         var maxSizeInMB = (maxSize / (1024*1024)).toFixed(2);
         if (this.files[index].selectedFiles[0].size > maxSize ){
             // Show a success message (it can also be an error message)
