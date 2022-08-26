@@ -17,6 +17,7 @@ export class StoresService
 {
     private _store: BehaviorSubject<Store | null> = new BehaviorSubject(null);
     private _stores: BehaviorSubject<Store[] | null> = new BehaviorSubject(null);
+    private _storesList: BehaviorSubject<Store[] | null> = new BehaviorSubject(null);
     private _storeAsset: BehaviorSubject<StoreAsset | null> = new BehaviorSubject(null);
     private _storeAssets: BehaviorSubject<StoreAsset[] | null> = new BehaviorSubject(null);
     private _pagination: BehaviorSubject<StorePagination | null> = new BehaviorSubject(null);
@@ -70,6 +71,15 @@ export class StoresService
     get stores$(): Observable<Store[]>
     {
         return this._stores.asObservable();
+    }
+
+    /**
+     * Getter for stores
+     *
+    */
+    get storesList$(): Observable<Store[]>
+    {
+        return this._storesList.asObservable();
     }
     
     /**
@@ -239,6 +249,44 @@ export class StoresService
 
                 this._pagination.next(_pagination);
                 this._stores.next(this._currentStores);
+            })
+        );
+    }
+
+    getStoresList(id: string = "", page: number = 0, size: number = 10, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', category: string = ''): 
+        Observable<Store[]>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
+
+        if(search === null) {
+            search = ""
+        }
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                clientId: clientId,
+                page: '' + page,
+                pageSize: '' + size,
+                sortByCol: '' + sort,
+                sortingOrder: '' + order.toUpperCase(),
+                name: '' + search
+            }
+        };
+
+        if (category !== "") {
+            header.params["verticalCode"] = category;
+        }
+        
+        return this._httpClient.get<{ pagination: StorePagination; stores: Store[] }>(productService + '/stores' , header)
+        .pipe(
+            map((response) => {
+                this._logging.debug("Response from StoresService (getStoresList)", response);
+
+                this._storesList.next(response["data"].content);
+                return response["data"].content;
             })
         );
     }
@@ -498,28 +546,6 @@ export class StoresService
                 })
             );
     }
-
-    // getStoreRegionCountryStateCity(state: string): Observable<any>
-    // {
-    //     let productService = this._apiServer.settings.apiServer.productService;
-    //     let accessToken = (this._authService.jwtAccessToken === '' || this._authService.jwtAccessToken === null) ? 'accessToken' : this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
-
-    //     const header = {
-    //         headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
-    //         params: {
-    //             "state": state
-    //         }
-    //     };
-
-    //     return this._httpClient.get<any>(productService + '/region-country-state-city', header)
-    //         .pipe(
-    //             tap((response) => {
-    //                 this._logging.debug("Response from StoresService (getStoreRegionCountryStateCity)",response);
-
-    //                 return response;
-    //             })
-    //         );
-    // }
 
     // ---------------------------
     // Store Timing Section

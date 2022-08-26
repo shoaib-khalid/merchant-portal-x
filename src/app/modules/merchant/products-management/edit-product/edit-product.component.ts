@@ -51,8 +51,8 @@ import { CartService } from 'app/core/cart/cart.service';
             }
             .content {
 
-                max-height: 80vh;
-                height: 80vh;
+                // max-height: 80vh;
+                // height: 80vh;
 
                 @screen sm {
                     max-height: 560px;
@@ -139,7 +139,7 @@ export class EditProductComponent implements OnInit, OnDestroy
     @ViewChild('imageSearchPanel') private _imageSearchPanel: TemplateRef<any>;
     @ViewChild('searchImageInput') public searchImageElement: ElementRef;
     @ViewChild('newVariantAvailableInput') public _newVariantAvailableInput: ElementRef;
-    
+
     // get current store
     store$: Store;
 

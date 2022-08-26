@@ -1978,13 +1978,20 @@ export class RegisterStoreComponent implements OnInit
                         },
                     }
                 });
-    
-                setTimeout(() => {
-                    this.isDisplayStatus = false;
-    
-                    // Navigate to the confirmation required page
-                    this._router.navigateByUrl('/stores');
-                }, 1000);
+
+                // Subscribe to the confirmation dialog closed action
+                confirmation.afterClosed().subscribe((result) => {
+
+                    // If the confirm button pressed...
+                    if ( result === 'confirmed' )
+                    {
+                        this.isDisplayStatus = false;
+        
+                        // Navigate to the confirmation required page
+                        this._router.navigateByUrl('/stores');
+
+                    }
+                });
 
             }
             else if ( status === true ) {
