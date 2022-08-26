@@ -1,11 +1,11 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators, FormArray} from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators, FormArray, FormControlName} from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { merge, Observable, of, Subject } from 'rxjs';
+import { merge, Observable, tap, delay, Subject, of, forkJoin } from 'rxjs';
 import { debounceTime, map, switchMap, take, takeUntil } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
@@ -18,6 +18,9 @@ import { AddProductComponent } from '../add-product/add-product.component';
 import {v4 as uuidv4} from 'uuid';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { EditProductComponent } from '../edit-product/edit-product.component';
+import { UserService } from 'app/core/user/user.service';
+import { Client } from 'app/core/user/user.types';
+import { MatSelect } from '@angular/material/select';
 
 
 @Component({
@@ -104,7 +107,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
 
     // get current store
     store$: Store;
-
     // product
     products$: Observable<Product[]>;
     selectedProduct: Product | null = null;
@@ -157,10 +159,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     variantimagesFile: any = [];
     currentVariantImageIndex: number = 0;
     variantImagesToBeDeleted: any = [];
-
-
     displayProductVariantAssets:any = [];
-
     selectedVariantCombos: any = []; // this is the list of combinations generated
 
     // sku, price & quantity 
@@ -194,10 +193,18 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         ]
     };
     variantIndex: number = 0;
-    
     currentScreenSize: string[];
+    client: Client;
+    displayDuplicateProduct: boolean = false;
+    storeList: FormControl = new FormControl();
+    stores: Store[] = [];
+    selectedStore: Store = null;
+    stores$: Observable<Store[]>;
+    storesForm: FormControl = new FormControl();
+    isDuplicating: boolean = false;
+    cloneErrorMessage: string = null;
+    // @ViewChild('storeSelector') storeSelector: MatSelect;
     
-
     /**
      * Constructor
      */
@@ -212,7 +219,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         private _viewContainerRef: ViewContainerRef,
         public _dialog: MatDialog,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
-
+        private _userService: UserService,
     )
     {
     }
@@ -322,6 +329,17 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             //     }])
             // }
         });
+        
+
+        // Subscribe to user changes
+        this._userService.clientForInv$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((client: Client) => {
+                this.client = client;
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
 
         // Get the stores
         this._storesService.store$
@@ -338,7 +356,6 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     
         // Get the products
         this.products$ = this._inventoryService.products$;
-        
         
         // Get the pagination
         this._inventoryService.pagination$
@@ -412,6 +429,33 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             )
             .subscribe();
 
+        // Query to get 20 stores
+        this._storesService.getStoresList('', 0, 20, 'name', 'asc' ).subscribe()
+
+        // Get the stores
+        this._storesService.storesList$
+        .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(response => {
+
+                this.stores = response;
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+        // this.setInitialValue();
+        
+        // set initial selection
+        this.storeList.setValue([]);
+        this.storeList.valueChanges
+            .pipe(takeUntil(this._unsubscribeAll), debounceTime(300))
+            .subscribe((result) => {
+                
+                this._storesService.getStoresList("", 0, 20, 'name', 'asc', result )
+                .subscribe((response)=>{
+                    this.stores = response;
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                });
+            });
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -492,9 +536,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             panelClass: 'custom-add-product-dialog',
             width: '1150px',
             maxWidth: '100vw',
-            // maxWidth:'70vw',
-            // height: '70vh',
-            // maxHeight: '70vh',
+            height: this.currentScreenSize.includes('sm') ? '99vh' : '100%',
+            maxHeight: this.currentScreenSize.includes('sm') ? '700px' : '100vh',
             disableClose: true, 
             data: { productType: productType } 
         });
@@ -513,8 +556,8 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
             panelClass: 'custom-edit-product-dialog',
             width: '1150px',
             maxWidth: '100vw',
-            // height: '90vh',
-            // maxHeight: '70vh',
+            height: this.currentScreenSize.includes('sm') ? '99vh' : '100%',
+            maxHeight: this.currentScreenSize.includes('sm') ? '700px' : '100vh',
             disableClose: true, 
             data: { productId: productId } 
         });
@@ -811,22 +854,41 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
         }
     }
 
-    /**
-     * Return the product type
-     * 
-     * @param product 
-     * @returns 
-     */
-    // productType(product: Product) {
+    duplicateProducts() {
 
-    //     if (product.isPackage === true) {
-    //         return 'Combo'
-    //     }
-    //     else if (product.productInventories.length > 1 && product.isPackage === false) {
-    //         return 'Variant'
-    //     }
-    //     else {
-    //         return 'Normal'
-    //     }
-    // }
+        if (this.selectedStore) {
+            this._inventoryService.cloneStoreProducts(this.store$.id, this.selectedStore.id)
+                .pipe(
+                    tap(() => {
+                        this.isDuplicating = true;
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    }),
+                    // Delay for 7 seconds
+                    delay(7000),
+                    switchMap(cloned => {
+                        if (cloned.error) {
+                            console.error('Cloning unsuccessful:', cloned.error)
+                            this.cloneErrorMessage = cloned.error;
+                            return of(null)
+                        }
+                        // If success only then we get products and categories
+                        else {
+                            this.cloneErrorMessage = null;
+                            return forkJoin([
+                                this._inventoryService.getProducts(), 
+                                this._inventoryService.getByQueryCategories( 0 , 30, 'name', 'asc')
+                            ])
+                        }
+                    })
+                )
+                .subscribe(response => {
+                    this.isDuplicating = false;
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                })
+        }
+
+    }
+
 }

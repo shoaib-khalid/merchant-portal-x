@@ -50,8 +50,8 @@ import { MatPaginator } from '@angular/material/paginator';
             }
             .content {
 
-                max-height: 80vh;
-                height: 80vh;
+                // max-height: 80vh;
+                // height: 80vh;
 
                 @screen sm {
                     max-height: 560px;

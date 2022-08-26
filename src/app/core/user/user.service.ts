@@ -14,6 +14,7 @@ import { AuthService } from '../auth/auth.service';
 export class UserService
 {
     private _client: BehaviorSubject<Client | null> = new BehaviorSubject(null);
+    private _clientForInv: BehaviorSubject<Client | null> = new BehaviorSubject(null);
     private _clientPaymentdetails: BehaviorSubject<ClientPaymentDetails | null> = new BehaviorSubject(null);
     private _pagination: BehaviorSubject<ClientPagination | null> = new BehaviorSubject(null);
 
@@ -52,6 +53,15 @@ export class UserService
     {
         // Client the value
         this._client.next(value);
+    }
+
+    /**
+     * Getter for clients for inventory
+     *
+     */
+    get clientForInv$(): Observable<Client>
+    {
+        return this._clientForInv.asObservable();
     }
 
     /**
@@ -100,6 +110,25 @@ export class UserService
                 tap((response) => {
                     this._logging.debug("Response from UserService (Get)",response);
                     return this._client.next(response.data);
+                })
+            );
+    }
+
+    /**
+     * Get the current logged in user data
+     */
+    getClientForInventory(ownerId: string): Observable<any>
+    {
+        let userService = this._apiServer.settings.apiServer.userService;
+        const header = {
+            headers: new HttpHeaders().set("Authorization", this._authService.publicToken)
+        };
+        
+        return this._httpClient.get<any>(userService + '/clients/' + ownerId, header)
+            .pipe(
+                tap((response) => {
+                    this._logging.debug("Response from UserService (getClientForInventory)",response);
+                    return this._clientForInv.next(response.data);
                 })
             );
     }

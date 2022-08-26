@@ -1,10 +1,5 @@
 <div class="flex flex-col max-w-260 md:min-w-160 -m-6">
-
-    <!-- Compose form -->
-    <!-- <div class="flex flex-col flex-auto p-1 sm:p-2 max-h-140 ">
-
-    </div> -->
-    <div class="flex px-4">
+    <div class="flex px-4 pb-8 sm:pb-0">
         <!-- Selected product form -->
         <form
             class="flex flex-col w-full"
@@ -18,10 +13,6 @@
                     [stepControl]="addProductForm.get('step1')"
                     #horizontalStepperStep1>
                     <ng-template matStepLabel>Basic information</ng-template>
-                    <!-- <p class="my-6 font-medium">
-                        Fill in your basic information to let us know your preferences
-                    </p> -->
-
                     <!-- Content -->
                     <div class="content flex flex-col overflow-y-auto">
 
@@ -871,7 +862,7 @@
                         
                     </div>
                     <!-- Cancel, Next button -->
-                    <div class="flex justify-end mt-3">
+                    <div class="flex justify-end mt-3 fixed sm:static bottom-4 right-8 z-10">
                         <!-- Flash message -->
                         <div
                             class="flex items-center mr-4"
@@ -1511,7 +1502,7 @@
                         </div>
                     </div>
                     <!-- Back, Next button -->
-                    <div class="flex justify-end mt-3">
+                    <div class="flex justify-end mt-3 fixed sm:static bottom-4 right-8 z-10">
                         <!-- Flash message -->
                         <div
                             class="flex items-center mr-4"
@@ -1892,7 +1883,7 @@
                         </div>
                     </div>
                     <!-- Back, Next button -->
-                    <div class="flex justify-end mt-3">
+                    <div class="flex justify-end mt-3 fixed sm:static bottom-4 right-8 z-10">
                         <!-- Flash message -->
                         <div
                             class="flex items-center mr-4"

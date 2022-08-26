@@ -6,6 +6,9 @@ import { InventoryService } from 'app/core/product/inventory.service';
 import { Product, ProductCategory, ProductCategoryPagination, ProductPagination, ProductVariant } from 'app/core/product/inventory.types';
 import { StoresService } from 'app/core/store/store.service';
 import { Store } from 'app/core/store/store.types';
+import { JwtService } from 'app/core/jwt/jwt.service';
+import { AuthService } from 'app/core/auth/auth.service';
+import { UserService } from 'app/core/user/user.service';
 
 @Injectable({
     providedIn: 'root'
@@ -209,3 +212,35 @@ export class ProductCategoriesResolver implements Resolve<any>
         return this._inventoryService.getByQueryCategories( 0 , 30, 'name', 'asc');
     }
 }
+
+@Injectable({
+    providedIn: 'root'
+})
+export class ClientResolver implements Resolve<any>
+{
+    /**
+     * Constructor
+     */
+    constructor(
+        private _jwtService: JwtService,
+        private _authService: AuthService,
+        private _userService: UserService)
+    {
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Resolver
+     *
+     * @param route
+     * @param state
+     */
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<ProductVariant[]>
+    {
+        return this._userService.getClientForInventory(this._jwtService.getJwtPayload(this._authService.jwtAccessToken).uid)
+    }
+}
+

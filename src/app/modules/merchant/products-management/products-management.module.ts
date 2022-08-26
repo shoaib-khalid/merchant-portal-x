@@ -26,6 +26,7 @@ import { EditProductComponent } from './edit-product/edit-product.component';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatAutocompleteModule, MAT_AUTOCOMPLETE_SCROLL_STRATEGY } from '@angular/material/autocomplete';
 import { Overlay, RepositionScrollStrategy } from '@angular/cdk/overlay';
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 
 @NgModule({
     declarations: [
@@ -55,7 +56,8 @@ import { Overlay, RepositionScrollStrategy } from '@angular/cdk/overlay';
         SharedModule,
         MatStepperModule,
         MatRadioModule,
-        MatAutocompleteModule
+        MatAutocompleteModule,
+        NgxMatSelectSearchModule
     ],
     providers   : [
         {

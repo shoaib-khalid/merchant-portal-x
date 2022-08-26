@@ -1698,4 +1698,26 @@ export class InventoryService
             })
         );
     }
+
+    cloneStoreProducts(thisStoreId: string, otherStoreId: string): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                storeOwnerId : '' + otherStoreId
+            }
+        };
+
+        return this._httpClient.post<any>(productService + '/stores/' + thisStoreId + '/products/clone' , null, header).pipe(
+            map((response) => {
+                this._logging.debug("Response from ProductsService (cloneStoreProducts )", response);
+
+                return response;
+            })
+        );
+
+    }
 }
