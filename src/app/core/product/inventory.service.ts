@@ -165,6 +165,9 @@ export class InventoryService
             }
         };
 
+        if (categoryId === null || categoryId === '') delete header.params.categoryId;
+        if (search === null || search === '') delete header.params.name;
+
         return this._httpClient.get<any>(productService +'/stores/'+this.storeId$+'/products', header).pipe(
             tap((response) => {
 
