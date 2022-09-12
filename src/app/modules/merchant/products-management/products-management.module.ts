@@ -27,6 +27,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatAutocompleteModule, MAT_AUTOCOMPLETE_SCROLL_STRATEGY } from '@angular/material/autocomplete';
 import { Overlay, RepositionScrollStrategy } from '@angular/cdk/overlay';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
+import { FuseFullscreenModule } from '@fuse/components/fullscreen';
 
 @NgModule({
     declarations: [
@@ -57,7 +58,8 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
         MatStepperModule,
         MatRadioModule,
         MatAutocompleteModule,
-        NgxMatSelectSearchModule
+        NgxMatSelectSearchModule,
+        FuseFullscreenModule
     ],
     providers   : [
         {

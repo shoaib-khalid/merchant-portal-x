@@ -156,15 +156,8 @@ export class OrderDetailsComponent implements OnInit
                         this.detailsForm.patchValue(order["data"]);
 
                         // get the value for voucher type
-                        this.voucherDetail = order["data"].voucherDetail;
-                        if (this.detailsForm.get('voucherDiscount').value && this.voucherDetail != null) {
-                            if (this.voucherDetail.voucherType === 'PLATFORM') {
-                            this.voucherDiscount.platform = this.detailsForm.get('voucherDiscount').value
-                            }
-                            else if (this.voucherDetail.voucherType === 'STORE') {
-                            this.voucherDiscount.store = this.detailsForm.get('voucherDiscount').value
-                            }
-                        }
+                        this.voucherDiscount.platform = this.order.orderGroupDetails.platformVoucherDiscount ? this.order.orderGroupDetails.platformVoucherDiscount : 0;
+                        this.voucherDiscount.store = this.order.storeVoucherDiscount ? this.order.storeVoucherDiscount : 0;  
             
                         this.detailsForm.get('storeName').setValue(order["data"].store.name);
                         this.detailsForm.get('storeAddress').setValue(order["data"].store.address);

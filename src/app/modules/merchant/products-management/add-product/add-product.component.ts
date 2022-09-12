@@ -14,6 +14,8 @@ import { StoresService } from 'app/core/store/store.service';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { AddProductValidationService } from './add-product.validation.service';
 import { MatPaginator } from '@angular/material/paginator';
+import { FSDocument, FSDocumentElement } from '@fuse/components/fullscreen';
+import { DOCUMENT } from '@angular/common';
 
 
 
@@ -273,6 +275,9 @@ export class AddProductComponent implements OnInit, OnDestroy
 
     searchImageControl: FormControl = new FormControl();
     autoCompleteList: {url: string, name: string}[] = [];
+    private _fsDoc: FSDocument;
+    private _fsDocEl: FSDocumentElement;
+    private _isFullscreen: boolean;
 
 
     /**
@@ -290,9 +295,13 @@ export class AddProductComponent implements OnInit, OnDestroy
         private _viewContainerRef: ViewContainerRef,
         public dialogRef: MatDialogRef<AddProductComponent>,
         @Inject(MAT_DIALOG_DATA) public data: MatDialog,
-        private _fuseMediaWatcherService: FuseMediaWatcherService
+        private _fuseMediaWatcherService: FuseMediaWatcherService,
+        @Inject(DOCUMENT) private _document: Document
+
     )
     {
+        this._fsDoc = _document as FSDocument;
+
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -312,6 +321,8 @@ export class AddProductComponent implements OnInit, OnDestroy
      */
     ngOnInit(): void
     {
+        this._fsDocEl = document.documentElement as FSDocumentElement;
+
         // Horizontol stepper
         this.addProductForm = this._formBuilder.group({
             step1: this._formBuilder.group({
@@ -508,10 +519,14 @@ export class AddProductComponent implements OnInit, OnDestroy
         {
             this._variantsPanelDeleteOverlayRef.dispose();
         }
+
+        this.toggleFullscreen();
     }
 
     ngAfterViewInit(): void
     {
+        this.toggleFullscreen();
+        
         // Mark for check
         this._changeDetectorRef.markForCheck();
 
@@ -2641,5 +2656,125 @@ export class AddProductComponent implements OnInit, OnDestroy
             }
         });
         
+    }
+
+    
+    /**
+     * Toggle the fullscreen mode
+     */
+    toggleFullscreen(): void
+    {
+        // Check if the fullscreen is open
+        this._isFullscreen = this._getBrowserFullscreenElement() !== null;
+
+        // Toggle the fullscreen
+        if ( this._isFullscreen )
+        {
+            this._closeFullscreen();
+        }
+        else
+        {
+            this._openFullscreen();
+        }
+    }
+
+    /**
+     * Open the fullscreen
+     *
+     * @private
+     */
+    private _openFullscreen(): void
+    {
+        if ( this._fsDocEl.requestFullscreen )
+        {
+            this._fsDocEl.requestFullscreen();
+            return;
+        }
+
+        // Firefox
+        if ( this._fsDocEl.mozRequestFullScreen )
+        {
+            this._fsDocEl.mozRequestFullScreen();
+            return;
+        }
+
+        // Chrome, Safari and Opera
+        if ( this._fsDocEl.webkitRequestFullscreen )
+        {
+            this._fsDocEl.webkitRequestFullscreen();
+            return;
+        }
+
+        // IE/Edge
+        if ( this._fsDocEl.msRequestFullscreen )
+        {
+            this._fsDocEl.msRequestFullscreen();
+            return;
+        }
+    }
+
+    /**
+     * Get browser's fullscreen element
+     *
+     * @private
+     */
+    private _getBrowserFullscreenElement(): Element
+    {
+        if ( typeof this._fsDoc.fullscreenElement !== 'undefined' )
+        {
+            return this._fsDoc.fullscreenElement;
+        }
+
+        if ( typeof this._fsDoc.mozFullScreenElement !== 'undefined' )
+        {
+            return this._fsDoc.mozFullScreenElement;
+        }
+
+        if ( typeof this._fsDoc.msFullscreenElement !== 'undefined' )
+        {
+            return this._fsDoc.msFullscreenElement;
+        }
+
+        if ( typeof this._fsDoc.webkitFullscreenElement !== 'undefined' )
+        {
+            return this._fsDoc.webkitFullscreenElement;
+        }
+
+        throw new Error('Fullscreen mode is not supported by this browser');
+    }
+
+    /**
+     * Close the fullscreen
+     *
+     * @private
+     */
+    private _closeFullscreen(): void
+    {
+        if ( this._fsDoc.exitFullscreen )
+        {
+            this._fsDoc.exitFullscreen();
+            return;
+        }
+
+        // Firefox
+        if ( this._fsDoc.mozCancelFullScreen )
+        {
+            this._fsDoc.mozCancelFullScreen();
+            return;
+        }
+
+        // Chrome, Safari and Opera
+        if ( this._fsDoc.webkitExitFullscreen )
+        {
+            this._fsDoc.webkitExitFullscreen();
+            return;
+        }
+
+        // IE/Edge
+        else if ( this._fsDoc.msExitFullscreen )
+        {
+            this._fsDoc.msExitFullscreen();
+            return;
+        }
     }
 }

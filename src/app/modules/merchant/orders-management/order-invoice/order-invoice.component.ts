@@ -141,15 +141,9 @@ export class OrderInvoiceComponent implements OnInit {
             // patch the value from order to invoice form
             this.invoiceForm.patchValue(order["data"]);
 
-            // get the value for voucher type
-            if (this.invoiceForm.get('voucherDiscount').value && this.voucherDetail != null) {
-              if (this.voucherDetail.voucherType === 'PLATFORM') {
-                this.voucherDiscount.platform = this.invoiceForm.get('voucherDiscount').value
-              }
-              else if (this.voucherDetail.voucherType === 'STORE') {
-                this.voucherDiscount.store = this.invoiceForm.get('voucherDiscount').value
-              }
-            }
+            this.voucherDiscount.platform = this.order.orderGroupDetails.platformVoucherDiscount ? this.order.orderGroupDetails.platformVoucherDiscount : 0;
+            this.voucherDiscount.store = this.order.storeVoucherDiscount ? this.order.storeVoucherDiscount : 0;
+
             this.invoiceForm.get('storeName').setValue(order["data"].store.name);
             
             const merchantAddress = () => {

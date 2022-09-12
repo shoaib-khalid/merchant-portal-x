@@ -39,7 +39,7 @@ export interface Order
       merchantTrackingUrl: string;
       customerTrackingUrl: string;
       trackingNumber: string;
-    },
+    };
     orderPaymentDetail: {
       accountName: string;
       gatewayId: string;
@@ -48,7 +48,7 @@ export interface Order
       orderId: string;
       deliveryQuotationReferenceId: string;
       deliveryQuotationAmount: number;
-    },
+    };
     store: {
       id: string;
       name: string;
@@ -66,7 +66,17 @@ export interface Order
       paymentType: string;
       invoiceSeqNo: number;
       nameAbreviation: string;
-    }
+    };
+    orderGroupDetails: OrderGroupDetails;
+    storeVoucherDiscount: number;
+
+}
+
+export interface OrderGroupDetails
+{
+  platformVoucherDiscount: number;
+  platformVoucherId: string;
+  total: number;
 }
 
 export interface OrderItem
