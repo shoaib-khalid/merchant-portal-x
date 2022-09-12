@@ -14,7 +14,6 @@ import { StoresService } from 'app/core/store/store.service';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { MatPaginator } from '@angular/material/paginator';
 import { CartService } from 'app/core/cart/cart.service';
-import { FuseFullscreenComponent } from '@fuse/components/fullscreen';
 
 
 
@@ -362,7 +361,6 @@ export class EditProductComponent implements OnInit, OnDestroy
         @Inject(MAT_DIALOG_DATA) public data: MatDialog,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
         private _cartService: CartService,
-        private _fullScreen: FuseFullscreenComponent
     )
     {
     }
