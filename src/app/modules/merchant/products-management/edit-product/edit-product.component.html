@@ -409,18 +409,17 @@
                                         </mat-error>
                                     </mat-form-field>
 
-                                    <!-- Packing Size for Ecomm -->
+                                    <!-- Packing Size for Ecomm *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'" -->
                                     <mat-form-field 
                                         class="w-full"
                                         appearance="fill" floatLabel="always"
-                                        *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'">
+                                        >
                                         <mat-label>Packing Size</mat-label>
                                         <mat-select
                                             required
                                             class="w-full"
                                             appearance="fill"
                                             [formControlName]="'packingSize'"
-                                            [value]="packingSize"
                                             placeholder="Select one option"
                                             (selectionChange)="addProductForm.get('step1').get('packingSize').patchValue(packingSizeSelector.value)"
                                             #packingSizeSelector="matSelect"
@@ -431,10 +430,22 @@
                                                 </span>
                                             </mat-select-trigger>
                                             <div>
-                                                <mat-option [value]="'S'">Small (below 0.5KG)</mat-option>
-                                                <mat-option [value]="'M'">Medium (0.5 - 1.0KG)</mat-option>
-                                                <mat-option [value]="'L'">Large (1.0 - 2.0KG)</mat-option>
-                                                <mat-option [value]="'XL'">Extra Large (above 2.0KG)</mat-option>
+                                                <ng-container *ngIf="(store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK')">
+                                                    <mat-option 
+                                                    [value]="'XS'">Extra Small (e.g. 1 stick of Satay)</mat-option>
+                                                    <mat-option 
+                                                    [value]="'S'">Small (e.g. 1 pack of Rice, or bigger)</mat-option>
+                                                </ng-container>
+                                                <ng-container *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'">
+                                                    <mat-option 
+                                                    [value]="'S'">Small (below 0.5KG)</mat-option>
+                                                    <mat-option 
+                                                    [value]="'M'">Medium (0.5 - 1.0KG)</mat-option>
+                                                    <mat-option 
+                                                    [value]="'L'">Large (1.0 - 2.0KG)</mat-option>
+                                                    <mat-option 
+                                                    [value]="'XL'">Extra Large (above 2.0KG)</mat-option>
+                                                </ng-container>
                                             </div>
                                         </mat-select>
                                         <mat-error *ngIf="addProductForm.get('step1').get('packingSize').hasError('required')">

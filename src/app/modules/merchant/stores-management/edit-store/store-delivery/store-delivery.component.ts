@@ -12,6 +12,7 @@ import { GoogleKey } from '../edit-store.types';
 import { MatSelect } from '@angular/material/select';
 import { City } from './store-delivery.types';
 import { StoresDeliveryService } from './store-delivery.service';
+import { environment } from 'environments/environment';
 
 
 
@@ -305,7 +306,7 @@ export class StoreDeliveryComponent implements OnInit
 
                         //======================== Iinsert google maps =========================
                         //if db got null then we need to set the curren location so that it will display the google maps instead of hardcode the value of katitutde and lontitude
-                        if(this.store.latitude === null){
+                        if (this.store.latitude === null){
                        
                                 this.displayLat = this.currentLat;
                                 this.displayLong = this.currentLong;
@@ -315,7 +316,7 @@ export class StoreDeliveryComponent implements OnInit
 
                         } else {
 
-                            this.displayLat = parseFloat(this.store.latitude) ;
+                            this.displayLat = parseFloat(this.store.latitude);
                             this.displayLong = parseFloat(this.store.longitude);
                             this.displayLatitude.next(this.store.latitude);
                             this.displayLongtitude.next(this.store.longitude);
@@ -323,7 +324,7 @@ export class StoreDeliveryComponent implements OnInit
                         }
                         // implement google maos
                         let loader = new Loader({
-                            apiKey: GoogleKey.GOOGLE_MAP_API_KEY,
+                            apiKey: environment.googleMapsAPIKey,
                             libraries: ['places']
                             
                             })
@@ -736,9 +737,8 @@ export class StoreDeliveryComponent implements OnInit
         storeBody.postcode = postcode;
         storeBody.regionCountryStateId = regionCountryStateId;
         storeBody.regionCountry = regionCountryId;
-        storeBody.latitude =this.location.lat.toString();
-        storeBody.longitude =this.location.lng.toString();
-
+        storeBody.latitude =this.location.lat.toFixed(6);
+        storeBody.longitude =this.location.lng.toFixed(6);
         
         this._storesService.update(storeId, storeBody)
             .subscribe(()=>{

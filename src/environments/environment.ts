@@ -5,6 +5,7 @@
 export const environment = {
     name: "dev",
     production: false,
+    googleMapsAPIKey: 'AIzaSyCFhf1LxbPWNQSDmxpfQlx69agW-I-xBIw',
     appVersion: require('../../package.json').version,
 };
 

@@ -28,6 +28,7 @@ import { City } from '../edit-store/store-delivery/store-delivery.types';
 import { StoresDeliveryService } from '../edit-store/store-delivery/store-delivery.service';
 import { MatSelect } from '@angular/material/select';
 import { MatStepper } from '@angular/material/stepper';
+import { environment } from 'environments/environment';
 
 @Component({
     selector     : 'register-store-page',
@@ -851,7 +852,7 @@ export class RegisterStoreComponent implements OnInit
 
         //Initialise google maps
         let loader = new Loader({
-            apiKey: GoogleKey.GOOGLE_MAP_API_KEY,
+            apiKey: environment.googleMapsAPIKey,
             libraries: ['places']
             
             })
@@ -1017,8 +1018,8 @@ export class RegisterStoreComponent implements OnInit
         createStoreBody["postcode"] = this.createStoreForm.get('step3').get('postcode').value;
         createStoreBody["regionCountryStateId"] = this.createStoreForm.get('step3').get('regionCountryStateId').value;
 
-        createStoreBody["latitude"] = this.location.lat.toString();
-        createStoreBody["longitude"] = this.location.lng.toString();
+        createStoreBody["latitude"] = this.location.lat.toFixed(6);
+        createStoreBody["longitude"] = this.location.lng.toFixed(6);
 
         // Disable the form
         this.createStoreForm.disable();
