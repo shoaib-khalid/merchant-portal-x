@@ -14,6 +14,7 @@
                                 matInput
                                 [formControlName]="'isDelivery'"
                                 [color]="'primary'"
+                                (change)="enableDelivery($event.checked)"
                                 >{{storeDeliveryForm.get('isDelivery').value === true ? 'Enabled' : 'Disabled'}}
                             </mat-slide-toggle>
                         </div>
@@ -36,11 +37,8 @@
                                     <div>
                                         <mat-label class="font-medium">Address</mat-label>
                                     </div>
-                            
                                 </div>
                                 <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full" floatLabel="always">
-                                    
-                        
                                     <textarea
                                         matInput
                                         placeholder="Your customer will be looking for your store, add your store address now !"
@@ -160,7 +158,7 @@
                         </div>
                         <!-- Actions -->
                         <div class="flex flex-row justify-between my-3 items-center">
-                            <div class="w-full pt-8 sm:pt-0">
+                            <div class="w-full">
                                 <div class="text-xl">Pin Location</div>
                                 <div class="text-secondary">Mark your location.</div>
                             </div>    
