@@ -90,7 +90,7 @@ export class StoreAccountComponent implements OnInit
             email               : ['', [Validators.required, Validators.email]],
             phoneNumber         : ['', EditStoreValidationService.phonenumberValidator],
             displayAddress      : [''],
-            paymentType        : ['', Validators.required],
+            paymentType         : ['', Validators.required],
         });
 
         this.storeId = this._route.snapshot.paramMap.get('storeid');

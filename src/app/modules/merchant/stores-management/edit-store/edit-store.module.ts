@@ -25,6 +25,7 @@ import { TimeSelectorInputModule } from 'app/layout/common/time-selector/timesel
 import { NgxGalleryModule } from 'ngx-gallery-9';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
+import { StoreDineInComponent } from './store-dine-in/store-dine-in.component';
 
 
 @NgModule({
@@ -33,7 +34,8 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
         StoreAssetComponent,
         StoreDeliveryComponent,
         StoreTimingComponent,
-        StoreGoogleAnalyticComponent
+        StoreGoogleAnalyticComponent,
+        StoreDineInComponent
     ],
     imports     : [
         RouterModule.forChild(editStoreRoutes),
@@ -62,7 +64,8 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
         StoreAssetComponent,
         StoreDeliveryComponent,
         StoreTimingComponent,
-        StoreGoogleAnalyticComponent
+        StoreGoogleAnalyticComponent,
+        StoreDineInComponent
     ]
 })
 export class EditStoreModule

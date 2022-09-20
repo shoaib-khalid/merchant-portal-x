@@ -151,6 +151,7 @@ export class StoreDeliveryComponent implements OnInit
             postcode                    : ['', [Validators.required, Validators.minLength(5), Validators.maxLength(10), EditStoreValidationService.postcodeValidator]],
             regionCountryStateId        : ['', Validators.required],
             regionCountryId             : ['', Validators.required],
+            isDelivery                  : [false]
         });
 
         this.setInitialValue();
@@ -721,7 +722,7 @@ export class StoreDeliveryComponent implements OnInit
         // this will remove the item from the object
         const { allowedSelfDeliveryStates, allowStorePickup, deliveryPeriods,
                 address, city, postcode, regionCountryStateId, regionCountryId,
-                deliveryType, deliverySpType, storeTiming, ...storeDeliveryBody } = this.storeDeliveryForm.value;
+                deliveryType, deliverySpType, storeTiming, isDelivery, ...storeDeliveryBody } = this.storeDeliveryForm.value;
   
         // this.editStoreForm.disable();
 
@@ -737,8 +738,9 @@ export class StoreDeliveryComponent implements OnInit
         storeBody.postcode = postcode;
         storeBody.regionCountryStateId = regionCountryStateId;
         storeBody.regionCountry = regionCountryId;
-        storeBody.latitude =this.location.lat.toFixed(6);
-        storeBody.longitude =this.location.lng.toFixed(6);
+        storeBody.latitude = this.location.lat.toFixed(6);
+        storeBody.longitude = this.location.lng.toFixed(6);
+        storeBody.isDelivery = isDelivery;
         
         this._storesService.update(storeId, storeBody)
             .subscribe(()=>{

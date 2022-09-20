@@ -67,8 +67,14 @@ export class EditStoreComponent implements OnInit
             {
                 id         : 'delivery',
                 icon       : 'mat_outline:delivery_dining',
-                title      : 'Delivery Details',
+                title      : 'Delivery Settings',
                 description: 'Manage your delivery type details and information'
+            },
+            {
+                id         : 'dine-in',
+                icon       : 'mat_outline:restaurant',
+                title      : 'Dine In Settings',
+                description: 'Manage your dine-in details and information'
             },
             {
                 id         : 'timing',

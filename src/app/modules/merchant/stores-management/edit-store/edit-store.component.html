@@ -79,19 +79,23 @@
                         <ng-container *ngSwitchCase="'account'">
                             <store-account></store-account>
                         </ng-container>
-                        <!-- Security -->
+                        <!-- Assets -->
                         <ng-container *ngSwitchCase="'security'">
                             <store-asset></store-asset>
                         </ng-container>
-                        <!-- Plan & Billing -->
+                        <!-- Delivery settings -->
                         <ng-container *ngSwitchCase="'delivery'">
                             <store-delivery></store-delivery>
                         </ng-container>
-                        <!-- Notifications -->
+                        <!-- Delivery settings -->
+                        <ng-container *ngSwitchCase="'dine-in'">
+                            <store-dine-in></store-dine-in>
+                        </ng-container>
+                        <!-- Store Timing -->
                         <ng-container *ngSwitchCase="'timing'">
                             <store-timining></store-timining>
                         </ng-container>
-                        <!-- Team -->
+                        <!-- Analytics -->
                         <ng-container *ngSwitchCase="'analytics'">
                             <store-google-analytic></store-google-analytic>
                         </ng-container>

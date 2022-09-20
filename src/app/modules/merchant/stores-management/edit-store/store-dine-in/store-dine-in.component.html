@@ -1,0 +1,106 @@
+<ng-container>
+    <div class="shadow rounded-lg sm:rounded-2xl bg-card">
+        <div class="flex flex-col flex-auto items-center m-1 p-1 sm:p-10">
+            <div class="w-full px-2 sm:px-0">
+                <!-- Form -->
+                <form [formGroup]="storeDineInForm">
+                    <!-- Enable/Disable Toggle -->
+                    <div class="flex flex-row gap-2 items-center my-4 sm:my-0">
+                        <span class="flex flex-col justify-center w-full">
+                            Dine In Service
+                        </span>
+                        <div class="flex flex-col w-full justify-start">
+                            <mat-slide-toggle
+                                matInput
+                                [formControlName]="'isDineIn'"
+                                [color]="'primary'"
+                                >{{storeDineInForm.get('isDineIn').value === true ? 'Enabled' : 'Disabled'}}
+                            </mat-slide-toggle>
+                        </div>
+                    </div>
+                    <!-- Content -->
+                    <ng-container *ngIf="storeDineInForm.get('isDineIn').value === true">
+                        <!-- Section -->
+                        <!-- <div class="w-full pt-8 sm:pt-0">
+                            <div class="text-xl">Pickup Address</div>
+                            <div class="text-secondary">Choose your type of delivery types to provide to the customer of delivery details.</div>
+                        </div> -->
+    
+                        <!-- Divider -->
+                        <div class="my-4 border-t"></div>
+
+                        <!-- Section Payment Type -->
+                        <div class="w-full ">
+                            <div class="text-xl">Payment Type</div>
+                            <div class="text-secondary">Choose the payment type</div>
+                        </div>
+                        <!-- Payment Type -->
+                        <div class="grid sm:grid-cols-4 gap-6 w-full mt-4">
+                            <div class="sm:col-span-2">
+                                <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
+                                    <mat-label>Payment Type</mat-label>
+                                    <mat-select
+                                    [formControlName]="'dineInPaymentType'"
+                                    [required]="true"
+                                    [placeholder]="'Select Payment Type'"
+                                    #paymentSelector="matSelect"
+                                    >
+                                    <mat-select-trigger>
+                                        <span class="flex items-center">
+                                            <span>{{ paymentSelector.triggerValue }}</span>
+                                        </span>
+                                    </mat-select-trigger>
+                                        <div>
+                                            <mat-option [value]="'COD'">Cash</mat-option>
+                                        </div>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="my-4 border-t"></div>
+
+                        <!-- Section Dine In Option -->
+                        <div class="w-full ">
+                            <div class="text-xl">Dine In Option</div>
+                            <div class="text-secondary">How the food should be served to customers</div>
+                        </div>
+                        <!-- Dine In Option -->
+                        <div class="grid sm:grid-cols-4 gap-6 w-full mt-4">
+                            <div class="sm:col-span-2">
+                                <mat-radio-group
+                                    class="flex flex-col gap-2"
+                                    [color]="'primary'"
+                                    [formControlName]="'dineInOption'">
+                                    <mat-radio-button
+                                        class=""
+                                        [value]="'SELFCOLLECT'">
+                                        Self Collect
+                                    </mat-radio-button>
+                                    <mat-radio-button
+                                        class=""
+                                        [value]="'SENDTOTABLE'">
+                                        Send to Table
+                                    </mat-radio-button>
+                                </mat-radio-group>
+                            </div>
+                        </div>
+                    </ng-container>
+    
+                </form>
+                <!-- Actions -->
+                <div class="mt-6 pb-8 sm:pb-0 flex items-center justify-end">
+                    <button
+                        class="ml-4"
+                        mat-flat-button
+                        type="button"
+                        [disabled]="storeDineInForm.pristine || storeDineInForm.invalid"
+                        (click)="update()"
+                        [color]="'primary'">Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-container>

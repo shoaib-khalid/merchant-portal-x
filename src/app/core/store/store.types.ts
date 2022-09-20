@@ -50,8 +50,12 @@ export interface Store
         region: string;
         timezone: string;
     }
-    latitude: string,
-    longitude: string,
+    latitude: string;
+    longitude: string;
+    isDelivery: boolean;
+    isDineIn: boolean;
+    dineInOption: string;
+    dineInPaymentType: string;
 }
 
 export interface CreateStore
