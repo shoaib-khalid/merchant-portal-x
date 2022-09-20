@@ -7,7 +7,7 @@ import { Store, StoreRegionCountries, CreateStore, StoreAssets, StoreSelfDeliver
 import { ChooseVerticalService } from '../../choose-vertical/choose-vertical.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Loader } from '@googlemaps/js-api-loader';
-import { BehaviorSubject, debounceTime, Observable, ReplaySubject, Subject, take, takeUntil } from 'rxjs';
+import { BehaviorSubject, debounceTime, map, Observable, ReplaySubject, Subject, take, takeUntil } from 'rxjs';
 import { GoogleKey } from '../edit-store.types';
 import { MatSelect } from '@angular/material/select';
 import { City } from './store-delivery.types';
@@ -105,6 +105,7 @@ export class StoreDeliveryComponent implements OnInit
     //get current location
     currentLat:any=0;
     currentLong:any=0;
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     /**
      * Constructor
@@ -150,7 +151,7 @@ export class StoreDeliveryComponent implements OnInit
             city                        : ['', Validators.required],
             postcode                    : ['', [Validators.required, Validators.minLength(5), Validators.maxLength(10), EditStoreValidationService.postcodeValidator]],
             regionCountryStateId        : ['', Validators.required],
-            regionCountryId             : ['', Validators.required],
+            regionCountryId             : [{value: '', disabled: true}, Validators.required],
             isDelivery                  : [false]
         });
 
@@ -220,7 +221,7 @@ export class StoreDeliveryComponent implements OnInit
                 // set store to current store
                 this._storesService.store = storeResponse;
                 this._storesService.storeId = this.storeId;
- 
+
                 // Fill the form
                 this.storeDeliveryForm.patchValue(storeResponse);
 
@@ -334,121 +335,240 @@ export class StoreDeliveryComponent implements OnInit
                             lat: this.displayLat,
                             lng: this.displayLong,
                         };
-                        
-                        loader.load().then(() => {
-                            
-                            this.map = new google.maps.Map(document.getElementById("map"), {
-                                center: this.location,
-                                zoom: 15,
-                                mapTypeControl:false,
-                                streetViewControl:false,//Removing the pegman from map
-                                // styles: styles,
-                                mapTypeId: "roadmap",
-                            })
-                    
-                            const initialMarker = new google.maps.Marker({
-                            position: this.location,
-                            map: this.map,
-                            });
-            
-                            //use for when user mark other location
-                            let markers: google.maps.Marker[] = [];
-                          
-                            // Configure the click listener.
-                            this.map.addListener("click", (event) => {
-                                this.storeDeliveryForm.markAsDirty();
 
-                                //to be display coordinate
-                                let coordinateClickStringify = JSON.stringify(event.latLng);
-                                let coordinateClickParse = JSON.parse(coordinateClickStringify);
-                        
-                                this.location = {
-                                    lat: coordinateClickParse.lat,
-                                    lng: coordinateClickParse.lng,
-                                };
-
-                                // Clear out the old markers.
-                                markers.forEach((marker) => {
-                                marker.setMap(null);
-                                });
-                                markers = [];
-                    
-                                // Clear out the init markers1.
-                                initialMarker.setMap(null);
-                    
-                                // Create a marker for each place.
-                                markers.push(
-                                new google.maps.Marker({
-                                    map:this.map,
-                                    // icon,
-                                    position: event.latLng,
-                                })
-                                );
-                                this.displayLatitude.next(coordinateClickParse.lat);
-                                this.displayLongtitude.next(coordinateClickParse.lng);
-                            
-                            });
-
-                            //Trigger when click Relocate
-                            let geocoder: google.maps.Geocoder;
-                            const relocatebutton = document.getElementById("relocate-button") as HTMLInputElement;
-                            // const submitButton =  document.getElementById("submit-btn");
-                            geocoder = new google.maps.Geocoder();
-                            relocatebutton.addEventListener("click", (e) =>{
-                                geocoder
-                                .geocode({ address: this.storeDeliveryForm.get('address').value})
-                                .then((result) => {
-                                    const { results } = result;
-                        
-                                    //to be display coordinate
-                                    let coordinateAddressStringify = JSON.stringify(results[0].geometry.location);
-                                    let coordinateAddressParse = JSON.parse(coordinateAddressStringify);
-                        
-                                    this.location = {
-                                    lat: coordinateAddressParse.lat,
-                                    lng: coordinateAddressParse.lng,
-                                    };
-
-                                    //to display for location code
-                                    this.displayLatitude.next(coordinateAddressParse.lat);
-                                    this.displayLongtitude.next(coordinateAddressParse.lng);
-                        
-                                    // Clear out the old markers.
-                                    markers.forEach((marker) => {
-                                        marker.setMap(null);
-                                    });
-                                    markers = [];
-                        
-                                    // Clear out the init markers1.
-                                    initialMarker.setMap(null);
-                        
-                                    // Create a marker for each place.
-                                    markers.push(
-                                        new google.maps.Marker({
-                                        map:this.map,
-                                        // icon,
-                                        position: results[0].geometry.location,
-                                        })
-                                    );
-                                    const bounds1 = new google.maps.LatLngBounds();
-                        
-                                    bounds1.extend(results[0].geometry.location);
-                        
-                                    this.map.fitBounds(bounds1);
+                        // Load map if isDelivery true
+                        if (this.storeDeliveryForm.get('isDelivery').value === true) {
+                            setTimeout(() => {
+                                loader.load().then(() => {
                                     
-                                    return results;
-                                })
-                                .catch((e) => {
-                                    alert("Geocode was not successful for the following reason: " + e);
-                                });
-
+                                    this.map = new google.maps.Map(document.getElementById("map"), {
+                                        center: this.location,
+                                        zoom: 15,
+                                        mapTypeControl:false,
+                                        streetViewControl:false,//Removing the pegman from map
+                                        // styles: styles,
+                                        mapTypeId: "roadmap",
+                                    })
+                            
+                                    const initialMarker = new google.maps.Marker({
+                                    position: this.location,
+                                    map: this.map,
+                                    });
+                    
+                                    //use for when user mark other location
+                                    let markers: google.maps.Marker[] = [];
+                                  
+                                    // Configure the click listener.
+                                    this.map.addListener("click", (event) => {
+                                        this.storeDeliveryForm.markAsDirty();
+        
+                                        //to be display coordinate
+                                        let coordinateClickStringify = JSON.stringify(event.latLng);
+                                        let coordinateClickParse = JSON.parse(coordinateClickStringify);
                                 
-                            });
-                    
-                    
+                                        this.location = {
+                                            lat: coordinateClickParse.lat,
+                                            lng: coordinateClickParse.lng,
+                                        };
+        
+                                        // Clear out the old markers.
+                                        markers.forEach((marker) => {
+                                        marker.setMap(null);
+                                        });
+                                        markers = [];
                             
+                                        // Clear out the init markers1.
+                                        initialMarker.setMap(null);
                             
+                                        // Create a marker for each place.
+                                        markers.push(
+                                        new google.maps.Marker({
+                                            map:this.map,
+                                            // icon,
+                                            position: event.latLng,
+                                        })
+                                        );
+                                        this.displayLatitude.next(coordinateClickParse.lat);
+                                        this.displayLongtitude.next(coordinateClickParse.lng);
+                                    
+                                    });
+        
+                                    //Trigger when click Relocate
+                                    let geocoder: google.maps.Geocoder;
+                                    const relocatebutton = document.getElementById("relocate-button") as HTMLInputElement;
+                                    // const submitButton =  document.getElementById("submit-btn");
+                                    geocoder = new google.maps.Geocoder();
+                                    relocatebutton.addEventListener("click", (e) =>{
+                                        geocoder
+                                        .geocode({ address: this.storeDeliveryForm.get('address').value})
+                                        .then((result) => {
+                                            const { results } = result;
+                                
+                                            //to be display coordinate
+                                            let coordinateAddressStringify = JSON.stringify(results[0].geometry.location);
+                                            let coordinateAddressParse = JSON.parse(coordinateAddressStringify);
+                                
+                                            this.location = {
+                                            lat: coordinateAddressParse.lat,
+                                            lng: coordinateAddressParse.lng,
+                                            };
+        
+                                            //to display for location code
+                                            this.displayLatitude.next(coordinateAddressParse.lat);
+                                            this.displayLongtitude.next(coordinateAddressParse.lng);
+                                
+                                            // Clear out the old markers.
+                                            markers.forEach((marker) => {
+                                                marker.setMap(null);
+                                            });
+                                            markers = [];
+                                
+                                            // Clear out the init markers1.
+                                            initialMarker.setMap(null);
+                                
+                                            // Create a marker for each place.
+                                            markers.push(
+                                                new google.maps.Marker({
+                                                map:this.map,
+                                                // icon,
+                                                position: results[0].geometry.location,
+                                                })
+                                            );
+                                            const bounds1 = new google.maps.LatLngBounds();
+                                
+                                            bounds1.extend(results[0].geometry.location);
+                                
+                                            this.map.fitBounds(bounds1);
+                                            
+                                            return results;
+                                        })
+                                        .catch((e) => {
+                                            alert("Geocode was not successful for the following reason: " + e);
+                                        });
+                                    });
+                                });
+                            }, 100);
+                        }
+
+                        // Load map if isDelivery becomes true
+                        this.storeDeliveryForm.get('isDelivery').valueChanges
+                        .pipe(
+                            debounceTime(100),
+                            takeUntil(this._unsubscribeAll),
+                        )
+                        .subscribe((value) => {
+                            if (value === true) {
+                                loader.load().then(() => {
+                                    this.map = new google.maps.Map(document.getElementById("map"), {
+                                        center: this.location,
+                                        zoom: 15,
+                                        mapTypeControl:false,
+                                        streetViewControl:false,//Removing the pegman from map
+                                        // styles: styles,
+                                        mapTypeId: "roadmap",
+                                    })
+                            
+                                    const initialMarker = new google.maps.Marker({
+                                    position: this.location,
+                                    map: this.map,
+                                    });
+                    
+                                    //use for when user mark other location
+                                    let markers: google.maps.Marker[] = [];
+                                  
+                                    // Configure the click listener.
+                                    this.map.addListener("click", (event) => {
+                                        this.storeDeliveryForm.markAsDirty();
+        
+                                        //to be display coordinate
+                                        let coordinateClickStringify = JSON.stringify(event.latLng);
+                                        let coordinateClickParse = JSON.parse(coordinateClickStringify);
+                                
+                                        this.location = {
+                                            lat: coordinateClickParse.lat,
+                                            lng: coordinateClickParse.lng,
+                                        };
+        
+                                        // Clear out the old markers.
+                                        markers.forEach((marker) => {
+                                        marker.setMap(null);
+                                        });
+                                        markers = [];
+                            
+                                        // Clear out the init markers1.
+                                        initialMarker.setMap(null);
+                            
+                                        // Create a marker for each place.
+                                        markers.push(
+                                        new google.maps.Marker({
+                                            map:this.map,
+                                            // icon,
+                                            position: event.latLng,
+                                        })
+                                        );
+                                        this.displayLatitude.next(coordinateClickParse.lat);
+                                        this.displayLongtitude.next(coordinateClickParse.lng);
+                                    
+                                    });
+        
+                                    //Trigger when click Relocate
+                                    let geocoder: google.maps.Geocoder;
+                                    const relocatebutton = document.getElementById("relocate-button") as HTMLInputElement;
+                                    // const submitButton =  document.getElementById("submit-btn");
+                                    geocoder = new google.maps.Geocoder();
+                                    relocatebutton.addEventListener("click", (e) =>{
+                                        geocoder
+                                        .geocode({ address: this.storeDeliveryForm.get('address').value})
+                                        .then((result) => {
+                                            const { results } = result;
+                                
+                                            //to be display coordinate
+                                            let coordinateAddressStringify = JSON.stringify(results[0].geometry.location);
+                                            let coordinateAddressParse = JSON.parse(coordinateAddressStringify);
+                                
+                                            this.location = {
+                                            lat: coordinateAddressParse.lat,
+                                            lng: coordinateAddressParse.lng,
+                                            };
+        
+                                            //to display for location code
+                                            this.displayLatitude.next(coordinateAddressParse.lat);
+                                            this.displayLongtitude.next(coordinateAddressParse.lng);
+                                
+                                            // Clear out the old markers.
+                                            markers.forEach((marker) => {
+                                                marker.setMap(null);
+                                            });
+                                            markers = [];
+                                
+                                            // Clear out the init markers1.
+                                            initialMarker.setMap(null);
+                                
+                                            // Create a marker for each place.
+                                            markers.push(
+                                                new google.maps.Marker({
+                                                map:this.map,
+                                                // icon,
+                                                position: results[0].geometry.location,
+                                                })
+                                            );
+                                            const bounds1 = new google.maps.LatLngBounds();
+                                
+                                            bounds1.extend(results[0].geometry.location);
+                                
+                                            this.map.fitBounds(bounds1);
+                                            
+                                            return results;
+                                        })
+                                        .catch((e) => {
+                                            alert("Geocode was not successful for the following reason: " + e);
+                                        });
+                                    });
+                                });
+                            }
                         });
+                        
+                        
 
                         // Mark for check
                         this._changeDetectorRef.markForCheck();
@@ -568,6 +688,16 @@ export class StoreDeliveryComponent implements OnInit
             });
 
     
+    }
+
+    /**
+     * On destroy
+     */
+    ngOnDestroy(): void
+    {
+        // Unsubscribe from all subscriptions
+        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.complete();
     }
 
     ngAfterViewInit(): void

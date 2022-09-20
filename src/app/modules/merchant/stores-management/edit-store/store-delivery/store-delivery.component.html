@@ -62,7 +62,6 @@
                                     <mat-select 
                                         [formControlName]="'regionCountryId'"
                                         [required]="true"
-                                        disabled="true"
                                         [value]="'regionCountryId'"
                                         [placeholder]="'Select Country'"
                                         (selectionChange)="storeDeliveryForm.get('regionCountryId').patchValue($event.value);updateStates(countrySelector.value)"

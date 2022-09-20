@@ -175,6 +175,16 @@ export class StoreAccountComponent implements OnInit
         this._changeDetectorRef.markForCheck();
     }
 
+    /**
+     * On destroy
+     */
+    ngOnDestroy(): void
+    {
+        // Unsubscribe from all subscriptions
+        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.complete();
+    }
+
     
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
