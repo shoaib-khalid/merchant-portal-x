@@ -205,10 +205,10 @@ export class StoreDeliveryComponent implements OnInit
         })
                  
         this.deliveryFulfilment = [
-            { selected: false, option: "INSTANT_DELIVERY", label: "Instant Delivery", tooltip: "This store support instant delivery. (Provided by store own logistic or delivery partners)" }, 
-            { selected: false, option: "REGULAR_DELIVERY", label: "Regular Delivery", tooltip: "This store support regular delivery. (Provided by store own logistic or delivery partners)" },
-            { selected: false, option: "SCHEDULED_DELIVERY", label: "Scheduled Delivery", tooltip: "This store allow scheduled delivery request from customer" },
-            { selected: false, option: "STORE_PICKUP", label: "Allow Store Pickup", tooltip: "This store allow customer to pick up item from store" }
+            { selected: false, option: "INSTANT_DELIVERY", label: "Instant Delivery", tooltip: "This store supports instant delivery. (Provided by store's own logistic or delivery partners)" }, 
+            { selected: false, option: "REGULAR_DELIVERY", label: "Regular Delivery", tooltip: "This store supports regular delivery. (Provided by store's own logistic or delivery partners)" },
+            { selected: false, option: "SCHEDULED_DELIVERY", label: "Scheduled Delivery", tooltip: "This store allows scheduled delivery request from customer" },
+            { selected: false, option: "STORE_PICKUP", label: "Allow Store Pickup", tooltip: "This store allows customers to pick item from store" }
         ];
 
         this.storeId = this._route.snapshot.paramMap.get('storeid');

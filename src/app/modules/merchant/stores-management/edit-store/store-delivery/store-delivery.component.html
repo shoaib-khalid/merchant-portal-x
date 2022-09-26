@@ -25,7 +25,7 @@
                         <div class="my-4 border-t"></div>
 
                         <!-- Section -->
-                        <div class="w-full pt-8 sm:pt-0">
+                        <div class="w-full">
                             <div class="text-xl">Pickup Address</div>
                             <div class="text-secondary">Choose your type of delivery types to provide to the customer of delivery details.</div>
                         </div>
@@ -189,9 +189,9 @@
                         <div class="col-span-4 mt-4">
                             <div class="flex flex-col w-full">
                                 <mat-label class="font-medium">Store Fulfilment</mat-label>
-                                <div class="flex flex-col sm:flex-row">
+                                <div class="flex flex-col sm:flex-row mt-1">
                                     <div class="flex w-full lg:w-2/4">
-                                        <mat-checkbox class="" [formControlName]="'allowStorePickup'" [checked]="deliveryFulfilment[3].selected">{{deliveryFulfilment[3].label}}</mat-checkbox>
+                                        <mat-checkbox color="primary" class="" [formControlName]="'allowStorePickup'" [checked]="deliveryFulfilment[3].selected">{{deliveryFulfilment[3].label}}</mat-checkbox>
                                         <mat-icon
                                             [matTooltip]="deliveryFulfilment[3].tooltip"
                                             class="flex flex-wrap transform scale-75"
@@ -211,7 +211,7 @@
                             <div class="text-secondary">Communication and information details in case customer want to connect with you.</div>
                         </div>
 
-                        <div class="grid grid-cols-4 gap-6 w-full mt-4">
+                        <div class="grid grid-cols-4 gap-2 w-full mt-4">
                             <!-- Delivery Type -->
                             <div class="col-span-4">
                                 <mat-form-field class="fuse-mat-emphasized-affix w-full">
@@ -348,6 +348,7 @@
                                             <!-- Adhoc -->
                                             <ng-container *ngIf="storeDeliveryForm.get('deliveryType').value === 'ADHOC'">
                                                 <mat-radio-group
+                                                    [color]="'primary'"
                                                     class="flex flex-col w-full"
                                                     [formControlName]="'deliverySpType'"
                                                 >

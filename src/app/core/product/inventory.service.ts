@@ -161,7 +161,8 @@ export class InventoryService
                 sortingOrder: '' + order.toUpperCase(),
                 name        : '' + search,
                 status      : '' + status,
-                categoryId  : '' + categoryId
+                categoryId  : '' + categoryId,
+                showAllPrice: true
             }
         };
 
@@ -241,9 +242,12 @@ export class InventoryService
                 sortingOrder: '' + order.toUpperCase(),
                 name        : '' + search,
                 status      : '' + status,
-                categoryId  : '' + categoryId
+                categoryId  : '' + categoryId,
+                showAllPrice: true
             }
         };
+
+        if (categoryId === null || categoryId === '') delete header.params.categoryId;
 
         return this._httpClient.get<any>(productService +'/stores/'+this.storeId$+'/products', header).pipe(
             tap((response) => {
@@ -468,6 +472,35 @@ export class InventoryService
     }
 
     /**
+     * Delete many products
+     *
+     * @param id
+     */
+    deleteProductInBulk(ids: string[]): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+      
+        return this.products$.pipe(
+            take(1),
+            switchMap(products => this._httpClient.post(productService +'/stores/'+this.storeId$+'/products/bulk-delete', ids, header).pipe(
+                map((status) => {
+
+                    this._logging.debug("Response from ProductsService (deleteProductInBulk)", status);
+
+                    // Return the deleted status
+                    return status['status'];
+                })
+            ))
+        );
+    }
+
+    /**
      * Get product assets by id
      */
 
@@ -656,17 +689,24 @@ export class InventoryService
         const date = now.getFullYear() + "" + (now.getMonth()+1) + "" + now.getDate() + "" + now.getHours() + "" + now.getMinutes()  + "" + now.getSeconds();
 
         const body = {
-            "productId": product.id,
-            // "itemCode": product.id + date,
-            "itemCode": productInventory.itemCode,
-            "price": productInventory.price,
-            "compareAtprice": 0,
-            "quantity": productInventory.quantity,
-            "sku": productInventory.sku,
-            // "status": "AVAILABLE"
-            "status": productInventory.status? productInventory.status : "NOTAVAILABLE"
+            productId: product.id,
+            itemCode: productInventory.itemCode,
+            price: productInventory.price,
+            compareAtprice: 0,
+            quantity: productInventory.quantity,
+            sku: productInventory.sku,
+            status: productInventory.status? productInventory.status : "NOTAVAILABLE",
+            dineInPrice: productInventory.dineInPrice
         };
 
+        // Delete empty value
+        if (!productInventory.price) {
+            delete body.price;
+        }
+        if (!productInventory.dineInPrice) {
+            delete body.dineInPrice;
+        }
+        
         
 
         // return of();
@@ -786,20 +826,26 @@ export class InventoryService
         };
 
         const body = {
-            "productId": productId,
-            // "itemCode": product.id + date,
-            "itemCode": productInventory.itemCode,
-            "price": productInventory.price,
-            "compareAtprice": 0,
-            "quantity": productInventory.quantity,
-            "sku": productInventory.sku,
-            // "status": "AVAILABLE"
-            "status": productInventory.status? productInventory.status : "NOTAVAILABLE"
+            productId: productId,
+            itemCode: productInventory.itemCode,
+            price: productInventory.price,
+            compareAtprice: 0,
+            quantity: productInventory.quantity,
+            sku: productInventory.sku,
+            status: productInventory.status? productInventory.status : "NOTAVAILABLE",
+            dineInPrice: productInventory.dineInPrice
         };
+
+        // Delete empty value
+        if (!productInventory.price) {
+            delete body.price;
+        }
+        if (!productInventory.dineInPrice) {
+            delete body.dineInPrice;
+        }
 
         return this._products.pipe(
             take(1),
-            // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
             switchMap(products => this._httpClient.put<Product>(productService +'/stores/'+this.storeId$+'/products/' + productId + "/inventory/" + productInventoriesId, body , header).pipe(
                 map((response) => {
 
@@ -1513,7 +1559,17 @@ export class InventoryService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
 
-        // product-service/v1/swagger-ui.html#/store-category-controller/postStoreCategoryByStoreIdUsingPOST
+        // Delete empty value
+        Object.keys(productPackage).forEach(key => {
+            if (Array.isArray(productPackage[key])) {
+                productPackage[key] = productPackage[key].filter(element => element !== null)
+            }
+            
+            if (!productPackage[key] || (Array.isArray(productPackage[key]) && productPackage[key].length === 0)) {
+                delete productPackage[key];
+            }
+        });
+
         return this.packages$.pipe(
             take(1),
             switchMap(packages => this._httpClient.post<ProductPackageOption>(productService + '/stores/' + this.storeId$ + '/package/' + packageId + '/options', productPackage , header).pipe(
@@ -1569,9 +1625,19 @@ export class InventoryService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
 
+        // Delete empty value
+        Object.keys(productPackage).forEach(key => {
+            if (Array.isArray(productPackage[key])) {
+                productPackage[key] = productPackage[key].filter(element => element !== null)
+            }
+            
+            if (!productPackage[key] || (Array.isArray(productPackage[key]) && productPackage[key].length === 0)) {
+                delete productPackage[key];
+            }
+        });
+
         return this.packages$.pipe(
             take(1),
-            // switchMap(products => this._httpClient.post<InventoryProduct>('api/apps/ecommerce/inventory/product', {}).pipe(
             switchMap(packages => this._httpClient.put<ProductPackageOption>(productService + '/stores/' + this.storeId$ + '/package/' + packageId + '/options/' + optionId, productPackage , header).pipe(
                 map((updatedPackage) => {
 

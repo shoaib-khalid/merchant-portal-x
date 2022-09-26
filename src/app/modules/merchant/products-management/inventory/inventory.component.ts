@@ -15,12 +15,11 @@ import { Store } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
 import { MatDialog } from '@angular/material/dialog';
 import { AddProductComponent } from '../add-product/add-product.component';
-import {v4 as uuidv4} from 'uuid';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { EditProductComponent } from '../edit-product/edit-product.component';
 import { UserService } from 'app/core/user/user.service';
 import { Client } from 'app/core/user/user.types';
-import { MatSelect } from '@angular/material/select';
+import { SelectionModel } from '@angular/cdk/collections';
 
 
 @Component({
@@ -30,34 +29,66 @@ import { MatSelect } from '@angular/material/select';
         /* language=SCSS */
         `
             .inventory-grid {
-                grid-template-columns: 48px auto 40px;
+                grid-template-columns: 20px 48px auto 40px;
 
                 @screen sm {
-                    grid-template-columns: 48px auto 112px 72px;
+                    grid-template-columns: 20px 48px auto 112px 60px;
                 }
 
                 @screen md {
-                    grid-template-columns: 48px 128px auto 80px 100px 72px;
+                    grid-template-columns: 20px 48px 128px auto 80px 110px 60px;
                 }
 
                 @screen lg {
-                    grid-template-columns: 48px 128px auto 80px 100px 72px 72px 72px;
+                    grid-template-columns: 20px 48px 128px auto 80px 110px 60px 60px 60px;
+                }
+            }
+
+            .inventory-grid-2price {
+                grid-template-columns: 20px 48px auto 40px;
+
+                @screen sm {
+                    grid-template-columns: 20px 48px auto 112px 60px;
+                }
+
+                @screen md {
+                    grid-template-columns: 20px 48px 128px auto 80px 110px 60px;
+                }
+
+                @screen lg {
+                    grid-template-columns: 20px 48px 128px auto 80px 110px 110px 60px 60px 60px;
                 }
             }
 
             .inventory-grid-fnb {
-                grid-template-columns: 48px auto 40px;
+                grid-template-columns: 20px 48px auto 40px;
 
                 @screen sm {
-                    grid-template-columns: 48px auto 112px 72px;
+                    grid-template-columns: 20px 48px auto 112px 60px;
                 }
 
                 @screen md {
-                    grid-template-columns: 48px 128px auto 80px 100px 72px;
+                    grid-template-columns: 20px 48px 128px auto 80px 110px 60px;
                 }
 
                 @screen lg {
-                    grid-template-columns: 48px 128px auto 80px 100px 72px 72px;
+                    grid-template-columns: 20px 48px 128px auto 80px 110px 110px 60px 60px;
+                }
+            }
+
+            .inventory-grid-fnb-2price {
+                grid-template-columns: 20px 48px auto 40px;
+
+                @screen sm {
+                    grid-template-columns: 20px 48px auto 112px 60px;
+                }
+
+                @screen md {
+                    grid-template-columns: 20px 48px 128px auto 80px 110px 60px;
+                }
+
+                @screen lg {
+                    grid-template-columns: 20px 48px 128px auto 80px 110px 110px 60px 60px;
                 }
             }
 
@@ -66,30 +97,14 @@ import { MatSelect } from '@angular/material/select';
             }
 
             .variant-grid {
-                // grid-template-columns: 68px auto 40px;
                 grid-template-columns: 68px 120px 120px 128px 80px 96px;
 
-                // @screen sm {
-                //     grid-template-columns: 68px auto auto 128px 84px 96px;
-                // }
 
                 @screen md {
                     grid-template-columns: 68px 120px auto 128px 80px 96px;
                 }
 
-                // @screen md {
-                //     grid-template-columns: 68px auto auto 128px 84px 96px;
-                // }
-
-                // @screen lg {
-                //     grid-template-columns: 68px auto 128px 128px 84px 96px;
-                // }
             }
-            /* to remove visible container when window dialog is opened  */
-            // .mat-dialog-container {
-            // padding: 0 !important;
-            // }
-            
 
         `
     ],
@@ -111,6 +126,7 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     products$: Observable<Product[]>;
     selectedProduct: Product | null = null;
     selectedProductForm: FormGroup;
+    productsList: Product[] = [];
 
     pagination: ProductPagination;
     
@@ -203,8 +219,19 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     storesForm: FormControl = new FormControl();
     isDuplicating: boolean = false;
     cloneErrorMessage: string = null;
-    // @ViewChild('storeSelector') storeSelector: MatSelect;
+
+    inventoryListCondition = '';
+    allSelected: boolean = false;
+    selectProductCheckbox:
+    {
+        id: string,
+        name: string,
+        selected: boolean,
+        color: string
+    }[]
+    selection = new SelectionModel<Product>(true, []);
     
+
     /**
      * Constructor
      */
@@ -248,86 +275,22 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     {
         // Create the selected product form
         this.selectedProductForm = this._formBuilder.group({
-            // id               : [''],
             name             : ['', [Validators.required]],
             description      : ['', [Validators.required]],
-            // storeId          : [''], // not used
             categoryId       : ['', [Validators.required]],
             status           : ['', [Validators.required]],
-            // thumbnailUrl     : [''],
-            // vendor           : [''], // not used
-            // region           : [''], // not used
             seoUrl           : [''],
-            // seoName          : [''], // not used
             trackQuantity    : [false],
             allowOutOfStockPurchases: [false], 
             minQuantityForAlarm: [-1],
             packingSize      : ['', [Validators.required]],
-            // created          : [''],
-            // updated          : [''],
-
             productVariants  : this._formBuilder.array([]),
-
-            // productVariants  : this._formBuilder.array([{
-            //     id                      : [''],
-            //     name                    : [''],
-            //     productVariantsAvailable: this._formBuilder.array([{
-            //         id                      : [''],
-            //         value                   : [''],
-            //         productId               : [''],
-            //         productVariantId        : [''],
-            //         sequenceNumber          : [0],
-            //     }]),
-            //     sequenceNumber          : [0],
-            // }]),
-
-            // productInventories : this._formBuilder.array([
-            //    this._formBuilder.group({
-            //         itemCode                : [''],
-            //         price                   : [0],
-            //         quantity                : [''],
-            //         productId               : [''],
-            //         sku                     : [''],
-            //         status           : ['AVAILABLE'],
-            //     })
-            // ]),
-
             productInventories: this._formBuilder.array([]),
-
             productReviews        : [''], // not used
-
             productAssets: this._formBuilder.array([]),
-            // productAssets         : this._formBuilder.array([{
-            //     id                  : [''],
-            //     itemCode            : [''],
-            //     name                : [''],
-            //     url                 : [''],
-            //     productId           : [''],
-            //     isThumbnail         : [false],
-            // }]),
             productDeliveryDetail : [''], // not used
-
-
-            // OLD HERE -----------------------------------
-
-            // currentImageIndex: [0],
-            // images           : [[]],
-            // sku              : [''],
-            // price            : [0],
-            // quantity         : [0],
             isVariants       : [false],
             isPackage        : [false],
-            // productPackage   : {
-            //     id          : [''],
-            //     packageId   : [''],
-            //     title       : [''],
-            //     totalAllow  : [0],
-            //     productPackageOptionDetail  : this._formBuilder.array([{
-            //         id                      : [''],
-            //         productPackageOptionId  : [''],
-            //         productId               : [''],
-            //     }])
-            // }
         });
         
 
@@ -349,6 +312,27 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                 // Update the pagination
                 this.store$ = store;
 
+                // if e-commerce
+                if ((this.store$.verticalCode === 'E-Commerce' || this.store$.verticalCode === 'ECommerce_PK' || this.store$.verticalCode === 'e-commerce-b2b2c')){
+                    // if isDelivery and isDineIn
+                    if (this.store$.isDelivery === true && this.store$.isDineIn === true) {
+                        this.inventoryListCondition = 'e-commerce-2-prices'
+                    }
+                    else {
+                        this.inventoryListCondition = 'e-commerce-1-price'
+                    }
+                }
+                /* if fnb */
+                else {
+                    // if isDelivery and isDineIn
+                    if (this.store$.isDelivery === true && this.store$.isDineIn === true) {
+                        this.inventoryListCondition = 'fnb-2-prices'
+                    }
+                    else {
+                        this.inventoryListCondition = 'fnb-1-price'
+                    }
+                }
+
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
@@ -356,6 +340,14 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
     
         // Get the products
         this.products$ = this._inventoryService.products$;
+
+        this.products$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((products: Product[]) => {
+                if (products) {
+                    this.productsList = products;
+                }
+            })
         
         // Get the pagination
         this._inventoryService.pagination$
@@ -887,6 +879,73 @@ export class InventoryComponent implements OnInit, AfterViewInit, OnDestroy
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
                 })
+        }
+
+    }
+
+    /** Whether the number of selected elements matches the total number of rows. */
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const numRows = this.productsList.length;
+        return numSelected === numRows;
+    }
+
+    /** Selects all rows if they are not all selected; otherwise clear selection. */
+    masterToggle() {
+        this.isAllSelected() ?
+            this.selection.clear() :
+            this.productsList.forEach(row => this.selection.select(row));
+
+        
+    }
+
+    deleteProducts() {
+
+        if (this.selection.selected.length > 0) {
+            // Open the confirmation dialog
+            const confirmation = this._fuseConfirmationService.open({
+                title  : 'Delete selected items',
+                message: 'Are you sure you want to delete items? This action cannot be undone!',
+                actions: {
+                    confirm: {
+                        label: 'Delete'
+                    }
+                }
+            });
+    
+            // Subscribe to the confirmation dialog closed action
+            confirmation.afterClosed().subscribe((result) => {
+                // If the confirm button pressed...
+                if ( result === 'confirmed' )
+                {
+                    this._inventoryService.deleteProductInBulk(this.selection.selected.map(x => x.id))
+                    .pipe(
+                        tap(() => {
+                            this.selection.clear();
+                        }),
+                        // Delay
+                        delay(300),
+                        // If success only then we get products and categories
+                        switchMap(status => {
+                            if (status === 200) {
+                                return forkJoin([
+                                    this._inventoryService.getProducts(), 
+                                    this._inventoryService.getByQueryCategories( 0 , 30, 'name', 'asc')
+                                ])
+                            }
+                            else {
+                                return of(null);
+                            }
+                        })
+                    )
+                    .subscribe(() => {
+                        
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    });
+            
+                }
+            });
         }
 
     }

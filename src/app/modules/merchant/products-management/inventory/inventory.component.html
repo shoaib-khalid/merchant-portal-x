@@ -91,11 +91,33 @@
                     <div class="grid">
                         <!-- Header -->
                         <div
-                            class="inventory-grid z-10 sticky top-0 grid gap-4 py-4 px-6 md:px-8 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
-                            [ngClass]="(store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c') ? 'inventory-grid' : 'inventory-grid-fnb'"
+                            class="inventory-grid items-center z-10 sticky top-0 grid gap-4 py-4 px-6 md:px-8 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                            [ngClass]="{
+                                'inventory-grid': inventoryListCondition === 'e-commerce-1-price', 
+                                'inventory-grid-2price' : inventoryListCondition === 'e-commerce-2-prices', 
+                                'inventory-grid-fnb'    : inventoryListCondition === 'fnb-1-price',
+                                'inventory-grid-fnb-2price' : inventoryListCondition === 'fnb-2-prices'   
+                            }"                            
                             matSort
                             matSortDisableClear>
-                            <div></div>
+                            <!-- Checkbox -->
+                            <div>
+                                <mat-checkbox [color]="'primary'" (change)="$event ? masterToggle() : null"
+                                    [checked]="selection.hasValue() && isAllSelected()"
+                                    [indeterminate]="selection.hasValue() && !isAllSelected()">
+                                </mat-checkbox>
+                            </div>
+                            <div>
+                                <button mat-icon-button 
+                                class=""
+                                (click)="deleteProducts()">
+                                    <mat-icon
+                                        class=""
+                                        [color]="'warn'"
+                                        [svgIcon]="'heroicons_outline:trash'">
+                                    </mat-icon>
+                                </button>
+                            </div>
                             <div
                                 class="hidden md:block"
                                 [mat-sort-header]="'sku'">
@@ -108,9 +130,16 @@
                                 Type
                             </div>
                             <div
+                                *ngIf="store$.isDelivery === true"
                                 class="hidden sm:block"
                                 [mat-sort-header]="'price'">
-                                Price
+                                DeliverIn Price
+                            </div>
+                            <div
+                                *ngIf="store$.isDineIn === true"
+                                class="hidden sm:block"
+                                [mat-sort-header]="'dineInPrice'">
+                                Dine In Price
                             </div>
                             <div
                                 *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'"
@@ -128,11 +157,23 @@
                         <!-- Rows -->
                         <ng-container *ngIf="(products$ | async) as products">
                             <ng-container *ngFor="let product of products; trackBy: trackByFn">
+                                <!-- [ngClass]="(store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c') ? 'inventory-grid' : 'inventory-grid-fnb'" -->
                                 <div 
                                     class="inventory-grid grid items-center gap-4 py-3 px-6 md:px-8 border-b"
-                                    [ngClass]="(store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c') ? 'inventory-grid' : 'inventory-grid-fnb'"
-
+                                    [ngClass]="{
+                                            'inventory-grid': inventoryListCondition === 'e-commerce-1-price', 
+                                            'inventory-grid-2price' : inventoryListCondition === 'e-commerce-2-prices', 
+                                            'inventory-grid-fnb'    : inventoryListCondition === 'fnb-1-price',
+                                            'inventory-grid-fnb-2price' : inventoryListCondition === 'fnb-2-prices'   
+                                        }"
                                 >
+                                    <!-- Checkbox -->
+                                    <div>
+                                        <mat-checkbox [color]="'primary'" (click)="$event.stopPropagation()"
+                                            (change)="$event ? selection.toggle(product) : null"
+                                            [checked]="selection.isSelected(product)">
+                                        </mat-checkbox>
+                                    </div>
 
                                     <!-- Image -->
                                     <div class="flex items-center">
@@ -170,10 +211,15 @@
                                     </div>
 
                                     <!-- Price -->
-                                    <div class="hidden sm:block">
+                                    <div *ngIf="store$.isDelivery === true" class="hidden sm:block">
                                         {{ product.productInventories.length > 0 ? (product.productInventories[0].price | currency:store$.regionCountry.currencySymbol:'symbol':'1.2-2') : '' }}
                                     </div>
 
+                                    <!-- Dine In Price -->
+                                    <div *ngIf="store$.isDineIn === true" class="hidden sm:block">
+                                        {{ product.productInventories.length > 0 ? (product.productInventories[0].dineInPrice | currency:store$.regionCountry.currencySymbol:'symbol':'1.2-2') : '' }}
+                                    </div>
+                                    
                                     <!-- Stock -->
                                     <div 
                                         *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'"

@@ -57,6 +57,7 @@ export interface ProductInventory
     productInventoryItems?: ProductInventoryItem[];
     sku: string;
     status: string;
+    dineInPrice: number;
 }
 
 
@@ -157,6 +158,7 @@ export interface ProductAssets
      title: string;
      totalAllow: number;
      productPackageOptionDetail: ProductPackageOptionDetail[];
+     sequenceNumber: number;
  }
  
  export interface ProductPackageOptionDetail 
@@ -165,6 +167,7 @@ export interface ProductAssets
      productId?: string;
      product?: Product;
      productPackageOptionId?: string;
+     sequenceNumber: number
      
  }
  

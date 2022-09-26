@@ -14,6 +14,7 @@ import { StoresService } from 'app/core/store/store.service';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { MatPaginator } from '@angular/material/paginator';
 import { CartService } from 'app/core/cart/cart.service';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 
 
@@ -82,10 +83,10 @@ import { CartService } from 'app/core/cart/cart.service';
                 // }
 
                 // No status (temporary!)
-                grid-template-columns: 64px 86px 340px 128px 80px;
+                grid-template-columns: 70px 84px 340px 154px 54px;
 
                 @screen md {
-                    grid-template-columns: 64px 86px 340px 128px 80px;
+                    grid-template-columns: 70px 84px 340px 154px 54px;
                 }
 
             }
@@ -105,9 +106,9 @@ import { CartService } from 'app/core/cart/cart.service';
             }
 
             .option-grid {
-                grid-template-columns: 120px 112px 128px 112px;
+                grid-template-columns: 52px 120px 76px 182px 86px;
                 @screen lg {
-                    grid-template-columns: 120px 112px auto 112px;
+                    grid-template-columns: 52px 120px 76px auto 86px;
                 }
             }
 
@@ -120,6 +121,26 @@ import { CartService } from 'app/core/cart/cart.service';
 
             input[type='number'] {
                 -moz-appearance:textfield;
+            }
+
+            .cdk-drag-preview {
+                box-sizing: border-box;
+                border-radius: 4px;
+                box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+                            0 8px 10px 1px rgba(0, 0, 0, 0.14),
+                            0 3px 14px 2px rgba(0, 0, 0, 0.12);
+            }
+
+            .cdk-drag-placeholder {
+                opacity: 0;
+            }
+
+            .cdk-drag-animating {
+                transition: transform 150ms cubic-bezier(0, 0, 0.2, 1);
+            }
+
+            .list-class.cdk-drop-list-dragging .contain-class:not(.cdk-drag-placeholder) {
+                transition: transform 150ms cubic-bezier(0, 0, 0.2, 1);
             }
 
         `
@@ -159,24 +180,25 @@ export class EditProductComponent implements OnInit, OnDestroy
     selectedProduct: Product | null = null;
     addProductForm: FormGroup;
     products$: Observable<Product[]>;
-    newProductId: string = null; // product id after it is created
-    creatingProduct: boolean; // use to disable next button until product is created
-    allProductsFiltered: Product[]; // used for checking if product name already exist 
     productPagination: ProductPagination = { length: 0, page: 0, size: 0, lastPage: 0, startIndex: 0, endIndex: 0 };
-
 
     // inventories
     productInventoriesFA: FormArray;
     productInventories$: ProductInventory[] = [];
-
 
     // product combo package
     _products: Product[]; // use in combo section -> 'Add product' --before filter
     filteredProductsOptions: Product[] = []; // use in listing html
     selectedProductsOptions: Product[] = [];
     selectedProductsOption: ProductPackageOption = null;
-    _selectedProductsOption = {};
-    optionChecked = [];
+    _selectedProductsOption: ProductPackageOption = {
+        id: null,
+        packageId: null,
+        title: null,
+        totalAllow: null,
+        productPackageOptionDetail: [],
+        sequenceNumber: 0
+    };
     _filteredProductsOptions: Product[] = []; // use in combo section -> 'Add product' --after filter
     productsCombos$: ProductPackageOption[] = [];
     localCategoryFilterControl: FormControl = new FormControl();
@@ -238,12 +260,6 @@ export class EditProductComponent implements OnInit, OnDestroy
         itemCode: string
     }[] = [];
 
-    // imagesWithId: {
-    //     id: string,
-    //     url: string,
-    //     isThumbnail: boolean
-    // }[] = [];
-
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     private _variantsPanelOverlayRef: OverlayRef;
     private _variantsPanelDeleteOverlayRef: OverlayRef;
@@ -269,7 +285,6 @@ export class EditProductComponent implements OnInit, OnDestroy
     // product variant section
 
     filteredProductVariants: ProductVariant[] = []; // used in html to loop variant
-    // productVariants: any[] = []; // (variantComboOptions)
     variantToBeCreated: ProductVariant[] = []; // use for creating on BE 
     variantToBeDeleted: ProductVariant[] = []; // use for deleting on BE 
     
@@ -286,7 +301,8 @@ export class EditProductComponent implements OnInit, OnDestroy
         quantity: number,
         sku: string,
         status: string,
-        variant: string
+        variant: string,
+        dineInPrice: number
     }[]
 
     selectedProductVariant: ProductVariant;
@@ -330,7 +346,12 @@ export class EditProductComponent implements OnInit, OnDestroy
     selectedParentCategory: string ='';
     product: Product;
     oriPriceNoVariants: number;
+    oriDineInPriceNoVariants: number;
     oriPriceVariants: {
+        price: number,
+        sku: string
+    }[];
+    oriDineInPriceVariants: {
         price: number,
         sku: string
     }[];
@@ -338,10 +359,15 @@ export class EditProductComponent implements OnInit, OnDestroy
         price: number,
         itemCode: string
     }[] = [];
+    variantsDineInPriceChange: {
+        price: number,
+        itemCode: string
+    }[] = [];
+    setOrderEnabled: boolean = false;
+    dropUpperLevelCalled: boolean = false;
 
     searchImageControl: FormControl = new FormControl();
     autoCompleteList: {url: string, name: string}[] = [];
-
 
 
     /**
@@ -415,7 +441,8 @@ export class EditProductComponent implements OnInit, OnDestroy
                 isNoteOptional   : [true],
                 customNote       : [''],
                 // form completion
-                valid            : [false]
+                valid            : [false],
+                dineInPrice      : ['', [Validators.required]],
             }),
             variantsSection     : this._formBuilder.array([]),
             comboSection : this._formBuilder.group({
@@ -700,9 +727,11 @@ export class EditProductComponent implements OnInit, OnDestroy
         this.addProductForm.get('step1').get('sku').setValue(product.productInventories[0].sku);
         this.addProductForm.get('step1').get('price').setValue(product.productInventories[0].price);
         this.addProductForm.get('step1').get('availableStock').setValue(this.totalInventories(product.productInventories));
+        this.addProductForm.get('step1').get('dineInPrice').setValue(product.productInventories[0].dineInPrice);
 
         // Set original price (No Variants)
         this.oriPriceNoVariants = product.productInventories[0].price;
+        this.oriDineInPriceNoVariants = product.productInventories[0].dineInPrice; 
 
         // Set original price (Variants)
         if (product.productInventories.length > 1) {
@@ -713,17 +742,37 @@ export class EditProductComponent implements OnInit, OnDestroy
                        sku: x.sku
                     }
                 });
+            this.oriDineInPriceVariants = product.productInventories.map(x => 
+                {
+                    return {
+                       price: x.dineInPrice,
+                       sku: x.sku
+                    }
+                });
         }
 
         if (this.addProductForm.get('step1').get('customNote').value || this.addProductForm.get('step1').get('isNoteOptional').value === false ){
             this.addProductForm.get('step1').get('isCustomNote').setValue(true);
         }
         
+        // if isDelivery true, disable dineInPrice
+        if (this.store$.isDelivery === true && this.store$.isDineIn === false) {
+            this.addProductForm.get('step1').get('dineInPrice').disable(); 
+        } 
+        else if (this.store$.isDelivery === false && this.store$.isDineIn === true) {
+            this.addProductForm.get('step1').get('price').disable(); 
+        }
+        else if (this.store$.isDelivery === true && this.store$.isDineIn === true) {
+            this.addProductForm.get('step1').get('price').enable(); 
+            this.addProductForm.get('step1').get('dineInPrice').enable(); 
+        }
+
         // disable the input if product has variants
         if (product.productVariants.length > 0) {
             this.addProductForm.get('step1').get('sku').disable();
             this.addProductForm.get('step1').get('price').disable();    
-            this.addProductForm.get('step1').get('availableStock').disable();    
+            this.addProductForm.get('step1').get('availableStock').disable();  
+            this.addProductForm.get('step1').get('dineInPrice').disable();   
         }
 
         // set packingSize to S if verticalCode FnB
@@ -996,6 +1045,7 @@ export class EditProductComponent implements OnInit, OnDestroy
                 this.selectedVariantCombos[comboIndex].image.newAsset = false;
                 this.selectedVariantCombos[comboIndex].image.isThumbnail = false;
                 this.selectedVariantCombos[comboIndex].image.file = null;
+                this.selectedVariantCombos[comboIndex].dineInPrice = item.dineInPrice;
             }
         });        
         const pIdLen = this.selectedProduct.id.length;
@@ -1538,7 +1588,8 @@ export class EditProductComponent implements OnInit, OnDestroy
                         quantity: item.quantity,
                         status: item.status,
                         SKU: item.sku,
-                        productId: this.selectedProduct.id
+                        productId: this.selectedProduct.id,
+                        dineInPrice: item.dineInPrice
                     }
                 })
 
@@ -1549,6 +1600,11 @@ export class EditProductComponent implements OnInit, OnDestroy
                         // Update cart item price
 
                         this._cartService.updateItemPriceBulk(null, this.variantsPriceChange.map(item => item.itemCode)).subscribe()
+                    }
+                    if (this.variantsDineInPriceChange.length > 0) {
+                        // Update cart item price
+
+                        this._cartService.updateItemPriceBulk(null, this.variantsDineInPriceChange.map(item => item.itemCode)).subscribe()
                     }
                 });
         
@@ -1598,17 +1654,19 @@ export class EditProductComponent implements OnInit, OnDestroy
             else {
                 // Update the inventory product
                 let _productInventories = {
-                    price: step1FormGroup.value.price,
+                    price: step1FormGroup.value.price === 0 ? null : step1FormGroup.value.price,
                     compareAtprice: 0,
                     quantity: step1FormGroup.value.availableStock,
                     sku: step1FormGroup.value.sku,
-                    status: 'AVAILABLE'
+                    status: 'AVAILABLE',
+                    dineInPrice: step1FormGroup.value.dineInPrice === 0 ? null : step1FormGroup.value.dineInPrice,
                 } 
                 
-                await this._inventoryService.updateInventoryToProduct(this.selectedProduct.id, this.productInventories$[0].itemCode, _productInventories).toPromise().then((item) => {
+                await lastValueFrom(this._inventoryService.updateInventoryToProduct(this.selectedProduct.id, this.productInventories$[0].itemCode, _productInventories)).then((item) => {
                     
                     // Update cart item price
-                    if (this.oriPriceNoVariants !== this.addProductForm.get('step1').get('price').value) {
+                    if ( (this.oriPriceNoVariants !== this.addProductForm.get('step1').get('price').value) || 
+                         (this.oriDineInPriceNoVariants !== this.addProductForm.get('step1').get('dineInPrice').value) ) {
                         this._cartService.updateItemPriceBulk(null, [item.itemCode]).subscribe()
                     }
                 });
@@ -1986,7 +2044,8 @@ export class EditProductComponent implements OnInit, OnDestroy
                     quantity: 0,
                     status: 'AVAILABLE',
                     SKU: tempSku,
-                    productId: this.selectedProduct.id
+                    productId: this.selectedProduct.id,
+                    dineInPrice: 0,
                 }];
                 this._inventoryService.addInventoryToProductBulk(this.selectedProduct.id, inventoryBodies)
                     .subscribe((inventories) => {
@@ -1995,6 +2054,7 @@ export class EditProductComponent implements OnInit, OnDestroy
 
                 this.addProductForm.get('step1').get('price').patchValue(this.selectedVariantCombos[0].price);
                 this.addProductForm.get('step1').get('sku').patchValue(tempSku);
+                this.addProductForm.get('step1').get('dineInPrice').setValue(this.selectedVariantCombos[0].dineInPrice);
 
                 // set the variant combinations array to empty
                 this.selectedVariantCombos = [];
@@ -2005,6 +2065,7 @@ export class EditProductComponent implements OnInit, OnDestroy
                 this.addProductForm.get('step1').get('sku').enable();
                 this.addProductForm.get('step1').get('price').enable();    
                 this.addProductForm.get('step1').get('availableStock').enable();   
+                this.addProductForm.get('step1').get('dineInPrice').enable();
 
             } else {
                 // Update the selected product form
@@ -2673,7 +2734,7 @@ export class EditProductComponent implements OnInit, OnDestroy
                 image: { preview: null, file: null, isThumbnail: false, newAsset: false, assetId: null}, 
                 itemCode: itemCode, 
                 variant: nameComboOutput.substring(1), 
-                price: 0, quantity: 0, 
+                price: 0, quantity: 0, dineInPrice: 0,
                 sku: nameComboOutput.substring(1).toLowerCase().replace(" / ", "-"), 
                 status: "NOTAVAILABLE" 
             })
@@ -2872,8 +2933,13 @@ export class EditProductComponent implements OnInit, OnDestroy
             .subscribe((packages) => {
                 this.selectedProductsOption = packages;
 
+                // if this.selectedProductsOption have value // for update
+                if (this.selectedProductsOption) {
+                    this._selectedProductsOption = this.selectedProductsOption;
+                }
+
                 // this is for checkbox
-                this.onChangeSelectProductValue = this.selectedProductsOption["productPackageOptionDetail"].map(x => x.productId);
+                this.onChangeSelectProductValue = this.selectedProductsOption.productPackageOptionDetail.map(x => x.productId);
 
                 // this is for Total Allowed input field, to make it dirty
                 this.addProductForm.get('comboSection').get('categoryId').setValue(this.onChangeSelectProductValue);
@@ -2930,50 +2996,27 @@ export class EditProductComponent implements OnInit, OnDestroy
 
     updateSelectedProductsOption(optionId = "") {
 
-        // if (this._selectedProductsOption["totalAllow"] > this.onChangeSelectProductValue.length) {
-        //     // Show a error message
-        //     // Open the confirmation dialog
-        //     this._fuseConfirmationService.open({
-        //         title  : 'Reminder',
-        //         message: 'Total allowed cannot be more than products in option.',
-        //         icon       : {
-        //             show : true,
-        //             name : 'heroicons_outline:exclamation',
-        //             color: 'warning'
-        //         },
-        //         actions: {
-                    
-        //             cancel: {
-        //                 label: 'OK',
-        //                 show: true
-        //                 },
-        //             confirm: {
-        //                 show: false,
-        //             }
-        //             }
-        //     });
-            
-            
-        // } else {
+        // Do nothing if totalAllow null
+        if (!this._selectedProductsOption.totalAllow) return;
 
-        // }
         this.clearOptName = true;
 
         // add / update _selectedProductsOption["packageId"] value 
-        this._selectedProductsOption["packageId"] = this.selectedProduct.id;   
+        this._selectedProductsOption.packageId = this.selectedProduct.id;  
+
+        // set the sequence number for this._selectedProductsOption.productPackageOptionDetail
+        this._selectedProductsOption.productPackageOptionDetail.forEach((x, index) => {
+            x.sequenceNumber = index + 1;
+        })
+
+        // set the sequence number for this._selectedProductsOption
+        let optionDetailIndex = this.productsCombos$.findIndex(x => x.id === this._selectedProductsOption.id);
+        if (optionDetailIndex > -1) {
+            this._selectedProductsOption.sequenceNumber = optionDetailIndex + 1;
+        }
         
         if (optionId !== ""){
             // update
-
-            // this is to remove all other element except productId when updating
-            let updateProductPackageOptionDetail = [];
-            this._selectedProductsOption["productPackageOptionDetail"].forEach(item => {
-                updateProductPackageOptionDetail.push({
-                    productId: item.productId
-                });
-            });
-            this._selectedProductsOption["productPackageOptionDetail"] = updateProductPackageOptionDetail;
-            
             this._inventoryService.updateProductsOption(this.selectedProduct.id, this._selectedProductsOption, optionId )
                 .pipe(takeUntil(this._unsubscribeAll))
                 .subscribe((response) => {
@@ -2987,6 +3030,7 @@ export class EditProductComponent implements OnInit, OnDestroy
                     this._changeDetectorRef.markForCheck();
                 });
         } else {
+            this._selectedProductsOption.sequenceNumber =  this.productsCombos$.length + 1;
             // add new
             this._inventoryService.createProductsOptionById(this.selectedProduct.id, this._selectedProductsOption)
                 .pipe(takeUntil(this._unsubscribeAll))
@@ -3005,15 +3049,17 @@ export class EditProductComponent implements OnInit, OnDestroy
         // Clear the form
         this.selectedProductsOption = null;
         // Clear the invisible form
-        this._selectedProductsOption = {};
+        this._selectedProductsOption = {
+            id: null,
+            packageId: null,
+            title: null,
+            totalAllow: null,
+            productPackageOptionDetail: [],
+            sequenceNumber: 0
+        };
         // Clear checkbox
         this.onChangeSelectProductValue.length = 0;
 
-
-        // for(let i=0;i < this.filteredProductsOptions.length;i++){
-        //     this.optionChecked[i] = false;
-        // }
-        
     }
 
     resetSelectedProductsOption() {
@@ -3022,7 +3068,14 @@ export class EditProductComponent implements OnInit, OnDestroy
         this.onChangeSelectProductValue.length = 0;
         this.addProductForm.get('comboSection').get('categoryId').reset;
         this.totalAllowed = 0;
-        this._selectedProductsOption = {};
+        this._selectedProductsOption = {
+            id: null,
+            packageId: null,
+            title: null,
+            totalAllow: null,
+            productPackageOptionDetail: [],
+            sequenceNumber: 0
+        };
         
     }
 
@@ -3032,8 +3085,8 @@ export class EditProductComponent implements OnInit, OnDestroy
         if (this.selectedProductsOption) {
             this._selectedProductsOption = this.selectedProductsOption;
         }
-
-        this._selectedProductsOption["title"] = value;
+        
+        this._selectedProductsOption.title = value;
     }
 
     insertProductsInOption(productId, isChecked: MatCheckboxChange) {
@@ -3050,44 +3103,45 @@ export class EditProductComponent implements OnInit, OnDestroy
 
             // this is mostly triggered by (change)="insertProductsInOption"
             // this is triggered when creating new option, selectedProductsOption is null since it's new
-            if (this._selectedProductsOption["productPackageOptionDetail"]) {
+            if (this._selectedProductsOption.productPackageOptionDetail) {
+
+                let sequence = this._selectedProductsOption.productPackageOptionDetail.length + 1;
                 // if there already a value in this._selectedProductsOption["productPackageOptionDetail"] ,
                 // push a new one
-                this._selectedProductsOption["productPackageOptionDetail"].push({
+                this._selectedProductsOption.productPackageOptionDetail.push({
                     productId: currentSelectedProductInOption.id,
-                    product: currentSelectedProductInOption
+                    product: currentSelectedProductInOption,
+                    sequenceNumber: sequence
                 });
             } else {
                 // if this._selectedProductsOption["productPackageOptionDetail"] have no value, initiate the array first
                 // then push the product id
-                this._selectedProductsOption["productPackageOptionDetail"] = [];
-                this._selectedProductsOption["productPackageOptionDetail"].push({
+                this._selectedProductsOption.productPackageOptionDetail = [];
+                this._selectedProductsOption.productPackageOptionDetail.push({
                     productId: currentSelectedProductInOption.id,
-                    product: currentSelectedProductInOption
+                    product: currentSelectedProductInOption,
+                    sequenceNumber: 1
                 });
             }
         } else {
             // this is mostly triggered by (change)="insertProductsInOption"
             // this is triggered when creating new option, selectedProductsOption is null since it's new
-            if (this._selectedProductsOption["productPackageOptionDetail"]) {
+            if (this._selectedProductsOption.productPackageOptionDetail) {
                 // if there already a value in this._selectedProductsOption["productPackageOptionDetail"] ,
                 // push a new one
-                let index = this._selectedProductsOption["productPackageOptionDetail"].findIndex(item => item.productId === productId);
+                let index = this._selectedProductsOption.productPackageOptionDetail.findIndex(item => item.productId === productId);
                 if (index > -1) {
                     // Delete the product from option
-                    this._selectedProductsOption["productPackageOptionDetail"].splice(index, 1);
+                    this._selectedProductsOption.productPackageOptionDetail.splice(index, 1);
                 }
 
                 // this mean this._selectedProductsOption["productPackageOptionDetail"] is empty
-                if (this._selectedProductsOption["productPackageOptionDetail"].length < 1) {
+                if (this._selectedProductsOption.productPackageOptionDetail.length < 1) {
                 }
-            } else {
-                // if this._selectedProductsOption["productPackageOptionDetail"] have no value, 
-                // dis should not happen                
             }
         }
 
-        this.onChangeSelectProductValue = this._selectedProductsOption["productPackageOptionDetail"].map(x => x.productId);
+        this.onChangeSelectProductValue = this._selectedProductsOption.productPackageOptionDetail.map(x => x.productId);
         this.addProductForm.get('comboSection').get('categoryId').patchValue(this.onChangeSelectProductValue);
         
     }
@@ -3110,7 +3164,7 @@ export class EditProductComponent implements OnInit, OnDestroy
             this._selectedProductsOption = this.selectedProductsOption;
         }
         
-        this._selectedProductsOption["totalAllow"] = value;
+        this._selectedProductsOption.totalAllow = value;
         this.totalAllowed = value;
     }
 
@@ -3124,22 +3178,41 @@ export class EditProductComponent implements OnInit, OnDestroy
     
     }
 
-    variantPriceChanged(event, i) {
-        this.selectedVariantCombos[i].price = event.target.value;   
-
-        if (this.selectedVariantCombos[i].itemCode) {
-            let index = this.variantsPriceChange.findIndex(x => x.itemCode === this.selectedVariantCombos[i].itemCode);
-
-            if (index > -1) {
-                this.variantsPriceChange[index].price = event.target.value;
-            }
-            else {
-                this.variantsPriceChange.push({
-                    price: event.target.value,
-                    itemCode: this.selectedVariantCombos[i].itemCode
-                })
-            }
-        }        
+    variantPriceChanged(type: 'deliverin' | 'dinein', event, i) {
+        if (type === 'deliverin') {
+            this.selectedVariantCombos[i].price = event.target.value;   
+    
+            if (this.selectedVariantCombos[i].itemCode) {
+                let index = this.variantsPriceChange.findIndex(x => x.itemCode === this.selectedVariantCombos[i].itemCode);
+    
+                if (index > -1) {
+                    this.variantsPriceChange[index].price = event.target.value;
+                }
+                else {
+                    this.variantsPriceChange.push({
+                        price: event.target.value,
+                        itemCode: this.selectedVariantCombos[i].itemCode
+                    })
+                }
+            }        
+        }
+        else if (type ='dinein') {
+            this.selectedVariantCombos[i].dineInPrice = event.target.value;   
+    
+            if (this.selectedVariantCombos[i].itemCode) {
+                let index = this.variantsDineInPriceChange.findIndex(x => x.itemCode === this.selectedVariantCombos[i].itemCode);
+    
+                if (index > -1) {
+                    this.variantsDineInPriceChange[index].price = event.target.value;
+                }
+                else {
+                    this.variantsDineInPriceChange.push({
+                        price: event.target.value,
+                        itemCode: this.selectedVariantCombos[i].itemCode
+                    })
+                }
+            }  
+        }
     }
 
     /**
@@ -3476,6 +3549,45 @@ export class EditProductComponent implements OnInit, OnDestroy
            
                 })
             }
+        }
+    }
+
+    drop(event: CdkDragDrop<string[]>, index: any) {
+        
+        moveItemInArray(this.productsCombos$[index].productPackageOptionDetail, event.previousIndex, event.currentIndex);
+        
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+
+    }
+    dropUpperLevel(event: CdkDragDrop<string[]>, index: any) {
+        
+        moveItemInArray(this.productsCombos$, event.previousIndex, event.currentIndex);
+        this.dropUpperLevelCalled = true;
+        
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+
+    }
+
+    reorderList(toggleValue: boolean) {
+        if (toggleValue === true) {
+            this.resetSelectedProductsOption();
+        }
+        if (toggleValue === false && this.dropUpperLevelCalled === true) {
+            
+            // Update the sequence number
+            this.productsCombos$.forEach((combo, index) => {
+                this._inventoryService.updateProductsOption(this.selectedProduct.id, {sequenceNumber: index + 1}, combo.id )
+                    .pipe(takeUntil(this._unsubscribeAll))
+                    .subscribe((response) => {
+    
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    });
+                this.dropUpperLevelCalled = false;
+                this.setOrderEnabled = false;
+            })
         }
     }
     
