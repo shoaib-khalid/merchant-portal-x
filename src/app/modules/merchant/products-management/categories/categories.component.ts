@@ -2,8 +2,8 @@ import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, E
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { merge, Observable, Subject } from 'rxjs';
-import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
+import { forkJoin, merge, Observable, of, Subject } from 'rxjs';
+import { debounceTime, delay, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { MatDialog } from '@angular/material/dialog';
@@ -12,6 +12,7 @@ import { ApiResponseModel, ProductCategory, ProductCategoryPagination } from 'ap
 import { AddCategoryComponent } from '../add-category/add-category.component';
 import { Store, StoreAsset } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
+import { SelectionModel } from '@angular/cdk/collections';
 
 @Component({
     selector       : 'categories',
@@ -20,10 +21,10 @@ import { StoresService } from 'app/core/store/store.service';
         /* language=SCSS */
         `
             .categories-grid {
-                grid-template-columns: 48px auto 40px;
+                grid-template-columns: 18px 36px auto 40px;
 
                 @screen sm {
-                    grid-template-columns: 48px 112px auto 40px;
+                    grid-template-columns: 18px 78px auto 40px;
                 }
             }
         `
@@ -45,7 +46,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
     categories$: Observable<ProductCategory[]>;
     selectedCategory: ProductCategory | null = null;
     categoriesForm: FormGroup;
-
+    categoriesList: ProductCategory[];
     pagination: ProductCategoryPagination;
 
     // discount tier
@@ -66,6 +67,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
     totalCategories: number;
 
     parentCategoriesOptions: ProductCategory[];
+    selection = new SelectionModel<ProductCategory>(true, []);
 
 
     /**
@@ -115,6 +117,14 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
 
         // Get the categories
         this.categories$ = this._inventoryService.categories$;
+
+        this.categories$
+        .pipe(
+            takeUntil(this._unsubscribeAll)
+        )
+        .subscribe((categories: ProductCategory[]) => {
+            this.categoriesList = categories;
+        })
 
         //Get the vertical code for this store id first then we get the parent categories
         this._storesService.store$
@@ -589,6 +599,73 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
         } else {
             return 'assets/branding/symplified/logo/symplified.png'
         }
+    }
+    /** Whether the number of selected elements matches the total number of rows. */
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const numRows = this.categoriesList.length;
+        return numSelected === numRows;
+    }
+
+    /** Selects all rows if they are not all selected; otherwise clear selection. */
+    masterToggle() {
+        this.isAllSelected() ?
+            this.selection.clear() :
+            this.categoriesList.forEach(row => this.selection.select(row));
+
+        
+    }
+
+    deleteCategories() {
+
+        if (this.selection.selected.length > 0) {
+            // Open the confirmation dialog
+            const confirmation = this._fuseConfirmationService.open({
+                title  : 'Delete selected categories',
+                message: 'Are you sure you want to delete categories? This action cannot be undone!',
+                actions: {
+                    confirm: {
+                        label: 'Delete'
+                    }
+                }
+            });
+    
+            // Subscribe to the confirmation dialog closed action
+            confirmation.afterClosed().subscribe((result) => {
+                // If the confirm button pressed...
+                if ( result === 'confirmed' )
+                {
+                    this._inventoryService.deleteCategoriesInBulk(this.selection.selected.map(x => x.id))
+                    .pipe(
+                        tap(() => {
+                            this.selection.clear();
+                        }),
+                        // Delay
+                        delay(300),
+                        // If success only then we get products and categories
+                        switchMap(status => {
+                            if (status === 200) {
+                                return forkJoin([
+                                    // this._inventoryService.getProducts(), 
+                                    this._inventoryService.getByQueryCategories( 0 , 30, 'name', 'asc')
+                                ])
+                                
+                            }
+                            else {
+                                return of(null);
+                            }
+                        })
+                    )
+                    .subscribe(() => {
+                        
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    });
+            
+                }
+            });
+        }
+
     }
 }
 

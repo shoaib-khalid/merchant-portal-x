@@ -685,9 +685,6 @@ export class InventoryService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
         };
 
-        const now = new Date();
-        const date = now.getFullYear() + "" + (now.getMonth()+1) + "" + now.getDate() + "" + now.getHours() + "" + now.getMinutes()  + "" + now.getSeconds();
-
         const body = {
             productId: product.id,
             itemCode: productInventory.itemCode,
@@ -706,10 +703,6 @@ export class InventoryService
         if (!productInventory.dineInPrice) {
             delete body.dineInPrice;
         }
-        
-        
-
-        // return of();
 
         return this.products$.pipe(
             take(1),
@@ -1457,13 +1450,11 @@ export class InventoryService
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`)
         };
 
-        // product-service/v1/swagger-ui.html#/store-category-controller
         return this._categories.pipe(
             take(1),
             switchMap(categories => this._httpClient.delete(productService + '/store-categories/' + id ,header)
             .pipe(
                 map((response) => {
-
 
                     this._logging.debug("Response from ProductsService (deleteCategory)", response);
 
@@ -1484,6 +1475,34 @@ export class InventoryService
 
                     // Return the deleted status
                     return response["status"];
+                })
+            ))
+        );
+    }
+
+    /**
+     * Delete many categories
+     *
+     * @param id
+     */
+    deleteCategoriesInBulk(ids: string[]): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+    
+        return this._categories.pipe(
+            take(1),
+            switchMap(categories => this._httpClient.post(productService +'/store-categories/' + this.storeId$ + '/bulk-delete', ids, header).pipe(
+                map((status) => {
+
+                    this._logging.debug("Response from ProductsService (deleteCategoriesInBulk)", status);
+
+                    // Return the deleted status
+                    return status['status'];
                 })
             ))
         );
