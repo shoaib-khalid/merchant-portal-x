@@ -899,6 +899,7 @@ export class StoreDeliveryComponent implements OnInit
                 streetViewControl:false,//Removing the pegman from map
                 // styles: styles,
                 mapTypeId: "roadmap",
+                gestureHandling: "cooperative"
             })
     
             const initialMarker = new google.maps.Marker({
