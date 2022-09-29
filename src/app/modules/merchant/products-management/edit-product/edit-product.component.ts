@@ -1654,12 +1654,12 @@ export class EditProductComponent implements OnInit, OnDestroy
             else {
                 // Update the inventory product
                 let _productInventories = {
-                    price: step1FormGroup.value.price === 0 ? null : step1FormGroup.value.price,
+                    price: step1FormGroup.value.price,
                     compareAtprice: 0,
                     quantity: step1FormGroup.value.availableStock,
                     sku: step1FormGroup.value.sku,
                     status: 'AVAILABLE',
-                    dineInPrice: step1FormGroup.value.dineInPrice === 0 ? null : step1FormGroup.value.dineInPrice,
+                    dineInPrice: step1FormGroup.value.dineInPrice,
                 } 
                 
                 await lastValueFrom(this._inventoryService.updateInventoryToProduct(this.selectedProduct.id, this.productInventories$[0].itemCode, _productInventories)).then((item) => {
