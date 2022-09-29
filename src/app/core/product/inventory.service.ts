@@ -697,10 +697,10 @@ export class InventoryService
         };
 
         // Delete empty value
-        if (!productInventory.price) {
+        if (productInventory.price === null || productInventory.price === undefined) {
             delete body.price;
         }
-        if (!productInventory.dineInPrice) {
+        if (productInventory.dineInPrice === null || productInventory.dineInPrice === undefined) {
             delete body.dineInPrice;
         }
 
@@ -830,10 +830,10 @@ export class InventoryService
         };
 
         // Delete empty value
-        if (!productInventory.price) {
+        if (productInventory.price === null || productInventory.price === undefined) {
             delete body.price;
         }
-        if (!productInventory.dineInPrice) {
+        if (productInventory.dineInPrice === null || productInventory.dineInPrice === undefined) {
             delete body.dineInPrice;
         }
 
