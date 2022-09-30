@@ -1721,7 +1721,7 @@
                                                 type="number"
                                                 [disabled]="addProductForm.get('comboSection').get('categoryId').value.length == 0"
                                                 (keyup)="validateProductsOptionTotalAllowed($event.target.value)"
-                                                [value]="(selectedProductsOption) ? selectedProductsOption.totalAllow : ''"
+                                                [value]="(selectedProductsOption) ? selectedProductsOption.totalAllow : 0"
                                                 #optionTotalAllow
                                                 >
                                         </mat-form-field>

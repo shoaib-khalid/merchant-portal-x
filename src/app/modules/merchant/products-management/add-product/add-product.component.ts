@@ -2251,7 +2251,7 @@ export class AddProductComponent implements OnInit, OnDestroy
     updateSelectedProductsOption(optionId = "") {
 
         // Do nothing if totalAllow null
-        if (!this._selectedProductsOption.totalAllow) return;
+        if (this._selectedProductsOption.totalAllow === null) return;
 
         this.clearOptName = true;
 
