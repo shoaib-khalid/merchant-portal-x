@@ -111,6 +111,7 @@
                             <div>
                                 <button mat-icon-button 
                                 class=""
+                                [ngClass]="selection.hasValue() ? 'visible' : 'invisible'"
                                 (click)="deleteProducts()">
                                     <mat-icon
                                         class=""

@@ -61,6 +61,7 @@
                             <div>
                                 <button mat-icon-button 
                                 class=""
+                                [ngClass]="selection.hasValue() ? 'visible' : 'invisible'"
                                 (click)="deleteCategories()">
                                     <mat-icon
                                         class=""
