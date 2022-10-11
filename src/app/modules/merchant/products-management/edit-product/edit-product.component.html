@@ -1539,6 +1539,7 @@
                                                                                 matInput
                                                                                 [disabled]="store$.isDelivery === false"
                                                                                 (input)="variantPriceChanged('deliverin', $event, i)"
+                                                                                placeholder="0"
                                                                                 [value]="variantCombo.price"
                                                                                 type="number">
                                                                         </mat-form-field> 
@@ -1550,6 +1551,7 @@
                                                                                 matInput
                                                                                 [disabled]="store$.isDineIn === false"
                                                                                 (input)="variantPriceChanged('dinein', $event, i)"
+                                                                                placeholder="0"
                                                                                 [value]="variantCombo.dineInPrice"
                                                                                 type="number">
                                                                         </mat-form-field> 
@@ -1716,7 +1718,7 @@
                                 mat-flat-button
                                 [color]="'primary'"
                                 type="button"
-                                [disabled]="isLoading || horizontalStepperStep1.stepControl.invalid"
+                                [disabled]="isLoading || horizontalStepperVariantStep.stepControl.invalid"
                                 (click)="updateProductMethod()"
                                 matStepperNext>
                                 <mat-icon

@@ -1991,7 +1991,7 @@ export class AddProductComponent implements OnInit, OnDestroy
                 image: { preview: null, file: null, isThumbnail: false, newAsset: false, assetId: null}, 
                 itemCode: itemCode, 
                 variant: nameComboOutput.substring(1), 
-                price: 0, quantity: 0, dineInPrice: 0,
+                price: this.store$.isDelivery ? 0 : null, quantity: 0, dineInPrice: this.store$.isDineIn ? 0 : null,
                 sku: nameComboOutput.substring(1).toLowerCase().replace(" / ", "-"), 
                 status: "NOTAVAILABLE" 
             })

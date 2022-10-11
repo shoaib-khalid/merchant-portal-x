@@ -1436,6 +1436,7 @@
                                                                                 [disabled]="store$.isDelivery === false"
                                                                                 (input)="variantPriceChanged('deliverin', $event, i)"
                                                                                 [value]="variantCombo.price"
+                                                                                placeholder="0"
                                                                                 type="number">
                                                                         </mat-form-field> 
                                                                     </div>
@@ -1447,6 +1448,7 @@
                                                                                 [disabled]="store$.isDineIn === false"
                                                                                 (input)="variantPriceChanged('dinein', $event, i)"
                                                                                 [value]="variantCombo.dineInPrice"
+                                                                                placeholder="0"
                                                                                 type="number">
                                                                         </mat-form-field> 
                                                                     </div>
