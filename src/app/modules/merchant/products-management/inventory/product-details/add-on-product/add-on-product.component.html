@@ -25,7 +25,7 @@
                         [clearSearchInput]="false"
                         ngDefaultControl></ngx-mat-select-search>
                     </mat-option> -->
-                    <mat-option *ngFor="let template of templatesList" [value]="template">
+                    <mat-option *ngFor="let template of templatesList" [value]="template" [disabled]="templateListValidation(template)">
                         {{template.title}}
                     </mat-option>
                 </mat-select>
@@ -152,7 +152,8 @@
                                 (click)="updateSelectedGroup()"
                                 (click)="minTotalAllow.value = 0; maxTotalAllow.value = 0"
                                 [disabled]="minTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || maxTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length"
-                                [ngClass]="(minTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || maxTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length) ? 'bg-blue-500 opacity-50 cursor-default' : 'hover:bg-blue-400 cursor-pointer'"
+                                [ngClass]="(minTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || maxTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length) ? 
+                                    'bg-blue-500 opacity-50 cursor-default' : 'hover:bg-blue-400 cursor-pointer'"
                                 >
                                 <mat-icon
                                     class="text-white icon-size-5"
@@ -165,7 +166,8 @@
                                 (click)="createSelectedTemplate()"
                                 (click)="minTotalAllow.value = 0; maxTotalAllow.value = 0"
                                 [disabled]="minTotalAllow.value > selectedItemsTemplates.length || maxTotalAllow.value > selectedItemsTemplates.length"
-                                [ngClass]="(minTotalAllow.value > selectedItemsTemplates.length || maxTotalAllow.value > selectedItemsTemplates.length) ? 'bg-blue-500 opacity-50 cursor-default' : 'hover:bg-blue-400 cursor-pointer'"
+                                [ngClass]="(minTotalAllow.value > selectedItemsTemplates.length || maxTotalAllow.value > selectedItemsTemplates.length) ? 
+                                    'bg-blue-500 opacity-50 cursor-default' : 'hover:bg-blue-400 cursor-pointer'"
                                 >
                                 <mat-icon
                                     class="text-white icon-size-5"

@@ -193,7 +193,6 @@ export class AddOnProductComponent
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
                 });
-
             });
 
         // Mark for check
@@ -258,6 +257,9 @@ export class AddOnProductComponent
             }
         }
         this.selectedGroupOnProduct = this.addOnsOnProductList[this.selectedGroupOnProductIndex];
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
 
     selectTemplateItemsCreate(templateItem: ItemTemplateList, isChecked: any){
@@ -281,6 +283,9 @@ export class AddOnProductComponent
             }
         }
         this.selectedGroupTemplate.addOnTemplateItem = this.selectedItemsTemplates;
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
 
     selectTemplate(template: AddOnGroupTemplate) {
@@ -305,10 +310,7 @@ export class AddOnProductComponent
             })
             // Mark for check
             this._changeDetectorRef.markForCheck();
-
         })
-
-        
     }
 
     totalAllowedItems(value: number, type: string) {
@@ -319,7 +321,6 @@ export class AddOnProductComponent
         else if (type === 'max') {
             this.maxAllowed = value;
         }
-        
     }
 
     async reorderList(toggleValue: boolean) {
@@ -327,50 +328,27 @@ export class AddOnProductComponent
             this.resetSelectedGroup();
         }
         if (toggleValue === false && this.dropUpperLevelCalled === true) {
+            // Update the sequence number
             for (let index = 0; index < this.addOnsOnProductList.length; index++) {
                 const element = this.addOnsOnProductList[index];
                 const group = {
                     addonTemplateGroupId: element.groupId,
-                    maxAllowed: element.maxAllowed,
-                    minAllowed: element.minAllowed,
-                    productId: this.productId,
-                    sequenceNumber: index + 1,
-                    status        : 'AVAILABLE'
+                    maxAllowed          : element.maxAllowed,
+                    minAllowed          : element.minAllowed,
+                    productId           : this.productId,
+                    sequenceNumber      : index + 1,
+                    status              : 'AVAILABLE'
                 }
-                await lastValueFrom(this._inventoryService.updateAddOnGroupOnProduct(element.id, group)).then(() => {
-                })
+                await lastValueFrom(this._inventoryService.updateAddOnGroupOnProduct(element.id, group))
             }
 
             this._inventoryService.getAddOnItemsOnProduct({productId: this.productId}).subscribe(() => {})
             this.dropUpperLevelCalled = false;
             this.setOrderEnabled = false;
 
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
             
-            // Update the sequence number
-            // this.addOnsOnProductList.forEach((addon, index) => {
-            //     const group = {
-            //         addonTemplateGroupId: addon.groupId,
-            //         maxAllowed: addon.maxAllowed,
-            //         minAllowed: addon.minAllowed,
-            //         productId: this.productId,
-            //         sequenceNumber: index + 1,
-            //         status        : 'AVAILABLE'
-            //     }
-            //     this._inventoryService.updateAddOnGroupOnProduct(addon.id, group)
-            //         .pipe(
-            //             takeUntil(this._unsubscribeAll),
-            //             delay(100),
-            //             switchMap(() => {
-            //                 return this._inventoryService.getAddOnItemsOnProduct({productId: this.productId})
-            //             }))
-            //         .subscribe((response) => {
-    
-            //             // Mark for check
-            //             this._changeDetectorRef.markForCheck();
-            //         });
-            //     this.dropUpperLevelCalled = false;
-            //     this.setOrderEnabled = false;
-            // })
         }
         // Emit toggle state to parent component
         this.dataFromAddOnEmitter.emit(toggleValue)
@@ -421,6 +399,8 @@ export class AddOnProductComponent
         this.maxAllowed = addOn.maxAllowed;
         this.minAllowed = addOn.minAllowed;
         
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
         
     }
 
@@ -481,7 +461,6 @@ export class AddOnProductComponent
                 status        : 'AVAILABLE'
             }
 
-
             this._inventoryService.createAddOnGroupOnProduct(group)
                 .pipe(
                     switchMap((respGroup: AddOnGroupProduct) => {
@@ -510,7 +489,6 @@ export class AddOnProductComponent
                 )
                 .subscribe(() => {
                     this.resetSelectedGroup();
-                    
                 })
         }
 
@@ -526,6 +504,9 @@ export class AddOnProductComponent
         if (this.selectDropdown) this.selectDropdown.value = null;
         this.maxAllowed = 0;
         this.minAllowed = 0;
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
         
     }
 
@@ -539,6 +520,14 @@ export class AddOnProductComponent
         const found = this.selectedGroupOnProduct.productAddOnItemDetail.some(el => el.addonTemplateItemId === id);
         if (found) return true
         else return false        
+    }
+
+    templateListValidation(template: AddOnGroupTemplate) {
+        // If the template already being added to the product, disable the option 
+        if (this.addOnsOnProductList.some(group => template.id === group.groupId)) {
+            return true;
+        }
+        else return false;
     }
 
 }
