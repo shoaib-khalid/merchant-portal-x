@@ -257,7 +257,7 @@ export class AddOnProductComponent
             }
         }
         this.selectedGroupOnProduct = this.addOnsOnProductList[this.selectedGroupOnProductIndex];
-
+        
         // Mark for check
         this._changeDetectorRef.markForCheck();
     }
@@ -283,6 +283,7 @@ export class AddOnProductComponent
             }
         }
         this.selectedGroupTemplate.addOnTemplateItem = this.selectedItemsTemplates;
+        this.maxAllowed = this.selectedItemsTemplates.length;
 
         // Mark for check
         this._changeDetectorRef.markForCheck();

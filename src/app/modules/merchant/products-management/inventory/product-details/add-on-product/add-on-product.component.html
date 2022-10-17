@@ -116,7 +116,7 @@
                             type="number"
                             [disabled]="false"
                             (keyup)="totalAllowedItems($event.target.value, 'min')"
-                            [(ngModel)]="minAllowed" 
+                            [(value)]="minAllowed" 
                             #minTotalAllow
                             >
                             <!-- [value]="(selectedGroupOnProduct) ? selectedGroupOnProduct.minAllowed : 0" -->
@@ -128,7 +128,7 @@
                             type="number"
                             [disabled]="false"
                             (keyup)="totalAllowedItems($event.target.value, 'max')"
-                            [(ngModel)]="maxAllowed" 
+                            [(value)]="maxAllowed" 
                             #maxTotalAllow
                             >
                             <!-- [value]="(selectedGroupOnProduct) ? selectedGroupOnProduct.maxAllowed : 0" -->

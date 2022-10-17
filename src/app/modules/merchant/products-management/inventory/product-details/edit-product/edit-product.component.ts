@@ -3653,6 +3653,9 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
             this.addProductForm.get('step1').get('isPackage').patchValue(false);
             this.addProductForm.get('step1').get('hasAddOn').patchValue(false);
         }
+
+        // set as dirty to remove pristine condition of the form control
+        this.addProductForm.get('step1').markAsDirty();
         
     }
 
