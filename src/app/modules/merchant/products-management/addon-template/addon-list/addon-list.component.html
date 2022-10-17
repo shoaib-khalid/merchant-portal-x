@@ -1,0 +1,100 @@
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden">
+
+    <mat-drawer-container
+        class="flex-auto h-full bg-card dark:bg-transparent"
+        (backdropClick)="onBackdropClicked()">
+
+        <!-- Drawer -->
+        <mat-drawer
+            class="w-full bg-gray-50 dark:bg-gray-900"
+            [mode]="'over'"
+            [opened]="false"
+            [position]="'end'"
+            [disableClose]="true"
+            #matDrawer>
+            <!-- <addon-details></addon-details> -->
+            <router-outlet></router-outlet>
+        </mat-drawer>
+
+        <mat-drawer-content class="flex flex-col">
+
+            <!-- Main -->
+            <div class="flex-auto">
+
+                <!-- Header -->
+                <div class="flex flex-col sm:flex-row flex-auto justify-between py-8 px-6 md:px-8 border-b sm:items-center">
+
+                    <!-- Title -->
+                    <div>
+                        <div class="text-4xl font-extrabold tracking-tight">Add-On</div>
+                        <!-- <div class="ml-0.5 font-medium text-secondary">
+                            <ng-container *ngIf="contactsCount > 0">
+                                {{contactsCount}}
+                            </ng-container>
+                            {{contactsCount | i18nPlural: {
+                            '=0'   : 'No contacts',
+                            '=1'   : 'contact',
+                            'other': 'contacts'
+                        } }}
+                        </div> -->
+                    </div>
+
+                    <!-- Main actions -->
+                    <div class="flex items-center mt-6 sm:mt-0">
+                        <!-- Search -->
+                        <!-- <div class="flex-auto">
+                            <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded w-full min-w-60">
+                                <mat-icon
+                                    class="icon-size-5"
+                                    matPrefix
+                                    [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                <input
+                                    matInput
+                                    [formControl]="searchInputControl"
+                                    [autocomplete]="'off'"
+                                    [placeholder]="'Search Add-On Template'">
+                            </mat-form-field>
+                        </div> -->
+                        <!-- Add addon button -->
+                        <button
+                            class="ml-4"
+                            mat-flat-button
+                            [color]="'primary'"
+                            (click)="createAddOn()">
+                            <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                            <span class="ml-2 mr-1">Add</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Addon list -->
+                <div class="relative">
+                    <ng-container *ngIf="addOnGroupTemplates$ | async as addOnGroupTemplates">
+                        <ng-container *ngIf="addOnGroupTemplates.length; else noAddon">
+                            <ng-container *ngFor="let template of addOnGroupTemplates; let i = index; trackBy: trackByFn">
+                                <!-- Addon -->
+                                <a
+                                    class="z-20 flex items-center px-6 py-4 md:px-8 cursor-pointer border-b hover:bg-primary-50"
+                                    [routerLink]="['./', template.id]">
+                                    <div class="min-w-0 ml-4">
+                                        <div class="font-medium leading-5 truncate">{{template.title}}</div>
+                                    </div>
+                                </a>
+                            </ng-container>
+                        </ng-container>
+                    </ng-container>
+
+                    <!-- No contacts -->
+                    <ng-template #noAddon>
+                        <div class="p-8 sm:p-16 border-t text-4xl font-semibold tracking-tight text-center">There are no Add-On Templates!</div>
+                    </ng-template>
+
+                </div>
+
+            </div>
+
+        </mat-drawer-content>
+
+    </mat-drawer-container>
+
+</div>

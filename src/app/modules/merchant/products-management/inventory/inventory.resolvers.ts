@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot } from '@angular/router';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, tap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { Product, ProductCategory, ProductCategoryPagination, ProductPagination, ProductVariant } from 'app/core/product/inventory.types';
@@ -66,7 +66,7 @@ export class InventoryProductResolver implements Resolve<any>
      */
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Product>
     {
-        return this._inventoryService.getProductsById(route.paramMap.get('id'))
+        return this._inventoryService.getProductById(route.paramMap.get('id'))
                    .pipe(
                        // Error here means the requested product is not available
                        catchError((error) => {
@@ -151,7 +151,9 @@ export class GetStoreByIdResolver implements Resolve<any>
     /**
      * Constructor
      */
-    constructor(private _storesService: StoresService)
+    constructor(
+        private _storesService: StoresService,
+        private _inventoryService: InventoryService,)
     {
     }
 
@@ -180,7 +182,14 @@ export class GetStoreByIdResolver implements Resolve<any>
      */
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Store>
     {
-        return this._storesService.getStoreById(this.storeId$);
+        return this._storesService.getStoreById(this.storeId$)
+            .pipe(
+                tap(store => {
+                    this._inventoryService.getParentCategories(0, 50, 'name', 'asc', '', store.verticalCode).subscribe();
+                    // Query to get 20 stores
+                    this._storesService.getStoresList('', 0, 20, 'name', 'asc' ).subscribe()
+                })
+            )
     }
 }
 

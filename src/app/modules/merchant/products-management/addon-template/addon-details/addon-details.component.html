@@ -1,0 +1,224 @@
+<div class="flex flex-col w-full justify-between p-2 gap-2 h-full">
+    <!-- Header/Body -->
+    <div class="flex flex-col">
+        <!-- Header -->
+        <div class="flex flex-row justify-end items-center">
+            <!-- Close button -->
+            <!-- <div class="p-2">
+                <button
+                    mat-icon-button
+                    [routerLink]="['../']">
+                    <mat-icon [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                </button>
+            </div> -->
+        </div>
+        <!-- Body -->
+        <div class="border rounded-lg p-4 md:p-8 bg-white">
+            <!-- Group -->
+            <div [formGroup]="addOnForm" class="flex flex-col gap-2">
+                <!-- Name -->
+                <mat-form-field class="w-full fuse-mat-no-subscript mb-1 text-sm md:text-base" appearance="fill" floatLabel="always">
+                    <mat-label class="text-base">Add-On Name</mat-label>
+                    <input
+                        matInput
+                        required
+                        [placeholder]="'Insert Name'"
+                        [formControlName]="'title'"
+                    >
+                    <mat-error *ngIf="addOnForm.get('title').hasError('required')">
+                        Required
+                    </mat-error>
+                </mat-form-field>
+        
+                <!-- Options -->
+                <mat-label class="font-medium">Options *</mat-label>
+                <div class="flex flex-col gap-1.5 list-class" formArrayName="options">
+                    <!-- Header -->
+                    <div class="grid grid-cols-8 items-center z-10 sticky top-0 gap-1 py-2">
+                        <div class="col-span-3 text-sm md:text-base">Name</div>
+                        <div class="col-span-2 text-sm md:text-base">DeliverIn Price</div>
+                        <div class="col-span-2 text-sm md:text-base">DineIn Price</div>
+                        <div class="col-span-1 text-center text-sm md:text-base">Action</div>
+                    </div>
+                    <!-- Rows -->
+                    <ng-container *ngFor="let optionForm of options.controls; let i = index">
+                        <div class="w-full grid grid-cols-8 gap-1 items-center" [formGroupName]="i">
+                            <!-- Option Name -->
+                            <mat-form-field class="col-span-3 fuse-mat-no-subscript text-sm md:text-base" appearance="fill">
+                                <input matInput
+                                    formControlName="name"
+                                    placeholder="Insert Option Name" />
+                    
+                            </mat-form-field>
+                            <ng-container *ngIf="!optionsData[i]">
+                                <!-- Price -->
+                                <mat-form-field class="col-span-2 fuse-mat-no-subscript text-sm md:text-base" appearance="fill" floatLabel="always">
+                    
+                                    <!-- <ng-container *ngIf="optionsData[i] && optionsData[i].addOnPrice">
+                                        <mat-select formControlName="addOnPrice"
+                                                    placeholder="Lesson level" [(value)]="optionsData[i].addOnPrice">
+                            
+                                        <mat-option value="beginner">Beginner</mat-option>
+                                        <mat-option value="intermediate">Intermediate</mat-option>
+                                        <mat-option value="advanced">Advanced</mat-option>
+                                    </mat-select>
+                                    </ng-container> -->
+                                    <input
+                                        class="text-left"
+                                        matInput
+                                        required
+                                        [placeholder]="'Price'"
+                                        [formControlName]="'price'"
+                                        type="number">
+                                    <span matPrefix>{{store$.regionCountry.currencySymbol}}</span>
+                                </mat-form-field>
+                                <!-- DineIn Price -->
+                                <mat-form-field class="col-span-2 fuse-mat-no-subscript text-sm md:text-base" appearance="fill" floatLabel="always">
+                    
+                                    <!-- <ng-container *ngIf="optionsData[i] && optionsData[i].addOnPrice">
+                                        <mat-select formControlName="addOnPrice"
+                                                    placeholder="Lesson level" [(value)]="optionsData[i].addOnPrice">
+                            
+                                        <mat-option value="beginner">Beginner</mat-option>
+                                        <mat-option value="intermediate">Intermediate</mat-option>
+                                        <mat-option value="advanced">Advanced</mat-option>
+                                    </mat-select>
+                                    </ng-container> -->
+                                    <input
+                                        class="text-left"
+                                        matInput
+                                        required
+                                        [placeholder]="'DineIn Price'"
+                                        [formControlName]="'dineInPrice'"
+                                        type="number">
+                                    <span matPrefix>{{store$.regionCountry.currencySymbol}}</span>
+                                </mat-form-field>
+                            </ng-container>
+                            <!-- Delete Button -->
+                            <div 
+                                *ngIf="options.controls.length > 1"
+                                class="flex justify-center mx-2">
+                                <!-- [ngClass]="options.controls.length > 1 ? 'visible' : 'invisible'" -->
+                                <mat-icon 
+                                    class="delete-btn cursor-pointer icon-size-4" 
+                                    [svgIcon]="'heroicons_solid:trash'" 
+                                    (click)="deleteOption(i)"></mat-icon>
+                            </div>
+                        </div>
+                    </ng-container>
+                </div>
+                <div 
+                    class="w-full flex flex-row py-2 px-1 items-center border justify-center hover:bg-primary-50 cursor-pointer mt-1 gap-1"
+                    (click)="addOption()">
+                    <mat-icon class="text-primary" svgIcon="heroicons_outline:plus-sm"></mat-icon>
+                    <span class="font-medium text-primary">Add Options</span>
+                </div>
+                <!-- Total allowed -->
+                <div *ngIf="false" class="flex flex-row gap-1 items-center">
+                    <!-- Total allowed Minimum -->
+                    <div class="flex flex-col md:flex-row md:w-1/2 w-full gap-1 items-center">
+                        <div class="flex flex-col">
+                            <mat-label class="font-medium">Min. Selection Allowed</mat-label>
+                            <mat-form-field floatLabel="always">
+                                <mat-select
+                                    class="flex item-center"
+                                    [formControlName]="'totalAllowed'"
+                                    (selectionChange)="selectTotalAllowed($event.value, 'min')"
+                                    #quantitySelector>
+                                    <mat-select-trigger>
+                                        <span class="flex items-center justify-center">
+                                            {{ quantitySelector.triggerValue }}
+                                        </span>
+                                    </mat-select-trigger>
+                                    <mat-option [value]= 0 >0</mat-option>
+                                    <div class="justify-center"
+                                        *ngFor="let quantity of [].constructor(options.controls.length); let i = index">
+                                        <mat-option [value]= 'i + 1'>{{i + 1}}</mat-option>
+                                    </div>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        <span>out of {{options.controls.length}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="flex justify-end w-full p-3">
+        <!-- Delete button  -->
+        <div *ngIf="selectedTemplate" class="justify-self-start mr-4">
+            <input
+                id="template-remove-button"
+                type="button"
+                (click)="deleteTemplateGroup()"
+                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                mat-button>
+            <label 
+                class="flex items-center justify-center h-10 px-4 border rounded border-red-300 dark:border-red-500 cursor-pointer hover:bg-hover"
+                for="template-remove-button"
+                matRipple>
+                <span class="hidden sm:block justify-center">Delete</span>
+                <mat-icon
+                    class="sm:ml-1"
+                    [color]="'warn'"
+                    [svgIcon]="'heroicons_outline:trash'">
+                </mat-icon>
+            </label>
+        </div>
+        <!-- Save button -->
+        <div>
+            <button
+                mat-flat-button
+                class="sm:w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
+                [color]="'gray'"
+                [routerLink]="['../']"
+                >
+                <mat-icon
+                    *ngIf="!currentScreenSize.includes('sm')"
+                    class="text-white icon-size-5"
+                    [svgIcon]="'heroicons_outline:x'">
+                </mat-icon>
+                <span class="hidden sm:block justify-center">
+                    Close
+                </span>
+            </button>
+            <button
+                *ngIf="selectedTemplate"
+                [disabled]="addOnForm.invalid"
+                class="sm:px-8 sm:w-24"
+                mat-flat-button
+                [color]="'primary'"
+                type="button"
+                (click)="saveTemplate()"
+                >
+                <mat-icon
+                        *ngIf="!currentScreenSize.includes('sm')"
+                        class="text-white icon-size-5"
+                        [svgIcon]="'heroicons_outline:check'">
+                </mat-icon>
+                <span class="hidden sm:block justify-center">
+                    Save
+                </span>
+            </button>
+            <button
+                *ngIf="!selectedTemplate"
+                class="sm:px-8 sm:w-24"
+                [disabled]="addOnForm.invalid"
+                mat-flat-button
+                [color]="'primary'"
+                type="button"
+                (click)="createTemplate()"
+                >
+                <mat-icon
+                        *ngIf="!currentScreenSize.includes('sm')"
+                        class="text-white icon-size-5"
+                        [svgIcon]="'heroicons_outline:check'">
+                </mat-icon>
+                <span class="hidden sm:block justify-center">
+                    Create
+                </span>
+            </button>
+        </div>
+    </div>
+</div>

@@ -6,7 +6,7 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { fromEvent, lastValueFrom, merge, Observable, of, Subject, tap } from 'rxjs';
 import { concatMap, debounceTime, delay, finalize, map, mergeMap, switchMap, take, takeUntil } from 'rxjs/operators';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, ProductCategory, ProductPagination, ProductPackageOption, ProductAssets, DeliveryVehicleType, ApiResponseModel, ProductInventoryItem } from 'app/core/product/inventory.types';
+import { Product, ProductVariant, ProductVariantAvailable, ProductInventory, ProductCategory, ProductPagination, ProductPackageOption, ProductAssets, DeliveryVehicleType, ApiResponseModel, ProductInventoryItem, ParentCategory } from 'app/core/product/inventory.types';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { Store } from 'app/core/store/store.types';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -15,11 +15,14 @@ import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { MatPaginator } from '@angular/material/paginator';
 import { CartService } from 'app/core/cart/cart.service';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { ActivatedRoute, Router } from '@angular/router';
+import { MatDrawer, MatDrawerToggleResult } from '@angular/material/sidenav';
+import { InventoryListComponent } from '../../product-list/inventory-list.component';
 
 
 
 @Component({
-    selector: 'dialog-edit-product',
+    selector: 'app-edit-product',
     templateUrl: './edit-product.component.html',
     styles         : [
         /* language=SCSS */
@@ -50,16 +53,7 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
                     height: 40px;
                 }
             }
-            .content {
-
-                // max-height: 80vh;
-                // height: 80vh;
-
-                @screen sm {
-                    max-height: 560px;
-                    height: 75vh;
-                }
-            }
+            
             :host ::ng-deep .ql-container .ql-editor {
                 min-height: 87px;
                 max-height: 87px;
@@ -147,7 +141,7 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
     ],
   })
   
-export class EditProductComponent implements OnInit, OnDestroy
+export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
 {
     @ViewChild('variantsPanelOrigin') private _variantsPanelOrigin: ElementRef;
     @ViewChild('variantsPanel') private _variantsPanel: TemplateRef<any>;
@@ -159,7 +153,7 @@ export class EditProductComponent implements OnInit, OnDestroy
     @ViewChild('imageSearchPanel') private _imageSearchPanel: TemplateRef<any>;
     @ViewChild('searchImageInput') public searchImageElement: ElementRef;
     @ViewChild('newVariantAvailableInput') public _newVariantAvailableInput: ElementRef;
-
+    
     // get current store
     store$: Store;
 
@@ -368,7 +362,7 @@ export class EditProductComponent implements OnInit, OnDestroy
 
     searchImageControl: FormControl = new FormControl();
     autoCompleteList: {url: string, name: string}[] = [];
-
+    productType: 'combo' | 'normal' | 'variant' | 'addon' = 'normal';
 
     /**
      * Constructor
@@ -383,10 +377,14 @@ export class EditProductComponent implements OnInit, OnDestroy
         private _overlay: Overlay,
         private _renderer2: Renderer2,
         private _viewContainerRef: ViewContainerRef,
-        public dialogRef: MatDialogRef<EditProductComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: MatDialog,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
         private _cartService: CartService,
+        private _router: Router,
+        private _activatedRoute: ActivatedRoute,
+        private _route: ActivatedRoute,
+        public _drawer: MatDrawer,
+        private _inventoryListComponent: InventoryListComponent,
+
     )
     {
     }
@@ -413,6 +411,7 @@ export class EditProductComponent implements OnInit, OnDestroy
      */
     ngOnInit(): void
     {        
+
         // Horizontol stepper
         this.addProductForm = this._formBuilder.group({
             step1: this._formBuilder.group({
@@ -443,18 +442,17 @@ export class EditProductComponent implements OnInit, OnDestroy
                 // form completion
                 valid            : [false],
                 dineInPrice      : ['', [Validators.required]],
+                hasAddOn         : [false]   
             }),
             variantsSection     : this._formBuilder.array([]),
             comboSection : this._formBuilder.group({
                 optionName       : ['', [Validators.required]],
                 categoryId       : [''],
-            })
+            }),
+            addOnSection     : this._formBuilder.array([]),
         });
 
-        this.setDetails(this.data['productId']);
-
-        // Get the products
-        // this.products$ = this._inventoryService.products$;
+        
 
         // Get the products for combo
         this.productsForCombo$ = this._inventoryService.productsForCombo$;
@@ -481,27 +479,13 @@ export class EditProductComponent implements OnInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             });
 
-
-        // Get the stores
-        this._storesService.store$
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((store: Store) => {
-
-                // Update the pagination
-                this.store$ = store;
-                this.storeVerticalCode =this.store$.verticalCode;
-
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            });
-
-        //get all values for parent categories with specied vertical code
-        this._inventoryService.getParentCategories(0, 50, 'name', 'asc', '',this.storeVerticalCode)
-        .subscribe((response:ApiResponseModel<ProductCategory[]>)=>{
-            
-             this.parentCategoriesOptions = response.data["content"];
-             return this.parentCategoriesOptions;
-        })
+        // get all values for parent categories with specied vertical code
+        this._inventoryService.parentCategories$
+            .subscribe((response: ParentCategory[])=>{
+                
+                this.parentCategoriesOptions = response;
+                    
+            })
 
         // Get delivery vehicle type
         this._inventoryService.getDeliveryVehicleType()
@@ -530,6 +514,23 @@ export class EditProductComponent implements OnInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             });
 
+
+        // Get the stores
+        this._storesService.store$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((store: Store) => {
+                
+                if (store) {
+                    this.store$ = store;
+                    this.storeVerticalCode =this.store$.verticalCode;
+                    this.setDetails(this._route.snapshot.paramMap.get('id'));
+                }
+
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+        
         // rest of the input checking process occur at bottom
         // refer function checkInput().... lol
         this.addProductForm.valueChanges.subscribe(data => {
@@ -680,36 +681,45 @@ export class EditProductComponent implements OnInit, OnDestroy
         }
 
         // Get the product by id
-        this._inventoryService.getProductById(productId)
+        this._inventoryService.product$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((response) => {
                 
-                let product = response["data"];
+                let product = response;
+
+                if (product) {
+                    // check for product that does not have product inventories, and add them
+                    if (product.productInventories.length < 1) {
+                        // tempSku is generated automatically since there are no product inventory
+                        let tempSku = product.name.substring(0).toLowerCase().replace(" / ", "-").replace(" ", "-");
+                        // Add Inventory to product
+                        this._inventoryService.addInventoryToProduct(product, { sku: tempSku, quantity: 0, price: 0, itemCode: productId + "aa" } )
+                            .subscribe((response)=>{
+    
+                                // update product
+                                product.productInventories = [response];
+    
+                                this.addProductForm.get('step1').get('sku').setValue(response.sku);
+                                this.addProductForm.get('step1').get('price').setValue(response.price);
+                                this.addProductForm.get('step1').get('availableStock').setValue(response.quantity);
+    
+                                this.loadProductDetails(product);
+                            });
+                    } else {
+                        this.loadProductDetails(product);
+                    }    
+                }
                 
-                // check for product that does not have product inventories, and add them
-                if (product.productInventories.length < 1) {
-                    // tempSku is generated automatically since there are no product inventory
-                    let tempSku = product.name.substring(0).toLowerCase().replace(" / ", "-").replace(" ", "-");
-                    // Add Inventory to product
-                    this._inventoryService.addInventoryToProduct(product, { sku: tempSku, quantity: 0, price: 0, itemCode: productId + "aa" } )
-                        .subscribe((response)=>{
-
-                            // update product
-                            product.productInventories = [response];
-
-                            this.addProductForm.get('step1').get('sku').setValue(response.sku);
-                            this.addProductForm.get('step1').get('price').setValue(response.price);
-                            this.addProductForm.get('step1').get('availableStock').setValue(response.quantity);
-
-                            this.loadProductDetails(product);
-                        });
-                } else {
-                    this.loadProductDetails(product);
-                }    
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
+
+        setTimeout(() => {
+            // Open the drawer
+            this._inventoryListComponent._drawer.open();
+            
+        }, 50);
     }
  
     // Extension of toggleDetails()
@@ -772,7 +782,10 @@ export class EditProductComponent implements OnInit, OnDestroy
             this.addProductForm.get('step1').get('sku').disable();
             this.addProductForm.get('step1').get('price').disable();    
             this.addProductForm.get('step1').get('availableStock').disable();  
-            this.addProductForm.get('step1').get('dineInPrice').disable();   
+            this.addProductForm.get('step1').get('dineInPrice').disable();  
+
+            // Set product type to variant
+            this.productType = 'variant';
         }
 
         // set packingSize to S if verticalCode FnB
@@ -953,6 +966,16 @@ export class EditProductComponent implements OnInit, OnDestroy
                 .subscribe((response)=>{
                     this.productsCombos$ = response["data"];
                 });
+
+            // Set product type to combo
+            this.productType = 'combo';
+        }
+
+        //--------
+        // Addon
+        //--------
+        if (this.selectedProduct.hasAddOn === true) {
+            this.productType = 'addon';
         }
     }
 
@@ -1583,13 +1606,13 @@ export class EditProductComponent implements OnInit, OnDestroy
                 let inventoryBodies = this.selectedVariantCombos.map((item, i) => {
                     return {
                         itemCode: this.selectedProduct.id + i,
-                        price: item.price,
+                        price: this.store$.isDelivery ? item.price : null,
                         compareAtPrice: 0,
                         quantity: item.quantity,
                         status: item.status,
                         SKU: item.sku,
                         productId: this.selectedProduct.id,
-                        dineInPrice: item.dineInPrice
+                        dineInPrice: this.store$.isDineIn ? item.dineInPrice : null
                     }
                 })
 
@@ -1809,11 +1832,14 @@ export class EditProductComponent implements OnInit, OnDestroy
     }
     
     cancelAddProduct(valid: boolean = false){
-        this.selectedProduct = null;
+        // Go back to the list
+        this._router.navigate(['.'], {relativeTo: this._activatedRoute.parent});
+
+        // this.selectedProduct = null;
         (this.addProductForm.get('step1').get('productInventories') as FormArray).clear();
         (this.addProductForm.get('step1').get('productVariants') as FormArray).clear();
         (this.addProductForm.get('step1').get('productAssets') as FormArray).clear();
-        this.dialogRef.close({ valid: valid });
+
      
     }
 
@@ -2070,6 +2096,7 @@ export class EditProductComponent implements OnInit, OnDestroy
             } else {
                 // Update the selected product form
                 this.addProductForm.get('step1').get('isVariants').patchValue(true);
+                this.productType = 'variant';
                 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -2087,8 +2114,6 @@ export class EditProductComponent implements OnInit, OnDestroy
     {
         
         return !!!(inputValue === '' || this.productVariants$.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
-        // return !!!(inputValue === '' || this.productVariants.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
-        // return !!!(inputValue === '' || this.variantComboOptions.findIndex(variant => variant.name.toLowerCase() === inputValue.toLowerCase()) > -1);
 
     }
 
@@ -2105,7 +2130,6 @@ export class EditProductComponent implements OnInit, OnDestroy
         }
 
         return !!!(inputValue === '' || this.productVariantAvailable?.findIndex(variantTag => variantTag.value.toLowerCase() === inputValue.toLowerCase()) > -1);
-        // return !!!(inputValue === '' || this.filteredProductVariantAvailable?.findIndex(variantTag => variantTag.value.toLowerCase() === inputValue.toLowerCase()) > -1);
 
     }
 
@@ -2734,7 +2758,7 @@ export class EditProductComponent implements OnInit, OnDestroy
                 image: { preview: null, file: null, isThumbnail: false, newAsset: false, assetId: null}, 
                 itemCode: itemCode, 
                 variant: nameComboOutput.substring(1), 
-                price: 0, quantity: 0, dineInPrice: 0,
+                price: this.store$.isDelivery ? 0 : null, quantity: 0, dineInPrice: this.store$.isDineIn ? 0 : null,
                 sku: nameComboOutput.substring(1).toLowerCase().replace(" / ", "-"), 
                 status: "NOTAVAILABLE" 
             })
@@ -3589,6 +3613,52 @@ export class EditProductComponent implements OnInit, OnDestroy
                 this.setOrderEnabled = false;
             })
         }
+    }
+
+    /**
+     * Close the drawer
+     */
+    closeDrawer(): Promise<MatDrawerToggleResult>
+    {
+        return this._inventoryListComponent._drawer.close();
+    }
+
+    changeProductType(value: string) {
+
+        // If close variant
+        if (value !== 'variant' && this.addProductForm.get('step1').get('isVariants').value === true && this.selectedVariantCombos.length > 0) {
+            this.deleteAllVariantsConfirmation();
+        }
+
+        if (value === 'variant') {
+            this.addProductForm.get('step1').get('isVariants').patchValue(true);
+
+            this.addProductForm.get('step1').get('isPackage').patchValue(false);
+            this.addProductForm.get('step1').get('hasAddOn').patchValue(false);
+        }
+        else if (value === 'combo') {
+            this.addProductForm.get('step1').get('isPackage').patchValue(true);
+
+            this.addProductForm.get('step1').get('isVariants').patchValue(false);
+            this.addProductForm.get('step1').get('hasAddOn').patchValue(false);
+        }
+        else if (value === 'addon') {
+            this.addProductForm.get('step1').get('hasAddOn').patchValue(true);
+
+            this.addProductForm.get('step1').get('isVariants').patchValue(false);
+            this.addProductForm.get('step1').get('isPackage').patchValue(false);
+        }
+        else {
+            this.addProductForm.get('step1').get('isVariants').patchValue(false);
+            this.addProductForm.get('step1').get('isPackage').patchValue(false);
+            this.addProductForm.get('step1').get('hasAddOn').patchValue(false);
+        }
+        
+    }
+
+    getDataFromAddOnComponent(value) {
+        // Get data for update button enable/disable state
+        this.setOrderEnabled = value;
     }
     
 }

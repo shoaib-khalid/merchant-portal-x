@@ -99,7 +99,7 @@ export class AddCategoryComponent implements OnInit {
             ),
         )
         .subscribe((categories) => {
-            this.parentCategoriesOptions = categories.data["content"];
+            this.parentCategoriesOptions = categories;
         });
   
     }

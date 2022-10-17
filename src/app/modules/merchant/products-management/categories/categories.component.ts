@@ -133,12 +133,12 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
                 this.store = response;
                 return response.verticalCode;
             }),
-            switchMap((storeVerticalCode:string)=>this._inventoryService.getParentCategories(0, 50, 'name', 'asc', '',storeVerticalCode)
+            switchMap((storeVerticalCode:string)=>this._inventoryService.parentCategories$
             ),
             takeUntil(this._unsubscribeAll)
         )
         .subscribe((categories) => {
-            this.parentCategoriesOptions = categories.data["content"];
+            this.parentCategoriesOptions = categories;
             // Mark for check
             this._changeDetectorRef.markForCheck();
         });

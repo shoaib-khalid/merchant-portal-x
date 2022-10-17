@@ -26,6 +26,7 @@ export interface Product
     productDeliveryDetail?: string;
     customNote?: string;
     isNoteOptional?: boolean;
+    hasAddOn: boolean
 }
 
 /**
@@ -105,12 +106,25 @@ export interface ProductPagination
 
 export interface ProductCategory
 {
-id?: string;
-storeId: string;
-parentCategoryId?: string;
-name: string;
-thumbnailUrl: string;
-verticalCode?: string;
+    id?: string;
+    storeId: string;
+    parentCategoryId?: string;
+    name: string;
+    thumbnailUrl: string;
+    verticalCode?: string;
+
+}
+
+export interface ParentCategory
+{
+    id?: string;
+    storeId: string;
+    parentCategoryId?: string;
+    name: string;
+    thumbnailUrl: string;
+    verticalCode?: string;
+    displaySequence: number;
+
 }
 
 /**
@@ -189,4 +203,61 @@ export interface ApiResponseModel<T>
   path : string;
   status: number;
   timestamp:string;
+}
+
+//---------------- 
+// ADD ON SECTION
+//----------------
+
+export interface AddOnGroupTemplate
+{
+    id?     : string;
+    storeId : string;
+    title   : string;
+    addOnTemplateItem? : AddOnItemTemplate[]
+
+}
+
+export interface AddOnItemTemplate
+{
+    dineInPrice : number;
+    groupId     : string;
+    id          : string;
+    name        : string;
+    price       : number;
+
+}
+
+export interface AddOnItemProduct
+{
+    addonTemplateItemId : string;
+    dineInPrice         : number;
+    id                  : string;
+    price               : number;
+    productId           : string;
+    sequenceNumber      : number;
+    status              : string;
+    name                : string;
+    productAddonGroupId : string;
+}
+
+export interface AddOnGroupProduct
+{
+    addonTemplateGroupId : string;
+    id?                  : string;
+    maxAllowed           : number;
+    minAllowed           : number;
+    productId            : string;
+    sequenceNumber       : number;
+}
+
+export interface AddOnProduct
+{
+    id?     : string;
+    title   : string;
+    productAddOnItemDetail? : AddOnItemProduct[];
+    maxAllowed  : number;
+    minAllowed  : number;
+    sequenceNumber : number;
+    groupId?     : string;
 }

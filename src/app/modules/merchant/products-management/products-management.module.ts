@@ -18,24 +18,35 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { SharedModule } from 'app/shared/shared.module';
 import { InventoryComponent } from 'app/modules/merchant/products-management/inventory/inventory.component';
 import { productsManagementRoutes } from 'app/modules/merchant/products-management/products-management.routing';
-import { AddProductComponent } from './add-product/add-product.component';
 import { CategoriesComponent } from './categories/categories.component';
 import { AddCategoryComponent } from './add-category/add-category.component';
 import { MatStepperModule } from '@angular/material/stepper';
-import { EditProductComponent } from './edit-product/edit-product.component';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatAutocompleteModule, MAT_AUTOCOMPLETE_SCROLL_STRATEGY } from '@angular/material/autocomplete';
 import { Overlay, RepositionScrollStrategy } from '@angular/cdk/overlay';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { AddOnDetailsComponent } from './addon-template/addon-details/addon-details.component';
+import { AddOnListComponent } from './addon-template/addon-list/addon-list.component';
+import { AddOnComponent } from './addon-template/addon.component';
+import { AddOnProductComponent } from './inventory/product-details/add-on-product/add-on-product.component';
+import { AddProductComponent2 } from './inventory/product-details/add-product/add-product.component';
+import { EditProductComponent2 } from './inventory/product-details/edit-product/edit-product.component';
+import { InventoryListComponent } from './inventory/product-list/inventory-list.component';
 
 @NgModule({
     declarations: [
         InventoryComponent,
-        AddProductComponent,
-        CategoriesComponent,
+        InventoryListComponent,
+        AddProductComponent2,
+        EditProductComponent2,
+        AddOnProductComponent,
         AddCategoryComponent,
-        EditProductComponent
+        CategoriesComponent,
+        AddOnListComponent,
+        AddOnDetailsComponent,
+        AddOnComponent,
     ],
     imports     : [
         RouterModule.forChild(productsManagementRoutes),
@@ -59,7 +70,8 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
         MatRadioModule,
         MatAutocompleteModule,
         NgxMatSelectSearchModule,
-        DragDropModule
+        DragDropModule,
+        MatSidenavModule
     ],
     providers   : [
         {

@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 
 @Component({
-    selector       : 'inventory',
-    templateUrl    : './inventory.component.html',
+    selector       : 'addon',
+    templateUrl    : './addon.component.html',
     encapsulation  : ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class InventoryComponent
+export class AddOnComponent
 {
     /**
      * Constructor
