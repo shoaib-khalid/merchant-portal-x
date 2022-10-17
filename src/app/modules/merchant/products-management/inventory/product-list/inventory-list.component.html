@@ -1,0 +1,413 @@
+<!-- <div class="sm:absolute sm:inset-0 flex flex-col flex-auto min-w-0 sm:overflow-hidden bg-card dark:bg-transparent">
+
+    
+</div> -->
+
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden">
+
+    <mat-drawer-container
+        class="flex-auto h-full bg-card dark:bg-transparent"
+        (backdropClick)="onBackdropClicked()">
+
+        <!-- Drawer -->
+        <mat-drawer
+            class="w-full dark:bg-gray-900"
+            [mode]="drawerMode"
+            [opened]="false"
+            [position]="'end'"
+            [disableClose]="true"
+            #matDrawer>
+            <router-outlet></router-outlet>
+        </mat-drawer>
+
+        <mat-drawer-content class="flex flex-col">
+
+            <!-- Main 2-->
+            <div class="flex-auto">
+
+                <!-- Header -->
+                <div class="flex flex-col sm:flex-row flex-auto justify-between py-8 px-6 md:px-8 border-b sm:items-center">
+
+                    <!-- Title -->
+                    <div>
+                        <div class="text-4xl font-extrabold tracking-tight">Inventory</div>
+                        <!-- <div class="ml-0.5 font-medium text-secondary">
+                            <ng-container *ngIf="contactsCount > 0">
+                                {{contactsCount}}
+                            </ng-container>
+                            {{contactsCount | i18nPlural: {
+                            '=0'   : 'No contacts',
+                            '=1'   : 'contact',
+                            'other': 'contacts'
+                        } }}
+                        </div> -->
+                    </div>
+
+                    <!-- Filter and actions -->
+                    <div class="sm:flex flex-shrink-0 items-center mt-6 sm:mt-0 sm:ml-4">
+                        <!-- Filter by category -->
+                        <div class="mb-2 sm:mb-0 sm:mr-2">
+                            <mat-form-field class="fuse-mat-dense fuse-mat-rounded fuse-mat-no-subscript w-30 sm:w-30">
+                                <mat-select
+                                    [formControl]="categoryFilterControl"
+                                    [value]="filterByCatId"
+                                    placeholder="Category"
+                                    #categorySelector="matSelect"
+                                >
+                                    <mat-select-trigger>
+                                        <span class="flex items-center">
+                                            <span>{{ categorySelector.triggerValue }}</span>
+                                        </span>
+                                    </mat-select-trigger>
+                                    <mat-option [value]="''">All</mat-option>
+                                    <ng-container *ngFor="let category of productCategories$; trackBy: trackByFn">
+                                        <mat-option [value]="category.id">{{category.name}}</mat-option>
+                                    </ng-container>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        <!-- Actions -->
+                        <div>
+                            <!-- Search -->
+                            <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded pr-2 pb-2 min-w-60 sm:pb-0">
+                                <mat-icon
+                                    class="icon-size-5"
+                                    matPrefix
+                                    [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                <input
+                                    matInput
+                                    [formControl]="searchInputControl"
+                                    [autocomplete]="'off'"
+                                    [placeholder]="'Search products'">
+                            </mat-form-field>
+                            <!-- Add product button -->
+                            <!-- <ng-container *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'">
+                                <button
+                                    class="ml-0"
+                                    (click)="initCreateProduct('normal')"
+                                    mat-flat-button
+                                    [color]="'primary'"
+                                >
+                                    <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                                    <span class="hidden sm:block ml-2 mr-1">Add</span>
+                                </button>
+                            </ng-container> -->
+                            <!-- *ngIf="store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK'" -->
+                            <ng-container 
+                            >
+                            <!-- [matMenuTriggerFor]="addProductMenu" -->
+                                <button
+                                    class="ml-0"
+                                    mat-flat-button
+                                    [color]="'primary'"
+                                    (click)="initCreateProduct('')"
+                                >
+                                    <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                                    <span class="hidden sm:block ml-2 mr-1">Add</span>
+                                </button>
+                                <!-- <mat-menu #addProductMenu="matMenu">
+                                    <button mat-menu-item (click)="initCreateProduct('normal')">Product</button>
+                                    <button mat-menu-item (click)="initCreateProduct('combo')">Combo</button>
+                                </mat-menu> -->
+                            </ng-container>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Addon list -->
+                <div class="relative">
+                    <ng-container *ngIf="(products$ | async) as products">
+                        <ng-container *ngIf="products.length > 0; else noProducts">
+                            <div class="grid">
+                                <!-- Header -->
+                                <div
+                                    class="inventory-grid items-center z-10 sticky top-0 grid gap-4 py-2 px-6 md:px-8 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                                    [ngClass]="{
+                                        'inventory-grid': inventoryListCondition === 'e-commerce-1-price', 
+                                        'inventory-grid-2price' : inventoryListCondition === 'e-commerce-2-prices', 
+                                        'inventory-grid-fnb'    : inventoryListCondition === 'fnb-1-price',
+                                        'inventory-grid-fnb-2price' : inventoryListCondition === 'fnb-2-prices'   
+                                    }"                            
+                                    matSort
+                                    matSortDisableClear>
+                                    <!-- Checkbox -->
+                                    <div>
+                                        <mat-checkbox [color]="'primary'" (change)="$event ? masterToggle() : null"
+                                            [checked]="selection.hasValue() && isAllSelected()"
+                                            [indeterminate]="selection.hasValue() && !isAllSelected()">
+                                        </mat-checkbox>
+                                    </div>
+                                    <!-- Delete button -->
+                                    <div>
+                                        <button mat-icon-button 
+                                        class=""
+                                        [ngClass]="selection.hasValue() ? 'visible' : 'invisible'"
+                                        (click)="deleteProducts()">
+                                            <mat-icon
+                                                class=""
+                                                [color]="'warn'"
+                                                [svgIcon]="'heroicons_outline:trash'">
+                                            </mat-icon>
+                                        </button>
+                                    </div>
+                                    <div
+                                        class="hidden md:block">
+                                        SKU
+                                    </div>
+                                    <div [mat-sort-header]="'name'">Name</div>
+                                    <div
+                                        class="hidden md:block"
+                                        >
+                                        Type
+                                    </div>
+                                    <div
+                                        *ngIf="store$.isDelivery === true"
+                                        class="hidden sm:block"
+                                        [mat-sort-header]="'price'">
+                                        DeliverIn Price
+                                    </div>
+                                    <div
+                                        *ngIf="store$.isDineIn === true"
+                                        class="hidden sm:block"
+                                        [mat-sort-header]="'dineInPrice'">
+                                        Dine In Price
+                                    </div>
+                                    <div
+                                        *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'"
+                                        class="hidden lg:block"
+                                        [mat-sort-header]="'quantity'">
+                                        Stock
+                                    </div>
+                                    <div
+                                        class="hidden lg:block"
+                                        [mat-sort-header]="'status'">
+                                        Active
+                                    </div>
+                                    <div class="hidden sm:block">Details</div>
+                                </div>
+                                <!-- Rows -->
+                                <ng-container *ngIf="(products$ | async) as products">
+                                    <ng-container *ngFor="let product of products; trackBy: trackByFn">
+                                        <!-- [ngClass]="(store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c') ? 'inventory-grid' : 'inventory-grid-fnb'" -->
+                                        <div 
+                                            class="inventory-grid grid items-center gap-4 py-3 px-6 md:px-8 border-b"
+                                            [ngClass]="{
+                                                    'inventory-grid': inventoryListCondition === 'e-commerce-1-price', 
+                                                    'inventory-grid-2price' : inventoryListCondition === 'e-commerce-2-prices', 
+                                                    'inventory-grid-fnb'    : inventoryListCondition === 'fnb-1-price',
+                                                    'inventory-grid-fnb-2price' : inventoryListCondition === 'fnb-2-prices'   
+                                                }"
+                                        >
+                                            <!-- Checkbox -->
+                                            <div>
+                                                <mat-checkbox [color]="'primary'" (click)="$event.stopPropagation()"
+                                                    (change)="$event ? selection.toggle(product) : null"
+                                                    [checked]="selection.isSelected(product)">
+                                                </mat-checkbox>
+                                            </div>
+
+                                            <!-- Image -->
+                                            <div class="flex items-center">
+                                                <div class="relative flex flex-0 items-center justify-center w-12 h-12 mr-6 rounded overflow-hidden border">
+                                                    <img
+                                                        class="w-8"
+                                                        *ngIf="product.thumbnailUrl"
+                                                        [alt]="'Product thumbnail image'"
+                                                        [src]="product.thumbnailUrl">
+                                                    <div
+                                                        class="flex items-center justify-center w-full h-full text-xs font-semibold leading-none text-center uppercase"
+                                                        *ngIf="!product.thumbnailUrl">
+                                                        NO THUMB
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- SKU -->
+                                            <div class="hidden md:block truncate">
+                                                {{ product.productInventories.length > 0 ? product.productInventories[0].sku : ''  }}
+                                            </div>
+
+                                            <!-- Name -->
+                                            <div class="truncate">
+                                                {{ product.name }}
+                                            </div>
+
+                                            <!-- Type -->
+                                            <div class="hidden md:block">
+                                                <!-- {{ productType(product) }} -->
+                                                {{ 
+                                                    ( product.isPackage === true ) ? 'Combo' : 
+                                                    ( product.productVariants.length > 0 && product.isPackage === false ) ? 'Variant' :  
+                                                    ( product.hasAddOn === true) ? 'Add-On' : 'Normal'
+                                                }}
+                                            </div>
+
+                                            <!-- Price -->
+                                            <div *ngIf="store$.isDelivery === true" class="hidden sm:block">
+                                                {{ product.productInventories.length > 0 ? (product.productInventories[0].price | currency:store$.regionCountry.currencySymbol:'symbol':'1.2-2') : '' }}
+                                            </div>
+
+                                            <!-- Dine In Price -->
+                                            <div *ngIf="store$.isDineIn === true" class="hidden sm:block">
+                                                {{ product.productInventories.length > 0 ? (product.productInventories[0].dineInPrice | currency:store$.regionCountry.currencySymbol:'symbol':'1.2-2') : '' }}
+                                            </div>
+                                            
+                                            <!-- Stock -->
+                                            <div 
+                                                *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'"
+                                                class="hidden lg:flex items-center">
+                                                <div class="flex justify-end min-w-5" >{{ totalInventories(product.productInventories) }}</div>
+                                                <!-- No stock -->
+                                                <div
+                                                    class="flex items-end ml-2 w-1 h-4 bg-red-200 rounded overflow-hidden"
+                                                    *ngIf="totalInventories(product.productInventories) === 0">
+                                                    <!-- <div class="flex w-full h-1/3 bg-red-600"></div> -->
+                                                </div>
+                                                <!-- Low stock -->
+                                                <div
+                                                    class="flex items-end ml-2 w-1 h-4 bg-red-200 rounded overflow-hidden"
+                                                    *ngIf="totalInventories(product.productInventories) >= 1 && totalInventories(product.productInventories) < 20">
+                                                    <div class="flex w-full h-1/3 bg-red-600"></div>
+                                                </div>
+                                                <!-- Medium stock -->
+                                                <div
+                                                    class="flex items-end ml-2 w-1 h-4 bg-orange-200 rounded overflow-hidden"
+                                                    *ngIf="totalInventories(product.productInventories) >= 20 && totalInventories(product.productInventories) < 40">
+                                                    <div class="flex w-full h-2/4 bg-orange-400"></div>
+                                                </div>
+                                                <!-- High stock -->
+                                                <div
+                                                    class="flex items-end ml-2 w-1 h-4 bg-green-100 rounded overflow-hidden"
+                                                    *ngIf="totalInventories(product.productInventories) >= 40">
+                                                    <div class="flex w-full h-full bg-green-400"></div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Active -->
+                                            <div class="hidden lg:block">
+                                                <ng-container *ngIf="product.status === 'ACTIVE'">
+                                                    <mat-icon
+                                                        class="text-green-400 icon-size-5"
+                                                        [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                                                </ng-container>
+                                                <ng-container *ngIf="product.status !== 'ACTIVE'">
+                                                    <mat-icon
+                                                        class="text-gray-400 icon-size-5"
+                                                        [svgIcon]="'heroicons_solid:x'"></mat-icon>
+                                                </ng-container>
+                                            </div>
+
+                                            <!-- Details button -->
+                                            <div>
+                                                <!-- (click)="toggleDetails(product.id);resetCycleImages()"> -->
+                                                <button
+                                                    class="min-w-10 min-h-7 h-7 px-2 leading-6"
+                                                    mat-stroked-button
+                                                    mat-button
+                                                    [routerLink]="['./', product.id]"
+                                                    >
+                                                    <mat-icon
+                                                        class="icon-size-5"
+                                                        [svgIcon]="'heroicons_solid:dots-horizontal'"></mat-icon>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </ng-container>
+                                </ng-container>
+                            </div>
+
+                            <mat-paginator
+                                class="sm:absolute sm:inset-x-0 sm:bottom-0 border-b sm:border-t sm:border-b-0 z-10 bg-gray-50 dark:bg-transparent"
+                                [ngClass]="{'pointer-events-none': isLoading}"
+                                [length]="pagination.length"
+                                [pageIndex]="pagination.page"
+                                [pageSize]="pagination.size"
+                                [pageSizeOptions]="[5, 10, 25, 100]"
+                                [showFirstLastButtons]="true"
+                                [hidePageSize]="currentScreenSize.includes('sm') ? false : true"></mat-paginator>
+
+                        </ng-container>
+                    </ng-container>
+
+                    <!-- No products -->
+                    <ng-template #noProducts>
+                        <div class="p-8 sm:p-14 sm:pb-10 border-t text-4xl font-semibold tracking-tight text-center">There are no products!</div>
+                        <div class="text-center">
+                            <span *ngIf="!displayDuplicateProduct" 
+                                class="underline cursor-pointer text-primary" 
+                                (click)="initCreateProduct('normal')">Add product</span>
+                            <ng-container *ngIf="client.roleId === 'SUPER_USER'">
+                                <ng-container *ngIf="!displayDuplicateProduct">
+                                    <span> or </span>
+                                    <span class="underline cursor-pointer text-primary" 
+                                    (click)="displayDuplicateProduct = true">
+                                        duplicate products
+                                    </span>
+                                </ng-container>
+                                <ng-container *ngIf="displayDuplicateProduct">
+                                    <div class="flex flex-col gap-1">
+                                        <span>Duplicate all products from:</span>
+                                        <div>
+                                            <mat-form-field class="fuse-mat-emphasized-affix w-3/4 sm:w-1/2" floatLabel="always">
+                                                <mat-select 
+                                                    [(ngModel)]="selectedStore"
+                                                    [ngModelOptions]="{standalone: true}"
+                                                    [placeholder]="'Select store'"
+                                                    #storeSelector="matSelect">
+                                                    <!-- <mat-select-trigger>
+                                                        <span class="flex items-center">
+                                                            <span>{{selectedStore}}</span>
+                                                        </span>
+                                                    </mat-select-trigger> -->
+                                                    <mat-option>
+                                                        <ngx-mat-select-search 
+                                                        [placeholderLabel]="'Search store'" 
+                                                        [noEntriesFoundLabel]="'No matching stores found'" 
+                                                        [formControl]="storeList"
+                                                        [clearSearchInput]="false"
+                                                        ngDefaultControl></ngx-mat-select-search>
+                                                    </mat-option>
+                                                    <mat-option class="m-t" *ngFor="let store of stores" [value]="store">
+                                                        {{store.name}}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                            <div class="mb-1">
+                                                <button
+                                                    class="ml-0"
+                                                    mat-flat-button
+                                                    [color]="'primary'"
+                                                    (click)="duplicateProducts()"
+                                                    [disabled]="isDuplicating"
+                                                    >
+                                                    <span *ngIf="!isDuplicating" class="mr-2">Duplicate</span>
+                                                    <span *ngIf="isDuplicating" class="mr-2">Duplicating...</span>
+                                                    <!-- Icons  -->
+                                                    <mat-icon *ngIf="!isDuplicating" [svgIcon]="'mat_solid:content_copy'"></mat-icon>
+                                                    <svg *ngIf="isDuplicating" class="w-6 h-6 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                                                        <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <ng-container *ngIf="cloneErrorMessage">
+                                                <span class="px-2 text-sm leading-tighter text-red-500">
+                                                    {{cloneErrorMessage}}
+                                                </span>
+                                            </ng-container>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                            </ng-container>
+                        </div>
+                    </ng-template>
+
+                </div>
+
+            </div>
+
+        </mat-drawer-content>
+
+    </mat-drawer-container>
+
+</div>

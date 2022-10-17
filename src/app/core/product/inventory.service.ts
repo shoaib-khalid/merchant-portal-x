@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { catchError, filter, map, switchMap, take, tap } from 'rxjs/operators';
-import { Product, ProductVariant, ProductInventory, ProductCategory, ProductPagination, ProductVariantAvailable, ProductPackageOption, ProductAssets, ProductCategoryPagination, DeliveryVehicleType, ApiResponseModel, ProductInventoryItem } from 'app/core/product/inventory.types';
+import { Product, ProductVariant, ProductInventory, ProductCategory, ProductPagination, ProductVariantAvailable, ProductPackageOption, ProductAssets, ProductCategoryPagination, DeliveryVehicleType, ApiResponseModel, ProductInventoryItem, ParentCategory, AddOnGroupTemplate, AddOnItemTemplate, AddOnGroupProduct, AddOnItemProduct, AddOnProduct } from 'app/core/product/inventory.types';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from '../logging/log.service';
@@ -24,6 +24,7 @@ export class InventoryService
     private _category: BehaviorSubject<ProductCategory | null> = new BehaviorSubject(null);
     private _categories: BehaviorSubject<ProductCategory[] | null> = new BehaviorSubject(null);
     private _categoryPagination: BehaviorSubject<ProductCategoryPagination | null> = new BehaviorSubject(null);
+    private _parentCategories: BehaviorSubject<ParentCategory[] | null> = new BehaviorSubject(null);
 
     private _inventory: BehaviorSubject<ProductInventory | null> = new BehaviorSubject(null);
     private _inventories: BehaviorSubject<ProductInventory[] | null> = new BehaviorSubject(null);
@@ -33,6 +34,21 @@ export class InventoryService
 
     private _productPaginationForCombo: BehaviorSubject<ProductPagination | null> = new BehaviorSubject(null);
     private _productsForCombo: BehaviorSubject<Product[] | null> = new BehaviorSubject(null);
+
+    private _addOnGroupTemplate: BehaviorSubject<AddOnGroupTemplate | null> = new BehaviorSubject(null);
+    private _addOnGroupTemplates: BehaviorSubject<AddOnGroupTemplate[] | null> = new BehaviorSubject(null);
+
+    private _addOnItemTemplate: BehaviorSubject<AddOnItemTemplate | null> = new BehaviorSubject(null);
+    private _addOnItemTemplates: BehaviorSubject<AddOnItemTemplate[] | null> = new BehaviorSubject(null);
+
+    private _addOnGroupProduct: BehaviorSubject<AddOnGroupProduct | null> = new BehaviorSubject(null);
+    private _addOnGroupProducts: BehaviorSubject<AddOnGroupProduct[] | null> = new BehaviorSubject(null);
+
+    private _addOnItemProduct: BehaviorSubject<AddOnItemProduct | null> = new BehaviorSubject(null);
+    private _addOnItemProducts: BehaviorSubject<AddOnItemProduct[] | null> = new BehaviorSubject(null);
+    
+    private _addOnsProduct: BehaviorSubject<AddOnProduct[] | null> = new BehaviorSubject(null);
+    private _addOnProduct: BehaviorSubject<AddOnProduct | null> = new BehaviorSubject(null);
     /**
      * Constructor
      */
@@ -56,6 +72,17 @@ export class InventoryService
     get product$(): Observable<Product>
     {
         return this._product.asObservable();
+    }
+
+    /**
+     * Setter for product
+     *
+     * @param value
+     */
+    set product(value: Product)
+    {
+        // Store the value
+        this._product.next(value);
     }
 
     /**
@@ -107,6 +134,14 @@ export class InventoryService
     }
 
     /**
+     * Getter for parent categories
+     */
+    get parentCategories$(): Observable<ParentCategory[]>
+    {
+        return this._parentCategories.asObservable();
+    }
+
+    /**
      * Getter for package
      */
     get package$(): Observable<ProductPackageOption>
@@ -131,6 +166,46 @@ export class InventoryService
     {
         return localStorage.getItem('storeId') ?? '';
     }
+
+    // ------------------
+    // Add On
+    // ------------------
+
+    /** Getter for addOnGroupTemplate */
+    get addOnGroupTemplate$(): Observable<AddOnGroupTemplate> { return this._addOnGroupTemplate.asObservable(); }
+
+    /** Setter for addOnGroupTemplate */
+    set addOnGroupTemplate(value: AddOnGroupTemplate) { this._addOnGroupTemplate.next(value); }
+
+    /** Getter for addOnGroupTemplates */
+    get addOnGroupTemplates$(): Observable<AddOnGroupTemplate[]> { return this._addOnGroupTemplates.asObservable(); }
+
+    /** Getter for addOnItemTemplate */
+    get addOnItemTemplate$(): Observable<AddOnItemTemplate> { return this._addOnItemTemplate.asObservable(); }
+
+    /** Getter for addOnItemTemplates */
+    get addOnItemTemplates$(): Observable<AddOnItemTemplate[]> { return this._addOnItemTemplates.asObservable(); }
+
+    /** Getter for addOnGroupProduct */
+    get addOnGroupProduct$(): Observable<AddOnGroupProduct> { return this._addOnGroupProduct.asObservable(); }
+
+    /** Getter for addOnGroupProducts */
+    get addOnGroupProducts$(): Observable<AddOnGroupProduct[]> { return this._addOnGroupProducts.asObservable(); }
+
+    /** Getter for addOnItemProduct */
+    get addOnItemProduct$(): Observable<AddOnItemProduct> { return this._addOnItemProduct.asObservable(); }
+
+    /** Getter for addOnItemProducts */
+    get addOnItemProducts$(): Observable<AddOnItemProduct[]> { return this._addOnItemProducts.asObservable(); }
+
+    /** Getter for addOnProduct */
+    get addOnProduct$(): Observable<AddOnProduct> { return this._addOnProduct.asObservable(); }
+
+    /** Getter for addOnsProduct */
+    get addOnsProduct$(): Observable<AddOnProduct[]> { return this._addOnsProduct.asObservable(); }
+
+    /** Setter for addOnsProduct */
+    set addOnsProduct(value: any){ this._addOnsProduct.next(value); }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
@@ -1272,12 +1347,12 @@ export class InventoryService
         );
     }
 
-    getParentCategories(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '',verticalcode:string=''):
-    Observable<ApiResponseModel<ProductCategory[]>>
-     {
+    getParentCategories(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', verticalcode:string=''):
+    Observable<ParentCategory[]>
+    {
         let productService = this._apiServer.settings.apiServer.productService;
         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
- 
+
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
             params: {
@@ -1290,14 +1365,18 @@ export class InventoryService
 
             }
         };
- 
-         return this._httpClient.get<ApiResponseModel<ProductCategory[]>>(productService  + '/store-categories',header).pipe(
-             tap((response) => {
- 
-                 this._logging.debug("Response from getParentCategories (getParentCategories)",response);
-             })
-         );
-     }
+
+        return this._httpClient.get<any>(productService  + '/store-categories', header).pipe(
+            map((response) => {
+
+                this._logging.debug("Response from getParentCategories (getParentCategories)", response);
+
+                this._parentCategories.next(response.data["content"]);
+
+                return response.data["content"]
+            })
+        );
+    }
 
     /**
      * Get ctegory by id
@@ -1808,4 +1887,626 @@ export class InventoryService
         );
 
     }
+
+    getAddOnGroupTemplates(
+        params: {
+            page    : number,
+            pageSize: number,
+            storeId : string
+        } =
+        {
+            page    : 0,
+            pageSize: 10,
+            storeId : null
+        }
+    ): Observable<AddOnGroupTemplate[]>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        // let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let accessToken = "accessToken";
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params : params
+        };
+
+        // Delete empty value
+        Object.keys(header.params).forEach(key => {
+            if (Array.isArray(header.params[key])) {
+                header.params[key] = header.params[key].filter(element => element !== null)
+            }
+            
+            if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
+                delete header.params[key];
+            }
+        });
+        
+        return this._httpClient.get<any>(productService + '/addon-template-group', header)
+            .pipe(
+                map((response) => {
+                    this._logging.debug("Response from ProductService (getAddOnGroupTemplates)", response);
+
+                    this._addOnGroupTemplates.next(response["data"]["content"]);
+                    return response["data"];
+                })
+            );
+    }
+
+    getAddOnGroupTemplateById(id : string): Observable<AddOnGroupTemplate>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        // let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let accessToken = "accessToken";
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+        
+        return this._httpClient.get<any>(productService + '/addon-template-group/' + id, header)
+            .pipe(
+                map((response) => {
+                    this._logging.debug("Response from ProductService (getAddOnGroupTemplateById)", response);
+                    
+                    this._addOnGroupTemplate.next(response["data"]);
+                    return response["data"];
+                })
+            );
+    }
+
+    createAddOnGroupTemplate(addOnTemplateBody: AddOnGroupTemplate): Observable<AddOnGroupTemplate>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this.addOnGroupTemplates$.pipe(
+            take(1),
+            switchMap(templates => this._httpClient.post<AddOnGroupTemplate>(productService + '/addon-template-group', addOnTemplateBody , header).pipe(
+                map((newTemplateGroup) => {
+
+                    this._logging.debug("Response from ProductsService (createAddOnGroupTemplate)", newTemplateGroup);
+                    
+                    let _newTemplateGroup = newTemplateGroup["data"];
+
+                    if (templates) {
+                        this._addOnGroupTemplates.next([_newTemplateGroup, ...templates]);
+                    }
+                    else {
+                        this._addOnGroupTemplates.next([_newTemplateGroup]);
+                    }
+
+                    // Return the new product
+                    return _newTemplateGroup;
+                })
+            ))
+        );
+    }
+
+    /**
+     * Update template group
+     *
+     * @param id
+     * @param templateBody
+     */
+    updateAddOnGroupTemplate(id: string, templateBody: AddOnGroupTemplate): Observable<AddOnGroupTemplate>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this.addOnGroupTemplates$.pipe(
+            take(1),
+            switchMap(templates => this._httpClient.put<AddOnGroupTemplate>(productService + '/addon-template-group/' + id, templateBody , header).pipe(
+                map((updatedTemplate) => {
+
+                    this._logging.debug("Response from ProductsService (updateAddOnGroupTemplate)", updatedTemplate);
+
+                    // Find the index of the updated template
+                    const index = templates.findIndex(item => item.id === id);
+                    
+                    // Update the product
+                    templates[index] = { ...templates[index], ...updatedTemplate["data"]};
+
+                    // Update the products
+                    this._addOnGroupTemplates.next(templates);
+
+                    // Return the updated product
+                    return updatedTemplate["data"];
+                })
+            ))
+        );
+    }
+
+    /**
+     * Delete the add on item template
+     *
+     * @param id
+     */
+    deleteAddOnGroupTemplate(id: string): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+    
+        return this.addOnGroupTemplates$.pipe(
+            take(1),
+            switchMap(templates => this._httpClient.delete(productService +'/addon-template-group/' + id, header).pipe(
+                map((status) => {
+
+                    this._logging.debug("Response from ProductsService (deleteAddOnGroupTemplate)", status);
+
+                    // Find the index of the deleted template
+                    const index = templates.findIndex(item => item.id === id);
+
+                    // Delete the template
+                    templates.splice(index, 1);
+
+                    // Update the templates
+                    this._addOnGroupTemplates.next(templates);
+
+                    // Return the deleted status
+                    return status;
+                })
+            ))
+        );
+    }
+
+
+
+
+
+
+
+    getAddOnItemTemplates(
+        params: {
+            page    : number,
+            pageSize: number,
+            groupId : string
+        } =
+        {
+            page    : 0,
+            pageSize: 10,
+            groupId : null
+        }
+    ): Observable<AddOnItemTemplate[]>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        // let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let accessToken = "accessToken";
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params : params
+        };
+
+        // Delete empty value
+        Object.keys(header.params).forEach(key => {
+            if (Array.isArray(header.params[key])) {
+                header.params[key] = header.params[key].filter(element => element !== null)
+            }
+            
+            if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
+                delete header.params[key];
+            }
+        });
+        
+        return this._httpClient.get<any>(productService + '/addon-template-item', header)
+            .pipe(
+                map((response) => {
+                    this._logging.debug("Response from ProductService (getAddOnItemTemplates)", response);
+
+                    this._addOnItemTemplates.next(response["data"]["content"]);
+                    return response["data"]["content"];
+                })
+            );
+    }
+
+    createAddOnItemTemplateBulk(addOnTemplateBodies: AddOnItemTemplate[]): Observable<AddOnItemTemplate>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.post<AddOnItemTemplate[]>(productService + '/addon-template-item/bulk', addOnTemplateBodies, header).pipe(
+            map((newTemplateItem) => {
+
+                this._logging.debug("Response from ProductsService (createAddOnItemTemplateBulk)", newTemplateItem);
+
+                let _newTemplateItems = newTemplateItem["data"];
+
+                // Return the new product
+                return _newTemplateItems;
+            })
+        )
+
+        // this.addOnItemTemplates$.pipe(
+        //     take(1),
+        //     switchMap(templates => this._httpClient.post<AddOnItemTemplate[]>(productService + '/addon-template-item/bulk', addOnTemplateBodies, header).pipe(
+        //         map((newTemplateItem) => {
+
+        //             this._logging.debug("Response from ProductsService (createAddOnItemTemplateBulk)", newTemplateItem);
+        //             console.log('templates', templates);
+
+        //             let _newTemplateItems = newTemplateItem["data"];
+        //             console.log('_newTemplateItems', _newTemplateItems);
+
+        //             if (!templates) {
+        //                 this._addOnItemTemplates.next(_newTemplateItems);
+        //             }
+        //             else {
+        //                 this._addOnItemTemplates.next([_newTemplateItems, ...templates]);
+        //             }
+
+        //             // Return the new product
+        //             return _newTemplateItems;
+        //         })
+        //     ))
+        // );
+    }
+
+    /**
+     * Update template group
+     *
+     * @param id
+     * @param templateBody
+     */
+    updateAddOnItemTemplate(id: string, templateBody: AddOnItemTemplate): Observable<AddOnItemTemplate>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this.addOnItemTemplates$.pipe(
+            take(1),
+            switchMap(templates => this._httpClient.put<AddOnItemTemplate>(productService + '/addon-template-item/' + id, templateBody, header).pipe(
+                map((updatedTemplate) => {
+
+                    this._logging.debug("Response from ProductsService (updateAddOnItemTemplate)", updatedTemplate);
+
+                    // Find the index of the updated template
+                    const index = templates.findIndex(item => item.id === id);
+                    
+                    // Update the product
+                    templates[index] = { ...templates[index], ...updatedTemplate["data"]};
+
+                    // Update the products
+                    this._addOnItemTemplates.next(templates);
+
+                    // Return the updated product
+                    return updatedTemplate["data"];
+                })
+            ))
+        );
+    }
+
+    /**
+     * Delete the add on item template
+     *
+     * @param id
+     */
+    deleteAddOnItemTemplate(id: string): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+    
+        return this.addOnItemTemplates$.pipe(
+            take(1),
+            switchMap(templates => this._httpClient.delete(productService +'/addon-template-item/' + id, header).pipe(
+                map((status) => {
+
+                    this._logging.debug("Response from ProductsService (deleteAddOnItemTemplate)", status);
+
+                    // Find the index of the deleted template
+                    const index = templates.findIndex(item => item.id === id);
+
+                    // Delete the template
+                    templates.splice(index, 1);
+
+                    // Update the templates
+                    this._addOnItemTemplates.next(templates);
+
+                    // Return the deleted status
+                    return status;
+                })
+            ))
+        );
+    }
+
+
+
+    getAddOnGroupsOnProduct( params: { productId : string } = { productId : null} )
+    : Observable<AddOnGroupProduct[]>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        // let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let accessToken = "accessToken";
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params : params
+        };
+
+        // Delete empty value
+        Object.keys(header.params).forEach(key => {
+            if (Array.isArray(header.params[key])) {
+                header.params[key] = header.params[key].filter(element => element !== null)
+            }
+            
+            if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
+                delete header.params[key];
+            }
+        });
+        
+        return this._httpClient.get<any>(productService + '/product-addon-group', header)
+            .pipe(
+                map((response) => {
+                    this._logging.debug("Response from ProductService (getAddOnGroupsOnProduct)", response);
+
+                    this._addOnGroupProducts.next(response["data"]);
+                    return response["data"];
+                })
+            );
+    }
+
+    createAddOnGroupOnProduct(addOnTemplateBody: AddOnGroupProduct): Observable<AddOnGroupProduct>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this.addOnGroupProducts$.pipe(
+            take(1),
+            switchMap(templates => this._httpClient.post<AddOnGroupProduct>(productService + '/product-addon-group', addOnTemplateBody , header).pipe(
+                map((newTemplateGroup) => {
+
+                    this._logging.debug("Response from ProductsService (createAddOnGroupOnProduct)", newTemplateGroup);
+                    
+                    let _newTemplateGroup = newTemplateGroup["data"];
+
+                    if (templates) {
+                        this._addOnGroupProducts.next([_newTemplateGroup, ...templates]);
+                    }
+                    else {
+                        this._addOnGroupProducts.next([_newTemplateGroup]);
+                    }
+
+                    // Return the new product
+                    return _newTemplateGroup;
+                })
+            ))
+        );
+    }
+
+    updateAddOnGroupOnProduct(id: string, groupBody: AddOnGroupProduct): Observable<AddOnGroupProduct>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this.addOnGroupProducts$.pipe(
+            take(1),
+            switchMap(templates => this._httpClient.put<AddOnGroupProduct>(productService + '/product-addon-group/' + id, groupBody , header).pipe(
+                map((updatedTemplate) => {
+
+                    this._logging.debug("Response from ProductsService (updateAddOnGroupOnProduct)", updatedTemplate);
+
+                    // Find the index of the updated template
+                    const index = templates.findIndex(item => item.id === id);
+                    
+                    // Update the product
+                    templates[index] = { ...templates[index], ...updatedTemplate["data"]};
+
+                    // Update the products
+                    this._addOnGroupProducts.next(templates);
+
+                    // Return the updated product
+                    return updatedTemplate["data"];
+                })
+            ))
+        );
+    }
+
+    deleteAddOnGroupOnProduct(id: string): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+    
+        return this.addOnsProduct$.pipe(
+            take(1),
+            switchMap(templates => this._httpClient.delete(productService +'/product-addon-group/' + id, header).pipe(
+                map((status) => {
+
+                    this._logging.debug("Response from ProductsService (deleteAddOnGroupOnProduct)", status);
+
+                    // Find the index of the deleted template
+                    const index = templates.findIndex(item => item.id === id);
+
+                    // Delete the template
+                    templates.splice(index, 1);
+
+                    // Update the templates
+                    this._addOnsProduct.next(templates);
+
+                    // Return the deleted status
+                    return status;
+                })
+            ))
+        );
+    }
+
+
+
+    getAddOnItemsOnProduct( params: { productId : string } = { productId : null} )
+    : Observable<AddOnProduct[]>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        // let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let accessToken = "accessToken";
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params : params
+        };
+
+        // Delete empty value
+        Object.keys(header.params).forEach(key => {
+            if (Array.isArray(header.params[key])) {
+                header.params[key] = header.params[key].filter(element => element !== null)
+            }
+            
+            if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
+                delete header.params[key];
+            }
+        });
+        
+        return this._httpClient.get<any>(productService + '/product-addon', header)
+            .pipe(
+                map((response) => {
+                    this._logging.debug("Response from ProductService (getAddOnItemsOnProduct)", response);
+
+                    this._addOnsProduct.next(response["data"]);
+                    return response["data"];
+                })
+            );
+    }
+
+    createAddOnItemOnProductBulk(addOnTemplateBodies: AddOnItemProduct[]): Observable<AddOnItemProduct>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.post<AddOnItemProduct[]>(productService + '/product-addon/bulk', addOnTemplateBodies, header).pipe(
+            map((newTemplateItem) => {
+
+                this._logging.debug("Response from ProductsService (createAddOnItemOnProductBulk)", newTemplateItem);
+
+                let _newTemplateItems = newTemplateItem["data"];
+
+                // Return the new product
+                return _newTemplateItems;
+            })
+        )
+    }
+
+    /**
+     * Update template group
+     *
+     * @param id
+     * @param templateBody
+     */
+    updateAddOnItemOnProduct(id: string, templateBody: AddOnItemProduct): Observable<AddOnItemProduct>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this.addOnsProduct$.pipe(
+            take(1),
+            switchMap(templates => this._httpClient.put<AddOnItemProduct>(productService + '/product-addon/' + id, templateBody, header).pipe(
+                map((updatedTemplate) => {
+
+                    this._logging.debug("Response from ProductsService (updateAddOnItemOnProduct)", updatedTemplate);
+
+                    // Find the index of the updated template
+                    const index = templates.findIndex(item => item.id === id);
+                    
+                    // Update the product
+                    templates[index] = { ...templates[index], ...updatedTemplate["data"]};
+
+                    // Update the products
+                    this._addOnsProduct.next(templates);
+
+                    // Return the updated product
+                    return updatedTemplate["data"];
+                })
+            ))
+        );
+    }
+
+    /**
+     * Delete the add on item template
+     *
+     * @param id
+     */
+    deleteAddOnItemOnProduct(id: string): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+    
+        return this._httpClient.delete(productService +'/product-addon/' + id, header).pipe(
+            map((status) => {
+
+                this._logging.debug("Response from ProductsService (deleteAddOnItemOnProduct)", status);
+
+                // Return the deleted status
+                return status;
+            })
+        )        
+        // this.addOnsProduct$.pipe(
+        //     take(1),
+        //     switchMap(templates => this._httpClient.delete(productService +'/product-addon/' + id, header).pipe(
+        //         map((status) => {
+
+        //             this._logging.debug("Response from ProductsService (deleteAddOnItemOnProduct)", status);
+
+        //             // // Find the index of the deleted template
+        //             // const index = templates.findIndex(item => item.id === id);
+
+        //             // // Delete the template
+        //             // templates.splice(index, 1);
+
+        //             // // Update the templates
+        //             // this._addOnsProduct.next(templates);
+
+        //             // Return the deleted status
+        //             return status;
+        //         })
+        //     ))
+        // );
+    }
+
+
+
+
+
 }

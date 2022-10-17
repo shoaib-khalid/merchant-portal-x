@@ -50,6 +50,13 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 type : 'basic',
                 link : '/products/inventory',
                 exactMatch: true
+            },
+            {
+                id   : 'app.manage-add-on',
+                title: 'Manage Add-On',
+                type : 'basic',
+                link : '/products/addon',
+                exactMatch: true
             }
         ],
     },
@@ -60,13 +67,6 @@ export const defaultNavigation: FuseNavigationItem[] = [
         icon : 'heroicons_outline:shopping-cart',
         link : '/orders'
     },
-    // {
-    //     id   : 'discount-management',
-    //     title: 'Discount Management',
-    //     type : 'basic',
-    //     icon : 'heroicons_outline:gift',
-    //     link : '/discounts'
-    // },   
     {
         id   : 'discount-management',
         title: 'Discount Management',
