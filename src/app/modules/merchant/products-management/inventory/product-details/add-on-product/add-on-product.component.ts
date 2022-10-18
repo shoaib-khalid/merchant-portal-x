@@ -103,7 +103,7 @@ export class AddOnProductComponent
     setOrderEnabled: boolean = false;
     dropUpperLevelCalled: boolean = false;
     minAllowed: number = 0;
-    maxAllowed: number = 1;
+    maxAllowed: number = 0;
     productId: string = null;
     itemTemplatesList: ItemTemplateList[]; // For HTML listing
 
@@ -293,6 +293,7 @@ export class AddOnProductComponent
         this.selectedGroupTemplate = null;
         this.selectedItemsTemplates = [];
         this.itemTemplatesList = [];
+        this.maxAllowed = 1;
 
         this.selectedGroupTemplate = template;
 
@@ -505,7 +506,7 @@ export class AddOnProductComponent
         this.selectedGroupOnProductIndex = null;
         this.itemTemplatesList = [];
         if (this.selectDropdown) this.selectDropdown.value = null;
-        this.maxAllowed = 1;
+        this.maxAllowed = 0;
         this.minAllowed = 0;
 
         // Mark for check
