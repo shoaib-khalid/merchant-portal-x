@@ -83,6 +83,9 @@ export class StoreTimingComponent implements OnInit
                 });
                 
                 this._storeTiming.forEach(item => {
+
+                    console.log('open time', item.openTime);
+                    
                     
                     //----------------
                     //  Start Time

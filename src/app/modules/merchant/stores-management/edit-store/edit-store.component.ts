@@ -6,6 +6,8 @@ import { ActivatedRoute } from '@angular/router';
 import { MatDrawer } from '@angular/material/sidenav';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { takeUntil } from 'rxjs/operators';
+import { PlatformService } from 'app/core/platform/platform.service';
+import { Platform } from 'app/core/platform/platform.types';
 
 @Component({
     selector     : 'edit-store-page',
@@ -28,6 +30,7 @@ export class EditStoreComponent implements OnInit
     selectedPanel: string = 'account';
     
     private _unsubscribeAll: Subject<any> = new Subject<any>();
+    platform: Platform = null;
 
     /**
      * Constructor
@@ -35,7 +38,9 @@ export class EditStoreComponent implements OnInit
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _route: ActivatedRoute,
-        private _fuseMediaWatcherService: FuseMediaWatcherService
+        private _fuseMediaWatcherService: FuseMediaWatcherService,
+        private _platformsService: PlatformService,
+
     )
     {
     }  
@@ -89,6 +94,22 @@ export class EditStoreComponent implements OnInit
                 description: 'Store Google analytic section'
             }
         ];
+
+        // Subscribe to platform data
+        this._platformsService.platform$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((platform: Platform) => {
+                this.platform = platform;
+
+                if (platform.country === 'PAK') {
+                    let index = this.panels.findIndex(item => item.id === 'dine-in')
+    
+                    if (index > -1) {
+                        this.panels.splice(index, 1);
+                    }
+                }
+            });
+        
 
         // Subscribe to media changes
         this._fuseMediaWatcherService.onMediaChange$

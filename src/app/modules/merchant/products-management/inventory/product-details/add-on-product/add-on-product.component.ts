@@ -103,7 +103,7 @@ export class AddOnProductComponent
     setOrderEnabled: boolean = false;
     dropUpperLevelCalled: boolean = false;
     minAllowed: number = 0;
-    maxAllowed: number = 0;
+    maxAllowed: number = 1;
     productId: string = null;
     itemTemplatesList: ItemTemplateList[]; // For HTML listing
 
@@ -283,7 +283,7 @@ export class AddOnProductComponent
             }
         }
         this.selectedGroupTemplate.addOnTemplateItem = this.selectedItemsTemplates;
-        this.maxAllowed = this.selectedItemsTemplates.length;
+        this.maxAllowed = this.selectedItemsTemplates.length > 0 ? this.selectedItemsTemplates.length : 1;
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -453,12 +453,14 @@ export class AddOnProductComponent
 
         if ( this.selectedGroupTemplate) {
 
+            let biggestSeq = Math.max(...this.addOnsOnProductList.map(x => x.sequenceNumber))
+
             const group = {
                 addonTemplateGroupId: this.selectedGroupTemplate.id,
                 maxAllowed  : this.maxAllowed,
                 minAllowed  : this.minAllowed,
                 productId   : this.productId,
-                sequenceNumber: this.addOnsOnProductList.length + 1,
+                sequenceNumber: biggestSeq + 1,
                 status        : 'AVAILABLE'
             }
 
@@ -503,7 +505,7 @@ export class AddOnProductComponent
         this.selectedGroupOnProductIndex = null;
         this.itemTemplatesList = [];
         if (this.selectDropdown) this.selectDropdown.value = null;
-        this.maxAllowed = 0;
+        this.maxAllowed = 1;
         this.minAllowed = 0;
 
         // Mark for check
