@@ -339,6 +339,9 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
             .subscribe((products: Product[]) => {
                 if (products) {
                     this.productsList = products;
+                    
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
                 }
             })
         
