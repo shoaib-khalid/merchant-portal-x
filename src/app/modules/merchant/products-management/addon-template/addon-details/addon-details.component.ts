@@ -185,9 +185,25 @@ export class AddOnDetailsComponent implements OnInit, OnDestroy
 
         if (option.id) {
             this._inventoryService.deleteAddOnItemTemplate(option.id)
-            .subscribe()
+            .subscribe({
+                next: (resp) => {
+                    this.options.removeAt(optionIndex);
+
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                },
+                error: (error) => {
+                    console.error('ERROR', error);
+                }
+            })
         }
-        this.options.removeAt(optionIndex);
+        else {
+            this.options.removeAt(optionIndex);
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        }
+        
     }
 
     deleteTemplateGroup() {
@@ -321,6 +337,7 @@ export class AddOnDetailsComponent implements OnInit, OnDestroy
         
     }
 
+    // DISABLED
     selectTotalAllowed(value: any, type: string) {
         
     }

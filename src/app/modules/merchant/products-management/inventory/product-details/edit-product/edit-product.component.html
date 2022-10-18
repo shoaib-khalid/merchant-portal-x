@@ -419,18 +419,40 @@
                                 
                                 <!-- SKU, Price, Packing Size-->
                                 <div class="flex flex-col w-full md:pl-2 lg:w-1/3">
-                                    <!-- SKU -->
-                                    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
-                                        <mat-label>SKU</mat-label>
-                                        <input
-                                            matInput
-                                            required
-                                            [formControlName]="'sku'"
-                                            placeholder="Insert SKU">
-                                        <mat-error *ngIf="addProductForm.get('step1').get('sku').hasError('required')">
-                                            Required
-                                        </mat-error>
-                                    </mat-form-field>
+                                    <!-- Product Type -->
+                                    <div class="flex flex-col w-full">
+                                        <mat-form-field class="w-full" floatLabel="always">
+                                            <mat-label class="font-medium">Product Type</mat-label>
+                                            <mat-select
+                                                required
+                                                floatLabel="always"
+                                                [(ngModel)]="productType"
+                                                [ngModelOptions]="{standalone: true}"
+                                                (selectionChange)="changeProductType(typeSelector.value)"
+                                                #typeSelector="matSelect"
+                                                >
+                                                <!-- <mat-select-trigger>
+                                                    <span class="flex items-center">
+                                                        <span>{{ typeSelector.triggerValue }}</span>
+                                                    </span>
+                                                </mat-select-trigger> -->
+                                                <div>
+                                                    <mat-option [value]="'normal'">Normal</mat-option>
+                                                    <mat-option [value]="'combo'">Combo</mat-option>
+                                                    <mat-option [value]="'variant'">With Variants</mat-option>
+                                                    <mat-option [value]="'addon'">With Add-Ons</mat-option>
+                                                </div>
+                                            </mat-select>
+                                            <!-- <mat-slide-toggle
+                                                [formControlName]="'status'"
+                                                [color]="'primary'">
+                                                {{addProductForm.get('step1').get('status').value === "ACTIVE" ? true : false}}
+                                            </mat-slide-toggle> -->
+                                            <!-- <mat-error *ngIf="addProductForm.get('step1').get('status').hasError('required')">
+                                                Required
+                                            </mat-error> -->
+                                        </mat-form-field>
+                                    </div>
     
                                     <!-- Price -->
                                     <mat-form-field 
@@ -491,45 +513,76 @@
                                             
                                         </div>
                                     </div> -->
-                                    <!-- Product Type -->
-                                    <div class="flex flex-col mt-0.5 w-full">
-                                        <mat-form-field class="w-full" floatLabel="always">
-                                            <mat-label class="font-medium">Product Type</mat-label>
-                                            <mat-select
-                                                required
-                                                floatLabel="always"
-                                                [(ngModel)]="productType"
-                                                [ngModelOptions]="{standalone: true}"
-                                                (selectionChange)="changeProductType(typeSelector.value)"
-                                                #typeSelector="matSelect"
+                                    <!-- Bulk Item, Vehicle Type  -->
+                                    <div class="w-full flex flex-row justify-between">
+                                        <!-- Bulk Item  -->
+                                        <div class="flex flex-col mb-6 md:mb-4">
+                                            <span class="mb-2 sm:mb-2 font-medium leading-tight">Bulk Item 
+                                                <mat-icon
+                                                    matTooltip="E.g. Cake"
+                                                    class="transform scale-75"
+                                                    [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                                </mat-icon>
+                                            </span>
+                                            <div class="mt-0 flex items-center justify-between -my-px w-full">
+                                                <mat-slide-toggle
+                                                    [formControlName]="'isBulkItem'"
+                                                    [color]="'primary'"
+                                                    (change)="( (addProductForm.get('step1').get('isBulkItem').value === true) && ( (addProductForm.get('step1').get('vehicleType').value === 'MOTORCYCLE') || (addProductForm.get('step1').get('vehicleType').value === null ) ) ) ? addProductForm.get('step1').get('vehicleType').setValue('CAR') : ''"
+                                                    >
+                                                    {{addProductForm.get('step1').get('isBulkItem').value === true ? 'Yes' : 'No'}}
+                                                </mat-slide-toggle>
+                                                <!-- *ngIf="selectedProductForm.get('isVariants').value === true" -->
+                                            </div>
+                                        </div>
+                                        <!-- Vehicle Type  -->
+                                        <div *ngIf="addProductForm.get('step1').get('isBulkItem').value === true">
+                                            <mat-form-field 
+                                                class="w-full fuse-mat-no-subscript"
+                                                appearance="fill" floatLabel="always"
                                                 >
-                                                <!-- <mat-select-trigger>
-                                                    <span class="flex items-center">
-                                                        <span>{{ typeSelector.triggerValue }}</span>
-                                                    </span>
-                                                </mat-select-trigger> -->
-                                                <div>
-                                                    <mat-option [value]="'normal'">Normal</mat-option>
-                                                    <mat-option [value]="'combo'">Combo</mat-option>
-                                                    <mat-option [value]="'variant'">With Variants</mat-option>
-                                                    <mat-option [value]="'addon'">With Add-Ons</mat-option>
-                                                </div>
-                                            </mat-select>
-                                            <!-- <mat-slide-toggle
-                                                [formControlName]="'status'"
-                                                [color]="'primary'">
-                                                {{addProductForm.get('step1').get('status').value === "ACTIVE" ? true : false}}
-                                            </mat-slide-toggle> -->
-                                            <!-- <mat-error *ngIf="addProductForm.get('step1').get('status').hasError('required')">
-                                                Required
-                                            </mat-error> -->
-                                        </mat-form-field>
+                                                <mat-label>Vehicle Type</mat-label>
+                                                <mat-select
+                                                    class="w-full"
+                                                    appearance="fill"
+                                                    [formControlName]="'vehicleType'"
+                                                    placeholder="Select one option"
+                                                    (selectionChange)="addProductForm.get('step1').get('vehicleType').patchValue(vehicleTypeSelector.value)"
+                                                    #vehicleTypeSelector="matSelect"
+                                                    >
+                                                    <mat-select-trigger>
+                                                        <span class="flex items-center">
+                                                            <span>{{ vehicleTypeSelector.triggerValue }}</span>
+                                                        </span>
+                                                    </mat-select-trigger>
+                                                    <div>
+                                                        <mat-option *ngFor="let vehicle of deliveryVehicle" [value]="vehicle.vehicleType">{{vehicle.name}}</mat-option>
+                                                    </div>
+                                                </mat-select>
+                                                <mat-error *ngIf="addProductForm.get('step1').get('vehicleType').hasError('required')">
+                                                    Required
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
     
                             <!-- Category, Bulk Item, Vehicle Type -->
                             <div class="flex flex-col w-full lg:w-3/12">
+                                <!-- SKU -->
+                                <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+                                    <mat-label>SKU</mat-label>
+                                    <input
+                                        matInput
+                                        required
+                                        [formControlName]="'sku'"
+                                        placeholder="Insert SKU">
+                                    <mat-error *ngIf="addProductForm.get('step1').get('sku').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                </mat-form-field>
+                                
                                 <!-- Parent categories -->
                                 <div class="w-full">
                                     <mat-form-field class="w-full">
@@ -683,58 +736,6 @@
                                         [ngClass]="addProductForm.get('step1').get('categoryId').hasError('required') ? 'visible' : 'invisible'">
                                         Required
                                     </mat-error>
-                                </div>
-                                <!-- Bulk Item, Vehicle Type  -->
-                                <div class="w-full pt-0 flex flex-row justify-between">
-                                    <!-- Bulk Item  -->
-                                    <div class="flex flex-col lg:mb-4">
-                                        <span class="mb-2 sm:mb-2 font-medium leading-tight">Bulk Item 
-                                            <mat-icon
-                                                matTooltip="E.g. Cake"
-                                                class="transform scale-75"
-                                                [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                            </mat-icon>
-                                        </span>
-                                        <div class="mt-0 flex items-center justify-between -my-px w-full">
-                                            <mat-slide-toggle
-                                                [formControlName]="'isBulkItem'"
-                                                [color]="'primary'"
-                                                (change)="( (addProductForm.get('step1').get('isBulkItem').value === true) && ( (addProductForm.get('step1').get('vehicleType').value === 'MOTORCYCLE') || (addProductForm.get('step1').get('vehicleType').value === null ) ) ) ? addProductForm.get('step1').get('vehicleType').setValue('CAR') : ''"
-                                                >
-                                                {{addProductForm.get('step1').get('isBulkItem').value === true ? 'Yes' : 'No'}}
-                                            </mat-slide-toggle>
-                                            <!-- *ngIf="selectedProductForm.get('isVariants').value === true" -->
-                                        </div>
-                                    </div>
-                                    <!-- Vehicle Type  -->
-                                    <div *ngIf="addProductForm.get('step1').get('isBulkItem').value === true">
-                                        <mat-form-field 
-                                            class="w-full"
-                                            appearance="fill" floatLabel="always"
-                                            >
-                                            <mat-label>Vehicle Type</mat-label>
-                                            <mat-select
-                                                class="w-full"
-                                                appearance="fill"
-                                                [formControlName]="'vehicleType'"
-                                                placeholder="Select one option"
-                                                (selectionChange)="addProductForm.get('step1').get('vehicleType').patchValue(vehicleTypeSelector.value)"
-                                                #vehicleTypeSelector="matSelect"
-                                                >
-                                                <mat-select-trigger>
-                                                    <span class="flex items-center">
-                                                        <span>{{ vehicleTypeSelector.triggerValue }}</span>
-                                                    </span>
-                                                </mat-select-trigger>
-                                                <div>
-                                                    <mat-option *ngFor="let vehicle of deliveryVehicle" [value]="vehicle.vehicleType">{{vehicle.name}}</mat-option>
-                                                </div>
-                                            </mat-select>
-                                            <mat-error *ngIf="addProductForm.get('step1').get('vehicleType').hasError('required')">
-                                                Required
-                                            </mat-error>
-                                        </mat-form-field>
-                                    </div>
                                 </div>
                             </div>
                         </div>
