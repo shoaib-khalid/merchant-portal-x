@@ -352,7 +352,7 @@ export class AddOnProductComponent
             this._changeDetectorRef.markForCheck();
             
         }
-        // Emit toggle state to parent component
+        // Emit toggle state to parent component - to disable Update button
         this.dataFromAddOnEmitter.emit(toggleValue)
     }
 
@@ -400,6 +400,9 @@ export class AddOnProductComponent
         this.selectedGroupOnProductIndex = index;
         this.maxAllowed = addOn.maxAllowed;
         this.minAllowed = addOn.minAllowed;
+
+        // Emit toggle state to parent component - to disable Update button
+        this.dataFromAddOnEmitter.emit(this.selectedGroupOnProduct ? true : false)
         
         // Mark for check
         this._changeDetectorRef.markForCheck();
@@ -508,6 +511,9 @@ export class AddOnProductComponent
         if (this.selectDropdown) this.selectDropdown.value = null;
         this.maxAllowed = 0;
         this.minAllowed = 0;
+
+        // Emit toggle state to parent component - to disable Update button
+        this.dataFromAddOnEmitter.emit(false)
 
         // Mark for check
         this._changeDetectorRef.markForCheck();

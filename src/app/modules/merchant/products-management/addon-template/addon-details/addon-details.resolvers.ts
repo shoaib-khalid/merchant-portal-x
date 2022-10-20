@@ -49,7 +49,7 @@ export class AddOnGroupTemplateResolver implements Resolve<any>
                         }),
                         take(1),
                         switchMap((groupTemplate) => {
-                                return this._inventoryService.getAddOnItemTemplates({ page: 0, pageSize: 10, groupId: groupTemplate.id })
+                                return this._inventoryService.getAddOnItemTemplates({ page: 0, pageSize: 20, groupId: groupTemplate.id })
                         }),
                    );
 

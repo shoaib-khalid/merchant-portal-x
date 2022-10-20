@@ -212,8 +212,8 @@ export class AddOnListComponent implements OnInit, AfterViewInit, OnDestroy
         if (this.selection.selected.length > 0) {
             // Open the confirmation dialog
             const confirmation = this._fuseConfirmationService.open({
-                title  : 'Delete selected categories',
-                message: 'Are you sure you want to delete categories? This action cannot be undone!',
+                title  : 'Delete selected templates',
+                message: 'Are you sure you want to delete templates? This action cannot be undone!',
                 actions: {
                     confirm: {
                         label: 'Delete'

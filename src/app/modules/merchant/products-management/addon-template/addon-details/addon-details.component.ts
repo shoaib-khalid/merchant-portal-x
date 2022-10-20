@@ -192,8 +192,27 @@ export class AddOnDetailsComponent implements OnInit, OnDestroy
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
                 },
-                error: (error) => {
-                    console.error('ERROR', error);
+                error: (err) => {
+                    console.error('ERROR', err);
+
+                    this._fuseConfirmationService.open({
+                        title  : err.error.error ? 'Error ' + err.error.error : 'Error',
+                        message: err.error.message ? err.error.message : err.message,
+                        icon: {
+                            show: true,
+                            name: "heroicons_outline:exclamation",
+                            color: "warn"
+                        },
+                        actions: {
+                            confirm: {
+                                label: 'OK',
+                                color: "primary",
+                            },
+                            cancel: {
+                                show: false,
+                            },
+                        }
+                    });
                 }
             })
         }
@@ -227,22 +246,43 @@ export class AddOnDetailsComponent implements OnInit, OnDestroy
             {
 
                 // Delete the product on the server
-                this._inventoryService.deleteAddOnGroupTemplate(this.selectedTemplate.id).subscribe(() => {
-                
-                    setTimeout(() => {
-                        // Go back to the list
-                        this._router.navigate(['.'], {relativeTo: this._activatedRoute.parent});
-        
-                        // Mark for check
-                        this._changeDetectorRef.markForCheck();
-                        
-                    }, 300);
+                this._inventoryService.deleteAddOnGroupTemplate(this.selectedTemplate.id)
+                .subscribe({
+                    next: () => {
+                        setTimeout(() => {
+                            // Go back to the list
+                            this._router.navigate(['.'], {relativeTo: this._activatedRoute.parent});
+            
+                            // Mark for check
+                            this._changeDetectorRef.markForCheck();
+                        }, 300);
+                    },
+                    error: (err) => {
+                        this._fuseConfirmationService.open({
+                            title  : err.error.error ? 'Error ' + err.error.error : 'Error',
+                            message: err.error.message ? err.error.message : err.message,
+                            icon: {
+                                show: true,
+                                name: "heroicons_outline:exclamation",
+                                color: "warn"
+                            },
+                            actions: {
+                                confirm: {
+                                    label: 'OK',
+                                    color: "primary",
+                                },
+                                cancel: {
+                                    show: false,
+                                },
+                            }
+                        });
+
+                    }
 
                 });
             }
         });
 
-        
     }
 
     /**
@@ -265,7 +305,8 @@ export class AddOnDetailsComponent implements OnInit, OnDestroy
 
         const addOnGroupBody = {
             storeId : this.store$.id,
-            title   : this.addOnForm.get('title').value
+            title   : this.addOnForm.get('title').value,
+            status  : 'AVAILABLE'
         }
 
         this._inventoryService.createAddOnGroupTemplate(addOnGroupBody)
@@ -276,7 +317,8 @@ export class AddOnDetailsComponent implements OnInit, OnDestroy
                             dineInPrice : item.dineInPrice,
                             name        : item.name,
                             price       : item.price,
-                            groupId     : template.id
+                            groupId     : template.id,
+                            status      : 'AVAILABLE'
                         }
                     });
                     return this._inventoryService.createAddOnItemTemplateBulk(addOnItemBodies)
@@ -295,14 +337,14 @@ export class AddOnDetailsComponent implements OnInit, OnDestroy
         
             })
 
-
     }
 
     saveTemplate() {
 
         const addOnGroupBody = {
             storeId : this.store$.id,
-            title   : this.addOnForm.get('title').value
+            title   : this.addOnForm.get('title').value,
+            status  : 'AVAILABLE'
         }
 
         this._inventoryService.updateAddOnGroupTemplate(this.addOnForm.get('id').value, addOnGroupBody)
@@ -314,7 +356,8 @@ export class AddOnDetailsComponent implements OnInit, OnDestroy
                             dineInPrice : item.dineInPrice,
                             name        : item.name,
                             price       : item.price,
-                            groupId     : template.id
+                            groupId     : template.id,
+                            status      : 'AVAILABLE'
                         }
                     });
                     return this._inventoryService.createAddOnItemTemplateBulk(addOnItemBodies)
@@ -331,10 +374,8 @@ export class AddOnDetailsComponent implements OnInit, OnDestroy
                     
                 }, 300);
 
-        
             })
 
-        
     }
 
     // DISABLED
