@@ -196,7 +196,7 @@ export class AddOnDetailsComponent implements OnInit, OnDestroy
                     console.error('ERROR', err);
 
                     this._fuseConfirmationService.open({
-                        title  : err.error.error ? 'Error ' + err.error.error : 'Error',
+                        title  : err.error.error ? err.error.error : 'Error',
                         message: err.error.message ? err.error.message : err.message,
                         icon: {
                             show: true,
@@ -259,7 +259,7 @@ export class AddOnDetailsComponent implements OnInit, OnDestroy
                     },
                     error: (err) => {
                         this._fuseConfirmationService.open({
-                            title  : err.error.error ? 'Error ' + err.error.error : 'Error',
+                            title  : err.error.error ? err.error.error : 'Error',
                             message: err.error.message ? err.error.message : err.message,
                             icon: {
                                 show: true,
