@@ -134,37 +134,38 @@
                             <!-- [value]="(selectedGroupOnProduct) ? selectedGroupOnProduct.maxAllowed : 0" -->
                     </mat-form-field>
                     <!-- Buttons -->
-                    <div class="col-span-2">
+                    <div class="col-span-2 mt-1">
                         <div class="w-full flex">
-                            <button
-                                *ngIf="selectedGroupTemplate && selectedGroupOnProduct"
-                                type="button"
-                                class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-gray-300 hover:bg-gray-400 mr-3"
-                                (click)="resetSelectedGroup();">
-                                <mat-icon
-                                    class="text-white icon-size-5"
-                                    [svgIcon]="'heroicons_outline:x'"></mat-icon>
-                            </button>
-                            <button
-                                *ngIf="selectedGroupTemplate && selectedGroupOnProduct"
-                                type="button"
-                                class="flex items-center justify-center w-9 h-9 rounded-full bg-blue-600 mr-0"
-                                (click)="updateSelectedGroup()"
-                                (click)="minTotalAllow.value = 0; maxTotalAllow.value = 1"
-                                [disabled]="minTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || maxTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || 
-                                                maxTotalAllow.value === 0"
-                                [ngClass]="(minTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || maxTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length) || 
-                                                maxTotalAllow.value === 0 ? 
-                                    'bg-blue-500 opacity-50 cursor-default' : 'hover:bg-blue-400 cursor-pointer'"
-                                >
-                                <mat-icon
-                                    class="text-white icon-size-5"
-                                    [svgIcon]="'heroicons_outline:check'"></mat-icon>
-                            </button>
+                            <div class="w-full flex flex-row gap-1" *ngIf="selectedGroupTemplate && selectedGroupOnProduct">
+                                <button
+                                    type="button"
+                                    class="flex items-center justify-center w-1/4 h-9 rounded cursor-pointer bg-gray-300 hover:bg-gray-400"
+                                    (click)="resetSelectedGroup();">
+                                    <mat-icon
+                                        class="text-white icon-size-5"
+                                        [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                                </button>
+                                <button
+                                    type="button"
+                                    class="flex items-center justify-center w-3/4 h-9 rounded bg-blue-600 text-white"
+                                    (click)="updateSelectedGroup()"
+                                    (click)="minTotalAllow.value = 0; maxTotalAllow.value = 1"
+                                    [disabled]="minTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || maxTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || 
+                                                    maxTotalAllow.value === 0"
+                                    [ngClass]="(minTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || maxTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length) || 
+                                                    maxTotalAllow.value === 0 ? 
+                                        'bg-blue-500 opacity-50 cursor-default' : 'hover:bg-blue-400 cursor-pointer'"
+                                    >
+                                    <mat-icon
+                                        class="text-white icon-size-5"
+                                        [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                                        Update
+                                </button>
+                            </div>
                             <button
                                 *ngIf="selectedGroupTemplate && !selectedGroupOnProduct && selectedItemsTemplates.length > 0"
                                 type="button"
-                                class="flex items-center justify-center w-9 h-9 rounded-full bg-blue-600 mr-0"
+                                class="flex items-center justify-center w-full h-9 rounded bg-blue-600 text-white"
                                 (click)="createSelectedTemplate()"
                                 (click)="minTotalAllow.value = 0; maxTotalAllow.value = 1"
                                 [disabled]="minTotalAllow.value > selectedItemsTemplates.length || maxTotalAllow.value > selectedItemsTemplates.length ||
@@ -176,6 +177,7 @@
                                 <mat-icon
                                     class="text-white icon-size-5"
                                     [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                                    Add
                             </button>
                         </div>
                     </div>

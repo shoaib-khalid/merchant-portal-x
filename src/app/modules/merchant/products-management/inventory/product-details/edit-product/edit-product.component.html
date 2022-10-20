@@ -1708,84 +1708,82 @@
                                 [svgIcon]="'heroicons_outline:trash'">
                             </mat-icon>
                         </label>
-
-                        </div>
-                        <!-- Cancel, Back, Update buttons -->
-                        <div class="justify-self-end flex col-span-3 fixed sm:static bottom-4 right-8 z-10">
-                            <!-- Flash message -->
-                            <div
-                                class="flex items-center mr-4"
-                                [ngClass]="flashMessage ? 'visible' : 'invisible'"
-                                >
-                                <ng-container *ngIf="flashMessage === 'success'">
-                                    <mat-icon
-                                        class="text-green-500"
-                                        [svgIcon]="'heroicons_outline:check'"></mat-icon>
-                                    <span class="ml-2">Product updated</span>
-                                </ng-container>
-                                <ng-container *ngIf="flashMessage === 'error'">
-                                    <mat-icon
-                                        class="text-red-500"
-                                        [svgIcon]="'heroicons_outline:x'"></mat-icon>
-                                    <span class="ml-2">An error occurred, try again!</span>
-                                </ng-container>
-                            </div>
-                            <!-- Cancel button -->
-                            <button
-                                mat-flat-button
-                                class="sm:w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
-                                [color]="'gray'"
-                                (click)="cancelAddProduct()"
-                                >
-                                <mat-icon
-                                    *ngIf="!currentScreenSize.includes('sm')"
-                                    class="text-white icon-size-5"
-                                    [svgIcon]="'heroicons_outline:x'">
-                                </mat-icon>
-                                <span class="hidden sm:block justify-center">
-                                    Cancel
-                                </span>
-                            </button>
-                            <!-- Back button  -->
-                            <button
-                                class="sm:px-8 mr-2 sm:w-24"
-                                mat-flat-button
-                                [color]="'accent'"
-                                type="button"
-                                matStepperPrevious>
-                                <mat-icon
-                                    *ngIf="!currentScreenSize.includes('sm')"
-                                    class="text-white icon-size-5"
-                                    [svgIcon]="'heroicons_outline:chevron-left'">
-                                </mat-icon>
-                                <span class="hidden sm:block justify-center">
-                                    Back
-                                </span>
-                            </button>
-                            <!-- Update button -->
-                            <button
-                                class="sm:px-8 sm:w-24"
-                                [ngClass]="isLoading ? 'cursor-wait' : 'cursor-pointer'"
-                                mat-flat-button
-                                [color]="'primary'"
-                                type="button"
-                                [disabled]="isLoading || horizontalStepperVariantStep.stepControl.invalid"
-                                (click)="updateProductMethod()"
-                                matStepperNext>
-                                <mat-icon
-                                    *ngIf="!currentScreenSize.includes('sm')"
-                                    class="text-white icon-size-5"
-                                    [svgIcon]="'heroicons_outline:check'">
-                                </mat-icon>
-                                <span class="hidden sm:block justify-center">
-                                    Update
-                                </span>
-                            </button>
-
-                        </div>
                     </div>
-                    
-                </mat-step>
+                    <!-- Cancel, Back, Update buttons -->
+                    <div class="justify-self-end flex col-span-3 fixed sm:static bottom-4 right-8 z-10">
+                        <!-- Flash message -->
+                        <div
+                            class="flex items-center mr-4"
+                            [ngClass]="flashMessage ? 'visible' : 'invisible'"
+                            >
+                            <ng-container *ngIf="flashMessage === 'success'">
+                                <mat-icon
+                                    class="text-green-500"
+                                    [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                                <span class="ml-2">Product updated</span>
+                            </ng-container>
+                            <ng-container *ngIf="flashMessage === 'error'">
+                                <mat-icon
+                                    class="text-red-500"
+                                    [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                                <span class="ml-2">An error occurred, try again!</span>
+                            </ng-container>
+                        </div>
+                        <!-- Cancel button -->
+                        <button
+                            mat-flat-button
+                            class="sm:w-24 mr-2 bg-gray-300 hover:bg-gray-500 border border-gray-500"
+                            [color]="'gray'"
+                            (click)="cancelAddProduct()"
+                            >
+                            <mat-icon
+                                *ngIf="!currentScreenSize.includes('sm')"
+                                class="text-white icon-size-5"
+                                [svgIcon]="'heroicons_outline:x'">
+                            </mat-icon>
+                            <span class="hidden sm:block justify-center">
+                                Cancel
+                            </span>
+                        </button>
+                        <!-- Back button  -->
+                        <button
+                            class="sm:px-8 mr-2 sm:w-24"
+                            mat-flat-button
+                            [color]="'accent'"
+                            type="button"
+                            matStepperPrevious>
+                            <mat-icon
+                                *ngIf="!currentScreenSize.includes('sm')"
+                                class="text-white icon-size-5"
+                                [svgIcon]="'heroicons_outline:chevron-left'">
+                            </mat-icon>
+                            <span class="hidden sm:block justify-center">
+                                Back
+                            </span>
+                        </button>
+                        <!-- Update button -->
+                        <button
+                            class="sm:px-8 sm:w-24"
+                            [ngClass]="isLoading ? 'cursor-wait' : 'cursor-pointer'"
+                            mat-flat-button
+                            [color]="'primary'"
+                            type="button"
+                            [disabled]="isLoading || horizontalStepperVariantStep.stepControl.invalid"
+                            (click)="updateProductMethod()"
+                            matStepperNext>
+                            <mat-icon
+                                *ngIf="!currentScreenSize.includes('sm')"
+                                class="text-white icon-size-5"
+                                [svgIcon]="'heroicons_outline:check'">
+                            </mat-icon>
+                            <span class="hidden sm:block justify-center">
+                                Update
+                            </span>
+                        </button>
+
+                    </div>
+                </div>
+            </mat-step>
 
             <!-- Combo section -->
             <mat-step
