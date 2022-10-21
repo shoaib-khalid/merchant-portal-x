@@ -262,6 +262,38 @@ export class AddOnProductComponent
         this._changeDetectorRef.markForCheck();
     }
 
+    selectAllTemplateItems(templateItems: ItemTemplateList[], isChecked: boolean) {
+        if (templateItems) {
+
+            if (isChecked) {
+                this.selectedItemsTemplates = templateItems.map(templateItem => {
+                    return {
+                        dineInPrice : templateItem.dineInPrice,
+                        groupId     : this.selectedGroupTemplate.id,
+                        id          : templateItem.addonTemplateItemId,
+                        name        : templateItem.name,
+                        price       : templateItem.price
+                    }
+                })
+                this.allSelected = true;
+            }
+            else {
+                this.selectedItemsTemplates = [];
+                this.allSelected = false;
+            }
+            this.selectedGroupTemplate.addOnTemplateItem = this.selectedItemsTemplates;
+            this.maxAllowed = this.selectedItemsTemplates.length > 0 ? this.selectedItemsTemplates.length : 1;
+        }
+        else return;
+    }
+
+    validateAllCheckbox() {
+        if (this.allSelected) {
+            return true;
+        }
+        else return false;
+    }
+
     selectTemplateItemsCreate(templateItem: ItemTemplateList, isChecked: any){
 
         let selectedItemIndex = this.selectedItemsTemplates.findIndex(x => x.id === templateItem.addonTemplateItemId);
@@ -294,10 +326,10 @@ export class AddOnProductComponent
         this.selectedItemsTemplates = [];
         this.itemTemplatesList = [];
         this.maxAllowed = 1;
-
+        this.allSelected = false;
         this.selectedGroupTemplate = template;
 
-        this._inventoryService.getAddOnItemTemplates({page: 0, pageSize: 10, groupId: template.id})
+        this._inventoryService.getAddOnItemTemplates({page: 0, pageSize: 20, groupId: template.id})
         .subscribe(items => {
             
             this.itemTemplatesList = items.map(item => {
@@ -377,6 +409,8 @@ export class AddOnProductComponent
 
     selectGroup(addOn: AddOnProduct, index: number) {
 
+        this.allSelected = false;
+
         this._inventoryService.getAddOnGroupTemplateById(addOn.groupId)
             .subscribe((resp: AddOnGroupTemplate) => {
 
@@ -392,6 +426,7 @@ export class AddOnProductComponent
                         productId: this.productId
                     }
                 })
+
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             })
@@ -403,7 +438,7 @@ export class AddOnProductComponent
 
         // Emit toggle state to parent component - to disable Update button
         this.dataFromAddOnEmitter.emit(this.selectedGroupOnProduct ? true : false)
-        
+
         // Mark for check
         this._changeDetectorRef.markForCheck();
         
@@ -418,7 +453,7 @@ export class AddOnProductComponent
                 maxAllowed  : this.maxAllowed,
                 minAllowed  : this.minAllowed,
                 productId   : this.productId,
-                sequenceNumber: this.selectedGroupOnProduct.sequenceNumber,
+                sequenceNumber: this.selectedGroupOnProduct.sequenceNumber ? this.selectedGroupOnProduct.sequenceNumber : 0,
                 status        : 'AVAILABLE'
             }
 
@@ -511,6 +546,7 @@ export class AddOnProductComponent
         if (this.selectDropdown) this.selectDropdown.value = null;
         this.maxAllowed = 0;
         this.minAllowed = 0;
+        this.allSelected = false;
 
         // Emit toggle state to parent component - to disable Update button
         this.dataFromAddOnEmitter.emit(false)

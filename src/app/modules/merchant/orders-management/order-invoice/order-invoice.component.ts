@@ -147,10 +147,10 @@ export class OrderInvoiceComponent implements OnInit {
             this.invoiceForm.get('storeName').setValue(order["data"].store.name);
             
             const merchantAddress = () => {
-                const address1 = order["data"].store.address === null ? ' ' : order["data"].store.address + ', ';
-                const city1 = order["data"].store.city === null ? ' ' : order["data"].store.city + ', ';
-                const state1 = order["data"].store.regionCountryStateId === null ? ' ' : order["data"].store.regionCountryStateId + ', ';
-                const postcode1 = order["data"].store.postcode === null ? ' ' : order["data"].store.postcode;
+                const address1 = order["data"].store.address ? order["data"].store.address + ', ' : '';
+                const city1 = order["data"].store.city ? order["data"].store.city + ', ' : '';
+                const state1 = order["data"].store.regionCountryStateId ? order["data"].store.regionCountryStateId + ', ' : '';
+                const postcode1 = order["data"].store.postcode ? order["data"].store.postcode : '';
   
                 return `${address1}${city1}${state1}${postcode1}`;
             }
@@ -162,10 +162,10 @@ export class OrderInvoiceComponent implements OnInit {
             this.invoiceForm.get('customerName').setValue(order["data"].orderShipmentDetail.receiverName);
 
             const detailCustomerAddress = () => {
-              const address2 = order["data"].orderShipmentDetail.address === null ? ' ' : order["data"].orderShipmentDetail.address+', ';
-              const city2 = order["data"].orderShipmentDetail.city === null ? ' ' : order["data"].orderShipmentDetail.city+', ';
-              const state2 = order["data"].orderShipmentDetail.state === null ? ' ' : order["data"].orderShipmentDetail.state+', ';
-              const postcode2 = order["data"].orderShipmentDetail.zipcode === null ? ' ' : order["data"].orderShipmentDetail.zipcode+'';
+              const address2 = order["data"].orderShipmentDetail.address ? order["data"].orderShipmentDetail.address + ', ' : '';
+              const city2 = order["data"].orderShipmentDetail.city ? order["data"].orderShipmentDetail.city + ', ' : '';
+              const state2 = order["data"].orderShipmentDetail.state ? order["data"].orderShipmentDetail.state + ', ' : '';
+              const postcode2 = order["data"].orderShipmentDetail.zipcode ? order["data"].orderShipmentDetail.zipcode + '' : '';
 
               return `${address2}${city2}${state2}${postcode2}`;
             }
@@ -269,6 +269,7 @@ export class OrderInvoiceComponent implements OnInit {
 
               // Create item form group
               item.orderSubItem = this._formBuilder.array(item.orderSubItem)
+              item.orderItemAddOn = this._formBuilder.array(item.orderItemAddOn)
               itemsFormGroups.push(
                 this._formBuilder.group(item)
               )

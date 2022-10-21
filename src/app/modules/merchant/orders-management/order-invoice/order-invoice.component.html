@@ -53,8 +53,8 @@
                     <!-- Columns -->
                     <div class="col-span-4 font-medium text-md text-secondary">ITEMS</div>
                     <div class="col-span-2 font-medium text-md text-right text-secondary">RATE</div>
-                    <div class="col-span-2 font-medium text-md text-right text-secondary">ORIGINAL QUANTITY</div>
-                    <div class="col-span-1 font-medium text-md text-right text-secondary">QUANTITY</div>
+                    <div class="col-span-2 font-medium text-md text-center text-secondary">ORI QTY</div>
+                    <div class="col-span-1 font-medium text-md text-center text-secondary">QTY</div>
                     <div class="col-span-2 font-medium text-md text-right text-secondary">TOTAL</div>
     
                     <ng-container *ngFor="let item of invoiceForm.get('items').value">
@@ -68,6 +68,13 @@
                                 <span class="mr-1 mb-1" *ngFor="let variant of item.productVariant">
                                     <span class="py-0.5 px-1.5 bg-gray-200 text-secondary rounded-full text-sm" >
                                         {{ variant }}
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="flex flex-wrap text-secondary" *ngIf="item.orderItemAddOn">
+                                <span class="mr-1 mb-1" *ngFor="let addon of item.orderItemAddOn">
+                                    <span class="py-0.5 px-1.5 bg-gray-200 text-secondary rounded-full text-sm"  >
+                                        {{addon.productAddOn.addOnTemplateItem.name}}
                                     </span>
                                 </span>
                             </div>

@@ -4,7 +4,7 @@
     <div class="flex flex-col flex-auto w-full">
         <div class="flex flex-wrap item-center justify-center w-full max-w-screen-xl mx-auto p-0 md:p-8">
 
-            <div class="lg:max-w-160 p-2 lg:p-10 rounded-2xl shadow bg-card print:w-auto print:p-0 print:rounded-none print:shadow-none print:bg-transparent text-sm">
+            <div class="lg:max-w-200 p-2 lg:p-10 rounded-2xl shadow bg-card print:w-auto print:p-0 print:rounded-none print:shadow-none print:bg-transparent text-sm">
                 <div>
 
                 <div class="grid grid-cols-2 gap-x-4 px-2 pt-2 lg:pt-0 lg:px-0">
@@ -233,6 +233,13 @@
                                     <span class="mr-1 mb-1" *ngFor="let combo of item.orderSubItem">
                                         <span class="py-0.5 px-1.5 bg-gray-200 text-secondary rounded-full text-sm"  >
                                             {{combo.productName}}
+                                        </span>
+                                    </span>
+                                </div>
+                                <div class="flex flex-wrap text-secondary" *ngIf="item.orderItemAddOn">
+                                    <span class="mr-1 mb-1" *ngFor="let addon of item.orderItemAddOn">
+                                        <span class="py-0.5 px-1.5 bg-gray-200 text-secondary rounded-full text-sm"  >
+                                            {{addon.productAddOn.addOnTemplateItem.name}}
                                         </span>
                                     </span>
                                 </div>

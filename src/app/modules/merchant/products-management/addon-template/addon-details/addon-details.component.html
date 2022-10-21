@@ -34,7 +34,7 @@
                 <mat-label class="font-medium">Options *</mat-label>
                 <div class="flex flex-col gap-1.5 list-class" formArrayName="options">
                     <!-- Header -->
-                    <div class="grid grid-cols-8 items-center z-10 sticky top-0 gap-1 py-2">
+                    <div class="grid grid-cols-8 items-center gap-1 py-2">
                         <div class="col-span-3 text-sm md:text-base">Name</div>
                         <div class="col-span-2 text-sm md:text-base">DeliverIn Price</div>
                         <div class="col-span-2 text-sm md:text-base">DineIn Price</div>
@@ -53,16 +53,6 @@
                             <ng-container *ngIf="!optionsData[i]">
                                 <!-- Price -->
                                 <mat-form-field class="col-span-2 fuse-mat-no-subscript text-sm md:text-base" appearance="fill" floatLabel="always">
-                    
-                                    <!-- <ng-container *ngIf="optionsData[i] && optionsData[i].addOnPrice">
-                                        <mat-select formControlName="addOnPrice"
-                                                    placeholder="Lesson level" [(value)]="optionsData[i].addOnPrice">
-                            
-                                        <mat-option value="beginner">Beginner</mat-option>
-                                        <mat-option value="intermediate">Intermediate</mat-option>
-                                        <mat-option value="advanced">Advanced</mat-option>
-                                    </mat-select>
-                                    </ng-container> -->
                                     <input
                                         class="text-left"
                                         matInput

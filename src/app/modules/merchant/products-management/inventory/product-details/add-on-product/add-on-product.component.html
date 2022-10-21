@@ -44,46 +44,34 @@
                     </div>
                 </div>
                 <div class="mt-1 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden">
-                    <!-- Header -->
-                    <!-- <div class="flex items-center -my-px py-2 px-3">
-                        <div class="flex items-center flex-auto min-w-0">
-                            <mat-icon
-                                class="icon-size-5"
-                                [svgIcon]="'heroicons_solid:search'"></mat-icon>
-                            <input
-                                class="min-w-0 ml-2 py-1 border-0"
-                                type="text"
-                                placeholder="Search option name"
-                                (input)="filterProducts($event)"
-                                (keydown)="filterProductsInputKeyDown($event)"
-                                [maxLength]="50"
-                                #newProductInput>
-                        </div>
-                    </div> -->
                     <!-- Add product to option -->
-                    <div class="h-48 max-h-48 py-1 leading-none overflow-y-auto border-gray-300 dark:border-gray-500">
+                    <div class="h-60 max-h-60 leading-none overflow-y-auto border-gray-300 dark:border-gray-500">
                         <!-- Products -->
                         <ng-container *ngIf="itemTemplatesList">
-                            <ng-container *ngFor="let item of itemTemplatesList ; let i = index; trackBy: trackByFn;">
-                                <!-- <mat-checkbox
+                            <!-- Select All -->
+                            <div *ngIf="selectedGroupTemplate && !selectedGroupOnProduct" class="border-b sticky top-0 z-10 bg-white">
+                                <mat-checkbox
                                     class="flex items-center h-10 min-h-10 px-4"
                                     [color]="'primary'"
-                                    (change)="selectTemplateItems(item.id, $event)"
-                                    [checked]="onChangeSelectProductValue.includes(product.id)"
-                                    [ngModelOptions]="{standalone: true}"
-                                    [disabled]="product.isPackage"
+                                    (change)="selectAllTemplateItems(itemTemplatesList ? itemTemplatesList : null, $event.checked)"
+                                    [disabled]="selectedGroupOnProduct || !selectedGroupTemplate"
+                                    [checked]="selectedGroupTemplate ? ((selectedItemsTemplates.length !== 0) && 
+                                                    (selectedGroupTemplate.addOnTemplateItem.length === itemTemplatesList.length))
+                                                    : false"
                                     >
-                                    {{item.name}}
-                                </mat-checkbox> -->
+                                    All
+                                </mat-checkbox>
+                            </div>
+                            <ng-container *ngFor="let item of itemTemplatesList ; let i = index; trackBy: trackByFn;">
                                 <!-- Checkbox -->
                                 <div>
                                     <!-- [checked]="selection.isSelected(item)" -->
                                     <!-- (change)="$event ? selection.toggle(item) : null" -->
                                     <mat-checkbox 
-                                        class="flex items-center h-9 min-h-9 px-4"
+                                        class="flex items-center h-10 min-h-10 px-4"
                                         [color]="'primary'" (click)="$event.stopPropagation()"
                                         (change)="selectedGroupOnProduct ? selectTemplateItemsUpdate(item, $event.checked) : selectTemplateItemsCreate(item, $event.checked)"
-                                        [checked]="selectedGroupOnProduct ? validateCheckbox(item.addonTemplateItemId) : null">
+                                        [checked]="selectedGroupOnProduct ? validateCheckbox(item.addonTemplateItemId) : validateAllCheckbox()">
                                         {{item.name}}
                                     </mat-checkbox>
                                 </div>
@@ -149,7 +137,6 @@
                                     type="button"
                                     class="flex items-center justify-center w-3/4 h-9 rounded bg-blue-600 text-white"
                                     (click)="updateSelectedGroup()"
-                                    (click)="minTotalAllow.value = 0; maxTotalAllow.value = 1"
                                     [disabled]="minTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || maxTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || 
                                                     maxTotalAllow.value === 0"
                                     [ngClass]="(minTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || maxTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length) || 
@@ -167,7 +154,6 @@
                                 type="button"
                                 class="flex items-center justify-center w-full h-9 rounded bg-blue-600 text-white"
                                 (click)="createSelectedTemplate()"
-                                (click)="minTotalAllow.value = 0; maxTotalAllow.value = 1"
                                 [disabled]="minTotalAllow.value > selectedItemsTemplates.length || maxTotalAllow.value > selectedItemsTemplates.length ||
                                                 maxTotalAllow.value === 0"
                                 [ngClass]="(minTotalAllow.value > selectedItemsTemplates.length || maxTotalAllow.value > selectedItemsTemplates.length) || 

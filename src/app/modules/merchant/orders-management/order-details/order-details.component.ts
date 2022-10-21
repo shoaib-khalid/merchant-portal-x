@@ -270,6 +270,7 @@ export class OrderDetailsComponent implements OnInit
             
                             // Create item form group
                             item.orderSubItem = this._formBuilder.array(item.orderSubItem);
+                            item.orderItemAddOn = this._formBuilder.array(item.orderItemAddOn);
                             itemsFormGroups.push(this._formBuilder.group(item));
                         });
                         
