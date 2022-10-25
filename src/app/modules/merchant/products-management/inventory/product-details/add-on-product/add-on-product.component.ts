@@ -499,7 +499,7 @@ export class AddOnProductComponent
                 maxAllowed  : this.maxAllowed,
                 minAllowed  : this.minAllowed,
                 productId   : this.productId,
-                sequenceNumber: biggestSeq + 1,
+                sequenceNumber: biggestSeq > -1 ? biggestSeq + 1 : 0,
                 status        : 'AVAILABLE'
             }
 
