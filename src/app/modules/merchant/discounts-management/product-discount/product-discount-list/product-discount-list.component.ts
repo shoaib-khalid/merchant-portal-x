@@ -381,7 +381,7 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
     {
         const dialogRef = this._dialog.open(
             CreateProductDiscountDialogComponent, {
-                width: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
+                width: this.currentScreenSize.includes('sm') ? '80%' : '100%',
                 height: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
                 maxWidth: this.currentScreenSize.includes('sm') ? 'auto' : '100vw',  
                 maxHeight: this.currentScreenSize.includes('sm') ? 'auto' : '100vh',
@@ -743,7 +743,7 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
 
         const dialogRef = this._dialog.open(
             EditProductDiscountDialogComponent, {
-                width: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
+                width: this.currentScreenSize.includes('sm') ? '80%' : '100%',
                 height: this.currentScreenSize.includes('sm') ? 'auto' : '100%',
                 maxWidth: this.currentScreenSize.includes('sm') ? 'auto' : '100vw',  
                 maxHeight: this.currentScreenSize.includes('sm') ? 'auto' : '100vh',

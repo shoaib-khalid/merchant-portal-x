@@ -37,18 +37,18 @@ import { CartService } from 'app/core/cart/cart.service';
             padding-left: 8px;
             padding-right: 8px;
         }
+        :host ::ng-deep .mat-paginator .mat-paginator-container {
+            padding: 0px 16px;
+        }
         .edit-product-product-grid {
-            grid-template-columns: 80px 80px auto 80px;
+            grid-template-columns: 30px auto 58px;
 
-            @screen sm {
-                grid-template-columns: 30px auto 104px 104px;
-            }
         }
         .edit-product-discount-grid {
-            grid-template-columns: 80px 80px auto 80px;
+            grid-template-columns: 80px 64px 80px 80px 80px;
 
             @screen sm {
-                grid-template-columns: auto 104px 90px 90px;
+                grid-template-columns: auto 64px 90px 90px 90px;
             }
         }
     `]
@@ -99,6 +99,7 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
     //================EDIT SECTION
     editModeDiscountProduct:any = [];
     editDiscountAmount :number;
+    editDineInDiscountAmount :number;
 
     currentScreenSize: string[] = [];
 
@@ -474,27 +475,32 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
     // Edit discount product
     editStoreProductDiscount(productDiscount){
 
-        if(this.editDiscountAmount>100||this.editDiscountAmount<0){
-            const confirmation = this.displayMessage('Cannot more than 100 or less than 0','Please change the discount amount','OK',false);
+        if (this.editDiscountAmount > 100 || this.editDiscountAmount < 0){
+            const confirmation = this.displayMessage('Cannot be more than 100 or less than 0','Please change the discount amount','OK',false);
 
         } 
         else{
             let payloadProductDiscount = {
                 
-                    id: productDiscount.id,
-                    storeDiscountId: productDiscount.storeDiscountId,
-                    itemCode:productDiscount.itemCode,
-                    calculationType:'PERCENT',
-                    discountAmount:this.editDiscountAmount?this.editDiscountAmount:productDiscount.discountAmount
-                
-            }
+                    id              : productDiscount.id,
+                    storeDiscountId : productDiscount.storeDiscountId,
+                    itemCode        : productDiscount.itemCode,
+                    calculationType : 'PERCENT',
+                    discountAmount  : this.editDiscountAmount ? this.editDiscountAmount : productDiscount.discountAmount,
 
+                    dineIncalculationType: 'PERCENT',
+                    dineInDiscountAmount : this.editDineInDiscountAmount ? this.editDineInDiscountAmount : productDiscount.dineInDiscountAmount,
+            }
+            
             this._discountProductService.updateProductDiscount(productDiscount.storeDiscountId,payloadProductDiscount).
                     subscribe((response) => {
 
                         if (response) {
                             this._cartService.updateItemPriceBulk(null, [response.itemCode]).subscribe()
                         }
+
+                        this.editDiscountAmount = 0;
+                        this.editDineInDiscountAmount = 0;
                         
                         // Mark for check
                         this._changeDetectorRef.markForCheck();
@@ -538,10 +544,16 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
         }
     }
 
-    inputEditDiscountAmount(index,event){
+    inputEditDiscountAmount(index, event){
 
-        this.editDiscountAmount =event.target.value;
-    
+        this.editDiscountAmount = event.target.value;
+        this.storeDiscountProduct[index].dineInDiscountAmount = event.target.value;
+        this.editDineInDiscountAmount = event.target.value;
+    }
+
+    inputEditDineInDiscountAmount(index, event){
+
+        this.editDineInDiscountAmount = event.target.value;
     }
 
     // --------------------------------------
@@ -552,7 +564,7 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
 
         if (this.onChangeSelectProductValue.length === 0){
             
-            this.displayMessage('Please select the product','Please select product to add product discount','OK',false); 
+            this.displayMessage('Please select products','Please select products to add product discount','OK',false); 
     
         }
         else {
@@ -598,9 +610,9 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
         this.selectedCategory = event.value;
 
         if(this.selectedCategory ){
-            return this._discountProductService.getByQueryProducts(0, 5, 'name', 'asc',this.inputSearchProducts,'ACTIVE,INACTIVE',this.selectedCategory).subscribe();
+            return this._discountProductService.getByQueryProducts(0, 10, 'name', 'asc',this.inputSearchProducts,'ACTIVE,INACTIVE',this.selectedCategory).subscribe();
         } else{
-            return this._discountProductService.getByQueryProducts(0, 5, 'name', 'asc',this.inputSearchProducts,'ACTIVE,INACTIVE').subscribe();
+            return this._discountProductService.getByQueryProducts(0, 10, 'name', 'asc',this.inputSearchProducts,'ACTIVE,INACTIVE').subscribe();
 
         }
 
@@ -617,7 +629,7 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
             debounceTime(500),
             switchMap((event:any) => {
                         
-                return this._discountProductService.getByQueryProducts(0, 5, 'name', 'asc', event.target.value,'ACTIVE,INACTIVE',this.selectedCategory)
+                return this._discountProductService.getByQueryProducts(0, 10, 'name', 'asc', event.target.value,'ACTIVE,INACTIVE',this.selectedCategory)
             }),
             map(() => {
                 this.isLoading = false;

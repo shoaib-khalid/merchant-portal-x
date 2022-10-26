@@ -77,7 +77,7 @@ export class InventoryProductsResolver implements Resolve<any>
     }
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<{ pagination: ProductPagination; products: Product[] }>
     {
-        return this._productDiscountService.getByQueryProducts(0,5,'name','asc','','ACTIVE,INACTIVE');
+        return this._productDiscountService.getByQueryProducts(0,10,'name','asc','','ACTIVE,INACTIVE');
 
     }
 }

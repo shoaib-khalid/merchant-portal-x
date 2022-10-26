@@ -4,7 +4,10 @@ export interface StoreDiscountProduct
     categoryId?: string;
     itemCode?: string;
     storeDiscountId: string;
-
+    dineInDiscountAmount?: number;
+    discountAmount?: number;
+    dineIncalculationType?: string;
+    calculationType?: string;
 }
 
 export interface StoreDiscountProductPagination
