@@ -38,9 +38,9 @@
                         <div class="justify-self-end text-4xl tracking-tight text-secondary">INVOICE</div>
                         <div class="text-4xl">{{ invoiceForm.get('invoiceId').value }}</div>
                         <div class="justify-self-end font-medium tracking-tight text-secondary">CREATED DATE</div>
-                        <div class="font-medium">{{ invoiceForm.get('invoiceCreatedDate').value | date:'MMM dd, h:mm a' }}</div>
+                        <div class="font-medium">{{ invoiceForm.get('invoiceCreatedDate').value | date:'h:mm a MMM dd, yy'}}</div>
                         <div class="justify-self-end font-medium tracking-tight text-secondary">UPDATED DATE</div>
-                        <div class="font-medium">{{ invoiceForm.get('invoiceUpdatedDate').value | date:'MMM dd, h:mm a'}}</div>
+                        <div class="font-medium">{{ invoiceForm.get('invoiceUpdatedDate').value | date:'h:mm a MMM dd, yy'}}</div>
                         <div class="col-span-2 place-self-center w-30 pt-4">
                             <img
                                 class="w-30"

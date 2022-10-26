@@ -14,9 +14,9 @@
                     </div>
                     <div class="grid grid-cols-2 gap-x-4">
                         <span class="font-medium tracking-tight text-secondary ml-1 justify-self-end">CREATED DATE</span>
-                        <span class="font-medium justify-self-end">{{ detailsForm.get('invoiceCreatedDate').value | date:'MMM dd, h:mm a' }}</span>
+                        <span class="font-medium justify-self-end">{{ detailsForm.get('invoiceCreatedDate').value | date:'h:mm a MMM dd, yy'}}</span>
                         <span class="font-medium tracking-tight text-secondary ml-1 justify-self-end">UPDATED DATE</span>
-                        <span class="font-medium justify-self-end">{{ detailsForm.get('invoiceUpdatedDate').value | date:'MMM dd, h:mm a'}}</span>
+                        <span class="font-medium justify-self-end">{{ detailsForm.get('invoiceUpdatedDate').value | date:'h:mm a MMM dd, yy'}}</span>
                     </div>
                     
                 </div>

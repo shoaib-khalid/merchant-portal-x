@@ -284,18 +284,18 @@
                                 <!-- Date -->
                                 <ng-container matColumnDef="created">
                                     <th
-                                        class="w-28 p-0"
+                                        class="w-36 p-0"
                                         mat-header-cell
                                         mat-sort-header
                                         *matHeaderCellDef>
                                         Date
                                     </th>
                                     <td
-                                        class="w-28 p-0 cell-style"
+                                        class="w-36 p-0 cell-style"
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span class="pr-6 whitespace-nowrap">
-                                            {{transaction.order.created | date:'MMM dd, y'}}
+                                            {{transaction.order.orderTimeConverted | date:'hh:mm aaa MMM dd, yy'}}
                                         </span>
                                     </td>
                                 </ng-container>
