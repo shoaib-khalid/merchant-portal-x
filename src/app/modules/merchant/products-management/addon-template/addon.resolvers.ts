@@ -42,6 +42,6 @@ export class AddOnGroupTemplatesResolver implements Resolve<any>
      */
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
     {
-        return this._inventoryService.getAddOnGroupTemplates({page: 0, pageSize: 10, storeId: this.storeId$});
+        return this._inventoryService.getAddOnGroupTemplates({page: 0, pageSize: 30, storeId: this.storeId$});
     }
 }

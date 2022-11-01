@@ -1896,7 +1896,7 @@ export class InventoryService
         } =
         {
             page    : 0,
-            pageSize: 10,
+            pageSize: 20,
             storeId : null
         }
     ): Observable<AddOnGroupTemplate[]>
