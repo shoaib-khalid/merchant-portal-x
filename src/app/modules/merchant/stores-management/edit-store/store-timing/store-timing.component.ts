@@ -18,6 +18,7 @@ export class StoreTimingComponent implements OnInit
 
     storeTimingForm: FormGroup;
     disabledProcced: boolean = false;
+    isAlwaysOpen: boolean = true;
 
     _storeTiming: any;
     storeTiming: FormArray;
@@ -103,6 +104,9 @@ export class StoreTimingComponent implements OnInit
                     }
                     
                     let _item = item;
+                    if (_itemOpenTimeHour === "0") {
+                        _itemOpenTimeHour = "12";
+                    }
                     _item["openTime"] = new TimeSelector(_itemOpenTimeHour,_itemOpenTimeMinute, _itemOpenTimeAMPM);
 
                     //----------------
@@ -122,7 +126,9 @@ export class StoreTimingComponent implements OnInit
                     } else {
                         _itemCloseTimeAMPM = "AM";
                     }
-
+                    if(_itemCloseTimeHour === "0") {
+                        _itemCloseTimeHour = "12";
+                    }
                     _item["closeTime"] = new TimeSelector(_itemCloseTimeHour,_itemCloseTimeMinute, _itemCloseTimeAMPM);
 
                     //----------------
@@ -141,6 +147,10 @@ export class StoreTimingComponent implements OnInit
                         _itemBreakOpenTimeAMPM = (item.breakStartTime && item.breakStartTime !== null) ? "PM" : "--";
                     } else {
                         _itemBreakOpenTimeAMPM = (item.breakStartTime && item.breakStartTime !== null) ? "AM": "--";
+                    }
+
+                    if(_itemBreakOpenTimeHour === "0") {
+                        _itemBreakOpenTimeHour = "12";
                     }
 
                     _item["breakStartTime"] = new TimeSelector(_itemBreakOpenTimeHour,_itemBreakOpenTimeMinute, _itemBreakOpenTimeAMPM);
@@ -162,6 +172,10 @@ export class StoreTimingComponent implements OnInit
                         _itemBreakCloseTimeAMPM = (item.breakEndTime && item.breakEndTime !== null) ? "PM" : "--";
                     } else {
                         _itemBreakCloseTimeAMPM = (item.breakEndTime && item.breakEndTime !== null) ? "AM" : "--";
+                    }
+
+                    if(_itemBreakCloseTimeHour === "0") {
+                        _itemBreakCloseTimeHour = "12";
                     }
 
                     _item["breakEndTime"] = new TimeSelector(_itemBreakCloseTimeHour,_itemBreakeCloseTimeMinute, _itemBreakCloseTimeAMPM);                    
@@ -231,13 +245,16 @@ export class StoreTimingComponent implements OnInit
         if (workingHourEndTime.getTime() === minToday.getTime()) {
             this.timeAlert[i] ="End time exceeds minimum time range for today (11:55PM)" ;
             this.disabledProcced = true;
-        } else if( workingHourStartTime >= workingHourEndTime){            
+        } 
+        else if( workingHourStartTime >= workingHourEndTime){            
             this.timeAlert[i] ="End time range incorrect" ;
             this.disabledProcced = true;
-        }else{
+        }
+        else{
             this.timeAlert[i] = " " ;
             this.disabledProcced = false;
         }  
+        
     }
 
     changeBreakTime(i){
@@ -535,5 +552,66 @@ export class StoreTimingComponent implements OnInit
                 // Enable the form
                 this.storeTimingForm.enable();
             });
+    }
+
+    toggleAlwaysOpen(event){
+
+        this.isAlwaysOpen = false;
+
+        let storeTiming = this.storeTimingForm.get('storeTiming').value;
+
+        let _storeTiming = storeTiming.map(item => {
+            let updateItem = {
+                isOpen: true,
+                isOff: false,
+                openTime: {
+                    timeAmPm: "AM",
+                    timeHour: "12",
+                    timeMinute: "00",
+                },
+                closeTime: {
+                    timeAmPm: "PM",
+                    timeHour: "11",
+                    timeMinute: "55",
+                },
+                isBreakTime: false
+
+            }
+            let newItem = {...item, ...updateItem};
+            return newItem            
+        });
+
+        
+        // let _storeTiming = {
+        //     breakStartTimeHour: storeTiming[index].breakStartTime.timeHour,
+        //     breakStartTimeMinute: storeTiming[index].breakStartTime.timeMinute,
+        //     breakStartTimeAmPm: storeTiming[index].breakStartTime.timeAmPm,
+
+        //     breakEndTimeHour: storeTiming[index].breakEndTime.timeHour,
+        //     breakEndTimeMinute: storeTiming[index].breakEndTime.timeMinute,
+        //     breakEndTimeAmPm: storeTiming[index].breakEndTime.timeAmPm,
+
+        //     openTime: storeTiming[index].openTime,
+        //     closeTime: storeTiming[index].closeTime,
+
+        //     breakToggle: storeTiming[index].isBreakTime
+        // } 
+
+        // this.storeTimingForm.get('storeTiming').value.forEach((item, i) => {
+        //     storeTiming[i].breakStartTime.timeHour = _storeTiming.breakStartTimeHour;
+        //     storeTiming[i].breakStartTime.timeMinute = _storeTiming.breakStartTimeMinute;
+        //     storeTiming[i].breakStartTime.timeAmPm = _storeTiming.breakStartTimeAmPm;
+
+        //     storeTiming[i].breakEndTime.timeHour =_storeTiming.breakEndTimeHour;
+        //     storeTiming[i].breakEndTime.timeMinute =_storeTiming.breakEndTimeMinute;
+        //     storeTiming[i].breakEndTime.timeAmPm =_storeTiming.breakEndTimeAmPm;
+
+        //     storeTiming[i].openTime =_storeTiming.openTime;
+        //     storeTiming[i].closeTime =_storeTiming.closeTime;
+
+        //     storeTiming[i].isBreakTime = _storeTiming.breakToggle;
+        // })
+        this.storeTimingForm.get('storeTiming').patchValue(_storeTiming);
+        
     }
 }
