@@ -38,18 +38,18 @@ import { TimeSelector } from 'app/layout/common/time-selector/timeselector.compo
         .content{
             height:400px;
         }
+        :host ::ng-deep .mat-paginator .mat-paginator-container {
+            padding: 0px 16px;
+        }
         .create-product-product-grid {
-            grid-template-columns: 80px 80px auto 80px;
+            grid-template-columns: 30px auto 58px;
 
-            @screen sm {
-                grid-template-columns: 30px auto 104px 104px;
-            }
         }
         .create-product-discount-grid {
-            grid-template-columns: 80px 80px auto 80px;
+            grid-template-columns: 80px 64px 80px 80px 80px;
 
             @screen sm {
-                grid-template-columns: auto 104px 90px 90px;
+                grid-template-columns: auto 64px 90px 90px 90px;
             }
         }
     `]
@@ -163,6 +163,14 @@ export class CreateProductDiscountDialogComponent implements OnInit {
 
             ]),
         });
+
+        this.productDiscountStepperForm.get('step2').valueChanges
+            .subscribe(
+                value => {
+                    console.log('value', value);
+                    
+                }
+            )
 
         //====================View PRODUCTS =====================
 
@@ -431,6 +439,10 @@ export class CreateProductDiscountDialogComponent implements OnInit {
                     price:el2.price,
                     calculationType:'PERCENT',
                     discountAmount:0.00,
+                    dineInPrice: el2.dineInPrice,
+                    dineIncalculationType: 'PERCENT',
+                    dineInDiscountAmount : 0.00
+
             })));//[[a,c,g],[d,e],[f]]
             const itemCodes = Array.prototype.concat.apply([],itemCodesArr);//[a,c,g,d,e,f];
 
@@ -469,9 +481,9 @@ export class CreateProductDiscountDialogComponent implements OnInit {
         this.selectedCategory = event.value;
 
         if(this.selectedCategory ){
-            return this._discountProductService.getByQueryProducts(0, 5, 'name', 'asc',this.inputSearchProducts,'ACTIVE,INACTIVE',this.selectedCategory).subscribe();
+            return this._discountProductService.getByQueryProducts(0, 10, 'name', 'asc',this.inputSearchProducts,'ACTIVE,INACTIVE',this.selectedCategory).subscribe();
         } else{
-            return this._discountProductService.getByQueryProducts(0, 5, 'name', 'asc',this.inputSearchProducts,'ACTIVE,INACTIVE').subscribe();
+            return this._discountProductService.getByQueryProducts(0, 10, 'name', 'asc',this.inputSearchProducts,'ACTIVE,INACTIVE').subscribe();
 
         }
 
@@ -488,7 +500,7 @@ export class CreateProductDiscountDialogComponent implements OnInit {
             debounceTime(500),
             switchMap((event:any) => {
                         
-                return this._discountProductService.getByQueryProducts(0, 5, 'name', 'asc', event.target.value,'ACTIVE,INACTIVE',this.selectedCategory)
+                return this._discountProductService.getByQueryProducts(0, 10, 'name', 'asc', event.target.value,'ACTIVE,INACTIVE',this.selectedCategory)
             }),
             map(() => {
                 this.isLoading = false;
@@ -525,8 +537,10 @@ export class CreateProductDiscountDialogComponent implements OnInit {
             let payloadProductDiscount ={
                 storeDiscountId:this.discountId,
                 itemCode:list.itemCode,
-                calculationType:list.calculationType,
-                discountAmount:list.discountAmount
+                calculationType: 'PERCENT',
+                discountAmount:list.discountAmount,
+                dineIncalculationType: 'PERCENT',
+                dineInDiscountAmount : list.dineInDiscountAmount
             }              
 
             this._discountProductService.createProductDiscount(this.discountId,payloadProductDiscount).
@@ -663,6 +677,13 @@ export class CreateProductDiscountDialogComponent implements OnInit {
             this.dateAlert ="Date selected is overlapped with existing date, please select another date !";
             this.disabledProceed = true;
         }
+    }
+
+    inputAddDiscountAmount(index: number) {
+        
+        this.addProductDiscountLevel.at(index).get('dineInDiscountAmount')
+        .patchValue(this.addProductDiscountLevel.at(index).get('discountAmount').value)
+        
     }
 
     // changeTime(){

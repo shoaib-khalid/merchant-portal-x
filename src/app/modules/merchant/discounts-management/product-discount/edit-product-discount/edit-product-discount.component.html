@@ -1,6 +1,6 @@
-<div class="flex flex-col max-w-256 lg:min-w-256 -m-6 py-4 px-8 overflow-hidden">
+<div class="flex flex-col -m-6 py-4 px-8 overflow-hidden max-h-screen">
     <form
-        class="flex flex-col w-full"
+        class="flex flex-col w-full overflow-auto"
         [formGroup]="editProductDiscountForm">
         <mat-horizontal-stepper
             [linear]="true"
@@ -208,9 +208,9 @@
                 <div class="overflow-y-auto">
                     <div class="flex flex-col sm:flex-row flex-auto mb-2">      
                         <!-- Product Search -->
-                        <div class="w-full sm:w-1/2 sm:pr-2">
+                        <div class="w-full sm:w-1/3 sm:pr-2">
                             <!-- Header -->
-                            <div class="flex flex-col md:flex-row w-full items-center justify-between py-2 mb-1 h-auto md:h-14">
+                            <div class="flex flex-col md:flex-row w-full items-center justify-between py-1 h-auto md:h-14">
                                 <div class="flex w-full items-center text-lg font-extrabold mb-2 md:mb-0">Product Search</div>
                                 <div class="flex flex-col w-full md:flex-row items-center md:mb-2  ">
                                     <!-- Category filter -->
@@ -243,23 +243,23 @@
                                 </div>
                             </div>
                             <!-- Content -->
-                            <div class="relative flex flex-col border border-solid rounded p-2 h-96">
+                            <div class="relative flex flex-col justify-between border border-solid rounded h-[31rem]">
                                 <!-- Table -->
                                 <ng-container *ngIf="(products$ | async) as products">
                                     <div class="grid overflow-auto rounded">
                                         <!-- Header -->
                                         <div
-                                            class="edit-product-product-grid sticky grid gap-1 sm:gap-4 py-4 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                                            class="edit-product-product-grid px-2 items-center sticky grid gap-1 sm:gap-4 py-4 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
                                         >
                                             <div></div>
                                             <div>
                                                 Product Name
                                             </div>
+                                            <!-- <div class="text-center">
+                                                Ori Price
+                                            </div> -->
                                             <div class="text-center">
-                                                Original Price
-                                            </div>
-                                            <div class="text-center">
-                                                Have Variant
+                                                Variant
                                             </div>
                                         </div>
                                         <!-- Rows -->
@@ -267,7 +267,7 @@
                                             class="overflow-y-auto">
                                             <div *ngFor="let productList of products; let i = index;">
                                                 <!-- Product Body -->
-                                                <div class="edit-product-product-grid grid items-center gap-4 py-2 sm:py-3 border-b">      
+                                                <div class="edit-product-product-grid px-2 grid items-center gap-1 sm:gap-4 py-2 border-b">      
                                                     <!-- Min Order Amount -->
                                                     <div class="truncate">
                                                         <mat-checkbox  
@@ -283,9 +283,9 @@
                                                     </div>
     
                                                     <!-- Original Price -->
-                                                    <div class="truncate text-center">
+                                                    <!-- <div class="truncate text-center">
                                                         {{productList.productInventories[0] ? productList.productInventories[0].price : 'undefined'}}
-                                                    </div>
+                                                    </div> -->
                 
                                                     <!-- Action Button -->
                                                     <div class="truncate text-center">
@@ -306,7 +306,7 @@
                                     </div>
                                 </ng-container>
                                 <!-- Pagination & Button -->
-                                <div class="absolute flex flex-row justify-between items-center bg-white px-4 bottom-0 left-0 right-0 w-full">
+                                <div class="sticky flex flex-row justify-between items-center bg-white bottom-0 w-full px-2">
                                     <mat-paginator
                                         [ngClass]="{'pointer-events-none': isLoading}"
                                         [length]="productPagination.length"
@@ -349,23 +349,24 @@
                         </div>
                 
                         <!-- Selected Product -->
-                        <div class="w-full sm:w-1/2 sm:pl-2">
+                        <div class="w-full sm:w-2/3 sm:pl-2">
                             <!-- Title -->
-                            <div class="flex flex-row text-lg font-extrabold py-2 items-end sm:items-center mb-1 h-14">Selected Product</div>
+                            <div class="flex flex-row text-lg font-extrabold py-1 items-end sm:items-center h-14">Selected Product</div>
                             <!-- Content -->
-                            <div class="relative flex flex-col border border-solid rounded p-2 h-96">
+                            <div class="relative flex flex-col justify-between border border-solid rounded h-[31rem]">
                                 <!-- Table -->
                                 <ng-container *ngIf="(storeDiscountProduct$ | async) as storeDiscountProducts">
                                     <div class="grid overflow-auto rounded">
                                         <!-- Header -->
                                         <div
-                                            class="edit-product-discount-grid sticky grid gap-1 sm:gap-4 py-3 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                                            class="edit-product-discount-grid px-3 sticky grid gap-1 sm:gap-4 py-2 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
                                         >
                                             <div>
                                                 Product Name (SKU)
                                             </div>
+                                            <div></div>
                                             <div class="text-center">
-                                                Original Price
+                                                Ori Price
                                             </div>
                                             <div class="text-center">
                                                 Discount %
@@ -377,31 +378,86 @@
                                         <!-- Rows -->
                                         <div 
                                             class="overflow-y-auto">
-                                            <div *ngFor="let productDiscountList of storeDiscountProducts; let i = index;">
+                                            <div *ngFor="let productDiscountList of storeDiscountProducts; let i = index; let isOdd = odd">
                                                 <!-- Selected Product Header -->
-                                                <div class="edit-product-discount-grid grid items-center gap-4 py-2 border-b">      
+                                                <div class="edit-product-discount-grid px-3 grid items-center gap-1 sm:gap-4 h-20 border-b"
+                                                    [ngClass]="isOdd ? 'bg-slate-50' : 'bg-white'">      
                                                     <!-- Product Name (SKU) -->
                                                     <div class="truncate">
                                                         {{ productDiscountList.productInventory.product.name + " ( "+productDiscountList.productInventory.sku +  " ) " }}
                                                     </div>
-                
-                                                    <!-- Original Price-->
-                                                    <div class="truncate text-center">
-                                                        {{productDiscountList.productInventory.price}}
-                                                    </div>
-    
-                                                    <!-- Discount % -->
-                                                    <div class="truncate text-center">
-                                                        <div *ngIf=!editModeDiscountProduct[i]>{{productDiscountList.discountAmount}}</div>
-                                            
-                                                        <div *ngIf=editModeDiscountProduct[i]>
-                                                            <input
-                                                                class="p-2 border border-gray-500 rounded w-18"
-                                                                type="number"
-                                                                [value]="productDiscountList.discountAmount"
-                                                                (input)="inputEditDiscountAmount(i,$event)"
-                                                            >
+                                                    <!-- DeliverIn / DineIn -->
+                                                    <div class="col-span-3 grid grid-rows-2 divide-y items-center h-full">
+                                                        <!-- DeliverIn Section -->
+                                                        <div class="flex flex-row items-center h-full gap-1 sm:gap-4">
+                                                            <div class="h-full flex items-center pl-2 text-sm w-[64px]">DeliverIn</div>
+                                                            <!-- Original Price-->
+                                                            <div class="truncate text-center w-[80px] sm:w-[90px] grid grid-cols-5 items-center ">
+                                                                <span class="text-sm col-span-2 text-secondary border-r">{{store$.regionCountry.currencySymbol}}</span>
+                                                                <span class="col-span-3">{{productDiscountList.productInventory.price}}</span>
+                                                            </div>
+                                                            <!-- Discount -->
+                                                            <div class="truncate text-center justify-center w-[80px] sm:w-[90px]">
+                                                                <div *ngIf=!editModeDiscountProduct[i]>{{productDiscountList.discountAmount}}</div>
+                                                    
+                                                                <div *ngIf=editModeDiscountProduct[i]>
+                                                                    <input
+                                                                        class="p-1 border border-gray-500 rounded w-18 bg-white"
+                                                                        type="number"
+                                                                        [(value)]="productDiscountList.discountAmount"
+                                                                        (input)="inputEditDiscountAmount(i, $event)"
+                                                                    >
+                                                                </div>
+                                                            </div>                                                        
                                                         </div>
+                                                        <!-- DineIn Section -->
+                                                        <div class="flex flex-row items-center h-full gap-1 sm:gap-4">
+                                                            <div class="h-full flex items-center pl-2 text-sm w-[64px]">DineIn</div>
+                                                            <!-- Original Price-->
+                                                            <div class="truncate text-center w-[80px] sm:w-[90px] grid grid-cols-5 items-center ">
+                                                                <span class="text-sm col-span-2 text-secondary border-r">{{store$.regionCountry.currencySymbol}}</span>
+                                                                <span class="col-span-3">{{productDiscountList.productInventory.dineInPrice}}</span>
+                                                            </div>
+                                                            <!-- Discount -->
+                                                            <div class="truncate text-center justify-center w-[80px] sm:w-[90px]">
+                                                                <div *ngIf=!editModeDiscountProduct[i]>{{productDiscountList.dineInDiscountAmount}}</div>
+                                                    
+                                                                <div *ngIf=editModeDiscountProduct[i]>
+                                                                    <input
+                                                                        class="p-1 border border-gray-500 rounded w-18 bg-white"
+                                                                        type="number"
+                                                                        [(value)]="productDiscountList.dineInDiscountAmount"
+                                                                        (input)="inputEditDineInDiscountAmount(i, $event)"
+                                                                    >
+                                                                </div>
+                                                            </div>                                                        
+                                                        </div>
+                                                        <ng-container *ngIf="false">
+
+                                                            <div class="grid grid-rows-2 h-full divide-y items-center border-l">
+                                                                <div class="h-full flex items-center pl-2">DeliverIn</div>
+                                                                <div class="h-full flex items-center pl-2">DineIn</div>
+                                                            </div>
+                                                            <!-- Original Price-->
+                                                            <div class="truncate text-center w-[80px] sm:w-[104px]">
+                                                                {{productDiscountList.productInventory.price}}
+                                                            </div>
+            
+                                                            <!-- Discount % -->
+                                                            <div class="truncate text-center justify-center w-[80px] sm:w-[90px]">
+                                                                <div *ngIf=!editModeDiscountProduct[i]>{{productDiscountList.discountAmount}}</div>
+                                                    
+                                                                <div *ngIf=editModeDiscountProduct[i]>
+                                                                    <input
+                                                                        class="p-2 border border-gray-500 rounded w-18"
+                                                                        type="number"
+                                                                        [value]="productDiscountList.discountAmount"
+                                                                        (input)="inputEditDiscountAmount(i,$event)"
+                                                                    >
+                                                                </div>
+                                                            </div>
+                                                        </ng-container>
+
                                                     </div>
                 
                                                     <!-- Action Button -->
@@ -462,7 +518,7 @@
                                         </div>
                                     </div>
                                 </ng-container>
-                                <div class="absolute bottom-0 left-0 right-0 w-full">
+                                <div class="sticky flex flex-row justify-between items-center bg-white bottom-0 w-full px-2">
                                     <mat-paginator
                                         [ngClass]="{'pointer-events-none': isLoading}"
                                         [length]="storeDiscountPagination.length"
