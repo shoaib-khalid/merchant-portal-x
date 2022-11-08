@@ -304,7 +304,7 @@ export class OrdersListService
     /**
      * Get data
      */
-    getOrdersCountSummary(): Observable<OrdersCountSummary[]>
+    getOrdersCountSummary(serviceType: string = ''): Observable<OrdersCountSummary[]>
     {
 
         let orderService = this._apiServer.settings.apiServer.orderService;
@@ -312,8 +312,22 @@ export class OrdersListService
         let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
         const header = {
-            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`)
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                serviceType: serviceType
+            }
         };
+
+        // Delete empty value
+        Object.keys(header.params).forEach(key => {
+            if (Array.isArray(header.params[key])) {
+                header.params[key] = header.params[key].filter(element => element !== null)
+            }
+            
+            if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
+                delete header.params[key];
+            }
+        });
 
         return this._httpClient.get<OrdersCountSummary[]>(orderService + '/orders/countsummary/' + this.storeId$, header)
         .pipe(

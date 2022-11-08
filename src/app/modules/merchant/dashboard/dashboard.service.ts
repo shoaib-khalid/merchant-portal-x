@@ -22,6 +22,8 @@ export class DashboardService
     private _dailyTopProduct: BehaviorSubject<DailyTopProducts | null> = new BehaviorSubject(null);
     private _dailyTopProducts: BehaviorSubject<DailyTopProducts[] | null> = new BehaviorSubject(null);
     private _dailyTopProductsPagination: BehaviorSubject<DailyTopProductsPagination | null> = new BehaviorSubject(null);
+    private _dailyTopProductsLastWeek: BehaviorSubject<DailyTopProducts[] | null> = new BehaviorSubject(null);
+    private _dailyTopProductsThisWeek: BehaviorSubject<DailyTopProducts[] | null> = new BehaviorSubject(null);
 
     private _detailedDailySale: BehaviorSubject<DetailedDailySales | null> = new BehaviorSubject(null);
     private _detailedDailySales: BehaviorSubject<DetailedDailySales[] | null> = new BehaviorSubject(null);
@@ -42,7 +44,8 @@ export class DashboardService
     private _settlementPagination: BehaviorSubject<SettlementPagination | null> = new BehaviorSubject(null);
 
     private _weeklySale: BehaviorSubject<WeeklySale[] | null> = new BehaviorSubject(null);
-    private _weeklyGraph: BehaviorSubject<WeeklyGraph[] | null> = new BehaviorSubject(null);
+    private _weeklyGraphLastWeek: BehaviorSubject<WeeklyGraph[] | null> = new BehaviorSubject(null);
+    private _weeklyGraphThisWeek: BehaviorSubject<WeeklyGraph[] | null> = new BehaviorSubject(null);
 
     fromDate: string;
     todayDate: string;
@@ -84,6 +87,24 @@ export class DashboardService
     get dailyTopProducts$(): Observable<DailyTopProducts[]>
     {
         return this._dailyTopProducts.asObservable();
+    }
+
+    /**
+     * Getter for dailyTopProducts
+     *
+    */
+    get dailyTopProductsThisWeek$(): Observable<DailyTopProducts[]>
+    {
+        return this._dailyTopProductsThisWeek.asObservable();
+    }
+
+     /**
+     * Getter for dailyTopProducts
+     *
+    */
+    get dailyTopProductsLastWeek$(): Observable<DailyTopProducts[]>
+    {
+        return this._dailyTopProductsLastWeek.asObservable();
     }
 
     /**
@@ -203,19 +224,28 @@ export class DashboardService
      * Getter for weekly sale
      *
     */
-     get weeklySale$(): Observable<WeeklySale[]>
-     {
-         return this._weeklySale.asObservable();
-     }
+    get weeklySale$(): Observable<WeeklySale[]>
+    {
+        return this._weeklySale.asObservable();
+    }
 
      /**
      * Getter for weekly graph
      *
     */
-      get weeklyGraph$(): Observable<WeeklyGraph[]>
-      {
-          return this._weeklyGraph.asObservable();
-      }
+    get weeklyGraphLastWeek$(): Observable<WeeklyGraph[]>
+    {
+        return this._weeklyGraphLastWeek.asObservable();
+    }
+
+     /**
+     * Getter for weekly graph
+     *
+    */
+    get weeklyGraphThisWeek$(): Observable<WeeklyGraph[]>
+    {
+        return this._weeklyGraphThisWeek.asObservable();
+    }
 
     /**
      * Getter for storeId
@@ -242,8 +272,30 @@ export class DashboardService
         );
     }
 
-    getDailyTopProducts(id: string, page: number = 0, size: number = 10, sort: string = 'date', order: 'asc' | 'desc' | '' = 'asc', 
-                        search: string = '', from: string = this.fromDate, to: string = this.todayDate):
+    getDailyTopProducts(
+        id: string, 
+        period: string = 'current',
+        params : {
+            page: number, 
+            pageSize: number, 
+            sortBy: string, 
+            sortingOrder: 'ASC' | 'DESC' | '', 
+            search: string, 
+            startDate: string, 
+            endDate: string,
+            serviceType: string
+        } =
+        {
+            page: 0, 
+            pageSize: 10, 
+            sortBy: 'date', 
+            sortingOrder: 'DESC', 
+            search: '', 
+            startDate: this.fromDate, 
+            endDate: this.todayDate,
+            serviceType: ''
+        }
+        ):
     Observable<{ pagination: DailyTopProductsPagination; dailyTopProducts: DailyTopProducts[] }>
     {
         let reportService = this._apiServer.settings.apiServer.reportService;
@@ -252,22 +304,26 @@ export class DashboardService
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
-            params: {
-                page: '' + page,
-                pageSize: '' + size,
-                sortBy: '' + sort,
-                sortingOrder: '' + order.toUpperCase(),
-                startDate: '' + from,
-                endDate: '' + to,
-            }
+            params: params
         };
+
+        // Delete empty value
+        Object.keys(header.params).forEach(key => {
+            if (Array.isArray(header.params[key])) {
+                header.params[key] = header.params[key].filter(element => element !== null)
+            }
+            
+            if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
+                delete header.params[key];
+            }
+        });
         
         return this._httpClient.get<{ pagination: DailyTopProductsPagination; dailyTopProducts: DailyTopProducts[] }>
             (reportService + '/store/' + id + '/report/merchantDailyTopProducts', header)
             .pipe(
                 tap((response) => {
                     
-                    this._logging.debug("Response from ReportService (getDailyTopProducts)",response);
+                    this._logging.debug("Response from ReportService (getDailyTopProducts) - " + period, response);
 
                     // Pagination
                     let _pagination = {
@@ -277,18 +333,42 @@ export class DashboardService
                         lastPage: response["data"].totalPages,
                         startIndex: response["data"].pageable.offset,
                         endIndex: response["data"].pageable.offset + response["data"].numberOfElements - 1
-                    };
-                    this._logging.debug("Response from StoresService (getDailyTopProducts pagination)",_pagination);
-                    
+                    };                    
 
-                    this._dailyTopProductsPagination.next(_pagination);
-                    this._dailyTopProducts.next(response["data"].content);
+                    if (period === 'current') {
+                        this._dailyTopProductsPagination.next(_pagination);
+                        this._dailyTopProducts.next(response["data"].content);
+                    }
+                    else if (period === 'this-week') {
+                        this._dailyTopProductsThisWeek.next(response["data"].content);
+                    }
+                    else if (period === 'last-week') {
+                        this._dailyTopProductsLastWeek.next(response["data"].content);
+                    }
                 })
             );
     }
 
-    getDetailedDailySales(id: string, page: number = 0, size: number = 10, sort: string = 'created', order: 'asc' | 'desc' | '' = 'asc', 
-                        from: string = this.fromDate, to: string = this.todayDate):
+    getDetailedDailySales(
+        id: string, 
+        params: {
+            page: number, 
+            pageSize: number, 
+            sortBy: string, 
+            sortingOrder: 'ASC' | 'DESC' | '', 
+            startDate: string, 
+            endDate: string,
+            serviceType: string
+        } = 
+        {
+            page: 0, 
+            pageSize: 10, 
+            sortBy: 'created', 
+            sortingOrder: 'ASC', 
+            startDate: this.fromDate, 
+            endDate: this.todayDate,
+            serviceType: ''
+        }):
     Observable<{ pagination: DetailedDailySalesPagination; detailedDailySales: DetailedDailySales[] }>
     {
         let reportService = this._apiServer.settings.apiServer.reportService;
@@ -297,15 +377,20 @@ export class DashboardService
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
-            params: {
-                page: '' + page,
-                pageSize: '' + size,
-                sortBy: '' + sort,
-                sortingOrder: '' + order.toUpperCase(),
-                startDate: '' + from,
-                endDate: '' + to,
-            }
+            params: params
         };
+
+        // Delete empty value
+        Object.keys(header.params).forEach(key => {
+            if (Array.isArray(header.params[key])) {
+                header.params[key] = header.params[key].filter(element => element !== null)
+            }
+            
+            if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
+                delete header.params[key];
+            }
+        });
+
         return this._httpClient.get<{ pagination: DetailedDailySalesPagination; detailedDailySales: DetailedDailySales[] }>
             (reportService + '/store/' + id + '/report/merchantDetailedDailySales', header)
             .pipe(
@@ -330,8 +415,27 @@ export class DashboardService
             );
     }
 
-    getSummarySales(id: string, page: number = 0, size: number = 10, sort: string = 'date', order: 'asc' | 'desc' | '' = 'asc', 
-                    search: string = '', from: string = this.fromDate, to: string = this.todayDate):
+    getSummarySales(id: string, 
+        params: {
+            page: number, 
+            pageSize: number, 
+            sortBy: string, 
+            sortingOrder: 'ASC' | 'DESC' | '', 
+            search: string, 
+            from: string, 
+            to: string,
+            serviceType: string
+        } = 
+        {
+            page: 0, 
+            pageSize: 10, 
+            sortBy: 'date', 
+            sortingOrder: 'ASC', 
+            search: '', 
+            from: this.fromDate, 
+            to:  this.todayDate,
+            serviceType: ''
+        }):
     Observable<{ pagination: SummarySalesPagination; summarySales: SummarySales[] }>
     {
         let reportService = this._apiServer.settings.apiServer.reportService;
@@ -340,15 +444,19 @@ export class DashboardService
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
-            params: {
-                page: '' + page,
-                pageSize: '' + size,
-                sortBy: '' + sort,
-                sortingOrder: '' + order.toUpperCase(),
-                from: '' + from,
-                to: '' + to,
-            }
+            params: params
         };
+
+        // Delete empty value
+        Object.keys(header.params).forEach(key => {
+            if (Array.isArray(header.params[key])) {
+                header.params[key] = header.params[key].filter(element => element !== null)
+            }
+            
+            if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
+                delete header.params[key];
+            }
+        });
         
         return this._httpClient.get<{ pagination: SummarySalesPagination; summarySales: SummarySales[] }>
             (reportService + '/store/' + id + '/merchant_daily_sales', header)
@@ -375,7 +483,7 @@ export class DashboardService
             );
     }
 
-    getTotalSales(id: string):
+    getTotalSales(id: string, serviceType: string):
     Observable<{ totalSalesTotal: TotalSalesTotal[]; totalSalesDaily: TotalSalesDaily[]; 
         totalSalesWeekly: TotalSalesWeekly[]; totalSalesMonthly: TotalSalesMonthly[] }>
     {
@@ -385,6 +493,9 @@ export class DashboardService
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                serviceType: serviceType
+            }
         };
         
         return this._httpClient.get<{ totalSalesTotal: TotalSalesTotal[]; totalSalesDaily: TotalSalesDaily[]; 
@@ -477,7 +588,19 @@ export class DashboardService
             );
     }
 
-    getWeeklyGraph(id: string, from: string = '', to: string = '' ):
+    getWeeklyGraph(
+        id: string,
+        period: 'last-week' | 'this-week' = 'this-week',
+        params: {
+            from: string, 
+            to: string,
+            serviceType: string
+        } = 
+        {
+            from: '', 
+            to: '',
+            serviceType: 'DELIVERIN'
+        }):
     Observable<{ weeklyGraph: WeeklyGraph[] }>
     {
         let reportService = this._apiServer.settings.apiServer.reportService;
@@ -486,21 +609,34 @@ export class DashboardService
 
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
-
-            params: {
-                from: '' + from,
-                to: '' + to,
-            }
+            params: params
         };
+
+        // Delete empty value
+        Object.keys(header.params).forEach(key => {
+            if (Array.isArray(header.params[key])) {
+                header.params[key] = header.params[key].filter(element => element !== null)
+            }
+            
+            if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
+                delete header.params[key];
+            }
+        });
         
         return this._httpClient.get<{ weeklyGraph: WeeklyGraph[] }>
             (reportService + '/store/' + id + '/weeklyGraph', header)
             .pipe(
                 tap((response) => {
                     
-                    this._logging.debug("Response from ReportService (getWeeklyGraph)", response);
+                    this._logging.debug("Response from ReportService (getWeeklyGraph) - " + period, response);
 
-                    this._weeklyGraph.next(response["dashboardGraph"]);
+                    if (period === 'last-week') {
+                        this._weeklyGraphLastWeek.next(response["dashboardGraph"]);
+                    }
+                    else if (period === 'this-week') {
+                        this._weeklyGraphThisWeek.next(response["dashboardGraph"]);
+                    }
+
                 })
             );
     }

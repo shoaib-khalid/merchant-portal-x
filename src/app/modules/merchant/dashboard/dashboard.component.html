@@ -59,140 +59,245 @@
                             <!-- Orders summary -->
                             <div class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
                                 <!-- Header -->
-                                <div class="text-lg font-medium tracking-tight leading-6 truncate">Orders Summary</div>
-                                <div class="grid grid-cols-1 md:grid-cols-4 grid-flow-row gap-4 w-full mt-4">
-                                    <!-- Container -->
-                                    <div class="flex flex-col flex-auto col-span-2 lg:col-span-1">
-                                        <div class="flex-auto grid grid-cols-2 gap-4">
-                                            <!-- New -->
-                                            <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-green-50 text-green-500 dark:bg-white dark:bg-opacity-5 dark:text-green-400">
-                                                <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
-                                                    {{_orderCountSummary[0].count}}
-                                                </div>
-                                                <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[0].label}}</div>
-                                            </div>
-                                            <!-- Sent Out -->
-                                            <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-blue-50 text-blue-500 dark:bg-white dark:bg-opacity-5 dark:text-blue-400">
-                                                <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
-                                                    {{_orderCountSummary[3].count}}
-                                                </div>
-                                                <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[3].label}}</div>
-                                            </div>
+                                <!-- Orders Summary -->
+                                <div class="items-center my-auto truncate flex flex-row gap-3">
+                                    <span class="text-lg font-medium tracking-tight leading-6">Orders Summary</span>
+                                    <ng-container *ngIf="verticalCode === 'FnB' || verticalCode === 'FnB_PK'">
+                                        <span class="font-light">|</span>
+                                        <!-- Filter by service type -->
+                                        <div class="text-secondary font-normal tracking-normal">
+                                            <mat-select
+                                                [formControl]="orderSummary_serviceTypeControl"
+                                                placeholder="Service Type"
+                                                [(value)]='orderSummaryServiceType'
+                                                #orderSummaryTypeSelector="matSelect"
+                                            >
+                                                <mat-select-trigger>
+                                                    <span class="flex items-center mr-1">
+                                                        <span>{{ orderSummaryTypeSelector.triggerValue }}</span>
+                                                    </span>
+                                                </mat-select-trigger>
+                                                <mat-option value=''>All</mat-option>
+                                                <mat-option value='DELIVERIN'>DeliverIn</mat-option>
+                                                <mat-option value='DINEIN'>DineIn</mat-option>
+                                            </mat-select>
                                         </div>
-                                    </div>
-                                    <div class="flex flex-col flex-auto col-span-2 lg:col-span-1">
-                                        <div class="flex-auto grid grid-cols-2 gap-4">
-                                            <!-- Process -->
-                                            <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-amber-50 text-amber-500 dark:bg-white dark:bg-opacity-5 dark:text-amber-400">
-                                                <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
-                                                    {{_orderCountSummary[1].count}}
-                                                </div>
-                                                <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[1].label}}</div>
-                                            </div>
-                                            <!-- Cancelled -->
-                                            <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-pink-50 text-pink-500 dark:bg-white dark:bg-opacity-5 dark:text-pink-400">
-                                                <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
-                                                    {{_orderCountSummary[5].count}}
-                                                </div>
-                                                <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[5].label}}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col flex-auto col-span-2 lg:col-span-1">
-                                        <div class="flex-auto grid grid-cols-2 gap-4">
-                                            <!-- Awaiting Pickup -->
-                                            <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-gray-50 text-black dark:bg-white dark:bg-opacity-5 dark:text-gray-400">
-                                                <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
-                                                    {{_orderCountSummary[2].count}}
-                                                </div>
-                                                <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[2].label}}</div>
-                                            </div>
-                                            <!-- Out of Stock -->
-                                            <ng-container *ngIf="verticalCode === 'E-Commerce'">
-                                                <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-red-50 text-red-500 dark:bg-white dark:bg-opacity-5 dark:text-red-400">
+                                    </ng-container>
+                                </div> 
+                                <ng-container *ngIf="orderSummaryServiceType !== 'DINEIN' ; else dineIn">
+                                    <div class="grid grid-cols-1 md:grid-cols-4 grid-flow-row gap-4 w-full mt-4">
+                                        <!-- Container -->
+                                        <div class="flex flex-col flex-auto col-span-2 lg:col-span-1">
+                                            <div class="flex-auto grid grid-cols-2 gap-4">
+                                                <!-- New -->
+                                                <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-green-50 text-green-500 dark:bg-white dark:bg-opacity-5 dark:text-green-400">
                                                     <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
-                                                        {{outOfStockProducts}}
+                                                        {{_orderCountSummary[0].count}}
                                                     </div>
-                                                    <div class="mt-1 text-sm sm:text-lg font-medium">Out Of Stock</div>
+                                                    <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[0].label}}</div>
                                                 </div>
-                                            </ng-container>
+                                                <!-- Sent Out -->
+                                                <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-blue-50 text-blue-500 dark:bg-white dark:bg-opacity-5 dark:text-blue-400">
+                                                    <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                        {{_orderCountSummary[3].count}}
+                                                    </div>
+                                                    <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[3].label}}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-col flex-auto col-span-2 lg:col-span-1">
+                                            <div class="flex-auto grid grid-cols-2 gap-4">
+                                                <!-- Process -->
+                                                <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-amber-50 text-amber-500 dark:bg-white dark:bg-opacity-5 dark:text-amber-400">
+                                                    <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                        {{_orderCountSummary[1].count}}
+                                                    </div>
+                                                    <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[1].label}}</div>
+                                                </div>
+                                                <!-- Cancelled -->
+                                                <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-pink-50 text-pink-500 dark:bg-white dark:bg-opacity-5 dark:text-pink-400">
+                                                    <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                        {{_orderCountSummary[5].count}}
+                                                    </div>
+                                                    <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[5].label}}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-col flex-auto col-span-2 lg:col-span-1">
+                                            <div class="flex-auto grid grid-cols-2 gap-4">
+                                                <!-- Awaiting Pickup -->
+                                                <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-gray-50 text-black dark:bg-white dark:bg-opacity-5 dark:text-gray-400">
+                                                    <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                        {{_orderCountSummary[2].count}}
+                                                    </div>
+                                                    <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[2].label}}</div>
+                                                </div>
+                                                <!-- Out of Stock -->
+                                                <ng-container *ngIf="verticalCode === 'E-Commerce'">
+                                                    <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-red-50 text-red-500 dark:bg-white dark:bg-opacity-5 dark:text-red-400">
+                                                        <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                            {{outOfStockProducts}}
+                                                        </div>
+                                                        <div class="mt-1 text-sm sm:text-lg font-medium">Out Of Stock</div>
+                                                    </div>
+                                                </ng-container>
+                                            </div>
+                                        </div>
+                                        <!-- Overview -->
+                                        <div class="flex flex-col flex-auto col-span-2 lg:col-span-1">
+                                            <div class="flex-auto grid grid-cols-2 gap-4">
+                                                <!-- Completed -->
+                                                <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-violet-50 text-violet-500 dark:bg-white dark:bg-opacity-5 dark:text-violet-400">
+                                                    <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                        {{_orderCountSummary[4].count}}
+                                                    </div>
+                                                    <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[4].label}}</div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <!-- Overview -->
-                                    <div class="flex flex-col flex-auto col-span-2 lg:col-span-1">
-                                        <div class="flex-auto grid grid-cols-2 gap-4">
-                                            <!-- Completed -->
-                                            <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-violet-50 text-violet-500 dark:bg-white dark:bg-opacity-5 dark:text-violet-400">
-                                                <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
-                                                    {{_orderCountSummary[4].count}}
+                                </ng-container>
+                                <ng-template #dineIn>
+                                    <div class="grid grid-cols-1 md:grid-cols-4 grid-flow-row gap-4 w-full mt-4">
+                                        <!-- New -->
+                                        <div class="flex flex-col flex-auto col-span-2 lg:col-span-1">
+                                            <div class="flex-auto grid grid-cols-2 gap-4">
+                                                <!-- New -->
+                                                <div class="col-span-2 md:h-[296px] flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-green-50 text-green-500 dark:bg-white dark:bg-opacity-5 dark:text-violet-400">
+                                                    <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                        {{_orderCountSummary[0].count}}
+                                                    </div>
+                                                    <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[0].label}}</div>
                                                 </div>
-                                                <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[4].label}}</div>
+                                            </div>
+                                        </div>
+                                        <!-- Process -->
+                                        <div class="flex flex-col flex-auto col-span-2 lg:col-span-1">
+                                            <div class="flex-auto grid grid-cols-2 gap-4">
+                                                <!-- Process -->
+                                                <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-amber-50 text-amber-500 dark:bg-white dark:bg-opacity-5 dark:text-violet-400">
+                                                    <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                        {{_orderCountSummary[1].count}}
+                                                    </div>
+                                                    <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[1].label}}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Cancelled -->
+                                        <div class="flex flex-col flex-auto col-span-2 lg:col-span-1">
+                                            <div class="flex-auto grid grid-cols-2 gap-4">
+                                                <!-- Cancelled -->
+                                                <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-pink-50 text-pink-500 dark:bg-white dark:bg-opacity-5 dark:text-violet-400">
+                                                    <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                        {{_orderCountSummary[5].count}}
+                                                    </div>
+                                                    <div class="mt-1 text-sm sm:text-lg font-medium">{{_orderCountSummary[5].label}}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Completed -->
+                                        <div class="flex flex-col flex-auto col-span-2 lg:col-span-1">
+                                            <div class="flex-auto grid grid-cols-2 gap-4">
+                                                <!-- Completed -->
+                                                <div class="col-span-2 flex flex-col items-center justify-center py-8 px-1 rounded-2xl bg-violet-50 text-violet-500 dark:bg-white dark:bg-opacity-5 dark:text-violet-400">
+                                                    <div class="text-5xl sm:text-7xl font-semibold leading-none tracking-tight">
+                                                        {{_orderCountSummary[4].count}}
+                                                    </div>
+                                                    <div class="mt-1 text-sm sm:text-lg font-medium">Completed</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </div>
+                            <div class="flex flex-col bg-card shadow rounded-2xl p-6 w-full sm:col-span-2 md:col-span-4">
+                                <!-- Sales overview -->
+                                <div class="items-center my-auto truncate flex flex-row gap-3">
+                                    <span class="text-lg font-medium tracking-tight leading-6">Sales Overview</span>
+                                    <ng-container *ngIf="verticalCode === 'FnB' || verticalCode === 'FnB_PK'">
+                                        <span class="font-light">|</span>
+                                        <!-- Filter by service type -->
+                                        <div class="text-secondary font-normal tracking-normal">
+                                            <mat-select
+                                                [formControl]="salesOverview_serviceTypeControl"
+                                                placeholder="Service Type"
+                                                [(value)]='graphServiceType'
+                                                #salesOverviewTypeSelector="matSelect"
+                                            >
+                                                <mat-select-trigger>
+                                                    <span class="flex items-center mr-1">
+                                                        <span>{{ salesOverviewTypeSelector.triggerValue }}</span>
+                                                    </span>
+                                                </mat-select-trigger>
+                                                <mat-option value=''>All</mat-option>
+                                                <mat-option value='DELIVERIN'>DeliverIn</mat-option>
+                                                <mat-option value='DINEIN'>DineIn</mat-option>
+                                            </mat-select>
+                                        </div>
+                                    </ng-container>
+                                </div> 
+                                <div class="flex flex-col md:flex-row gap-4 mt-4">
+                                    <!-- Today Sales -->
+                                    <div class="flex flex-col flex-auto p-6 bg-blue-50 rounded-2xl overflow-hidden">
+                                        <div class="flex items-start justify-between">
+                                            <div class="text-lg font-medium tracking-tight leading-6 truncate">Today Sales</div>
+                                        </div>
+                                        <div class="flex flex-col items-center mt-2">
+                                            <div class="text-7xl sm:text-8xl font-bold tracking-tight leading-none text-blue-500">{{sumDailyCompleted}}</div>
+                                            <div class="text-lg font-medium text-blue-600 dark:text-blue-500">Completed</div>
+                                            <div class="flex items-baseline justify-center w-full mt-5 text-secondary">
+                                                <div class="text-md font-medium truncate">Pending:</div>
+                                                <div class="ml-1.5 text-lg font-semibold">{{sumDailyPending}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Weekly Sales -->
+                                    <div class="flex flex-col flex-auto p-6 bg-red-50 rounded-2xl overflow-hidden">
+                                        <div class="flex items-start justify-between">
+                                            <div class="text-lg font-medium tracking-tight leading-6 truncate">Weekly Sales</div>
+                                        </div>
+                                        <div class="flex flex-col items-center mt-2">
+                                            <div class="text-7xl sm:text-8xl font-bold tracking-tight leading-none text-red-500">{{sumWeeklyCompleted}}</div>
+                                            <div class="text-lg font-medium text-red-600 dark:text-red-500">Completed</div>
+                                            <div class="flex items-baseline justify-center w-full mt-5 text-secondary">
+                                                <div class="text-md font-medium truncate">Pending:</div>
+                                                <div class="ml-1.5 text-lg font-semibold">{{sumWeeklyPending}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Monthly Sales -->
+                                    <div class="flex flex-col flex-auto p-6 bg-amber-50 rounded-2xl overflow-hidden">
+                                        <div class="flex items-start justify-between">
+                                            <div class="text-lg font-medium tracking-tight leading-6 truncate">Monthly Sales</div>
+                                        </div>
+                                        <div class="flex flex-col items-center mt-2">
+                                            <div class="text-7xl sm:text-8xl font-bold tracking-tight leading-none text-amber-500">{{sumMonthlyCompleted}}</div>
+                                            <div class="text-lg font-medium text-amber-600 dark:text-amber-500">Completed</div>
+                                            <div class="flex items-baseline justify-center w-full mt-5 text-secondary">
+                                                <div class="text-md font-medium truncate">Pending:</div>
+                                                <div class="ml-1.5 text-lg font-semibold">{{sumMonthlyPending}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Total Sales -->
+                                    <div class="flex flex-col flex-auto p-6 bg-green-50 rounded-2xl overflow-hidden">
+                                        <div class="flex items-start justify-between">
+                                            <div class="text-lg font-medium tracking-tight leading-6 truncate">Total Sales</div>
+                                        </div>
+                                        <div class="flex flex-col items-center mt-2">
+                                            <div class="text-7xl sm:text-8xl font-bold tracking-tight leading-none text-green-500">{{sumTotalCompleted}}</div>
+                                            <div class="text-lg font-medium text-green-600 dark:text-green-500">Completed</div>
+                                            <div class="flex items-baseline justify-center w-full mt-5 text-secondary">
+                                                <div class="text-md font-medium truncate">Pending:</div>
+                                                <div class="ml-1.5 text-lg font-semibold">{{sumTotalPending}}</div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <!-- Today Sales -->
-                            <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
-                                <div class="flex items-start justify-between">
-                                    <div class="text-lg font-medium tracking-tight leading-6 truncate">Today Sales</div>
-                                </div>
-                                <div class="flex flex-col items-center mt-2">
-                                    <div class="text-7xl sm:text-8xl font-bold tracking-tight leading-none text-blue-500">{{sumDailyCompleted}}</div>
-                                    <div class="text-lg font-medium text-blue-600 dark:text-blue-500">Completed</div>
-                                    <div class="flex items-baseline justify-center w-full mt-5 text-secondary">
-                                        <div class="text-md font-medium truncate">Pending:</div>
-                                        <div class="ml-1.5 text-lg font-semibold">{{sumDailyPending}}</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Weekly Sales -->
-                            <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
-                                <div class="flex items-start justify-between">
-                                    <div class="text-lg font-medium tracking-tight leading-6 truncate">Weekly Sales</div>
-                                </div>
-                                <div class="flex flex-col items-center mt-2">
-                                    <div class="text-7xl sm:text-8xl font-bold tracking-tight leading-none text-red-500">{{sumWeeklyCompleted}}</div>
-                                    <div class="text-lg font-medium text-red-600 dark:text-red-500">Completed</div>
-                                    <div class="flex items-baseline justify-center w-full mt-5 text-secondary">
-                                        <div class="text-md font-medium truncate">Pending:</div>
-                                        <div class="ml-1.5 text-lg font-semibold">{{sumWeeklyPending}}</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Monthly Sales -->
-                            <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
-                                <div class="flex items-start justify-between">
-                                    <div class="text-lg font-medium tracking-tight leading-6 truncate">Monthly Sales</div>
-                                </div>
-                                <div class="flex flex-col items-center mt-2">
-                                    <div class="text-7xl sm:text-8xl font-bold tracking-tight leading-none text-amber-500">{{sumMonthlyCompleted}}</div>
-                                    <div class="text-lg font-medium text-amber-600 dark:text-amber-500">Completed</div>
-                                    <div class="flex items-baseline justify-center w-full mt-5 text-secondary">
-                                        <div class="text-md font-medium truncate">Pending:</div>
-                                        <div class="ml-1.5 text-lg font-semibold">{{sumMonthlyPending}}</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Total Sales -->
-                            <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
-                                <div class="flex items-start justify-between">
-                                    <div class="text-lg font-medium tracking-tight leading-6 truncate">Total Sales</div>
-                                </div>
-                                <div class="flex flex-col items-center mt-2">
-                                    <div class="text-7xl sm:text-8xl font-bold tracking-tight leading-none text-green-500">{{sumTotalCompleted}}</div>
-                                    <div class="text-lg font-medium text-green-600 dark:text-green-500">Completed</div>
-                                    <div class="flex items-baseline justify-center w-full mt-5 text-secondary">
-                                        <div class="text-md font-medium truncate">Pending:</div>
-                                        <div class="ml-1.5 text-lg font-semibold">{{sumTotalPending}}</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Sales summary -->
-                            <div class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                                <!-- Graph -->
                                 <!-- Header -->
-                                <div class="flex flex-col sm:flex-row items-start justify-between">
-                                    <div class="text-lg font-medium tracking-tight leading-6 truncate">Sales Summary</div>
+                                <div class="flex flex-col sm:flex-row items-start justify-end mt-4">
+                                    <!-- <div class="text-lg font-medium tracking-tight leading-6 truncate">Sales Summary</div> -->
                                     <div class="mt-3 sm:mt-0 sm:ml-2">
                                         <mat-button-toggle-group
                                             value="this-week"
@@ -302,10 +407,33 @@
                             <!-- Summary Sales details -->
                             <div class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 pb-0 bg-card shadow rounded-2xl overflow-hidden">
                                 
-                                <div class="flex flex-wrap justify-between item-center w-full">
-                                    <div class="text-lg font-medium tracking-tight my-auto leading-6 truncate">Summary Sales Details</div>
+                                <div class="flex flex-wrap justify-between item-center w-full gap-2 md:gap-0">
+                                    <div class="items-center my-auto truncate flex flex-row gap-3">
+                                        <span class="text-lg font-medium tracking-tight leading-6">Summary Sales Details</span>
+                                        <ng-container *ngIf="verticalCode === 'FnB' || verticalCode === 'FnB_PK'">
+                                            <span class="font-light">|</span>
+                                            <!-- Filter by service type -->
+                                            <div class="text-secondary font-normal tracking-normal">
+                                                <mat-select
+                                                    [formControl]="summarySales_serviceTypeControl"
+                                                    placeholder="Service Type"
+                                                    [(value)]='summarySalesServiceType'
+                                                    #summaryTypeSelector="matSelect"
+                                                >
+                                                    <mat-select-trigger>
+                                                        <span class="flex items-center mr-1">
+                                                            <span>{{ summaryTypeSelector.triggerValue }}</span>
+                                                        </span>
+                                                    </mat-select-trigger>
+                                                    <mat-option value=''>All</mat-option>
+                                                    <mat-option value='DELIVERIN'>DeliverIn</mat-option>
+                                                    <mat-option value='DINEIN'>DineIn</mat-option>
+                                                </mat-select>
+                                            </div>
+                                        </ng-container>
+                                    </div>                                    
                                     <mat-form-field 
-                                        class="fuse-mat-no-subscript w-full sm:w-72"
+                                        class="fuse-mat-dense fuse-mat-no-subscript w-full sm:w-72"
                                         appearance="fill">
                                             <mat-date-range-input [rangePicker]="summarySalesDateRangePicker">
                                                 <input matStartDate [formControl]="summarySalesDateInputStartControl" placeholder="mm/dd/yyyy" >
@@ -341,7 +469,7 @@
                                             </td>
                                         </ng-container>
 
-                                        <!-- Customer Name -->
+                                        <!-- Total Orders -->
                                         <ng-container matColumnDef="totalOrders">
                                             <th
                                                 mat-header-cell
@@ -405,10 +533,33 @@
 
                             <!-- Daily Detailed Sales details -->
                             <div class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 pb-0 bg-card shadow rounded-2xl overflow-hidden">
-                                <div class="flex flex-wrap justify-between item-center w-full">
-                                    <div class="text-lg font-medium tracking-tight my-auto leading-6 truncate">Daily Detailed Sales Details</div>
+                                <div class="flex flex-wrap justify-between item-center w-full gap-2 md:gap-0">
+                                    <div class="items-center my-auto truncate flex flex-row gap-3">
+                                        <span class="text-lg font-medium tracking-tight leading-6">Daily Sales Details</span>
+                                        <ng-container *ngIf="verticalCode === 'FnB' || verticalCode === 'FnB_PK'">
+                                            <span class="font-light">|</span>
+                                            <!-- Filter by service type -->
+                                            <div class="text-secondary font-normal tracking-normal">
+                                                <mat-select
+                                                    [formControl]="detailedDailySales_serviceTypeControl"
+                                                    placeholder="Service Type"
+                                                    [(value)]='detailedDailySalesServiceType'
+                                                    #detailedDailyTypeSelector="matSelect"
+                                                >
+                                                    <mat-select-trigger>
+                                                        <span class="flex items-center mr-1">
+                                                            <span>{{ detailedDailyTypeSelector.triggerValue }}</span>
+                                                        </span>
+                                                    </mat-select-trigger>
+                                                    <mat-option value=''>All</mat-option>
+                                                    <mat-option value='DELIVERIN'>DeliverIn</mat-option>
+                                                    <mat-option value='DINEIN'>DineIn</mat-option>
+                                                </mat-select>
+                                            </div>
+                                        </ng-container>
+                                    </div>
                                     <mat-form-field 
-                                        class="fuse-mat-no-subscript w-full sm:w-72"
+                                        class="fuse-mat-dense fuse-mat-no-subscript w-full sm:w-72"
                                         appearance="fill"
                                     >
                                     <mat-date-range-input [rangePicker]="detailedDailySalesDateRangePicker">
@@ -451,13 +602,29 @@
                                                 
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                Customer Name
+                                                Name
                                             </th>
                                             <td
                                                 class="truncate-cell"
                                                 mat-cell
                                                 *matCellDef="let detailedDailySale">
                                                 {{detailedDailySale.customerName}}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Service Type -->
+                                        <ng-container matColumnDef="serviceType">
+                                            <th
+                                                
+                                                mat-header-cell
+                                                *matHeaderCellDef>
+                                                Service Type
+                                            </th>
+                                            <td
+                                                class="truncate-cell"
+                                                mat-cell
+                                                *matCellDef="let detailedDailySale">
+                                                {{detailedDailySale.serviceType}}
                                             </td>
                                         </ng-container>
 
@@ -621,10 +788,10 @@
 
                             <!-- Daily Top Products details -->
                             <div class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 pb-0 bg-card shadow rounded-2xl overflow-hidden">
-                                <div class="flex flex-wrap justify-between item-center w-full">
+                                <div class="flex flex-wrap justify-between item-center w-full gap-2 md:gap-0">
                                     <div class="text-lg font-medium tracking-tight my-auto leading-6 truncate">Daily Top Products Details</div>
                                     <mat-form-field 
-                                        class="fuse-mat-no-subscript w-full sm:w-72"
+                                        class="fuse-mat-dense fuse-mat-no-subscript w-full sm:w-72"
                                         appearance="fill"
                                     >
                                     <mat-date-range-input [rangePicker]="dailyTopProductsDateRangePicker">
@@ -742,10 +909,10 @@
 
                             <!-- Settlement -->
                             <div class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 pb-0 bg-card shadow rounded-2xl overflow-hidden">
-                                <div class="flex flex-wrap justify-between item-center w-full">
+                                <div class="flex flex-wrap justify-between item-center w-full gap-2 md:gap-0">
                                     <div class="text-lg font-medium tracking-tight my-auto leading-6 truncate">Settlement</div>
                                     <mat-form-field 
-                                        class="fuse-mat-no-subscript w-full sm:w-72"
+                                        class="fuse-mat-dense fuse-mat-no-subscript w-full sm:w-72"
                                         appearance="fill"
                                     >
                                     <mat-date-range-input [rangePicker]="settlementDateRangePicker">
