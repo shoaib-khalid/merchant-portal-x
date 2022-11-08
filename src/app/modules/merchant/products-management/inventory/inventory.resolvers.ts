@@ -187,7 +187,7 @@ export class GetStoreByIdResolver implements Resolve<any>
                 tap(store => {
                     this._inventoryService.getParentCategories(0, 50, 'name', 'asc', '', store.verticalCode).subscribe();
                     // Query to get 20 stores
-                    this._storesService.getStoresList('', 0, 20, 'name', 'asc' ).subscribe()
+                    this._storesService.getStoresList('', 0, 20, 'name', 'asc', '', store.verticalCode ).subscribe()
                 })
             )
     }

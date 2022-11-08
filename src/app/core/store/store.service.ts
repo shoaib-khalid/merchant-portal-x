@@ -253,7 +253,7 @@ export class StoresService
         );
     }
 
-    getStoresList(id: string = "", page: number = 0, size: number = 10, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', category: string = ''): 
+    getStoresList(id: string = "", page: number = 0, size: number = 10, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = '', verticalCode: string = ''): 
         Observable<Store[]>
     {
         let productService = this._apiServer.settings.apiServer.productService;
@@ -272,13 +272,21 @@ export class StoresService
                 pageSize: '' + size,
                 sortByCol: '' + sort,
                 sortingOrder: '' + order.toUpperCase(),
-                name: '' + search
+                name: '' + search,
+                verticalCode: verticalCode
             }
         };
 
-        if (category !== "") {
-            header.params["verticalCode"] = category;
-        }
+        // Delete empty value
+        Object.keys(header.params).forEach(key => {
+            if (Array.isArray(header.params[key])) {
+                header.params[key] = header.params[key].filter(element => element !== null)
+            }
+            
+            if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
+                delete header.params[key];
+            }
+        });
         
         return this._httpClient.get<{ pagination: StorePagination; stores: Store[] }>(productService + '/stores' , header)
         .pipe(

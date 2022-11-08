@@ -138,15 +138,26 @@
                                         </mat-checkbox>
                                     </div>
                                     <!-- Delete button -->
-                                    <div>
+                                    <div class="flex flex-row justify-center">
                                         <button mat-icon-button 
-                                        class=""
-                                        [ngClass]="selection.hasValue() ? 'visible' : 'invisible'"
-                                        (click)="deleteProducts()">
+                                            class=""
+                                            [ngClass]="selection.hasValue() ? 'visible' : 'invisible'"
+                                            (click)="deleteProducts()">
                                             <mat-icon
                                                 class=""
                                                 [color]="'warn'"
                                                 [svgIcon]="'heroicons_outline:trash'">
+                                            </mat-icon>
+                                        </button>
+                                        <button mat-icon-button 
+                                            *ngIf="client.roleId === 'SUPER_USER'"
+                                            class=""
+                                            [ngClass]="selection.hasValue() ? 'visible' : 'invisible'"
+                                            (click)="duplicateSelectedProducts()">
+                                            <mat-icon
+                                                class=""
+                                                [color]="'primary'"
+                                                [svgIcon]="'mat_solid:content_copy'">
                                             </mat-icon>
                                         </button>
                                     </div>
@@ -207,10 +218,10 @@
                                             </div>
 
                                             <!-- Image -->
-                                            <div class="flex items-center">
-                                                <div class="relative flex flex-0 items-center justify-center w-12 h-12 mr-6 rounded overflow-hidden border">
+                                            <div class="flex items-center justify-center">
+                                                <div class="relative flex flex-0 items-center justify-center w-14 h-14 rounded overflow-hidden border">
                                                     <img
-                                                        class="w-8"
+                                                        class="w-10"
                                                         *ngIf="product.thumbnailUrl"
                                                         [alt]="'Product thumbnail image'"
                                                         [src]="product.thumbnailUrl">

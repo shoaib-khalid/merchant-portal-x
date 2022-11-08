@@ -1888,6 +1888,28 @@ export class InventoryService
 
     }
 
+    cloneSelectedStoreProducts(thisStoreId: string, otherStoreId: string, productIds: string[]): Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                storeBranchId : '' + otherStoreId
+            }
+        };
+
+        return this._httpClient.post<any>(productService + '/stores/' + thisStoreId + '/products/selected-clone' , productIds, header).pipe(
+            map((response) => {
+                this._logging.debug("Response from ProductsService (cloneSelectedStoreProducts )", response);
+
+                return response;
+            })
+        );
+
+    }
+
     getAddOnGroupTemplates(
         params: {
             page    : number,
@@ -2131,29 +2153,6 @@ export class InventoryService
             })
         )
 
-        // this.addOnItemTemplates$.pipe(
-        //     take(1),
-        //     switchMap(templates => this._httpClient.post<AddOnItemTemplate[]>(productService + '/addon-template-item/bulk', addOnTemplateBodies, header).pipe(
-        //         map((newTemplateItem) => {
-
-        //             this._logging.debug("Response from ProductsService (createAddOnItemTemplateBulk)", newTemplateItem);
-        //             console.log('templates', templates);
-
-        //             let _newTemplateItems = newTemplateItem["data"];
-        //             console.log('_newTemplateItems', _newTemplateItems);
-
-        //             if (!templates) {
-        //                 this._addOnItemTemplates.next(_newTemplateItems);
-        //             }
-        //             else {
-        //                 this._addOnItemTemplates.next([_newTemplateItems, ...templates]);
-        //             }
-
-        //             // Return the new product
-        //             return _newTemplateItems;
-        //         })
-        //     ))
-        // );
     }
 
     /**
@@ -2482,31 +2481,6 @@ export class InventoryService
                 return status;
             })
         )        
-        // this.addOnsProduct$.pipe(
-        //     take(1),
-        //     switchMap(templates => this._httpClient.delete(productService +'/product-addon/' + id, header).pipe(
-        //         map((status) => {
-
-        //             this._logging.debug("Response from ProductsService (deleteAddOnItemOnProduct)", status);
-
-        //             // // Find the index of the deleted template
-        //             // const index = templates.findIndex(item => item.id === id);
-
-        //             // // Delete the template
-        //             // templates.splice(index, 1);
-
-        //             // // Update the templates
-        //             // this._addOnsProduct.next(templates);
-
-        //             // Return the deleted status
-        //             return status;
-        //         })
-        //     ))
-        // );
     }
-
-
-
-
 
 }

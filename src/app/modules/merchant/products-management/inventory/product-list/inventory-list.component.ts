@@ -20,6 +20,7 @@ import { Client } from 'app/core/user/user.types';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatDrawer } from '@angular/material/sidenav';
 import { ActivatedRoute, Router } from '@angular/router';
+import { DuplicateProductsModalComponent } from '../product-duplicate-modal/product-duplicate-modal.component';
 
 
 @Component({
@@ -29,66 +30,66 @@ import { ActivatedRoute, Router } from '@angular/router';
         /* language=SCSS */
         `
             .inventory-grid {
-                grid-template-columns: 20px 48px auto 40px;
+                grid-template-columns: 20px 80px auto 40px;
 
                 @screen sm {
-                    grid-template-columns: 20px 48px auto 112px 60px;
+                    grid-template-columns: 20px 80px auto 112px 60px;
                 }
 
                 @screen md {
-                    grid-template-columns: 20px 48px 128px auto 80px 110px 60px;
+                    grid-template-columns: 20px 80px 128px auto 80px 110px 60px;
                 }
 
                 @screen lg {
-                    grid-template-columns: 20px 48px 128px auto 80px 110px 60px 60px 60px;
+                    grid-template-columns: 20px 80px 128px auto 80px 110px 60px 60px 60px;
                 }
             }
 
             .inventory-grid-2price {
-                grid-template-columns: 20px 48px auto 40px;
+                grid-template-columns: 20px 80px auto 40px;
 
                 @screen sm {
-                    grid-template-columns: 20px 48px auto 112px 60px;
+                    grid-template-columns: 20px 80px auto 112px 60px;
                 }
 
                 @screen md {
-                    grid-template-columns: 20px 48px 128px auto 80px 110px 60px;
+                    grid-template-columns: 20px 80px 128px auto 80px 110px 60px;
                 }
 
                 @screen lg {
-                    grid-template-columns: 20px 48px 128px auto 80px 110px 110px 60px 60px 60px;
+                    grid-template-columns: 20px 80px 128px auto 80px 110px 110px 60px 60px 60px;
                 }
             }
 
             .inventory-grid-fnb {
-                grid-template-columns: 20px 48px auto 40px;
+                grid-template-columns: 20px 80px auto 40px;
 
                 @screen sm {
-                    grid-template-columns: 20px 48px auto 112px 60px;
+                    grid-template-columns: 20px 80px auto 112px 60px;
                 }
 
                 @screen md {
-                    grid-template-columns: 20px 48px 128px auto 80px 110px 60px;
+                    grid-template-columns: 20px 80px 128px auto 80px 110px 60px;
                 }
 
                 @screen lg {
-                    grid-template-columns: 20px 48px 128px auto 80px 110px 110px 60px 60px;
+                    grid-template-columns: 20px 80px 128px auto 80px 110px 110px 60px 60px;
                 }
             }
 
             .inventory-grid-fnb-2price {
-                grid-template-columns: 20px 48px auto 40px;
+                grid-template-columns: 20px 80px auto 40px;
 
                 @screen sm {
-                    grid-template-columns: 20px 48px auto 112px 60px;
+                    grid-template-columns: 20px 80px auto 112px 60px;
                 }
 
                 @screen md {
-                    grid-template-columns: 20px 48px 128px auto 80px 110px 60px;
+                    grid-template-columns: 20px 80px 128px auto 80px 110px 60px;
                 }
 
                 @screen lg {
-                    grid-template-columns: 20px 48px 128px auto 80px 110px 110px 60px 60px;
+                    grid-template-columns: 20px 80px 128px auto 80px 110px 110px 60px 60px;
                 }
             }
 
@@ -973,6 +974,26 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
 
         // Mark for check
         this._changeDetectorRef.markForCheck();
+    }
+
+    duplicateSelectedProducts() {
+
+        const dialog = this._dialog.open(DuplicateProductsModalComponent, { 
+            disableClose: false,
+            width: this.currentScreenSize.includes('sm') ? 'auto' : '80vw',
+            data: this.selection.selected.map(x => x.id)
+        });
+
+        dialog.afterClosed().subscribe((result) => {
+
+            if (result === 'closed') {
+                this.selection.clear();
+            }
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+
+        })
     }
 
 }
