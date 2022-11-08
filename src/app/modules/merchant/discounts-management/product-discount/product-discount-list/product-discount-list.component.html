@@ -105,7 +105,7 @@
                                     <div class="hidden lg:block">
                                         {{  
                                             discount.isExpired==true ? 'Expired'  
-                                            : discount.isExpired==false || discount.isExpired==null && discount.isActive==true?'Active'
+                                            : (discount.isExpired==false || discount.isExpired==null) && discount.isActive==true?'Active'
                                             : 'Inactive'
                                         }}
                                     </div>

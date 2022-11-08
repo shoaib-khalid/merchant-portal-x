@@ -840,7 +840,7 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
         };
 
         if(startDateTime > endDateTime && _endDate !== ""){            
-            this.dateAlert = "Date and Time Range incorrect !" ;
+            this.dateAlert = "Date and Time Range Incorrect !" ;
             this.disabledProceed = true;
         } else if(endTime.timeMinute === "--" || _endTime === "--" || endTime.timeAmPm === "--"){
             this.disabledProceed = true;
@@ -850,7 +850,7 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
             if(this.checkExistingDate(discountBody)) {
                 this.disabledProceed = true;
             }
-            this.dateAlert = " " ;
+            this.dateAlert = "" ;
             this.disabledProceed = false;
         }
     }
@@ -859,7 +859,7 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
     async checkExistingDate(discountBody){
         let status = await this._discountService.getExistingDate(discountBody);
         if (status === 417 ){
-            this.dateAlert ="Date selected is overlapped with existing date, please select another date !";
+            this.dateAlert ="Date selected is overlapped with existing date, please select another date!";
             this.disabledProceed = true;
         }
     }

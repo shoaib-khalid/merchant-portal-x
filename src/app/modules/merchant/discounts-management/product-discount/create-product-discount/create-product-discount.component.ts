@@ -164,14 +164,6 @@ export class CreateProductDiscountDialogComponent implements OnInit {
             ]),
         });
 
-        this.productDiscountStepperForm.get('step2').valueChanges
-            .subscribe(
-                value => {
-                    console.log('value', value);
-                    
-                }
-            )
-
         //====================View PRODUCTS =====================
 
         this._inventoryService.categories$
@@ -655,7 +647,7 @@ export class CreateProductDiscountDialogComponent implements OnInit {
         };
 
         if(startDateTime > endDateTime && _endDate !== ""){            
-            this.dateAlert = "Date and Time Range incorrect !" ;
+            this.dateAlert = "Date and Time Range Incorrect !" ;
             this.disabledProceed = true;
         } else if(endTime.timeMinute === "--" || _endTime === "--" || endTime.timeAmPm === "--"){
             this.disabledProceed = true;
@@ -665,7 +657,7 @@ export class CreateProductDiscountDialogComponent implements OnInit {
             if(this.checkExistingDate(discountBody)) {
                 this.disabledProceed = true;
             }
-            this.dateAlert = " " ;
+            this.dateAlert = "" ;
             this.disabledProceed = false;
         }
     }
@@ -674,7 +666,7 @@ export class CreateProductDiscountDialogComponent implements OnInit {
     async checkExistingDate(discountBody){
         let status = await this._discountService.getExistingDate(discountBody);
         if (status === 417 ){
-            this.dateAlert ="Date selected is overlapped with existing date, please select another date !";
+            this.dateAlert ="Date selected is overlapped with existing date, please select another date!";
             this.disabledProceed = true;
         }
     }
