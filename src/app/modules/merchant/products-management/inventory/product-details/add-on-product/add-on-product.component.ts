@@ -188,7 +188,7 @@ export class AddOnProductComponent
             .pipe(takeUntil(this._unsubscribeAll), debounceTime(300))
             .subscribe((result) => {
                 
-                this._inventoryService.getAddOnGroupTemplates({page: 0, pageSize: 20, storeId: this.store.id})
+                this._inventoryService.getAddOnGroupTemplates({page: 0, pageSize: 30, storeId: this.store.id})
                 .subscribe(()=>{
                     // Mark for check
                     this._changeDetectorRef.markForCheck();

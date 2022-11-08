@@ -21,6 +21,7 @@ import { SharedModule } from 'app/shared/shared.module';
 import { DashboardComponent } from 'app/modules/merchant/dashboard/dashboard.component';
 import { dashboardRoutes } from 'app/modules/merchant/dashboard/dashboard.routing';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSelectModule } from '@angular/material/select';
 
 @NgModule({
     declarations: [
@@ -46,7 +47,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
         NgApexchartsModule,
         TranslocoModule,
         SharedModule,
-        MatTooltipModule
+        MatTooltipModule,
+        MatSelectModule
     ]
 })
 export class DashboardModule

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { merge, of, Subject } from 'rxjs';
+import { forkJoin, merge, of, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { MatPaginator } from '@angular/material/paginator';
 import { ApexOptions } from 'ng-apexcharts';
@@ -58,6 +58,8 @@ export class DashboardComponent implements OnInit, OnDestroy
     
     orderCountSummary: OrdersCountSummary[];
     _orderCountSummary: any;
+    orderSummary_serviceTypeControl: FormControl = new FormControl('');
+    orderSummaryServiceType = ''
 
     outOfStockProducts: string;
     verticalCode: string;
@@ -78,7 +80,8 @@ export class DashboardComponent implements OnInit, OnDestroy
     }
     summarySalesDateInputStartControl: FormControl = new FormControl();
     summarySalesDateInputEndControl: FormControl = new FormControl();
-    
+    summarySalesServiceType = '';
+    summarySales_serviceTypeControl: FormControl = new FormControl('');
 
     // -----------------------------
     // Daily Top Products Properties
@@ -93,12 +96,13 @@ export class DashboardComponent implements OnInit, OnDestroy
     }
     dailyTopProductsDateInputStart: FormControl = new FormControl();
     dailyTopProductsDateInputEnd: FormControl = new FormControl();
-    
+    dailyTopProductsServiceType: string = '';
+
     // -------------------------------
     // Daily Detailed Sales Properties
     // -------------------------------
 
-    detailedDailySalesCol = ["date","customerName","total","subTotal", "appliedDiscount","serviceCharge","deliveryCharge", "deliveryDiscount","commission","netTotal"]
+    detailedDailySalesCol = ["date", "customerName", "serviceType", "total", "subTotal", "appliedDiscount","serviceCharge","deliveryCharge", "deliveryDiscount","commission","netTotal"]
     detailedDailySalesRow = [];
     detailedDailySalesPagination: DetailedDailySalesPagination;
     detailedDailySalesDateRange: any = {
@@ -107,6 +111,8 @@ export class DashboardComponent implements OnInit, OnDestroy
     }
     detailedDailySalesDateInputStart: FormControl = new FormControl();
     detailedDailySalesDateInputEnd: FormControl = new FormControl();
+    detailedDailySales_serviceTypeControl: FormControl = new FormControl('');
+    detailedDailySalesServiceType: string = '';
 
     // -------------------------------
     // Settlements Properties
@@ -168,6 +174,9 @@ export class DashboardComponent implements OnInit, OnDestroy
     overviewThisWeekArr = [];
     overviewLastWeekArr = [];
 
+    graphServiceType = ''
+    salesOverview_serviceTypeControl: FormControl = new FormControl('');
+
     sumThisWeekCompleted: number = 0;
     sumThisWeekPending: number = 0;
     sumThisWeekFailed: number = 0;
@@ -178,15 +187,6 @@ export class DashboardComponent implements OnInit, OnDestroy
     
     thisWeekChartArr = [];
     lastWeekChartArr = [];
-
-    thisWeekTotalCompleted: number = 0;
-    thisWeekTotalPending: number = 0;
-    thisWeekTotalFailed: number = 0;
-
-    lastWeekTotalCompleted: number = 0;
-    lastWeekTotalPending: number = 0;
-    lastWeekTotalFailed: number = 0;
-
 
     thisWeekDayChartCompleted = [0,0,0,0,0,0,0];
     thisWeekDayChartPending = [0,0,0,0,0,0,0];
@@ -220,6 +220,24 @@ export class DashboardComponent implements OnInit, OnDestroy
         private _inventoryService: InventoryService,
     )
     {
+        const now = new Date();
+        const todayDate = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate();
+    
+        now.setDate(now.getDate()-7);
+        const fromDate = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate();
+    
+        this.detailedDailySalesDateRange.start = fromDate;
+        this.detailedDailySalesDateRange.end = todayDate;
+
+        this.summarySalesDateRange.start = fromDate;
+        this.summarySalesDateRange.end = todayDate;
+
+        this.dailyTopProductsDateRange.start = fromDate;
+        this.dailyTopProductsDateRange.end = todayDate;
+
+        this.settlementDateRange.start = fromDate;
+        this.settlementDateRange.end = todayDate;
+        
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -230,10 +248,10 @@ export class DashboardComponent implements OnInit, OnDestroy
      * Getter for storeId
      */
 
-     get storeId$(): string
-     {
-         return localStorage.getItem('storeId') ?? '';
-     }
+    get storeId$(): string
+    {
+        return localStorage.getItem('storeId') ?? '';
+    }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
@@ -244,15 +262,6 @@ export class DashboardComponent implements OnInit, OnDestroy
      */
     ngOnInit(): void
     {   
-        this._orderCountSummary = [
-            { id: "NEW", label: "New", completionStatus: ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE"], count: 0 },
-            { id: "PROCESS", label: "Process", completionStatus: "BEING_PREPARED", count: 0 },
-            { id: "AWAITING_PICKUP", label: "Awaiting Pickup", completionStatus: "AWAITING_PICKUP", count: 0 },
-            { id: "SENT_OUT", label: "Sent Out", completionStatus: "BEING_DELIVERED", count: 0 },
-            { id: "DELIVERED", label: "Delivered", completionStatus: "DELIVERED_TO_CUSTOMER", count: 0 },
-            { id: "CANCELLED", label: "Cancelled", completionStatus: "CANCELED_BY_MERCHANT", count: 0 },
-            { id: "HISTORY", label: "History", completionStatus: ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE", "BEING_PREPARED", "AWAITING_PICKUP", "BEING_DELIVERED", "DELIVERED_TO_CUSTOMER", "CANCELED_BY_MERCHANT"], count: 0 }
-        ];
 
         this._inventoryService.getProducts(0,100,'name','asc','','OUTOFSTOCK','')
         .pipe(takeUntil(this._unsubscribeAll))
@@ -268,6 +277,16 @@ export class DashboardComponent implements OnInit, OnDestroy
             
             this.orderCountSummary = response;
 
+            this._orderCountSummary = [
+                { id: "NEW", label: "New", completionStatus: ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE"], count: 0 },
+                { id: "PROCESS", label: "Process", completionStatus: "BEING_PREPARED", count: 0 },
+                { id: "AWAITING_PICKUP", label: "Awaiting Pickup", completionStatus: "AWAITING_PICKUP", count: 0 },
+                { id: "SENT_OUT", label: "Sent Out", completionStatus: "BEING_DELIVERED", count: 0 },
+                { id: "DELIVERED", label: "Delivered", completionStatus: "DELIVERED_TO_CUSTOMER", count: 0 },
+                { id: "CANCELLED", label: "Cancelled", completionStatus: "CANCELED_BY_MERCHANT", count: 0 },
+                { id: "HISTORY", label: "History", completionStatus: ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE", "BEING_PREPARED", "AWAITING_PICKUP", "BEING_DELIVERED", "DELIVERED_TO_CUSTOMER", "CANCELED_BY_MERCHANT"], count: 0 }
+            ];
+    
             this._orderCountSummary.forEach((item,i) => {
 
                 // if have multiple completionStatus
@@ -285,6 +304,9 @@ export class DashboardComponent implements OnInit, OnDestroy
                     }
                 }
             });
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
         });        
         
         this._fuseMediaWatcherService.onMediaChange$
@@ -376,7 +398,8 @@ export class DashboardComponent implements OnInit, OnDestroy
                         netTotal: item.storeShare,
                         deliveryDiscount: item.deliveryDiscount,
                         appliedDiscount: item.appliedDiscount,
-                        deliveryType: item.deliveryType
+                        deliveryType: item.deliveryType,
+                        serviceType: item.serviceType
                     });
                 });                
                 
@@ -429,6 +452,11 @@ export class DashboardComponent implements OnInit, OnDestroy
         this._dashboardService.totalSalesTotal$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((totalSalesTotal: TotalSalesTotal[])=>{
+                this.totalSalesTotalRow = [];
+                this.sumTotalCompleted = 0;
+                this.sumTotalPending = 0;
+                this.sumTotalFailed = 0;
+
                 totalSalesTotal.forEach(items => {
                     this.totalSalesTotalRow.push({ 
                         completionStatus: items.completionStatus,
@@ -436,6 +464,20 @@ export class DashboardComponent implements OnInit, OnDestroy
                     });
 
                 });
+
+                // Sum up Total Sales Total
+                this.totalSalesTotalRow.forEach(a => {
+                    
+                    if (this.completeCompletionStatus.includes(a.completionStatus))
+                        this.sumTotalCompleted += a.total;
+                    
+                    else if (this.failedCompletionStatus.includes(a.completionStatus))
+                        this.sumTotalFailed += a.total;
+                    
+                    else
+                        this.sumTotalPending += a.total;
+
+                })
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -445,12 +487,31 @@ export class DashboardComponent implements OnInit, OnDestroy
         this._dashboardService.totalSalesDaily$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((totalSalesDaily: TotalSalesDaily[])=>{
+                this.totalSalesDailyRow = [];
+                this.sumDailyCompleted = 0;
+                this.sumDailyPending = 0;
+                this.sumDailyFailed = 0;
+
                 totalSalesDaily.forEach(items => {
                     this.totalSalesDailyRow.push({ 
                         completionStatus: items.completionStatus,
                         total: items.total
                     });
                 });
+                // Sum up Total Sales Daily
+                this.totalSalesDailyRow.forEach(a => {
+                    
+                    if (this.completeCompletionStatus.includes(a.completionStatus))
+                        this.sumDailyCompleted += a.total;
+                    
+                    else if (this.failedCompletionStatus.includes(a.completionStatus))
+                        this.sumDailyFailed += a.total;
+                    
+                    else
+                        this.sumDailyPending += a.total;
+
+                })
+
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });  
@@ -459,12 +520,32 @@ export class DashboardComponent implements OnInit, OnDestroy
         this._dashboardService.totalSalesWeekly$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((totalSalesWeekly: TotalSalesWeekly[])=>{
+                this.totalSalesWeeklyRow = [];
+                this.sumWeeklyCompleted = 0;
+                this.sumWeeklyPending = 0;
+                this.sumWeeklyFailed = 0;
+
                 totalSalesWeekly.forEach(items => {
                     this.totalSalesWeeklyRow.push({ 
                         completionStatus: items.completionStatus,
                         total: items.total
                     });
                 });
+
+                // Sum up Total Sales Weekly
+                this.totalSalesWeeklyRow.forEach(a => {
+                    
+                    if (this.completeCompletionStatus.includes(a.completionStatus))
+                        this.sumWeeklyCompleted += a.total;
+                        
+                    else if (this.failedCompletionStatus.includes(a.completionStatus))
+                        this.sumWeeklyFailed += a.total;
+                        
+                    else
+                        this.sumWeeklyPending += a.total;
+                        
+                })
+
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });  
@@ -473,12 +554,32 @@ export class DashboardComponent implements OnInit, OnDestroy
         this._dashboardService.totalSalesMonthly$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((totalSalesMonthly: TotalSalesMonthly[])=>{
+                this.totalSalesMonthlyRow = [];
+                this.sumMonthlyCompleted = 0;
+                this.sumMonthlyPending = 0;
+                this.sumMonthlyFailed = 0;
+
                 totalSalesMonthly.forEach(items => {
                     this.totalSalesMonthlyRow.push({ 
                         completionStatus: items.completionStatus,
                         total: items.total
                     });
                 });
+
+                    // Sum up Total Sales Monthly 
+                this.totalSalesMonthlyRow.forEach(a => {
+                    
+                    if (this.completeCompletionStatus.includes(a.completionStatus))
+                        this.sumMonthlyCompleted += a.total;
+                    
+                    else if (this.failedCompletionStatus.includes(a.completionStatus))
+                        this.sumMonthlyFailed += a.total;
+                    
+                    else
+                        this.sumMonthlyPending += a.total;
+
+                })
+
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });      
@@ -522,61 +623,10 @@ export class DashboardComponent implements OnInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             });
 
-        // Sum up Total Sales Total
-        this.totalSalesTotalRow.forEach(a => {
             
-            if (this.completeCompletionStatus.includes(a.completionStatus))
-                this.sumTotalCompleted += a.total;
-            
-            else if (this.failedCompletionStatus.includes(a.completionStatus))
-                this.sumTotalFailed += a.total;
-            
-            else
-                this.sumTotalPending += a.total;
 
-        })
-        
-        // Sum up Total Sales Daily
-        this.totalSalesDailyRow.forEach(a => {
-            
-            if (this.completeCompletionStatus.includes(a.completionStatus))
-                this.sumDailyCompleted += a.total;
-            
-            else if (this.failedCompletionStatus.includes(a.completionStatus))
-                this.sumDailyFailed += a.total;
-            
-            else
-                this.sumDailyPending += a.total;
-
-        })
-
-        // Sum up Total Sales Weekly
-        this.totalSalesWeeklyRow.forEach(a => {
-            
-            if (this.completeCompletionStatus.includes(a.completionStatus))
-                this.sumWeeklyCompleted += a.total;
-                
-            else if (this.failedCompletionStatus.includes(a.completionStatus))
-                this.sumWeeklyFailed += a.total;
-                
-            else
-                this.sumWeeklyPending += a.total;
-                
-        })
-
-        // Sum up Total Sales Monthly 
-        this.totalSalesMonthlyRow.forEach(a => {
-            
-            if (this.completeCompletionStatus.includes(a.completionStatus))
-                this.sumMonthlyCompleted += a.total;
-            
-            else if (this.failedCompletionStatus.includes(a.completionStatus))
-                this.sumMonthlyFailed += a.total;
-            
-            else
-                this.sumMonthlyPending += a.total;
-
-        })
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
 
         // Attach SVG fill fixer to all ApexCharts
         window['Apex'] = {
@@ -637,8 +687,16 @@ export class DashboardComponent implements OnInit, OnDestroy
                     
                     this.summarySalesDateRange.end = formattedDate;
 
-                    return this._dashboardService.getSummarySales(this.storeId$, 0, this.summarySalesPageSize, 'created', 'asc','', 
-                                                                    this.summarySalesDateRange.start, this.summarySalesDateRange.end);
+                    return this._dashboardService.getSummarySales(this.storeId$, {
+                        page: 0,
+                        pageSize: this.summarySalesPageSize,
+                        sortBy: 'created',
+                        sortingOrder: 'ASC',
+                        from: this.summarySalesDateRange.start,
+                        to: this.summarySalesDateRange.end,
+                        serviceType: this.summarySalesServiceType,
+                        search: ''
+                    });
                 }),
                 map(() => {
 
@@ -647,9 +705,58 @@ export class DashboardComponent implements OnInit, OnDestroy
             )
             .subscribe();
 
+        // Filter by service type dropdown
+        this.summarySales_serviceTypeControl.valueChanges
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((value) => {
+                    
+                    this.isLoading = true;
+                    return this._dashboardService.getSummarySales(this.storeId$, {
+                        page: 0,
+                        pageSize: this.summarySalesPageSize,
+                        sortBy: 'created',
+                        sortingOrder: 'ASC',
+                        from: this.summarySalesDateRange.start,
+                        to: this.summarySalesDateRange.end,
+                        serviceType: value,
+                        search: ''
+                    });
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
+
         // -------------------------------
         // Daily Detailed Sales Date Range Input
         // -------------------------------
+
+        // Filter by service type dropdown
+        this.detailedDailySales_serviceTypeControl.valueChanges
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((value) => {
+                    
+                    this.isLoading = true;
+                    return this._dashboardService.getDetailedDailySales(this.storeId$, {
+                        page: 0,
+                        pageSize: this.detailedDailySalesPageSize,
+                        sortBy: 'created',
+                        sortingOrder: 'ASC',
+                        startDate: this.detailedDailySalesDateRange.start,
+                        endDate: this.detailedDailySalesDateRange.end,
+                        serviceType: value
+                    }); 
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
         
         // Subscribe to start date input field value changes 
         this.detailedDailySalesDateInputStart.valueChanges
@@ -692,8 +799,16 @@ export class DashboardComponent implements OnInit, OnDestroy
                     
                     this.detailedDailySalesDateRange.end = formattedDate;
 
-                    return this._dashboardService.getDetailedDailySales(this.storeId$, 0, this.detailedDailySalesPageSize, 'created', 'asc', 
-                                                                            this.detailedDailySalesDateRange.start, this.detailedDailySalesDateRange.end);
+                    return this._dashboardService.getDetailedDailySales(this.storeId$, {
+                        page: 0,
+                        pageSize: this.detailedDailySalesPageSize,
+                        sortBy: 'created',
+                        sortingOrder: 'ASC',
+                        startDate: this.detailedDailySalesDateRange.start,
+                        endDate: this.detailedDailySalesDateRange.end,
+                        serviceType: this.detailedDailySalesServiceType
+                    }); 
+
                 }),
                 map(() => {
 
@@ -747,8 +862,19 @@ export class DashboardComponent implements OnInit, OnDestroy
                     
                     this.dailyTopProductsDateRange.end = formattedDate;
 
-                    return this._dashboardService.getDailyTopProducts(this.storeId$, 0, this.dailyTopProductsPageSize, 'date', 'asc', "",
-                                                                            this.dailyTopProductsDateRange.start, this.dailyTopProductsDateRange.end);
+                    return this._dashboardService.getDailyTopProducts(
+                        this.storeId$, 'current',
+                        {
+                            page: 0,
+                            pageSize: this.dailyTopProductsPageSize,
+                            sortBy: 'date',
+                            sortingOrder: 'ASC',
+                            search: '',
+                            startDate: this.dailyTopProductsDateRange.start,
+                            endDate: this.dailyTopProductsDateRange.end,
+                            serviceType: ''
+
+                        });
                 }),
                 map(() => {
 
@@ -830,18 +956,17 @@ export class DashboardComponent implements OnInit, OnDestroy
         // Top Product This Week
         // -------------------------------
 
-        this._dashboardService.getDailyTopProducts(this.storeId$, 0, 10, 'date', 'desc', "",
-        formattedLastMonday, formattedToday)
+        this._dashboardService.dailyTopProductsThisWeek$
+        .pipe(takeUntil(this._unsubscribeAll))
         .subscribe(response => {
             
             this.topProductThisWeekRow = []
             
-            response['data'].content.forEach(product => {
-                this.topProductThisWeekRow.push({
+            this.topProductThisWeekRow = response.map(product => {
+                return {
                     name : product.name,
                     rank : product.ranking
-
-                })
+                }
             })
 
             // sort the array by rank
@@ -854,23 +979,36 @@ export class DashboardComponent implements OnInit, OnDestroy
             this.secondThisWeek = this.topProductThisWeekRow[1]?.name;
             this.thirdThisWeek = this.topProductThisWeekRow[2]?.name;
 
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+
         })
 
         // // -------------------------------
         // // Graph & Overview This Week
         // // -------------------------------
 
-        this._dashboardService.getWeeklyGraph(this.storeId$, formattedLastMonday, formattedToday)
+        this._dashboardService.weeklyGraphThisWeek$
+        .pipe(takeUntil(this._unsubscribeAll))
         .subscribe(response => {
+
+            this.thisWeekDayChartCompleted = [0,0,0,0,0,0,0];
+            this.thisWeekDayChartPending = [0,0,0,0,0,0,0];
+            this.thisWeekDayChartFailed = [0,0,0,0,0,0,0];
+            this.sumThisWeekCompleted = 0;
+            this.sumThisWeekPending = 0;
+            this.sumThisWeekFailed = 0;
             this.overviewThisWeekArr = [];
-            response['dashboardGraph'].forEach(item => {
-                this.overviewThisWeekArr.push({ 
+
+            this.overviewThisWeekArr = response.map(item => {
+                return {
                     completionStatus: item.completionStatus,
                     total: item.total,
                     //get the day of the week
                     day: new Date(item.date).getDay()
-                });
-            });
+                }
+            })
+
             // Sum up This Week Total and plot the Chart based on Day
             this.overviewThisWeekArr.forEach(a => {
             
@@ -895,6 +1033,9 @@ export class DashboardComponent implements OnInit, OnDestroy
             })
 
             this._prepareChartData();
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
         })
 
         //-----------------------------
@@ -902,7 +1043,7 @@ export class DashboardComponent implements OnInit, OnDestroy
         //-----------------------------
 
         // get this week monday
-        let lastWeekStart = this.getPreviousMonday()
+        let lastWeekStart = this.getPreviousMonday();
         
         // set lastWeekStartFixed to last week monday
         const lastWeekStartFixed = new Date(lastWeekStart.setDate(lastWeekStart.getDate() - 7)); 
@@ -918,18 +1059,17 @@ export class DashboardComponent implements OnInit, OnDestroy
         // Top Product Last Week
         // -------------------------------
 
-        this._dashboardService.getDailyTopProducts(this.storeId$, 0, 10, 'date', 'desc', "",
-        formattedLastWeekStart, formattedLastWeekEnd)
+        this._dashboardService.dailyTopProductsLastWeek$
+        .pipe(takeUntil(this._unsubscribeAll))
         .subscribe(response => {
             
             this.topProductLastWeekRow = []
 
-            response['data'].content.forEach(product => {
-                this.topProductLastWeekRow.push({
+            this.topProductLastWeekRow = response.map(product => {
+                return {
                     name : product.name,
                     rank : product.ranking
-
-                })
+                }
             })
 
             // sort the array by rank
@@ -941,6 +1081,9 @@ export class DashboardComponent implements OnInit, OnDestroy
             this.firstLastWeek = this.topProductLastWeekRow[0]?.name;
             this.secondLastWeek = this.topProductLastWeekRow[1]?.name;
             this.thirdLastWeek = this.topProductLastWeekRow[2]?.name;
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
             
         })
         
@@ -948,18 +1091,27 @@ export class DashboardComponent implements OnInit, OnDestroy
         // // Graph & Overview Last Week
         // // -------------------------------
 
-        this._dashboardService.getWeeklyGraph(this.storeId$, formattedLastWeekStart, formattedLastWeekEnd)
+        this._dashboardService.weeklyGraphLastWeek$
+        .pipe(takeUntil(this._unsubscribeAll))
         .subscribe(response => {
-            this.overviewLastWeekArr = [];
-            response['dashboardGraph'].forEach(item => {
-                this.overviewLastWeekArr.push({ 
+
+            this.lastWeekDayChartCompleted = [0,0,0,0,0,0,0];
+            this.lastWeekDayChartPending = [0,0,0,0,0,0,0];
+            this.lastWeekDayChartFailed = [0,0,0,0,0,0,0];
+            this.sumLastWeekCompleted = 0;
+            this.sumLastWeekPending = 0;
+            this.sumLastWeekFailed = 0;                
+            this.overviewLastWeekArr = [];  
+
+            this.overviewLastWeekArr = response.map(item => {
+                return {
                     completionStatus: item.completionStatus,
                     total: item.total,
                     //get the day of the week
                     day: new Date(item.date).getDay()
-                });
-            });
-
+                }
+            })
+            
             // Sum up Last Week Total and plot the Chart based on Day
             this.overviewLastWeekArr.forEach(a => {
             
@@ -984,8 +1136,83 @@ export class DashboardComponent implements OnInit, OnDestroy
             })
 
             this._prepareChartData();
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
             
         })
+
+        // Filter by service type dropdown
+        this.salesOverview_serviceTypeControl.valueChanges
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((value) => {
+                    
+                    this.isLoading = true;
+                                                    
+                    return forkJoin([
+                        this._dashboardService.getWeeklyGraph(this.storeId$, 'this-week',
+                            {
+                                to: formattedToday,
+                                from: formattedLastMonday,
+                                serviceType: value
+                            }),
+                        this._dashboardService.getWeeklyGraph(this.storeId$, 'last-week',
+                            {
+                                to: formattedLastWeekEnd,
+                                from: formattedLastWeekStart,
+                                serviceType: value
+                            }),
+                        this._dashboardService.getTotalSales(this.storeId$, value),
+                        this._dashboardService.getDailyTopProducts(
+                            this.storeId$, 'this-week',
+                            {
+                                page: 0,
+                                pageSize: 10,
+                                sortBy: 'date',
+                                sortingOrder: 'DESC',
+                                search: '',
+                                startDate: formattedLastMonday,
+                                endDate: formattedToday,
+                                serviceType: value
+                            }),
+                        this._dashboardService.getDailyTopProducts(
+                            this.storeId$, 'last-week',
+                            {
+                                page: 0,
+                                pageSize: 10,
+                                sortBy: 'date',
+                                sortingOrder: 'DESC',
+                                search: '',
+                                startDate: formattedLastWeekStart,
+                                endDate: formattedLastWeekEnd,
+                                serviceType: value
+                            })
+                        ]) 
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
+
+        // Filter by service type dropdown
+        this.orderSummary_serviceTypeControl.valueChanges
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((value) => {
+                    
+                    this.isLoading = true;
+                                
+                    return this._orderslistService.getOrdersCountSummary(value)
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
 
 
         this._prepareChartData();
@@ -1015,11 +1242,18 @@ export class DashboardComponent implements OnInit, OnDestroy
 
                         this.dailyTopProductsPageSize = this._dailyTopProductsPaginator.pageSize;
 
-                        if (this.dailyTopProductsDateRange.start == null && this.dailyTopProductsDateRange.end == null)
-                            return this._dashboardService.getDailyTopProducts(this.storeId$, this._dailyTopProductsPaginator.pageIndex, this._dailyTopProductsPaginator.pageSize, "date", "asc");
-                        else
-                            return this._dashboardService.getDailyTopProducts(this.storeId$, this._dailyTopProductsPaginator.pageIndex, this._dailyTopProductsPaginator.pageSize, "date", "asc", "",
-                                                                                    this.dailyTopProductsDateRange.start, this.dailyTopProductsDateRange.end);
+                        return this._dashboardService.getDailyTopProducts(
+                            this.storeId$, 'current',
+                            {
+                                page: this._dailyTopProductsPaginator.pageIndex,
+                                pageSize: this._dailyTopProductsPaginator.pageSize,
+                                sortBy: 'date',
+                                sortingOrder: 'DESC',
+                                search: '',
+                                startDate: this.dailyTopProductsDateRange.start,
+                                endDate: this.dailyTopProductsDateRange.end,
+                                serviceType: ''
+                            });
 
                     }),
                     map(() => {
@@ -1041,11 +1275,15 @@ export class DashboardComponent implements OnInit, OnDestroy
 
                         this.detailedDailySalesPageSize = this._detailedDailySalesPaginator.pageSize;
 
-                        if (this.detailedDailySalesDateRange.start == null && this.detailedDailySalesDateRange.end == null)
-                            return this._dashboardService.getDetailedDailySales(this.storeId$, this._detailedDailySalesPaginator.pageIndex, this._detailedDailySalesPaginator.pageSize, "created", "asc");
-                        else
-                            return this._dashboardService.getDetailedDailySales(this.storeId$, this._detailedDailySalesPaginator.pageIndex, this._detailedDailySalesPaginator.pageSize, "created", "asc", 
-                                                                                    this.detailedDailySalesDateRange.start, this.detailedDailySalesDateRange.end);
+                        return this._dashboardService.getDetailedDailySales(this.storeId$, {
+                            page: this._detailedDailySalesPaginator.pageIndex,
+                            pageSize: this._detailedDailySalesPaginator.pageSize,
+                            sortBy: 'created',
+                            sortingOrder: 'ASC',
+                            startDate: this.detailedDailySalesDateRange.start,
+                            endDate: this.detailedDailySalesDateRange.end,
+                            serviceType: this.detailedDailySalesServiceType
+                        }); 
                     }),
                     map(() => {
                         this.isLoading = false;
@@ -1066,12 +1304,16 @@ export class DashboardComponent implements OnInit, OnDestroy
 
                         this.summarySalesPageSize = this._summarySalesPaginator.pageSize;
 
-                        if (this.summarySalesDateRange.start == null && this.summarySalesDateRange.end == null)
-                            return this._dashboardService.getSummarySales(this.storeId$, this._summarySalesPaginator.pageIndex, this._summarySalesPaginator.pageSize, "date", "asc");
-                        else
-                            return this._dashboardService.getSummarySales(this.storeId$, this._summarySalesPaginator.pageIndex, this._summarySalesPaginator.pageSize, "date", "asc", "", 
-                                                                            this.summarySalesDateRange.start, this.summarySalesDateRange.end);
-
+                        return this._dashboardService.getSummarySales(this.storeId$, {
+                            page: this._summarySalesPaginator.pageIndex,
+                            pageSize: this._summarySalesPaginator.pageSize,
+                            sortBy: 'created',
+                            sortingOrder: 'ASC',
+                            from: this.summarySalesDateRange.start,
+                            to: this.summarySalesDateRange.end,
+                            serviceType: this.summarySalesServiceType,
+                            search: ''
+                        });
                     }),
                     map(() => {
                         this.isLoading = false;
@@ -1192,9 +1434,7 @@ export class DashboardComponent implements OnInit, OnDestroy
      * Prepare the chart data from the data
      *
      * @private
-     */
-
-    
+     */    
     private _prepareChartData(): void
     {
         
@@ -1223,7 +1463,6 @@ export class DashboardComponent implements OnInit, OnDestroy
                 {
                     name: 'Completed',
                     type: 'line',
-                    // data: [9, 8, 10, 12, 7, 11, 15]
                     data: [this.lastWeekDayChartCompleted[1], this.lastWeekDayChartCompleted[2], this.lastWeekDayChartCompleted[3], 
                     this.lastWeekDayChartCompleted[4], this.lastWeekDayChartCompleted[5], this.lastWeekDayChartCompleted[6], this.lastWeekDayChartCompleted[0]],
                     
@@ -1350,7 +1589,11 @@ export class DashboardComponent implements OnInit, OnDestroy
                 }
               }
         };
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
+
     exportSummarySalesToExcel(): void
     {
     /* pass here the table id */

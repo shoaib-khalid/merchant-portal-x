@@ -53,6 +53,7 @@ export interface DetailedDailySales
     deliveryDiscount: number;
     storeServiceCharges: number;
     storeShare: number;
+    serviceType: string;
 }
 
 export interface DetailedDailySalesPagination
