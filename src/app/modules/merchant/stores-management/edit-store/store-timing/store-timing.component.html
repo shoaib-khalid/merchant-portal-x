@@ -11,6 +11,15 @@
                     [formGroup]="storeTimingForm"
                     #supportNgForm="ngForm"
                     class="w-full">
+
+                    <!-- 24/7 Toggle -->
+                    <div *ngIf="isAlwaysOpen" class="flex flex-row w-full justify-end">
+                        <mat-label >Always Open</mat-label>
+                        <input class="ml-2" 
+                        (change)="toggleAlwaysOpen($event)"
+                        type="checkbox" />
+                    </div>
+
                     <!-- Opening Hour -->
                     <div class="flex flex-col w-full">
                         <mat-label class="font-medium">Store Operating Hour *</mat-label>

@@ -53,6 +53,8 @@ export class RegisterStoreComponent implements OnInit
 
     storeId: string;
 
+    isAlwaysOpen: boolean = true;
+
     // display Errors
     createStoreCondition: any = {
         error: null,
@@ -2569,6 +2571,37 @@ export class RegisterStoreComponent implements OnInit
         }      
     }
 
+     //Always Open Checkbox
+
+    toggleAlwaysOpen(event){
+
+        this.isAlwaysOpen = false;
+
+        let storeTiming = this.createStoreForm.get('step4').get('storeTiming').value;
+        
+        let _storeTiming = storeTiming.map(item => {
+            let updateItem = {
+                isOpen: true,
+                isOff: false,
+                openTime: {
+                    timeAmPm: "AM",
+                    timeHour: "12",
+                    timeMinute: "00",
+                },
+                closeTime: {
+                    timeAmPm: "PM",
+                    timeHour: "11",
+                    timeMinute: "55",
+                },
+                isBreakTime: false
+
+            }
+            let newItem = {...item, ...updateItem};
+            return newItem            
+        });
+        this.createStoreForm.get('step4').get('storeTiming').patchValue(_storeTiming);
+    }
+   
     // Quil editor text limit
     textChanged($event) {
         const MAX_LENGTH = 500;
