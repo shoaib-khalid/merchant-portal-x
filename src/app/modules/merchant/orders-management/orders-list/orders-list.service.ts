@@ -92,7 +92,7 @@ export class OrdersListService
      * Get data
      */
     getOrders(page: number = 0, size: number = 10, sort: string = 'created', order: 'asc' | 'desc' | '' = 'desc', accountName: string = '', phoneNumber: string = '', from: string = '', to: string = '',
-             completionStatus: string[] = ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE"], invoiceId: string = ''): 
+             completionStatus: string[] = ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE"], invoiceId: string = '', serviceType: string = ''): 
     Observable<{ pagination: OrdersListPagination; stores: Order[] }>
     {
         
@@ -113,9 +113,21 @@ export class OrdersListService
                 sortingOrder: '' + order.toUpperCase(),
                 storeId: this.storeId$,
                 accountName: '' + accountName,
-                invoiceId: '' + invoiceId
+                invoiceId: '' + invoiceId,
+                serviceType: serviceType
             }
         };
+
+        // Delete empty value
+        Object.keys(header.params).forEach(key => {
+            if (Array.isArray(header.params[key])) {
+                header.params[key] = header.params[key].filter(element => element !== null)
+            }
+            
+            if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
+                delete header.params[key];
+            }
+        });
         
         return this._httpClient.get<{ pagination: OrdersListPagination; stores: Order[] }>(orderService + '/orders/search', header)
         .pipe(

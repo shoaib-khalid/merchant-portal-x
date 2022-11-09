@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { BehaviorSubject, merge, of, Subject } from 'rxjs';
+import { BehaviorSubject, forkJoin, merge, of, Subject } from 'rxjs';
 import { debounceTime, finalize, map, switchMap, takeUntil } from 'rxjs/operators';
 import { OrdersListService } from 'app/modules/merchant/orders-management/orders-list/orders-list.service';
 import { Order, OrdersCountSummary, OrdersListPagination } from 'app/modules/merchant/orders-management/orders-list/orders-list.types'
@@ -46,6 +46,25 @@ import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dia
         .cell-style-small {
             width: 90px
         }
+
+        /* .mat-select .mat-select-trigger .mat-select-value {
+            display: flex;
+            position: relative;
+            max-width: none;
+            justify-content: center;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+
+        }
+
+        .mat-select .mat-select-trigger {
+            display: inline-flex;
+            align-items: center;
+            width: 100%;
+            height: auto;
+            padding-left: 0.25rem;
+            padding-right: 0.25rem;
+        } */
         `
     ],
     encapsulation  : ViewEncapsulation.None,
@@ -91,7 +110,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     orderSubmitted: any = [];
     bulkOrderSubmitted: boolean = false;
 
-    recentTransactionsTableColumns: string[] = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total','deliveryType','deliveryService', 'deliveryProvider', 'pickup', 'action'];
+    recentTransactionsTableColumns: string[] = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total','deliveryType','deliveryService', 'deliveryProvider', 'serviceType', 'action'];
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     loading: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -100,6 +119,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     currentScreenSize: string[] = [];
 
     isRevised:any;
+    serviceTypeControl: FormControl = new FormControl('');
 
     /**
      * Constructor
@@ -162,21 +182,23 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             });
 
-        this._orderCountSummary = [
-            { id: "NEW", label: "New", completionStatus: ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE"], count: 0 },
-            { id: "PROCESS", label: "Process", completionStatus: "BEING_PREPARED", count: 0 },
-            { id: "AWAITING_PICKUP", label: "Awaiting Pickup", completionStatus: "AWAITING_PICKUP", count: 0 },
-            { id: "SENT_OUT", label: "Sent Out", completionStatus: "BEING_DELIVERED", count: 0 },
-            { id: "DELIVERED", label: "Delivered", completionStatus: "DELIVERED_TO_CUSTOMER", count: 0 },
-            { id: "CANCELLED", label: "Cancelled", completionStatus: "CANCELED_BY_MERCHANT", count: 0 },
-            { id: "HISTORY", label: "History", completionStatus: ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE", "BEING_PREPARED", "AWAITING_PICKUP", "BEING_DELIVERED", "DELIVERED_TO_CUSTOMER", "CANCELED_BY_MERCHANT"], count: 0 }
-        ];
+
 
         this._orderslistService.ordersCountSummary$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((response) => {
 
                 this.orderCountSummary = response;
+
+                this._orderCountSummary = [
+                    { id: "NEW", label: "New", completionStatus: ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE"], count: 0 },
+                    { id: "PROCESS", label: "Process", completionStatus: "BEING_PREPARED", count: 0 },
+                    { id: "AWAITING_PICKUP", label: "Awaiting Pickup", completionStatus: "AWAITING_PICKUP", count: 0 },
+                    { id: "SENT_OUT", label: "Sent Out", completionStatus: "BEING_DELIVERED", count: 0 },
+                    { id: "DELIVERED", label: "Delivered", completionStatus: "DELIVERED_TO_CUSTOMER", count: 0 },
+                    { id: "CANCELLED", label: "Cancelled", completionStatus: "CANCELED_BY_MERCHANT", count: 0 },
+                    { id: "HISTORY", label: "History", completionStatus: ["PAYMENT_CONFIRMED", "RECEIVED_AT_STORE", "BEING_PREPARED", "AWAITING_PICKUP", "BEING_DELIVERED", "DELIVERED_TO_CUSTOMER", "CANCELED_BY_MERCHANT"], count: 0 }
+                ];
 
                 this._orderCountSummary.forEach((item,i) => {
 
@@ -195,6 +217,10 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                         }
                     }
                 });
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+
             });
             
         // get store
@@ -210,7 +236,8 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                     this.isLoading = true;
                     this.filterCustNameControlValue = query;
 
-                    return this._orderslistService.getOrders(0, 10, 'created', 'desc', query, '', '', '', this.tabControl.value);
+
+                    return this._orderslistService.getOrders(0, 10, 'created', 'desc', query, '', '', '', this.tabControl.value, '', this.serviceTypeControl.value);
                 }),
                 map(() => {
                     this.isLoading = false;
@@ -227,7 +254,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                     this.isLoading = true;
                     this.filterTrxIdControlValue = query;
 
-                    return this._orderslistService.getOrders(0, 10, 'created', 'desc', '', '', '', '', this.tabControl.value, query);
+                    return this._orderslistService.getOrders(0, 10, 'created', 'desc', '', '', '', '', this.tabControl.value, query, this.serviceTypeControl.value);
                 }),
                 map(() => {
                     this.isLoading = false;
@@ -274,7 +301,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                     
                     this.filterDateRange.end = formattedDate;
                         
-                    return this._orderslistService.getOrders(0, 10, 'created', 'desc', '', '', this.filterDateRange.start, this.filterDateRange.end, this.tabControl.value);
+                    return this._orderslistService.getOrders(0, 10, 'created', 'desc', '', '', this.filterDateRange.start, this.filterDateRange.end, this.tabControl.value, '', this.serviceTypeControl.value);
                 }),
                 map(() => {
                     this.isLoading = false;
@@ -289,7 +316,26 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                 switchMap((query) => {
                     this.isLoading = true;
                     //kena ubah
-                    return this._orderslistService.getOrders(0, 10, 'created', 'desc', '', '', '', '', query);
+                    return this._orderslistService.getOrders(0, 10, 'created', 'desc', '', '', '', '', query, '', this.serviceTypeControl.value);
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
+
+        // Filter by service type dropdown
+        this.serviceTypeControl.valueChanges
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((value) => {
+                    
+                    this.isLoading = true;
+                    return forkJoin([
+                        this._orderslistService.getOrders(0, 10, 'created', 'desc', '', '', '', '', this.tabControl.value, '', value),
+                        this._orderslistService.getOrdersCountSummary(value)
+                    ])
                 }),
                 map(() => {
                     this.isLoading = false;
@@ -343,18 +389,18 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                         //pagination filtered by date
                         if (this.filterDateRange.start != null && this.filterDateRange.end != null)
                             return this._orderslistService.getOrders(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, '' , '', 
-                                                                        this.filterDateRange.start, this.filterDateRange.end, this.tabControl.value);
+                                                                        this.filterDateRange.start, this.filterDateRange.end, this.tabControl.value, '', this.serviceTypeControl.value);
                         //pagination filtered by trx id
                         else if (this.filterTrxIdControlValue != null)
                             return this._orderslistService.getOrders(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, '' , '', '', '', 
-                                                                        this.tabControl.value, this.filterTrxIdControlValue);
+                                                                        this.tabControl.value, this.filterTrxIdControlValue, this.serviceTypeControl.value);
                         //pagination filtered by cust name
                         else if (this.filterCustNameControlValue != null)
                             return this._orderslistService.getOrders(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, 
-                                                                        this.filterCustNameControlValue , '', '', '', this.tabControl.value);
+                                                                        this.filterCustNameControlValue , '', '', '', this.tabControl.value, '', this.serviceTypeControl.value);
 
                         else
-                            return this._orderslistService.getOrders(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, '' , '', '', '', this.tabControl.value);
+                            return this._orderslistService.getOrders(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction, '' , '', '', '', this.tabControl.value, '', this.serviceTypeControl.value);
                     }),
                     map(() => {
                         this.isLoading = false;
@@ -398,11 +444,11 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
 
         let currentOpenTab = displayStatuses;
         if (displayStatuses === "PROCESS") {
-            this.recentTransactionsTableColumns = ['bulkId', 'invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'deliveryType', 'deliveryService', 'deliveryProvider', 'pickup', 'action'];
+            this.recentTransactionsTableColumns = ['bulkId', 'invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'deliveryType', 'deliveryService', 'deliveryProvider', 'serviceType', 'action'];
         } else if (displayStatuses !== "HISTORY") {
-            this.recentTransactionsTableColumns = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'deliveryType','deliveryService', 'deliveryProvider', 'pickup', 'action'];
+            this.recentTransactionsTableColumns = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'deliveryType','deliveryService', 'deliveryProvider', 'serviceType', 'action'];
         }  else {
-            this.recentTransactionsTableColumns = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'completionStatus', 'pickup', 'action'];
+            this.recentTransactionsTableColumns = ['invoiceId', 'created', 'orderPaymentDetail.accountName', 'total', 'completionStatus', 'serviceType', 'action'];
         }
 
         this.tabControl.setValue(this._orderCountSummary.find(item => item.id === this.openTab).completionStatus);
@@ -413,8 +459,8 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     }
 
     clearFilter(){
-        this.filterCustNameControl.reset();
-        this.filterTrxIdControl.reset();
+        this.filterCustNameControl.setValue('');
+        this.filterTrxIdControl.setValue('');
     }
 
     openSelector() {
@@ -456,6 +502,9 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                                         // re-fetch the completion status    
                                         this._orderslistService.getCompletionStatus(order.id, nextCompletionStatus).subscribe(() => {
                                         });
+                                        
+                                        // this._orderslistService.getOrdersCountSummary(this.serviceTypeControl.value).subscribe()
+                                        // this._orderslistService.getOrders(0, 10, 'created', 'desc', '', '', '', '', this.tabControl.value, '', this.serviceTypeControl.value).subscribe()
     
                                         // Mark for check
                                         this._changeDetectorRef.markForCheck();
@@ -472,6 +521,9 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                                 // re-fetch the completion status  
                                 this._orderslistService.getCompletionStatus(order.id, nextCompletionStatus).subscribe(() => {
                                 });
+                                // this._orderslistService.getOrdersCountSummary(this.serviceTypeControl.value).subscribe()
+                                // this._orderslistService.getOrders(0, 10, 'created', 'desc', '', '', '', '', this.tabControl.value, '', this.serviceTypeControl.value).subscribe()
+
                                 // Mark for check
                                 this._changeDetectorRef.markForCheck();
                             });
@@ -486,6 +538,9 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                     // re-fetch the completion status  
                     this._orderslistService.getCompletionStatus(order.id, nextCompletionStatus).subscribe(() => {
                     });
+                    // this._orderslistService.getOrdersCountSummary(this.serviceTypeControl.value).subscribe()
+                    // this._orderslistService.getOrders(0, 10, 'created', 'desc', '', '', '', '', this.tabControl.value, '', this.serviceTypeControl.value).subscribe()
+
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
                 });
@@ -598,6 +653,9 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
                                     if (index > -1) {                                        
                                         this.orders.data[index].selected = null;                                        
                                     }
+                                    // this._orderslistService.getOrdersCountSummary(this.serviceTypeControl.value).subscribe()
+                                    // this._orderslistService.getOrders(0, 10, 'created', 'desc', '', '', '', '', this.tabControl.value, '', this.serviceTypeControl.value).subscribe()
+
 
                                 });                                
 
