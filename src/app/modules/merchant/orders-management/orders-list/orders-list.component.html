@@ -6,8 +6,8 @@
             <!-- Title and action buttons -->
             <div class="flex items-center justify-between w-full">
                 <div>
-                    <h2 class="text-3xl font-semibold tracking-tight leading-8">Orders Management</h2>
-                    <div class="font-medium tracking-tight text-secondary">Keep track of your financial status</div>
+                    <h2 class="text-3xl font-semibold tracking-tight leading-8">Order Management</h2>
+                    <!-- <div class="font-medium tracking-tight text-secondary">Keep track of your financial status</div> -->
                 </div>
                 <div class="flex items-center ml-6">
                     <!-- <button
@@ -56,14 +56,35 @@
                 <div class="xl:col-span-2 flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden">
                     <div class="flex flex-col sm:flex-row p-6 sm:justify-between">
                         <!-- Recent transactions -->
-                        <div class="flex w-full">
+                        <div class="flex w-full items-center">
                             <div class="flex-0">
                                 <div class="mr-4 text-lg font-medium tracking-tight leading-6 truncate">Recent transactions</div>
                                 <!-- <div class="text-secondary font-medium">1 pending, 4 completed</div> -->
                             </div>
+                            <mat-form-field
+                                class="fuse-mat-no-subscript fuse-mat-rounded fuse-mat-dense w-full sm:w-auto"
+                                [floatLabel]="'always'">
+                                <!-- Filter by service type -->
+                                <div class="text-secondary font-normal tracking-normal">
+                                    <mat-select
+                                        [formControl]="serviceTypeControl"
+                                        placeholder="Service Type"
+                                        #serviceTypeSelector="matSelect"
+                                    >
+                                        <mat-select-trigger>
+                                            <span class="flex items-center mr-1">
+                                                <span>{{ serviceTypeSelector.triggerValue }}</span>
+                                            </span>
+                                        </mat-select-trigger>
+                                        <mat-option value=''>All</mat-option>
+                                        <mat-option value='DELIVERIN'>DeliverIn</mat-option>
+                                        <mat-option value='DINEIN'>DineIn</mat-option>
+                                    </mat-select>
+                                </div>
+                            </mat-form-field>
                         </div>
                         <!-- Search & Filter -->
-                        <div class="flex w-full sm:w-auto mt-4 sm:mt-0">
+                        <div class="flex flex-row w-full sm:w-auto mt-4 sm:mt-0">
                             <div class="flex items-center justify-center pr-2">
                                 <mat-select
                                     id="filter-control-input"
@@ -307,7 +328,7 @@
                                         mat-header-cell
                                         mat-sort-header
                                         *matHeaderCellDef>
-                                        Customer Name
+                                        Name
                                     </th>
                                     <td
                                         class="w-40 lg:w-auto p-0 mr-4 truncate-cell"
@@ -352,7 +373,7 @@
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span
-                                            class="inline-flex items-center font-bold text-xs px-2.5 py-0.5 rounded-full tracking-wide uppercase"
+                                            class="inline-flex items-center font-bold text-xs px-2 py-0.5 rounded-full tracking-wide uppercase"
                                             [ngClass]="{'bg-green-200 text-green-800 dark:bg-green-600 dark:text-green-50': transaction.order.completionStatus === 'PAYMENT_CONFIRMED',
                                                         'bg-yellow-200 text-yellow-800 dark:bg-yellow-600 dark:text-yellow-50': transaction.order.completionStatus === 'BEING_PREPARED',
                                                         'bg-orange-200 text-orange-800 dark:bg-orange-600 dark:text-orange-50': transaction.order.completionStatus === 'AWAITING_PICKUP',
@@ -380,7 +401,7 @@
                                         [style.display]="'none'"
                                         *matCellDef="let transaction">
                                         <span *ngIf="store" 
-                                              class="inline-flex items-center font-bold text-xs px-2.5 py-0.5 rounded-full tracking-wide uppercase"
+                                              class="inline-flex items-center font-bold text-xs px-2 py-0.5 rounded-full tracking-wide uppercase"
                                               [ngClass]="{'bg-green-200 text-green-800 dark:bg-green-600 dark:text-green-50': transaction.order.deliveryType === 'SCHEDULED',
                                                           'bg-blue-200 text-blue-800 dark:bg-blue-600 dark:text-blue-50': transaction.order.deliveryType === 'ADHOC'}">
                                             {{ transaction.order.deliveryType }}
@@ -402,7 +423,7 @@
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span *ngIf="store" 
-                                                class="inline-flex items-center font-bold text-xs px-2.5 py-0.5 rounded-full tracking-wide uppercase"
+                                                class="inline-flex items-center font-bold text-xs px-2 py-0.5 rounded-full tracking-wide uppercase"
                                                 [ngClass]="transaction.order.orderShipmentDetail.deliveryPeriodDetails?.id === 'EXPRESS' ? 'bg-green-200 text-green-800 dark:bg-green-600 dark:text-green-50'
                                                 : transaction.order.orderShipmentDetail.deliveryPeriodDetails?.id === 'FOURDAYS' ? 'bg-blue-200 text-blue-800 dark:bg-blue-600 dark:text-blue-50' 
                                                 : transaction.order.orderShipmentDetail.deliveryPeriodDetails?.id === 'FOURHOURS' ? 'bg-purple-200 text-purple-800 dark:bg-purple-600 dark:text-purple-50' 
@@ -416,7 +437,7 @@
                                 <!-- Delivery Provider -->
                                 <ng-container matColumnDef="deliveryProvider">
                                     <th
-                                        class="w-22 p-0"
+                                        class="w-24 p-0"
                                         mat-header-cell
                                         mat-sort-header
                                         *matHeaderCellDef>
@@ -427,41 +448,29 @@
                                         mat-cell
                                         *matCellDef="let transaction">
                                         <span *ngIf="store && transaction.order.orderShipmentDetail.deliveryServiceProvider" 
-                                            class="inline-flex items-center font-bold text-xs px-2.5 py-0.5 rounded-full tracking-wide uppercase"
-                                            [ngClass]="{ 'bg-orange-200 text-orange-800 dark:bg-orange-600 dark:text-orange-50': transaction.order.orderShipmentDetail.deliveryServiceProvider.id === '3',
-                                                         'bg-red-200 text-red-800 dark:bg-red-600 dark:text-red-50': transaction.order.orderShipmentDetail.deliveryServiceProvider.id === '5'}"
+                                            class="inline-flex items-center font-bold text-xs px-2 py-0.5 rounded-full tracking-wide uppercase"
+                                            [ngClass]="{ 'bg-orange-200 text-orange-800 dark:bg-orange-600 dark:text-orange-50': transaction.order.orderShipmentDetail.deliveryServiceProvider.id === 3,
+                                                         'bg-red-200 text-red-800 dark:bg-red-600 dark:text-red-50': transaction.order.orderShipmentDetail.deliveryServiceProvider.id === 5}"
                                             >
                                             {{ transaction.order.orderShipmentDetail.deliveryServiceProvider ? transaction.order.orderShipmentDetail.deliveryServiceProvider.name : '' }}
                                         </span>
                                     </td>
                                 </ng-container>
 
-                                <!-- Pickup -->
-                                <ng-container matColumnDef="pickup">
+                                <!-- Service Type -->
+                                <ng-container matColumnDef="serviceType">
                                     <th
-                                        class="w-20 p-0"
+                                        class="w-24 p-0"
                                         mat-header-cell
                                         *matHeaderCellDef>
-                                        Store Pickup
+                                        Service Type
                                     </th>
                                     <td
-                                        class="cell-style-small px-2 pr-6 sm:px-3 md:px-4 lg:px-6"
+                                        class="truncate-cell"
                                         mat-cell
                                         *matCellDef="let transaction">
-                                        <div class="flex items-start items-center">
-
-                                            <mat-icon
-                                                *ngIf="transaction.order.orderShipmentDetail.storePickup"
-                                                class="text-green-400 icon-size-5"
-                                                [svgIcon]="'heroicons_outline:check'"></mat-icon>
-
-                                            <!-- <input 
-                                                class="bg-gray-50 border-gray-300 focus:ring-0 focus:ring-blue-300 h-6 w-6 rounded-full" 
-                                                type="checkbox" 
-                                                [checked]="transaction.order.orderShipmentDetail.storePickup"
-                                                onclick="return false;"
-                                                > -->
-                                      </div>
+                                        <span class="whitespace-nowrap text-sm font-medium">
+                                            {{ transaction.order.serviceType !== 'DINEIN' && transaction.order.orderShipmentDetail.storePickup ? 'SELF COLLECT' : transaction.order.serviceType}}</span>
                                     </td>
                                 </ng-container>
 
@@ -503,7 +512,7 @@
                                                         class="w-3/5 py-2 px-1 rounded-full border border-solid"
                                                         [ngClass]="orderSubmitted[transaction.order.id] ? 'cursor-wait' : 'cursor-pointer'"
                                                         [ngClass]="bulkOrders.length > 0 ? 'cursor-not-allowed border-gray-300 bg-gray-200' : 'cursor-pointer border-primary hover:bg-primary'"
-                                                        [placeholder]="'&nbsp; &nbsp;' + transaction.nextActionText"
+                                                        [placeholder]="'&nbsp;&nbsp;&nbsp;'+ transaction.nextActionText"
                                                         [disabled]="orderSubmitted[transaction.order.id] || bulkOrders.length > 0"
                                                     >
                                                         <ng-container>
@@ -557,8 +566,8 @@
                                             <ng-template #cancelTemplate>
                                                 <mat-select
                                                     [id]="'action-cancel-' + transaction.order.id"
-                                                    class="flex placeholder-black items-center justify-center w-3/5 py-2 px-1 rounded-full border border-primary border-solid group hover:bg-primary"
-                                                    [placeholder]="'&nbsp; &nbsp; &nbsp;' + transaction.nextActionText"
+                                                    class="flex items-center justify-center w-3/5 py-2 px-1 rounded-full border border-primary border-solid group hover:bg-primary"
+                                                    [placeholder]="'&nbsp;&nbsp;&nbsp;'+ transaction.nextActionText"
                                                     [disabled]="orderSubmitted[transaction.order.id]"
                                                     [ngClass]="orderSubmitted[transaction.order.id] ? 'cursor-wait' : 'cursor-pointer' "
                                                     >

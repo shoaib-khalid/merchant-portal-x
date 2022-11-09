@@ -140,6 +140,7 @@
                                     <!-- Delete button -->
                                     <div class="flex flex-row justify-center">
                                         <button mat-icon-button 
+                                            matTooltip="Delete selected items"
                                             class=""
                                             [ngClass]="selection.hasValue() ? 'visible' : 'invisible'"
                                             (click)="deleteProducts()">
@@ -151,6 +152,7 @@
                                         </button>
                                         <button mat-icon-button 
                                             *ngIf="client.roleId === 'SUPER_USER'"
+                                            matTooltip="Duplicate selected items"
                                             class=""
                                             [ngClass]="selection.hasValue() ? 'visible' : 'invisible'"
                                             (click)="duplicateSelectedProducts()">
