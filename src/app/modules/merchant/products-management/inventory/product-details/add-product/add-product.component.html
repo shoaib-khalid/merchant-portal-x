@@ -1684,7 +1684,7 @@
                                         <!-- <span class="mb-px font-medium leading-tight">Add product</span> -->
                                     </div>
                                     <!-- Filter by category -->
-                                    <div class="justify-self-end">
+                                    <div class="justify-self-end w-full">
                                         <!-- <mat-form-field class="fuse-mat-dense fuse-mat-rounded fuse-mat-no-subscript w-30 sm:w-30">
                                             <mat-select
                                                 [formControl]="localCategoryFilterControl"
@@ -1705,7 +1705,7 @@
                                         </mat-form-field> -->
 
                                         <!-- Category filter -->
-                                        <mat-form-field class="fuse-mat-dense fuse-mat-rounded fuse-mat-no-subscript w-30 sm:w-30">
+                                        <mat-form-field class="fuse-mat-dense fuse-mat-rounded fuse-mat-no-subscript w-full">
                                             <mat-select
                                                 class="w-full"
                                                 placeholder="Category"
@@ -1747,7 +1747,7 @@
                                                 (change)="insertProductsInOption(product.id, $event)"
                                                 [checked]="onChangeSelectProductValue.includes(product.id)"
                                                 [ngModelOptions]="{standalone: true}"
-                                                [disabled]="product.isPackage"
+                                                [disabled]="product.isPackage || product.hasAddOn || product.productVariants.length > 0"
                                                 >
                                                 {{product.name}}
                                             </mat-checkbox>
