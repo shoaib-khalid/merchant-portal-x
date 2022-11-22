@@ -135,16 +135,13 @@
                                 </button>
                                 <button
                                     type="button"
-                                    class="flex items-center justify-center w-3/4 h-9 rounded bg-blue-600 text-white"
+                                    class="flex items-center justify-center w-3/4 h-9 rounded hover:bg-blue-400 cursor-pointer bg-blue-600 text-white disabled:bg-blue-500 disabled:cursor-default disabled:opacity-50"
                                     (click)="updateSelectedGroup()"
-                                    [disabled]="minTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || maxTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || 
-                                                    maxTotalAllow.value === 0"
-                                    [ngClass]="(minTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || maxTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length) || 
-                                                    maxTotalAllow.value === 0 ? 
-                                        'bg-blue-500 opacity-50 cursor-default' : 'hover:bg-blue-400 cursor-pointer'"
+                                    [disabled]="minTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || 
+                                                    (maxTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || maxTotalAllow.value == 0)"
                                     >
                                     <mat-icon
-                                        class="text-white icon-size-5"
+                                        class="text-white icon-size-5 mr-0.5"
                                         [svgIcon]="'heroicons_outline:check'"></mat-icon>
                                         Update
                                 </button>
@@ -152,16 +149,13 @@
                             <button
                                 *ngIf="selectedGroupTemplate && !selectedGroupOnProduct && selectedItemsTemplates.length > 0"
                                 type="button"
-                                class="flex items-center justify-center w-full h-9 rounded bg-blue-600 text-white"
+                                class="flex items-center justify-center w-full h-9 rounded hover:bg-blue-400 cursor-pointer bg-blue-600 text-white disabled:bg-blue-500 disabled:cursor-default disabled:opacity-50"
                                 (click)="createSelectedTemplate()"
-                                [disabled]="minTotalAllow.value > selectedItemsTemplates.length || maxTotalAllow.value > selectedItemsTemplates.length ||
-                                                maxTotalAllow.value === 0"
-                                [ngClass]="(minTotalAllow.value > selectedItemsTemplates.length || maxTotalAllow.value > selectedItemsTemplates.length) || 
-                                                maxTotalAllow.value === 0 ? 
-                                    'bg-blue-500 opacity-50 cursor-default' : 'hover:bg-blue-400 cursor-pointer'"
+                                [disabled]="minTotalAllow.value > selectedItemsTemplates.length || 
+                                                (maxTotalAllow.value > selectedItemsTemplates.length || maxTotalAllow.value == 0)"
                                 >
                                 <mat-icon
-                                    class="text-white icon-size-5"
+                                    class="text-white icon-size-5 mr-0.5"
                                     [svgIcon]="'heroicons_outline:plus'"></mat-icon>
                                     Add
                             </button>

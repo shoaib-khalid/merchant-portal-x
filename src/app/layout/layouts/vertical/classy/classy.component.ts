@@ -89,6 +89,9 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((navigation: Navigation) => {
                 this.navigation = navigation;
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
             });
 
         // Subscribe to platform data
@@ -96,6 +99,10 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((platform: Platform) => {
                 this.platform = platform;
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+
             });
 
         // Subscribe to the user service
@@ -103,6 +110,10 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
             .pipe((takeUntil(this._unsubscribeAll)))
             .subscribe((client: Client) => {
                 this.client = client;
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+
             });
 
         // Subscribe to the store service
@@ -142,6 +153,8 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
                         this.currentStoreId = '';
                         this.storeLogo = null;
                     }
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
 
                     return [];
                 })
@@ -155,6 +168,9 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
 
                 // Check if the screen is small
                 this.isScreenSmall = !matchingAliases.includes('md');
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
             });
 
         // Mark for check

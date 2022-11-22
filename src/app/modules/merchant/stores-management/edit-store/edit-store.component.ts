@@ -101,13 +101,13 @@ export class EditStoreComponent implements OnInit
             .subscribe((platform: Platform) => {
                 this.platform = platform;
 
-                if (platform.country === 'PAK') {
-                    let index = this.panels.findIndex(item => item.id === 'dine-in')
+                // if (platform.country === 'PAK') {
+                //     let index = this.panels.findIndex(item => item.id === 'dine-in')
     
-                    if (index > -1) {
-                        this.panels.splice(index, 1);
-                    }
-                }
+                //     if (index > -1) {
+                //         this.panels.splice(index, 1);
+                //     }
+                // }
             });
         
 

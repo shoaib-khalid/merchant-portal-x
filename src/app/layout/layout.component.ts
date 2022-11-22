@@ -1,4 +1,4 @@
-import { Component, Inject, OnDestroy, OnInit, Renderer2, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, Renderer2, ViewEncapsulation } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { combineLatest, Subject } from 'rxjs';
@@ -32,7 +32,9 @@ export class LayoutComponent implements OnInit, OnDestroy
         private _renderer2: Renderer2,
         private _router: Router,
         private _fuseConfigService: FuseConfigService,
-        private _fuseMediaWatcherService: FuseMediaWatcherService
+        private _fuseMediaWatcherService: FuseMediaWatcherService,
+        private _changeDetectorRef: ChangeDetectorRef
+
     )
     {
     }
@@ -103,6 +105,9 @@ export class LayoutComponent implements OnInit, OnDestroy
 
         // Set the app version
         this._renderer2.setAttribute(this._document.querySelector('[ng-version]'), 'fuse-version', FUSE_VERSION);
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
 
     /**
