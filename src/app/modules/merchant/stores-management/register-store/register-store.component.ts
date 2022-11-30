@@ -1011,7 +1011,9 @@ export class RegisterStoreComponent implements OnInit
         const deliverySpType = this.createStoreForm.get('step3').get('deliverySpType').value;        
 
         // add domain when sending to backend.. at frontend form call it subdomain
-        createStoreBody["domain"] =  this.createStoreForm.get('step1').get('subdomain').value + this.domainName;
+        // createStoreBody["domain"] =  this.createStoreForm.get('step1').get('subdomain').value + this.domainName;
+        createStoreBody["domain"] = this.customDomain ? subdomain : subdomain + this.domainName;
+
         createStoreBody["clientId"] = this.createStoreForm.get('clientId').value;
         createStoreBody["isBranch"] = this.createStoreForm.get('isBranch').value;
         createStoreBody["isSnooze"] = this.createStoreForm.get('step4').get('isSnooze').value;
