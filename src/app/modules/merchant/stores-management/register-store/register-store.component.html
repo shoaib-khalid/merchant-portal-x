@@ -71,9 +71,18 @@
                                             </mat-error>
                                         </mat-form-field>
                                         <!-- Store URL -->
+                                        <div class="w-full flex flex-row justify-between mb-0.5">
+                                            <span class="font-medium">Store URL *</span>
+                                            <mat-slide-toggle 
+                                                [color]="'primary'"
+                                                [(ngModel)]="customDomain"
+                                                [ngModelOptions]="{standalone: true}"
+                                                (change)="toggleCustomDomain()">
+                                                Custom Domain: {{customDomain ? 'Yes' : 'No'}}</mat-slide-toggle>
+                                        </div>
                                         <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
-                                            <mat-label>Store URL</mat-label>
-                                            <span class="sm:flex sm:flex-col">https://</span> 
+                                            <!-- <mat-label>Store URL</mat-label> -->
+                                            <span class="sm:flex sm:flex-col text-secondary">https://</span> 
                                             <input
                                                 matInput
                                                 minlength="4"
@@ -86,7 +95,7 @@
                                                     matPrefix
                                                     [svgIcon]="'heroicons_outline:globe-alt'">
                                                 </mat-icon>
-                                            <span *ngIf="currentScreenSize.includes('sm')" matSuffix>{{ domainName }}</span>
+                                            <span *ngIf="currentScreenSize.includes('sm') && !customDomain" matSuffix>{{ domainName }}</span>
                                             <mat-error *ngIf="createStoreForm.get('step1').get('subdomain').hasError('required')">
                                                 Required
                                             </mat-error>

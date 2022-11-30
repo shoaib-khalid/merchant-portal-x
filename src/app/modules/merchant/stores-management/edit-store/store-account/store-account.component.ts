@@ -36,6 +36,8 @@ export class StoreAccountComponent implements OnInit
     // Fuse Media Watcher
     currentScreenSize: string[] = [];
 
+    customDomain: boolean = false;
+
     /** Quil Modules */
     quillModules: any = {
         toolbar: [
@@ -85,7 +87,7 @@ export class StoreAccountComponent implements OnInit
         // Create the form
         this.storeAccountForm = this._formBuilder.group({
             name                : ['', Validators.required],
-            subdomain           : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(63), EditStoreValidationService.domainValidator]],
+            subdomain           : ['', [Validators.required, Validators.minLength(4), Validators.maxLength(63), EditStoreValidationService.domainValidator]],
             storeDescription    : ['', [Validators.required, Validators.maxLength(200)]],
             email               : ['', [Validators.required, Validators.email]],
             phoneNumber         : ['', EditStoreValidationService.phonenumberValidator],
@@ -137,21 +139,31 @@ export class StoreAccountComponent implements OnInit
                     .subscribe((response) => {
                         
                         this.domainName = "." + response.domain;
+
+                        // get subdomain from store domain (store service)
+                        this.fullDomain = storeResponse.domain;
+                        
+                        let storeDomain = this.fullDomain.substring(this.fullDomain.indexOf("."));
+
+                        if (storeDomain === this.domainName) {
+                            this.customDomain = false;
+                            this.subDomainName = this.fullDomain.split(".")[0];
+
+                            this.storeAccountForm.get('subdomain').patchValue(this.subDomainName);
+
+                            this.storeAccountForm.get('subdomain').setValidators([Validators.required, Validators.minLength(4), Validators.maxLength(63), EditStoreValidationService.domainValidator]);
+                            this.storeAccountForm.get('subdomain').updateValueAndValidity();  
+                        }
+                        else {
+                            this.customDomain = true;
+
+                            this.storeAccountForm.get('subdomain').patchValue(this.fullDomain);
+
+                            this.storeAccountForm.get('subdomain').setValidators([Validators.required, Validators.minLength(4), Validators.maxLength(63), EditStoreValidationService.customDomainValidator]);
+                            this.storeAccountForm.get('subdomain').updateValueAndValidity();
+                        }
+
                     });
-
-                // get subdomain from store domain (store service)
-                this.fullDomain = storeResponse.domain;
-
-                // domain retrieve from store service that have less than 3 xxx.xxx.xxx is consider invalid
-                if (this.fullDomain.split(".").length >= 3) {
-                    // set sub domain name 
-                    this.subDomainName = this.fullDomain.split(".")[0]
-                } else {
-                    console.error("Invalid domain name from backend : ",this.fullDomain);
-                    alert("Invalid domain name from backend : " + this.fullDomain)
-                }
-
-                this.storeAccountForm.get('subdomain').patchValue(this.subDomainName);
 
                 this.storeName = storeResponse.name;
 
@@ -191,19 +203,35 @@ export class StoreAccountComponent implements OnInit
     // -----------------------------------------------------------------------------------------------------
 
     async checkExistingURL(subdomain: string){
-        let url = subdomain + this.domainName;
+        if (subdomain === '') return;
+        if (subdomain.substring(0, 1) === '.') return;
+
+        let url = this.customDomain ? subdomain : subdomain + this.domainName;
         let status = await this._storesService.getExistingURL(url);
         if (status === 409 && this.fullDomain !== url){
-            this.storeAccountForm.get('subdomain').setErrors({domainAlreadyTaken: true});
+            setTimeout(() => {
+                this.storeAccountForm.get('subdomain').setErrors({domainAlreadyTaken: true});
+                this.storeAccountForm.get('subdomain').markAsTouched({onlySelf: true});
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            }, 0);
         }
     }
     
     async checkExistingName(name:string){
+        if (name === '') return;
+
         let status = await this._storesService.getExistingName(name);
         if (status === 409 && this.storeName !== name){
-            this.storeAccountForm.get('name').setErrors({storeNameAlreadyTaken: true});
-        }
+            setTimeout(() => {
+                this.storeAccountForm.get('name').setErrors({storeNameAlreadyTaken: true});
+                this.storeAccountForm.get('name').markAsTouched({onlySelf: true});
 
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            }, 0);
+        }
     }
 
     sanitizePhoneNumber(phoneNumber: string) {
@@ -238,7 +266,7 @@ export class StoreAccountComponent implements OnInit
         const { subdomain,...storeAccountBody } = this.storeAccountForm.value;
     
         // add domain when sending to backend.. at frontend form call it subdomain
-        storeAccountBody["domain"] = subdomain + this.domainName;
+        storeAccountBody["domain"] = this.customDomain ? subdomain : subdomain + this.domainName;
 
         this._storesService.update(this.storeId, storeAccountBody)
         .subscribe((response) => {
@@ -277,5 +305,19 @@ export class StoreAccountComponent implements OnInit
         if ($event.editor.getLength() > MAX_LENGTH) {
            $event.editor.deleteText(MAX_LENGTH, $event.editor.getLength());
         }
+    }
+
+    toggleCustomDomain() {
+        if (!this.customDomain) {
+            this.storeAccountForm.get('subdomain').setValidators([Validators.required, Validators.minLength(4), Validators.maxLength(63), EditStoreValidationService.domainValidator]);
+            this.storeAccountForm.get('subdomain').updateValueAndValidity();
+        }
+        else {
+            this.storeAccountForm.get('subdomain').setValidators([Validators.required, Validators.minLength(4), Validators.maxLength(63), EditStoreValidationService.customDomainValidator]);
+            this.storeAccountForm.get('subdomain').updateValueAndValidity();
+        }
+        this.storeAccountForm.get('subdomain').markAsTouched({onlySelf: true});
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
 }

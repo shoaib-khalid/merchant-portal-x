@@ -51,6 +51,24 @@ export class EditStoreValidationService {
           return { invalidDomain: true };
         }
     }
+
+    static customDomainValidator(control) {
+
+        
+        if (!control.value || control.value === null){
+          return { required: true };
+        }
+
+        if (
+          control.value.match(
+            /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/
+          )
+        ) {
+          return null;
+        } else {
+          return { invalidDomain: true };
+        }
+    }
   
     static creditCardValidator(control) {
         // Visa, MasterCard, American Express, Diners Club, Discover, JCB

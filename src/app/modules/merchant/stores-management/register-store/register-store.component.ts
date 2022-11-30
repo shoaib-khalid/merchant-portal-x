@@ -175,6 +175,7 @@ export class RegisterStoreComponent implements OnInit
     displayLatitude: BehaviorSubject<string> = new BehaviorSubject<string>('');
     displayLongtitude: BehaviorSubject<string> = new BehaviorSubject<string>('');
     storeCreationError: boolean = false;
+    customDomain: boolean = false;
 
     /**
      * Constructor
@@ -852,106 +853,62 @@ export class RegisterStoreComponent implements OnInit
         let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
         this.createStoreForm.get('clientId').patchValue(clientId);
 
-        //Initialise google maps
-        let loader = new Loader({
-            apiKey: environment.googleMapsAPIKey,
-            libraries: ['places']
-            
-            })
-
-        //hardcode value
-        this.displayLat = 0;
-        this.displayLong = 0;
-
-        this.location = {
-            lat: this.displayLat,
-            lng: this.displayLong,
-        };
-
-        this.displayLatitude.next(this.displayLat.toString());
-        this.displayLongtitude.next(this.displayLong.toString());
         
-        loader.load().then(() => {
-            
-            this.map = new google.maps.Map(document.getElementById("map-create"), {
-                center: this.location,
-                zoom: 15,
-                mapTypeControl:false,
-                streetViewControl:false,//Removing the pegman from map
-                // styles: styles,
-                mapTypeId: "roadmap",
-            })
-    
-            const initialMarker = new google.maps.Marker({
-            position: this.location,
-            map: this.map,
-            });
-
-            //use for when user mark other location
-            let markers: google.maps.Marker[] = [];
-          
-            // Configure the click listener.
-            this.map.addListener("click", (event) => {
+        setTimeout(() => {
+            //Initialise google maps
+            let loader = new Loader({
+                apiKey: environment.googleMapsAPIKey,
+                libraries: ['places']
                 
-                // this.storeDeliveryForm.markAsDirty();
-                //to be display coordinate
-                let coordinateClickStringify = JSON.stringify(event.latLng);
-                let coordinateClickParse = JSON.parse(coordinateClickStringify);
-        
-                this.location = {
-                    lat: coordinateClickParse.lat,
-                    lng: coordinateClickParse.lng,
-                };
-
-                // Clear out the old markers.
-                markers.forEach((marker) => {
-                marker.setMap(null);
-                });
-                markers = [];
-    
-                // Clear out the init markers1.
-                initialMarker.setMap(null);
-    
-                // Create a marker for each place.
-                markers.push(
-                new google.maps.Marker({
-                    map:this.map,
-                    // icon,
-                    position: event.latLng,
                 })
-                );
-                this.displayLatitude.next(coordinateClickParse.lat);
-                this.displayLongtitude.next(coordinateClickParse.lng);
-            
-            });
+    
+            //hardcode value
+            this.displayLat = 0;
+            this.displayLong = 0;
+    
+            this.location = {
+                lat: this.displayLat,
+                lng: this.displayLong,
+            };
+    
+            this.displayLatitude.next(this.displayLat.toString());
+            this.displayLongtitude.next(this.displayLong.toString());
 
-            //Trigger when click Relocate
-            let geocoder: google.maps.Geocoder;
-            const relocatebutton = document.getElementById("relocate-button") as HTMLInputElement;
-            // const submitButton =  document.getElementById("submit-btn");
-            geocoder = new google.maps.Geocoder();
-            relocatebutton.addEventListener("click", (e) =>{
-                geocoder
-                .geocode({ address: this.createStoreForm.get('step3').get('address').value})
-                .then((result) => {
-                    const { results } = result;
+            loader.load().then(() => {
+                
+                this.map = new google.maps.Map(document.getElementById("map-create"), {
+                    center: this.location,
+                    zoom: 15,
+                    mapTypeControl:false,
+                    streetViewControl:false,//Removing the pegman from map
+                    // styles: styles,
+                    mapTypeId: "roadmap",
+                })
         
+                const initialMarker = new google.maps.Marker({
+                position: this.location,
+                map: this.map,
+                });
+    
+                //use for when user mark other location
+                let markers: google.maps.Marker[] = [];
+              
+                // Configure the click listener.
+                this.map.addListener("click", (event) => {
+                    
+                    // this.storeDeliveryForm.markAsDirty();
                     //to be display coordinate
-                    let coordinateAddressStringify = JSON.stringify(results[0].geometry.location);
-                    let coordinateAddressParse = JSON.parse(coordinateAddressStringify);
-        
+                    let coordinateClickStringify = JSON.stringify(event.latLng);
+                    let coordinateClickParse = JSON.parse(coordinateClickStringify);
+            
                     this.location = {
-                    lat: coordinateAddressParse.lat,
-                    lng: coordinateAddressParse.lng,
+                        lat: coordinateClickParse.lat,
+                        lng: coordinateClickParse.lng,
                     };
-
-                    //to be display at front in string
-                    this.displayLatitude.next(coordinateAddressParse.lat);
-                    this.displayLongtitude.next(coordinateAddressParse.lng);
-        
+    
                     // Clear out the old markers.
                     markers.forEach((marker) => {
-                        marker.setMap(null);
+                    marker.setMap(null);
                     });
                     markers = [];
         
@@ -960,29 +917,76 @@ export class RegisterStoreComponent implements OnInit
         
                     // Create a marker for each place.
                     markers.push(
-                        new google.maps.Marker({
+                    new google.maps.Marker({
                         map:this.map,
                         // icon,
-                        position: results[0].geometry.location,
-                        })
+                        position: event.latLng,
+                    })
                     );
-                    const bounds1 = new google.maps.LatLngBounds();
-        
-                    bounds1.extend(results[0].geometry.location);
-        
-                    this.map.fitBounds(bounds1);
-                    
-                    return results;
-                })
-                .catch((e) => {
-                    alert("Geocode was not successful for the following reason: " + e);
-                });
-
+                    this.displayLatitude.next(coordinateClickParse.lat);
+                    this.displayLongtitude.next(coordinateClickParse.lng);
                 
-            });
+                });
     
+                //Trigger when click Relocate
+                let geocoder: google.maps.Geocoder;
+                const relocatebutton = document.getElementById("relocate-button") as HTMLInputElement;
+                // const submitButton =  document.getElementById("submit-btn");
+                geocoder = new google.maps.Geocoder();
+                relocatebutton.addEventListener("click", (e) =>{
+                    geocoder
+                    .geocode({ address: this.createStoreForm.get('step3').get('address').value})
+                    .then((result) => {
+                        const { results } = result;
             
-        });        
+                        //to be display coordinate
+                        let coordinateAddressStringify = JSON.stringify(results[0].geometry.location);
+                        let coordinateAddressParse = JSON.parse(coordinateAddressStringify);
+            
+                        this.location = {
+                        lat: coordinateAddressParse.lat,
+                        lng: coordinateAddressParse.lng,
+                        };
+    
+                        //to be display at front in string
+                        this.displayLatitude.next(coordinateAddressParse.lat);
+                        this.displayLongtitude.next(coordinateAddressParse.lng);
+            
+                        // Clear out the old markers.
+                        markers.forEach((marker) => {
+                            marker.setMap(null);
+                        });
+                        markers = [];
+            
+                        // Clear out the init markers1.
+                        initialMarker.setMap(null);
+            
+                        // Create a marker for each place.
+                        markers.push(
+                            new google.maps.Marker({
+                            map:this.map,
+                            // icon,
+                            position: results[0].geometry.location,
+                            })
+                        );
+                        const bounds1 = new google.maps.LatLngBounds();
+            
+                        bounds1.extend(results[0].geometry.location);
+            
+                        this.map.fitBounds(bounds1);
+                        
+                        return results;
+                    })
+                    .catch((e) => {
+                        alert("Geocode was not successful for the following reason: " + e);
+                    });
+    
+                    
+                });
+        
+                
+            });        
+        }, 1000);
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -2042,19 +2046,35 @@ export class RegisterStoreComponent implements OnInit
     }
 
     async checkExistingURL(subdomain: string){
-        let url = subdomain + this.domainName;
+        if (subdomain === '') return;
+        if (subdomain.substring(0, 1) === '.') return;
+
+        let url = this.customDomain ? subdomain : subdomain + this.domainName;
         let status = await this._storesService.getExistingURL(url);
         if (status === 409){
-            this.createStoreForm.get('step1').get('subdomain').setErrors({domainAlreadyTaken: true});
+            setTimeout(() => {
+                this.createStoreForm.get('step1').get('subdomain').setErrors({domainAlreadyTaken: true});
+                this.createStoreForm.get('step1').get('subdomain').markAsTouched({onlySelf: true});
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            }, 0);
         }
     }
     
     async checkExistingName(name:string){
-        let status = await this._storesService.getExistingName(name);
-        if (status ===409){
-            this.createStoreForm.get('step1').get('name').setErrors({storeNameAlreadyTaken: true});
-        }
+        if (name === '') return;
 
+        let status = await this._storesService.getExistingName(name);
+        if (status === 409){
+            setTimeout(() => {
+                this.createStoreForm.get('step1').get('name').setErrors({storeNameAlreadyTaken: true});
+                this.createStoreForm.get('step1').get('name').markAsTouched({onlySelf: true});
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            }, 0);
+        }
     }
     
     sanitizePhoneNumber(phoneNumber: string) {
@@ -2644,5 +2664,19 @@ export class RegisterStoreComponent implements OnInit
             .subscribe(() => {
                 this.stateCitySelector.compareWith = (a: any, b: any) => a === b;
             });
+    }
+
+    toggleCustomDomain() {
+        if (!this.customDomain) {
+            this.createStoreForm.get('step1').get('subdomain').setValidators([Validators.required, Validators.minLength(4), Validators.maxLength(63), RegisterStoreValidationService.domainValidator]);
+            this.createStoreForm.get('step1').get('subdomain').updateValueAndValidity();
+        }
+        else {
+            this.createStoreForm.get('step1').get('subdomain').setValidators([Validators.required, Validators.minLength(4), Validators.maxLength(63), RegisterStoreValidationService.customDomainValidator]);
+            this.createStoreForm.get('step1').get('subdomain').updateValueAndValidity();
+        }
+        this.createStoreForm.get('step1').get('subdomain').markAsTouched({onlySelf: true});
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
 }

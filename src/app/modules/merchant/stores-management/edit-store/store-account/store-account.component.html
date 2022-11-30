@@ -35,15 +35,24 @@
                         </div>
                         <!-- Store Url -->
                         <div class="sm:col-span-4">
+                            <div class="w-full flex flex-row justify-between mb-0.5">
+                                <span class="font-medium">Store URL *</span>
+                                <mat-slide-toggle 
+                                    [color]="'primary'"
+                                    [(ngModel)]="customDomain"
+                                    [ngModelOptions]="{standalone: true}"
+                                    (change)="toggleCustomDomain()">
+                                    Custom Domain: {{customDomain ? 'Yes' : 'No'}}</mat-slide-toggle>
+                            </div>
                             <mat-form-field class="fuse-mat-emphasized-affix w-full" floatLabel="always">
-                                <mat-label>Store URL</mat-label>
-                                <span>https://</span> 
+                                <!-- <mat-label>Store URL</mat-label> -->
+                                <span class="text-secondary">https://</span> 
                                 <mat-icon
                                     matPrefix
                                     [svgIcon]="'heroicons_outline:globe-alt'">
                                 </mat-icon>
                                 <div
-                                    *ngIf="currentScreenSize.includes('sm')"
+                                    *ngIf="currentScreenSize.includes('sm') && !customDomain"  
                                     class="text-secondary"
                                     matSuffix>
                                     {{domainName}}
@@ -72,7 +81,7 @@
                                     The subdomain name entered is already taken
                                 </mat-error>
                             </mat-form-field>
-                            <div *ngIf="!currentScreenSize.includes('sm')" class="w-full text-gray-500 pr-2 text-right">
+                            <div *ngIf="!currentScreenSize.includes('sm') && !customDomain" class="w-full text-gray-500 pr-2 text-right">
                                 {{domainName}}
                             </div>
                         </div>
