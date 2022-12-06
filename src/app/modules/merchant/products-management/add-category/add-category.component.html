@@ -79,16 +79,21 @@
                     <mat-select
                         class="w-full"
                         placeholder="Choose Parent Category"
-                        [formControlName] = "'parentCategoryId'"
+                        [formControlName]= "'parentCategoryId'"
                     >
-                        <div>
-                            <mat-option *ngFor="let listing of parentCategoriesOptions;" [value]="listing.id">
-                                {{listing.name}}
-                            </mat-option>
-                        </div>
+                        <mat-option *ngFor="let listing of parentCategoriesOptions;" [value]="listing.id">
+                            <div class="flex flex-row gap-3 items-center">
+                                <img
+                                    class="w-7 h-7 rounded-full object-cover"
+                                    [src]="listing.thumbnailUrl">
+                                <span>
+                                    {{listing.name}}
+                                </span>
+                            </div>
+                        </mat-option>
                     </mat-select>
                     <mat-error *ngIf="addCategoryForm.get('parentCategoryId').hasError('required')">
-                        Please select Parent Category
+                        Select parent category
                     </mat-error>
                 </mat-form-field>
                 <mat-form-field 
@@ -107,11 +112,11 @@
             </div>
 
             <!-- Actions -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-end mt-4 sm:mt-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-end mt-2">
                 <div *ngIf="message !== ''" class="mr-3 text-warn">
                     {{message}}
                 </div>
-                <div class="order-last">
+                <div class="order-last flex justify-end">
                     <!-- Send -->
                     <button
                         class="bg-gray-300 hover:bg-gray-500 border border-gray-500"
@@ -123,9 +128,9 @@
                     </button>
                     
                     <button
-                        class="bg-primary-300 hover:bg-primary-500 border border-primary-500 ml-2"
+                        class="ml-2"
                         mat-flat-button
-                        [color]="'gray'"
+                        [color]="'primary'"
                         (click)="addNewCategory()"
                         [disabled]="addCategoryForm.pristine || addCategoryForm.invalid"
                         >

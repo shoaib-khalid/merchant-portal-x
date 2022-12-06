@@ -95,8 +95,7 @@ export class AddCategoryComponent implements OnInit {
             map((response)=>{
                 return this.storeVerticalCode = response.verticalCode;
             }),
-            switchMap((storeVerticalCode:string)=>this._inventoryService.getParentCategories(0, 50, 'name', 'asc', '',storeVerticalCode)
-            ),
+            switchMap((storeVerticalCode:string)=> this._inventoryService.parentCategories$),
         )
         .subscribe((categories) => {
             this.parentCategoriesOptions = categories;

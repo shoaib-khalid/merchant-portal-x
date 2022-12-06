@@ -1310,7 +1310,7 @@ export class InventoryService
      * @param order
      * @param search
      */
-    getByQueryCategories(page: number = 0, size: number = 20, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = ''):
+    getByQueryCategories(page: number = 0, size: number = 30, sort: string = 'sequenceNumber', order: 'asc' | 'desc' | '' = 'asc', search: string = ''):
     Observable<{ pagination: ProductCategoryPagination; products: ProductCategory[] }>
     {
         let productService = this._apiServer.settings.apiServer.productService;
@@ -1327,6 +1327,17 @@ export class InventoryService
                 storeId : '' + this.storeId$,
             }
         };
+
+        // Delete empty value
+        Object.keys(header.params).forEach(key => {
+            if (Array.isArray(header.params[key])) {
+                header.params[key] = header.params[key].filter(element => element !== null)
+            }
+            
+            if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
+                delete header.params[key];
+            }
+        });
 
         return this._httpClient.get<any>(productService  + '/store-categories',header).pipe(
             tap((response) => {
@@ -1426,24 +1437,35 @@ export class InventoryService
             params: {
                 name: category.name,
                 storeId: this.storeId$,
-                parentCategoryId:category.parentCategoryId 
+                parentCategoryId: category.parentCategoryId,
+                sequenceNumber: category.sequenceNumber
             }
         };
 
-        if (!category.parentCategoryId || category.parentCategoryId === "") {
-            delete header.params['parentCategoryId'];
-        }
+        // if (!category.parentCategoryId || category.parentCategoryId === "") {
+        //     delete header.params['parentCategoryId'];
+        // }
+
+        // Delete empty value
+        Object.keys(header.params).forEach(key => {
+            if (Array.isArray(header.params[key])) {
+                header.params[key] = header.params[key].filter(element => element !== null)
+            }
+            
+            if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
+                delete header.params[key];
+            }
+        });
         
-        // product-service/v1/swagger-ui.html#/store-category-controller/postStoreCategoryByStoreIdUsingPOST
         return this.categories$.pipe(
             take(1),
             switchMap(categories => this._httpClient.post<any>(productService + '/store-categories', formData , header).pipe(
                 map((newCategory) => {
 
-                    this._logging.debug("Response from ProductsService (createCategory)",category);
+                    this._logging.debug("Response from ProductsService (createCategory)", newCategory);
 
                     // Update the categories with the new category
-                    this._categories.next([newCategory.data, ...categories]);
+                    this._categories.next([...categories, newCategory.data]);
                     
                     let paginationNumber = this._categoryPagination["_value"]
                     
@@ -1452,7 +1474,7 @@ export class InventoryService
                     this._categoryPagination.next(paginationNumber)
                     
                     // Return new category from observable
-                    return newCategory;
+                    return newCategory.data;
                 })
             ))
         );
@@ -1475,13 +1497,25 @@ export class InventoryService
             params: {
                 name: category.name,
                 storeId: this.storeId$,
-                parentCategoryId:category.parentCategoryId 
+                parentCategoryId: category.parentCategoryId ,
+                sequenceNumber: category.sequenceNumber
             }
         };
 
-        if (!category.parentCategoryId || category.parentCategoryId === "") {
-            delete header.params['parentCategoryId'];
-        }
+        // if (!category.parentCategoryId || category.parentCategoryId === "") {
+        //     delete header.params['parentCategoryId'];
+        // }
+
+        // Delete empty value
+        Object.keys(header.params).forEach(key => {
+            if (Array.isArray(header.params[key])) {
+                header.params[key] = header.params[key].filter(element => element !== null)
+            }
+            
+            if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
+                delete header.params[key];
+            }
+        });
         
         // product-service/v1/swagger-ui.html#/store-category-controller/putStoreProductAssetsByIdUsingPUT
         return this.categories$.pipe(
@@ -1489,7 +1523,7 @@ export class InventoryService
             switchMap(categories => this._httpClient.put<any>(productService + '/store-categories/' + id , formdata , header).pipe(
                 map((newCategory) => {
 
-                    this._logging.debug("Response from ProductsService (updateCategory)",newCategory);
+                    this._logging.debug("Response from ProductsService (updateCategory)", newCategory);
 
                     // Find the index of the updated product
                     const index = categories.findIndex(item => item.id === id);
@@ -1513,6 +1547,26 @@ export class InventoryService
                 })
             ))
         );
+    }
+
+    updateCategoryBulk(storeCategoryProduct: any): Observable<ProductCategory>
+    {
+
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                storeId: this.storeId$,
+            }
+        };
+        
+        return this._httpClient.post<any>(productService + '/store-categories/bulk-edit-sequence', storeCategoryProduct, header).pipe(
+            tap((newCategory) => {
+                this._logging.debug("Response from ProductsService (updateCategoryBulk)", newCategory);
+            })
+        )
     }
   
      /**

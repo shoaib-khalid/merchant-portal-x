@@ -41,103 +41,119 @@
     <div class="flex flex-auto overflow-hidden">
 
         <!-- Categories list -->
-        <div class="flex flex-col flex-auto sm:mb-18 overflow-hidden sm:overflow-y-auto">
-            <ng-container *ngIf="(categories$ | async) as categories">
-                <ng-container *ngIf="categories.length > 0; else noCategories">
-                    <div class="grid">
-                        <!-- Header -->
-                        <div
-                            class="categories-grid items-center z-10 sticky top-0 grid gap-2 sm:gap-4 py-2 px-6 md:px-8 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
-                            matSort
-                            matSortDisableClear>
-                            <!-- Checkbox -->
-                            <div>
-                                <mat-checkbox [color]="'primary'" (change)="$event ? masterToggle() : null"
-                                    [checked]="selection.hasValue() && isAllSelected()"
-                                    [indeterminate]="selection.hasValue() && !isAllSelected()">
-                                </mat-checkbox>
-                            </div>
-                            <!-- Delete button -->
-                            <div>
-                                <button mat-icon-button 
-                                class=""
-                                [ngClass]="selection.hasValue() ? 'visible' : 'invisible'"
-                                (click)="deleteCategories()">
-                                    <mat-icon
-                                        class=""
-                                        [color]="'warn'"
-                                        [svgIcon]="'heroicons_outline:trash'">
-                                    </mat-icon>
-                                </button>
-                            </div>
-                            <div [mat-sort-header]="'name'">Category Name</div>
-                            <div class="block">Details</div>
+        <div class="flex flex-col flex-auto sm:mb-18 overflow-hidden sm:overflow-y-auto" cdkScrollable>
+            <ng-container *ngIf="categoriesList.length > 0; else noCategories">
+                <div class="grid">
+                    <!-- Header -->
+                    <div
+                        class="categories-grid items-center z-10 sticky top-0 grid gap-2 sm:gap-4 py-2 px-6 md:px-8 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                        matSort
+                        matSortDisableClear>
+                        <!-- Slide toggle for reorder list -->
+                        <div class="flex flex-col">
+                            <mat-slide-toggle 
+                                [disabled]="selectedCategory || selection.hasValue()"
+                                [color]="'primary'"
+                                [(ngModel)]="setOrderEnabled" 
+                                [ngModelOptions]="{standalone: true}"
+                                (change)='reorderList($event.checked)'></mat-slide-toggle>
                         </div>
-                        <!-- Rows -->
-                        <ng-container *ngIf="(categories$ | async) as categories">
-                            <ng-container *ngFor="let category of categories; trackBy: trackByFn">
-                                <div class="categories-grid grid items-center gap-2 sm:gap-4 py-3 px-6 md:px-8 border-b">
-
-                                    <!-- Checkbox -->
-                                    <div>
-                                        <mat-checkbox [color]="'primary'" (click)="$event.stopPropagation()"
-                                            (change)="$event ? selection.toggle(category) : null"
-                                            [checked]="selection.isSelected(category)">
-                                        </mat-checkbox>
-                                    </div>
-                                    <div class="sm:hidden"></div>
-                                    <!-- Image -->
-                                    <div class="flex items-center hidden sm:block">
-                                        <div class="relative flex flex-0 items-center justify-center w-20 h-20 mr-6 rounded overflow-hidden border">
-                                            <img
-                                                class="w-full p-2"
-                                                *ngIf="category.thumbnailUrl"
-                                                [alt]="'category thumbnail image'"
-                                                [src]="category.thumbnailUrl">
-                                            <img
-                                                class="w-full p-2"
-                                                *ngIf="!category.thumbnailUrl"
-                                                [src]="displayStoreLogo(store.storeAssets)">
-                                        </div>
-                                    </div>
-
-                                     <!-- Name -->
-                                     <div class="truncate">
-                                        {{ category.name }}
-                                    </div>
-
-                                    <!-- Details button -->
-                                    <div>
-                                        <button
-                                            class="min-w-10 min-h-7 h-7 px-2 leading-6"
-                                            mat-stroked-button
-                                            (click)="toggleDetails(category.id);">
-                                            <mat-icon
-                                                class="icon-size-5"
-                                                [svgIcon]="selectedCategory?.id === category.id ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'">
-                                            </mat-icon>
-                                        </button>
+                        <!-- Checkbox -->
+                        <div>
+                            <mat-checkbox [color]="'primary'" (change)="$event ? masterToggle() : null"
+                                (change)="setOrderEnabled = false"
+                                [checked]="selection.hasValue() && isAllSelected()"
+                                [indeterminate]="selection.hasValue() && !isAllSelected()">
+                            </mat-checkbox>
+                        </div>
+                        <!-- Delete button -->
+                        <div>
+                            <button mat-icon-button 
+                            class=""
+                            [ngClass]="selection.hasValue() ? 'visible' : 'invisible'"
+                            (click)="deleteCategories()">
+                                <mat-icon
+                                    class=""
+                                    [color]="'warn'"
+                                    [svgIcon]="'heroicons_outline:trash'">
+                                </mat-icon>
+                            </button>
+                        </div>
+                        <div [mat-sort-header]="'name'">Category Name</div>
+                        <div class="block">Details</div>
+                    </div>
+                    <!-- Rows -->
+                    <div cdkDropList [cdkDropListDisabled]="!setOrderEnabled" (cdkDropListDropped)="dropUpperLevel($event)" 
+                        [cdkDropListAutoScrollStep]="10" class="list-class">
+                        <ng-container *ngFor="let category of categoriesList; trackBy: trackByFn; let i = index">
+                            <div id="cat-{{i}}" cdkDrag class="categories-grid grid items-center gap-2 sm:gap-4 py-3 px-6 md:px-8 border-b">
+                                <!-- Sequence -->
+                                <div class="flex items-center" cdkDragHandle>
+                                    <mat-icon 
+                                        [ngClass]="setOrderEnabled ? 'text-gray-500 cursor-move' : 'text-gray-200 cursor-default'"
+                                    svgIcon="mat_solid:drag_handle"></mat-icon>
+                                </div>
+                                <!-- Checkbox -->
+                                <div>
+                                    <mat-checkbox [color]="'primary'" (click)="$event.stopPropagation()"
+                                        (change)="setOrderEnabled = false"
+                                        (change)="$event ? selection.toggle(category) : null"
+                                        [checked]="selection.isSelected(category)">
+                                    </mat-checkbox>
+                                </div>
+                                <div class="sm:hidden"></div>
+                                <!-- Image -->
+                                <div class="flex items-center hidden sm:block">
+                                    <div class="relative flex flex-0 items-center justify-center w-20 h-20 mr-6 rounded overflow-hidden border">
+                                        <img
+                                            class="w-full p-2"
+                                            *ngIf="category.thumbnailUrl"
+                                            [alt]="'category thumbnail image'"
+                                            [src]="category.thumbnailUrl">
+                                        <img
+                                            class="w-full p-2"
+                                            *ngIf="!category.thumbnailUrl"
+                                            [src]="displayStoreLogo(store.storeAssets)">
                                     </div>
                                 </div>
-                                <div class="grid">
-                                    <ng-container *ngIf="selectedCategory?.id === category.id">
-                                        <ng-container *ngTemplateOutlet="rowDetailsTemplate; context: {$implicit: category}"></ng-container>
-                                    </ng-container>
+    
+                                 <!-- Name -->
+                                 <div class="truncate">
+                                    {{ category.name }}
                                 </div>
-                            </ng-container>
+    
+                                <!-- Details button -->
+                                <div>
+                                    <button
+                                        class="min-w-10 min-h-7 h-7 px-2 leading-6"
+                                        mat-stroked-button
+                                        (click)="toggleDetails(category.id);">
+                                        <mat-icon
+                                            class="icon-size-5"
+                                            [svgIcon]="selectedCategory?.id === category.id ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'">
+                                        </mat-icon>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="grid">
+                                <ng-container *ngIf="selectedCategory?.id === category.id">
+                                    <ng-container *ngTemplateOutlet="rowDetailsTemplate; context: {$implicit: category}"></ng-container>
+                                </ng-container>
+                            </div>
                         </ng-container>
                     </div>
+                </div>
 
-                    <mat-paginator
-                        class="sm:absolute sm:inset-x-0 sm:bottom-0 border-b sm:border-t sm:border-b-0 z-10 bg-gray-50 dark:bg-transparent"
-                        [ngClass]="{'pointer-events-none': isLoading}"
-                        [length]="pagination.length"
-                        [pageIndex]="pagination.page"
-                        [pageSize]="pagination.size"
-                        [pageSizeOptions]="[5, 10, 25, 100]"
-                        [showFirstLastButtons]="true"></mat-paginator>
+                <mat-paginator
+                    class="sm:absolute sm:inset-x-0 sm:bottom-0 border-b sm:border-t sm:border-b-0 z-10 bg-gray-50 dark:bg-transparent"
+                    (page)="setOrderEnabled = false"
+                    [ngClass]="{'pointer-events-none': isLoading}"
+                    [length]="pagination.length"
+                    [pageIndex]="pagination.page"
+                    [pageSize]="pagination.size"
+                    [pageSizeOptions]="[5, 10, 30]"
+                    [showFirstLastButtons]="true"></mat-paginator>
 
-                </ng-container>
             </ng-container>
 
             <ng-template
@@ -149,13 +165,12 @@
                         <form
                             class="flex flex-col w-full"
                             [formGroup]="categoriesForm">
-                            <!-- Display Discount name, start/end time&date,status,Discount on -->
-                            <div class="flex flex-col sm:flex-row px-8 pt-4 pb-4">
-                                <!-- Name, Description, SKU -->
-                                <div class="flex flex-auto flex-wrap w-full">
-                                    <div class="flex flex-col w-full items-center justify-center">
+                            <div class="flex flex-col sm:flex-row px-8 pt-4 pb-4 w-full gap-4 sm:gap-20">
+                                <!-- Image -->
+                                <div class="flex w-full items-center justify-center sm:justify-end">
+                                    <div class="relative flex flex-col w-full sm:w-1/3 items-center justify-center sm:h-full">
                                         <!-- Image Frame -->
-                                        <div class="w-30 h-30 border rounded overflow-hidden">
+                                        <div class="w-30 h-30 max-h-full sm:w-44 sm:h-44 border rounded overflow-hidden">
                                             <ng-container *ngIf="this.files[0].fileSource ; else noImage">
                                                 <img
                                                     class="w-full h-full object-cover"
@@ -163,11 +178,11 @@
                                             </ng-container>
                                             <ng-template #noImage>
                                                 <img
-                                                    class="w-full h-full object-cover"
+                                                    class="w-full h-full object-contain"
                                                     [src]="displayStoreLogo(store.storeAssets)">
                                             </ng-template>
                                         </div>
-                                        <div class="flex items-center mt-2 whitespace-nowrap">
+                                        <div class="absolute bottom-0 bg-black rounded-b bg-opacity-50 w-30 sm:w-44 h-1/4 flex justify-center items-center whitespace-nowrap">
                                         <!-- Add New Image -->
                                             <div>
                                                 <input
@@ -183,8 +198,8 @@
                                                     for="image-file-input"
                                                     matRipple>
                                                     <mat-icon
-                                                        class="icon-size-5"
-                                                        [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                                                        class="icon-size-5 text-white"
+                                                        [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
                                                 </label>
                                             </div>
                                             <!-- remove image -->
@@ -207,25 +222,32 @@
                                             </div> -->
                                         </div>    
                                     </div>
-
-                                    <!-- Parent Category Name -->
-                                    <div class="flex flex-row w-full items-center justify-center">
-                                        <mat-form-field class="w-50 mx-2">
+                                </div>
+                                <!-- Parent / Category Name -->
+                                <div class="flex flex-row w-full items-center justify-center sm:justify-start">
+                                    <div class="flex flex-col w-full sm:w-1/3 items-center sm:items-start justify-center">
+                                        <!-- Parent Category Name -->
+                                        <mat-form-field class="w-full px-4 sm:px-0 fuse-mat-no-subscript mb-3">
                                             <mat-label>Parent Category Name</mat-label>
                                             <mat-select
                                                 class="w-full"
                                                 placeholder="Choose Parent Category"
                                                 [formControlName] = "'parentCategoryId'"
                                            >
-                                                <div>
-                                                    <mat-option *ngFor="let listing of parentCategoriesOptions;" [value]="listing.id">
-                                                        {{listing.name}}
-                                                    </mat-option>
-                                                </div>
+                                           <mat-option *ngFor="let listing of parentCategoriesOptions;" [value]="listing.id">
+                                            <div class="flex flex-row gap-3 items-center">
+                                                <img
+                                                    class="w-7 h-7 rounded-full object-cover"
+                                                    [src]="listing.thumbnailUrl">
+                                                <span>
+                                                    {{listing.name}}
+                                                </span>
+                                            </div>
+                                        </mat-option>
                                             </mat-select>
                                         </mat-form-field>
                                         <!-- Name -->
-                                        <mat-form-field class="w-50">
+                                        <mat-form-field class="w-full px-4 sm:px-0 fuse-mat-no-subscript">
                                             <mat-label>Category Name</mat-label>
                                             <input
                                                 matInput
@@ -236,9 +258,10 @@
                                             </mat-error>
                                         </mat-form-field>
                                     </div>
-                              
                                 </div>
                             </div>
+                            <!-- <div class="flex flex-col sm:flex-row px-8 pt-4 pb-4">
+                            </div> -->
 
                             <!-- Delete and update button -->
                             <div class="flex items-center justify-between w-full border-t px-8 py-4">

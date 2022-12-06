@@ -112,6 +112,8 @@ export interface ProductCategory
     name: string;
     thumbnailUrl: string;
     verticalCode?: string;
+    displaySequence?: number;
+    sequenceNumber?: number;
 
 }
 

@@ -218,7 +218,7 @@ export class ProductCategoriesResolver implements Resolve<any>
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<{ pagination: ProductCategoryPagination; products: ProductCategory[] }>
     
     {
-        return this._inventoryService.getByQueryCategories( 0 , 30, 'name', 'asc');
+        return this._inventoryService.getByQueryCategories(0 , 30, 'sequenceNumber', 'asc');
     }
 }
 

@@ -1,8 +1,8 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef, Inject } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { forkJoin, merge, Observable, of, Subject } from 'rxjs';
+import { forkJoin, lastValueFrom, merge, Observable, of, Subject } from 'rxjs';
 import { debounceTime, delay, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
@@ -13,6 +13,8 @@ import { AddCategoryComponent } from '../add-category/add-category.component';
 import { Store, StoreAsset } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
 import { SelectionModel } from '@angular/cdk/collections';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
     selector       : 'categories',
@@ -21,11 +23,31 @@ import { SelectionModel } from '@angular/cdk/collections';
         /* language=SCSS */
         `
             .categories-grid {
-                grid-template-columns: 18px 36px auto 40px;
+                grid-template-columns: 52px 18px 36px auto 40px;
 
                 @screen sm {
-                    grid-template-columns: 18px 78px auto 40px;
+                    grid-template-columns: 52px 18px 78px auto 40px;
                 }
+            }
+
+            .cdk-drag-preview {
+                box-sizing: border-box;
+                border-radius: 4px;
+                box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+                            0 8px 10px 1px rgba(0, 0, 0, 0.14),
+                            0 3px 14px 2px rgba(0, 0, 0, 0.12);
+            }
+
+            .cdk-drag-placeholder {
+                opacity: 0;
+            }
+
+            .cdk-drag-animating {
+                transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+            }
+
+            .list-class.cdk-drop-list-dragging .contain-class:not(.cdk-drag-placeholder) {
+                transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
             }
         `
     ],
@@ -68,12 +90,15 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
 
     parentCategoriesOptions: ProductCategory[];
     selection = new SelectionModel<ProductCategory>(true, []);
+    setOrderEnabled: boolean = false;
+    dropUpperLevelCalled: boolean = false;
 
 
     /**
      * Constructor
      */
     constructor(
+        @Inject(DOCUMENT) private _document: Document,
         private _changeDetectorRef: ChangeDetectorRef,
         private _fuseConfirmationService: FuseConfirmationService,
         private _formBuilder: FormBuilder,
@@ -119,22 +144,22 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
         this.categories$ = this._inventoryService.categories$;
 
         this.categories$
-        .pipe(
-            takeUntil(this._unsubscribeAll)
-        )
+        .pipe(takeUntil(this._unsubscribeAll))
         .subscribe((categories: ProductCategory[]) => {
             this.categoriesList = categories;
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
         })
 
         //Get the vertical code for this store id first then we get the parent categories
         this._storesService.store$
         .pipe(
-            map((response)=>{
+            map((response) => {
                 this.store = response;
                 return response.verticalCode;
             }),
-            switchMap((storeVerticalCode:string)=>this._inventoryService.parentCategories$
-            ),
+            switchMap((storeVerticalCode:string) => this._inventoryService.parentCategories$),
             takeUntil(this._unsubscribeAll)
         )
         .subscribe((categories) => {
@@ -163,7 +188,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
                 switchMap((query) => {
                     this.closeDetails();
                     this.isLoading = true;
-                    return this._inventoryService.getByQueryCategories(0, 10, 'name', 'asc', query);
+                    return this._inventoryService.getByQueryCategories(0, this.pagination ? this.pagination.size : 30, 'sequenceNumber', 'asc', query);
                 }),
                 map(() => {
                     this.isLoading = false;
@@ -194,46 +219,46 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
     /**
      * After view init
      */
-     ngAfterViewInit(): void
-     {
-         setTimeout(() => {
-             if ( this._sort && this._paginator )
-             {
-                 // Set the initial sort
-                 this._sort.sort({
-                     id          : 'name',
-                     start       : 'asc',
-                     disableClear: true
-                 });
- 
-                 // Mark for check
-                 this._changeDetectorRef.markForCheck();
- 
-                 // If the user changes the sort order...
-                 this._sort.sortChange
-                     .pipe(takeUntil(this._unsubscribeAll))
-                     .subscribe(() => {
-                         // Reset back to the first page
-                         this._paginator.pageIndex = 0;
- 
-                         // Close the details
-                         this.closeDetails();
-                     });
- 
-                 // Get products if sort or page changes
-                 merge(this._sort.sortChange, this._paginator.page).pipe(
-                     switchMap(() => {
-                         this.closeDetails();
-                         this.isLoading = true;
-                         return this._inventoryService.getByQueryCategories(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction);
-                     }),
-                     map(() => {
-                         this.isLoading = false;
-                     })
-                 ).subscribe();
-             }
-         }, 0);
-     }
+    ngAfterViewInit(): void
+    {
+        setTimeout(() => {
+            if ( this._sort && this._paginator )
+            {
+                // Set the initial sort
+                this._sort.sort({
+                    id          : 'sequenceNumber',
+                    start       : 'asc',
+                    disableClear: true
+                });
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+
+                // If the user changes the sort order...
+                this._sort.sortChange
+                    .pipe(takeUntil(this._unsubscribeAll))
+                    .subscribe(() => {
+                        // Reset back to the first page
+                        this._paginator.pageIndex = 0;
+
+                        // Close the details
+                        this.closeDetails();
+                    });
+
+                // Get products if sort or page changes
+                merge(this._sort.sortChange, this._paginator.page).pipe(
+                    switchMap(() => {
+                        this.closeDetails();
+                        this.isLoading = true;
+                        return this._inventoryService.getByQueryCategories(this._paginator.pageIndex, this._paginator.pageSize, this._sort.active, this._sort.direction);
+                    }),
+                    map(() => {
+                        this.isLoading = false;
+                    })
+                ).subscribe();
+            }
+        }, 0);
+    }
 
     /**
      * On destroy
@@ -256,6 +281,9 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
      */
     toggleDetails(categoryId: string): void
     {
+        // Set setOrderEnabled to false
+        this.setOrderEnabled = false;
+
         // If the discount is already selected...
         if ( this.selectedCategory && this.selectedCategory.id === categoryId )
         {
@@ -321,9 +349,11 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
      */
     createCategory(): void
     {
-        let categoriesLimit = this.pagination;
+        this.setOrderEnabled = false;
+
+        let categoriesLimit = this.pagination.length;
         
-        if(categoriesLimit.length >= 30) {            
+        if (categoriesLimit >= 30) {            
             // Open the confirmation dialog
             const confirmation = this._fuseConfirmationService.open({
                 title   : "Categories Limit",
@@ -348,42 +378,57 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
             dialogRef.afterClosed().subscribe(result => {
                 
                 if (result.status === true) {
-                    let category = {
+
+                    let biggestSeq = Math.max(...this.categoriesList.map(x => x.sequenceNumber))
+
+                    let categoryBody = {
                         name:result.value.name,
                         storeId: this.storeId$,
                         parentCategoryId: result.value.parentCategoryId,
-                        thumbnailUrl:null,
+                        thumbnailUrl: null,
+                        sequenceNumber: biggestSeq > -1 ? biggestSeq + 1 : 1
                     };
-                    
+
                     const formData = new FormData();
                     formData.append("file", result.value.imagefiles[0]);
             
                     // Create category on the server
-                    this._inventoryService.createCategory(category, formData)
+                    this._inventoryService.createCategory(categoryBody, formData)
                     .pipe(takeUntil(this._unsubscribeAll))
-                    .subscribe((response) => {
-                        response["data"]; 
-                    },(error) => {
-    
-                        if (error.status === 409) {
-                            // Open the confirmation dialog
-                            const confirmation = this._fuseConfirmationService.open({
-                                title  : 'Name already existed',
-                                message: 'The category name inserted is already existed, please create new category with a different name',
-                                actions: {
-                                    confirm: {
-                                        label: 'OK'
-                                    },
-                                    cancel : {
-                                        show : false,
-                                    }
+                    .subscribe({
+                        next: (categoryResp: ProductCategory) => {
+                            // Scroll newly created category into view
+                            setTimeout(() => {
+
+                                let index = this.categoriesList.findIndex(category => category.id === categoryResp.id);
+                                
+                                if (index > -1) {
+                                    const element = this._document.getElementById(`cat-${index}`) as HTMLInputElement;
+                                    element.scrollIntoView({
+                                        behavior: 'smooth',
+                                        block: 'nearest', 
+                                        inline: 'start'
+                                    });
+                                    
                                 }
-                            });
+                            }, 300);
+                        },
+                        error: (error) => {
+                            if (error.status === 409) {
+                                // Open the confirmation dialog
+                                this._fuseConfirmationService.open({
+                                    title  : 'Name already exist',
+                                    message: 'The category name inserted is already exist, please create a new category with a different name',
+                                    actions: {
+                                        confirm: { label: 'OK' },
+                                        cancel : { show : false }
+                                    }
+                                });
+                            }
                         }
                     });
                 }
             });
-            
         }        
     }
 
@@ -392,7 +437,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
      */
     updateCategory(): void
     {
-        if(this.categoriesForm.invalid){
+        if (this.categoriesForm.invalid){
             return;
         }
         
@@ -612,8 +657,6 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
         this.isAllSelected() ?
             this.selection.clear() :
             this.categoriesList.forEach(row => this.selection.select(row));
-
-        
     }
 
     deleteCategories() {
@@ -647,17 +690,13 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
                             if (status === 200) {
                                 return forkJoin([
                                     // this._inventoryService.getProducts(), 
-                                    this._inventoryService.getByQueryCategories( 0 , 30, 'name', 'asc')
+                                    this._inventoryService.getByQueryCategories( 0 , this.pagination ? this.pagination.size : 30, 'sequenceNumber', 'asc')
                                 ])
-                                
                             }
-                            else {
-                                return of(null);
-                            }
+                            else return of(null);
                         })
                     )
                     .subscribe(() => {
-                        
                         // Mark for check
                         this._changeDetectorRef.markForCheck();
                     });
@@ -666,6 +705,42 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
             });
         }
 
+    }
+
+    dropUpperLevel(event: CdkDragDrop<string[]>, index?: any) {
+        
+        moveItemInArray(this.categoriesList, event.previousIndex, event.currentIndex);
+        this.dropUpperLevelCalled = true;
+        
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+
+    }
+
+    async reorderList(toggleValue: boolean) {
+        
+        // Get all categories first, which is 30
+        if (toggleValue === true && this.pagination.size !== 30) {
+            this._inventoryService.getByQueryCategories( 0, 30, 'sequenceNumber', 'asc').subscribe();
+        }
+
+        if (toggleValue === false && this.dropUpperLevelCalled === true) {
+
+            const updateBody = this.categoriesList.map((category, index) => {
+                return {
+                    id: category.id,
+                    sequenceNumber: index + 1
+                }
+            })
+            this._inventoryService.updateCategoryBulk(updateBody).subscribe()
+            
+            this.dropUpperLevelCalled = false;
+            this.setOrderEnabled = false;
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+            
+        }
     }
 }
 

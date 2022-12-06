@@ -883,7 +883,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
                             this.cloneErrorMessage = null;
                             return forkJoin([
                                 this._inventoryService.getProducts(), 
-                                this._inventoryService.getByQueryCategories( 0 , 30, 'name', 'asc')
+                                this._inventoryService.getByQueryCategories( 0 , 30, 'sequenceNumber', 'asc')
                             ])
                         }
                     })
@@ -944,7 +944,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
                             if (status === 200) {
                                 return forkJoin([
                                     this._inventoryService.getProducts(), 
-                                    this._inventoryService.getByQueryCategories( 0 , 30, 'name', 'asc')
+                                    this._inventoryService.getByQueryCategories( 0 , 30, 'sequenceNumber', 'asc')
                                 ])
                             }
                             else {
