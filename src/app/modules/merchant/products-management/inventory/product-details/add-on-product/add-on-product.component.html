@@ -178,6 +178,7 @@
                                     matSortDisableClear>
                                     <div class="flex flex-col">
                                         <mat-slide-toggle 
+                                            [matTooltip]="setOrderEnabled ? 'Disable toggle to save the current order' : 'Enable toggle and drag the handle to change the order'"
                                             [color]="'primary'"
                                             [(ngModel)]="setOrderEnabled" 
                                             [ngModelOptions]="{standalone: true}"
@@ -190,13 +191,14 @@
                                 </div>
                                 <!-- Rows -->
                                 <div cdkDropList [cdkDropListDisabled]="!setOrderEnabled" (cdkDropListDropped)="dropUpperLevel($event)" 
-                                    [cdkDropListAutoScrollStep]="10" class="addon-details-grid overflow-y-auto">
-                                    <div cdkDrag *ngFor="let addOn of addOnsOnProductList; let i = index; trackBy: trackByFn">
+                                    [cdkDropListAutoScrollStep]="10" class="list-class addon-details-grid overflow-y-auto">
+                                    <div cdkDrag *ngFor="let addOn of addOnsOnProductList; let i = index; trackBy: trackByFn" class="contain-class">
                                         <div class="option-grid grid items-center gap-4 py-2 px-6 md:px-8 border-b bg-white">        
                                             
                                             <!-- Sequence -->
                                             <div class="flex items-center" cdkDragHandle>
                                                 <mat-icon 
+                                                    [matTooltip]="setOrderEnabled ? 'Drag to change the order' : ''"
                                                     [ngClass]="setOrderEnabled ? 'text-gray-500 cursor-move' : 'text-gray-200 cursor-default'"
                                                 svgIcon="mat_solid:drag_handle"></mat-icon>
                                             </div>
@@ -223,9 +225,9 @@
                                             [cdkDropListAutoScrollStep]="10" class="truncate list-class">
                                                 <ng-container *ngIf="addOn.productAddOnItemDetail.length">
                                                     <ng-container *ngFor="let option of addOn.productAddOnItemDetail; trackBy: trackByFn">
-                                                        <div cdkDrag *ngIf="option.name" class="mb-1 last:mb-0 flex flex-row gap-2">
+                                                        <div cdkDrag *ngIf="option.name" class="contain-class mb-1 last:mb-0 flex flex-row gap-2">
                                                             <div
-                                                                class="contain-class flex flex-col gap-2 items-center justify-center px-4 py-1.5 rounded-md leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                                class="flex flex-col gap-2 items-center justify-center px-4 py-1.5 rounded-md leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
                                                                 <span class="truncate text-base font-medium whitespace-nowrap leading-tight">{{option.name}}</span>
                                                                 <!-- Price -->
                                                                 <div class="flex flex-col md:flex-row gap-1 md:gap-2">
@@ -264,6 +266,7 @@
                                                             <!-- Sequence -->
                                                             <div class="flex items-center" cdkDragHandle>
                                                                 <mat-icon 
+                                                                    [matTooltip]="!selectedGroupOnProduct || (selectedGroupOnProduct && selectedGroupOnProduct.id !== addOn.id) ? '' : 'Drag to change the order'"
                                                                     [ngClass]="!selectedGroupOnProduct || (selectedGroupOnProduct && selectedGroupOnProduct.id !== addOn.id) ? 'text-gray-200 cursor-default' : 'text-gray-500 cursor-move'"
                                                                 svgIcon="mat_solid:drag_handle"></mat-icon>
                                                             </div>

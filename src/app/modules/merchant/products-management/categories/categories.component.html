@@ -52,6 +52,7 @@
                         <!-- Slide toggle for reorder list -->
                         <div class="flex flex-col">
                             <mat-slide-toggle 
+                                [matTooltip]="setOrderEnabled ? 'Disable toggle to save the current order' : 'Enable toggle and drag the handle to change the order'"
                                 [disabled]="selectedCategory || selection.hasValue()"
                                 [color]="'primary'"
                                 [(ngModel)]="setOrderEnabled" 
@@ -86,10 +87,11 @@
                     <div cdkDropList [cdkDropListDisabled]="!setOrderEnabled" (cdkDropListDropped)="dropUpperLevel($event)" 
                         [cdkDropListAutoScrollStep]="10" class="list-class">
                         <ng-container *ngFor="let category of categoriesList; trackBy: trackByFn; let i = index">
-                            <div id="cat-{{i}}" cdkDrag class="categories-grid grid items-center gap-2 sm:gap-4 py-3 px-6 md:px-8 border-b">
+                            <div id="cat-{{i}}" cdkDrag class="contain-class categories-grid grid items-center gap-2 sm:gap-4 py-3 px-6 md:px-8 border-b">
                                 <!-- Sequence -->
                                 <div class="flex items-center" cdkDragHandle>
                                     <mat-icon 
+                                        [matTooltip]="setOrderEnabled ? 'Drag to change the order' : ''"
                                         [ngClass]="setOrderEnabled ? 'text-gray-500 cursor-move' : 'text-gray-200 cursor-default'"
                                     svgIcon="mat_solid:drag_handle"></mat-icon>
                                 </div>

@@ -57,11 +57,11 @@ export interface ItemTemplateList
             }
 
             .cdk-drag-animating {
-                transition: transform 150ms cubic-bezier(0, 0, 0.2, 1);
+                transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
             }
 
             .list-class.cdk-drop-list-dragging .contain-class:not(.cdk-drag-placeholder) {
-                transition: transform 150ms cubic-bezier(0, 0, 0.2, 1);
+                transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
             }
 
             /** Custom input number **/
