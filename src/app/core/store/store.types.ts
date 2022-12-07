@@ -56,6 +56,7 @@ export interface Store
     isDineIn: boolean;
     dineInOption: string;
     dineInPaymentType: string;
+    regionCountryId?: string;
 }
 
 export interface CreateStore

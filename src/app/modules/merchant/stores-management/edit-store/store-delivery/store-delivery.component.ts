@@ -218,6 +218,9 @@ export class StoreDeliveryComponent implements OnInit
 
                 this.store = storeResponse;
 
+                console.log('this.store', this.store);
+                
+
                 // set store to current store
                 this._storesService.store = storeResponse;
                 this._storesService.storeId = this.storeId;
@@ -643,7 +646,7 @@ export class StoreDeliveryComponent implements OnInit
         storeBody.city = city;
         storeBody.postcode = postcode;
         storeBody.regionCountryStateId = regionCountryStateId;
-        storeBody.regionCountry = regionCountryId;
+        storeBody.regionCountryId = regionCountryId;
         storeBody.latitude = this.location.lat.toFixed(6);
         storeBody.longitude = this.location.lng.toFixed(6);
         storeBody.isDelivery = isDelivery;
