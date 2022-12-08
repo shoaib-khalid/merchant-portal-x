@@ -218,9 +218,6 @@ export class StoreDeliveryComponent implements OnInit
 
                 this.store = storeResponse;
 
-                console.log('this.store', this.store);
-                
-
                 // set store to current store
                 this._storesService.store = storeResponse;
                 this._storesService.storeId = this.storeId;
