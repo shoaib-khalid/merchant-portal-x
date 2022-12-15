@@ -8,8 +8,8 @@ import { Store, StoreRegionCountries } from 'app/core/store/store.types';
 import { debounce } from 'lodash';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
-import { takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { switchMap, takeUntil, tap } from 'rxjs/operators';
+import { of, Subject } from 'rxjs';
 
 @Component({
     selector       : 'store-dine-in',
@@ -83,7 +83,8 @@ export class StoreDineInComponent implements OnInit
         this.storeDineInForm = this._formBuilder.group({
             dineInPaymentType   : ['COD', Validators.required],
             dineInOption        : ['SELFCOLLECT'], //SELFCOLLECT, SENDTOTABLE
-            isDineIn            : [false]
+            isDineIn            : [false],
+            dineInConsolidatedOrder: [false]
         });
 
         this.storeId = this._route.snapshot.paramMap.get('storeid');
