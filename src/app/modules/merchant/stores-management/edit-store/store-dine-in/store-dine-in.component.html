@@ -90,13 +90,14 @@
                         <!-- Divider -->
                         <div class="my-4 border-t"></div>
 
-                        <!-- Enable/Disable Consolidate Order Toggle -->
+                        <!-- Consolidate Order Toggle -->
                         <div class="w-full ">
                             <div class="text-xl">Consolidate Order</div>
                             <div class="text-secondary">Select whether to allow customers combine their orders</div>
                         </div>
                         <div class="flex flex-col w-full justify-start mt-4">
                             <mat-slide-toggle
+                                [disabled]="true"
                                 matInput
                                 [formControlName]="'dineInConsolidatedOrder'"
                                 [color]="'primary'"
