@@ -226,10 +226,18 @@ export class AddOnProductComponent
         
     }
 
+    /**
+     * Called upon check/uncheck template items only when add group on the product is selected
+     * 
+     * @param templateItem 
+     * @param isChecked 
+     */
     selectTemplateItemsUpdate(templateItem: ItemTemplateList, isChecked: any) {
+        // Find index of the template items of selected addon group on the product
         let selectedItemIndex = this.addOnsOnProductList[this.selectedGroupOnProductIndex].productAddOnItemDetail.findIndex(x => x.addonTemplateItemId === templateItem.addonTemplateItemId);
 
         if (isChecked === true) {
+            // If index is -1 which is not exist, push the template item to the addon group on the product
             if (selectedItemIndex === -1) {
                 this.addOnsOnProductList[this.selectedGroupOnProductIndex].productAddOnItemDetail.push({
                     addonTemplateItemId : templateItem.addonTemplateItemId,
@@ -247,11 +255,14 @@ export class AddOnProductComponent
 
         }
         else if (isChecked === false) {
+            // If uncheck and the template item already exist in addon group on the product
             if (selectedItemIndex > -1) {
+                // If the item has ID, delete it 
                 if (this.addOnsOnProductList[this.selectedGroupOnProductIndex].productAddOnItemDetail[selectedItemIndex].id) {
                     this._inventoryService.deleteAddOnItemOnProduct(this.addOnsOnProductList[this.selectedGroupOnProductIndex].productAddOnItemDetail[selectedItemIndex].id)
                     .subscribe()
                 }
+                // Then remove from the addon group on the product array 
                 this.addOnsOnProductList[this.selectedGroupOnProductIndex].productAddOnItemDetail.splice(selectedItemIndex, 1);
 
             }
@@ -262,6 +273,13 @@ export class AddOnProductComponent
         this._changeDetectorRef.markForCheck();
     }
 
+    /**
+     * Select all template items checkbox
+     * 
+     * @param templateItems 
+     * @param isChecked 
+     * @returns 
+     */
     selectAllTemplateItems(templateItems: ItemTemplateList[], isChecked: boolean) {
         if (templateItems) {
 
@@ -294,6 +312,12 @@ export class AddOnProductComponent
         else return false;
     }
 
+    /**
+     * Select template items from the checkbox; called if no addon group on the product is selected
+     * 
+     * @param templateItem 
+     * @param isChecked 
+     */
     selectTemplateItemsCreate(templateItem: ItemTemplateList, isChecked: any){
 
         let selectedItemIndex = this.selectedItemsTemplates.findIndex(x => x.id === templateItem.addonTemplateItemId);
@@ -321,6 +345,11 @@ export class AddOnProductComponent
         this._changeDetectorRef.markForCheck();
     }
 
+    /**
+     * Select Addon Group Template, not from the product addons
+     * 
+     * @param template 
+     */
     selectTemplate(template: AddOnGroupTemplate) {
         this.selectedGroupTemplate = null;
         this.selectedItemsTemplates = [];
@@ -357,6 +386,11 @@ export class AddOnProductComponent
         }
     }
 
+    /**
+     * Method for change order toggle
+     * 
+     * @param toggleValue 
+     */
     async reorderList(toggleValue: boolean) {
         if (toggleValue === true) {
             this.resetSelectedGroup();
@@ -388,7 +422,13 @@ export class AddOnProductComponent
         this.dataFromAddOnEmitter.emit(toggleValue)
     }
 
-    dropUpperLevel(event: CdkDragDrop<string[]>, index?: any) {
+    /**
+     * Drag and Drop function; called upon dropping addon group on the product
+     * 
+     * @param event 
+     * @param index 
+     */
+    dropUpperLevel(event: CdkDragDrop<string[]>) {
         
         moveItemInArray(this.addOnsOnProductList, event.previousIndex, event.currentIndex);
         this.dropUpperLevelCalled = true;
@@ -407,6 +447,12 @@ export class AddOnProductComponent
 
     }
 
+    /**
+     * Select Addon Group on the product, not Template Group 
+     * 
+     * @param addOn 
+     * @param index 
+     */
     selectGroup(addOn: AddOnProduct, index: number) {
 
         this.allSelected = false;
@@ -444,6 +490,9 @@ export class AddOnProductComponent
         
     }
 
+    /**
+     * Method for 'Update' button
+     */
     updateSelectedGroup() {
 
         if (this.selectedGroupOnProduct) {
@@ -487,11 +536,14 @@ export class AddOnProductComponent
                 })
         }
     }
-
+    /**
+     * Method for 'Add' button
+     */
     createSelectedTemplate() {
 
         if ( this.selectedGroupTemplate) {
 
+            // Find the biggest sequenceNumber from add on list on the product
             let biggestSeq = Math.max(...this.addOnsOnProductList.map(x => x.sequenceNumber))
 
             const group = {
@@ -537,6 +589,9 @@ export class AddOnProductComponent
     }
 
 
+    /**
+     * Method for 'X' button
+     */
     resetSelectedGroup() {
         this.selectedGroupOnProduct = null;
         this.selectedGroupTemplate = null;
@@ -556,18 +611,35 @@ export class AddOnProductComponent
         
     }
 
+    /**
+     * Method for delete addon group on the product
+     * @param id 
+     */
     deleteAddOn(id: string) {
         this._inventoryService.deleteAddOnGroupOnProduct(id)
         .subscribe(()=> {})
     }
 
+    /**
+     * Validate the checkbox on addon items 
+     * 
+     * @param id 
+     * @returns 
+     */
     validateCheckbox(id: string) {
-
+        // Look for addon item from selected addon group
         const found = this.selectedGroupOnProduct.productAddOnItemDetail.some(el => el.addonTemplateItemId === id);
+        // If found, check the checkbox
         if (found) return true
         else return false        
     }
 
+    /**
+     * Validate the list of templates dropdown
+     * 
+     * @param template 
+     * @returns 
+     */
     templateListValidation(template: AddOnGroupTemplate) {
         // If the template already being added to the product, disable the option 
         if (this.addOnsOnProductList.some(group => template.id === group.groupId)) {

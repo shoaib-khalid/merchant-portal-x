@@ -44,43 +44,43 @@
             </div>
 
             <!-- Select Store -->
-            <div *ngIf="stores && stores.length > 0" class="flex flex-col items-center justify-center w-full mt-6">
-                <div class="flex flex-row w-full">
-                <mat-form-field class="w-5/6">
-                    <!-- <mat-select> -->
-                    <mat-select
-                        [(ngModel)]="currentStoreId"
-                        (selectionChange)="changeStore($event.value)"
-                        placeholder="Select Store"
-                        appearance="fill"
-                        #storeSelector="matSelect"
-                        >
-                        <mat-select-trigger>
-                            <span class="flex items-center">
-                                <span>{{ storeSelector.triggerValue }}</span>
-                            </span>
-                        </mat-select-trigger>
-                        <div *ngFor="let store of stores">
-                            <mat-option [value]="store.id">{{ store.name }}</mat-option>
-                        </div>
-                    </mat-select>
-                </mat-form-field>
-                <span class="w-1/6 ml-1">
-                    <input
-                        id="see-store-button"
-                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                        type="button"
-                        (click)="openStoreFront()"
-                        mat-icon-button>
-                    <label 
-                        class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
-                        for="see-store-button"
-                        matRipple>
-                        <mat-icon
-                            class="text-white"
-                            [svgIcon]="'heroicons_outline:eye'"></mat-icon>
-                    </label>
-                </span>
+            <div *ngIf="stores && stores.length > 0" class="flex flex-col items-center justify-center w-full mt-6 mb-4">
+                <div class="flex flex-row w-full items-center">
+                    <mat-form-field class="w-5/6 fuse-mat-no-subscript">
+                        <!-- <mat-select> -->
+                        <mat-select
+                            [(ngModel)]="currentStoreId"
+                            (selectionChange)="changeStore($event.value)"
+                            placeholder="Select Store"
+                            appearance="fill"
+                            #storeSelector="matSelect"
+                            >
+                            <mat-select-trigger>
+                                <span class="flex items-center">
+                                    <span>{{ storeSelector.triggerValue }}</span>
+                                </span>
+                            </mat-select-trigger>
+                            <div *ngFor="let store of stores">
+                                <mat-option [value]="store.id">{{ store.name }}</mat-option>
+                            </div>
+                        </mat-select>
+                    </mat-form-field>
+                    <span class="w-1/6 ml-1">
+                        <input
+                            id="see-store-button"
+                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                            type="button"
+                            (click)="openStoreFront()"
+                            mat-icon-button>
+                        <label 
+                            class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                            for="see-store-button"
+                            matRipple>
+                            <mat-icon
+                                class=""
+                                [svgIcon]="'mat_outline:open_in_new'"></mat-icon>
+                        </label>
+                    </span>
                 </div>
             </div>
 
@@ -118,7 +118,7 @@
             <!-- <countries></countries> -->
             <!-- <languages></languages> -->
             <fuse-fullscreen class="hidden md:block"></fuse-fullscreen>
-            <search [appearance]="'bar'"></search>
+            <!-- <search [appearance]="'bar'"></search> -->
             <!-- <shortcuts></shortcuts> -->
             <!-- <messages></messages> -->
             <!-- <button

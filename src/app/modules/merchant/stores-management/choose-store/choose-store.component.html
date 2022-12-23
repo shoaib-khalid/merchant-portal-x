@@ -31,7 +31,7 @@
         <div class="flex flex-col flex-auto w-full max-w-xs sm:max-w-5xl mx-auto">
             <!-- Filters -->
             <div class="flex flex-col sm:flex-row items-center justify-between w-full max-w-xs sm:max-w-none">
-                <mat-form-field class="fuse-mat-no-subscript w-full sm:w-48">
+                <mat-form-field class="fuse-mat-no-subscript fuse-mat-rounded w-full sm:w-48">
                     <!-- <mat-select
                         [value]="'all'"
                         (selectionChange)=""> -->
@@ -53,7 +53,7 @@
                     </mat-select>
                 </mat-form-field>
                 <mat-form-field
-                    class="fuse-mat-no-subscript w-full sm:w-72 mt-4 sm:mt-0 sm:ml-4"
+                    class="fuse-mat-no-subscript fuse-mat-rounded w-full sm:w-72 mt-4 sm:mt-0 sm:ml-4"
                     [floatLabel]="'always'">
                     <mat-icon
                         matPrefix
@@ -95,10 +95,10 @@
                     <div class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-hover p-2">
                         <mat-icon class="text-gray-400 icon-size-5" [matMenuTriggerFor]="sortMenu" [svgIcon]="'mat_outline:sort'"></mat-icon>
                         <mat-menu #sortMenu="matMenu">
-                            <mat-option (click)="filterControl.setValue('recent')">Most Recent</mat-option>
-                            <mat-option (click)="filterControl.setValue('oldest')">Oldest</mat-option>
-                            <mat-option (click)="filterControl.setValue('ascending')">Name : Ascending</mat-option>
-                            <mat-option (click)="filterControl.setValue('descending')">Name : Descending</mat-option>
+                            <mat-option class="text-base" (click)="filterControl.setValue('recent')">Most Recent</mat-option>
+                            <mat-option class="text-base" (click)="filterControl.setValue('oldest')">Oldest</mat-option>
+                            <mat-option class="text-base" (click)="filterControl.setValue('ascending')">Name : Ascending</mat-option>
+                            <mat-option class="text-base" (click)="filterControl.setValue('descending')">Name : Descending</mat-option>
                         </mat-menu>
                     </div>
                     <div>
