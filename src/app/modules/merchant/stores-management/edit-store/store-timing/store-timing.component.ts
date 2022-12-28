@@ -572,7 +572,7 @@ export class StoreTimingComponent implements OnInit
                 closeTime: {
                     timeAmPm: "PM",
                     timeHour: "11",
-                    timeMinute: "55",
+                    timeMinute: "59",
                 },
                 isBreakTime: false
 

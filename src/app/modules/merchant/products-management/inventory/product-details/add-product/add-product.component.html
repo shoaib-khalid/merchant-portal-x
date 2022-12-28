@@ -1802,8 +1802,9 @@
                                                 (click)="updateSelectedProductsOption((selectedProductsOption) ? selectedProductsOption.id : '')"
                                                 (click)="optionTotalAllow.value=0"
                                                 (click)="clearOptName === true ? optionName.value='' : ''" 
-                                                [disabled]="_selectedProductsOption.productPackageOptionDetail.length < totalAllowed"
-                                                [ngClass]="(_selectedProductsOption.productPackageOptionDetail.length < totalAllowed) ? 'bg-blue-500 opacity-50 cursor-default' : 'hover:bg-blue-400 cursor-pointer'"
+                                                [disabled]="!(totalAllowed != 0 && (_selectedProductsOption.productPackageOptionDetail.length >= totalAllowed))"
+                                                [ngClass]="(totalAllowed != 0 && (_selectedProductsOption.productPackageOptionDetail.length >= totalAllowed)) ? 
+                                                'hover:bg-blue-400 cursor-pointer' : 'bg-blue-500 opacity-50 cursor-default'"
                                                 >
                                                 <mat-icon
                                                     *ngIf="selectedProductsOption"
