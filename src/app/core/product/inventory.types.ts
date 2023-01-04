@@ -169,12 +169,14 @@ export interface ProductAssets
 
  export interface ProductPackageOption
  {
-     id?: string;
-     packageId: string;
-     title: string;
-     totalAllow: number;
-     productPackageOptionDetail: ProductPackageOptionDetail[];
-     sequenceNumber: number;
+    id?: string;
+    packageId: string;
+    title: string;
+    totalAllow: number; //max allowed
+    productPackageOptionDetail: ProductPackageOptionDetail[];
+    sequenceNumber: number;
+    minAllow: number;
+    allowSameItem: boolean;
  }
  
  export interface ProductPackageOptionDetail 

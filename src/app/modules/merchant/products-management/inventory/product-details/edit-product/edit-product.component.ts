@@ -189,9 +189,11 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
         id: null,
         packageId: null,
         title: null,
-        totalAllow: null,
+        totalAllow: 0,
         productPackageOptionDetail: [],
-        sequenceNumber: 0
+        sequenceNumber: 0,
+        minAllow: 0,
+        allowSameItem: false
     };
     _filteredProductsOptions: Product[] = []; // use in combo section -> 'Add product' --after filter
     productsCombos$: ProductPackageOption[] = [];
@@ -333,8 +335,8 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
     inputSearchProducts : string = '';
     selectedCategory:string ='';
     onChangeSelectProductValue: any = []; // for product checkbox in combo section
-    totalAllowed: number = 0;
-
+    totalAllowed: number = 0; //max allowed
+    minAllowed: number = 0;
     storeVerticalCode : string = '';
     parentCategoriesOptions: ProductCategory[];
     selectedParentCategory: string ='';
@@ -2960,6 +2962,8 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
                 // if this.selectedProductsOption have value // for update
                 if (this.selectedProductsOption) {
                     this._selectedProductsOption = this.selectedProductsOption;
+                    this.minAllowed = this.selectedProductsOption.minAllow;
+                    this.totalAllowed = this.selectedProductsOption.totalAllow;
                 }
 
                 // this is for checkbox
@@ -3021,7 +3025,7 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
     updateSelectedProductsOption(optionId = "") {
 
         // Do nothing if totalAllow null
-        if (this._selectedProductsOption.totalAllow === null) return;
+        if (this._selectedProductsOption.totalAllow === null || this._selectedProductsOption.totalAllow == 0) return;
 
         this.clearOptName = true;
 
@@ -3040,6 +3044,9 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
         }
         
         if (optionId !== ""){
+
+            this._selectedProductsOption['minAllow'] = this._selectedProductsOption.minAllow ? this._selectedProductsOption.minAllow : 0;
+
             // update
             this._inventoryService.updateProductsOption(this.selectedProduct.id, this._selectedProductsOption, optionId )
                 .pipe(takeUntil(this._unsubscribeAll))
@@ -3049,12 +3056,16 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
                     this.productsCombos$[index] = response;
 
                     this.clearOptName = false;
+                    this.resetSelectedProductsOption();
 
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
                 });
         } else {
+
             this._selectedProductsOption.sequenceNumber =  this.productsCombos$.length + 1;
+            this._selectedProductsOption['minAllow'] = this._selectedProductsOption.minAllow ? this._selectedProductsOption.minAllow : 0;
+
             // add new
             this._inventoryService.createProductsOptionById(this.selectedProduct.id, this._selectedProductsOption)
                 .pipe(takeUntil(this._unsubscribeAll))
@@ -3064,25 +3075,12 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
                     this.productsCombos$.push(response);
 
                     this.clearOptName = false;
+                    this.resetSelectedProductsOption();
 
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
                 });
         }
-
-        // Clear the form
-        this.selectedProductsOption = null;
-        // Clear the invisible form
-        this._selectedProductsOption = {
-            id: null,
-            packageId: null,
-            title: null,
-            totalAllow: null,
-            productPackageOptionDetail: [],
-            sequenceNumber: 0
-        };
-        // Clear checkbox
-        this.onChangeSelectProductValue.length = 0;
 
     }
 
@@ -3092,13 +3090,16 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
         this.onChangeSelectProductValue.length = 0;
         this.addProductForm.get('comboSection').get('categoryId').reset;
         this.totalAllowed = 0;
+        this.minAllowed = 0;
         this._selectedProductsOption = {
             id: null,
             packageId: null,
             title: null,
-            totalAllow: null,
+            totalAllow: 0,
             productPackageOptionDetail: [],
-            sequenceNumber: 0
+            sequenceNumber: 0,
+            minAllow: 0,
+            allowSameItem: false
         };
         
     }
@@ -3182,14 +3183,20 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
         return (index > -1) ? true : false;
     }
 
-    validateProductsOptionTotalAllowed(value) {
+    validateProductsOptionTotalAllowed(value, type: string) {
         // if this.selectedProductsOption have value // for update
         if (this.selectedProductsOption) {
             this._selectedProductsOption = this.selectedProductsOption;
         }
-        
-        this._selectedProductsOption.totalAllow = value;
-        this.totalAllowed = value;
+
+        if (type === 'min') {
+            this._selectedProductsOption.minAllow = value;
+            this.minAllowed = value;
+        }
+        else if (type === 'max') {
+            this._selectedProductsOption.totalAllow = value;
+            this.totalAllowed = value;
+        }
     }
 
     variantSkuChanged(event, i) {
@@ -3662,6 +3669,10 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
     getDataFromAddOnComponent(value) {
         // Get data for update button enable/disable state
         this.setOrderEnabled = value;
+    }
+
+    toggleAllowSameItem(toggleValue: boolean) {
+        this._selectedProductsOption['allowSameItem'] = toggleValue;
     }
     
 }

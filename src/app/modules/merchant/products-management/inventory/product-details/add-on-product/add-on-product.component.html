@@ -137,9 +137,11 @@
                                     type="button"
                                     class="flex items-center justify-center w-3/4 h-9 rounded hover:bg-blue-400 cursor-pointer bg-blue-600 text-white disabled:bg-blue-500 disabled:cursor-default disabled:opacity-50"
                                     (click)="updateSelectedGroup()"
-                                    [disabled]="minTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || 
-                                                    (maxTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || maxTotalAllow.value == 0)"
+                                    [disabled]="(minTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || 
+                                        maxTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length) || maxTotalAllow.value == 0 || minTotalAllow.value > maxTotalAllow.value"
                                     >
+                                    <!-- [disabled]="minTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || 
+                                                    (maxTotalAllow.value > selectedGroupOnProduct.productAddOnItemDetail.length || maxTotalAllow.value == 0)" -->
                                     <mat-icon
                                         class="text-white icon-size-5 mr-0.5"
                                         [svgIcon]="'heroicons_outline:check'"></mat-icon>
@@ -151,9 +153,11 @@
                                 type="button"
                                 class="flex items-center justify-center w-full h-9 rounded hover:bg-blue-400 cursor-pointer bg-blue-600 text-white disabled:bg-blue-500 disabled:cursor-default disabled:opacity-50"
                                 (click)="createSelectedTemplate()"
-                                [disabled]="minTotalAllow.value > selectedItemsTemplates.length || 
-                                                (maxTotalAllow.value > selectedItemsTemplates.length || maxTotalAllow.value == 0)"
+                                [disabled]="(minTotalAllow.value > selectedItemsTemplates.length || 
+                                    maxTotalAllow.value > selectedItemsTemplates.length) || maxTotalAllow.value == 0 || minTotalAllow.value > maxTotalAllow.value"
                                 >
+                                <!-- [disabled]="minTotalAllow.value > selectedItemsTemplates.length || 
+                                                (maxTotalAllow.value > selectedItemsTemplates.length || maxTotalAllow.value == 0)" -->
                                 <mat-icon
                                     class="text-white icon-size-5 mr-0.5"
                                     [svgIcon]="'heroicons_outline:plus'"></mat-icon>

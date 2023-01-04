@@ -1658,7 +1658,7 @@ export class InventoryService
 
         return this._httpClient.get<any>(productService + '/stores/' + this.storeId$ + '/package/' + packageId + '/options',header).pipe(
             tap((packages) => {
-                this._logging.debug("Response from ProductsService (getProductPackageOptions)",packages);
+                this._logging.debug("Response from ProductsService (getProductPackageOptions)", packages);
                 this._packages.next(packages.data);
             })
         );
@@ -1712,15 +1712,15 @@ export class InventoryService
         };
 
         // Delete empty value
-        Object.keys(productPackage).forEach(key => {
-            if (Array.isArray(productPackage[key])) {
-                productPackage[key] = productPackage[key].filter(element => element !== null)
-            }
+        // Object.keys(productPackage).forEach(key => {
+        //     if (Array.isArray(productPackage[key])) {
+        //         productPackage[key] = productPackage[key].filter(element => element !== null)
+        //     }
             
-            if (!productPackage[key] || (Array.isArray(productPackage[key]) && productPackage[key].length === 0)) {
-                delete productPackage[key];
-            }
-        });
+        //     if (!productPackage[key] || (Array.isArray(productPackage[key]) && productPackage[key].length === 0)) {
+        //         delete productPackage[key];
+        //     }
+        // });
 
         return this.packages$.pipe(
             take(1),
@@ -1778,15 +1778,15 @@ export class InventoryService
         };
 
         // Delete empty value
-        Object.keys(productPackage).forEach(key => {
-            if (Array.isArray(productPackage[key])) {
-                productPackage[key] = productPackage[key].filter(element => element !== null)
-            }
+        // Object.keys(productPackage).forEach(key => {
+        //     if (Array.isArray(productPackage[key])) {
+        //         productPackage[key] = productPackage[key].filter(element => element !== null)
+        //     }
             
-            if (!productPackage[key] || (Array.isArray(productPackage[key]) && productPackage[key].length === 0)) {
-                delete productPackage[key];
-            }
-        });
+        //     if (!productPackage[key] || (Array.isArray(productPackage[key]) && productPackage[key].length === 0)) {
+        //         delete productPackage[key];
+        //     }
+        // });
 
         return this.packages$.pipe(
             take(1),
