@@ -1916,7 +1916,7 @@
                                             [(ngModel)]="_selectedProductsOption.allowSameItem" 
                                             [ngModelOptions]="{standalone: true}"
                                             (change)='toggleAllowSameItem($event.checked)'
-                                            [matTooltip]="'Enable to allow customers select same item when adding to cart'"
+                                            [matTooltip]="'Enable to allow customers select same combo item when adding to cart'"
                                             >
                                         Allow Same Item</mat-slide-toggle>
                                     </div>
@@ -1960,11 +1960,10 @@
                                                     class="flex items-center justify-center w-3/4 h-9 rounded hover:bg-blue-400 cursor-pointer bg-blue-600 text-white disabled:bg-blue-500 disabled:cursor-default disabled:opacity-50"
                                                     (click)="updateSelectedProductsOption(selectedProductsOption.id)"
                                                     (click)="clearOptName === true ? optionName.value='' : ''" 
-                                                    [disabled]="(minAllowed > _selectedProductsOption.productPackageOptionDetail.length || 
-                                                        totalAllowed > _selectedProductsOption.productPackageOptionDetail.length) || totalAllowed == 0 || minAllowed > totalAllowed"
-                                                    [ngClass]="!((minAllowed > _selectedProductsOption.productPackageOptionDetail.length || 
-                                                        totalAllowed > _selectedProductsOption.productPackageOptionDetail.length) || totalAllowed == 0 || minAllowed > totalAllowed) ? 
-                                                    'hover:bg-blue-400 cursor-pointer' : 'bg-blue-500 opacity-50 cursor-default'"
+                                                    [disabled]="_selectedProductsOption.allowSameItem ? 
+                                                        (totalAllowed == 0 || minAllowed > totalAllowed ):
+                                                        ((minAllowed > _selectedProductsOption.productPackageOptionDetail.length || 
+                                                            totalAllowed > _selectedProductsOption.productPackageOptionDetail.length) || totalAllowed == 0 || minAllowed > totalAllowed)"
                                                     >
                                                     <mat-icon
                                                         class="text-white icon-size-5 mr-0.5"
@@ -1978,11 +1977,10 @@
                                                 class="flex items-center justify-center w-full h-9 rounded hover:bg-blue-400 cursor-pointer bg-blue-600 text-white disabled:bg-blue-500 disabled:cursor-default disabled:opacity-50"
                                                 (click)="updateSelectedProductsOption('')"
                                                 (click)="clearOptName === true ? optionName.value='' : ''" 
-                                                [disabled]="(minAllowed > _selectedProductsOption.productPackageOptionDetail.length || 
-                                                    totalAllowed > _selectedProductsOption.productPackageOptionDetail.length) || totalAllowed == 0 || minAllowed > totalAllowed"
-                                                [ngClass]="!((minAllowed > _selectedProductsOption.productPackageOptionDetail.length || 
-                                                    totalAllowed > _selectedProductsOption.productPackageOptionDetail.length) || totalAllowed == 0 || minAllowed > totalAllowed) ? 
-                                                'hover:bg-blue-400 cursor-pointer' : 'bg-blue-500 opacity-50 cursor-default'"
+                                                [disabled]="_selectedProductsOption.allowSameItem ? 
+                                                    (totalAllowed == 0 || minAllowed > totalAllowed ):
+                                                    ((minAllowed > _selectedProductsOption.productPackageOptionDetail.length || 
+                                                        totalAllowed > _selectedProductsOption.productPackageOptionDetail.length) || totalAllowed == 0 || minAllowed > totalAllowed)"
                                                 >
                                                 <mat-icon
                                                     class="text-white icon-size-5 mr-0.5"
@@ -2022,7 +2020,8 @@
                                                 <div cdkDropList [cdkDropListDisabled]="!setOrderEnabled" (cdkDropListDropped)="dropUpperLevel($event, i)" 
                                                     [cdkDropListAutoScrollStep]="10" class="combo-details-grid overflow-y-auto">
                                                     <div cdkDrag *ngFor="let combos of productsCombos$; let i = index; trackBy: trackByFn">
-                                                        <div class="option-grid grid items-center gap-4 py-2 px-6 md:px-8 border-b bg-white">        
+                                                        <div class="option-grid grid items-center gap-4 py-2 px-6 md:px-8 border-b"
+                                                        [ngClass]="selectedProductsOption && selectedProductsOption.id === combos.id ? 'bg-primary-50' : 'bg-white'">        
                                                             
                                                             <!-- Sequence -->
                                                             <div class="flex items-center" cdkDragHandle>
@@ -2053,8 +2052,8 @@
                                                                 <ng-container *ngIf="combos.productPackageOptionDetail.length">
                                                                     <ng-container *ngFor="let package of combos.productPackageOptionDetail; trackBy: trackByFn">
                                                                         <div cdkDrag *ngIf="package.product" 
-                                                                        [ngClass]="selectedProductsOption && selectedProductsOption.id === combos.id? 'cursor-move' : 'cursor-default'"
-                                                                        class="contain-class flex items-center justify-center px-4 my-1.5 rounded-full leading-9 text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                                        [ngClass]="selectedProductsOption && selectedProductsOption.id === combos.id ? 'cursor-move bg-gray-200' : 'cursor-default bg-gray-100'"
+                                                                        class="contain-class flex items-center justify-center px-4 my-1.5 rounded-full leading-9 text-gray-500 dark:text-gray-300 dark:bg-gray-700">
                                                                             <span class="truncate text-md font-medium whitespace-nowrap">{{package.product.name}}</span>
                                                                         </div>
                                                                     </ng-container>
@@ -2064,11 +2063,10 @@
                                                             <!-- Action -->
                                                             <div class="flex flex-wrap">
                                                                 <button
-                                                                    [disabled]="setOrderEnabled"
-                                                                    [ngClass]="setOrderEnabled ? 'opacity-50 cursor-default' : 'hover:bg-blue-400 cursor-pointer'"
-                                                                    class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer mr-3 bg-blue-600"
+                                                                    [disabled]="setOrderEnabled || (selectedProductsOption && selectedProductsOption.id === combos.id)"
+                                                                    class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer mr-3 bg-blue-600 disabled:opacity-50 disabled:cursor-default hover:bg-blue-400 disabled:hover:bg-blue-600"
                                                                     [for]="'select-option-btn' + combos.id"
-                                                                    (click)="(!selectedProductsOption || (selectedProductsOption && selectedProductsOption.id !== combos.id)) ? selectProductOption(combos.id) : updateSelectedProductsOption((selectedProductsOption) ? selectedProductsOption.id : '')"
+                                                                    (click)="(!selectedProductsOption || (selectedProductsOption && selectedProductsOption.id !== combos.id)) ? selectProductOption(combos.id) : ''"
                                                                     matRipple>
                                                                     <mat-icon
                                                                         *ngIf="!selectedProductsOption || (selectedProductsOption && selectedProductsOption.id !== combos.id)"
@@ -2086,9 +2084,8 @@
                                                                     (click)="deleteProductOption(combos.id)"
                                                                     > -->
                                                                 <button
-                                                                    [disabled]="setOrderEnabled"
-                                                                    [ngClass]="setOrderEnabled ? 'opacity-50 cursor-default' : 'hover:bg-warn-700 cursor-pointer'"
-                                                                    class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-warn"
+                                                                    [disabled]="setOrderEnabled || (selectedProductsOption && selectedProductsOption.id === combos.id)"
+                                                                    class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-warn disabled:opacity-50 disabled:cursor-default hover:bg-warn-700 disabled:hover:bg-warn"
                                                                     [for]="'delete-option-btn' + combos.id"
                                                                     (click)="deleteProductOption(combos.id)"
                                                                     matRipple>
