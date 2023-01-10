@@ -274,11 +274,11 @@ export class StoreDineInComponent implements OnInit
         )
     }
 
-    removeTab(index: number) {
+    removeTab(index: number, zoneName: string) {
 
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title  : 'Delete Zone',
+            title  : `Delete Zone '${zoneName}'`,
             message: 'Are you sure you want to delete this zone?',
             actions: {
                 confirm: {
@@ -308,11 +308,11 @@ export class StoreDineInComponent implements OnInit
         });       
     }
 
-    deleteTable(zoneIndex: number, tableIndex: number) {
+    deleteTable(zoneIndex: number, tableIndex: number, tableName: string) {
 
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title  : 'Delete Table',
+            title  : `Delete Table '${tableName}'`,
             message: 'Are you sure you want to delete this table?',
             actions: {
                 confirm: {
