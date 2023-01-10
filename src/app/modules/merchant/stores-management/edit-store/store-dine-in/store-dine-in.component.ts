@@ -500,19 +500,23 @@ export class StoreDineInComponent implements OnInit
         })
 
         // Delete zones
-        this.zonesToBeDeleted.forEach(id => {
-            this._locationService.deleteZone(id)
-            .subscribe(() => {
-                this.zonesToBeDeleted = [];
-            });
+        this.zonesToBeDeleted.forEach((id, idx, arr) => {
+            this._locationService.deleteZone(id).subscribe();
+
+            // Only set to empty on the last iteration
+            if (idx === arr.length - 1){ 
+                this.zonesToBeDeleted = []; 
+            }
         })
 
         // Delete tables
-        this.tablesToBeDeleted.forEach(id => {
-            this._locationService.deleteTable(id)
-            .subscribe(() => {
-                this.tablesToBeDeleted = [];
-            });
+        this.tablesToBeDeleted.forEach((id, idx, arr) => {
+            this._locationService.deleteTable(id).subscribe();
+
+            // Only set to empty on the last iteration
+            if (idx === arr.length - 1){ 
+                this.tablesToBeDeleted = []; 
+            }
         })
 
         // Enable the form

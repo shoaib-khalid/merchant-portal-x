@@ -142,23 +142,23 @@
                                             <div class="">
                                                 <div class="flex flex-col gap-1.5 list-class mb-4">
                                                     <!-- Header -->
-                                                    <div class="grid grid-cols-8 items-center gap-1 p-2 border-b font-medium">
+                                                    <div class="grid grid-cols-6 items-center gap-1 p-2 border-b font-medium">
                                                         <div class="col-span-4 text-sm md:text-base">Table No.</div>
-                                                        <div class="col-span-2 text-sm md:text-base">Edit</div>
-                                                        <div class="col-span-2 text-sm md:text-base">Delete</div>
+                                                        <div class="col-span-1 text-sm md:text-base">Edit</div>
+                                                        <div class="col-span-1 text-sm md:text-base">Delete</div>
                                                     </div>
                                                     <!-- Rows -->
                                                     <ng-container *ngFor="let tableNo of tab.tagTables; let i = index">
-                                                        <div class="w-full grid grid-cols-8 h-10 gap-1 items-center px-2 hover:bg-white">
+                                                        <div class="w-full grid grid-cols-6 h-10 gap-1 items-center px-2 hover:bg-white">
                                                             <span class="col-span-4 ml-1">{{tableNo.combinationTableNumber}}</span>
-                                                            <div class="col-span-2 flex">
+                                                            <div class="col-span-1 flex">
                                                                 <mat-icon
                                                                     (click)="editTableNo(tab, tableNo.combinationTableNumber, i)"
-                                                                    class="icon-size-5 cursor-pointer"
+                                                                    class="icon-size-5 cursor-pointer ml-0.5 md:ml-1"
                                                                     [svgIcon]="'heroicons_outline:pencil-alt'">
                                                                 </mat-icon>
                                                             </div>
-                                                            <div class="col-span-2 flex">
+                                                            <div class="col-span-1 flex">
                                                                 <mat-icon
                                                                     (click)="deleteTable(tabIndex, i)"
                                                                     class="icon-size-5 ml-2 md:ml-3 cursor-pointer"
