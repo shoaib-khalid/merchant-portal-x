@@ -20,7 +20,8 @@ configProdJson:
               "orderService"        : "https://api.symplified.it/order-service/v1",
               "reportService"       : "https://api.symplified.it/report-service/v1",
               "deliveryService"     : "https://api.symplified.it/delivery-service/v1",
-              "paymentService"      : "https://api.symplified.it/payment-service/v1"
+              "paymentService"      : "https://api.symplified.it/payment-service/v1",
+              "locationService"     : "https://api.symplified.it/location-service/v1"
           },
           "storeFrontDomain"          : ".dev-my.symplified.ai",
           "marketplaceDomain"         : "customer.dev-my.symplified.ai",
@@ -39,7 +40,7 @@ fullnameOverride: ""
 image:
   pullPolicy: Always
   repository: kalsym/merchant-portal-x
-  tag: 1.7.9
+  tag: 1.8.1
 imagePullSecrets:
 - name: kalsym-docker-hub
 ingress:

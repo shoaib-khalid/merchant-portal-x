@@ -104,51 +104,51 @@ export class ChooseStoreResolver implements Resolve<any>
     }
 }
 
-@Injectable({
-    providedIn: 'root'
-})
-export class StoreTagResolver implements Resolve<any>
-{
-    /**
-     * Constructor
-     */
-    constructor(
-        private _router: Router,
-        private _locationService: LocationService
-    )
-    {
-    }
+// @Injectable({
+//     providedIn: 'root'
+// })
+// export class StoreTagResolver implements Resolve<any>
+// {
+//     /**
+//      * Constructor
+//      */
+//     constructor(
+//         private _router: Router,
+//         private _locationService: LocationService
+//     )
+//     {
+//     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
+//     // -----------------------------------------------------------------------------------------------------
+//     // @ Public methods
+//     // -----------------------------------------------------------------------------------------------------
 
-    /**
-     * Resolver
-     *
-     * @param route
-     * @param state
-     */
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
-    {
+//     /**
+//      * Resolver
+//      *
+//      * @param route
+//      * @param state
+//      */
+//     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
+//     {
         
-        return this._locationService.getTagDetails(route.paramMap.get('storeid'))
-            .pipe(
-                // Error here means the requested task is not available
-                catchError((error) => {
+//         return this._locationService.getTagDetails(route.paramMap.get('storeid'))
+//             .pipe(
+//                 // Error here means the requested task is not available
+//                 catchError((error) => {
 
-                    // Log the error
-                    console.error(error);
+//                     // Log the error
+//                     console.error(error);
 
-                    // Get the parent url
-                    const parentUrl = state.url.split('/').slice(0, -1).join('/');
+//                     // Get the parent url
+//                     const parentUrl = state.url.split('/').slice(0, -1).join('/');
 
-                    // Navigate to there
-                    this._router.navigateByUrl(parentUrl);
+//                     // Navigate to there
+//                     this._router.navigateByUrl(parentUrl);
 
-                    // Throw an error
-                    return throwError(error);
-                })
-            );
-    }
-}
+//                     // Throw an error
+//                     return throwError(error);
+//                 })
+//             );
+//     }
+// }
