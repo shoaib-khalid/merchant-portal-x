@@ -54,7 +54,7 @@
                                             <input
                                                 matInput
                                                 maxlength="100"
-                                                placeholder="Tell us, what is your store name?"
+                                                placeholder="Store name"
                                                 [formControlName]="'name'"
                                                 [required]="true"
                                                 (input)="checkExistingName($event.target.value)">
@@ -68,6 +68,30 @@
                                             </mat-error>
                                             <mat-error *ngIf="createStoreForm.get('step1').get('name').hasError('storeNameAlreadyTaken')">
                                                 The store name entered is already taken
+                                            </mat-error>
+                                        </mat-form-field>
+                                        <!-- Store Prefix -->
+                                        <mat-form-field class="w-full fuse-mat-emphasized-affix" floatLabel="always">
+                                            <input
+                                                matInput
+                                                maxlength="4"
+                                                placeholder="Store prefix"
+                                                [formControlName]="'storePrefix'"
+                                                [required]="true"
+                                                (input)="checkPrefix($event.target.value)">
+                                                <mat-icon
+                                                    matPrefix
+                                                    [svgIcon]="'mat_solid:store'">
+                                                </mat-icon>
+                                            <mat-label>Store Prefix</mat-label>
+                                            <mat-error *ngIf="createStoreForm.get('step1').get('storePrefix').hasError('required')">
+                                                Required
+                                            </mat-error>
+                                            <mat-error *ngIf="createStoreForm.get('step1').get('storePrefix').hasError('prefixAlreadyTaken')">
+                                                The prefix entered is already taken
+                                            </mat-error>
+                                            <mat-error *ngIf="createStoreForm.get('step1').get('storePrefix').hasError('minlength') || createStoreForm.get('step1').get('storePrefix').hasError('maxlength')">
+                                                Prefix must be 4 characters
                                             </mat-error>
                                         </mat-form-field>
                                         <!-- Store URL -->

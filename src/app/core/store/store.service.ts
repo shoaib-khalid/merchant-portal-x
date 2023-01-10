@@ -1178,7 +1178,33 @@ export class StoresService
                             .toPromise();
     
 
-        this._logging.debug("Response from StoresService (getExistingName) ",response);
+        this._logging.debug("Response from StoresService (getExistingName)", response);
+        
+        //if exist status = 409, if not exist status = 200
+        return response.status;
+
+    }
+
+    async getExistingPrefix(name:string){
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params:{
+                storePrefix: name
+            }
+        };
+
+        let response = await this._httpClient.get<any>(productService + '/stores/checkprefix', header)
+                            .pipe<any>(catchError((error:HttpErrorResponse)=>{
+                                    return of(error);
+                                })
+                            )
+                            .toPromise();
+    
+
+        this._logging.debug("Response from StoresService (getExistingPrefix)", response);
         
         //if exist status = 409, if not exist status = 200
         return response.status;
