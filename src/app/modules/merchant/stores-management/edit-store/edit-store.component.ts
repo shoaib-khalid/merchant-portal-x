@@ -27,7 +27,7 @@ export class EditStoreComponent implements OnInit
     drawerMode: 'over' | 'side' = 'side';
     drawerOpened: boolean = true;
     panels: any[] = [];
-    selectedPanel: string = 'dine-in';
+    selectedPanel: string = 'account';
     
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     platform: Platform = null;
