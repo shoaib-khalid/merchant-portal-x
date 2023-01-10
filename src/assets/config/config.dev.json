@@ -10,7 +10,8 @@
         "productService"        : "https://api.symplified.it/product-service/v1",
         "orderService"          : "https://api.symplified.it/order-service/v1",
         "reportService"         : "https://api.symplified.it/report-service/v1",
-        "deliveryService"       : "https://api.symplified.it/delivery-service/v1"
+        "deliveryService"       : "https://api.symplified.it/delivery-service/v1",
+        "locationService"       : "https://api.symplified.it/location-service/v1"
     },
     "storeFrontDomain"          : ".dev-my.symplified.ai",
     "marketplaceDomain"         : "customer.dev-my.symplified.ai",

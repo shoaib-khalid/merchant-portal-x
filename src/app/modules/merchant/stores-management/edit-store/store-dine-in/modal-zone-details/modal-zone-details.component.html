@@ -1,0 +1,121 @@
+<div class="flex flex-col max-h-full overflow-y-auto">
+    <div [formGroup]="zoneFormGroup" class="flex flex-col md:grid md:grid-cols-5 gap-2 mb-2 items-center">
+        <!-- Zone Name -->
+        <ng-container *ngIf="toCreate === 'create' || toCreate === 'edit_zone'">
+            <div class="col-span-2 duration-200">
+                <span class="tracking-tight">Zone Name</span>
+            </div>
+            <mat-form-field class="fuse-mat-no-subscript col-span-3" appearance="fill" floatLabel="always">
+                <input
+                    matInput
+                    required
+                    [placeholder]="'E.g. Indoor'"
+                    [formControlName]="'zoneName'"
+                    (keyup)="checkZoneName($event.target.value)"
+                    >
+            </mat-form-field>
+        </ng-container>
+        <ng-container *ngIf="toCreate === 'create'">
+            <span class="col-span-2 tracking-tight">Table No. ( Prefix + Table No. )</span>
+            <div class="grid grid-cols-10 gap-1 items-center col-span-3">
+                <!-- Prefix -->
+                <mat-form-field class="fuse-mat-no-subscript col-span-3" appearance="fill" floatLabel="always">
+                    <input
+                        matInput
+                        [placeholder]="'E.g. A'"
+                        [formControlName]="'prefix'"
+                        >
+                </mat-form-field>
+                <!-- Table No Start -->
+                <mat-form-field class="fuse-mat-no-subscript col-span-3" appearance="fill" floatLabel="always">
+                    <input
+                        min="1"
+                        max="99"
+                        type="number"
+                        matInput
+                        required
+                        [placeholder]="'E.g. 1'"
+                        [formControlName]="'tableNoStart'"
+                        >
+                </mat-form-field>
+                <span class="flex justify-center">to</span>
+                <!-- Table No End -->
+                <mat-form-field class="fuse-mat-no-subscript col-span-3" appearance="fill" floatLabel="always">
+                    <input
+                        min="1"
+                        max="99"
+                        type="number"
+                        matInput
+                        required
+                        [placeholder]="'E.g. 30'"
+                        [formControlName]="'tableNoEnd'"
+                        >
+                </mat-form-field>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="toCreate === 'edit_table'">
+            <span class="col-span-2 tracking-tight">Table No. ( Prefix + Table No. )</span>
+            <div class="grid grid-cols-10 gap-1 items-center col-span-3">
+                <!-- Prefix -->
+                <mat-form-field class="fuse-mat-no-subscript col-span-5" appearance="fill" floatLabel="always">
+                    <input
+                        matInput
+                        [placeholder]="'E.g. A'"
+                        [formControlName]="'prefix'"
+                        (keyup)="toCreate === 'edit_table' ? checkTableNo($event.target.value, 'prefix') : ''"
+                        >
+                </mat-form-field>
+                <!-- Table No Start -->
+                <mat-form-field class="fuse-mat-no-subscript col-span-5" appearance="fill" floatLabel="always">
+                    <input
+                        matInput
+                        required
+                        [placeholder]="'E.g. 1'"
+                        [formControlName]="'tableNoStart'"
+                        (keyup)="toCreate === 'edit_table' ? checkTableNo($event.target.value, 'tableNoStart') : ''"
+                        >
+                </mat-form-field>
+            </div>
+        </ng-container>
+    </div>
+    <!-- Actions -->
+    <div class="flex flex-row items-center justify-end mt-2 gap-2">
+        <!-- Error messages -->
+        <div class="flex flex-col">
+            <mat-error class="tracking-tight text-sm" *ngIf="zoneFormGroup.get('zoneName').hasError('zoneNameExists')">
+                '{{zoneFormGroup.get('zoneName').value.trim()}}' already exists
+            </mat-error>
+            <mat-error class="tracking-tight text-sm" *ngIf="zoneFormGroup.get('tableNoStart').value >= zoneFormGroup.get('tableNoEnd').value && zoneFormGroup.get('tableNoEnd').touched">
+                Table No. range invalid
+            </mat-error>
+            <mat-error class="tracking-tight text-sm" *ngIf="zoneFormGroup.get('combinations').hasError('nameExists')">
+                '{{zoneFormGroup.get('prefix').value + zoneFormGroup.get('tableNoStart').value}}' already exists
+            </mat-error>
+        </div>
+        <button
+            class="hover:bg-gray-500 border border-gray-500"
+            mat-flat-button
+            type="button"
+            [color]="'gray'"
+            (click)="closeDialog()"
+            >
+            Cancel
+        </button>
+        <button
+            *ngIf="toCreate !== 'edit_table'"
+            mat-flat-button
+            type="button"
+            [disabled]="zoneFormGroup.invalid || zoneFormGroup.get('tableNoStart').value >= zoneFormGroup.get('tableNoEnd').value"
+            (click)="save()"
+            [color]="'primary'">Save
+        </button>
+        <button
+            *ngIf="toCreate === 'edit_table'"
+            mat-flat-button
+            type="button"
+            [disabled]="zoneFormGroup.invalid"
+            (click)="save()"
+            [color]="'primary'">Save
+        </button>
+    </div>
+</div>

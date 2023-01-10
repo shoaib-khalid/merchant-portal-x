@@ -26,6 +26,8 @@ import { NgxGalleryModule } from 'ngx-gallery-9';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { StoreDineInComponent } from './store-dine-in/store-dine-in.component';
+import { MatTabsModule } from '@angular/material/tabs';
+import { ZoneDetailsModalComponent } from './store-dine-in/modal-zone-details/modal-zone-details.component';
 
 
 @NgModule({
@@ -35,7 +37,8 @@ import { StoreDineInComponent } from './store-dine-in/store-dine-in.component';
         StoreDeliveryComponent,
         StoreTimingComponent,
         StoreGoogleAnalyticComponent,
-        StoreDineInComponent
+        StoreDineInComponent,
+        ZoneDetailsModalComponent
     ],
     imports     : [
         RouterModule.forChild(editStoreRoutes),
@@ -56,7 +59,8 @@ import { StoreDineInComponent } from './store-dine-in/store-dine-in.component';
         TimeSelectorInputModule,
         NgxGalleryModule,
         FontAwesomeModule,
-        NgxMatSelectSearchModule 
+        NgxMatSelectSearchModule,
+        MatTabsModule 
 
     ],
     exports     : [

@@ -103,6 +103,104 @@
                                 >{{storeDineInForm.get('dineInConsolidatedOrder').value === true ? 'Yes' : 'No'}}
                             </mat-slide-toggle>
                         </div>
+
+                        <ng-container *ngIf="tagDetails && tagDetails.isFoodCourtOwner">
+                            <!-- Divider -->
+                            <div class="my-4 border-t"></div>
+    
+                            <!-- Zone & Table Management -->
+                            <div class="w-full mb-4">
+                                <div class="text-xl">Table Floor Plan</div>
+                                <div class="text-secondary">Manage your zone and table number</div>
+                            </div>
+                            <div class="flex flex-col gap-3">
+                                <div>
+                                    <button mat-flat-button
+                                        class=""
+                                        [color]="'primary'"
+                                        (click)="addTab()">
+                                        Add Zone
+                                    </button>
+                                </div>        
+                                <ng-container *ngIf="tabs.length > 0">
+                                    <mat-tab-group [selectedIndex]="selected.value"
+                                            (selectedIndexChange)="selected.setValue($event)" mat-align-tabs="start" 
+                                            class="pt-4 bg-slate-100 rounded-lg">
+                                        <mat-tab *ngFor="let tab of tabs; let tabIndex = index" [label]="tab">
+                                            <ng-template mat-tab-label>
+                                                <div class="flex flex-row gap-1.5 items-center">
+                                                    <span>
+                                                        {{tab.zoneName}}
+                                                    </span>
+                                                    <mat-icon
+                                                        (click)="editZoneName(tab.zoneName); $event.stopPropagation()"
+                                                        class="icon-size-4"
+                                                        [svgIcon]="'heroicons_outline:pencil-alt'">
+                                                    </mat-icon>
+                                                </div>
+                                              </ng-template>
+                                            <div class="">
+                                                <div class="flex flex-col gap-1.5 list-class mb-4">
+                                                    <!-- Header -->
+                                                    <div class="grid grid-cols-8 items-center gap-1 p-2 border-b font-medium">
+                                                        <div class="col-span-4 text-sm md:text-base">Table No.</div>
+                                                        <div class="col-span-2 text-sm md:text-base">Edit</div>
+                                                        <div class="col-span-2 text-sm md:text-base">Delete</div>
+                                                    </div>
+                                                    <!-- Rows -->
+                                                    <ng-container *ngFor="let tableNo of tab.tagTables; let i = index">
+                                                        <div class="w-full grid grid-cols-8 h-10 gap-1 items-center px-2 hover:bg-white">
+                                                            <span class="col-span-4 ml-1">{{tableNo.combinationTableNumber}}</span>
+                                                            <div class="col-span-2 flex">
+                                                                <mat-icon
+                                                                    (click)="editTableNo(tab, tableNo.combinationTableNumber, i)"
+                                                                    class="icon-size-5 cursor-pointer"
+                                                                    [svgIcon]="'heroicons_outline:pencil-alt'">
+                                                                </mat-icon>
+                                                            </div>
+                                                            <div class="col-span-2 flex">
+                                                                <mat-icon
+                                                                    (click)="deleteTable(tabIndex, i)"
+                                                                    class="icon-size-5 ml-2 md:ml-3 cursor-pointer"
+                                                                    [color]="'warn'"
+                                                                    [svgIcon]="'heroicons_outline:trash'">
+                                                                </mat-icon>
+                                                            </div>
+                                                        </div>
+                                                    </ng-container>
+                                                </div>
+                
+                                                <!-- Delete button  -->
+                                                <div class="justify-self-start w-30">
+                                                    <input
+                                                        id="product-remove-button"
+                                                        type="button"
+                                                        [disabled]="tabs.length === 1"
+                                                        (click)="removeTab(tabIndex)"
+                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                        mat-button>
+                                                    <label 
+                                                        class="flex duration-100 items-center bg-white justify-center h-10 px-4 border rounded dark:border-red-500"
+                                                        [ngClass]="tabs.length === 1 ? 'cursor-default' : 'cursor-pointer hover:bg-red-200 border-red-300'"
+                                                        for="product-remove-button"
+                                                        matRipple>
+                                                        <span 
+                                                            class="justify-center"
+                                                            [ngClass]="tabs.length === 1 ? 'text-gray-400' : 'text-black'"
+                                                        >Delete Zone</span>
+                                                        <!-- <mat-icon
+                                                            class="sm:ml-1"
+                                                            [color]="'warn'"
+                                                            [svgIcon]="'heroicons_outline:trash'">
+                                                        </mat-icon> -->
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </mat-tab>
+                                    </mat-tab-group>
+                                </ng-container>
+                            </div>
+                        </ng-container>
                     </ng-container>
     
                 </form>

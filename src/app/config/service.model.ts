@@ -6,10 +6,11 @@ export interface IAppConfig {
         flowBuilderService: string;
         userService: string;
         productService:string;
-        orderService:string;
-        reportService:string;
-        deliveryService:string;
-        paymentService:string;
+        orderService: string;
+        reportService: string;
+        deliveryService: string;
+        paymentService: string;
+        locationService: string;
 
     };
     storeFrontDomain:string;
