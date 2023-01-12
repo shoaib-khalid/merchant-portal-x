@@ -23,7 +23,7 @@
                                     [required]="true"
                                     (input)="checkExistingName($event.target.value)"
                                     maxlength="100"
-                                    placeholder="Tell us, what is your store name ?"
+                                    placeholder="Store name"
                                     matInput>
                                 <mat-error *ngIf="storeAccountForm.get('name').hasError('required')">
                                     Required
@@ -31,6 +31,20 @@
                                 <mat-error *ngIf="storeAccountForm.get('name').hasError('storeNameAlreadyTaken')">
                                     The store name entered is already taken
                                 </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <!-- Store Prefix -->
+                        <div class="sm:col-span-4">
+                            <mat-form-field class="fuse-mat-emphasized-affix w-full" floatLabel="always">
+                                <mat-label>Store Prefix</mat-label>
+                                <mat-icon
+                                    class="icon-size-5"
+                                    [svgIcon]="'mat_solid:store'"
+                                    matPrefix></mat-icon>
+                                <input
+                                    [formControlName]="'storePrefix'"
+                                    placeholder="Store prefix"
+                                    matInput>
                             </mat-form-field>
                         </div>
                         <!-- Store Url -->
@@ -107,7 +121,7 @@
                     <!-- Section -->
                     <div class="w-full">
                         <div class="text-xl">Store Information</div>
-                        <div class="text-secondary">Communication and information details in case customer want to connect with you.</div>
+                        <div class="text-secondary">Communication and information details in case customers want to connect with you</div>
                     </div>
                     <div class="sm:grid sm:grid-cols-4 gap-6 w-full mt-8">
                         <!-- Email -->
@@ -150,7 +164,7 @@
                                     Required
                                 </mat-error>
                                 <mat-error *ngIf="storeAccountForm.get('phoneNumber').hasError('invalidPhonenumber')">
-                                    Invalid Phonenumber
+                                    Invalid phone number
                                 </mat-error>
                             </mat-form-field>
                         </div>
@@ -160,7 +174,7 @@
                                 <mat-label>Address</mat-label>
                                 <textarea
                                     matInput
-                                    placeholder="Your customer will be looking for your store, add your store address now !"
+                                    placeholder="Your customer will be looking for your store, add your store address now!"
                                     maxlength="500"
                                     [rows]="5"
                                     [formControlName]="'displayAddress'"
@@ -175,7 +189,7 @@
                     <!-- Section -->
                     <div class="w-full ">
                         <div class="text-xl">Payment</div>
-                        <div class="text-secondary">This selection is to choose your payment type</div>
+                        <div class="text-secondary">Select your payment type</div>
                     </div>
                     <!-- Payment Type -->
                     <div class="grid sm:grid-cols-4 gap-6 w-full mt-8">

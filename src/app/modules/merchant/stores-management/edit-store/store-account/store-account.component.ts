@@ -93,6 +93,7 @@ export class StoreAccountComponent implements OnInit
             phoneNumber         : ['', EditStoreValidationService.phonenumberValidator],
             displayAddress      : [''],
             paymentType         : ['', Validators.required],
+            storePrefix         : [{value: '', disabled: true}],
         });
 
         this.storeId = this._route.snapshot.paramMap.get('storeid');
