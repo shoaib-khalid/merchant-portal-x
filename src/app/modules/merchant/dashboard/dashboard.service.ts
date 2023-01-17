@@ -5,11 +5,13 @@ import { tap } from 'rxjs/operators';
 import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { LogService } from 'app/core/logging/log.service';
-import { DailyTopProducts, DailyTopProductsPagination, 
-         DetailedDailySales, DetailedDailySalesPagination, 
-         Settlement, 
-         SettlementPagination, 
-         SummarySales, SummarySalesPagination, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly, WeeklyGraph, WeeklySale 
+import { DailyTopProducts, DailyTopProductsPagination,
+         DetailedDailySales, DetailedDailySalesPagination,
+         Settlement,
+         SettlementPagination,
+         StaffSales,
+         StaffSalesPagination,
+         SummarySales, SummarySalesPagination, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly, WeeklyGraph, WeeklySale
        } from './dashboard.types';
 import { AuthService } from 'app/core/auth/auth.service';
 
@@ -47,6 +49,10 @@ export class DashboardService
     private _weeklyGraphLastWeek: BehaviorSubject<WeeklyGraph[] | null> = new BehaviorSubject(null);
     private _weeklyGraphThisWeek: BehaviorSubject<WeeklyGraph[] | null> = new BehaviorSubject(null);
 
+    private _staffSale: BehaviorSubject<StaffSales | null> = new BehaviorSubject(null);
+    private _staffSales: BehaviorSubject<StaffSales[] | null> = new BehaviorSubject(null);
+    private _staffSalesPagination: BehaviorSubject<StaffSalesPagination | null> = new BehaviorSubject(null);
+
     fromDate: string;
     todayDate: string;
 
@@ -63,7 +69,7 @@ export class DashboardService
     {
         const now = new Date();
         this.todayDate = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate();
-    
+
         now.setDate(now.getDate()-7);
         this.fromDate = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate();
     }
@@ -123,7 +129,7 @@ export class DashboardService
     {
         return this._detailedDailySales.asObservable();
     }
-    
+
     /**
      * Getter for pagination
      */
@@ -141,6 +147,34 @@ export class DashboardService
     {
         // Store the value
         this._detailedDailySales.next(value);
+    }
+
+    /**
+     * Getter for staffSales
+     *
+    */
+    get staffSales$(): Observable<StaffSales[]>
+    {
+        return this._staffSales.asObservable();
+    }
+
+    /**
+     * Getter for staffSales pagination
+     */
+    get staffSalesPagination$(): Observable<StaffSalesPagination>
+    {
+        return this._staffSalesPagination.asObservable();
+    }
+
+    /**
+     * Setter for detailedDailySales
+     *
+     * @param value
+     */
+    set staffSales(value: StaffSales[])
+    {
+        // Store the value
+        this._staffSales.next(value);
     }
 
     /**
@@ -200,7 +234,7 @@ export class DashboardService
     {
         return this._settlement.asObservable();
     }
-    
+
     /**
      * Getter for pagination
      */
@@ -273,25 +307,25 @@ export class DashboardService
     }
 
     getDailyTopProducts(
-        id: string, 
+        id: string,
         period: string = 'current',
         params : {
-            page: number, 
-            pageSize: number, 
-            sortBy: string, 
-            sortingOrder: 'ASC' | 'DESC' | '', 
-            search: string, 
-            startDate: string, 
+            page: number,
+            pageSize: number,
+            sortBy: string,
+            sortingOrder: 'ASC' | 'DESC' | '',
+            search: string,
+            startDate: string,
             endDate: string,
             serviceType: string
         } =
         {
-            page: 0, 
-            pageSize: 10, 
-            sortBy: 'date', 
-            sortingOrder: 'DESC', 
-            search: '', 
-            startDate: this.fromDate, 
+            page: 0,
+            pageSize: 10,
+            sortBy: 'date',
+            sortingOrder: 'DESC',
+            search: '',
+            startDate: this.fromDate,
             endDate: this.todayDate,
             serviceType: ''
         }
@@ -312,17 +346,17 @@ export class DashboardService
             if (Array.isArray(header.params[key])) {
                 header.params[key] = header.params[key].filter(element => element !== null)
             }
-            
+
             if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
                 delete header.params[key];
             }
         });
-        
+
         return this._httpClient.get<{ pagination: DailyTopProductsPagination; dailyTopProducts: DailyTopProducts[] }>
             (reportService + '/store/' + id + '/report/merchantDailyTopProducts', header)
             .pipe(
                 tap((response) => {
-                    
+
                     this._logging.debug("Response from ReportService (getDailyTopProducts) - " + period, response);
 
                     // Pagination
@@ -333,7 +367,7 @@ export class DashboardService
                         lastPage: response["data"].totalPages,
                         startIndex: response["data"].pageable.offset,
                         endIndex: response["data"].pageable.offset + response["data"].numberOfElements - 1
-                    };                    
+                    };
 
                     if (period === 'current') {
                         this._dailyTopProductsPagination.next(_pagination);
@@ -350,22 +384,22 @@ export class DashboardService
     }
 
     getDetailedDailySales(
-        id: string, 
+        id: string,
         params: {
-            page: number, 
-            pageSize: number, 
-            sortBy: string, 
-            sortingOrder: 'ASC' | 'DESC' | '', 
-            startDate: string, 
+            page: number,
+            pageSize: number,
+            sortBy: string,
+            sortingOrder: 'ASC' | 'DESC' | '',
+            startDate: string,
             endDate: string,
             serviceType: string
-        } = 
+        } =
         {
-            page: 0, 
-            pageSize: 10, 
-            sortBy: 'created', 
-            sortingOrder: 'ASC', 
-            startDate: this.fromDate, 
+            page: 0,
+            pageSize: 10,
+            sortBy: 'created',
+            sortingOrder: 'ASC',
+            startDate: this.fromDate,
             endDate: this.todayDate,
             serviceType: ''
         }):
@@ -385,7 +419,7 @@ export class DashboardService
             if (Array.isArray(header.params[key])) {
                 header.params[key] = header.params[key].filter(element => element !== null)
             }
-            
+
             if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
                 delete header.params[key];
             }
@@ -395,7 +429,7 @@ export class DashboardService
             (reportService + '/store/' + id + '/report/merchantDetailedDailySales', header)
             .pipe(
                 tap((response) => {
-                    
+
                     this._logging.debug("Response from ReportService (getDetailedDailySales)",response);
 
                     // Pagination
@@ -415,24 +449,24 @@ export class DashboardService
             );
     }
 
-    getSummarySales(id: string, 
+    getSummarySales(id: string,
         params: {
-            page: number, 
-            pageSize: number, 
-            sortBy: string, 
-            sortingOrder: 'ASC' | 'DESC' | '', 
-            search: string, 
-            from: string, 
+            page: number,
+            pageSize: number,
+            sortBy: string,
+            sortingOrder: 'ASC' | 'DESC' | '',
+            search: string,
+            from: string,
             to: string,
             serviceType: string
-        } = 
+        } =
         {
-            page: 0, 
-            pageSize: 10, 
-            sortBy: 'date', 
-            sortingOrder: 'ASC', 
-            search: '', 
-            from: this.fromDate, 
+            page: 0,
+            pageSize: 10,
+            sortBy: 'date',
+            sortingOrder: 'ASC',
+            search: '',
+            from: this.fromDate,
             to:  this.todayDate,
             serviceType: ''
         }):
@@ -452,17 +486,17 @@ export class DashboardService
             if (Array.isArray(header.params[key])) {
                 header.params[key] = header.params[key].filter(element => element !== null)
             }
-            
+
             if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
                 delete header.params[key];
             }
         });
-        
+
         return this._httpClient.get<{ pagination: SummarySalesPagination; summarySales: SummarySales[] }>
             (reportService + '/store/' + id + '/merchant_daily_sales', header)
             .pipe(
                 tap((response) => {
-                    
+
                     this._logging.debug("Response from ReportService (getSummarySales)",response);
 
                     // Pagination
@@ -484,7 +518,7 @@ export class DashboardService
     }
 
     getTotalSales(id: string, serviceType: string):
-    Observable<{ totalSalesTotal: TotalSalesTotal[]; totalSalesDaily: TotalSalesDaily[]; 
+    Observable<{ totalSalesTotal: TotalSalesTotal[]; totalSalesDaily: TotalSalesDaily[];
         totalSalesWeekly: TotalSalesWeekly[]; totalSalesMonthly: TotalSalesMonthly[] }>
     {
         let reportService = this._apiServer.settings.apiServer.reportService;
@@ -503,18 +537,18 @@ export class DashboardService
             if (Array.isArray(header.params[key])) {
                 header.params[key] = header.params[key].filter(element => element !== null)
             }
-            
+
             if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
                 delete header.params[key];
             }
         });
-        
-        return this._httpClient.get<{ totalSalesTotal: TotalSalesTotal[]; totalSalesDaily: TotalSalesDaily[]; 
+
+        return this._httpClient.get<{ totalSalesTotal: TotalSalesTotal[]; totalSalesDaily: TotalSalesDaily[];
             totalSalesWeekly: TotalSalesWeekly[]; totalSalesMonthly: TotalSalesMonthly[] }>
             (reportService + '/store/' + id + '/totalSales', header)
             .pipe(
                 tap((response) => {
-                    
+
                     this._logging.debug("Response from ReportService (getTotalSales)", response);
 
                     this._totalSalesTotal.next(response["totalSales"]);
@@ -525,9 +559,9 @@ export class DashboardService
             );
     }
 
-    
 
-    getSettlement(id: string, page: number = 0, size: number = 10, sort: string = 'created', order: 'cycleStartDate' | 'cycleEndDate' | '' = 'cycleStartDate', 
+
+    getSettlement(id: string, page: number = 0, size: number = 10, sort: string = 'created', order: 'cycleStartDate' | 'cycleEndDate' | '' = 'cycleStartDate',
                         from: string = this.fromDate, to: string = this.todayDate):
     Observable<{ pagination: SettlementPagination; settlement: Settlement[] }>
     {
@@ -546,12 +580,12 @@ export class DashboardService
                 to: '' + to,
             }
         };
-        
+
         return this._httpClient.get<{ pagination: SettlementPagination; settlement: Settlement[] }>
             (reportService + '/store/' + id + '/settlement', header)
             .pipe(
                 tap((response) => {
-                    
+
                     this._logging.debug("Response from ReportService (getSettlement)", response);
 
                     // Pagination
@@ -586,12 +620,12 @@ export class DashboardService
                 to: '' + to,
             }
         };
-        
+
         return this._httpClient.get<{ weeklySale: WeeklySale[] }>
             (reportService + '/store/' + id + '/weeklySale', header)
             .pipe(
                 tap((response) => {
-                    
+
                     this._logging.debug("Response from ReportService (getWeeklySale)", response);
 
                     this._weeklySale.next(response["weeklySales"]);
@@ -603,12 +637,12 @@ export class DashboardService
         id: string,
         period: 'last-week' | 'this-week' = 'this-week',
         params: {
-            from: string, 
+            from: string,
             to: string,
             serviceType: string
-        } = 
+        } =
         {
-            from: '', 
+            from: '',
             to: '',
             serviceType: 'DELIVERIN'
         }):
@@ -628,17 +662,17 @@ export class DashboardService
             if (Array.isArray(header.params[key])) {
                 header.params[key] = header.params[key].filter(element => element !== null)
             }
-            
+
             if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
                 delete header.params[key];
             }
         });
-        
+
         return this._httpClient.get<{ weeklyGraph: WeeklyGraph[] }>
             (reportService + '/store/' + id + '/weeklyGraph', header)
             .pipe(
                 tap((response) => {
-                    
+
                     this._logging.debug("Response from ReportService (getWeeklyGraph) - " + period, response);
 
                     if (period === 'last-week') {
@@ -648,6 +682,73 @@ export class DashboardService
                         this._weeklyGraphThisWeek.next(response["dashboardGraph"]);
                     }
 
+                })
+            );
+    }
+
+    getStaffSales(id: string,
+        params: {
+            page: number,
+            pageSize: number,
+            sortBy: string,
+            sortingOrder: 'ASC' | 'DESC' | '',
+            search?: string,
+            from?: string,
+            to?: string,
+            serviceType?: string
+        } =
+        {
+            page: 0,
+            pageSize: 10,
+            sortBy: 'created',
+            sortingOrder: 'ASC',
+            search: '',
+            from: this.fromDate,
+            to:  this.todayDate,
+            serviceType: ''
+        }):
+    Observable<{ pagination: StaffSalesPagination; staffSales: StaffSales[] }>
+    {
+        let reportService = this._apiServer.settings.apiServer.reportService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: params
+        };
+
+        // Delete empty value
+        Object.keys(header.params).forEach(key => {
+            if (Array.isArray(header.params[key])) {
+                header.params[key] = header.params[key].filter(element => element !== null)
+            }
+
+            if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
+                delete header.params[key];
+            }
+        });
+
+        return this._httpClient.get<{ pagination: StaffSalesPagination;  staffSales:  StaffSales[] }>
+            (reportService + '/store/' + id + '/report/staff/totalSales', header)
+            .pipe(
+                tap((response) => {
+                    this._logging.debug("Response from StoresService (getStaffSales)",response);
+
+                    // Pagination
+                    let _pagination = {
+                        length: response["data"].totalElements,
+                        size: response["data"].size,
+                        page: response["data"].number,
+                        lastPage: response["data"].totalPages,
+                        startIndex: response["data"].pageable.offset,
+                        endIndex: response["data"].pageable.offset + response["data"].numberOfElements - 1
+                    };
+
+                    this._logging.debug("Response from StoresService (getStaffSales pagination)",_pagination);
+
+                    this._staffSalesPagination.next(_pagination);
+                    this._staffSales.next(response["data"].content);
                 })
             );
     }

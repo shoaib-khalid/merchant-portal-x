@@ -341,7 +341,7 @@ export class WeeklyGraphResolver implements Resolve<any>
     get prevMonday(): Date
     {
         let today = new Date();
-        
+
         // get the day of date (0-6)
         let day = today.getDay();
         let prevMonday = new Date();
@@ -355,36 +355,36 @@ export class WeeklyGraphResolver implements Resolve<any>
         else {
             prevMonday.setDate(today.getDate() - (day-1));
         }
-    
+
         return prevMonday;
     }
 
     get lastWeek(): {start: string, end: string} {
 
         let locale = 'en-MY';
-        // reformat date 
+        // reformat date
         const format = 'yyyy-MM-dd';
 
         // get this week monday
         let lastWeekStart = this.prevMonday;
-        
+
         // set lastWeekStartFixed to last week monday
-        const lastWeekStartFixed = new Date(lastWeekStart.setDate(lastWeekStart.getDate() - 7)); 
-        
-        // set lastWeekEnd to end of last week        
+        const lastWeekStartFixed = new Date(lastWeekStart.setDate(lastWeekStart.getDate() - 7));
+
+        // set lastWeekEnd to end of last week
         let lastWeekEnd = new Date(lastWeekStart.setDate(lastWeekStart.getDate() + 6));
 
-        // reformat date 
+        // reformat date
         let formattedLastWeekStart = formatDate(lastWeekStartFixed, format, locale);
         let formattedLastWeekEnd = formatDate(lastWeekEnd, format, locale);
-    
+
         return {start: formattedLastWeekStart, end: formattedLastWeekEnd};
     }
 
     get thisWeek(): {start: string, end: string} {
-        
+
         let locale = 'en-MY';
-        // reformat date 
+        // reformat date
         const format = 'yyyy-MM-dd';
         let today = new Date();
 
@@ -392,8 +392,8 @@ export class WeeklyGraphResolver implements Resolve<any>
         let lastMonday = this.prevMonday;
         let formattedLastMonday = formatDate(lastMonday, format, locale);
         let formattedToday = formatDate(today, format, locale);
-        
-    
+
+
         return {start: formattedLastMonday, end: formattedToday};
     }
 
@@ -444,7 +444,19 @@ export class WeeklyGraphResolver implements Resolve<any>
                         startDate: this.lastWeek.start,
                         endDate: this.lastWeek.end,
                         serviceType: ''
-                    })
-            ]) 
+                    }),
+                this._dashboardService.getStaffSales(
+                    this.storeId$,
+                    {
+                        pageSize: 10,
+                        sortBy: 'created',
+                        sortingOrder: 'ASC',
+                        search: '',
+                        page: 0,
+                        from: '',
+                        to: '',
+                    }
+                )
+            ])
     }
 }

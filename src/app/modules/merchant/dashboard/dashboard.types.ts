@@ -40,9 +40,9 @@ export interface DetailedDailySales
         privateAdminNotes: string;
     }
     store: {
-        id: string; 
-        name: string; 
-        clientId: string; 
+        id: string;
+        name: string;
+        clientId: string;
         nameAbreviation: string;
     }
     subTotal: number;
@@ -165,6 +165,41 @@ export interface Settlement
 }
 
 export interface SettlementPagination
+{
+    length: number;
+    size: number;
+    page: number;
+    lastPage: number;
+    startIndex: number;
+    endIndex: number;
+}
+
+export interface StaffSales
+{
+    staff               : Staff;
+    dailyCount          : Count;
+    weeklyCount         : Count;
+    monthlyCount        : Count;
+    previousMonthlyCount: Count;
+    previousWeeklyCount : Count;
+}
+
+export interface Staff
+{
+    id                  : string;
+    name                : string;
+    storeId             : string;
+}
+
+export interface Count
+{
+    date?               : string;
+    weekNo              : number;
+    month?              : string;
+    total               : number;
+    previousWeekNo      : number;
+}
+export interface StaffSalesPagination
 {
     length: number;
     size: number;
