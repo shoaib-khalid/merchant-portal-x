@@ -94,9 +94,23 @@ export class ZoneDetailsModalComponent implements OnInit, OnDestroy
                 this.zoneFormGroup.get('zoneName').patchValue(zone.zoneName);
                 this.zoneFormGroup.get('prefix').patchValue(zone.tagTables[tableIndex].tablePrefix);
                 this.zoneFormGroup.get('tableNoStart').patchValue(zone.tagTables[tableIndex].tableNumber);
-
-                
             }
+
+            // Update validator
+            this.zoneFormGroup.get('tableNoStart').setValidators([Validators.required]);
+            // Disable to enable save button
+            this.zoneFormGroup.get('tableNoEnd').clearValidators();
+            this.zoneFormGroup.get('tableNoEnd').disable();
+
+            this.zoneFormGroup.updateValueAndValidity();
+        }
+
+        else if (this.toCreate === ModalTypes.ADD_TABLE) {
+
+            const zone: ZoneTable = this.data.currentZone;
+
+            this.zoneFormGroup.get('zoneName').patchValue(zone.zoneName);
+            this.zoneFormGroup.get('tableNoStart').patchValue('');
             // Update validator
             this.zoneFormGroup.get('tableNoStart').setValidators([Validators.required]);
             // Disable to enable save button
@@ -106,19 +120,7 @@ export class ZoneDetailsModalComponent implements OnInit, OnDestroy
             this.zoneFormGroup.updateValueAndValidity();
         }
         
-
-        // this.zoneForm.patchValue(this.data.zoneForm)
-                    
-        // this._storesService.store$
-        //     .pipe(takeUntil(this._unsubscribeAll))
-        //     .subscribe((store: Store) => {
-        //         if (store){
-        //             this.store = store;
-        //         }
-        //         // Mark for check
-        //         this._changeDetectorRef.markForCheck();
-        //     });    
-        }
+    }
 
     /**
      * On destroy
@@ -170,7 +172,7 @@ export class ZoneDetailsModalComponent implements OnInit, OnDestroy
         }
 
         const combiTableNo = this.zoneFormGroup.get('prefix').value + this.zoneFormGroup.get('tableNoStart').value;
-
+        
         // Set error
         if (zone.tagTables.map(x => x.combinationTableNumber).includes(combiTableNo)) {
             this.zoneFormGroup.get('combinations').setErrors({nameExists: true});
