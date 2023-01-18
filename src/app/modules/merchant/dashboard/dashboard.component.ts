@@ -665,14 +665,25 @@ export class DashboardComponent implements OnInit, OnDestroy
                     this.staffSales = staffSales;
                     this.staffSalesDataSource.data = this.staffSales;
 
-                    this.thisMonthStaffSales = staffSales[0].monthlyCount.month
-                    this.lastMonthStaffSales = staffSales[0].previousMonthlyCount.month
+                    if(staffSales[0]){
+                        this.thisMonthStaffSales = staffSales[0].monthlyCount.month
+                        this.lastMonthStaffSales = staffSales[0].previousMonthlyCount.month
 
-                    this.thisMonthStaffSalesYear = parseInt(staffSales[0].dailyCount.date.substring(0, 4))
-                    if(staffSales[0].monthlyCount.month === 'January'){
-                        this.lastMonthStaffSalesYear = (parseInt(staffSales[0].dailyCount.date.substring(0, 4)) - 1)
-                    }else{
-                        this.lastMonthStaffSalesYear = parseInt(staffSales[0].dailyCount.date.substring(0, 4))
+                        this.thisMonthStaffSalesYear = parseInt(staffSales[0].dailyCount.date.substring(0, 4))
+                        if(staffSales[0].monthlyCount.month === 'January'){
+                            this.lastMonthStaffSalesYear = (parseInt(staffSales[0].dailyCount.date.substring(0, 4)) - 1)
+                        }else{
+                            this.lastMonthStaffSalesYear = parseInt(staffSales[0].dailyCount.date.substring(0, 4))
+                        }
+                    }
+
+                    // Remove the table if no month of sales
+                    if (this.thisMonthStaffSales === null) {
+                        this.staffSalesCol.splice(this.staffSalesCol.indexOf("thisMonth"), 1);
+                    }
+
+                    if (this.lastMonthStaffSales === null) {
+                        this.staffSalesCol.splice(this.staffSalesCol.indexOf("lastMonth"), 1);
                     }
                 }
                 // Mark for check
