@@ -26,7 +26,8 @@ export interface Product
     productDeliveryDetail?: string;
     customNote?: string;
     isNoteOptional?: boolean;
-    hasAddOn: boolean
+    hasAddOn: boolean;
+    sequenceNumber?: number
 }
 
 /**

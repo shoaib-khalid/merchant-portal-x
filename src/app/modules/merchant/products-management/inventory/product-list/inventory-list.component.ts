@@ -26,89 +26,7 @@ import { DuplicateProductsModalComponent } from '../product-duplicate-modal/prod
 @Component({
     selector       : 'inventory-list',
     templateUrl    : './inventory-list.component.html',
-    styles         : [
-        /* language=SCSS */
-        `
-            .inventory-grid {
-                grid-template-columns: 20px 80px auto 40px;
-
-                @screen sm {
-                    grid-template-columns: 20px 80px auto 112px 60px;
-                }
-
-                @screen md {
-                    grid-template-columns: 20px 80px 128px auto 80px 110px 60px;
-                }
-
-                @screen lg {
-                    grid-template-columns: 20px 80px 128px auto 80px 110px 60px 60px 60px;
-                }
-            }
-
-            .inventory-grid-2price {
-                grid-template-columns: 20px 80px auto 40px;
-
-                @screen sm {
-                    grid-template-columns: 20px 80px auto 112px 60px;
-                }
-
-                @screen md {
-                    grid-template-columns: 20px 80px 128px auto 80px 110px 60px;
-                }
-
-                @screen lg {
-                    grid-template-columns: 20px 80px 128px auto 80px 110px 110px 60px 60px 60px;
-                }
-            }
-
-            .inventory-grid-fnb {
-                grid-template-columns: 20px 80px auto 40px;
-
-                @screen sm {
-                    grid-template-columns: 20px 80px auto 112px 60px;
-                }
-
-                @screen md {
-                    grid-template-columns: 20px 80px 128px auto 80px 110px 60px;
-                }
-
-                @screen lg {
-                    grid-template-columns: 20px 80px 128px auto 80px 110px 110px 60px 60px;
-                }
-            }
-
-            .inventory-grid-fnb-2price {
-                grid-template-columns: 20px 80px auto 40px;
-
-                @screen sm {
-                    grid-template-columns: 20px 80px auto 112px 60px;
-                }
-
-                @screen md {
-                    grid-template-columns: 20px 80px 128px auto 80px 110px 60px;
-                }
-
-                @screen lg {
-                    grid-template-columns: 20px 80px 128px auto 80px 110px 110px 60px 60px;
-                }
-            }
-
-            .option-grid {
-                grid-template-columns: 120px 112px auto 112px;
-            }
-
-            .variant-grid {
-                grid-template-columns: 68px 120px 120px 128px 80px 96px;
-
-
-                @screen md {
-                    grid-template-columns: 68px 120px auto 128px 80px 96px;
-                }
-
-            }
-
-        `
-    ],
+    styleUrls    : ['./inventory-list.component.scss'],
     encapsulation  : ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
     animations     : fuseAnimations
@@ -994,6 +912,15 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
             this._changeDetectorRef.markForCheck();
 
         })
+    }
+
+    changeSequence(value: any, product: Product) {
+
+        let { productAssets, productInventories, productReviews, productVariants, thumbnailUrl, ...productToUpdate} = product;
+        productToUpdate.sequenceNumber = +value.target.value;
+
+        this._inventoryService.updateProduct(product.id, productToUpdate).subscribe();
+        
     }
 
 }

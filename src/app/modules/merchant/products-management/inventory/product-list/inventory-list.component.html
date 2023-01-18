@@ -196,6 +196,11 @@
                                         [mat-sort-header]="'status'">
                                         Active
                                     </div>
+                                    <div class="hidden lg:flex flex-col items-center leading-tight"
+                                        [mat-sort-header]="'sequenceNumber'">
+                                        <span>Sequence</span>
+                                        <span class="font-normal">({{pagination.startIndex + 1}} to {{pagination.endIndex + 1}})</span>
+                                    </div>
                                     <div class="hidden sm:block">Details</div>
                                 </div>
                                 <!-- Rows -->
@@ -308,6 +313,16 @@
                                                         class="text-gray-400 icon-size-5"
                                                         [svgIcon]="'heroicons_solid:x'"></mat-icon>
                                                 </ng-container>
+                                            </div>
+
+                                            <!-- Sequence -->
+                                            <div class="hidden lg:block pr-2">
+                                                <input
+                                                    class="border w-full px-3 py-1 rounded"
+                                                    type="number"
+                                                    [value]="product.sequenceNumber"
+                                                    (change)="changeSequence($event, product)"
+                                                >
                                             </div>
 
                                             <!-- Details button -->
