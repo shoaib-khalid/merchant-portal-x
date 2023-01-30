@@ -29,12 +29,14 @@ interface DialogResponse
 /**
  *  CREATE = 'create',
     EDIT_ZONE = 'edit_zone',
-    EDIT_TABLE = 'edit_table'
+    EDIT_TABLE = 'edit_table',
+    ADD_TABLE = 'add_table'
  */
 export const enum ModalTypes {
     CREATE = 'create',
     EDIT_ZONE = 'edit_zone',
-    EDIT_TABLE = 'edit_table'
+    EDIT_TABLE = 'edit_table',
+    ADD_TABLE = 'add_table'
 }
 
 @Component({
@@ -94,6 +96,7 @@ export class StoreDineInComponent implements OnInit
     tagDetails: TagDetails = null;
     zonesToBeDeleted = [];
     tablesToBeDeleted = [];
+    tablesToBeCreated = [];
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
@@ -332,6 +335,14 @@ export class StoreDineInComponent implements OnInit
                 } 
                 this.tabs[zoneIndex].tagTables.splice(tableIndex, 1);
 
+                if (this.tablesToBeCreated.length > 0) {
+                    let index = this.tablesToBeCreated.findIndex(table => table.combinationTableNumber == tableName);
+
+                    if (index > -1) {
+                        this.tablesToBeCreated.splice(index, 1);
+                    }
+                }
+
                 // To enable save button
                 this.storeDineInForm.markAsDirty();
 
@@ -417,6 +428,48 @@ export class StoreDineInComponent implements OnInit
                 }
             }
         )
+    }
+
+    addTableNo(zone: ZoneTable, zoneIndex: number) {
+
+        const dialogRef = this._dialog.open( 
+            ZoneDetailsModalComponent, {
+                width: '580px',
+                maxWidth: '100vw',
+                data: {
+                    toCreate: ModalTypes.ADD_TABLE,
+                    currentZone: zone
+                },
+                disableClose: true
+            });
+
+        dialogRef.afterClosed().subscribe((result: DialogResponse) => 
+            {
+
+                if (result.saved) {
+                    
+                    const zoneResp = result.value;
+
+                    const tableBody = {
+                        combinationTableNumber: `${zoneResp.prefix}${zoneResp.tableNoStart}`,
+                        tableNumber: zoneResp.tableNoStart + '',
+                        tablePrefix: zoneResp.prefix,
+                        zoneId: zone.id
+                    }
+
+                    this.tabs[zoneIndex].tagTables.push(tableBody);
+
+                    this.tablesToBeCreated.push(tableBody);
+    
+                    // To enable save button
+                    this.storeDineInForm.markAsDirty();
+    
+                    // Mark for check
+                    this._changeDetectorRef.markForCheck();
+                }
+            }
+        )
+
     }
 
     update(){
@@ -518,6 +571,11 @@ export class StoreDineInComponent implements OnInit
                 this.tablesToBeDeleted = []; 
             }
         })
+
+        // Create new tables
+        if (this.tablesToBeCreated.length > 0) {
+            this._locationService.postTablesBulk(this.tablesToBeCreated).subscribe()
+        }
 
         // Enable the form
         // this.storeDineInForm.enable();

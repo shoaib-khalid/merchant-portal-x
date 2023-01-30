@@ -150,7 +150,10 @@
                                                 <div class="flex flex-col gap-1.5 list-class mb-4">
                                                     <!-- Header -->
                                                     <div class="grid grid-cols-6 items-center gap-1 p-2 border-b font-medium">
-                                                        <div class="col-span-4 text-sm md:text-base">Table No.</div>
+                                                        <div class="col-span-4 flex flex-row gap-2">
+                                                            <span class="text-sm md:text-base">Table No.</span>
+                                                            <span (click)="addTableNo(tab, tabIndex)" class="font-normal tracking-tight cursor-pointer text-sm md:text-base underline text-primary-500">Add Table</span>
+                                                        </div>
                                                         <div class="col-span-1 text-sm md:text-base">Edit</div>
                                                         <div class="col-span-1 text-sm md:text-base">Delete</div>
                                                     </div>
