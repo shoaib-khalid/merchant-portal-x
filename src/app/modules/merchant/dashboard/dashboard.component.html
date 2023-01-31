@@ -979,7 +979,7 @@
                                             <td
                                                 mat-cell
                                                 *matCellDef="let staffSales">
-                                                {{staffSales.dailyCount.total | currency: 'RM'}}
+                                                {{staffSales.dailyCount.total | currency: currencySymbol}}
                                             </td>
                                         </ng-container>
 
@@ -993,7 +993,7 @@
                                             <td
                                                 mat-cell
                                                 *matCellDef="let staffSales">
-                                                {{staffSales.previousWeeklyCount.total | currency: 'RM'}}
+                                                {{staffSales.weeklyCount.total | currency: currencySymbol}}
                                             </td>
                                         </ng-container>
 
@@ -1007,7 +1007,7 @@
                                             <td
                                                 mat-cell
                                                 *matCellDef="let staffSales">
-                                                {{staffSales.weeklyCount.total | currency: 'RM'}}
+                                                {{staffSales.previousWeeklyCount.total | currency: currencySymbol}}
                                             </td>
                                         </ng-container>
 
@@ -1021,7 +1021,7 @@
                                             <td
                                                 mat-cell
                                                 *matCellDef="let staffSales">
-                                                {{staffSales.previousMonthlyCount.total | currency: 'RM'}}
+                                                {{staffSales.monthlyCount.total | currency: currencySymbol}}
                                             </td>
                                         </ng-container>
 
@@ -1035,7 +1035,7 @@
                                             <td
                                                 mat-cell
                                                 *matCellDef="let staffSales">
-                                                {{staffSales.monthlyCount.total | currency: 'RM'}}
+                                                {{staffSales.previousMonthlyCount.total | currency: currencySymbol}}
                                             </td>
                                         </ng-container>
 

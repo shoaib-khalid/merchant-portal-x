@@ -185,7 +185,7 @@ export class DashboardComponent implements OnInit, OnDestroy
 
     isLoading: boolean = false;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
-    currencySymbol: string;
+    currencySymbol: string = '$';
 
     lastMonday: any;
 
