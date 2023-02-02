@@ -134,9 +134,6 @@ export class StoreDineInComponent implements OnInit
             dineInConsolidatedOrder: [false]
         });
 
-        // temporarily disable
-        this.storeDineInForm.get('dineInConsolidatedOrder').disable();
-
         this.storeId = this._route.snapshot.paramMap.get('storeid');
 
         this._storesService.getStoreById(this.storeId)
