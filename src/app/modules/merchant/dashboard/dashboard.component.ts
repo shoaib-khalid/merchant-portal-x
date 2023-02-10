@@ -7,7 +7,7 @@ import { ApexOptions } from 'ng-apexcharts';
 import { DashboardService } from 'app/modules/merchant/dashboard/dashboard.service';
 import { Store, StoreRegionCountries } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
-import { DailyTopProducts, DailyTopProductsPagination, DetailedDailySales, DetailedDailySalesPagination, Settlement, SettlementPagination, StaffSales, StaffSalesPagination, SummarySales, SummarySalesPagination, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly } from './dashboard.types';
+import { DailyTopProducts, DailyTopProductsPagination, DetailedDailySales, DetailedDailySalesPagination, Settlement, SettlementPagination, StaffName, StaffSales, StaffSalesDetail, StaffSalesPagination, SummarySales, SummarySalesPagination, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly } from './dashboard.types';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { formatDate } from '@angular/common';
 import * as XLSX from 'xlsx';
@@ -49,7 +49,7 @@ export class DashboardComponent implements OnInit, OnDestroy
     @ViewChild("staffSalesPaginator", {read: MatPaginator}) private _staffSalesPaginator: MatPaginator;
 
 
-    store: Store;
+    store: Store = null;
     stores: Store[];
     currentStoreId: string;
     storeName: string = "";
@@ -65,7 +65,7 @@ export class DashboardComponent implements OnInit, OnDestroy
     orderSummaryServiceType = ''
 
     outOfStockProducts: string;
-    verticalCode: string;
+    verticalCode: string = '';
 
     // topProductChart:any;
 
@@ -122,15 +122,25 @@ export class DashboardComponent implements OnInit, OnDestroy
     // -------------------------------
 
     staffSalesDataSource: MatTableDataSource<any> = new MatTableDataSource();
-    staffSalesCol = ["staff", "today", "thisWeek", 'lastWeek' , "thisMonth" , "lastMonth"]
-    staffSales: StaffSales[] = []
+    staffSalesCol = ["date", "totalAmount", "cash", 'duitNow' , "others"]
+    // staffSales: StaffSales[] = []
+    staffFormControl: FormControl = new FormControl();
+    staffNames: StaffName[] = [];
+    staffId: string = '';
 
     thisMonthStaffSales: string = null;
     lastMonthStaffSales: string = null;
     thisMonthStaffSalesYear: number = null;
     lastMonthStaffSalesYear: number = null;
 
-    staffSalesPagination: StaffSalesPagination;
+    staffSalesPagination: StaffSalesPagination = {
+        length: 0,
+        size: 0,
+        page: 0,
+        lastPage: 0,
+        startIndex: 0,
+        endIndex: 0
+    };
     staffSalesDateRange: any = {
         start : null,
         end: null
@@ -361,7 +371,8 @@ export class DashboardComponent implements OnInit, OnDestroy
                 if (store) {
                     this.storeName = store.name;
                     this.currencySymbol = store.regionCountry.currencySymbol;
-                    this.verticalCode = store.verticalCode
+                    this.verticalCode = store.verticalCode;
+                    this.store = store;
                 }
 
                 // Mark for check
@@ -657,34 +668,65 @@ export class DashboardComponent implements OnInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             });
 
-        // Get the Staff Sales Report
-        this._dashboardService.staffSales$
+        // Get staff names
+        this._dashboardService.staffNames$
             .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((staffSales: StaffSales[]) => {
+            .subscribe((staffNames: StaffName[]) => {
+                this.staffNames = staffNames;
+            })
+        
+        // Get the Staff Sales Report
+        this._dashboardService.staffSalesDetails$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((staffSales: StaffSalesDetail[]) => {
                 if (staffSales) {
-                    this.staffSales = staffSales;
-                    this.staffSalesDataSource.data = this.staffSales;
 
-                    if(staffSales[0]){
-                        this.thisMonthStaffSales = staffSales[0].monthlyCount.month
-                        this.lastMonthStaffSales = staffSales[0].previousMonthlyCount.month
+                    this.staffSalesDataSource.data = staffSales.map(sale => {
 
-                        this.thisMonthStaffSalesYear = parseInt(staffSales[0].dailyCount.date.substring(0, 4))
-                        if(staffSales[0].monthlyCount.month === 'January'){
-                            this.lastMonthStaffSalesYear = (parseInt(staffSales[0].dailyCount.date.substring(0, 4)) - 1)
-                        }else{
-                            this.lastMonthStaffSalesYear = parseInt(staffSales[0].dailyCount.date.substring(0, 4))
-                        }
-                    }
+                        let paymentType = {};
+                        let cashAmount = 0;
+                        let duitNowAmount = 0;
+                        let othersAmount = 0;
 
-                    // Remove the table if no month of sales
-                    if (this.thisMonthStaffSales === null) {
-                        this.staffSalesCol.splice(this.staffSalesCol.indexOf("thisMonth"), 1);
-                    }
+                        // Get sales amount for each channel
+                        sale.summaryDetails.forEach(sale => {
 
-                    if (this.lastMonthStaffSales === null) {
-                        this.staffSalesCol.splice(this.staffSalesCol.indexOf("lastMonth"), 1);
-                    }
+                            if ( sale.paymentChannel == 'CASH' ) {
+                                cashAmount = sale.saleAmount;
+                            }
+                            if ( sale.paymentChannel == 'DUITNOW' ) {
+                                duitNowAmount = sale.saleAmount;
+                            }
+                            if ( sale.paymentChannel != 'CASH' && sale.paymentChannel != 'DUITNOW' ) {
+                                othersAmount = othersAmount + sale.saleAmount;
+                            }
+
+                            paymentType = { cashAmount, duitNowAmount, othersAmount };
+                        })
+
+                        return { ...sale, paymentType: paymentType }
+                    })                    
+
+                    // if(staffSales[0]){
+                    //     this.thisMonthStaffSales = staffSales[0].monthlyCount.month
+                    //     this.lastMonthStaffSales = staffSales[0].previousMonthlyCount.month
+
+                    //     this.thisMonthStaffSalesYear = parseInt(staffSales[0].dailyCount.date.substring(0, 4))
+                    //     if(staffSales[0].monthlyCount.month === 'January'){
+                    //         this.lastMonthStaffSalesYear = (parseInt(staffSales[0].dailyCount.date.substring(0, 4)) - 1)
+                    //     }else{
+                    //         this.lastMonthStaffSalesYear = parseInt(staffSales[0].dailyCount.date.substring(0, 4))
+                    //     }
+                    // }
+
+                    // // Remove the table if no month of sales
+                    // if (this.thisMonthStaffSales === null) {
+                    //     this.staffSalesCol.splice(this.staffSalesCol.indexOf("thisMonth"), 1);
+                    // }
+
+                    // if (this.lastMonthStaffSales === null) {
+                    //     this.staffSalesCol.splice(this.staffSalesCol.indexOf("lastMonth"), 1);
+                    // }
                 }
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -975,8 +1017,40 @@ export class DashboardComponent implements OnInit, OnDestroy
             .subscribe();
 
         // -------------------------------
-        // Staff Sales Report Date Range Input
+        // Staff Sales Report Date Range Input and Staff Filter
         // -------------------------------
+
+        this.staffFormControl.valueChanges
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                debounceTime(300),
+                switchMap((query) => {
+                    this.isLoading = true;
+
+                    // // reformat date
+                    // const format = 'yyyy-MM-dd';
+                    // let myDate = query;
+                    // const locale = 'en-MY';
+                    // let formattedDate = formatDate(myDate, format, locale);
+
+                    // this.staffSalesDateRange.start = formattedDate;
+
+                    this.staffId = query;
+
+                    return this._dashboardService.getStaffTotalSalesByStaffId(this.storeId$, {
+                        page: 0,
+                        pageSize: this.staffSalesPageSize,
+                        sortBy: 'created',
+                        sortingOrder: 'ASC',
+                        from: this.staffSalesDateRange.start,
+                        to: this.staffSalesDateRange.end,
+                    }, this.staffId);
+                }),
+                map(() => {
+                    this.isLoading = false;
+                })
+            )
+            .subscribe();
 
         // Subscribe to start date input field value changes
         this.staffSalesDateInputStart.valueChanges
@@ -1019,14 +1093,14 @@ export class DashboardComponent implements OnInit, OnDestroy
 
                     this.staffSalesDateRange.end = formattedDate;
 
-                    return this._dashboardService.getStaffSales(this.storeId$, {
+                    return this._dashboardService.getStaffTotalSalesByStaffId(this.storeId$, {
                         page: 0,
                         pageSize: this.staffSalesPageSize,
                         sortBy: 'created',
                         sortingOrder: 'ASC',
                         from: this.staffSalesDateRange.start,
                         to: this.staffSalesDateRange.end,
-                    });
+                    }, this.staffId );
                 }),
                 map(() => {
 
@@ -1519,14 +1593,14 @@ export class DashboardComponent implements OnInit, OnDestroy
                         this.staffSalesPageSize = this._staffSalesPaginator.pageSize;
 
                         if (this.staffSalesDateRange.start == null && this.staffSalesDateRange.end == null)
-                            return this._dashboardService.getStaffSales(this.storeId$, {
+                            return this._dashboardService.getStaffTotalSalesByStaffId(this.storeId$, {
                                 page: this._staffSalesPaginator.pageIndex,
                                 pageSize: this._staffSalesPaginator.pageSize,
                                 sortBy: "created",
                                 sortingOrder: "ASC"
-                            });
+                            }, this.staffId);
                         else
-                            return this._dashboardService.getStaffSales(this.storeId$,
+                            return this._dashboardService.getStaffTotalSalesByStaffId(this.storeId$,
                                 {
                                     page: this._staffSalesPaginator.pageIndex,
                                     pageSize: this._staffSalesPaginator.pageSize,
@@ -1534,7 +1608,7 @@ export class DashboardComponent implements OnInit, OnDestroy
                                     sortingOrder: "ASC",
                                     from: this.staffSalesDateRange.start,
                                     to: this.staffSalesDateRange.end
-                                });
+                                }, this.staffId);
 
                     }),
                     map(() => {

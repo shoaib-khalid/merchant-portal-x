@@ -174,6 +174,8 @@ export interface SettlementPagination
     endIndex: number;
 }
 
+/////////////////
+
 export interface StaffSales
 {
     staff               : Staff;
@@ -207,4 +209,36 @@ export interface StaffSalesPagination
     lastPage: number;
     startIndex: number;
     endIndex: number;
+}
+
+export interface StaffName 
+{
+    id          : string;
+    storeId     : string;
+    password    : string;
+    name        : string;
+    created     : string;
+    updated     : string;
+    shiftSummaries: ShiftSummary[];
+}
+
+export interface ShiftSummary
+{
+    id              : number;
+    summaryId       : number;
+    paymentChannel  : string;
+    saleAmount      : number;
+}
+
+export interface StaffSalesDetail
+{   
+    id              : number;
+    userId          : string;
+    firstOrderId    : string;
+    lastOrderId     : string;
+    firstOrderTime  : string;
+    lastOrderTime   : string;
+    created         : string;
+    updated         : string;
+    summaryDetails  : ShiftSummary[];
 }

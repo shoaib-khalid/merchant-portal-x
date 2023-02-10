@@ -9,7 +9,9 @@ import { DailyTopProducts, DailyTopProductsPagination,
          DetailedDailySales, DetailedDailySalesPagination,
          Settlement,
          SettlementPagination,
+         StaffName,
          StaffSales,
+         StaffSalesDetail,
          StaffSalesPagination,
          SummarySales, SummarySalesPagination, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly, WeeklyGraph, WeeklySale
        } from './dashboard.types';
@@ -49,9 +51,10 @@ export class DashboardService
     private _weeklyGraphLastWeek: BehaviorSubject<WeeklyGraph[] | null> = new BehaviorSubject(null);
     private _weeklyGraphThisWeek: BehaviorSubject<WeeklyGraph[] | null> = new BehaviorSubject(null);
 
-    private _staffSale: BehaviorSubject<StaffSales | null> = new BehaviorSubject(null);
     private _staffSales: BehaviorSubject<StaffSales[] | null> = new BehaviorSubject(null);
     private _staffSalesPagination: BehaviorSubject<StaffSalesPagination | null> = new BehaviorSubject(null);
+    private _staffNames: BehaviorSubject<StaffName[] | null> = new BehaviorSubject(null);
+    private _staffSalesDetails: BehaviorSubject<StaffSalesDetail[] | null> = new BehaviorSubject(null);
 
     fromDate: string;
     todayDate: string;
@@ -158,6 +161,11 @@ export class DashboardService
         return this._staffSales.asObservable();
     }
 
+    get staffSalesDetails$(): Observable<StaffSalesDetail[]>
+    {
+        return this._staffSalesDetails.asObservable();
+    }
+
     /**
      * Getter for staffSales pagination
      */
@@ -175,6 +183,14 @@ export class DashboardService
     {
         // Store the value
         this._staffSales.next(value);
+    }
+
+    /**
+     * Getter for staff names
+     */
+    get staffNames$(): Observable<StaffName[]>
+    {
+        return this._staffNames.asObservable();
     }
 
     /**
@@ -686,7 +702,8 @@ export class DashboardService
             );
     }
 
-    getStaffSales(id: string,
+    getStaffTotalSales(
+        storeId: string,
         params: {
             page: number,
             pageSize: number,
@@ -730,7 +747,7 @@ export class DashboardService
         });
 
         return this._httpClient.get<{ pagination: StaffSalesPagination;  staffSales:  StaffSales[] }>
-            (reportService + '/store/' + id + '/report/staff/totalSales', header)
+            (reportService + '/store/' + storeId + '/report/staff/totalSales', header)
             .pipe(
                 tap((response) => {
                     this._logging.debug("Response from StoresService (getStaffSales)",response);
@@ -749,6 +766,95 @@ export class DashboardService
 
                     this._staffSalesPagination.next(_pagination);
                     this._staffSales.next(response["data"].content);
+                })
+            );
+    }
+
+    getStaffNames(storeId: string): Observable<StaffName[]>
+    {
+        let reportService = this._apiServer.settings.apiServer.reportService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`)
+        };
+
+        return this._httpClient.get<any>
+            (reportService + '/store/' + storeId + '/report/staff/name', header)
+            .pipe(
+                tap((response) => {
+                    this._logging.debug("Response from StoresService (getStaffNames)",response);
+
+                    this._staffNames.next(response["data"]);
+                })
+            );
+    }
+
+    getStaffTotalSalesByStaffId(
+        storeId: string,
+        params: {
+            page: number,
+            pageSize: number,
+            sortBy: string,
+            sortingOrder: 'ASC' | 'DESC' | '',
+            search?: string,
+            from?: string,
+            to?: string,
+            serviceType?: string
+        } =
+        {
+            page: 0,
+            pageSize: 10,
+            sortBy: 'created',
+            sortingOrder: 'ASC',
+            search: '',
+            from: this.fromDate,
+            to:  this.todayDate,
+            serviceType: ''
+        },
+        staffId: string = ''
+        ):
+    Observable<{ pagination: StaffSalesPagination; staffSales: StaffSalesDetail[] }>
+    {
+        let reportService = this._apiServer.settings.apiServer.reportService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: params
+        };
+
+        // Delete empty value
+        Object.keys(header.params).forEach(key => {
+            if (Array.isArray(header.params[key])) {
+                header.params[key] = header.params[key].filter(element => element !== null)
+            }
+
+            if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
+                delete header.params[key];
+            }
+        });
+
+        return this._httpClient.get<{ pagination: StaffSalesPagination;  staffSales:  StaffSalesDetail[] }>
+            (reportService + '/store/' + storeId + '/report/staff/totalSales/' + staffId, header)
+            .pipe(
+                tap((response) => {
+                    this._logging.debug("Response from StoresService (getStaffTotalSalesByStaffId)",response);
+
+                    // Pagination
+                    let _pagination = {
+                        length: response["data"].totalElements,
+                        size: response["data"].size,
+                        page: response["data"].number,
+                        lastPage: response["data"].totalPages,
+                        startIndex: response["data"].pageable.offset,
+                        endIndex: response["data"].pageable.offset + response["data"].numberOfElements - 1
+                    };
+
+                    this._staffSalesPagination.next(_pagination);
+                    this._staffSalesDetails.next(response["data"].content);
                 })
             );
     }

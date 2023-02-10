@@ -4,6 +4,7 @@ import { forkJoin, Observable } from 'rxjs';
 import { DashboardService } from 'app/modules/merchant/dashboard/dashboard.service';
 import { OrdersListService } from '../orders-management/orders-list/orders-list.service';
 import { formatDate } from '@angular/common';
+import { StoresService } from 'app/core/store/store.service';
 
 @Injectable({
     providedIn: 'root'
@@ -13,8 +14,20 @@ export class DashboardResolver implements Resolve<any>
     /**
      * Constructor
      */
-    constructor(private _dashboardService: DashboardService)
+    constructor(
+        private _dashboardService: DashboardService, 
+        private _storesService: StoresService
+    )
     {
+    }
+
+    /**
+     * Getter for storeId
+     */
+
+    get storeId$(): string
+    {
+        return localStorage.getItem('storeId') ?? '';
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -29,7 +42,10 @@ export class DashboardResolver implements Resolve<any>
      */
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
     {
-        return this._dashboardService.getData();
+        return forkJoin([
+            this._dashboardService.getData(),
+            this._storesService.getStoreById(this.storeId$)
+        ]);
     }
 }
 
@@ -445,18 +461,19 @@ export class WeeklyGraphResolver implements Resolve<any>
                         endDate: this.lastWeek.end,
                         serviceType: ''
                     }),
-                this._dashboardService.getStaffSales(
-                    this.storeId$,
-                    {
-                        pageSize: 10,
-                        sortBy: 'created',
-                        sortingOrder: 'ASC',
-                        search: '',
-                        page: 0,
-                        from: '',
-                        to: '',
-                    }
-                )
+                // this._dashboardService.getStaffTotalSales(
+                //     this.storeId$,
+                //     {
+                //         pageSize: 10,
+                //         sortBy: 'created',
+                //         sortingOrder: 'ASC',
+                //         search: '',
+                //         page: 0,
+                //         from: '',
+                //         to: '',
+                //     }
+                // ),
+                this._dashboardService.getStaffNames(this.storeId$)
             ])
     }
 }

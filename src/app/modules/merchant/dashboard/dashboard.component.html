@@ -938,13 +938,46 @@
                             </div>
 
                             <!-- Staff Sales Report -->
-                            <div class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 pb-0 bg-card shadow rounded-2xl overflow-hidden">
+                            <div *ngIf="store.isDineIn" class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 pb-0 bg-card shadow rounded-2xl overflow-hidden">
                                 <div class="flex flex-wrap justify-between item-center w-full gap-2 md:gap-0">
                                     <div class="items-center my-auto truncate flex flex-row gap-3">
-                                        <span class="text-lg font-medium tracking-tight leading-6">Staff Sales Report</span>
+                                        <span class="text-lg font-medium tracking-tight leading-6">Staff Daily Sales</span>
                                         <span class="font-light">|</span>
                                         <span class="font-normal tracking-normal">DineIn</span>
                                     </div>
+                                </div>
+                                <!-- Staff selection & date picker -->
+                                <div class="flex flex-row justify-between mt-2 items-center gap-2">
+                                    <!-- Filter by staff -->
+                                    <mat-form-field 
+                                        class="fuse-mat-dense fuse-mat-no-subscript w-full sm:w-72"
+                                        appearance="fill" floatLabel="always"
+                                        >
+                                        <mat-select
+                                            [formControl]="staffFormControl"
+                                            placeholder="Staff"
+                                            #staffNameSelector="matSelect"
+                                        >
+                                            <mat-select-trigger>
+                                                <span class="flex items-center mr-1">
+                                                    <span>{{ staffNameSelector.triggerValue }}</span>
+                                                </span>
+                                            </mat-select-trigger>
+                                            <mat-option *ngFor="let staff of staffNames" [value]="staff.id">{{staff.name}}</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                    <mat-form-field
+                                        class="fuse-mat-dense fuse-mat-no-subscript w-full sm:w-72"
+                                        appearance="fill"
+                                    >
+                                        <mat-date-range-input [rangePicker]="staffSalesDateRangePicker">
+                                            <input matStartDate [formControl]="staffSalesDateInputStart" placeholder="mm/dd/yyyy" [disabled]="!staffFormControl.value" >
+                                            <input matEndDate [formControl]="staffSalesDateInputEnd" placeholder="mm/dd/yyyy" [disabled]="!staffFormControl.value">
+                                        </mat-date-range-input>
+                                        <mat-datepicker-toggle matSuffix [for]="staffSalesDateRangePicker"></mat-datepicker-toggle>
+                                        <mat-date-range-picker #staffSalesDateRangePicker></mat-date-range-picker>
+    
+                                    </mat-form-field>
                                 </div>
                                 <div class="flex flex-col flex-auto mt-2 overflow-x-auto">
                                     <table
@@ -953,92 +986,77 @@
                                         mat-table
                                         [dataSource]="staffSalesDataSource">
 
-                                         <!-- Name -->
-                                         <ng-container matColumnDef="staff">
+                                         <!-- Date -->
+                                         <ng-container matColumnDef="date">
                                             <th
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                Staff Name
+                                                Date
                                             </th>
                                             <td
                                                 mat-cell
                                                 *matCellDef="let staffSales">
                                                 <span class="font-medium text-right">
-                                                    {{staffSales.staff.name}}
+                                                    {{staffSales.created | date:'MMM dd, yyyy'}}
                                                 </span>
                                             </td>
                                         </ng-container>
 
-                                        <!-- Today -->
-                                        <ng-container matColumnDef="today">
+                                        <!-- Total Amount -->
+                                        <ng-container matColumnDef="totalAmount">
                                             <th
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                Today
+                                                Total Amount
                                             </th>
                                             <td
                                                 mat-cell
                                                 *matCellDef="let staffSales">
-                                                {{staffSales.dailyCount.total | currency: currencySymbol}}
+                                                {{staffSales.totalSales | currency: currencySymbol}}
                                             </td>
                                         </ng-container>
 
-                                        <!-- This Week -->
-                                        <ng-container matColumnDef="thisWeek">
+                                        <!-- Cash -->
+                                        <ng-container matColumnDef="cash">
                                             <th
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                This Week
+                                                Cash
                                             </th>
                                             <td
                                                 mat-cell
                                                 *matCellDef="let staffSales">
-                                                {{staffSales.weeklyCount.total | currency: currencySymbol}}
+                                                {{staffSales.paymentType.cashAmount | currency: currencySymbol}}
                                             </td>
                                         </ng-container>
 
-                                        <!-- Last Week -->
-                                        <ng-container matColumnDef="lastWeek">
+                                        <!-- DuitNow -->
+                                        <ng-container matColumnDef="duitNow">
                                             <th
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                Last Week
+                                                DuitNow
                                             </th>
                                             <td
                                                 mat-cell
                                                 *matCellDef="let staffSales">
-                                                {{staffSales.previousWeeklyCount.total | currency: currencySymbol}}
+                                                {{staffSales.paymentType.duitNowAmount | currency: currencySymbol}}
                                             </td>
                                         </ng-container>
 
-                                        <!-- This Month -->
-                                        <ng-container matColumnDef="thisMonth">
+                                        <!-- Others -->
+                                        <ng-container matColumnDef="others">
                                             <th
                                                 mat-header-cell
                                                 *matHeaderCellDef>
-                                                {{thisMonthStaffSales}} ({{thisMonthStaffSalesYear}})
+                                                Others
                                             </th>
                                             <td
                                                 mat-cell
                                                 *matCellDef="let staffSales">
-                                                {{staffSales.monthlyCount.total | currency: currencySymbol}}
+                                                {{staffSales.paymentType.othersAmount | currency: currencySymbol}}
                                             </td>
                                         </ng-container>
-
-                                        <!-- Last Month -->
-                                        <ng-container matColumnDef="lastMonth">
-                                            <th
-                                                mat-header-cell
-                                                *matHeaderCellDef>
-                                                {{lastMonthStaffSales}} ({{lastMonthStaffSalesYear}})
-                                            </th>
-                                            <td
-                                                mat-cell
-                                                *matCellDef="let staffSales">
-                                                {{staffSales.previousMonthlyCount.total | currency: currencySymbol}}
-                                            </td>
-                                        </ng-container>
-
                                         <tr
                                             mat-header-row
                                             *matHeaderRowDef="staffSalesCol"></tr>
@@ -1050,6 +1068,7 @@
                                 <div class="flex items-center justify-between">
                                     <mat-paginator
                                         class=""
+                                        [disabled]="staffSalesDataSource.data.length < 1"
                                         [ngClass]="{'pointer-events-none': isLoading}"
                                         [length]="staffSalesPagination.length"
                                         [pageIndex]="staffSalesPagination.page"
