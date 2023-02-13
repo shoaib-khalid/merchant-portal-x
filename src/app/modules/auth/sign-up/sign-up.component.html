@@ -166,17 +166,18 @@
                     </div>
     
                     <!-- Single sign-on buttons -->
-                    <div *ngIf="true" class="flex items-center mt-8 space-x-4">
-                        <button
+                    <div *ngIf="true" class="flex items-center mt-8 space-x-3">
+                        <!-- <button
                             class="flex-auto"
                             type="button"
                             (click)="signInWithGoogle()"
                             mat-stroked-button>
-                            <!-- <mat-icon
-                                class="icon-size-5"
-                                [svgIcon]="'iconsmind:google_plus'"></mat-icon> -->
                             <img src="assets/images/svgIcon/google-svgrepo.svg" style="width: 20px;height: 20px;"/>
-                        </button>
+                        </button> -->
+                        <div class="flex flex-row justify-center items-center">
+                            <div id="googleButtonSignUp" class="w-auto outline-0" data-onsuccess="onSignIn" #gbutton></div>
+                        </div>
+                        <span class="text-secondary">or</span>
                         <button
                             class="flex-auto"
                             type="button"

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, NgZone, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
@@ -14,7 +14,10 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AuthModalComponent } from '../auth-modal/auth-modal.component';
 import { AppleLoginProvider } from '../sign-in/apple.provider';
-import { ValidateOauthRequest } from '../sign-in/oauth.types';
+import { SocialLooginClientId, ValidateOauthRequest } from '../sign-in/oauth.types';
+import jwt_decode from "jwt-decode";
+
+declare const google: any;
 
 @Component({
     selector     : 'auth-sign-up',
@@ -60,6 +63,7 @@ export class AuthSignUpComponent implements OnInit
         private _platformsService: PlatformService,
         private _storesService: StoresService,
         private _socialAuthService: SocialAuthService,
+        private _ngZone: NgZone  //the navigation will be triggered outside Angular zone
 
     )
     {
@@ -106,6 +110,24 @@ export class AuthSignUpComponent implements OnInit
 
         });
 
+    }
+
+    ngAfterViewInit() {
+
+        google.accounts.id.initialize({
+            client_id: SocialLooginClientId.GOOGLE_CLIENT_ID,
+            //Collect the token that Google returns to us when logging in
+            callback: (response: any) => this._ngZone.run(() => {
+              this.handleGoogleSignIn(response);
+            })
+        });
+
+        //Use customized button for Google Sign-in
+        google.accounts.id.renderButton(
+        //    this.gbutton.nativeElement,
+        document.getElementById('googleButtonSignUp'),
+           { size: "large", text: 'signup_with', theme:"outline", shape:"circle", type:"icon" }
+        );
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -247,4 +269,39 @@ export class AuthSignUpComponent implements OnInit
         });
        
    }
+
+    handleGoogleSignIn(response: any) {
+        // Decode Google Token
+        let userObject: ValidateOauthRequest = jwt_decode(response.credential);
+        if (userObject) {
+
+            let userData = {
+                email         : userObject.email,
+                loginType     : "GOOGLE",
+                name          : userObject.name,
+                token         : response.credential
+            }
+
+            this.validateOauthRequest = new ValidateOauthRequest();
+            this.validateOauthRequest.country = this.countryCode;
+            this.validateOauthRequest.email = userData.email;
+            this.validateOauthRequest.loginType = "GOOGLE";
+            this.validateOauthRequest.name = userData.name;
+            this.validateOauthRequest.token = userData.token;
+            
+            this._authService.loginOauth(this.validateOauthRequest,'sign-in-comp-google')
+                .subscribe(() => {
+                    // const redirectURL = this._activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/signed-in-redirect';
+
+                    // // Navigate to the redirect url
+                    // this._router.navigateByUrl(redirectURL);
+
+                    this._router.navigate(['/stores' ]);
+                },
+                exception => {
+                    console.error("An error has occured : ",exception);
+                });
+        }
+
+    }
 }
