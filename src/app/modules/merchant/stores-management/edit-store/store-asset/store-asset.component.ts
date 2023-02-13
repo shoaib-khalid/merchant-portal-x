@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, UntypedFormGroup } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
@@ -22,7 +22,7 @@ export class StoreAssetComponent implements OnInit
     galleryOptionsBannerDesktop: NgxGalleryOptions[] = [];
     galleryOptionsBannerMobile: NgxGalleryOptions[] = [];
 
-    storeAssetForm: FormGroup;
+    storeAssetForm: UntypedFormGroup;
     plans: any[];
     // Image part    
     files: {

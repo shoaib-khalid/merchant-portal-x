@@ -1,6 +1,6 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormArray, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatDrawer, MatDrawerToggleResult } from '@angular/material/sidenav';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
@@ -43,7 +43,7 @@ import { AddOnListComponent } from '../addon-list/addon-list.component';
 })
 export class AddOnDetailsComponent implements OnInit, OnDestroy
 {
-    addOnForm: FormGroup;
+    addOnForm: UntypedFormGroup;
     store$: Store;
     optionsData = [];
     storeVerticalCode: string = null;
@@ -55,7 +55,7 @@ export class AddOnDetailsComponent implements OnInit, OnDestroy
      */
     constructor(
         public _drawer: MatDrawer,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _storesService: StoresService,
         private _changeDetectorRef: ChangeDetectorRef,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
@@ -72,7 +72,7 @@ export class AddOnDetailsComponent implements OnInit, OnDestroy
      * Options getter
      */
     get options() {
-        return this.addOnForm.controls["options"] as FormArray;
+        return this.addOnForm.controls["options"] as UntypedFormArray;
     }
     
     ngOnInit(): void {
@@ -97,10 +97,10 @@ export class AddOnDetailsComponent implements OnInit, OnDestroy
                     if (template.addOnTemplateItem && template.addOnTemplateItem.length > 0) {
                         template.addOnTemplateItem.forEach(ld => {
                             const optForm = this._formBuilder.group({
-                                id          : new FormControl(ld.id),
-                                name        : new FormControl(ld.name, Validators.required),
-                                price       : new FormControl(ld.price, Validators.required),
-                                dineInPrice : new FormControl(ld.dineInPrice, Validators.required)
+                                id          : new UntypedFormControl(ld.id),
+                                name        : new UntypedFormControl(ld.name, Validators.required),
+                                price       : new UntypedFormControl(ld.price, Validators.required),
+                                dineInPrice : new UntypedFormControl(ld.dineInPrice, Validators.required)
                             });
                             this.options.push(optForm);
                         });
@@ -290,7 +290,7 @@ export class AddOnDetailsComponent implements OnInit, OnDestroy
      * @param event 
      */
     drop(event: CdkDragDrop<string[]>) {
-        const option = this.addOnForm.controls["options"] as FormArray;
+        const option = this.addOnForm.controls["options"] as UntypedFormArray;
         const currentGroup = option.at(event.previousIndex);
 
         option.removeAt(event.previousIndex);

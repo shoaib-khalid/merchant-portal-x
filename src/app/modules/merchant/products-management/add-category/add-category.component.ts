@@ -2,7 +2,7 @@ import { Component, OnInit,Inject } from '@angular/core';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { ChangeDetectorRef } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { map, Observable, Subject, switchMap } from 'rxjs';
 import { ApiResponseModel, ProductCategory } from 'app/core/product/inventory.types';
@@ -30,7 +30,7 @@ export class AddCategoryComponent implements OnInit {
   
     message: string = "";
     referenceId: any;
-    addCategoryForm: FormGroup;
+    addCategoryForm: UntypedFormGroup;
     
     // product assets
     thumbnailUrl: any = [];
@@ -50,7 +50,7 @@ export class AddCategoryComponent implements OnInit {
     private _jwt: JwtService,
     private _changeDetectorRef: ChangeDetectorRef,
     private _inventoryService: InventoryService,
-    private _formBuilder: FormBuilder,
+    private _formBuilder: UntypedFormBuilder,
     private _storesService: StoresService,
     @Inject(MAT_DIALOG_DATA) public data: MatDialog,
     private _fuseConfirmationService: FuseConfirmationService,

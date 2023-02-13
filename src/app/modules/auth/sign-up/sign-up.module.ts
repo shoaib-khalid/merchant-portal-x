@@ -14,9 +14,9 @@ import { authSignupRoutes } from 'app/modules/auth/sign-up/sign-up.routing';
 import { MatSelectModule } from '@angular/material/select';
 
 import { SharedBackgroundModule } from '../shared-background/shared-background.module';
-import { FacebookLoginProvider, GoogleLoginProvider, SocialAuthServiceConfig, SocialLoginModule } from 'angularx-social-login';
 import { SocialLooginClientId } from '../sign-in/oauth.types';
 import { AppleLoginProvider } from '../sign-in/apple.provider';
+import { FacebookLoginProvider, GoogleLoginProvider, SocialAuthServiceConfig, SocialLoginModule } from '@abacritt/angularx-social-login';
 
 @NgModule({
     declarations: [

@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormArray, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { merge, Observable, Subject } from 'rxjs';
@@ -51,8 +51,8 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
     // discount
     discounts$: Observable<Discount[]>;
     selectedDiscount: Discount | null = null;
-    selectedDiscountForm: FormGroup;
-    storeDiscountTierList: FormArray;
+    selectedDiscountForm: UntypedFormGroup;
+    storeDiscountTierList: UntypedFormArray;
     storeDiscountTierListValueEditMode:any = [];
 
     pagination: DiscountPagination;
@@ -66,7 +66,7 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
 
     flashMessage: 'success' | 'error' | null = null;
     isLoading: boolean = false;
-    searchInputControl: FormControl = new FormControl();
+    searchInputControl: UntypedFormControl = new UntypedFormControl();
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     discountName: string;
@@ -85,7 +85,7 @@ export class OrderDiscountListComponent implements OnInit, AfterViewInit, OnDest
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _fuseConfirmationService: FuseConfirmationService,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _discountService: DiscountsService,
         public _dialog: MatDialog,
         private _fuseMediaWatcherService: FuseMediaWatcherService,

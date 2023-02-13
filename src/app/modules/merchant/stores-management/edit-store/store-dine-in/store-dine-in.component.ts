@@ -1,19 +1,16 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation, ViewChild } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, FormGroupDirective, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { StoresService } from 'app/core/store/store.service';
-import { ChooseVerticalService } from '../../choose-vertical/choose-vertical.service';
-import { EditStoreValidationService } from 'app/modules/merchant/stores-management/edit-store/edit-store.validation.service';
-import { Store, StoreRegionCountries } from 'app/core/store/store.types';
-import { debounce } from 'lodash';
+import { Store } from 'app/core/store/store.types';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { switchMap, takeUntil, tap } from 'rxjs/operators';
-import { of, pipe, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { LocationService } from 'app/core/location-service/location.service';
 import { TagDetails, TagTable, ZoneTable } from 'app/core/location-service/location.types';
 import { ZoneDetailsModalComponent } from './modal-zone-details/modal-zone-details.component';
 import { MatDialog } from '@angular/material/dialog';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 
 interface DialogResponse
 {
@@ -47,7 +44,7 @@ export const enum ModalTypes {
 })
 export class StoreDineInComponent implements OnInit
 {
-    storeDineInForm: FormGroup;
+    storeDineInForm: UntypedFormGroup;
     
     store: Store;
     storeId: string;
@@ -90,8 +87,8 @@ export class StoreDineInComponent implements OnInit
         tagTables: TagTable[],
         edited?: boolean
     }[] = [];
-    selected = new FormControl(0);
-    tabForm: FormGroup;
+    selected = new UntypedFormControl(0);
+    tabForm: UntypedFormGroup;
 
     tagDetails: TagDetails = null;
     zonesToBeDeleted = [];
@@ -105,10 +102,9 @@ export class StoreDineInComponent implements OnInit
      */
     constructor(
         public _dialog: MatDialog,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _route: ActivatedRoute,
         private _storesService: StoresService,
-        private _chooseVerticalService: ChooseVerticalService,
         private _changeDetectorRef: ChangeDetectorRef,
         private _fuseConfirmationService: FuseConfirmationService,
         private _fuseMediaWatcherService: FuseMediaWatcherService,

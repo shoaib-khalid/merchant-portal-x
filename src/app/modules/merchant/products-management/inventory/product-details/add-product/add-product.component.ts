@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef, Inject } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
@@ -157,9 +157,9 @@ export class AddProductComponent2 implements OnInit, OnDestroy
 
     // product
     selectedProduct: Product | null = null;
-    addProductForm: FormGroup;
+    addProductForm: UntypedFormGroup;
     products$: Observable<Product[]>;
-    createdProductForm: FormGroup;
+    createdProductForm: UntypedFormGroup;
     productType: 'combo' | 'normal' | 'variant' | 'addon' = 'normal';
     newProductId: string = null; // product id after it is created
     creatingProduct: boolean; // use to disable next button until product is created
@@ -182,7 +182,7 @@ export class AddProductComponent2 implements OnInit, OnDestroy
     };
     _filteredProductsOptions: Product[] = []; // use in combo section -> 'Add product' --after filter
     productsCombos$: ProductPackageOption[] = [];
-    localCategoryFilterControl: FormControl = new FormControl();
+    localCategoryFilterControl: UntypedFormControl = new UntypedFormControl();
     productsForCombo$: Observable<Product[]>;
     productPaginationForCombo: ProductPagination;
     clearOptName: boolean = false;
@@ -292,7 +292,7 @@ export class AddProductComponent2 implements OnInit, OnDestroy
     parentCategoriesOptions: ProductCategory[];
     storeVerticalCode : string = '';
 
-    searchImageControl: FormControl = new FormControl();
+    searchImageControl: UntypedFormControl = new UntypedFormControl();
     autoCompleteList: {url: string, name: string}[] = [];
     setOrderEnabled: boolean = false;
     dropUpperLevelCalled: boolean = false;
@@ -304,7 +304,7 @@ export class AddProductComponent2 implements OnInit, OnDestroy
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _fuseConfirmationService: FuseConfirmationService,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _inventoryService: InventoryService,
         private _storesService: StoresService,
         public _dialog: MatDialog,

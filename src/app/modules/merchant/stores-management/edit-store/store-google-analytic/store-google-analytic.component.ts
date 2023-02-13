@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
-import { FormBuilder, FormGroup, NgForm } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { StoresService } from 'app/core/store/store.service';
@@ -17,13 +17,13 @@ export class StoreGoogleAnalyticComponent implements OnInit
 
     googleAnalyticId: string;
 
-    googleAnalyticForm: FormGroup;
+    googleAnalyticForm: UntypedFormGroup;
 
     /**
      * Constructor
      */
     constructor(
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _storesService: StoresService,
         private _route: ActivatedRoute,
         private _fuseConfirmationService: FuseConfirmationService,

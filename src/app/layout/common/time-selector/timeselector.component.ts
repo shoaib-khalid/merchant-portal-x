@@ -1,7 +1,7 @@
 import { FocusMonitor } from '@angular/cdk/a11y';
 import { BooleanInput, coerceBooleanProperty } from '@angular/cdk/coercion';
 import { Component, ElementRef, Inject, Input, OnDestroy, Optional, Self, ViewChild } from '@angular/core';
-import { AbstractControl, ControlValueAccessor, FormBuilder, FormControl, FormGroup, NgControl, Validators } from '@angular/forms';
+import { AbstractControl, ControlValueAccessor, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, NgControl, Validators } from '@angular/forms';
 import {MAT_FORM_FIELD, MatFormField, MatFormFieldControl} from '@angular/material/form-field';
 import {Subject} from 'rxjs';
 
@@ -11,8 +11,8 @@ import {Subject} from 'rxjs';
   templateUrl: './form-field-custom-control-example.component.html',
 })
 export class FormFieldCustomControlExample {
-  form: FormGroup = new FormGroup({
-    tel: new FormControl(new TimeSelector('', '', '')),
+  form: UntypedFormGroup = new UntypedFormGroup({
+    tel: new UntypedFormControl(new TimeSelector('', '', '')),
   });
 }
 
@@ -39,7 +39,7 @@ export class TimeSelectorInput implements ControlValueAccessor, MatFormFieldCont
     @ViewChild('timeMinute') timeMinuteInput: HTMLInputElement;
     @ViewChild('timeAmPm') timeAmPmInput: HTMLInputElement;
 
-    timeSelection: FormGroup;
+    timeSelection: UntypedFormGroup;
     stateChanges = new Subject<void>();
     focused = false;
     touched = false;
@@ -114,7 +114,7 @@ export class TimeSelectorInput implements ControlValueAccessor, MatFormFieldCont
     }
 
   constructor(
-        formBuilder: FormBuilder,
+        formBuilder: UntypedFormBuilder,
         private _focusMonitor: FocusMonitor,
         private _elementRef: ElementRef<HTMLElement>,
 

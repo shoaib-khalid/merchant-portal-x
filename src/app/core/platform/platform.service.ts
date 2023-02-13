@@ -6,7 +6,7 @@ import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { takeUntil } from 'rxjs/operators';
 import { LogService } from 'app/core/logging/log.service';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { PlatformLocation } from '@angular/common';
 import { Platform } from './platform.types';
 import { AuthService } from '../auth/auth.service';
@@ -19,7 +19,7 @@ export class PlatformService
     private _platform: BehaviorSubject<Platform | null> = new BehaviorSubject(null);
     private _platforms: BehaviorSubject<Platform[] | null> = new BehaviorSubject(null);
     private _unsubscribeAll: Subject<any> = new Subject<any>();
-    public platformControl: FormControl = new FormControl();
+    public platformControl: UntypedFormControl = new UntypedFormControl();
 
     private url = {
         full: null,

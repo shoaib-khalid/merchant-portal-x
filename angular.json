@@ -3,7 +3,9 @@
     "version": 1,
     "cli": {
       "analytics": false,
-        "defaultCollection": "@angular-eslint/schematics"
+        "schematicCollections": [
+          "@angular-eslint/schematics"
+        ]
     },
     "newProjectRoot": "projects",
     "projects": {
@@ -32,7 +34,12 @@
                             "highlight.js",
                             "crypto-js/enc-utf8",
                             "crypto-js/hmac-sha256",
-                            "crypto-js/enc-base64"
+                            "crypto-js/enc-base64",
+                            "moment",
+                            "lodash",
+                            "flat",
+                            "quill",
+                            "luxon", "xlsx", "file-saver"
                         ],
                         "assets": [
                             "src/favicon-16x16.png",
@@ -142,6 +149,5 @@
                 }
             }
         }
-    },
-    "defaultProject": "fuse"
+    }
 }

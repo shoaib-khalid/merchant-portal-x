@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators, FormArray, FormControlName} from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators, UntypedFormArray, FormControlName} from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -42,7 +42,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     // product
     products$: Observable<Product[]>;
     selectedProduct: Product | null = null;
-    selectedProductForm: FormGroup;
+    selectedProductForm: UntypedFormGroup;
     productsList: Product[] = [];
 
     pagination: ProductPagination;
@@ -51,7 +51,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     // product inventory
     // -----------------------
 
-    productInventories: FormArray;
+    productInventories: UntypedFormArray;
     productInventories$: ProductInventory[] = [];
     filteredProductInventories: ProductInventory[] = [];
     selectedProductInventories: ProductInventory;
@@ -66,17 +66,17 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     productCategoriesEditMode: boolean = false;
     productCategoriesValueEditMode:any = [];
 
-    categoryFilterControl: FormControl = new FormControl();
+    categoryFilterControl: UntypedFormControl = new UntypedFormControl();
     filterByCatId: string = "";
 
-    localCategoryFilterControl: FormControl = new FormControl();
+    localCategoryFilterControl: UntypedFormControl = new UntypedFormControl();
     localFilterByCatId: string = "";
 
     // ------------------
     // product assets
     // ------------------
 
-    productAssets: FormArray;
+    productAssets: UntypedFormArray;
     productAssets$: ProductAssets[] = [];
 
     // image
@@ -104,7 +104,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
 
     flashMessage: 'success' | 'error' | null = null;
     isLoading: boolean = false;
-    searchInputControl: FormControl = new FormControl();
+    searchInputControl: UntypedFormControl = new UntypedFormControl();
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     private _variantsPanelOverlayRef: OverlayRef;
@@ -129,11 +129,11 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     currentScreenSize: string[];
     client: Client;
     displayDuplicateProduct: boolean = false;
-    storeList: FormControl = new FormControl();
+    storeList: UntypedFormControl = new UntypedFormControl();
     stores: Store[] = [];
     selectedStore: Store = null;
     stores$: Observable<Store[]>;
-    storesForm: FormControl = new FormControl();
+    storesForm: UntypedFormControl = new UntypedFormControl();
     isDuplicating: boolean = false;
     cloneErrorMessage: string = null;
 
@@ -147,7 +147,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _fuseConfirmationService: FuseConfirmationService,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _inventoryService: InventoryService,
         private _storesService: StoresService,
         private _overlay: Overlay,
@@ -524,9 +524,9 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     closeDetails(): void
     {
         this.selectedProduct = null;
-        (this.selectedProductForm.get('productInventories') as FormArray).clear();
-        (this.selectedProductForm.get('productVariants') as FormArray).clear();
-        (this.selectedProductForm.get('productAssets') as FormArray).clear();
+        (this.selectedProductForm.get('productInventories') as UntypedFormArray).clear();
+        (this.selectedProductForm.get('productVariants') as UntypedFormArray).clear();
+        (this.selectedProductForm.get('productAssets') as UntypedFormArray).clear();
 
 
     }

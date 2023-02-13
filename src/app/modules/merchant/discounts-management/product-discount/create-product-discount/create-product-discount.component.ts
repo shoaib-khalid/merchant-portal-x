@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, Inject, OnInit, ViewChild } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormArray, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { InventoryService } from 'app/core/product/inventory.service';
@@ -90,8 +90,8 @@ export class CreateProductDiscountDialogComponent implements OnInit {
     changeEndTime:string;
 
     //=====================new
-    productDiscountStepperForm: FormGroup;
-    addProductDiscountLevel: FormArray;
+    productDiscountStepperForm: UntypedFormGroup;
+    addProductDiscountLevel: UntypedFormArray;
 
     //Search mode
     inputSearchCategory : string ='';
@@ -124,7 +124,7 @@ export class CreateProductDiscountDialogComponent implements OnInit {
 
     constructor(
         public dialogRef: MatDialogRef<CreateProductDiscountDialogComponent>,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _discountProductService : DiscountsProductService,
         private _inventoryService: InventoryService ,
         private _discountService: DiscountsService,
@@ -393,7 +393,7 @@ export class CreateProductDiscountDialogComponent implements OnInit {
 
     deleteSelectedProductDiscount(indexForm){
 
-        this.addProductDiscountLevel= this.productDiscountStepperForm.get('step2') as FormArray;
+        this.addProductDiscountLevel= this.productDiscountStepperForm.get('step2') as UntypedFormArray;
         let index = (this.addProductDiscountLevel.value.findIndex(function checkIndex(element, index, array) {
         return   index=== indexForm;
         }));
@@ -439,13 +439,13 @@ export class CreateProductDiscountDialogComponent implements OnInit {
             const itemCodes = Array.prototype.concat.apply([],itemCodesArr);//[a,c,g,d,e,f];
 
             //Filter objects that exists in both arrays
-            this.addProductDiscountLevel = this.productDiscountStepperForm.get('step2') as FormArray;
+            this.addProductDiscountLevel = this.productDiscountStepperForm.get('step2') as UntypedFormArray;
 
             let checkItemCodeExist = itemCodes.filter(el=> this.addProductDiscountLevel.value.some(x => x.itemCode === el.itemCode));
 
             if(checkItemCodeExist.length === 0){
             itemCodes.forEach((item) => {
-                this.addProductDiscountLevel = this.productDiscountStepperForm.get('step2') as FormArray;
+                this.addProductDiscountLevel = this.productDiscountStepperForm.get('step2') as UntypedFormArray;
                 this.addProductDiscountLevel.push(this._formBuilder.group(item));
             });
             }else{

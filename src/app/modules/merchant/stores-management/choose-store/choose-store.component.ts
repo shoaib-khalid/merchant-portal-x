@@ -10,7 +10,7 @@ import { StoreCategory, Store, StorePagination } from 'app/core/store/store.type
 import { InventoryService } from 'app/core/product/inventory.service';
 import { StoresService } from 'app/core/store/store.service';
 import { MatSort } from '@angular/material/sort';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { items } from 'app/mock-api/apps/file-manager/data';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { Platform } from 'app/core/platform/platform.types';
@@ -38,12 +38,12 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
     pagination: StorePagination;
     isLoading: boolean = false;
 
-    filterControl: FormControl = new FormControl();
+    filterControl: UntypedFormControl = new UntypedFormControl();
     sortName: string = "name";
     sortOrder: 'asc' | 'desc' | '' = 'asc';
     searchName: string = "";
 
-    categoryFilterControl: FormControl = new FormControl();
+    categoryFilterControl: UntypedFormControl = new UntypedFormControl();
     filteredCategory: string = "";
     storeLogo: string ;
 

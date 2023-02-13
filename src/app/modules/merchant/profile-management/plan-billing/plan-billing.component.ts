@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { UserService } from 'app/core/user/user.service';
 
@@ -11,7 +11,7 @@ import { UserService } from 'app/core/user/user.service';
 })
 export class EditPlanBillingComponent implements OnInit
 {
-    planBillingForm: FormGroup;
+    planBillingForm: UntypedFormGroup;
     plans: any[];
 
     alert: any;
@@ -21,7 +21,7 @@ export class EditPlanBillingComponent implements OnInit
      * Constructor
      */
     constructor(
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _userService: UserService,
         private _fuseConfirmationService: FuseConfirmationService,
 

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { UntypedFormArray, UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { StoresService } from 'app/core/store/store.service';
@@ -16,18 +16,18 @@ export class StoreTimingComponent implements OnInit
     storeId: string;
     timeAlert: any = [];
 
-    storeTimingForm: FormGroup;
+    storeTimingForm: UntypedFormGroup;
     disabledProcced: boolean = false;
     isAlwaysOpen: boolean = true;
 
     _storeTiming: any;
-    storeTiming: FormArray;
+    storeTiming: UntypedFormArray;
 
     /**
      * Constructor
      */
     constructor(
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _storesService: StoresService,
         private _route: ActivatedRoute,
         private _changeDetectorRef: ChangeDetectorRef,
@@ -180,7 +180,7 @@ export class StoreTimingComponent implements OnInit
 
                     _item["breakEndTime"] = new TimeSelector(_itemBreakCloseTimeHour,_itemBreakeCloseTimeMinute, _itemBreakCloseTimeAMPM);                    
 
-                    this.storeTiming = this.storeTimingForm.get('storeTiming') as FormArray;
+                    this.storeTiming = this.storeTimingForm.get('storeTiming') as UntypedFormArray;
                     this.storeTiming.push(this._formBuilder.group(_item));
                 });
 
@@ -335,7 +335,7 @@ export class StoreTimingComponent implements OnInit
 
         this.storeTiming.clear();
         this._storeTiming.forEach(item => {
-            this.storeTiming = this.storeTimingForm.get('storeTiming') as FormArray;
+            this.storeTiming = this.storeTimingForm.get('storeTiming') as UntypedFormArray;
             this.storeTiming.push(this._formBuilder.group(item));
         }); 
     }

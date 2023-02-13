@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, NgForm, ValidationErrors, Validators } from '@angular/forms';
+import { UntypedFormArray, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, NgForm, ValidationErrors, Validators } from '@angular/forms';
 import { fuseAnimations } from '@fuse/animations';
 import { RegisterStoreValidationService } from 'app/modules/merchant/stores-management/register-store/register-store.validation.service';
 import { BehaviorSubject, forkJoin, Observable, ReplaySubject, Subject, take } from 'rxjs';
@@ -64,8 +64,8 @@ export class RegisterStoreComponent implements OnInit
 
     domainName:string;
 
-    createStoreForm: FormGroup;
-    otherStoreForm: FormGroup;
+    createStoreForm: UntypedFormGroup;
+    otherStoreForm: UntypedFormGroup;
 
     statesList: any;
     statesByCountry: string;
@@ -81,7 +81,7 @@ export class RegisterStoreComponent implements OnInit
     storeStateCities: string[] = [];
 
     /** control for the selected bank for multi-selection */
-    public regionCountryStateCities: FormControl = new FormControl();
+    public regionCountryStateCities: UntypedFormControl = new UntypedFormControl();
     private _onDestroy = new Subject<void>();
     public filteredCities: ReplaySubject<any[]> = new ReplaySubject<any[]>(1);
     @ViewChild('stateCitySelector') stateCitySelector: MatSelect;
@@ -92,15 +92,15 @@ export class RegisterStoreComponent implements OnInit
 
     // Allowed Self Delivery States
     _allowedSelfDeliveryStates: any;
-    allowedSelfDeliveryStates: FormArray;
+    allowedSelfDeliveryStates: UntypedFormArray;
 
     // Delivery Periods Fulfilment
     _deliveryPeriods: StoreDeliveryPeriod[] = [];
-    deliveryPeriods: FormArray;
+    deliveryPeriods: UntypedFormArray;
 
     // Store Timing
     _storeTiming: any;
-    storeTiming: FormArray;
+    storeTiming: UntypedFormArray;
 
     // Image part  
     progressInfos: any[] = [];
@@ -147,7 +147,7 @@ export class RegisterStoreComponent implements OnInit
     galleryOptionsBannerDesktop: NgxGalleryOptions[] = [];
     galleryOptionsBannerMobile: NgxGalleryOptions[] = [];
 
-    verticalStepperForm: FormGroup;
+    verticalStepperForm: UntypedFormGroup;
 
     // display error
     alert: { type: FuseAlertType; message: string } = {
@@ -181,7 +181,7 @@ export class RegisterStoreComponent implements OnInit
      * Constructor
      */
     constructor(
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _storesService: StoresService,
         private _jwt: JwtService,
         private _changeDetectorRef: ChangeDetectorRef,
@@ -403,7 +403,7 @@ export class RegisterStoreComponent implements OnInit
                             this.deliveryPartnerTypes = [ ...new Set(this.deliveryPartners.map(item => item.fulfilment))];
 
                             // Set deliveryPeriods
-                            this.deliveryPeriods = this.createStoreForm.get('step3').get('deliveryPeriods').get('values') as FormArray;
+                            this.deliveryPeriods = this.createStoreForm.get('step3').get('deliveryPeriods').get('values') as UntypedFormArray;
 
                             // check changes
                             this.checkDeliveryPartner();
@@ -613,7 +613,7 @@ export class RegisterStoreComponent implements OnInit
 
             _item["breakEndTime"] = new TimeSelector(_itemBreakCloseTimeHour,_itemBreakeCloseTimeMinute, _itemBreakCloseTimeAMPM);                    
 
-            this.storeTiming = this.createStoreForm.get('step4').get('storeTiming') as FormArray;
+            this.storeTiming = this.createStoreForm.get('step4').get('storeTiming') as UntypedFormArray;
             this.storeTiming.push(this._formBuilder.group(item));
         });    
         
@@ -626,7 +626,7 @@ export class RegisterStoreComponent implements OnInit
         ];
         
         this._allowedSelfDeliveryStates.forEach(item => {
-            this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
+            this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as UntypedFormArray;
             this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
         });
         
@@ -1708,7 +1708,7 @@ export class RegisterStoreComponent implements OnInit
         this._allowedSelfDeliveryStates.push(selfDeliveryStateItem);
 
         // push to allowedSelfDeliveryStates (form)
-        this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
+        this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as UntypedFormArray;
         this.allowedSelfDeliveryStates.push(this._formBuilder.group(selfDeliveryStateItem));
     }
 
@@ -1716,7 +1716,7 @@ export class RegisterStoreComponent implements OnInit
         this._allowedSelfDeliveryStates.splice(index,1);
 
         // push to allowedSelfDeliveryStates (form)
-        this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
+        this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as UntypedFormArray;
         // since backend give full discount tier list .. (not the only one that have been created only)
         this.allowedSelfDeliveryStates.clear();
 
@@ -1738,7 +1738,7 @@ export class RegisterStoreComponent implements OnInit
         }
 
         // push to allowedSelfDeliveryStates (form)
-        this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
+        this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as UntypedFormArray;
         // since backend give full discount tier list .. (not the only one that have been created only)
         this.allowedSelfDeliveryStates.clear();
 
@@ -1768,7 +1768,7 @@ export class RegisterStoreComponent implements OnInit
         if (this.createStoreForm.get('step3').get('deliveryType').value === "ADHOC" || this.createStoreForm.get('step3').get('deliveryType').value === "SCHEDULED") {
 
             // push to allowedSelfDeliveryStates (form)
-            this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
+            this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as UntypedFormArray;
             // since backend give full discount tier list .. (not the only one that have been created only)
             this.allowedSelfDeliveryStates.clear();
             
@@ -1786,7 +1786,7 @@ export class RegisterStoreComponent implements OnInit
 
             // SELF
             // push to allowedSelfDeliveryStates (form)
-            this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
+            this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as UntypedFormArray;
             // since backend give full discount tier list .. (not the only one that have been created only)
             this.allowedSelfDeliveryStates.clear();
 
@@ -1795,11 +1795,11 @@ export class RegisterStoreComponent implements OnInit
             ];
             
             this._allowedSelfDeliveryStates.forEach(item => {
-                this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as FormArray;
+                this.allowedSelfDeliveryStates = this.createStoreForm.get('step3').get('allowedSelfDeliveryStates') as UntypedFormArray;
                 this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
             });
 
-            let deliveryPeriods = this.createStoreForm.get('step3').get('deliveryPeriods').get('values') as FormArray;
+            let deliveryPeriods = this.createStoreForm.get('step3').get('deliveryPeriods').get('values') as UntypedFormArray;
             
             deliveryPeriods['controls'].forEach(item => {
                 item['controls'].enabled.patchValue(false);                
@@ -2011,7 +2011,7 @@ export class RegisterStoreComponent implements OnInit
 
         this.storeTiming.clear();
         this._storeTiming.forEach(item => {
-            this.storeTiming = this.createStoreForm.get('step4').get('storeTiming') as FormArray;
+            this.storeTiming = this.createStoreForm.get('step4').get('storeTiming') as UntypedFormArray;
             this.storeTiming.push(this._formBuilder.group(item));
         }); 
     }

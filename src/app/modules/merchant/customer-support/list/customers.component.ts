@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -43,13 +43,13 @@ export class CustomersComponent implements OnInit, AfterViewInit, OnDestroy
     // customer
     customers$: Observable<Customer[]>;
     selectedCustomer: Customer | null = null;
-    selectedCustomerForm: FormGroup;
+    selectedCustomerForm: UntypedFormGroup;
     
     pagination: CustomerPagination;
 
     flashMessage: 'success' | 'error' | null = null;
     isLoading: boolean = false;
-    searchInputControl: FormControl = new FormControl();
+    searchInputControl: UntypedFormControl = new UntypedFormControl();
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
@@ -59,7 +59,7 @@ export class CustomersComponent implements OnInit, AfterViewInit, OnDestroy
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _fuseConfirmationService: FuseConfirmationService,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _customerService: CustomersService,
         private _storesService: StoresService
     )

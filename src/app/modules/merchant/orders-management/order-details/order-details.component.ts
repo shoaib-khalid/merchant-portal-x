@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormArray, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { StoresService } from 'app/core/store/store.service';
@@ -28,7 +28,7 @@ import { FuseConfirmationDialogComponent } from '@fuse/services/confirmation/dia
 export class OrderDetailsComponent implements OnInit
 {
     store$: Store;
-    detailsForm: FormGroup;
+    detailsForm: UntypedFormGroup;
     order: Order;
     orderId: string;
     timezone: string;
@@ -45,7 +45,7 @@ export class OrderDetailsComponent implements OnInit
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _activatedRoute: ActivatedRoute,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _storesService: StoresService,
         private _ordersService: OrdersListService,
         private _fuseConfirmationService: FuseConfirmationService,
@@ -254,7 +254,7 @@ export class OrderDetailsComponent implements OnInit
                     .subscribe((orderItems: OrderItem[]) => {
                         
                         // Clear items form array
-                        (this.detailsForm.get('items') as FormArray).clear();
+                        (this.detailsForm.get('items') as UntypedFormArray).clear();
                         
                         // Setup item form array
                         const itemsFormGroups = [];
@@ -276,7 +276,7 @@ export class OrderDetailsComponent implements OnInit
                         
                         // Add the item form group to the items form array     
                         itemsFormGroups.forEach((itemFormGroup) => {
-                            (this.detailsForm.get('items') as FormArray).push(itemFormGroup)  
+                            (this.detailsForm.get('items') as UntypedFormArray).push(itemFormGroup)  
                         });
                     });
         

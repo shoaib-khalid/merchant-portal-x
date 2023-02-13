@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { UserService } from 'app/core/user/user.service';
 import { Client } from '../edit-profile/edit-profile.types';
@@ -13,7 +13,7 @@ import { Client } from '../edit-profile/edit-profile.types';
 export class EditAccountComponent implements OnInit
 {
     alert: any;
-    accountForm: FormGroup;
+    accountForm: UntypedFormGroup;
     clientId: string;
     client: Client;
 
@@ -21,7 +21,7 @@ export class EditAccountComponent implements OnInit
      * Constructor
      */
     constructor(
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _userService: UserService,
         private _fuseConfirmationService: FuseConfirmationService,
         private _changeDetectorRef: ChangeDetectorRef

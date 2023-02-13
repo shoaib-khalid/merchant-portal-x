@@ -6,7 +6,7 @@ import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { ChannelsListService } from 'app/modules/merchant/social-media/channels-list/channels-list.service';
 import { ChannelsListPagination } from 'app/modules/merchant/social-media/channels-list/channels-list.types'
 import { MatPaginator } from '@angular/material/paginator';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
 import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
@@ -35,13 +35,13 @@ export class ChannelsListComponent implements OnInit, AfterViewInit, OnDestroy
 
     pagination: ChannelsListPagination;
     isLoading: boolean = false;
-    filterControl: FormControl = new FormControl();
-    tabControl: FormControl = new FormControl();
+    filterControl: UntypedFormControl = new UntypedFormControl();
+    tabControl: UntypedFormControl = new UntypedFormControl();
     filterList: string = "name";
 
     channels$: Observable<ChannelsList[]>;
     selectedChannel: ChannelsList | null = null;
-    selectedChannelForm: FormGroup;
+    selectedChannelForm: UntypedFormGroup;
 
 
     range: any;
@@ -72,9 +72,9 @@ export class ChannelsListComponent implements OnInit, AfterViewInit, OnDestroy
      */
     ngOnInit(): void
     {
-        this.range = new FormGroup({
-            start: new FormControl(),
-            end: new FormControl(),
+        this.range = new UntypedFormGroup({
+            start: new UntypedFormControl(),
+            end: new UntypedFormControl(),
         });
 
         // Set initial active tab value

@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormArray, UntypedFormBuilder, FormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { TimeSelector } from 'app/layout/common/time-selector/timeselector.component';
 import { Subject } from 'rxjs';
@@ -51,13 +51,13 @@ export class EditOrderDiscountDialogComponent implements OnInit {
     originalStartDate: any;
     originalEndDate: any;
     
-    editOrderDiscountForm: FormGroup;
+    editOrderDiscountForm: UntypedFormGroup;
     discountId: string;
     selectedDiscount: Discount | null = null;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     loadDetails:boolean=false;
-    storeDiscountTierList: FormArray;
+    storeDiscountTierList: UntypedFormArray;
 
     storeDiscountTierListValueEditMode:any = [];
 
@@ -85,7 +85,7 @@ export class EditOrderDiscountDialogComponent implements OnInit {
     constructor(
         public dialogRef: MatDialogRef<EditOrderDiscountDialogComponent>,
         private _changeDetectorRef: ChangeDetectorRef,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _discountService: DiscountsService,
         private _fuseConfirmationService: FuseConfirmationService,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
@@ -160,11 +160,11 @@ export class EditOrderDiscountDialogComponent implements OnInit {
                 this.loadDetails =true;
 
                 // clear discount tier form array
-                (this.editOrderDiscountForm.get('step2') as FormArray).clear();
+                (this.editOrderDiscountForm.get('step2') as UntypedFormArray).clear();
                 
                 // load discount tier form array with data frombackend
                 response.data.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
-                    this.storeDiscountTierList = this.editOrderDiscountForm.get('step2') as FormArray;
+                    this.storeDiscountTierList = this.editOrderDiscountForm.get('step2') as UntypedFormArray;
                     this.storeDiscountTierList.push(this._formBuilder.group(item));
                 });
                 
@@ -376,7 +376,7 @@ export class EditOrderDiscountDialogComponent implements OnInit {
         this._discountService.createDiscountTier(this.selectedDiscount.id,discountTier)
             .subscribe((response) => {
                 
-                this.storeDiscountTierList = this.editOrderDiscountForm.get('step2') as FormArray;
+                this.storeDiscountTierList = this.editOrderDiscountForm.get('step2') as UntypedFormArray;
 
                 // since backend give full discount tier list .. (not the only one that have been created only)
                 this.storeDiscountTierList.clear();
@@ -437,7 +437,7 @@ export class EditOrderDiscountDialogComponent implements OnInit {
                 // Delete the discount on the server
                 this._discountService.deleteDiscountTier(this.selectedDiscount.id, discountTierId).subscribe(() => {
                     
-                    this.storeDiscountTierList = this.editOrderDiscountForm.get('step2') as FormArray;
+                    this.storeDiscountTierList = this.editOrderDiscountForm.get('step2') as UntypedFormArray;
 
                     let index = (this.storeDiscountTierList.value.findIndex(x => x.id === discountTierId));
 

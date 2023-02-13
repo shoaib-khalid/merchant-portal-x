@@ -2,7 +2,7 @@ import { Component, OnInit,Inject } from '@angular/core';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { ChangeDetectorRef } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, ValidationErrors } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, Validators, ValidationErrors } from '@angular/forms';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
@@ -18,7 +18,7 @@ export class storeStatusComponent implements OnInit {
     storeId: string;
     message: string = "";
 
-    storeSnoozeForm: FormGroup;
+    storeSnoozeForm: UntypedFormGroup;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
 
@@ -33,7 +33,7 @@ export class storeStatusComponent implements OnInit {
     private _changeDetectorRef: ChangeDetectorRef,
     private _inventoryService: InventoryService,
     private _storesService: StoresService,
-    private _formBuilder: FormBuilder,
+    private _formBuilder: UntypedFormBuilder,
     @Inject(MAT_DIALOG_DATA) public data: MatDialog
   ) { }
 

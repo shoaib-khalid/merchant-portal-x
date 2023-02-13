@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef, Inject } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormArray, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { forkJoin, lastValueFrom, merge, Observable, of, Subject } from 'rxjs';
@@ -67,7 +67,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
     // products$: Observable<Product[]>;
     categories$: Observable<ProductCategory[]>;
     selectedCategory: ProductCategory | null = null;
-    categoriesForm: FormGroup;
+    categoriesForm: UntypedFormGroup;
     categoriesList: ProductCategory[];
     pagination: ProductCategoryPagination;
 
@@ -83,7 +83,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
 
     flashMessage: 'success' | 'error' | null = null;
     isLoading: boolean = false;
-    searchInputControl: FormControl = new FormControl();
+    searchInputControl: UntypedFormControl = new UntypedFormControl();
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     totalCategories: number;
@@ -101,7 +101,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
         @Inject(DOCUMENT) private _document: Document,
         private _changeDetectorRef: ChangeDetectorRef,
         private _fuseConfirmationService: FuseConfirmationService,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _inventoryService: InventoryService,
         private _storesService: StoresService,
         public _dialog: MatDialog,

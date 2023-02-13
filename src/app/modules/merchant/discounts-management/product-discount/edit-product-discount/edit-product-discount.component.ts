@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnDestroy, Inject, OnInit, ViewChild } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormArray, UntypedFormBuilder, FormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { TimeSelector } from 'app/layout/common/time-selector/timeselector.component';
 import { fromEvent, merge, Observable, Subject } from 'rxjs';
@@ -62,12 +62,12 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
     disabledProceed: boolean = false;
     dateAlert: any;
 
-    editProductDiscountForm: FormGroup;
+    editProductDiscountForm: UntypedFormGroup;
     discountId:string;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     loadDetails:boolean=false;
-    storeDiscountTierList: FormArray;
+    storeDiscountTierList: UntypedFormArray;
 
     flashMessage: 'success' | 'error' | null = null;
 
@@ -106,7 +106,7 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
     constructor(
         public dialogRef: MatDialogRef<EditProductDiscountDialogComponent>,
         private _changeDetectorRef: ChangeDetectorRef,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _discountService: DiscountsService,
         private _inventoryService: InventoryService ,
         private _discountProductService : DiscountsProductService,
@@ -186,11 +186,11 @@ export class EditProductDiscountDialogComponent implements OnInit, OnDestroy {
                     
                     //Take note that in product discount it will be empty array only cause backedn structure like that 
                     // clear discount tier form array
-                    (this.editProductDiscountForm.get('step1.storeDiscountTierList') as FormArray).clear();
+                    (this.editProductDiscountForm.get('step1.storeDiscountTierList') as UntypedFormArray).clear();
                     
                     // load discount tier form array with data frombackend
                     response.data.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
-                        this.storeDiscountTierList = this.editProductDiscountForm.get('step1.storeDiscountTierList') as FormArray;
+                        this.storeDiscountTierList = this.editProductDiscountForm.get('step1.storeDiscountTierList') as UntypedFormArray;
                         this.storeDiscountTierList.push(this._formBuilder.group(item));
                     });
         

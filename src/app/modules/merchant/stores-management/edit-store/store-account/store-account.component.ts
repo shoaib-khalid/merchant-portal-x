@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { StoresService } from 'app/core/store/store.service';
 import { ChooseVerticalService } from '../../choose-vertical/choose-vertical.service';
@@ -19,7 +19,7 @@ import { Subject } from 'rxjs';
 })
 export class StoreAccountComponent implements OnInit
 {
-    storeAccountForm: FormGroup;
+    storeAccountForm: UntypedFormGroup;
     
     store: Store;
     storeId: string;
@@ -62,7 +62,7 @@ export class StoreAccountComponent implements OnInit
      * Constructor
      */
     constructor(
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _route: ActivatedRoute,
         private _storesService: StoresService,
         private _chooseVerticalService: ChooseVerticalService,

@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef, Output, EventEmitter } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormArray, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MatSort } from '@angular/material/sort';
@@ -52,8 +52,8 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
     // discount
     discounts$: Observable<Discount[]>;
     selectedDiscount: Discount | null = null;
-    selectedDiscountForm: FormGroup;
-    storeDiscountTierList: FormArray;
+    selectedDiscountForm: UntypedFormGroup;
+    storeDiscountTierList: UntypedFormArray;
     storeDiscountTierListValueEditMode:any = [];
 
     // store discount product
@@ -94,7 +94,7 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
 
     flashMessage: 'success' | 'error' | null = null;
     isLoading: boolean = false;
-    searchInputControl: FormControl = new FormControl();
+    searchInputControl: UntypedFormControl = new UntypedFormControl();
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     discountName: string;
@@ -112,7 +112,7 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _fuseConfirmationService: FuseConfirmationService,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _discountService: DiscountsService,
         private _inventoryService: InventoryService ,
         private _discountProductService:DiscountsProductService ,
@@ -710,18 +710,18 @@ export class ProductDiscountListComponent implements OnInit, AfterViewInit, OnDe
                 this.setValueToTimeSelector(discount);
 
                 // clear discount tier form array
-                (this.selectedDiscountForm.get('storeDiscountTierList') as FormArray).clear();
+                (this.selectedDiscountForm.get('storeDiscountTierList') as UntypedFormArray).clear();
 
                 //to handle logic if storeDiscount tier list exist or not
                 this.storeDiscountTierId = this.selectedDiscount.storeDiscountTierList[0]?.id?this.selectedDiscount.storeDiscountTierList[0].id:null;
                 // load discount tier form array with data frombackend
                 if(this.storeDiscountTierId !== null){
                     discount.storeDiscountTierList.forEach((item: StoreDiscountTierList) => {
-                        this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
+                        this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as UntypedFormArray;
                         this.storeDiscountTierList.push(this._formBuilder.group(item));
                     });
                 } else {
-                    this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as FormArray;
+                    this.storeDiscountTierList = this.selectedDiscountForm.get('storeDiscountTierList') as UntypedFormArray;
                     this.storeDiscountTierList.push(this._formBuilder.group(
                         {
                         discountAmount: null,

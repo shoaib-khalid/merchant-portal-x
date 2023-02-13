@@ -1,7 +1,7 @@
-import { BaseLoginProvider, SocialUser } from 'angularx-social-login';
 import { AppleConfiguration, SocialLooginClientId } from './oauth.types';
 import { AppConfig } from 'app/config/service.config';
 import { Injectable } from '@angular/core';
+import { BaseLoginProvider, SocialUser } from '@abacritt/angularx-social-login';
 
 declare let AppleID: any;
 Injectable()

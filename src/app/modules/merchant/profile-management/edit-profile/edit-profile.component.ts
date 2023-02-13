@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
+import { FormArray, UntypedFormBuilder, UntypedFormGroup, NgForm, Validators } from '@angular/forms';
 import { fuseAnimations } from '@fuse/animations';
 import { UserService } from 'app/core/user/user.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
@@ -25,7 +25,7 @@ export class EditProfileComponent implements OnInit
     clientPaymentId: string;
 
     alert: any;
-    editProfileForm: FormGroup;
+    editProfileForm: UntypedFormGroup;
 
     // Image part    
     files: any;
@@ -34,7 +34,7 @@ export class EditProfileComponent implements OnInit
      * Constructor
      */
     constructor(
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _userService: UserService,
         private _fuseConfirmationService: FuseConfirmationService,
         private _changeDetectorRef: ChangeDetectorRef,

@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { merge, Observable, Subject } from 'rxjs';
@@ -38,11 +38,11 @@ export class ManageAgentComponent implements OnInit, AfterViewInit, OnDestroy
      // agent
      agents$: Observable<Agent[]>;
      selectedAgent: Agent | null = null;
-     selectedAgentForm: FormGroup;
+     selectedAgentForm: UntypedFormGroup;
 
      openTab: string = "HISTORY";
      displayStatuses: any = [];
-     filterControl: FormControl = new FormControl();
+     filterControl: UntypedFormControl = new UntypedFormControl();
 
      range: any;
 
@@ -52,8 +52,8 @@ export class ManageAgentComponent implements OnInit, AfterViewInit, OnDestroy
      pagination: AgentPagination;
      flashMessage: 'success' | 'error' | null = null;
      isLoading: boolean = false;
-     searchInputControl: FormControl = new FormControl();
-     tabControl: FormControl = new FormControl();
+     searchInputControl: UntypedFormControl = new UntypedFormControl();
+     tabControl: UntypedFormControl = new UntypedFormControl();
  
      private _unsubscribeAll: Subject<any> = new Subject<any>();
     formFieldValue: any;
@@ -61,7 +61,7 @@ export class ManageAgentComponent implements OnInit, AfterViewInit, OnDestroy
   constructor(
     private _changeDetectorRef: ChangeDetectorRef,
     private _manageAgentService: ManageAgentService,
-    private _formBuilder: FormBuilder,
+    private _formBuilder: UntypedFormBuilder,
     public _dialog: MatDialog,
     private _router: Router,
     private _fuseConfirmationService: FuseConfirmationService,

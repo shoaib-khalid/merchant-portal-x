@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { PlatformService } from 'app/core/platform/platform.service';
 import { Platform } from 'app/core/platform/platform.types';
 import { DOCUMENT } from '@angular/common';
-import { FormBuilder, Validators } from '@angular/forms';
+import { UntypedFormBuilder, Validators } from '@angular/forms';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { CartService } from 'app/core/cart/cart.service';
 import { AuthService } from 'app/core/auth/auth.service';
@@ -45,7 +45,7 @@ export class ZoneDetailsModalComponent implements OnInit, OnDestroy
         @Inject(DOCUMENT) private _document: Document,
         @Inject(MAT_DIALOG_DATA) public data: any,
         public dialogRef: MatDialogRef<ZoneDetailsModalComponent>,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _changeDetectorRef: ChangeDetectorRef,
         private _fuseConfirmationService: FuseConfirmationService,
         private _storesService: StoresService

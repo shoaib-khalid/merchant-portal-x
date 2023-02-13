@@ -1,7 +1,7 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, ViewChild, ViewEncapsulation } from '@angular/core';
-import { FormBuilder, FormControl } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MatDialog } from '@angular/material/dialog';
 import { MatInput } from '@angular/material/input';
@@ -86,7 +86,7 @@ export class AddOnProductComponent
 
     addOnGroupTemplates$: Observable<AddOnGroupTemplate[]>;
     templatesList: AddOnGroupTemplate[] = [];
-    templateFormControl: FormControl = new FormControl();
+    templateFormControl: UntypedFormControl = new UntypedFormControl();
 
     addOnGroupOnProductList: AddOnGroupProduct[] = [];
     addOnsOnProductList: AddOnProduct[] = [];
@@ -123,7 +123,7 @@ export class AddOnProductComponent
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _fuseConfirmationService: FuseConfirmationService,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _inventoryService: InventoryService,
         private _storesService: StoresService,
         public _dialog: MatDialog,

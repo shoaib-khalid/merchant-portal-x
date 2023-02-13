@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { UntypedFormArray, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { StoresService } from 'app/core/store/store.service';
 import { EditStoreValidationService } from 'app/modules/merchant/stores-management/edit-store/edit-store.validation.service';
@@ -56,28 +56,28 @@ import { environment } from 'environments/environment';
 export class StoreDeliveryComponent implements OnInit
 {
     /** control for the selected bank for multi-selection */
-    public regionCountryStateCities: FormControl = new FormControl();
+    public regionCountryStateCities: UntypedFormControl = new UntypedFormControl();
 
     private _onDestroy = new Subject<void>();
     public filteredCities: ReplaySubject<any[]> = new ReplaySubject<any[]>(1);
 
     @ViewChild('stateCitySelector') stateCitySelector: MatSelect;
     
-    storeDeliveryForm: FormGroup;
+    storeDeliveryForm: UntypedFormGroup;
     
     store: Store;
     storeId: string;
     storeName: string;
 
     _deliveryPeriods: StoreDeliveryPeriod[] = [];
-    deliveryPeriods: FormArray;
+    deliveryPeriods: UntypedFormArray;
 
     deliveryFulfilment: any;
     deliveryPartners: StoreDeliveryProvider[] = [];
     deliveryPartnerTypes: any = [];
         
     _allowedSelfDeliveryStates: any = [];
-    allowedSelfDeliveryStates: FormArray;
+    allowedSelfDeliveryStates: UntypedFormArray;
 
     storeStates: string[] = [];
     storeStateCities: string[] = [];
@@ -111,7 +111,7 @@ export class StoreDeliveryComponent implements OnInit
      * Constructor
      */
     constructor(
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _storesService: StoresService,
         private _route: ActivatedRoute,
         private _changeDetectorRef: ChangeDetectorRef,
@@ -258,7 +258,7 @@ export class StoreDeliveryComponent implements OnInit
                         this.deliveryPartnerTypes = [ ...new Set(this.deliveryPartners.map(item => item.fulfilment))];
                         
                         // Set deliveryPeriods
-                        this.deliveryPeriods = this.storeDeliveryForm.get('deliveryPeriods').get('values') as FormArray;
+                        this.deliveryPeriods = this.storeDeliveryForm.get('deliveryPeriods').get('values') as UntypedFormArray;
 
                         // check changes
                         this.checkDeliveryPartner();
@@ -404,7 +404,7 @@ export class StoreDeliveryComponent implements OnInit
                             ];
                         }
 
-                        this.allowedSelfDeliveryStates = this.storeDeliveryForm.get('allowedSelfDeliveryStates') as FormArray;
+                        this.allowedSelfDeliveryStates = this.storeDeliveryForm.get('allowedSelfDeliveryStates') as UntypedFormArray;
 
                         // since backend give full discount tier list .. (not the only one that have been created only)
                         this.allowedSelfDeliveryStates.clear();
@@ -502,7 +502,7 @@ export class StoreDeliveryComponent implements OnInit
         if (this.storeDeliveryForm.get('deliveryType').value === "ADHOC" || this.storeDeliveryForm.get('deliveryType').value === "SCHEDULED") {
 
             // push to allowedSelfDeliveryStates (form)
-            this.allowedSelfDeliveryStates = this.storeDeliveryForm.get('allowedSelfDeliveryStates') as FormArray;
+            this.allowedSelfDeliveryStates = this.storeDeliveryForm.get('allowedSelfDeliveryStates') as UntypedFormArray;
             // since backend give full discount tier list .. (not the only one that have been created only)
             this.allowedSelfDeliveryStates.clear();
             
@@ -520,7 +520,7 @@ export class StoreDeliveryComponent implements OnInit
 
             // SELF
             // push to allowedSelfDeliveryStates (form)
-            this.allowedSelfDeliveryStates = this.storeDeliveryForm.get('allowedSelfDeliveryStates') as FormArray;
+            this.allowedSelfDeliveryStates = this.storeDeliveryForm.get('allowedSelfDeliveryStates') as UntypedFormArray;
             // since backend give full discount tier list .. (not the only one that have been created only)
             this.allowedSelfDeliveryStates.clear();
             
@@ -528,7 +528,7 @@ export class StoreDeliveryComponent implements OnInit
                 this.allowedSelfDeliveryStates.push(this._formBuilder.group(item));
             });
 
-            let deliveryPeriods = this.storeDeliveryForm.get('deliveryPeriods').get('values') as FormArray;
+            let deliveryPeriods = this.storeDeliveryForm.get('deliveryPeriods').get('values') as UntypedFormArray;
             
             deliveryPeriods['controls'].forEach(item => {
                 item['controls'].enabled.patchValue(false);                
@@ -574,7 +574,7 @@ export class StoreDeliveryComponent implements OnInit
         this._allowedSelfDeliveryStates.push(selfDeliveryStateItem);
 
         // push to allowedSelfDeliveryStates (form)
-        this.allowedSelfDeliveryStates = this.storeDeliveryForm.get('allowedSelfDeliveryStates') as FormArray;
+        this.allowedSelfDeliveryStates = this.storeDeliveryForm.get('allowedSelfDeliveryStates') as UntypedFormArray;
         this.allowedSelfDeliveryStates.push(this._formBuilder.group(selfDeliveryStateItem));
     }
 
@@ -582,7 +582,7 @@ export class StoreDeliveryComponent implements OnInit
         this._allowedSelfDeliveryStates.splice(index,1);
 
         // push to allowedSelfDeliveryStates (form)
-        this.allowedSelfDeliveryStates = this.storeDeliveryForm.get('allowedSelfDeliveryStates') as FormArray;
+        this.allowedSelfDeliveryStates = this.storeDeliveryForm.get('allowedSelfDeliveryStates') as UntypedFormArray;
         // since backend give full discount tier list .. (not the only one that have been created only)
         this.allowedSelfDeliveryStates.clear();
 
@@ -603,7 +603,7 @@ export class StoreDeliveryComponent implements OnInit
         }
 
         // push to allowedSelfDeliveryStates (form)
-        this.allowedSelfDeliveryStates = this.storeDeliveryForm.get('allowedSelfDeliveryStates') as FormArray;
+        this.allowedSelfDeliveryStates = this.storeDeliveryForm.get('allowedSelfDeliveryStates') as UntypedFormArray;
         // since backend give full discount tier list .. (not the only one that have been created only)
         this.allowedSelfDeliveryStates.clear();
 

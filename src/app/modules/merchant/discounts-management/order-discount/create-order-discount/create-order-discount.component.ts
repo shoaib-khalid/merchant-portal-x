@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormArray, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
@@ -82,8 +82,8 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
 
     message: string = "";
 
-    createOrderDiscountForm: FormGroup;
-    storeDiscountTierList: FormArray;
+    createOrderDiscountForm: UntypedFormGroup;
+    storeDiscountTierList: UntypedFormArray;
 
     storeDiscountTierListValueEditMode:any = [];
 
@@ -106,7 +106,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
 
     constructor(
         public dialogRef: MatDialogRef<CreateOrderDiscountDialogComponent>,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _fuseConfirmationService: FuseConfirmationService,
         private _discountService: DiscountsService,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
@@ -340,7 +340,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
             startTotalSalesAmount: this.startTotalSalesAmount,
         }
 
-        this.storeDiscountTierList = this.createOrderDiscountForm.get('step2') as FormArray;
+        this.storeDiscountTierList = this.createOrderDiscountForm.get('step2') as UntypedFormArray;
         let checkDiscountAmount = (this.storeDiscountTierList.value.find(function checkValue(element, index, array) {
             return   element.startTotalSalesAmount=== discountTier.startTotalSalesAmount;
         }));
@@ -380,7 +380,7 @@ export class CreateOrderDiscountDialogComponent implements OnInit {
     deleteSelectedDiscountTier(indexForm): void
     {
 
-        this.storeDiscountTierList = this.createOrderDiscountForm.get('step2') as FormArray;
+        this.storeDiscountTierList = this.createOrderDiscountForm.get('step2') as UntypedFormArray;
         let index = (this.storeDiscountTierList.value.findIndex(function checkIndex(element, index, array) {
             return   index=== indexForm;
         }));

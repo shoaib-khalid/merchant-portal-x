@@ -6,7 +6,7 @@ import { debounceTime, finalize, map, switchMap, takeUntil } from 'rxjs/operator
 import { OrdersListService } from 'app/modules/merchant/orders-management/orders-list/orders-list.service';
 import { Order, OrdersCountSummary, OrdersListPagination } from 'app/modules/merchant/orders-management/orders-list/orders-list.types'
 import { MatPaginator } from '@angular/material/paginator';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { OrderInvoiceComponent } from 'app/modules/merchant/orders-management/order-invoice/order-invoice.component';
@@ -87,19 +87,19 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     pagination: OrdersListPagination;
     isLoading: boolean = false;
 
-    filterCustNameControl: FormControl = new FormControl();
+    filterCustNameControl: UntypedFormControl = new UntypedFormControl();
     filterCustNameControlValue: string;
 
-    filterTrxIdControl: FormControl = new FormControl();
+    filterTrxIdControl: UntypedFormControl = new UntypedFormControl();
     filterTrxIdControlValue: string;
 
     filterDateRange: any = {
         start : null,
         end: null
     }
-    filterDateInputStartControl: FormControl = new FormControl();
-    filterDateInputEndControl: FormControl = new FormControl();
-    tabControl: FormControl = new FormControl();
+    filterDateInputStartControl: UntypedFormControl = new UntypedFormControl();
+    filterDateInputEndControl: UntypedFormControl = new UntypedFormControl();
+    tabControl: UntypedFormControl = new UntypedFormControl();
     filterList: string = "name";
 
     range: any;
@@ -119,7 +119,7 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
     currentScreenSize: string[] = [];
 
     isRevised:any;
-    serviceTypeControl: FormControl = new FormControl('');
+    serviceTypeControl: UntypedFormControl = new UntypedFormControl('');
 
     /**
      * Constructor
@@ -145,9 +145,9 @@ export class OrdersListComponent implements OnInit, AfterViewInit, OnDestroy
      */
     ngOnInit(): void
     {
-        this.range = new FormGroup({
-            start: new FormControl(),
-            end: new FormControl(),
+        this.range = new UntypedFormGroup({
+            start: new UntypedFormControl(),
+            end: new UntypedFormControl(),
         });
 
         // Set initial active tab value

@@ -8,7 +8,7 @@ import { DashboardService } from 'app/modules/merchant/dashboard/dashboard.servi
 import { Store, StoreRegionCountries } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
 import { DailyTopProducts, DailyTopProductsPagination, DetailedDailySales, DetailedDailySalesPagination, Settlement, SettlementPagination, StaffName, StaffSales, StaffSalesDetail, StaffSalesPagination, SummarySales, SummarySalesPagination, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly } from './dashboard.types';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, UntypedFormControl, FormGroup, Validators } from '@angular/forms';
 import { formatDate } from '@angular/common';
 import * as XLSX from 'xlsx';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
@@ -61,7 +61,7 @@ export class DashboardComponent implements OnInit, OnDestroy
 
     orderCountSummary: OrdersCountSummary[];
     _orderCountSummary: any;
-    orderSummary_serviceTypeControl: FormControl = new FormControl('');
+    orderSummary_serviceTypeControl: UntypedFormControl = new UntypedFormControl('');
     orderSummaryServiceType = ''
 
     outOfStockProducts: string;
@@ -81,10 +81,10 @@ export class DashboardComponent implements OnInit, OnDestroy
         start : null,
         end: null
     }
-    summarySalesDateInputStartControl: FormControl = new FormControl();
-    summarySalesDateInputEndControl: FormControl = new FormControl();
+    summarySalesDateInputStartControl: UntypedFormControl = new UntypedFormControl();
+    summarySalesDateInputEndControl: UntypedFormControl = new UntypedFormControl();
     summarySalesServiceType = '';
-    summarySales_serviceTypeControl: FormControl = new FormControl('');
+    summarySales_serviceTypeControl: UntypedFormControl = new UntypedFormControl('');
 
     // -----------------------------
     // Daily Top Products Properties
@@ -97,8 +97,8 @@ export class DashboardComponent implements OnInit, OnDestroy
         start : null,
         end: null
     }
-    dailyTopProductsDateInputStart: FormControl = new FormControl();
-    dailyTopProductsDateInputEnd: FormControl = new FormControl();
+    dailyTopProductsDateInputStart: UntypedFormControl = new UntypedFormControl();
+    dailyTopProductsDateInputEnd: UntypedFormControl = new UntypedFormControl();
     dailyTopProductsServiceType: string = '';
 
     // -------------------------------
@@ -112,9 +112,9 @@ export class DashboardComponent implements OnInit, OnDestroy
         start : null,
         end: null
     }
-    detailedDailySalesDateInputStart: FormControl = new FormControl();
-    detailedDailySalesDateInputEnd: FormControl = new FormControl();
-    detailedDailySales_serviceTypeControl: FormControl = new FormControl('');
+    detailedDailySalesDateInputStart: UntypedFormControl = new UntypedFormControl();
+    detailedDailySalesDateInputEnd: UntypedFormControl = new UntypedFormControl();
+    detailedDailySales_serviceTypeControl: UntypedFormControl = new UntypedFormControl('');
     detailedDailySalesServiceType: string = '';
 
     // -------------------------------
@@ -124,7 +124,7 @@ export class DashboardComponent implements OnInit, OnDestroy
     staffSalesDataSource: MatTableDataSource<any> = new MatTableDataSource();
     staffSalesCol = ["date", "totalAmount", "cash", 'duitNow' , "others"]
     // staffSales: StaffSales[] = []
-    staffFormControl: FormControl = new FormControl();
+    staffFormControl: UntypedFormControl = new UntypedFormControl();
     staffNames: StaffName[] = [];
     staffId: string = '';
 
@@ -145,9 +145,9 @@ export class DashboardComponent implements OnInit, OnDestroy
         start : null,
         end: null
     }
-    staffSalesDateInputStart: FormControl = new FormControl();
-    staffSalesDateInputEnd: FormControl = new FormControl();
-    staffSales_serviceTypeControl: FormControl = new FormControl('');
+    staffSalesDateInputStart: UntypedFormControl = new UntypedFormControl();
+    staffSalesDateInputEnd: UntypedFormControl = new UntypedFormControl();
+    staffSales_serviceTypeControl: UntypedFormControl = new UntypedFormControl('');
     staffSalesServiceType: string = '';
 
     settlementPageSize: number = 10;
@@ -164,8 +164,8 @@ export class DashboardComponent implements OnInit, OnDestroy
         start : null,
         end: null
     }
-    settlementDateInputStart: FormControl = new FormControl();
-    settlementDateInputEnd: FormControl = new FormControl();
+    settlementDateInputStart: UntypedFormControl = new UntypedFormControl();
+    settlementDateInputEnd: UntypedFormControl = new UntypedFormControl();
 
 
     completeCompletionStatus = ["DELIVERED_TO_CUSTOMER"];
@@ -214,7 +214,7 @@ export class DashboardComponent implements OnInit, OnDestroy
     overviewLastWeekArr = [];
 
     graphServiceType = ''
-    salesOverview_serviceTypeControl: FormControl = new FormControl('');
+    salesOverview_serviceTypeControl: UntypedFormControl = new UntypedFormControl('');
 
     sumThisWeekCompleted: number = 0;
     sumThisWeekPending: number = 0;

@@ -1,6 +1,6 @@
 import { formatDate } from '@angular/common';
 import { ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormArray, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { StoresService } from 'app/core/store/store.service';
@@ -28,7 +28,7 @@ export class OrderInvoiceComponent implements OnInit {
 
   store$: Store;
 
-  invoiceForm: FormGroup;
+  invoiceForm: UntypedFormGroup;
   private _unsubscribeAll: Subject<any> = new Subject<any>();
   order: Order;
   orderId: string;
@@ -44,7 +44,7 @@ export class OrderInvoiceComponent implements OnInit {
   constructor(
     private _changeDetectorRef: ChangeDetectorRef,
     private _activatedRoute: ActivatedRoute,
-    private _formBuilder: FormBuilder,
+    private _formBuilder: UntypedFormBuilder,
     private _storesService: StoresService,
     private _ordersService: OrdersListService,
     public _matDialogRef: MatDialogRef<OrderInvoiceComponent>,
@@ -250,7 +250,7 @@ export class OrderInvoiceComponent implements OnInit {
         .subscribe((orderItems: OrderItem[]) => {
           
           // Clear items form array
-          (this.invoiceForm.get('items') as FormArray).clear();
+          (this.invoiceForm.get('items') as UntypedFormArray).clear();
           
           // Setup item form array
           const itemsFormGroups = [];
@@ -278,7 +278,7 @@ export class OrderInvoiceComponent implements OnInit {
             
             // Add the item form group to the items form array     
             itemsFormGroups.forEach((itemFormGroup) => {
-              (this.invoiceForm.get('items') as FormArray).push(itemFormGroup)
+              (this.invoiceForm.get('items') as UntypedFormArray).push(itemFormGroup)
               
             })
             

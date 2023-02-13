@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation, Renderer2, TemplateRef, ViewContainerRef, Inject, ViewChildren, QueryList } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { UntypedFormArray, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
@@ -172,12 +172,12 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
 
     // product
     selectedProduct: Product | null = null;
-    addProductForm: FormGroup;
+    addProductForm: UntypedFormGroup;
     products$: Observable<Product[]>;
     productPagination: ProductPagination = { length: 0, page: 0, size: 0, lastPage: 0, startIndex: 0, endIndex: 0 };
 
     // inventories
-    productInventoriesFA: FormArray;
+    productInventoriesFA: UntypedFormArray;
     productInventories$: ProductInventory[] = [];
 
     // product combo package
@@ -197,7 +197,7 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
     };
     _filteredProductsOptions: Product[] = []; // use in combo section -> 'Add product' --after filter
     productsCombos$: ProductPackageOption[] = [];
-    localCategoryFilterControl: FormControl = new FormControl();
+    localCategoryFilterControl: UntypedFormControl = new UntypedFormControl();
     productsForCombo$: Observable<Product[]>;
     productPaginationForCombo: ProductPagination;
     clearOptName: boolean = false;
@@ -242,7 +242,7 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
         assetId: string, 
         isThumbnail: boolean 
     }[] = [];
-    productAssetsFA: FormArray;
+    productAssetsFA: UntypedFormArray;
     imagesToBeDeleted: {
         id: string,
         index: number
@@ -302,7 +302,7 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
     }[]
 
     selectedProductVariant: ProductVariant;
-    productVariantsFA: FormArray;
+    productVariantsFA: UntypedFormArray;
     productVariants$: ProductVariant[] = [];
     variantIndex: number = 0; // set index when open overlay panel in variant available section
 
@@ -362,7 +362,7 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
     setOrderEnabled: boolean = false;
     dropUpperLevelCalled: boolean = false;
 
-    searchImageControl: FormControl = new FormControl();
+    searchImageControl: UntypedFormControl = new UntypedFormControl();
     autoCompleteList: {url: string, name: string}[] = [];
     productType: 'combo' | 'normal' | 'variant' | 'addon' = 'normal';
 
@@ -372,7 +372,7 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _fuseConfirmationService: FuseConfirmationService,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _inventoryService: InventoryService,
         private _storesService: StoresService,
         public _dialog: MatDialog,
@@ -873,7 +873,7 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
         // Product Assets
         // ---------------------
 
-        this.productAssetsFA = this.addProductForm.get('step1').get('productAssets') as FormArray;
+        this.productAssetsFA = this.addProductForm.get('step1').get('productAssets') as UntypedFormArray;
         // this.imagesFile = [];
 
         product.productAssets.forEach(item => {
@@ -886,7 +886,7 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
         // ---------------------
             
         this.productInventories$ = product.productInventories;
-        this.productInventoriesFA = this.addProductForm.get('step1').get('productInventories') as FormArray;
+        this.productInventoriesFA = this.addProductForm.get('step1').get('productInventories') as UntypedFormArray;
         this.productInventories$.forEach(item => {
             this.productInventoriesFA.push(this._formBuilder.group(item));
         });
@@ -898,7 +898,7 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
         // Set to this productVariants 
         this.productVariants$ = product.productVariants;
         
-        this.productVariantsFA = this.addProductForm.get('step1').get('productVariants') as FormArray;
+        this.productVariantsFA = this.addProductForm.get('step1').get('productVariants') as UntypedFormArray;
         // this.productVariants.clear();
 
         this.productVariants$.forEach(item => {
@@ -1562,7 +1562,7 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
         if (this.addProductForm.get('step1').get('isBulkItem').value === false){
             this.addProductForm.get('step1').get('vehicleType').setValue('MOTORCYCLE')
         }
-        const step1FormGroup = this.addProductForm.get('step1') as FormGroup;
+        const step1FormGroup = this.addProductForm.get('step1') as UntypedFormGroup;
         
         // Get the product object
         const { sku, price, quantity, isCustomNote, ...product} = step1FormGroup.getRawValue();
@@ -1838,9 +1838,9 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
         this._router.navigate(['.'], {relativeTo: this._activatedRoute.parent});
 
         // this.selectedProduct = null;
-        (this.addProductForm.get('step1').get('productInventories') as FormArray).clear();
-        (this.addProductForm.get('step1').get('productVariants') as FormArray).clear();
-        (this.addProductForm.get('step1').get('productAssets') as FormArray).clear();
+        (this.addProductForm.get('step1').get('productInventories') as UntypedFormArray).clear();
+        (this.addProductForm.get('step1').get('productVariants') as UntypedFormArray).clear();
+        (this.addProductForm.get('step1').get('productAssets') as UntypedFormArray).clear();
 
      
     }

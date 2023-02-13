@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { CartService } from 'app/core/cart/cart.service';
 import { InventoryService } from 'app/core/product/inventory.service';
@@ -16,7 +16,7 @@ export class DuplicateProductsModalComponent implements OnInit {
     selectedStore: Store = null;
     stores: Store[] = [];
     isDuplicating: boolean = false;
-    storeList: FormControl = new FormControl();
+    storeList: UntypedFormControl = new UntypedFormControl();
     cloneErrorMessage: string = null;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     store$: Store;

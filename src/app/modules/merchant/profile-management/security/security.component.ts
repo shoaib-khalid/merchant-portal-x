@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { UserService } from 'app/core/user/user.service';
 @Component({
@@ -10,14 +10,14 @@ import { UserService } from 'app/core/user/user.service';
 })
 export class EditSecurityComponent implements OnInit
 {
-    securityForm: FormGroup;
+    securityForm: UntypedFormGroup;
     alert: any;
 
     /**
      * Constructor
      */
     constructor(
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _userService: UserService,
         private _fuseConfirmationService: FuseConfirmationService,
         private _changeDetectorRef: ChangeDetectorRef
@@ -135,7 +135,7 @@ export class EditSecurityComponent implements OnInit
 
     checkPasswordMatch(controlName: string,
         matchingControlName: string){
-        return (formGroup: FormGroup) => {
+        return (formGroup: UntypedFormGroup) => {
           const control = formGroup.controls[controlName];
           const matchingControl = formGroup.controls[matchingControlName];
       

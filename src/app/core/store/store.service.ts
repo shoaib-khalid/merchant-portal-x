@@ -7,7 +7,7 @@ import { AppConfig } from 'app/config/service.config';
 import { JwtService } from 'app/core/jwt/jwt.service';
 import { takeUntil } from 'rxjs/operators';
 import { LogService } from 'app/core/logging/log.service';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { AuthService } from '../auth/auth.service';
 
 @Injectable({
@@ -24,7 +24,7 @@ export class StoresService
     private _storeRegionCountries: ReplaySubject<StoreRegionCountries[]> = new ReplaySubject<StoreRegionCountries[]>(1);
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     private _currentStores: Store[] = [];
-    public storeControl: FormControl = new FormControl();
+    public storeControl: UntypedFormControl = new UntypedFormControl();
 
 
     /**

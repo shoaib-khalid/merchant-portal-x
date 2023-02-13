@@ -10,7 +10,7 @@ import { StoresService } from 'app/core/store/store.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { storeStatusComponent } from './status/status.component';
 import { MatDialog } from '@angular/material/dialog';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 
 @Component({
     selector       : 'user',
@@ -28,7 +28,7 @@ export class UserComponent implements OnInit, OnDestroy
     @Input() showAvatar: boolean = true;
     client: Client;
 
-    selectedStatusForm: FormGroup;
+    selectedStatusForm: UntypedFormGroup;
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
@@ -42,7 +42,7 @@ export class UserComponent implements OnInit, OnDestroy
         private _storesService: StoresService,
         private _fuseConfirmationService: FuseConfirmationService,
         public _dialog: MatDialog,
-        private _formBuilder: FormBuilder
+        private _formBuilder: UntypedFormBuilder
     )
     {
     }
