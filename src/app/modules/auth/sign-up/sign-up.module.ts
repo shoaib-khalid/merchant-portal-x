@@ -43,10 +43,10 @@ import { AppleLoginProvider } from '../sign-in/apple.provider';
             useValue: {
                 autoLogin: false,
                 providers: [
-                    {
-                        id: GoogleLoginProvider.PROVIDER_ID,
-                        provider: new GoogleLoginProvider(SocialLooginClientId.GOOGLE_CLIENT_ID)
-                    },
+                    // {
+                    //     id: GoogleLoginProvider.PROVIDER_ID,
+                    //     provider: new GoogleLoginProvider(SocialLooginClientId.GOOGLE_CLIENT_ID)
+                    // },
                     {
                         id: AppleLoginProvider.PROVIDER_ID,
                         provider: new AppleLoginProvider(SocialLooginClientId.APPLE_CLIENT_ID)

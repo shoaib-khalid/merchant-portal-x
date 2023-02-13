@@ -116,7 +116,7 @@ export class AuthSignInComponent implements OnInit
         google.accounts.id.renderButton(
         //    this.gbutton.nativeElement,
         document.getElementById('googleButton'),
-           { size: "large", text: '', theme:"outline", shape:"circle" }
+            { size: "large", text: 'signup_with', theme:"outline", shape:"circle", type:"icon" }
         );
     }
 

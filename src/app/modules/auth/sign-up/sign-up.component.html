@@ -166,7 +166,7 @@
                     </div>
     
                     <!-- Single sign-on buttons -->
-                    <div *ngIf="true" class="flex items-center mt-8 space-x-3">
+                    <div *ngIf="true" class="flex items-center mt-6 space-x-3 justify-center">
                         <!-- <button
                             class="flex-auto"
                             type="button"
@@ -177,24 +177,35 @@
                         <div class="flex flex-row justify-center items-center">
                             <div id="googleButtonSignUp" class="w-auto outline-0" data-onsuccess="onSignIn" #gbutton></div>
                         </div>
-                        <span class="text-secondary">or</span>
-                        <button
+                        <!-- <span class="text-secondary">or</span> -->
+                        <label 
+                            class="flex items-center ring-1 ring-slate-300 justify-center w-10 h-10 rounded-full cursor-pointer"
+                            for="fb-button"
+                            (click)="signInWithFB()"
+                            matRipple>
+                            <img src="assets/images/svgIcon/facebook-svgrepo.svg" style="width: 20px;height: 20px;"/>
+                        </label>
+                        <!-- <button
                             class="flex-auto"
                             type="button"
                             (click)="signInWithFB()"
                             mat-stroked-button>
-                            <!-- <mat-icon
-                                class="icon-size-5"
-                                [svgIcon]="'feather:facebook'"></mat-icon> -->
                             <img src="assets/images/svgIcon/facebook-svgrepo.svg" style="width: 20px;height: 20px;"/>
-                        </button>
-                        <button
+                        </button> -->
+                        <label 
+                            class="flex items-center ring-1 ring-slate-300 justify-center w-10 h-10 rounded-full cursor-pointer"
+                            for="fb-button"
+                            (click)="signInWithApple()"
+                            matRipple>
+                            <img src="assets/images/svgIcon/apple-svgrepo.svg" style="width: 20px;height: 20px;"/>
+                        </label>
+                        <!-- <button
                             class="flex-auto"
                             type="button"
                             (click)="signInWithApple()"
                             mat-stroked-button>
                             <img src="assets/images/svgIcon/apple-svgrepo.svg" style="width: 20px;height: 20px;"/>
-                        </button>
+                        </button> -->
                         <!-- <a href="https://appleid.apple.com/auth/authorize?client_id=my.deliverin.symplified.service&redirect_uri=https://merchant.symplified.it/applelogin&response_type=code id_token&state=init&scope=name email&response_mode=form_post"><button
                                 class="flex-auto"
                                 type="button"
