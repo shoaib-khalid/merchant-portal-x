@@ -578,4 +578,13 @@ export class StoreDineInComponent implements OnInit
         // this.storeDineInForm.enable();
     }
 
+    toggleDineInConsolidatedOrder(toggleValue: boolean) {
+        if (toggleValue === true) {
+            this.storeDineInForm.get('dineInPaymentType').setValue('COD');
+            this.storeDineInForm.get('dineInPaymentType').disable();
+        }
+        else {
+            this.storeDineInForm.get('dineInPaymentType').enable();
+        }
+    }
 }

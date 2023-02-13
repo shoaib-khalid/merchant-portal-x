@@ -96,15 +96,21 @@
                             <div class="text-xl">Consolidate Order</div>
                             <div class="text-secondary">Select whether to allow customers combine their orders</div>
                         </div>
-                        <div class="flex flex-col w-full justify-start mt-4">
+                        <div class="flex flex-row w-full justify-start mt-4 items-center">
                             <mat-slide-toggle
                                 matInput
                                 [formControlName]="'dineInConsolidatedOrder'"
                                 [color]="'primary'"
-                                >{{storeDineInForm.get('dineInConsolidatedOrder').value === true ? 'Yes' : 'No'}}
+                                (change)="toggleDineInConsolidatedOrder($event.checked)"
+                                >
+                                <span>
+                                    {{storeDineInForm.get('dineInConsolidatedOrder').value === true ? 'Yes' : 'No'}}
+                                </span>
                             </mat-slide-toggle>
+                            <span class="text-secondary ml-4 break-normal leading-none tracking-tight">
+                                {{storeDineInForm.get('dineInConsolidatedOrder').value === true ? 'Remark: Consolidate Order only accept CASH payment' : ''}}
+                            </span>
                         </div>
-
                         <ng-container *ngIf="tagDetails && tagDetails.isFoodCourtOwner">
                             <!-- Divider -->
                             <div class="my-4 border-t"></div>
