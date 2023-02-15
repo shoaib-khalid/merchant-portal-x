@@ -151,6 +151,10 @@ export class StoreDineInComponent implements OnInit
                 if (this.storeDineInForm.get('isDineIn').value === false) {
                     this.storeDineInForm.get('dineInOption').setValue('SELFCOLLECT');
                 }
+                if (this.storeDineInForm.get('dineInConsolidatedOrder').value === true) {
+                    // onlySelf true because we want the value 'COD' when updating the store
+                    this.storeDineInForm.get('dineInPaymentType').disable({onlySelf: true});
+                }
  
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -581,7 +585,8 @@ export class StoreDineInComponent implements OnInit
     toggleDineInConsolidatedOrder(toggleValue: boolean) {
         if (toggleValue === true) {
             this.storeDineInForm.get('dineInPaymentType').setValue('COD');
-            this.storeDineInForm.get('dineInPaymentType').disable();
+            // onlySelf true because we want the value 'COD' when updating the store
+            this.storeDineInForm.get('dineInPaymentType').disable({onlySelf: true});
         }
         else {
             this.storeDineInForm.get('dineInPaymentType').enable();
