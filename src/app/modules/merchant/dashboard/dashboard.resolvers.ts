@@ -210,7 +210,8 @@ export class TotalSalesResolver implements Resolve<any>
      */
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
     {
-        return this._dashboardService.getTotalSales(this.storeId$, '');
+        // return this._dashboardService.getTotalSales(this.storeId$, '');
+        return this._dashboardService.getTotalSalesAmount(this.storeId$, '');
     }
 
 }
@@ -425,7 +426,8 @@ export class WeeklyGraphResolver implements Resolve<any>
      */
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
     {
-        return forkJoin([this._dashboardService.getWeeklyGraph(this.storeId$, 'this-week',
+        return forkJoin([
+                this._dashboardService.getWeeklyGraph(this.storeId$, 'this-week',
                 {
                     to: this.thisWeek.end,
                     from: this.thisWeek.start,
@@ -437,30 +439,43 @@ export class WeeklyGraphResolver implements Resolve<any>
                     from: this.lastWeek.start,
                     serviceType: ''
                 }),
-                this._dashboardService.getDailyTopProducts(
-                    this.storeId$, 'this-week',
-                    {
-                        page: 0,
-                        pageSize: 10,
-                        sortBy: 'date',
-                        sortingOrder: 'DESC',
-                        search: '',
-                        startDate: this.thisWeek.start,
-                        endDate: this.thisWeek.end,
-                        serviceType: ''
-                    }),
-                this._dashboardService.getDailyTopProducts(
-                    this.storeId$, 'last-week',
-                    {
-                        page: 0,
-                        pageSize: 10,
-                        sortBy: 'date',
-                        sortingOrder: 'DESC',
-                        search: '',
-                        startDate: this.lastWeek.start,
-                        endDate: this.lastWeek.end,
-                        serviceType: ''
-                    }),
+                this._dashboardService.getWeeklySalesGraph(this.storeId$, 'this-week',
+                {
+                    to: this.thisWeek.end,
+                    from: this.thisWeek.start,
+                    serviceType: ''
+                }),
+                this._dashboardService.getWeeklySalesGraph(this.storeId$, 'last-week',
+                {
+                    to: this.lastWeek.end,
+                    from: this.lastWeek.start,
+                    serviceType: ''
+                }),
+
+                // this._dashboardService.getDailyTopProducts(
+                //     this.storeId$, 'this-week',
+                //     {
+                //         page: 0,
+                //         pageSize: 10,
+                //         sortBy: 'date',
+                //         sortingOrder: 'DESC',
+                //         search: '',
+                //         startDate: this.thisWeek.start,
+                //         endDate: this.thisWeek.end,
+                //         serviceType: ''
+                //     }),
+                // this._dashboardService.getDailyTopProducts(
+                //     this.storeId$, 'last-week',
+                //     {
+                //         page: 0,
+                //         pageSize: 10,
+                //         sortBy: 'date',
+                //         sortingOrder: 'DESC',
+                //         search: '',
+                //         startDate: this.lastWeek.start,
+                //         endDate: this.lastWeek.end,
+                //         serviceType: ''
+                //     }),
                 // this._dashboardService.getStaffTotalSales(
                 //     this.storeId$,
                 //     {

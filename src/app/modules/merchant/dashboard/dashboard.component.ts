@@ -3,11 +3,23 @@ import { NavigationEnd, Router } from '@angular/router';
 import { forkJoin, merge, of, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { MatPaginator } from '@angular/material/paginator';
-import { ApexOptions } from 'ng-apexcharts';
+import {
+    ApexAxisChartSeries,
+    ApexChart,
+    ChartComponent,
+    ApexDataLabels,
+    ApexPlotOptions,
+    ApexYAxis,
+    ApexLegend,
+    ApexStroke,
+    ApexXAxis,
+    ApexFill,
+    ApexTooltip
+  } from "ng-apexcharts";
 import { DashboardService } from 'app/modules/merchant/dashboard/dashboard.service';
 import { Store, StoreRegionCountries } from 'app/core/store/store.types';
 import { StoresService } from 'app/core/store/store.service';
-import { DailyTopProducts, DailyTopProductsPagination, DetailedDailySales, DetailedDailySalesPagination, Settlement, SettlementPagination, StaffName, StaffSales, StaffSalesDetail, StaffSalesPagination, SummarySales, SummarySalesPagination, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly } from './dashboard.types';
+import { DailyTopProducts, DailyTopProductsPagination, DetailedDailySales, DetailedDailySalesPagination, Settlement, SettlementPagination, StaffName, StaffSales, StaffSalesDetail, StaffSalesPagination, SummarySales, SummarySalesPagination, TotalSalesAmount, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly, WeeklyGraph } from './dashboard.types';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { formatDate } from '@angular/common';
 import * as XLSX from 'xlsx';
@@ -16,6 +28,20 @@ import { OrdersCountSummary } from '../orders-management/orders-list/orders-list
 import { OrdersListService } from '../orders-management/orders-list/orders-list.service';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { MatTableDataSource } from '@angular/material/table';
+
+export type ChartOptions = {
+    series: ApexAxisChartSeries;
+    chart: ApexChart;
+    dataLabels: ApexDataLabels;
+    plotOptions: ApexPlotOptions;
+    yaxis: ApexYAxis | ApexYAxis[];
+    xaxis: ApexXAxis;
+    fill: ApexFill;
+    tooltip: ApexTooltip;
+    stroke: ApexStroke;
+    legend: ApexLegend;
+    labels: string[];
+  };
 
 @Component({
     selector       : 'dashboard',
@@ -53,7 +79,8 @@ export class DashboardComponent implements OnInit, OnDestroy
     stores: Store[];
     currentStoreId: string;
     storeName: string = "";
-    salesChart: ApexOptions = {};
+    // salesChart: ApexOptions = {};
+    salesChart: Partial<ChartOptions>;
     data: any;
     seriesChart: any;
     overviewChart: any;
@@ -172,26 +199,28 @@ export class DashboardComponent implements OnInit, OnDestroy
     pendingCompletionStatus = [];
     failedCompletionStatus = ["REQUESTING_DELIVERY_FAILED","PAYMENT_FAILED","CANCELED_BY_CUSTOMER","FAILED","REJECTED_BY_STORE","CANCELED_BY_MERCHANT"];
 
-    totalSalesTotalRow = [];
-    totalSalesDailyRow = [];
-    totalSalesWeeklyRow = [];
-    totalSalesMonthlyRow = [];
+    // totalSalesTotalRow = [];
+    // totalSalesDailyRow = [];
+    // totalSalesWeeklyRow = [];
+    // totalSalesMonthlyRow = [];
+    
+    totalSalesAmount: TotalSalesAmount
 
-    sumTotalCompleted: number = 0;
-    sumTotalPending: number = 0;
-    sumTotalFailed: number = 0;
+    // sumTotalCompleted: number = 0;
+    // sumTotalPending: number = 0;
+    // sumTotalFailed: number = 0;
 
-    sumDailyCompleted: number = 0;
-    sumDailyPending: number = 0;
-    sumDailyFailed: number = 0;
+    // sumDailyCompleted: number = 0;
+    // sumDailyPending: number = 0;
+    // sumDailyFailed: number = 0;
 
-    sumWeeklyCompleted: number = 0;
-    sumWeeklyPending: number = 0;
-    sumWeeklyFailed: number = 0;
+    // sumWeeklyCompleted: number = 0;
+    // sumWeeklyPending: number = 0;
+    // sumWeeklyFailed: number = 0;
 
-    sumMonthlyCompleted: number = 0;
-    sumMonthlyPending: number = 0;
-    sumMonthlyFailed: number = 0;
+    // sumMonthlyCompleted: number = 0;
+    // sumMonthlyPending: number = 0;
+    // sumMonthlyFailed: number = 0;
 
     isLoading: boolean = false;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -199,19 +228,36 @@ export class DashboardComponent implements OnInit, OnDestroy
 
     lastMonday: any;
 
-    topProductThisWeekRow = [];
-    topProductLastWeekRow = [];
+    // topProductThisWeekRow = [];
+    // topProductLastWeekRow = [];
 
-    firstThisWeek: string;
-    secondThisWeek: string;
-    thirdThisWeek: string;
+    firstThisWeek: {
+        amount: number,
+        day: string
+    };
+    secondThisWeek: {
+        amount: number,
+        day: string
+    };
+    thirdThisWeek: {
+        amount: number,
+        day: string
+    };
 
-    firstLastWeek: string;
-    secondLastWeek: string;
-    thirdLastWeek: string;
+    firstLastWeek: {
+        amount: number,
+        day: string
+    };
+    secondLastWeek: {
+        amount: number,
+        day: string
+    };
+    thirdLastWeek: {
+        amount: number,
+        day: string
+    };
 
-    overviewThisWeekArr = [];
-    overviewLastWeekArr = [];
+    days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
     graphServiceType = ''
     salesOverview_serviceTypeControl: FormControl = new FormControl('');
@@ -228,12 +274,14 @@ export class DashboardComponent implements OnInit, OnDestroy
     lastWeekChartArr = [];
 
     thisWeekDayChartCompleted = [0,0,0,0,0,0,0];
-    thisWeekDayChartPending = [0,0,0,0,0,0,0];
-    thisWeekDayChartFailed = [0,0,0,0,0,0,0];
+    // thisWeekDayChartPending = [0,0,0,0,0,0,0];
+    // thisWeekDayChartFailed = [0,0,0,0,0,0,0];
+    thisWeekDayChartAmount = [0,0,0,0,0,0,0];
 
     lastWeekDayChartCompleted = [0,0,0,0,0,0,0];
-    lastWeekDayChartPending = [0,0,0,0,0,0,0];
-    lastWeekDayChartFailed = [0,0,0,0,0,0,0];
+    // lastWeekDayChartPending = [0,0,0,0,0,0,0];
+    // lastWeekDayChartFailed = [0,0,0,0,0,0,0];
+    lastWeekDayChartAmount = [0,0,0,0,0,0,0];
 
     summarySalesFileExel= 'SummarySales.xlsx';
     dailySalesFileExel= 'DailySales.xlsx';
@@ -492,7 +540,18 @@ export class DashboardComponent implements OnInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             });
 
+        // Get Total Sales Amount
+        this._dashboardService.totalSalesAmount$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe((totalSalesAmount: TotalSalesAmount)=>{
 
+            this.totalSalesAmount = totalSalesAmount;
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
+
+        /*
         // Get the Total Sales Total
         this._dashboardService.totalSalesTotal$
             .pipe(takeUntil(this._unsubscribeAll))
@@ -628,7 +687,7 @@ export class DashboardComponent implements OnInit, OnDestroy
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
-
+        */
 
         // Get the Settlement
         this._dashboardService.settlement$
@@ -1188,80 +1247,89 @@ export class DashboardComponent implements OnInit, OnDestroy
         // Top Product This Week
         // -------------------------------
 
-        this._dashboardService.dailyTopProductsThisWeek$
-        .pipe(takeUntil(this._unsubscribeAll))
-        .subscribe(response => {
+        // this._dashboardService.dailyTopProductsThisWeek$
+        // .pipe(takeUntil(this._unsubscribeAll))
+        // .subscribe(response => {
 
-            this.topProductThisWeekRow = []
+        //     this.topProductThisWeekRow = []
 
-            this.topProductThisWeekRow = response.map(product => {
-                return {
-                    name : product.name,
-                    rank : product.ranking
-                }
-            })
+        //     this.topProductThisWeekRow = response.map(product => {
+        //         return {
+        //             name : product.name,
+        //             rank : product.ranking
+        //         }
+        //     })
 
-            // sort the array by rank
-            this.topProductThisWeekRow.sort(function (x, y) {
-                return x.rank - y.rank;
-            });
+        //     // sort the array by rank
+        //     this.topProductThisWeekRow.sort(function (x, y) {
+        //         return x.rank - y.rank;
+        //     });
 
-            // assign product name to the top three
-            this.firstThisWeek = this.topProductThisWeekRow[0]?.name;
-            this.secondThisWeek = this.topProductThisWeekRow[1]?.name;
-            this.thirdThisWeek = this.topProductThisWeekRow[2]?.name;
+        //     // assign product name to the top three
+        //     this.firstThisWeek = this.topProductThisWeekRow[0]?.name;
+        //     this.secondThisWeek = this.topProductThisWeekRow[1]?.name;
+        //     this.thirdThisWeek = this.topProductThisWeekRow[2]?.name;
 
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
+        //     // Mark for check
+        //     this._changeDetectorRef.markForCheck();
 
-        })
+        // })
 
         // // -------------------------------
         // // Graph & Overview This Week
         // // -------------------------------
 
+        this._dashboardService.weeklySalesGraphThisWeek$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((response: WeeklyGraph[]) => {
+                this.thisWeekDayChartAmount = [0,0,0,0,0,0,0];
+
+                response.forEach(resp => {
+
+                    const day = new Date(resp.date).getDay();
+
+                    this.thisWeekDayChartAmount[day] += resp.totalSalesAmount;
+
+                })
+
+                // Create a copy of the array using the slice() method and sort it in descending order using the sort() method
+                const sortedArr = this.thisWeekDayChartAmount.slice().sort((a, b) => b - a);
+
+                // Get the index positions of each element in the original array
+                const indexArr = sortedArr.map(el => this.thisWeekDayChartAmount.indexOf(el));   
+                
+                // assign to the top three
+                this.firstThisWeek = { amount: sortedArr[0], day: sortedArr[0] ? this.days[indexArr[0]] : ''};
+                this.secondThisWeek = { amount: sortedArr[1], day: sortedArr[1] ? this.days[indexArr[1]] : ''};
+                this.thirdThisWeek = { amount: sortedArr[2], day: sortedArr[2] ? this.days[indexArr[2]] : ''};
+
+                this._prepareChartData();
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+
+            });
+
         this._dashboardService.weeklyGraphThisWeek$
         .pipe(takeUntil(this._unsubscribeAll))
-        .subscribe(response => {
+        .subscribe((response: WeeklyGraph[]) => {
 
-            this.thisWeekDayChartCompleted = [0,0,0,0,0,0,0];
-            this.thisWeekDayChartPending = [0,0,0,0,0,0,0];
-            this.thisWeekDayChartFailed = [0,0,0,0,0,0,0];
             this.sumThisWeekCompleted = 0;
             this.sumThisWeekPending = 0;
             this.sumThisWeekFailed = 0;
-            this.overviewThisWeekArr = [];
+            this.thisWeekDayChartCompleted = [0,0,0,0,0,0,0];
 
-            this.overviewThisWeekArr = response.map(item => {
-                return {
-                    completionStatus: item.completionStatus,
-                    total: item.total,
-                    //get the day of the week
-                    day: new Date(item.date).getDay()
+            response.forEach(resp => {
+                if (this.completeCompletionStatus.includes(resp.completionStatus)) {
+                    this.sumThisWeekCompleted += resp.total;
+                    this.thisWeekDayChartCompleted[new Date(resp.date).getDay()] += resp.total;
                 }
-            })
-
-            // Sum up This Week Total and plot the Chart based on Day
-            this.overviewThisWeekArr.forEach(a => {
-
-            if (this.completeCompletionStatus.includes(a.completionStatus)){
-
-                this.sumThisWeekCompleted += a.total;
-                this.thisWeekDayChartCompleted[a.day] += a.total;
-            }
-
-            else if (this.failedCompletionStatus.includes(a.completionStatus)){
-
-                this.sumThisWeekFailed += a.total;
-                this.thisWeekDayChartFailed[a.day] += a.total;
-            }
-
-            else {
-
-                this.sumThisWeekPending += a.total;
-                this.thisWeekDayChartPending[a.day] += a.total;
-            }
-
+                else if (this.failedCompletionStatus.includes(resp.completionStatus)){
+                    this.sumThisWeekFailed += resp.total;
+                }
+                else {
+                    this.sumThisWeekPending += resp.total;
+                }
             })
 
             this._prepareChartData();
@@ -1291,79 +1359,88 @@ export class DashboardComponent implements OnInit, OnDestroy
         // Top Product Last Week
         // -------------------------------
 
-        this._dashboardService.dailyTopProductsLastWeek$
-        .pipe(takeUntil(this._unsubscribeAll))
-        .subscribe(response => {
+        // this._dashboardService.dailyTopProductsLastWeek$
+        // .pipe(takeUntil(this._unsubscribeAll))
+        // .subscribe(response => {
 
-            this.topProductLastWeekRow = []
+        //     this.topProductLastWeekRow = []
 
-            this.topProductLastWeekRow = response.map(product => {
-                return {
-                    name : product.name,
-                    rank : product.ranking
-                }
-            })
+        //     this.topProductLastWeekRow = response.map(product => {
+        //         return {
+        //             name : product.name,
+        //             rank : product.ranking
+        //         }
+        //     })
 
-            // sort the array by rank
-            this.topProductLastWeekRow.sort(function (x, y) {
-                return x.rank - y.rank;
-            });
+        //     // sort the array by rank
+        //     this.topProductLastWeekRow.sort(function (x, y) {
+        //         return x.rank - y.rank;
+        //     });
 
-            // assign product name to the top three
-            this.firstLastWeek = this.topProductLastWeekRow[0]?.name;
-            this.secondLastWeek = this.topProductLastWeekRow[1]?.name;
-            this.thirdLastWeek = this.topProductLastWeekRow[2]?.name;
+        //     // assign product name to the top three
+        //     this.firstLastWeek = this.topProductLastWeekRow[0]?.name;
+        //     this.secondLastWeek = this.topProductLastWeekRow[1]?.name;
+        //     this.thirdLastWeek = this.topProductLastWeekRow[2]?.name;
 
-            // Mark for check
-            this._changeDetectorRef.markForCheck();
+        //     // Mark for check
+        //     this._changeDetectorRef.markForCheck();
 
-        })
+        // })
 
         // // -------------------------------
         // // Graph & Overview Last Week
         // // -------------------------------
 
+        this._dashboardService.weeklySalesGraphLastWeek$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((response: WeeklyGraph[]) => {
+                this.lastWeekDayChartAmount = [0,0,0,0,0,0,0];
+
+                response.forEach(resp => {
+
+                    const day = new Date(resp.date).getDay();
+
+                    this.lastWeekDayChartAmount[day] += resp.totalSalesAmount;
+
+                })
+
+                // Create a copy of the array using the slice() method and sort it in descending order using the sort() method
+                const sortedArr = this.lastWeekDayChartAmount.slice().sort((a, b) => b - a);
+
+                // Get the index positions of each element in the original array
+                const indexArr = sortedArr.map(el => this.lastWeekDayChartAmount.indexOf(el));                   
+                
+                // assign to the top three
+                this.firstLastWeek = { amount: sortedArr[0], day: sortedArr[0] ? this.days[indexArr[0]] : ''};
+                this.secondLastWeek = { amount: sortedArr[1], day: sortedArr[1] ? this.days[indexArr[1]] : ''};
+                this.thirdLastWeek = { amount: sortedArr[2], day: sortedArr[2] ? this.days[indexArr[2]] : ''};
+
+                this._prepareChartData();
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+
+            });
+
         this._dashboardService.weeklyGraphLastWeek$
         .pipe(takeUntil(this._unsubscribeAll))
-        .subscribe(response => {
+        .subscribe((response: WeeklyGraph[]) => {
 
-            this.lastWeekDayChartCompleted = [0,0,0,0,0,0,0];
-            this.lastWeekDayChartPending = [0,0,0,0,0,0,0];
-            this.lastWeekDayChartFailed = [0,0,0,0,0,0,0];
             this.sumLastWeekCompleted = 0;
             this.sumLastWeekPending = 0;
             this.sumLastWeekFailed = 0;
-            this.overviewLastWeekArr = [];
+            this.lastWeekDayChartCompleted = [0,0,0,0,0,0,0];
 
-            this.overviewLastWeekArr = response.map(item => {
-                return {
-                    completionStatus: item.completionStatus,
-                    total: item.total,
-                    //get the day of the week
-                    day: new Date(item.date).getDay()
+            response.forEach(resp => {
+                if (this.completeCompletionStatus.includes(resp.completionStatus)) {
+                    this.sumLastWeekCompleted += resp.total;
+                    this.lastWeekDayChartCompleted[new Date(resp.date).getDay()] += resp.total;
                 }
-            })
-
-            // Sum up Last Week Total and plot the Chart based on Day
-            this.overviewLastWeekArr.forEach(a => {
-
-                if (this.completeCompletionStatus.includes(a.completionStatus)){
-
-                    this.sumLastWeekCompleted += a.total;
-                    this.lastWeekDayChartCompleted[a.day] += a.total;
-
+                else if (this.failedCompletionStatus.includes(resp.completionStatus)){
+                    this.sumLastWeekFailed += resp.total;
                 }
-
-                else if (this.failedCompletionStatus.includes(a.completionStatus)){
-
-                    this.sumLastWeekFailed += a.total;
-                    this.lastWeekDayChartFailed[a.day] += a.total;
-                }
-
                 else {
-
-                    this.sumLastWeekPending += a.total;
-                    this.lastWeekDayChartPending[a.day] += a.total;
+                    this.sumLastWeekPending += resp.total;
                 }
             })
 
@@ -1384,6 +1461,18 @@ export class DashboardComponent implements OnInit, OnDestroy
                     this.isLoading = true;
 
                     return forkJoin([
+                        this._dashboardService.getWeeklySalesGraph(this.storeId$, 'this-week',
+                            {
+                                to: formattedToday,
+                                from: formattedLastMonday,
+                                serviceType: value
+                            }),
+                        this._dashboardService.getWeeklySalesGraph(this.storeId$, 'last-week',
+                            {
+                                to: formattedLastWeekEnd,
+                                from: formattedLastWeekStart,
+                                serviceType: value
+                            }),
                         this._dashboardService.getWeeklyGraph(this.storeId$, 'this-week',
                             {
                                 to: formattedToday,
@@ -1396,31 +1485,31 @@ export class DashboardComponent implements OnInit, OnDestroy
                                 from: formattedLastWeekStart,
                                 serviceType: value
                             }),
-                        this._dashboardService.getTotalSales(this.storeId$, value),
-                        this._dashboardService.getDailyTopProducts(
-                            this.storeId$, 'this-week',
-                            {
-                                page: 0,
-                                pageSize: 10,
-                                sortBy: 'date',
-                                sortingOrder: 'DESC',
-                                search: '',
-                                startDate: formattedLastMonday,
-                                endDate: formattedToday,
-                                serviceType: value
-                            }),
-                        this._dashboardService.getDailyTopProducts(
-                            this.storeId$, 'last-week',
-                            {
-                                page: 0,
-                                pageSize: 10,
-                                sortBy: 'date',
-                                sortingOrder: 'DESC',
-                                search: '',
-                                startDate: formattedLastWeekStart,
-                                endDate: formattedLastWeekEnd,
-                                serviceType: value
-                            })
+                        this._dashboardService.getTotalSalesAmount(this.storeId$, value),
+                        // this._dashboardService.getDailyTopProducts(
+                        //     this.storeId$, 'this-week',
+                        //     {
+                        //         page: 0,
+                        //         pageSize: 10,
+                        //         sortBy: 'date',
+                        //         sortingOrder: 'DESC',
+                        //         search: '',
+                        //         startDate: formattedLastMonday,
+                        //         endDate: formattedToday,
+                        //         serviceType: value
+                        //     }),
+                        // this._dashboardService.getDailyTopProducts(
+                        //     this.storeId$, 'last-week',
+                        //     {
+                        //         page: 0,
+                        //         pageSize: 10,
+                        //         sortBy: 'date',
+                        //         sortingOrder: 'DESC',
+                        //         search: '',
+                        //         startDate: formattedLastWeekStart,
+                        //         endDate: formattedLastWeekEnd,
+                        //         serviceType: value
+                        //     })
                         ])
                 }),
                 map(() => {
@@ -1711,154 +1800,259 @@ export class DashboardComponent implements OnInit, OnDestroy
         this.seriesChart  = {
             'this-week': [
                 {
-                    name: 'Completed',
+                    name: 'Sales Amount',
+                    type: 'column',
+                    data: [this.thisWeekDayChartAmount[1], this.thisWeekDayChartAmount[2], this.thisWeekDayChartAmount[3],
+                    this.thisWeekDayChartAmount[4], this.thisWeekDayChartAmount[5], this.thisWeekDayChartAmount[6], this.thisWeekDayChartAmount[0]]
+                },
+                {
+                    name: 'Completed Order',
                     type: 'line',
                     data: [this.thisWeekDayChartCompleted[1], this.thisWeekDayChartCompleted[2], this.thisWeekDayChartCompleted[3],
                     this.thisWeekDayChartCompleted[4], this.thisWeekDayChartCompleted[5], this.thisWeekDayChartCompleted[6], this.thisWeekDayChartCompleted[0]]
                 },
-                {
-                    name: 'Pending',
-                    type: 'line',
-                    data: [this.thisWeekDayChartPending[1], this.thisWeekDayChartPending[2], this.thisWeekDayChartPending[3],
-                    this.thisWeekDayChartPending[4], this.thisWeekDayChartPending[5], this.thisWeekDayChartPending[6], this.thisWeekDayChartPending[0]]
-                },
-                {
-                    name: 'Failed',
-                    type: 'column',
-                    data: [this.thisWeekDayChartFailed[1], this.thisWeekDayChartFailed[2], this.thisWeekDayChartFailed[3],
-                    this.thisWeekDayChartFailed[4], this.thisWeekDayChartFailed[5], this.thisWeekDayChartFailed[6], this.thisWeekDayChartFailed[0]]
-                }
+                // {
+                //     name: 'Failed',
+                //     type: 'column',
+                //     data: [this.thisWeekDayChartFailed[1], this.thisWeekDayChartFailed[2], this.thisWeekDayChartFailed[3],
+                //     this.thisWeekDayChartFailed[4], this.thisWeekDayChartFailed[5], this.thisWeekDayChartFailed[6], this.thisWeekDayChartFailed[0]]
+                // }
             ],
             'last-week': [
                 {
-                    name: 'Completed',
+                    name: 'Sales Amount',
+                    type: 'column',
+                    data: [this.lastWeekDayChartAmount[1], this.lastWeekDayChartAmount[2], this.lastWeekDayChartAmount[3],
+                    this.lastWeekDayChartAmount[4], this.lastWeekDayChartAmount[5], this.lastWeekDayChartAmount[6], this.lastWeekDayChartAmount[0]],
+
+
+                },
+                {
+                    name: 'Completed Order',
                     type: 'line',
                     data: [this.lastWeekDayChartCompleted[1], this.lastWeekDayChartCompleted[2], this.lastWeekDayChartCompleted[3],
-                    this.lastWeekDayChartCompleted[4], this.lastWeekDayChartCompleted[5], this.lastWeekDayChartCompleted[6], this.lastWeekDayChartCompleted[0]],
-
-
+                    this.lastWeekDayChartCompleted[4], this.lastWeekDayChartCompleted[5], this.lastWeekDayChartCompleted[6], this.lastWeekDayChartCompleted[0]]
                 },
-                {
-                    name: 'Pending',
-                    type: 'line',
-                    data: [this.lastWeekDayChartPending[1], this.lastWeekDayChartPending[2], this.lastWeekDayChartPending[3],
-                    this.lastWeekDayChartPending[4], this.lastWeekDayChartPending[5], this.lastWeekDayChartPending[6], this.lastWeekDayChartPending[0]]
-                },
-                {
-                    name: 'Failed',
-                    type: 'column',
-                    data: [this.lastWeekDayChartFailed[1], this.lastWeekDayChartFailed[2], this.lastWeekDayChartFailed[3],
-                    this.lastWeekDayChartFailed[4], this.lastWeekDayChartFailed[5], this.lastWeekDayChartFailed[6], this.lastWeekDayChartFailed[0]]
-                }
+                // {
+                //     name: 'Failed',
+                //     type: 'column',
+                //     data: [this.lastWeekDayChartFailed[1], this.lastWeekDayChartFailed[2], this.lastWeekDayChartFailed[3],
+                //     this.lastWeekDayChartFailed[4], this.lastWeekDayChartFailed[5], this.lastWeekDayChartFailed[6], this.lastWeekDayChartFailed[0]]
+                // }
             ]
         }
 
         // Sales summary
+        // this.salesChart = {
+        //     chart      : {
+        //         fontFamily: 'inherit',
+        //         foreColor : 'inherit',
+        //         height    : '100%',
+        //         type      : 'line',
+        //         toolbar   : {
+        //             show: false
+        //         },
+        //         zoom      : {
+        //             enabled: false
+        //         },
+        //     },
+        //     colors     : ['#3b82f6', '#f59e0b', '#ef4444'],
+        //     dataLabels : {
+        //         enabled        : true,
+        //         enabledOnSeries: [0, 1],
+        //         background     : {
+        //             borderWidth: 0
+        //         }
+        //     },
+        //     grid       : {
+        //         borderColor: 'var(--fuse-border)'
+        //     },
+        //     labels     : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        //     legend     : {
+        //         show: false
+        //     },
+        //     plotOptions: {
+        //         bar: {
+        //             columnWidth: '50%'
+        //         }
+        //     },
+        //     series     : this.seriesChart,
+        //     states     : {
+        //         hover: {
+        //             filter: {
+        //                 type : 'darken',
+        //                 value: 0.75
+        //             }
+        //         }
+        //     },
+        //     stroke     : {
+        //         width: [2, 2, 0]
+        //     },
+        //     tooltip    : {
+        //         y: [
+        //           {
+        //             title: {
+        //               formatter: function(val) {
+        //                 return val;
+        //               }
+        //             }
+        //           },
+        //           {
+        //             title: {
+        //               formatter: function(val) {
+        //                 return val;
+        //               }
+        //             }
+        //           },
+        //           {
+        //             title: {
+        //               formatter: function(val) {
+        //                 return val;
+        //               }
+        //             }
+        //           }
+        //         ]
+        //       },
+        //     xaxis      : {
+        //         axisBorder: {
+        //             show: false
+        //         },
+        //         axisTicks : {
+        //             color: 'var(--fuse-border)'
+        //         },
+        //         labels    : {
+        //             style: {
+        //                 colors: 'var(--fuse-text-secondary)'
+        //             }
+        //         },
+        //         tooltip   : {
+        //             enabled: false
+        //         }
+        //     },
+        //     yaxis      : {
+        //         labels: {
+        //             offsetX: -16,
+        //             style  : {
+        //                 colors: 'var(--fuse-text-secondary)'
+        //             },
+        //             formatter: function(val) {
+        //                 return val.toFixed(0)
+        //             },
+        //         },
+        //         tickAmount: 1,
+        //         title: {
+        //             text: `${this.currencySymbol}`
+        //           }
+        //     },
+        //     markers: {
+        //         size: 0,
+        //         hover: {
+        //           sizeOffset: 6
+        //         }
+        //       }
+        // };
+
+        const currency = this.store ? this.store.regionCountry.currencySymbol : '$';
+
         this.salesChart = {
-            chart      : {
-                fontFamily: 'inherit',
-                foreColor : 'inherit',
-                height    : '100%',
-                type      : 'line',
-                toolbar   : {
-                    show: false
-                },
-                zoom      : {
-                    enabled: false
-                },
+            chart: {
+              height: 380,
+              type: 'line',
+              stacked: false,
             },
-            colors     : ['#3b82f6', '#f59e0b', '#ef4444'],
-            dataLabels : {
-                enabled        : true,
-                enabledOnSeries: [0, 1],
-                background     : {
-                    borderWidth: 0
-                }
-            },
-            grid       : {
-                borderColor: 'var(--fuse-border)'
-            },
-            labels     : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            legend     : {
-                show: false
+            stroke: {
+              width: [0, 3, 5],
+              curve: 'straight'
             },
             plotOptions: {
-                bar: {
-                    columnWidth: '50%'
-                }
+              bar: {
+                columnWidth: '50%'
+              }
             },
-            series     : this.seriesChart,
-            states     : {
-                hover: {
-                    filter: {
-                        type : 'darken',
-                        value: 0.75
-                    }
-                }
+            series: this.seriesChart,
+            fill: {
+                opacity: [0.85, 0.85],
+                // gradient: {
+                //     inverseColors: false,
+                //     shade: 'light',
+                //     type: "vertical",
+                //     opacityFrom: 0.85,
+                //     opacityTo: 0.55,
+                //     stops: [0, 100, 100, 100]
+                // }
             },
-            stroke     : {
-                width: [2, 2, 0]
-            },
-            tooltip    : {
-                y: [
-                  {
-                    title: {
-                      formatter: function(val) {
-                        return val;
-                      }
-                    }
-                  },
-                  {
-                    title: {
-                      formatter: function(val) {
-                        return val;
-                      }
-                    }
-                  },
-                  {
-                    title: {
-                      formatter: function(val) {
-                        return val;
-                      }
-                    }
-                  }
-                ]
-              },
-            xaxis      : {
-                axisBorder: {
-                    show: false
-                },
-                axisTicks : {
-                    color: 'var(--fuse-border)'
-                },
-                labels    : {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            xaxis: {
+                labels: {
                     style: {
                         colors: 'var(--fuse-text-secondary)'
                     }
                 },
-                tooltip   : {
-                    enabled: false
-                }
             },
-            yaxis      : {
-                labels: {
-                    offsetX: -16,
-                    style  : {
-                        colors: 'var(--fuse-text-secondary)'
+            yaxis: [
+                {
+                    labels: {
+                        formatter: function (y) {
+                            if (typeof y !== "undefined") {
+                              return y.toFixed(2);
+                            }
+                            return y;
+                            
+                          }
                     },
-                    formatter: function(val) {
-                        return val.toFixed(0)
-                    },
+                    title: {
+                        style: {
+                            color: undefined,
+                            fontSize: '12px',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            cssClass: 'font-semibold',
+                        },
+                        text: `Sales Amount (${currency})`,
+                    }
                 },
-                tickAmount: 1,
-            },
-            markers: {
-                size: 0,
-                hover: {
-                  sizeOffset: 6
+                {
+                    opposite: true,
+                    labels: {
+                        formatter: function (y) {
+                            if (typeof y !== "undefined") {
+                              return  y.toFixed(0);
+                            }
+                            return y;
+                        }
+                    },
+                    title: {
+                        style: {
+                            color: undefined,
+                            fontSize: '12px',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            cssClass: 'font-semibold',
+                        },
+                        text: 'Completed Order',
+                    }
                 }
-              }
-        };
+            ],
+            tooltip: {
+              shared: true,
+              intersect: false,
+              y: [{
+                formatter: function (y) {
+                  if (typeof y !== "undefined") {
+                    return  currency + y.toFixed(2);
+                  }
+                  return y;
+                  
+                }
+              }, {
+                formatter: function (y) {
+                  if (typeof y !== "undefined") {
+                    return  y.toFixed(0);
+                  }
+                  return y;
+                }
+              }]
+            }
+      
+          }
 
         // Mark for check
         this._changeDetectorRef.markForCheck();

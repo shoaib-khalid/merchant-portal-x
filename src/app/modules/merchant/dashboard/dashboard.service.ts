@@ -13,7 +13,7 @@ import { DailyTopProducts, DailyTopProductsPagination,
          StaffSales,
          StaffSalesDetail,
          StaffSalesPagination,
-         SummarySales, SummarySalesPagination, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly, WeeklyGraph, WeeklySale
+         SummarySales, SummarySalesPagination, TotalSalesAmount, TotalSalesDaily, TotalSalesMonthly, TotalSalesTotal, TotalSalesWeekly, WeeklyGraph, WeeklySale
        } from './dashboard.types';
 import { AuthService } from 'app/core/auth/auth.service';
 
@@ -43,6 +43,7 @@ export class DashboardService
     private _totalSalesDaily: BehaviorSubject<TotalSalesDaily[] | null> = new BehaviorSubject(null);
     private _totalSalesWeekly: BehaviorSubject<TotalSalesWeekly[] | null> = new BehaviorSubject(null);
     private _totalSalesMonthly: BehaviorSubject<TotalSalesMonthly[] | null> = new BehaviorSubject(null);
+    private _totalSalesAmount: BehaviorSubject<TotalSalesAmount | null> = new BehaviorSubject(null);
 
     private _settlement: BehaviorSubject<Settlement[] | null> = new BehaviorSubject(null);
     private _settlementPagination: BehaviorSubject<SettlementPagination | null> = new BehaviorSubject(null);
@@ -50,6 +51,9 @@ export class DashboardService
     private _weeklySale: BehaviorSubject<WeeklySale[] | null> = new BehaviorSubject(null);
     private _weeklyGraphLastWeek: BehaviorSubject<WeeklyGraph[] | null> = new BehaviorSubject(null);
     private _weeklyGraphThisWeek: BehaviorSubject<WeeklyGraph[] | null> = new BehaviorSubject(null);
+
+    private _weeklySalesGraphLastWeek: BehaviorSubject<WeeklyGraph[] | null> = new BehaviorSubject(null);
+    private _weeklySalesGraphThisWeek: BehaviorSubject<WeeklyGraph[] | null> = new BehaviorSubject(null);
 
     private _staffSales: BehaviorSubject<StaffSales[] | null> = new BehaviorSubject(null);
     private _staffSalesPagination: BehaviorSubject<StaffSalesPagination | null> = new BehaviorSubject(null);
@@ -225,22 +229,27 @@ export class DashboardService
      * Getter for totalSales
      *
     */
-     get totalSalesTotal$(): Observable<TotalSalesTotal[]>
-     {
-         return this._totalSalesTotal.asObservable();
-     }
-     get totalSalesDaily$(): Observable<TotalSalesDaily[]>
-     {
-         return this._totalSalesDaily.asObservable();
-     }
-     get totalSalesWeekly$(): Observable<TotalSalesWeekly[]>
-     {
-         return this._totalSalesWeekly.asObservable();
-     }
-     get totalSalesMonthly$(): Observable<TotalSalesMonthly[]>
-     {
-         return this._totalSalesMonthly.asObservable();
-     }
+    get totalSalesTotal$(): Observable<TotalSalesTotal[]>
+    {
+        return this._totalSalesTotal.asObservable();
+    }
+    get totalSalesDaily$(): Observable<TotalSalesDaily[]>
+    {
+        return this._totalSalesDaily.asObservable();
+    }
+    get totalSalesWeekly$(): Observable<TotalSalesWeekly[]>
+    {
+        return this._totalSalesWeekly.asObservable();
+    }
+    get totalSalesMonthly$(): Observable<TotalSalesMonthly[]>
+    {
+        return this._totalSalesMonthly.asObservable();
+    }
+
+    get totalSalesAmount$(): Observable<TotalSalesAmount>
+    {
+        return this._totalSalesAmount.asObservable();
+    }
 
      /**
      * Getter for settlement
@@ -295,6 +304,24 @@ export class DashboardService
     get weeklyGraphThisWeek$(): Observable<WeeklyGraph[]>
     {
         return this._weeklyGraphThisWeek.asObservable();
+    }
+
+     /**
+     * Getter for weekly sales graph
+     *
+    */
+    get weeklySalesGraphLastWeek$(): Observable<WeeklyGraph[]>
+    {
+        return this._weeklySalesGraphLastWeek.asObservable();
+    }
+
+    /**
+     * Getter for weekly sales graph
+     *
+ */
+    get weeklySalesGraphThisWeek$(): Observable<WeeklyGraph[]>
+    {
+        return this._weeklySalesGraphThisWeek.asObservable();
     }
 
     /**
@@ -575,7 +602,42 @@ export class DashboardService
             );
     }
 
+    getTotalSalesAmount(id: string, serviceType: string):
+    Observable<TotalSalesAmount>
+    {
+        let reportService = this._apiServer.settings.apiServer.reportService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: {
+                serviceType: serviceType
+            }
+        };
+
+        // Delete empty value
+        Object.keys(header.params).forEach(key => {
+            if (Array.isArray(header.params[key])) {
+                header.params[key] = header.params[key].filter(element => element !== null)
+            }
+
+            if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
+                delete header.params[key];
+            }
+        });
+
+        return this._httpClient.get<TotalSalesAmount>
+            (reportService + '/store/' + id + '/totalSalesAmount', header)
+            .pipe(
+                tap((response) => {
+
+                    this._logging.debug("Response from ReportService (getTotalSalesAmount)", response);
+
+                    this._totalSalesAmount.next(response);
+                })
+            );
+    }
 
     getSettlement(id: string, page: number = 0, size: number = 10, sort: string = 'created', order: 'cycleStartDate' | 'cycleEndDate' | '' = 'cycleStartDate',
                         from: string = this.fromDate, to: string = this.todayDate):
@@ -696,6 +758,59 @@ export class DashboardService
                     }
                     else if (period === 'this-week') {
                         this._weeklyGraphThisWeek.next(response["dashboardGraph"]);
+                    }
+
+                })
+            );
+    }
+
+    getWeeklySalesGraph(
+        id: string,
+        period: 'last-week' | 'this-week' = 'this-week',
+        params: {
+            from: string,
+            to: string,
+            serviceType: string
+        } =
+        {
+            from: '',
+            to: '',
+            serviceType: 'DELIVERIN'
+        }):
+    Observable<{ weeklyGraph: WeeklyGraph[] }>
+    {
+        let reportService = this._apiServer.settings.apiServer.reportService;
+        let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+        let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+            params: params
+        };
+
+        // Delete empty value
+        Object.keys(header.params).forEach(key => {
+            if (Array.isArray(header.params[key])) {
+                header.params[key] = header.params[key].filter(element => element !== null)
+            }
+
+            if (!header.params[key] || (Array.isArray(header.params[key]) && header.params[key].length === 0)) {
+                delete header.params[key];
+            }
+        });
+
+        return this._httpClient.get<{ weeklyGraph: WeeklyGraph[] }>
+            (reportService + '/store/' + id + '/weeklySalesGraph', header)
+            .pipe(
+                tap((response) => {
+
+                    this._logging.debug("Response from ReportService (getWeeklySalesGraph) - " + period, response);
+
+                    if (period === 'last-week') {
+                        this._weeklySalesGraphLastWeek.next(response["dashboardGraph"]);
+                    }
+                    else if (period === 'this-week') {
+                        this._weeklySalesGraphThisWeek.next(response["dashboardGraph"]);
                     }
 
                 })

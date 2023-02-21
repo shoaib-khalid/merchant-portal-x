@@ -106,24 +106,43 @@ export interface TotalSalesDaily
 {
     total: number;
     completionStatus: string;
+    date: string;
+    totalSalesAmount: number;
 }
 
 export interface TotalSalesWeekly
 {
     total: number;
     completionStatus: string;
+    date: string;
+    totalSalesAmount: number;
+
 }
 
 export interface TotalSalesMonthly
 {
     total: number;
     completionStatus: string;
+        date: string;
+    totalSalesAmount: number;
+
 }
 
 export interface TotalSalesTotal
 {
     total: number;
     completionStatus: string;
+    date: string;
+    totalSalesAmount: number;
+
+}
+
+export interface TotalSalesAmount
+{
+    dailySales  : TotalSalesTotal[];
+    monthlySales: TotalSalesTotal[];
+    totalSales  : TotalSalesTotal[];
+    weeklySales : TotalSalesTotal[];
 }
 
 export interface WeeklySale
@@ -138,6 +157,7 @@ export interface WeeklyGraph
     date: string;
     total: number;
     completionStatus: string;
+    totalSalesAmount: number;
 }
 
 ////
