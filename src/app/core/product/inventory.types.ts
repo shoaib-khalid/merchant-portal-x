@@ -1,7 +1,7 @@
 export interface Product
 {
-    product: ProductInventory;
-    id: string;
+    product?: ProductInventory;
+    id?: string;
     name: string;
     description: string;
     storeId: string;
@@ -27,7 +27,11 @@ export interface Product
     customNote?: string;
     isNoteOptional?: boolean;
     hasAddOn: boolean;
-    sequenceNumber?: number
+    sequenceNumber?: number;
+    isCustomPrice?: boolean;
+    isVariants?: boolean;
+    isBulkItem?: boolean;
+    vehicleType?: string;
 }
 
 /**

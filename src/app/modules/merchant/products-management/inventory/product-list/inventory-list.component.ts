@@ -917,6 +917,7 @@ export class InventoryListComponent implements OnInit, AfterViewInit, OnDestroy
     changeSequence(value: any, product: Product) {
 
         let { productAssets, productInventories, productReviews, productVariants, thumbnailUrl, ...productToUpdate} = product;
+        // '+' is used to convert from string to number type
         productToUpdate.sequenceNumber = +value.target.value;
 
         this._inventoryService.updateProduct(product.id, productToUpdate).subscribe();

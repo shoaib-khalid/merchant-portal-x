@@ -43,7 +43,7 @@ export class DashboardResolver implements Resolve<any>
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
     {
         return forkJoin([
-            this._dashboardService.getData(),
+            // this._dashboardService.getData(),
             this._storesService.getStoreById(this.storeId$)
         ]);
     }

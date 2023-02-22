@@ -1570,6 +1570,7 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
         product.seoName = product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
         product.seoUrl = storeFrontURL + '/product/' + product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
         product.name = product.name.trim();
+        product.isCustomPrice = false;
 
         // Get the product object for updating the product
         const { productAssets, productInventories, productReviews, productVariants, images, imagefiles, thumbnailIndex, ...productToUpdate} = product;

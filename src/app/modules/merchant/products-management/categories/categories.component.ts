@@ -26,7 +26,7 @@ import { DOCUMENT } from '@angular/common';
                 grid-template-columns: 52px 18px 36px auto 40px;
 
                 @screen sm {
-                    grid-template-columns: 52px 18px 78px auto 40px;
+                    grid-template-columns: 52px 18px 78px auto 108px;
                 }
             }
 
@@ -70,16 +70,8 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
     categoriesForm: FormGroup;
     categoriesList: ProductCategory[];
     pagination: ProductCategoryPagination;
-
-    // discount tier
-    calculationType: string;
-    discountAmount: number;
-    // endTotalSalesAmount: number;
-    startTotalSalesAmount: number;
-
     // Image part    
     files: any;
-
 
     flashMessage: 'success' | 'error' | null = null;
     isLoading: boolean = false;
@@ -476,8 +468,8 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
 
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title  : 'Delete category',
-            message: 'Are you sure you want to disable this category? Current category of this product will be remove permenantly!',
+            title  : 'Delete Category',
+            message: 'This category will be removed permenantly!',
             actions: {
                 confirm: {
                     label: 'Delete'
@@ -564,7 +556,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
         if (this.files[index].selectedFiles[0].size > maxSize ) {
             // Show a success message (it can also be an error message)
             const confirmation = this._fuseConfirmationService.open({
-                title  : 'Image size limit',
+                title  : 'Image Size Limit',
                 message: 'Your uploaded image exceeds the maximum size of ' + maxSizeInMB + ' MB!',
                 icon: {
                     show: true,
@@ -664,7 +656,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy
         if (this.selection.selected.length > 0) {
             // Open the confirmation dialog
             const confirmation = this._fuseConfirmationService.open({
-                title  : 'Delete selected categories',
+                title  : 'Delete Selected Categories',
                 message: 'Are you sure you want to delete categories? This action cannot be undone!',
                 actions: {
                     confirm: {

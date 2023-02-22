@@ -115,34 +115,6 @@ export class InventoryProductsResolver implements Resolve<any>
     }
 }
 
-// @Injectable({
-//     providedIn: 'root'
-// })
-// export class InventoryTagsResolver implements Resolve<any>
-// {
-//     /**
-//      * Constructor
-//      */
-//     constructor(private _inventoryService: InventoryService)
-//     {
-//     }
-
-//     // -----------------------------------------------------------------------------------------------------
-//     // @ Public methods
-//     // -----------------------------------------------------------------------------------------------------
-
-//     /**
-//      * Resolver
-//      *
-//      * @param route
-//      * @param state
-//      */
-//     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<ProductVariant[]>
-//     {
-//         return this._inventoryService.getVariants();
-//     }
-// }
-
 @Injectable({
     providedIn: 'root'
 })

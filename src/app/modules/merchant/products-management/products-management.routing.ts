@@ -15,6 +15,8 @@ import { AddOnGroupOnProductResolver } from './inventory/product-details/addon-p
 import { EditProductComponent2 } from './inventory/product-details/edit-product/edit-product.component';
 import { CanDeactivateEditInventory } from './inventory/product-details/edit-product/edit-product.guards';
 import { InventoryListComponent } from './inventory/product-list/inventory-list.component';
+import { OpenItemComponent } from './open-item/open-item.component';
+import { GetStoreResolver, OpenItemResolver } from './open-item/open-item.resolvers';
 // import { CategoriesResolver, CategoriesProductsResolver, CategoriesTagsResolver, } from './categories/categories.resolvers';
 // import { InventoryBrandsResolver
 
@@ -127,6 +129,20 @@ export const productsManagementRoutes: Route[] = [
                     }
                 ]
             
+            }
+        ]
+    
+    },
+    {
+        path     : 'open-item',
+        component: OpenItemComponent,
+        children : [
+            {
+                path     : '',
+                resolve  : {
+                    items: OpenItemResolver,
+                    storeById : GetStoreResolver
+                }
             }
         ]
     

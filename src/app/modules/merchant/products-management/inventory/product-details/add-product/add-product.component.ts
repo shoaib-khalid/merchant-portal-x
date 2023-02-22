@@ -1051,6 +1051,7 @@ export class AddProductComponent2 implements OnInit, OnDestroy
         newProductBody["isPackage"] = (this.productType === "combo") ? true : false;
         newProductBody["allowOutOfStockPurchases"] = ((this.store$.verticalCode === "FnB" || this.store$.verticalCode === "FnB_PK") && (newProductBody.status !== "OUTOFSTOCK")) ? true : false;
         newProductBody["name"] = newProductBody.name.trim();
+        newProductBody["isCustomPrice"] = false;
 
         // Create the product
         this._inventoryService.createProduct(newProductBody)
@@ -2656,11 +2657,14 @@ export class AddProductComponent2 implements OnInit, OnDestroy
             });
         }
 
-        let normalImagesArr = this.productImages;
+        let normalImagesArr = [];
 
         // If one of the variant images is thumbnail, set all normal images thumbnail to false
         if (variantImagesArr.some(item => item.isThumbnail === true)) {
-            normalImagesArr.map(item => item.isThumbnail = false)
+            normalImagesArr = this.productImages.map(item => ({ ...item, isThumbnail: false}))
+        }
+        else {
+            normalImagesArr = this.productImages;
         }
 
         // Filter out elements with file

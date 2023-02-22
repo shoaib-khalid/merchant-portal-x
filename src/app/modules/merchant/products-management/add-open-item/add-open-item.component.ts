@@ -11,10 +11,10 @@ import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 
 @Component({
-    selector: 'dialog-add-category',
-    templateUrl: './add-category.component.html'
+    selector: 'dialog-add-open-item',
+    templateUrl: './add-open-item.component.html'
 })
-export class AddCategoryComponent implements OnInit {
+export class AddOpenItemComponent implements OnInit {
   
     disabledProceed: boolean = true;
     checkname = false;
@@ -30,7 +30,7 @@ export class AddCategoryComponent implements OnInit {
   
     message: string = "";
     referenceId: any;
-    addCategoryForm: FormGroup;
+    addOpenItemForm: FormGroup;
     
     // product assets
     thumbnailUrl: any = [];
@@ -46,7 +46,7 @@ export class AddCategoryComponent implements OnInit {
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
   constructor(
-    public dialogRef: MatDialogRef<AddCategoryComponent>,
+    public dialogRef: MatDialogRef<AddOpenItemComponent>,
     private _jwt: JwtService,
     private _changeDetectorRef: ChangeDetectorRef,
     private _inventoryService: InventoryService,
@@ -76,24 +76,12 @@ export class AddCategoryComponent implements OnInit {
     ngOnInit(): void {
 
       // Create the selected product form
-      this.addCategoryForm = this._formBuilder.group({
-        name             : ['',[Validators.required]],
-        parentCategoryId : ['',[Validators.required]],
+      this.addOpenItemForm = this._formBuilder.group({
+        name             : ['', [Validators.required]],
+        status             : ['', [Validators.required]],
         thumbnailUrl     : [[]],
         imagefiles:[[]],
       });
-
-      //Get the vertical code for this store id first then we get the parent categories
-        this._storesService.store$
-        .pipe(
-            map((response)=>{
-                return this.storeVerticalCode = response.verticalCode;
-            }),
-            switchMap((storeVerticalCode:string)=> this._inventoryService.parentCategories$),
-        )
-        .subscribe((categories) => {
-            this.parentCategoriesOptions = categories;
-        });
   
     }
 
@@ -101,19 +89,19 @@ export class AddCategoryComponent implements OnInit {
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------  
 
-    addNewCategory() {
-        this.addCategoryForm.get('thumbnailUrl').patchValue(this.thumbnailUrl);
-        this.addCategoryForm.get('imagefiles').patchValue(this.imagesFile);
+    addNew() {
+        this.addOpenItemForm.get('thumbnailUrl').patchValue(this.thumbnailUrl);
+        this.addOpenItemForm.get('imagefiles').patchValue(this.imagesFile);
 
-        if (this.addCategoryForm.invalid)
+        if (this.addOpenItemForm.invalid)
         {
             return;
         }
 
-        this.dialogRef.close({ value: this.addCategoryForm.value, status: true });
+        this.dialogRef.close({ value: this.addOpenItemForm.value, status: true });
     }
 
-    cancelCreateCategory(){
+    cancelCreate(){
         this.dialogRef.close({ value: null, status: false });
     }
 
@@ -184,17 +172,21 @@ export class AddCategoryComponent implements OnInit {
             this._changeDetectorRef.markForCheck();
         }
 
-        const product = this.addCategoryForm.getRawValue();
+        const product = this.addOpenItemForm.getRawValue();
     }
 
     /**
-     * Remove the image
+     * 
+     * Check if the product name already exists
+     * 
+     * @param value 
      */
-    removeImage(): void
-    {
-        const index = this.currentImageIndex;
-        if (index > -1) {
-            this.addCategoryForm.get('images').value.splice(index, 1);
+    async checkProductName(name: string){
+
+        let status = await this._inventoryService.getExistingProductName(name.trim());
+        if (status === 409){
+            this.addOpenItemForm.get('name').setErrors({productAlreadyExists: true});
         }
     }
+
 }

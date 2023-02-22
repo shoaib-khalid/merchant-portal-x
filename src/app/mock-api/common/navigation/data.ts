@@ -57,6 +57,13 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 type : 'basic',
                 link : '/products/addon',
                 exactMatch: true
+            },
+            {
+                id   : 'app.manage-open-item',
+                title: 'Manage Open Item',
+                type : 'basic',
+                link : '/products/open-item',
+                exactMatch: true
             }
         ],
     },

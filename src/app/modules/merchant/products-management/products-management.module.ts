@@ -35,6 +35,8 @@ import { AddProductComponent2 } from './inventory/product-details/add-product/ad
 import { EditProductComponent2 } from './inventory/product-details/edit-product/edit-product.component';
 import { InventoryListComponent } from './inventory/product-list/inventory-list.component';
 import { DuplicateProductsModalComponent } from './inventory/product-duplicate-modal/product-duplicate-modal.component';
+import { OpenItemComponent } from './open-item/open-item.component';
+import { AddOpenItemComponent } from './add-open-item/add-open-item.component';
 
 @NgModule({
     declarations: [
@@ -48,7 +50,9 @@ import { DuplicateProductsModalComponent } from './inventory/product-duplicate-m
         AddOnListComponent,
         AddOnDetailsComponent,
         AddOnComponent,
-        DuplicateProductsModalComponent
+        DuplicateProductsModalComponent,
+        OpenItemComponent,
+        AddOpenItemComponent
     ],
     imports     : [
         RouterModule.forChild(productsManagementRoutes),

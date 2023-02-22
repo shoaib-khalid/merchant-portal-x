@@ -9,7 +9,7 @@
             <mat-progress-bar [mode]="'indeterminate'"></mat-progress-bar>
         </div>
         <!-- Title -->
-        <div class="text-4xl font-extrabold tracking-tight">Product Categories</div>
+        <div class="text-4xl font-extrabold tracking-tight">Open Item</div>
         <!-- Actions -->
         <div class="flex flex-shrink-0 items-center mt-6 sm:mt-0 sm:ml-4">
             <!-- Search -->
@@ -22,13 +22,13 @@
                     matInput
                     [formControl]="searchInputControl"
                     [autocomplete]="'off'"
-                    [placeholder]="'Search categories'">
+                    [placeholder]="'Search open items'">
             </mat-form-field>
             <!-- Add category button -->
             <button
                 id="create-discount-btn"
                 class="ml-4"
-                (click)="createCategory()"
+                (click)="createOpenItem()"
                 mat-flat-button
                 [color]="'primary'">
                 <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
@@ -42,18 +42,18 @@
 
         <!-- Categories list -->
         <div class="flex flex-col flex-auto sm:mb-18 overflow-hidden sm:overflow-y-auto" cdkScrollable>
-            <ng-container *ngIf="categoriesList.length > 0; else noCategories">
+            <ng-container *ngIf="itemList.length > 0; else noOpenItem">
                 <div class="grid">
                     <!-- Header -->
                     <div
-                        class="categories-grid items-center z-10 sticky top-0 grid gap-2 sm:gap-4 py-2 px-6 md:px-8 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                        class="item-grid items-center z-10 sticky top-0 grid gap-2 sm:gap-4 py-2 px-6 md:px-8 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
                         matSort
                         matSortDisableClear>
                         <!-- Slide toggle for reorder list -->
                         <div class="flex flex-col">
                             <mat-slide-toggle 
                                 [matTooltip]="setOrderEnabled ? 'Disable toggle to save the current order' : 'Enable toggle and drag the handle to change the order'"
-                                [disabled]="selectedCategory || selection.hasValue()"
+                                [disabled]="selectedProduct || selection.hasValue()"
                                 [color]="'primary'"
                                 [(ngModel)]="setOrderEnabled" 
                                 [ngModelOptions]="{standalone: true}"
@@ -72,7 +72,7 @@
                             <button mat-icon-button 
                             class=""
                             [ngClass]="selection.hasValue() ? 'visible' : 'invisible'"
-                            (click)="deleteCategories()">
+                            (click)="deleteItems()">
                                 <mat-icon
                                     class=""
                                     [color]="'warn'"
@@ -80,14 +80,15 @@
                                 </mat-icon>
                             </button>
                         </div>
-                        <div [mat-sort-header]="'name'">Category Name</div>
+                        <div>Open Item Name</div>
+                        <span>Status</span>
                         <div class="block">Details</div>
                     </div>
                     <!-- Rows -->
                     <div cdkDropList [cdkDropListDisabled]="!setOrderEnabled" (cdkDropListDropped)="dropUpperLevel($event)" 
                         [cdkDropListAutoScrollStep]="10" class="list-class">
-                        <ng-container *ngFor="let category of categoriesList; trackBy: trackByFn; let i = index">
-                            <div id="cat-{{i}}" cdkDrag class="contain-class categories-grid grid items-center gap-2 sm:gap-4 py-3 px-6 md:px-8 border-b">
+                        <ng-container *ngFor="let openItem of itemList; trackBy: trackByFn; let i = index">
+                            <div id="cat-{{i}}" cdkDrag class="contain-class item-grid grid items-center gap-2 sm:gap-4 py-3 px-6 md:px-8 border-b">
                                 <!-- Sequence -->
                                 <div class="flex items-center" cdkDragHandle>
                                     <mat-icon 
@@ -99,8 +100,8 @@
                                 <div>
                                     <mat-checkbox [color]="'primary'" (click)="$event.stopPropagation()"
                                         (change)="setOrderEnabled = false"
-                                        (change)="$event ? selection.toggle(category) : null"
-                                        [checked]="selection.isSelected(category)">
+                                        (change)="$event ? selection.toggle(openItem) : null"
+                                        [checked]="selection.isSelected(openItem)">
                                     </mat-checkbox>
                                 </div>
                                 <div class="sm:hidden"></div>
@@ -109,19 +110,29 @@
                                     <div class="relative flex flex-0 items-center justify-center w-20 h-20 mr-6 rounded overflow-hidden border">
                                         <img
                                             class="w-full p-2"
-                                            *ngIf="category.thumbnailUrl"
-                                            [alt]="'category thumbnail image'"
-                                            [src]="category.thumbnailUrl">
-                                        <img
+                                            *ngIf="openItem.thumbnailUrl"
+                                            [alt]="'openItem thumbnail image'"
+                                            [src]="openItem.thumbnailUrl">
+                                        <!-- <img
                                             class="w-full p-2"
-                                            *ngIf="!category.thumbnailUrl"
-                                            [src]="displayStoreLogo(store.storeAssets)">
+                                            *ngIf="!openItem.thumbnailUrl"
+                                            [src]="displayStoreLogo(store.storeAssets)"> -->
+                                        <div
+                                            class="flex items-center justify-center w-full h-full text-xs font-semibold leading-none text-center uppercase"
+                                            *ngIf="!openItem.thumbnailUrl">
+                                            NO THUMB
+                                        </div>
                                     </div>
                                 </div>
     
                                  <!-- Name -->
                                  <div class="truncate">
-                                    {{ category.name }}
+                                    {{ openItem.name }}
+                                </div>
+
+                                <!-- Status -->
+                                <div class="truncate">
+                                    {{ openItem.status }}
                                 </div>
     
                                 <!-- Details button -->
@@ -129,17 +140,17 @@
                                     <button
                                         class="min-w-10 min-h-7 h-7 px-2 leading-6"
                                         mat-stroked-button
-                                        (click)="toggleDetails(category.id);">
+                                        (click)="toggleDetails(openItem.id);">
                                         <mat-icon
                                             class="icon-size-5"
-                                            [svgIcon]="selectedCategory?.id === category.id ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'">
+                                            [svgIcon]="selectedProduct?.id === openItem.id ? 'heroicons_solid:chevron-up' : 'heroicons_solid:chevron-down'">
                                         </mat-icon>
                                     </button>
                                 </div>
                             </div>
                             <div class="grid">
-                                <ng-container *ngIf="selectedCategory?.id === category.id">
-                                    <ng-container *ngTemplateOutlet="rowDetailsTemplate; context: {$implicit: category}"></ng-container>
+                                <ng-container *ngIf="selectedProduct?.id === openItem.id">
+                                    <ng-container *ngTemplateOutlet="rowDetailsTemplate; context: {$implicit: openItem}"></ng-container>
                                 </ng-container>
                             </div>
                         </ng-container>
@@ -166,22 +177,26 @@
                         <!-- Selected discount form -->
                         <form
                             class="flex flex-col w-full"
-                            [formGroup]="categoriesForm">
+                            [formGroup]="productForm">
                             <div class="flex flex-col sm:flex-row px-8 pt-4 pb-4 w-full gap-4 sm:gap-20">
                                 <!-- Image -->
                                 <div class="flex w-full items-center justify-center sm:justify-end">
                                     <div class="relative flex flex-col w-full sm:w-1/3 items-center justify-center sm:h-full">
                                         <!-- Image Frame -->
                                         <div class="w-30 h-30 max-h-full sm:w-44 sm:h-44 border rounded overflow-hidden">
-                                            <ng-container *ngIf="this.files[0].fileSource ; else noImage">
+                                            <ng-container *ngIf="image.preview ; else noImage">
                                                 <img
                                                     class="w-full h-full object-cover"
-                                                    [src]="this.files[0].fileSource">
+                                                    [src]="image.preview">
                                             </ng-container>
                                             <ng-template #noImage>
-                                                <img
+                                                <!-- <img
                                                     class="w-full h-full object-contain"
-                                                    [src]="displayStoreLogo(store.storeAssets)">
+                                                    [src]="displayStoreLogo(store.storeAssets)"> -->
+                                                <div
+                                                    class="flex items-center justify-center w-full h-full text-base font-semibold leading-none text-center uppercase">
+                                                    NO THUMB
+                                                </div>
                                             </ng-template>
                                         </div>
                                         <div class="absolute bottom-0 bg-black rounded-b bg-opacity-50 w-30 sm:w-44 h-1/4 flex justify-center items-center whitespace-nowrap">
@@ -193,7 +208,7 @@
                                                     type="file"
                                                     [multiple]="false"
                                                     [accept]="'image/jpeg, image/png'"
-                                                    (change)="selectFiles('logo',$event)"
+                                                    (change)="changeImage(imageFileInput.files)"
                                                     #imageFileInput>
                                                 <label
                                                     class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
@@ -201,7 +216,7 @@
                                                     matRipple>
                                                     <mat-icon
                                                         class="icon-size-5 text-white"
-                                                        [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                                                        [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
                                                 </label>
                                             </div>
                                             <!-- remove image -->
@@ -228,35 +243,40 @@
                                 <!-- Parent / Category Name -->
                                 <div class="flex flex-row w-full items-center justify-center sm:justify-start">
                                     <div class="flex flex-col w-full sm:w-1/3 items-center sm:items-start justify-center">
-                                        <!-- Parent Category Name -->
-                                        <mat-form-field class="w-full px-4 sm:px-0 fuse-mat-no-subscript mb-3">
-                                            <mat-label>Parent Category Name</mat-label>
-                                            <mat-select
-                                                class="w-full"
-                                                placeholder="Choose Parent Category"
-                                                [formControlName] = "'parentCategoryId'"
-                                           >
-                                           <mat-option *ngFor="let listing of parentCategoriesOptions;" [value]="listing.id">
-                                            <div class="flex flex-row gap-3 items-center">
-                                                <img
-                                                    class="w-7 h-7 rounded-full object-cover"
-                                                    [src]="listing.thumbnailUrl">
-                                                <span>
-                                                    {{listing.name}}
-                                                </span>
-                                            </div>
-                                        </mat-option>
-                                            </mat-select>
-                                        </mat-form-field>
                                         <!-- Name -->
-                                        <mat-form-field class="w-full px-4 sm:px-0 fuse-mat-no-subscript">
-                                            <mat-label>Category Name</mat-label>
+                                        <mat-form-field class="w-full" floatLabel="always">
+                                            <mat-label>Name</mat-label>
                                             <input
                                                 matInput
                                                 [formControlName]="'name'"
                                             >
-                                            <mat-error *ngIf="categoriesForm.get('name').hasError('required')">
-                                                Category name is required
+                                            <mat-error *ngIf="productForm.get('name').hasError('required')">
+                                                Name is required
+                                            </mat-error>
+                                        </mat-form-field>
+                                        <!-- Status -->
+                                        <mat-form-field class="w-full" floatLabel="always">
+                                            <mat-label class="font-medium">Status</mat-label>
+                                            <mat-select
+                                                required
+                                                floatLabel="always"
+                                                placeholder="Select status"
+                                                [formControlName]="'status'"
+                                                #statusSelector="matSelect"
+                                                >
+                                                <mat-select-trigger>
+                                                    <span class="flex items-center">
+                                                        <span>{{ statusSelector.triggerValue }}</span>
+                                                    </span>
+                                                </mat-select-trigger>
+                                                <div>
+                                                    <mat-option [value]="'ACTIVE'">Active</mat-option>
+                                                    <mat-option [value]="'INACTIVE'">Inactive</mat-option>
+                                                    <mat-option [value]="'OUTOFSTOCK'">Out of Stock</mat-option>
+                                                </div>
+                                            </mat-select>
+                                            <mat-error *ngIf="productForm.get('status').hasError('required')">
+                                                Status is required
                                             </mat-error>
                                         </mat-form-field>
                                     </div>
@@ -270,7 +290,7 @@
                                 <input
                                     id="product-remove-button"
                                     type="button"
-                                    (click)="deleteCategory()"
+                                    (click)="deleteOpenItem()"
                                     class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                     mat-button>
                                 <label 
@@ -303,7 +323,7 @@
                                     <button
                                         mat-flat-button
                                         [color]="'primary'"
-                                        (click)="updateCategory()">
+                                        (click)="updateOpenItem()">
                                         Update
                                     </button>
                                 </div>
@@ -312,8 +332,8 @@
                     </div>
                 </div>
             </ng-template>
-            <ng-template #noCategories>
-                <div class="p-8 sm:p-16 border-t text-4xl font-semibold tracking-tight text-center">There are no categories!</div>
+            <ng-template #noOpenItem>
+                <div class="p-8 sm:p-16 border-t text-4xl font-semibold tracking-tight text-center">There are no Open Items!</div>
             </ng-template>
         </div>
     </div>
