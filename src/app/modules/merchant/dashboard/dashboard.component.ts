@@ -421,6 +421,27 @@ export class DashboardComponent implements OnInit, OnDestroy
                     this.currencySymbol = store.regionCountry.currencySymbol;
                     this.verticalCode = store.verticalCode;
                     this.store = store;
+
+                    let serviceType: string = '';
+                    
+                    //  Get the service type
+                    if (store.isDineIn && store.isDelivery) {
+                        serviceType = '';
+                    }
+                    else if (store.isDineIn && !store.isDelivery) {
+                        serviceType = 'DINEIN';
+                        this.orderSummaryServiceType = 'DINEIN';
+                    }
+                    else if (!store.isDineIn && store.isDelivery) {
+                        serviceType = 'DELIVERIN';
+                    }
+
+                    // Set service type to the service type control 
+                    this.orderSummary_serviceTypeControl.patchValue(serviceType, {onlySelf: true, emitEvent: false});
+                    this.summarySales_serviceTypeControl.patchValue(serviceType, {onlySelf: true, emitEvent: false});
+                    this.detailedDailySales_serviceTypeControl.patchValue(serviceType, {onlySelf: true, emitEvent: false});
+                    this.staffSales_serviceTypeControl.patchValue(serviceType, {onlySelf: true, emitEvent: false});
+                    this.salesOverview_serviceTypeControl.patchValue(serviceType, {onlySelf: true, emitEvent: false});
                 }
 
                 // Mark for check
@@ -865,7 +886,7 @@ export class DashboardComponent implements OnInit, OnDestroy
 
                     this.summarySalesDateRange.end = formattedDate;
 
-                    return this._dashboardService.getSummarySales(this.storeId$, {
+                    return this._dashboardService.getSummarySales(this.storeId$, this.summarySalesServiceType, {
                         page: 0,
                         pageSize: this.summarySalesPageSize,
                         sortBy: 'created',
@@ -891,7 +912,7 @@ export class DashboardComponent implements OnInit, OnDestroy
                 switchMap((value) => {
 
                     this.isLoading = true;
-                    return this._dashboardService.getSummarySales(this.storeId$, {
+                    return this._dashboardService.getSummarySales(this.storeId$, value, {
                         page: 0,
                         pageSize: this.summarySalesPageSize,
                         sortBy: 'created',
@@ -934,7 +955,7 @@ export class DashboardComponent implements OnInit, OnDestroy
 
 
                     this.isLoading = true;
-                    return this._dashboardService.getDetailedDailySales(this.storeId$, {
+                    return this._dashboardService.getDetailedDailySales(this.storeId$, value, {
                         page: 0,
                         pageSize: this.detailedDailySalesPageSize,
                         sortBy: 'created',
@@ -991,14 +1012,16 @@ export class DashboardComponent implements OnInit, OnDestroy
 
                     this.detailedDailySalesDateRange.end = formattedDate;
 
-                    return this._dashboardService.getDetailedDailySales(this.storeId$, {
-                        page: 0,
-                        pageSize: this.detailedDailySalesPageSize,
-                        sortBy: 'created',
-                        sortingOrder: 'ASC',
-                        startDate: this.detailedDailySalesDateRange.start,
-                        endDate: this.detailedDailySalesDateRange.end,
-                        serviceType: this.detailedDailySalesServiceType
+                    return this._dashboardService.getDetailedDailySales(this.storeId$, 
+                        this.detailedDailySalesServiceType, 
+                        {
+                            page: 0,
+                            pageSize: this.detailedDailySalesPageSize,
+                            sortBy: 'created',
+                            sortingOrder: 'ASC',
+                            startDate: this.detailedDailySalesDateRange.start,
+                            endDate: this.detailedDailySalesDateRange.end,
+                            serviceType: this.detailedDailySalesServiceType
                     });
 
                 }),
@@ -1596,7 +1619,7 @@ export class DashboardComponent implements OnInit, OnDestroy
 
                         this.detailedDailySalesPageSize = this._detailedDailySalesPaginator.pageSize;
 
-                        return this._dashboardService.getDetailedDailySales(this.storeId$, {
+                        return this._dashboardService.getDetailedDailySales(this.storeId$, this.detailedDailySalesServiceType, {
                             page: this._detailedDailySalesPaginator.pageIndex,
                             pageSize: this._detailedDailySalesPaginator.pageSize,
                             sortBy: 'created',
@@ -1625,7 +1648,7 @@ export class DashboardComponent implements OnInit, OnDestroy
 
                         this.summarySalesPageSize = this._summarySalesPaginator.pageSize;
 
-                        return this._dashboardService.getSummarySales(this.storeId$, {
+                        return this._dashboardService.getSummarySales(this.storeId$, this.summarySalesServiceType, {
                             page: this._summarySalesPaginator.pageIndex,
                             pageSize: this._summarySalesPaginator.pageSize,
                             sortBy: 'created',

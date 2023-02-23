@@ -1,6 +1,6 @@
 import { Route } from '@angular/router';
 import { DashboardComponent } from 'app/modules/merchant/dashboard/dashboard.component';
-import { DashboardResolver, DailyTopProductsResolver, DetailedDailySalesResolver, SummarySalesResolver, TotalSalesResolver, SettlementResolver, WeeklySaleResolver, OrdersListResolver, WeeklyGraphResolver } from 'app/modules/merchant/dashboard/dashboard.resolvers';
+import { DashboardResolver, DailyTopProductsResolver, DetailedDailySalesResolver, SummarySalesResolver, TotalSalesResolver, SettlementResolver, WeeklySaleResolver, OrdersListResolver, DashboardDataResolver } from 'app/modules/merchant/dashboard/dashboard.resolvers';
 
 export const dashboardRoutes: Route[] = [
     {
@@ -8,15 +8,15 @@ export const dashboardRoutes: Route[] = [
         component: DashboardComponent,
         runGuardsAndResolvers: "always",
         resolve  : {
-            data: DashboardResolver,
+            // data: DashboardResolver,
             dailyTopProducts: DailyTopProductsResolver,
-            detailedDailySalesResolver: DetailedDailySalesResolver,
-            summarySalesResolver: SummarySalesResolver,
-            totalSalesResolver: TotalSalesResolver,
+            // detailedDailySalesResolver: DetailedDailySalesResolver,
+            // summarySalesResolver: SummarySalesResolver,
+            // totalSalesResolver: TotalSalesResolver,
             settlementResolver: SettlementResolver,
-            weeklySalesResolver: WeeklySaleResolver,
-            OrdersListResolver: OrdersListResolver,
-            weeklyGraphResolver: WeeklyGraphResolver
+            // weeklySalesResolver: WeeklySaleResolver,
+            // OrdersListResolver: OrdersListResolver,
+            dashboardDataResolver: DashboardDataResolver
         }
     }
 ];

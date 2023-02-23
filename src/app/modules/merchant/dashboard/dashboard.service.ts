@@ -428,6 +428,7 @@ export class DashboardService
 
     getDetailedDailySales(
         id: string,
+        service_Type: string,
         params: {
             page: number,
             pageSize: number,
@@ -452,6 +453,8 @@ export class DashboardService
         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
         let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
+        params.serviceType = service_Type;
+        
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
             params: params
@@ -492,7 +495,9 @@ export class DashboardService
             );
     }
 
-    getSummarySales(id: string,
+    getSummarySales(
+        id: string, 
+        service_Type: string,
         params: {
             page: number,
             pageSize: number,
@@ -519,6 +524,8 @@ export class DashboardService
         let accessToken = this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
         let clientId = this._jwt.getJwtPayload(this._authService.jwtAccessToken).uid;
 
+        params.serviceType = service_Type;
+        
         const header = {
             headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
             params: params
