@@ -1290,4 +1290,23 @@ export class StoresService
             })
         );
     }
+
+    generateStorePrefix(body: { name: string}) : Observable<any>
+    {
+        let productService = this._apiServer.settings.apiServer.productService;
+        let accessToken = this._authService.jwtAccessToken === this._jwt.getJwtPayload(this._authService.jwtAccessToken).act;
+
+        const header = {
+            headers: new HttpHeaders().set("Authorization", `Bearer ${accessToken}`),
+        };
+
+        return this._httpClient.post<any>(productService + '/stores/generateprefix', body, header).pipe(
+            map((response) => {
+
+                this._logging.debug("Response from StoresService (generateStorePrefix)", response);
+
+                return response.data;
+            })
+        );
+    }
 }

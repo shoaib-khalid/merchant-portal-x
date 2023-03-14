@@ -215,13 +215,14 @@ export class RegisterStoreComponent implements OnInit
         this.createStoreForm = this._formBuilder.group({
             step1: this._formBuilder.group({
                 name                : ['', Validators.required],
-                storePrefix         : ['', [Validators.required, Validators.minLength(4), Validators.maxLength(4)]],
-                subdomain           : ['',[Validators.required, Validators.minLength(4), Validators.maxLength(63), RegisterStoreValidationService.domainValidator]],
-                storeDescription    : ['', [Validators.required, Validators.maxLength(200)]],
+                // storePrefix         : ['', [Validators.required, Validators.minLength(4), Validators.maxLength(4)]],
+                storePrefix         : [''],
+                subdomain           : ['', [Validators.required, Validators.minLength(4), Validators.maxLength(63), RegisterStoreValidationService.domainValidator]],
+                storeDescription    : ['', [Validators.maxLength(200)]],
                 displayAddress      : [''],
                 email               : ['', [Validators.required, Validators.email]],
                 phoneNumber         : ['', [RegisterStoreValidationService.phonenumberValidator, Validators.minLength(5), Validators.maxLength(30)]],
-                paymentType         : ['', Validators.required],
+                paymentType         : ['ONLINEPAYMENT', Validators.required],
             }),
             step3: this._formBuilder.group({
 
@@ -258,6 +259,9 @@ export class RegisterStoreComponent implements OnInit
             verticalCode            : [''],
             isBranch                : [false],
         });
+
+        // Disable 
+        this.createStoreForm.get('step1').get('paymentType').disable({ onlySelf: true, emitEvent: false });
 
         this.setInitialValue();
 
@@ -325,160 +329,171 @@ export class RegisterStoreComponent implements OnInit
             // get client info from (user service)
             // this is to get the current location by using 3rd party api service
 
-            this._userService.client$.subscribe((response: Client)=> {
+            this._userService.client$
+            .pipe(takeUntil(this._onDestroy))
+            .subscribe((response: Client)=> {
 
-                if (response['data'].regionCountry) {
+                if (response['data']) {
 
-                    let symplifiedCountryId = response['data'].regionCountry.id;
-
-                    let symplifiedCountryStateId = this.createStoreForm.get('step3.regionCountryStateId').value;
-
-                    this.countryCode = symplifiedCountryId;
-
+                    if (response['data'].email)
+                        this.createStoreForm.get('step1').get('email').patchValue(response['data'].email);
     
-                    // check if vertical selected is valid for selected country
-                    if ((_verticalCode === "ECommerce_PK" || _verticalCode === "FnB_PK") && symplifiedCountryId === "PAK") {
-                        this.createStoreCondition.error = null;
-                    } else if ((_verticalCode === 'E-Commerce' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'FnB') && symplifiedCountryId === "MYS") {
-                        this.createStoreCondition.error = null;
-                    } else {
-                        this.createStoreCondition.error = "VERTICAL-ERROR";
-                        this.createStoreCondition.errorTitle = "Vertical Error";
-                        this.createStoreCondition.errorDesc = "This vertical is not available at your country, please choose another vertical";
-                        let message = symplifiedCountryId ? "Vertical code: " + _verticalCode + " is not available for " + symplifiedCountryId + " country" : "Missing region country id";
-                        console.error(message)
-                    }
-                    // state (using component variable)
-                    // INITIALLY (refer below section updateStates(); for changes), get states from symplified backed by using the 3rd party api
-                    
-                    // -------------------------
-                    // States By Country
-                    // -------------------------
+                    if (response['data'].regionCountry) {
+    
+                        let symplifiedCountryId = response['data'].regionCountry.id;
+    
+                        let symplifiedCountryStateId = this.createStoreForm.get('step3.regionCountryStateId').value;
+    
+                        this.countryCode = symplifiedCountryId;
+    
         
-                    // Get states by country (using symplified backend)
-                    this._storesService.getStoreRegionCountryState(symplifiedCountryId).subscribe((response)=>{
-                        this.statesByCountry = response.data.content;
+                        // check if vertical selected is valid for selected country
+                        if ((_verticalCode === "ECommerce_PK" || _verticalCode === "FnB_PK") && symplifiedCountryId === "PAK") {
+                            this.createStoreCondition.error = null;
+                        } else if ((_verticalCode === 'E-Commerce' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'FnB') && symplifiedCountryId === "MYS") {
+                            this.createStoreCondition.error = null;
+                        } else {
+                            this.createStoreCondition.error = "VERTICAL-ERROR";
+                            this.createStoreCondition.errorTitle = "Vertical Error";
+                            this.createStoreCondition.errorDesc = "This vertical is not available at your country, please choose another vertical";
+                            let message = symplifiedCountryId ? "Vertical code: " + _verticalCode + " is not available for " + symplifiedCountryId + " country" : "Missing region country id";
+                            console.error(message)
+                        }
+                        // state (using component variable)
+                        // INITIALLY (refer below section updateStates(); for changes), get states from symplified backed by using the 3rd party api
                         
-                    });
-
-                    // Get city by state
-                    this._storeDeliveryService.getStoreRegionCountryStateCity(null,symplifiedCountryStateId, this.countryCode)
-                    .subscribe((response)=>{
-                        // Get the products
-                        this.storeStateCities$ = this._storeDeliveryService.cities$;                        
-
-                        // Mark for check
-                        this._changeDetectorRef.markForCheck();
-                    });
-        
-                    // country (using form builder variable)
-                    this.createStoreForm.get('step3').get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
+                        // -------------------------
+                        // States By Country
+                        // -------------------------
+            
+                        // Get states by country (using symplified backend)
+                        this._storesService.getStoreRegionCountryState(symplifiedCountryId)
+                        .subscribe((response)=>{
+                            this.statesByCountry = response.data.content;
+                            
+                        });
     
-                     // -------------------------------------
-                    // Delivery Partner
-                    // -------------------------------------
-        
-                    let _regionCountryId = symplifiedCountryId.toUpperCase();
-                    let _deliveryType;
+                        // Get city by state
+                        this._storeDeliveryService.getStoreRegionCountryStateCity(null,symplifiedCountryStateId, this.countryCode)
+                        .subscribe((response)=>{
+                            // Get the products
+                            this.storeStateCities$ = this._storeDeliveryService.cities$;                        
     
-                    if (_verticalCode === "FnB" || _verticalCode === "FnB_PK") {
-                        _deliveryType = "ADHOC";
-                    } else if (_verticalCode === 'E-Commerce' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'ECommerce_PK') {
-                        _deliveryType = "SCHEDULED";
-                    } else {
-                        console.error("Invalid vertical code: ", _verticalCode)
-                    }
-
-                    // ----------------------
-                    // Get All Available Store Delivery Provider
-                    // ----------------------
-    
-                    this._storesService.getStoreDeliveryProvider({deliveryType: _deliveryType, regionCountryId: _regionCountryId}).subscribe(
-                        (response: StoreDeliveryProvider[]) => {
-                            // reset this.deliveryPartners first to initial state
-                            this.deliveryPartners = [];
-                            this.deliveryPartners = response;                            
-
-                            // filter delivery fulfilment aka delivery period
-                            this.deliveryPartnerTypes = [ ...new Set(this.deliveryPartners.map(item => item.fulfilment))];
-
-                            // Set deliveryPeriods
-                            this.deliveryPeriods = this.createStoreForm.get('step3').get('deliveryPeriods').get('values') as FormArray;
-
-                            // check changes
-                            this.checkDeliveryPartner();
-
-                            // -------------------------------------
-                            // delivery period fulfilment
-                            // -------------------------------------
-
-                            this._storesService.getDeliveryPeriod(null)
-                                .subscribe((response: StoreDeliveryPeriod[]) => {
-                                    this._deliveryPeriods = response;
-                                
-                                    this._deliveryPeriods.forEach(item => {
-
-                                        // find delivery provider for each delviery period
-                                        let deliveryPartners = this.deliveryPartners.map(element => { 
-                                            if (element.fulfilment === item.deliveryPeriod) {
-                                                return element;
-                                            } else {
-                                                return null;
-                                            }
-                                        });
-
-                                        // remove undefined
-                                        // deliveryPartners.filter(n => n);
-                                        
-                                        let _deliveryProviders = this._formBuilder.array(deliveryPartners.filter(n => n));
-                        
-                                        // set empty array for each delivery period of deliveryProviders
-                                        Object.assign(item, { deliveryProviders: _deliveryProviders });
-
-                                        // this.deliveryPeriods = this.createStoreForm.get('step3').get('deliveryPeriods').get('values') as FormArray;
-                                        
-                                        // attacted delivery provider to delivery period
-                                        this.deliveryPeriods.push(this._formBuilder.group(item));
-
-                                        // Mark for check
-                                        this._changeDetectorRef.markForCheck();
-                                    });
-                                
-                                // Mark for check
-                                this._changeDetectorRef.markForCheck();
-                            });
-
                             // Mark for check
                             this._changeDetectorRef.markForCheck();
+                        });
+            
+                        // country (using form builder variable)
+                        this.createStoreForm.get('step3').get('regionCountryId').patchValue(symplifiedCountryId.toUpperCase());
+        
+                         // -------------------------------------
+                        // Delivery Partner
+                        // -------------------------------------
+            
+                        let _regionCountryId = symplifiedCountryId.toUpperCase();
+                        let _deliveryType;
+        
+                        if (_verticalCode === "FnB" || _verticalCode === "FnB_PK") {
+                            _deliveryType = "ADHOC";
+                        } else if (_verticalCode === 'E-Commerce' || _verticalCode === 'e-commerce-b2b2c' || _verticalCode === 'ECommerce_PK') {
+                            _deliveryType = "SCHEDULED";
+                        } else {
+                            console.error("Invalid vertical code: ", _verticalCode)
                         }
-                    );
+    
+                        // ----------------------
+                        // Get All Available Store Delivery Provider
+                        // ----------------------
+        
+                        this._storesService.getStoreDeliveryProvider({deliveryType: _deliveryType, regionCountryId: _regionCountryId})
+                        .subscribe((response: StoreDeliveryProvider[]) => {
+                                // reset this.deliveryPartners first to initial state
+                                this.deliveryPartners = [];
+                                this.deliveryPartners = response;                            
+    
+                                // filter delivery fulfilment aka delivery period
+                                this.deliveryPartnerTypes = [ ...new Set(this.deliveryPartners.map(item => item.fulfilment))];
+    
+                                // Set deliveryPeriods
+                                this.deliveryPeriods = this.createStoreForm.get('step3').get('deliveryPeriods').get('values') as FormArray;
+    
+                                // check changes
+                                this.checkDeliveryPartner();
+    
+                                // -------------------------------------
+                                // delivery period fulfilment
+                                // -------------------------------------
+    
+                                this._storesService.getDeliveryPeriod(null)
+                                    .subscribe((response: StoreDeliveryPeriod[]) => {
+                                        this._deliveryPeriods = response;
+                                    
+                                        this._deliveryPeriods.forEach(item => {
+    
+                                            // find delivery provider for each delviery period
+                                            let deliveryPartners = this.deliveryPartners.map(element => { 
+                                                if (element.fulfilment === item.deliveryPeriod) {
+                                                    return element;
+                                                } else {
+                                                    return null;
+                                                }
+                                            });
+    
+                                            // remove undefined
+                                            // deliveryPartners.filter(n => n);
+                                            
+                                            let _deliveryProviders = this._formBuilder.array(deliveryPartners.filter(n => n));
+                            
+                                            // set empty array for each delivery period of deliveryProviders
+                                            Object.assign(item, { deliveryProviders: _deliveryProviders });
+    
+                                            // this.deliveryPeriods = this.createStoreForm.get('step3').get('deliveryPeriods').get('values') as FormArray;
+                                            
+                                            // attacted delivery provider to delivery period
+                                            this.deliveryPeriods.push(this._formBuilder.group(item));
+    
+                                            // Mark for check
+                                            this._changeDetectorRef.markForCheck();
+                                        });
+                                    
+                                    // Mark for check
+                                    this._changeDetectorRef.markForCheck();
+                                });
+    
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
+                            }
+                        );
+                    }
+    
+                    // -------------------------
+                    // Set Dialing code
+                    // -------------------------
+                    
+                    let countryId = response['data'].countryId;
+                    switch (countryId) {
+                        case 'MYS':
+                            this.dialingCode = '+60';
+                            this.createStoreForm.get('step3').get('regionCountryStateId').patchValue('Selangor');
+                            break;
+                        case 'PAK':
+                            this.dialingCode = '+92';
+                            this.createStoreForm.get('step3').get('regionCountryStateId').patchValue('Federal');
+                            break;
+                        default:
+                            break;
+                    }
                 }
 
-                // -------------------------
-                // Set Dialing code
-                // -------------------------
-                
-                let countryId = response['data'].countryId;
-                switch (countryId) {
-                    case 'MYS':
-                        this.dialingCode = '+60';
-                        this.createStoreForm.get('step3').get('regionCountryStateId').patchValue('Selangor');
-                        break;
-                    case 'PAK':
-                        this.dialingCode = '+92';
-                        this.createStoreForm.get('step3').get('regionCountryStateId').patchValue('Federal');
-                        break;
-                    default:
-                        break;
-                }
-                                
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
         });
 
         // check total of stores this account have
-        this._storesService.stores$.subscribe((response)=>{
+        this._storesService.stores$
+        .pipe(takeUntil(this._onDestroy))
+        .subscribe((response)=>{
             if (response.length && response.length > 11) {
                 this.createStoreCondition.error = "MAX-STORES";
                 this.createStoreCondition.errorTitle = "Maximum store creation has been reached";
@@ -1030,6 +1045,7 @@ export class RegisterStoreComponent implements OnInit
 
         createStoreBody["latitude"] = this.location.lat.toFixed(6);
         createStoreBody["longitude"] = this.location.lng.toFixed(6);
+        createStoreBody["paymentType"] = 'ONLINEPAYMENT';
 
         // Disable the form
         this.createStoreForm.disable();
@@ -1634,6 +1650,42 @@ export class RegisterStoreComponent implements OnInit
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             }, 0);
+        }
+        else if (status === 200) {
+            this._storesService.generateStorePrefix({name})
+                .subscribe(
+                    {
+                        next: (prefix) => {
+                            if (prefix) {
+                                this.createStoreForm.get('step1').get('storePrefix').patchValue(prefix);
+        
+                                // Mark for check
+                                this._changeDetectorRef.markForCheck();
+                            }
+                        },
+                        error: (err) => {
+                            // Show a failed message (it can also be an error message)
+                            this._fuseConfirmationService.open({
+                                title  : err.error.error ? err.error.error : 'Error',
+                                message: err.error.message ? err.error.message : err.message,
+                                icon: {
+                                    show: true,
+                                    name: "heroicons_outline:exclamation",
+                                    color: "warn"
+                                },
+                                actions: {
+                                    confirm: {
+                                        label: 'OK',
+                                        color: "primary",
+                                    },
+                                    cancel: {
+                                        show: false,
+                                    },
+                                }
+                            });
+                        }
+                    }
+                )
         }
     }
 

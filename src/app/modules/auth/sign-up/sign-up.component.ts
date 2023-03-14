@@ -1,7 +1,7 @@
 import { Component, NgZone, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { FacebookLoginProvider, GoogleLoginProvider, SocialAuthService } from 'angularx-social-login';
@@ -16,6 +16,8 @@ import { AuthModalComponent } from '../auth-modal/auth-modal.component';
 import { AppleLoginProvider } from '../sign-in/apple.provider';
 import { SocialLooginClientId, ValidateOauthRequest } from '../sign-in/oauth.types';
 import jwt_decode from "jwt-decode";
+import { ClientAuthenticate } from 'app/core/auth/auth.type';
+import { UserService } from 'app/core/user/user.service';
 
 declare const google: any;
 
@@ -63,7 +65,10 @@ export class AuthSignUpComponent implements OnInit
         private _platformsService: PlatformService,
         private _storesService: StoresService,
         private _socialAuthService: SocialAuthService,
-        private _ngZone: NgZone  //the navigation will be triggered outside Angular zone
+        private _activatedRoute: ActivatedRoute,
+        private _ngZone: NgZone,  //the navigation will be triggered outside Angular zone
+        private _userService: UserService,
+
 
     )
     {
@@ -89,6 +94,12 @@ export class AuthSignUpComponent implements OnInit
             }
         );
 
+        this.signUpForm.get('email').valueChanges
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe( value => {
+                this.signUpForm.get('username').patchValue(value);
+            })
+
         // Subscribe to platform data
         this._platformsService.platform$
             .pipe(takeUntil(this._unsubscribeAll))
@@ -102,13 +113,11 @@ export class AuthSignUpComponent implements OnInit
             });
 
         // get value for country list
-        this._storesService.getStoreRegionCountries().subscribe((response: StoreRegionCountries[])=>{
+        this._storesService.getStoreRegionCountries()
+            .subscribe((response: StoreRegionCountries[])=> {
             
-            response["data"].content.forEach((country: StoreRegionCountries) => {
-                this.countriesList.push(country);
+                this.countriesList = response["data"].content;
             });
-
-        });
 
     }
 
@@ -147,7 +156,7 @@ export class AuthSignUpComponent implements OnInit
         }
 
         // Disable the form
-        this.signUpForm.disable();
+        this.signUpForm.disable({onlySelf: true, emitEvent: false});
 
         // Hide the alert
         this.showAlert = false;
@@ -159,7 +168,59 @@ export class AuthSignUpComponent implements OnInit
                 (response) => {
 
                     // Navigate to the confirmation required page
-                    this._router.navigateByUrl('/confirmation-required');
+                    // this._router.navigateByUrl('/confirmation-required');
+                    
+                    // Sign in
+                    this._authService.signIn({ username: response.data.email, password: this.signUpForm.get('password').value })
+                    .subscribe((clientAuthenticateResponse: ClientAuthenticate) => {
+                        if (clientAuthenticateResponse) {
+                            this._userService.get(clientAuthenticateResponse.session.ownerId)
+                                .subscribe((response)=>{
+                                    let user = {
+                                        "id": response.id,
+                                        "name": response.name,
+                                        "username": response.username,
+                                        "locked": response.locked,
+                                        "deactivated": response.deactivated,
+                                        "created": response.created,
+                                        "updated": response.updated,
+                                        "roleId": response.roleId,
+                                        "email": response.email,
+                                        "avatar": "assets/images/logo/logo_default_bg.jpg",
+                                        "status": "online",
+                                        "role": response.roleId
+                                    };
+
+                                    this._userService.client = user;
+                                });
+
+                            // Set the redirect url.
+                            // The '/signed-in-redirect' is a dummy url to catch the request and redirect the user
+                            // to the correct page after a successful sign in. This way, that url can be set via
+                            // routing file and we don't have to touch here.
+                            const redirectURL = this._activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/signed-in-redirect';
+
+                            // Navigate to the redirect url
+                            this._router.navigateByUrl(redirectURL);
+                        }
+                    }, (error) => {
+
+                        let message;
+
+                        if (response.status === 409) {
+                            message = "Something went wrong, " + response.error.data;
+                        } else {
+                            message = "Something went wrong, please try again.";
+                        }
+    
+                        this.alert = {
+                            type   : 'error',
+                            message: message
+                        };
+
+                        // Show the alert
+                        this.showAlert = true;
+                    });
                 },
                 (response) => {
 

@@ -63,7 +63,7 @@ export class ChooseVerticalComponent
         .subscribe((verticals: Vertical[]) => {
 
             this._userService.client$.subscribe((response: Client)=>{
-                if (response['data'].regionCountry) {
+                if (response['data'] && response['data'].regionCountry) {
                     let regionId = response['data'].regionCountry.region;
                     if (!response['data'].regionCountry.region) {
                         console.error("Empty symplifiedRegion")

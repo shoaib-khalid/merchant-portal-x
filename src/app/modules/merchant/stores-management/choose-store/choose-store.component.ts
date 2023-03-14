@@ -303,7 +303,7 @@ export class ChooseStoreComponent implements OnInit, OnDestroy
             if (pageType === "editPage")
                 this._router.navigateByUrl('/stores/edit/'+ storeId)
             else if (response["data"]["content"].length < 1)
-                this._router.navigateByUrl('/products/inventory')
+                this._router.navigateByUrl('/products/categories')
             else
                 this._router.navigateByUrl('/dashboard')
         })

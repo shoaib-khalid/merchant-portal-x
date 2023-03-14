@@ -80,7 +80,8 @@ export class RedirectComponent implements OnInit, OnDestroy
                 // due to nature of add product (for product service) - backend
                 // need to have store service object[0] to be saved in local storage
                 await this._storesService.setFirstStoreId();
-                this.goToAddProducts();
+                // this.goToAddProducts();
+                this.goToAddCategories();
             }
         } else {
             // if there is more than 1 store
