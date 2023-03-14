@@ -8,6 +8,8 @@ import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { takeUntil } from 'rxjs/operators';
 import { PlatformService } from 'app/core/platform/platform.service';
 import { Platform } from 'app/core/platform/platform.types';
+import { StoresService } from 'app/core/store/store.service';
+import { Store } from 'app/core/store/store.types';
 
 @Component({
     selector     : 'edit-store-page',
@@ -40,7 +42,7 @@ export class EditStoreComponent implements OnInit
         private _route: ActivatedRoute,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
         private _platformsService: PlatformService,
-
+        private _storesService: StoresService
     )
     {
     }  
@@ -108,6 +110,23 @@ export class EditStoreComponent implements OnInit
                 //         this.panels.splice(index, 1);
                 //     }
                 // }
+            });
+
+        
+        this._storesService.store$
+        .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((store: Store) => {
+                if (store) {
+                    // Hide Dine In Settings panel if vertical is e-commerce
+                    if (store.verticalCode === "E-Commerce" || store.verticalCode === "ECommerce_PK")
+                    {
+                        let index = this.panels.findIndex(item => item.id === 'dine-in');
+    
+                        if (index > -1) {
+                            this.panels.splice(index, 1);
+                        }
+                    }
+                }                
             });
         
 
