@@ -511,8 +511,8 @@ export class DashboardComponent implements OnInit, OnDestroy
 
                 if (indexAssetShortcut < 0) {
                     this.shortcutArr.push({
-                        title   : 'Add Store Images',
-                        desc    : `Add store images to showcase your brand.`,
+                        title   : 'Upload Store Images',
+                        desc    : `Upload store images to showcase your brand.`,
                         panelId : 'assets',
                         icon    : 'image',
                         link    : '../stores/edit/' + store.id + '/assets'
