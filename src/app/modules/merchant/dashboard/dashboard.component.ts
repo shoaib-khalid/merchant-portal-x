@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { forkJoin, merge, of, Subject } from 'rxjs';
+import { combineLatest, forkJoin, merge, of, Subject } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { MatPaginator } from '@angular/material/paginator';
 import {
@@ -28,6 +28,8 @@ import { OrdersCountSummary } from '../orders-management/orders-list/orders-list
 import { OrdersListService } from '../orders-management/orders-list/orders-list.service';
 import { InventoryService } from 'app/core/product/inventory.service';
 import { MatTableDataSource } from '@angular/material/table';
+import { UserService } from 'app/core/user/user.service';
+import { ClientPaymentDetails } from '../profile-management/edit-profile/edit-profile.types';
 
 export type ChartOptions = {
     series: ApexAxisChartSeries;
@@ -316,6 +318,7 @@ export class DashboardComponent implements OnInit, OnDestroy
         private _fuseMediaWatcherService: FuseMediaWatcherService,
         private _orderslistService: OrdersListService,
         private _inventoryService: InventoryService,
+        private _userService: UserService
     )
     {
         const now = new Date();
@@ -420,89 +423,105 @@ export class DashboardComponent implements OnInit, OnDestroy
                 this._changeDetectorRef.markForCheck();
             });
 
+        // ----------------------
+        // Get client payment Details
+        // ----------------------
 
-        this._storesService.store$
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((store: Store)=>{
+        combineLatest([
+            this._userService.clientPaymentDetails$,
+            this._storesService.store$
+        ]).pipe(takeUntil(this._unsubscribeAll))
+        .subscribe(([paymentDetail, store] : [ClientPaymentDetails, Store])=> {
+            
+            if (store) {
+                this.storeName = store.name;
+                this.currencySymbol = store.regionCountry.currencySymbol;
+                this.verticalCode = store.verticalCode;
+                this.store = store;
 
-                if (store) {
-                    this.storeName = store.name;
-                    this.currencySymbol = store.regionCountry.currencySymbol;
-                    this.verticalCode = store.verticalCode;
-                    this.store = store;
-
-                    let serviceType: string = '';
-                    
-                    //  Get the service type
-                    if (store.isDineIn && store.isDelivery) {
-                        serviceType = '';
-                    }
-                    else if (store.isDineIn && !store.isDelivery) {
-                        serviceType = 'DINEIN';
-                        this.orderSummaryServiceType = 'DINEIN';
-                    }
-                    else if (!store.isDineIn && store.isDelivery) {
-                        serviceType = 'DELIVERIN';
-                    }
-
-                    // Set service type to the service type control 
-                    this.orderSummary_serviceTypeControl.patchValue(serviceType, {onlySelf: true, emitEvent: false});
-                    this.summarySales_serviceTypeControl.patchValue(serviceType, {onlySelf: true, emitEvent: false});
-                    this.detailedDailySales_serviceTypeControl.patchValue(serviceType, {onlySelf: true, emitEvent: false});
-                    this.staffSales_serviceTypeControl.patchValue(serviceType, {onlySelf: true, emitEvent: false});
-                    this.salesOverview_serviceTypeControl.patchValue(serviceType, {onlySelf: true, emitEvent: false});
-
-                                        
-                    // Delivery Settings
-                    if (store.latitude === '' || store.longitude === '' ) {
-
-                        let index = this.shortcutArr.findIndex(x => x.panelId === 'delivery');
-
-                        if (index < 0) {
-                            this.shortcutArr.push({
-                                title   : 'Edit Delivery Settings',
-                                desc    : 'Complete your store address for prompt and accurate delivery.',
-                                panelId : 'delivery',
-                                icon    : 'delivery_dining',
-                                link    : '../stores/edit/' + store.id + '/delivery'
-                            });
-                        }
-                    }
-                    // Store Assets Settings
-                    if (store.storeAssets.length === 0) {
-
-                        let index = this.shortcutArr.findIndex(x => x.panelId === 'assets');
-
-                        if (index < 0) {
-                            this.shortcutArr.push({
-                                title   : 'Add Store Images',
-                                desc    : `Enhance your store's appeal with images. Add store images to showcase your products and brand.`,
-                                panelId : 'assets',
-                                icon    : 'image',
-                                link    : '../stores/edit/' + store.id + '/assets'
-                            });
-                        }
-                    }
-                    // Store Timing Settings
-                    if (store.storeTiming.every(time => time.isOff === true)) {
-
-                        let index = this.shortcutArr.findIndex(x => x.panelId === 'timing');
-
-                        if (index < 0) {
-                            this.shortcutArr.push({
-                                title   : 'Open Your Store',
-                                desc    : `Get ready to sell! Open your store and start reaching customers today.`,
-                                panelId : 'timing',
-                                icon    : 'access_time',
-                                link    : '../stores/edit/' + store.id + '/timing'
-                            });
-                        }
-                    }                    
+                let serviceType: string = '';
+                
+                //  Get the service type
+                if (store.isDineIn && store.isDelivery) {
+                    serviceType = '';
+                }
+                else if (store.isDineIn && !store.isDelivery) {
+                    serviceType = 'DINEIN';
+                    this.orderSummaryServiceType = 'DINEIN';
+                }
+                else if (!store.isDineIn && store.isDelivery) {
+                    serviceType = 'DELIVERIN';
                 }
 
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            });
+                // Set service type to the service type control 
+                this.orderSummary_serviceTypeControl.patchValue(serviceType, {onlySelf: true, emitEvent: false});
+                this.summarySales_serviceTypeControl.patchValue(serviceType, {onlySelf: true, emitEvent: false});
+                this.detailedDailySales_serviceTypeControl.patchValue(serviceType, {onlySelf: true, emitEvent: false});
+                this.staffSales_serviceTypeControl.patchValue(serviceType, {onlySelf: true, emitEvent: false});
+                this.salesOverview_serviceTypeControl.patchValue(serviceType, {onlySelf: true, emitEvent: false});
+
+                                    
+                // Delivery Settings
+                if (store.latitude === '' || store.longitude === '' ) {
+
+                    let index = this.shortcutArr.findIndex(x => x.panelId === 'delivery');
+
+                    if (index < 0) {
+                        this.shortcutArr.push({
+                            title   : 'Update Delivery Settings',
+                            desc    : 'Complete your pickup address for orders fulfillment.',
+                            panelId : 'delivery',
+                            icon    : 'delivery_dining',
+                            link    : '../stores/edit/' + store.id + '/delivery'
+                        });
+                    }
+                }
+                // Store Timing Settings
+                if (store.storeTiming.every(time => time.isOff === true)) {
+
+                    let index = this.shortcutArr.findIndex(x => x.panelId === 'timing');
+
+                    if (index < 0) {
+                        this.shortcutArr.push({
+                            title   : 'Set Store Timing',
+                            desc    : `Let's set your store timing to start selling today.`,
+                            panelId : 'timing',
+                            icon    : 'access_time',
+                            link    : '../stores/edit/' + store.id + '/timing'
+                        });
+                    }
+                }     
+                // Bank Info Settings
+                if (!paymentDetail || !paymentDetail.bankAccountNumber) {
+
+                    let index = this.shortcutArr.findIndex(x => x.panelId === 'bank');
+
+                    if (index < 0) {
+                        this.shortcutArr.push({
+                            title   : 'Bank Info for Settlement',
+                            desc    : `Add your bank info for settlement and get paid hassle-free.`,
+                            panelId : 'bank',
+                            icon    : 'account_balance',
+                            link    : '../profile/plan-billing'
+                        });
+                    }
+                }                 
+                // Store Assets Settings
+                let indexAssetShortcut = this.shortcutArr.findIndex(x => x.panelId === 'assets');
+
+                if (indexAssetShortcut < 0) {
+                    this.shortcutArr.push({
+                        title   : 'Add Store Images',
+                        desc    : `Add store images to showcase your brand.`,
+                        panelId : 'assets',
+                        icon    : 'image',
+                        link    : '../stores/edit/' + store.id + '/assets'
+                    });
+                }
+            }
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        })
 
         this._storesService.storeControl.valueChanges
             .pipe(

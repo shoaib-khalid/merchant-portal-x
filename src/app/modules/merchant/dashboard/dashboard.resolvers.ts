@@ -6,6 +6,7 @@ import { OrdersListService } from '../orders-management/orders-list/orders-list.
 import { formatDate } from '@angular/common';
 import { StoresService } from 'app/core/store/store.service';
 import { Store } from 'app/core/store/store.types';
+import { UserService } from 'app/core/user/user.service';
 
 @Injectable({
     providedIn: 'root'
@@ -341,7 +342,8 @@ export class DashboardDataResolver implements Resolve<any>
     constructor(
         private _dashboardService: DashboardService, 
         private _storesService: StoresService,
-        private _ordersListService: OrdersListService
+        private _ordersListService: OrdersListService,
+        private _userService: UserService
         )
     {
 
@@ -477,7 +479,8 @@ export class DashboardDataResolver implements Resolve<any>
                             this._dashboardService.getTotalSalesAmount(this.storeId$, serviceType),
                             this._ordersListService.getOrdersCountSummary(serviceType),
                             this._dashboardService.getDetailedDailySales(this.storeId$, serviceType),
-                            this._dashboardService.getSummarySales(this.storeId$, serviceType)
+                            this._dashboardService.getSummarySales(this.storeId$, serviceType),
+                            this._userService.getClientPaymentDetails()
 
                             // this._dashboardService.getDailyTopProducts(
                             //     this.storeId$, 'this-week',

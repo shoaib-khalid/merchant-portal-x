@@ -583,66 +583,67 @@
                         <!-- Separator -->
                         <div class="border-t my-2"></div>
                         <!-- Bulk Item  -->
-                        <div class="flex flex-col">
-                            <!-- Sub-Title with Hint (packing size style)-->
-                            <div class="flex flex-row items-center leading-none mt-0.5 ">
-                                <mat-label class="font-normal text-md">Bulk Item
-                                </mat-label>
-                                <mat-icon
-                                    [matTooltip]="'Big items, e.g. Cake'"
-                                    matTooltipPosition="right"
-                                    matTooltipClass="multiline-tooltip"
-                                    class="scale-75 -translate-y-1"
-                                    [svgIcon]="'heroicons_solid:question-mark-circle'">
-                                </mat-icon>
-                            </div>
-                            <div class="flex items-start w-full gap-4">
-                                <mat-radio-group
-                                    class="flex flex-row flex-wrap px-3 py-1.5 gap-3 justify-between"
-                                    [color]="'primary'"
-                                    [formControlName]="'isBulkItem'"
-                                    (change)="( (addProductForm.get('step1').get('isBulkItem').value === true) ) ? addProductForm.get('step1').get('vehicleType').setValue('CAR') : ''"
-                                    >
-                                    <mat-radio-button
-                                        class=""
-                                        [value]="true">
-                                        Yes
-                                    </mat-radio-button>
-                                    <mat-radio-button
-                                        class=""
-                                        [value]="false">
-                                        No
-                                    </mat-radio-button>
-                                </mat-radio-group>
-                                <!-- Vehicle Type  -->
-                                <!-- *ngIf="addProductForm.get('step1').get('isBulkItem').value === true" -->
-                                <div *ngIf="false">
-                                    <mat-form-field 
-                                        class="w-full fuse-mat-no-subscript fuse-mat-dense"
-                                        appearance="fill" floatLabel="always"
-                                        >
-                                        <mat-select
-                                            class="w-full"
-                                            appearance="fill"
-                                            [formControlName]="'vehicleType'"
-                                            placeholder="Select one option"
-                                            (selectionChange)="addProductForm.get('step1').get('vehicleType').patchValue(vehicleTypeSelector.value)"
-                                            #vehicleTypeSelector="matSelect"
-                                            >
-                                            <mat-select-trigger>
-                                                <span class="flex items-center">
-                                                    <span>{{ vehicleTypeSelector.triggerValue }}</span>
-                                                </span>
-                                            </mat-select-trigger>
-                                            <div>
-                                                <mat-option *ngFor="let vehicle of deliveryVehicle" [value]="vehicle.vehicleType">{{vehicle.name}}</mat-option>
-                                            </div>
-                                        </mat-select>
-                                        <mat-error *ngIf="addProductForm.get('step1').get('vehicleType').hasError('required')">
-                                            Required
-                                        </mat-error>
-                                    </mat-form-field>
+                        <div class="grid grid-cols-2 sm:grid-cols-6 items-end sm:gap-4">
+                            <div class="flex flex-col">
+                                <!-- Sub-Title with Hint (packing size style)-->
+                                <div class="flex flex-row items-center leading-none mt-0.5 ">
+                                    <mat-label class="font-normal text-md">Bulk Item
+                                    </mat-label>
+                                    <mat-icon
+                                        [matTooltip]="'Big items, e.g. Cake'"
+                                        matTooltipPosition="right"
+                                        matTooltipClass="multiline-tooltip"
+                                        class="scale-75 -translate-y-1"
+                                        [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                    </mat-icon>
                                 </div>
+                                <div class="flex items-start w-full gap-4">
+                                    <mat-radio-group
+                                        class="flex flex-row flex-wrap px-3 py-1.5 gap-3 justify-between"
+                                        [color]="'primary'"
+                                        [formControlName]="'isBulkItem'"
+                                        (change)="( (addProductForm.get('step1').get('isBulkItem').value === true) ) ? addProductForm.get('step1').get('vehicleType').setValue('CAR') : ''"
+                                        >
+                                        <mat-radio-button
+                                            class=""
+                                            [value]="true">
+                                            Yes
+                                        </mat-radio-button>
+                                        <mat-radio-button
+                                            class=""
+                                            [value]="false">
+                                            No
+                                        </mat-radio-button>
+                                    </mat-radio-group>
+                                </div>
+                            </div>
+                            <!-- Vehicle Type -->
+                            <div *ngIf="addProductForm.get('step1').get('isBulkItem').value === true">
+                                <mat-form-field 
+                                    class="w-full fuse-mat-no-subscript fuse-mat-dense"
+                                    appearance="fill" floatLabel="always"
+                                    >
+                                    <mat-select
+                                        class="w-full"
+                                        appearance="fill"
+                                        [formControlName]="'vehicleType'"
+                                        placeholder="Select one option"
+                                        (selectionChange)="addProductForm.get('step1').get('vehicleType').patchValue(vehicleTypeSelector.value)"
+                                        #vehicleTypeSelector="matSelect"
+                                        >
+                                        <mat-select-trigger>
+                                            <span class="flex items-center">
+                                                <span>{{ vehicleTypeSelector.triggerValue }}</span>
+                                            </span>
+                                        </mat-select-trigger>
+                                        <div>
+                                            <mat-option *ngFor="let vehicle of deliveryVehicle" [value]="vehicle.vehicleType">{{vehicle.name}}</mat-option>
+                                        </div>
+                                    </mat-select>
+                                    <mat-error *ngIf="addProductForm.get('step1').get('vehicleType').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                </mat-form-field>
                             </div>
                         </div>
                     </div>
@@ -657,7 +658,7 @@
                                     <mat-label class="font-medium">Customise Special Instruction
                                     </mat-label>
                                     <mat-icon
-                                        matTooltip="Personalise your instructions to fit your unique needs."
+                                        matTooltip="Customise special instruction placeholder to help your customers personalise their purchase."
                                         class="scale-75 -translate-y-1"
                                         [svgIcon]="'heroicons_solid:question-mark-circle'">
                                     </mat-icon>
@@ -683,12 +684,30 @@
                                             <mat-radio-button
                                                 class="ml-2"
                                                 [value]="true">
-                                                Optional
+                                                <div class="flex items-center leading-none">
+                                                    <span>
+                                                        Optional
+                                                    </span>
+                                                    <mat-icon
+                                                        matTooltip="Special instruction is not required and can be left blank by customers."
+                                                        class="scale-75 -translate-y-1"
+                                                        [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                                    </mat-icon>
+                                                </div>
                                             </mat-radio-button>
                                             <mat-radio-button
                                                 class="ml-4"
                                                 [value]="false">
-                                                Mandatory
+                                                <div class="flex items-center leading-none">
+                                                    <span>
+                                                        Mandatory
+                                                    </span>
+                                                    <mat-icon
+                                                        matTooltip="Special instruction is required and cannot be left blank by customers."
+                                                        class="scale-75 -translate-y-1"
+                                                        [svgIcon]="'heroicons_solid:question-mark-circle'">
+                                                    </mat-icon>
+                                                </div>
                                             </mat-radio-button>
                                         </mat-radio-group>
                                     </div>

@@ -1,10 +1,12 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { fuseAnimations } from '@fuse/animations';
 import { UserService } from 'app/core/user/user.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { MatDialog } from '@angular/material/dialog';
 import { MatDrawer } from '@angular/material/sidenav';
+import { Subject, takeUntil } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
     selector     : 'edit-profile-page',
@@ -12,7 +14,7 @@ import { MatDrawer } from '@angular/material/sidenav';
     encapsulation: ViewEncapsulation.None,
     animations   : fuseAnimations
 })
-export class EditProfileComponent implements OnInit
+export class EditProfileComponent implements OnInit, OnDestroy
 {
     @ViewChild('supportNgForm') supportNgForm: NgForm;
     @ViewChild('drawer') drawer: MatDrawer;
@@ -29,6 +31,8 @@ export class EditProfileComponent implements OnInit
 
     // Image part    
     files: any;
+    
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     /**
      * Constructor
@@ -39,10 +43,12 @@ export class EditProfileComponent implements OnInit
         private _fuseConfirmationService: FuseConfirmationService,
         private _changeDetectorRef: ChangeDetectorRef,
         public _dialog: MatDialog,
+        private _route: ActivatedRoute
     )
     {
         // this.checkExistingURL = debounce(this.checkExistingURL, 300);
         // this.checkExistingName = debounce(this.checkExistingName,300);
+        this.selectedPanel = this._route.snapshot.paramMap.get('panel-id') ? this._route.snapshot.paramMap.get('panel-id') : 'account';
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -142,7 +148,9 @@ export class EditProfileComponent implements OnInit
         // Get client Details
         // ----------------------
 
-        this._userService.client$.subscribe(
+        this._userService.client$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe(
             (response) => {
                 // Fill the form
                 this.editProfileForm.patchValue(response);
@@ -154,7 +162,9 @@ export class EditProfileComponent implements OnInit
         // Get client payment Details
         // ----------------------
 
-        this._userService.clientPaymentDetails$.subscribe(
+        this._userService.clientPaymentDetails$
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe(
             (response) => {
                 // Fill the form
                 //response?. to handle if it is undefined
@@ -163,14 +173,19 @@ export class EditProfileComponent implements OnInit
                 this.editProfileForm.get('bankAccountTitle').patchValue(response?.bankAccountTitle?response.bankAccountTitle:null);
 
                 this.clientPaymentId = response?.id?response.id:null;
-                
           
             } 
         );   
 
     }
 
-    ngAfterViewInit(): void{
+    /**
+     * On destroy
+     */
+    ngOnDestroy(): void
+    {
+        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.complete();
     }
 
     // -----------------------------------------------------------------------------------------------------

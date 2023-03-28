@@ -137,6 +137,7 @@ import { AddCategoryComponent } from '../../../add-category/add-category.compone
 
             ::ng-deep .multiline-tooltip{
                 white-space: pre;
+                max-width: unset !important;
             }
         `
     ],
@@ -222,7 +223,7 @@ export class AddProductComponent2 implements OnInit, OnDestroy
 
     arr_ProductPrice_stock = [
         { title: 'Product Price', desc: 'Price for the product.' },
-        { title: 'Stock Details', desc: 'Update or track stock (for Ecommerce).' }
+        { title: 'Stock Details', desc: 'Update or track stock (for E-commerce).' }
     ]; 
     tooltipText_ProductPrice_stock = this.arr_ProductPrice_stock
     .map((x) => (x.title + " : " + x.desc))
@@ -1139,10 +1140,9 @@ export class AddProductComponent2 implements OnInit, OnDestroy
         // if the bulk item toggle stays close, then set to 'motorcycle'
         if (this.addProductForm.get('step1').get('isBulkItem').value === false){
             this.addProductForm.get('step1').get('vehicleType').setValue('MOTORCYCLE');
-        } else 
-            this.addProductForm.get('step1').get('vehicleType').setValue('CAR');
+        }
 
-        const {valid, ...productBody} = this.addProductForm.get('step1').value
+        const {valid, ...productBody} = this.addProductForm.get('step1').value;
 
         const { sku, availableStock, price, images, imagefiles, thumbnailIndex, isCustomNote, dineInPrice, ...newProductBody } = productBody;
         

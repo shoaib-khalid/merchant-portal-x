@@ -4,7 +4,7 @@ import { GetClientResolver, GetProfilePaymentResolver } from './edit-profile/edi
 
 export const profileManagementRoutes: Route[] = [
     {
-        path     : '',
+        path     : ':panel-id',
         component: EditProfileComponent,
         resolve  : {
             clients: GetClientResolver,
