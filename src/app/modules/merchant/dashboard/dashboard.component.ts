@@ -296,6 +296,15 @@ export class DashboardComponent implements OnInit, OnDestroy
 
     currentScreenSize: any;
 
+    // SHORTCUT CARDS
+    shortcutArr: {
+        title   : string,
+        desc    : string,
+        panelId : string,
+        icon    : string,
+        link    : string
+    }[] = [];
+
     /**
      * Constructor
      */
@@ -442,6 +451,53 @@ export class DashboardComponent implements OnInit, OnDestroy
                     this.detailedDailySales_serviceTypeControl.patchValue(serviceType, {onlySelf: true, emitEvent: false});
                     this.staffSales_serviceTypeControl.patchValue(serviceType, {onlySelf: true, emitEvent: false});
                     this.salesOverview_serviceTypeControl.patchValue(serviceType, {onlySelf: true, emitEvent: false});
+
+                                        
+                    // Delivery Settings
+                    if (store.latitude === '' || store.longitude === '' ) {
+
+                        let index = this.shortcutArr.findIndex(x => x.panelId === 'delivery');
+
+                        if (index < 0) {
+                            this.shortcutArr.push({
+                                title   : 'Edit Delivery Settings',
+                                desc    : 'Complete your store address for prompt and accurate delivery.',
+                                panelId : 'delivery',
+                                icon    : 'delivery_dining',
+                                link    : '../stores/edit/' + store.id + '/delivery'
+                            });
+                        }
+                    }
+                    // Store Assets Settings
+                    if (store.storeAssets.length === 0) {
+
+                        let index = this.shortcutArr.findIndex(x => x.panelId === 'assets');
+
+                        if (index < 0) {
+                            this.shortcutArr.push({
+                                title   : 'Add Store Images',
+                                desc    : `Enhance your store's appeal with images. Add store images to showcase your products and brand.`,
+                                panelId : 'assets',
+                                icon    : 'image',
+                                link    : '../stores/edit/' + store.id + '/assets'
+                            });
+                        }
+                    }
+                    // Store Timing Settings
+                    if (store.storeTiming.every(time => time.isOff === true)) {
+
+                        let index = this.shortcutArr.findIndex(x => x.panelId === 'timing');
+
+                        if (index < 0) {
+                            this.shortcutArr.push({
+                                title   : 'Open Your Store',
+                                desc    : `Get ready to sell! Open your store and start reaching customers today.`,
+                                panelId : 'timing',
+                                icon    : 'access_time',
+                                link    : '../stores/edit/' + store.id + '/timing'
+                            });
+                        }
+                    }                    
                 }
 
                 // Mark for check
@@ -459,6 +515,7 @@ export class DashboardComponent implements OnInit, OnDestroy
 
                     // Mark for check
                     this._changeDetectorRef.markForCheck();
+
                     this.reload();
                     return [];
                 })

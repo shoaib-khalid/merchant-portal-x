@@ -37,6 +37,8 @@ import { InventoryListComponent } from './inventory/product-list/inventory-list.
 import { DuplicateProductsModalComponent } from './inventory/product-duplicate-modal/product-duplicate-modal.component';
 import { OpenItemComponent } from './open-item/open-item.component';
 import { AddOpenItemComponent } from './add-open-item/add-open-item.component';
+import { FileDragNDropDirective } from './inventory/product-details/add-product/file-drag-n-drop.directive';
+import { MatDividerModule } from '@angular/material/divider';
 
 @NgModule({
     declarations: [
@@ -52,7 +54,8 @@ import { AddOpenItemComponent } from './add-open-item/add-open-item.component';
         AddOnComponent,
         DuplicateProductsModalComponent,
         OpenItemComponent,
-        AddOpenItemComponent
+        AddOpenItemComponent,
+        FileDragNDropDirective
     ],
     imports     : [
         RouterModule.forChild(productsManagementRoutes),
@@ -77,7 +80,8 @@ import { AddOpenItemComponent } from './add-open-item/add-open-item.component';
         MatAutocompleteModule,
         NgxMatSelectSearchModule,
         DragDropModule,
-        MatSidenavModule
+        MatSidenavModule,
+        MatDividerModule
     ],
     providers   : [
         {

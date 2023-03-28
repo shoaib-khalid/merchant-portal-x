@@ -179,9 +179,9 @@
                                     <span class="text-xs tracking-tight text-gray-400">
                                         *Recommended size: {{files[4].recommendedImageWidth}} x {{files[4].recommendedImageHeight}}px 
                                     </span>   
-                                    <span class="absolute top-0 left-0 m-2 text-xs tracking-tight text-gray-400">
+                                    <!-- <span class="absolute top-0 left-0 m-2 text-xs tracking-tight text-gray-400">
                                         *Required
-                                    </span>  
+                                    </span>   -->
                                 </ng-container>
                                 <!-- Edit/Delete Button -->
                                 <ng-container *ngIf="this.files[4].fileSource !== null">
@@ -602,11 +602,11 @@
                     </ng-container>
                     <!-- Actions -->
                     <div class="mt-6 pb-8 sm:pb-0 flex items-center justify-end">
+                        <!-- [disabled]="files[4].fileSource === null" -->
                         <button
                             class="ml-4"
                             mat-flat-button
                             type="button"
-                            [disabled]="files[4].fileSource === null"
                             (click)="updateStoreAsset()"
                             [color]="'primary'">Save
                         </button>

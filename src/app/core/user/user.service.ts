@@ -109,7 +109,7 @@ export class UserService
             .pipe(
                 tap((response) => {
                     this._logging.debug("Response from UserService (Get)",response);
-                    return this._client.next(response.data);
+                    return this._client.next(response['data']);
                 })
             );
     }
@@ -232,7 +232,7 @@ export class UserService
                     updateResponse["countryCode"] = response['data'].regionCountry.id ;
                 }
 
-                return this._client.next(response);
+                return this._client.next(response['data']);
 
             })
         );

@@ -318,8 +318,8 @@ export class StoreDeliveryComponent implements OnInit
 
                         } else {
 
-                            this.displayLat = parseFloat(this.store.latitude);
-                            this.displayLong = parseFloat(this.store.longitude);
+                            this.displayLat = parseFloat(this.store.latitude ? this.store.latitude : '0');
+                            this.displayLong = parseFloat(this.store.longitude ? this.store.longitude : '0');
                             this.displayLatitude.next(this.store.latitude);
                             this.displayLongtitude.next(this.store.longitude);
 

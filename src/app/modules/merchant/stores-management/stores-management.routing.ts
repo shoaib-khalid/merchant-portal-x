@@ -5,6 +5,7 @@ import { ChooseVerticalComponent } from './choose-vertical/choose-vertical.compo
 import { RegisterStoreComponent } from './register-store/register-store.component';
 import { ChooseVerticalsResolver } from './register-store/register-store.resolvers';
 import { EditStoreComponent } from './edit-store/edit-store.component';
+import { CreateStoreAccountComponent } from './create-store/create-store-account/create-store-account.component';
 
 export const storesManagementRoutes: Route[] = [
     {
@@ -34,7 +35,8 @@ export const storesManagementRoutes: Route[] = [
             {
                 path     : 'create-store/:vertical-code',
                 pathMatch: 'full',
-                component: RegisterStoreComponent,
+                // component: RegisterStoreComponent,
+                component: CreateStoreAccountComponent,
                 resolve  : {
                     createStore: ChooseVerticalsResolver
                 }

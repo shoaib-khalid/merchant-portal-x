@@ -34,15 +34,17 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-6 lg:gap-y-0 md:gap-x-6">
                     <!-- Cards -->
                     <ng-container *ngIf="createStoreCondition.error === null; else errorCard">
-                        <fuse-card *ngFor="let vertical of verticals" class="flex-col max-w-sm md:max-w-none p-6 sm:py-12 sm:px-10 mt-8">
-                            <!-- Price -->
-                            <div class="flex items-baseline whitespace-nowrap mb-6">
-                                <img [src]="vertical.thumbnailUrl" alt="">
-                                <!-- <img class="max-h-30 overflow-hidden flex item-center justify-center" [src]="vertical.thumbnailUrl" alt=""> -->
+                        <fuse-card *ngFor="let vertical of verticals" class="flex-col max-w-sm md:max-w-none p-6 sm:py-12 sm:px-10 mt-8 justify-between">
+                            <div class="flex flex-col">
+                                <!-- Image -->
+                                <div class="flex items-baseline whitespace-nowrap mb-6">
+                                    <img class="h-48 overflow-hidden flex item-center justify-center object-cover rounded-2xl"
+                                        [src]="vertical.thumbnailUrl" alt="">
+                                    <!-- <img class="max-h-30 overflow-hidden flex item-center justify-center" [src]="vertical.thumbnailUrl" alt=""> -->
+                                </div>
+                                <!-- Title -->
+                                <span class="text-4xl font-bold tracking-tight leading-tight">{{ vertical.name }}</span>
                             </div>
-                            <!-- <div class="w-8 h-1 my-10 rounded bg-accent"></div> -->
-                            <div class="text-4xl font-bold tracking-tight leading-tight">{{ vertical.name }}</div>
-                            <!-- <div class="mt-2 text-lg font-medium tracking-tight text-secondary">{{ vertical.description }}</div> -->
                             <!-- CTA -->
                             <button
                                 class="fuse-mat-button-large mt-10"
@@ -87,6 +89,25 @@
                                     </div>
                                 </div>
                             </div> -->
+                        </fuse-card>
+                        <fuse-card class="flex-col max-w-sm md:max-w-none p-6 sm:py-12 sm:px-10 mt-8 justify-between">
+                            <div class="flex flex-col">
+                                <!-- Image -->
+                                <div class="flex items-baseline whitespace-nowrap mb-6">
+                                    <img class="h-48 overflow-hidden flex item-center justify-center object-cover rounded-2xl"
+                                        [src]="'assets/images/verticals/services.png'" alt="">
+                                    <!-- <img class="max-h-30 overflow-hidden flex item-center justify-center" [src]="vertical.thumbnailUrl" alt=""> -->
+                                </div>
+                                <!-- Title -->
+                                <span class="text-4xl font-bold tracking-tight leading-tight">Services</span>
+                            </div>
+                            <button
+                                disabled
+                                class="fuse-mat-button-large mt-10"
+                                mat-stroked-button
+                                [color]="'primary'">
+                                Coming Soon...
+                            </button>
                         </fuse-card>
                     </ng-container>
 

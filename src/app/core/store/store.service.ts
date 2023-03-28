@@ -344,7 +344,7 @@ export class StoresService
         return this._httpClient.get<Store>(productService + '/stores/' + id , header)
         .pipe(
             map((response) => {
-                this._logging.debug("Response from StoresService (getStoreById)",response);
+                this._logging.debug("Response from StoresService (getStoreById)", response);
                 this._store.next(response["data"]);
 
                 // set this
@@ -374,7 +374,7 @@ export class StoresService
             switchMap(stores => this._httpClient.post<Store>(productService + '/stores', storeBody , header).pipe(
                 map((response) => {
 
-                    this._logging.debug("Response from StoresService (Create Store)",response);
+                    this._logging.debug("Response from StoresService (Create Store)", response);
 
                     let newResponse = response["data"];
                     newResponse.slug = newResponse.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
@@ -603,7 +603,7 @@ export class StoresService
                 const index = stores.findIndex(item => item.id === storeId);
 
                 let updatedStore = stores[index];
-                updatedStore.storeTiming = storeTiming
+                // updatedStore.storeTiming = storeTiming
 
                 // Update the product
                 stores[index] = { ...stores[index], ...updatedStore};

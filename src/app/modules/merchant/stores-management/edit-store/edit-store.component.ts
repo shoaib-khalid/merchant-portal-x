@@ -45,6 +45,7 @@ export class EditStoreComponent implements OnInit
         private _storesService: StoresService
     )
     {
+        this.selectedPanel = this._route.snapshot.paramMap.get('panel-id') ? this._route.snapshot.paramMap.get('panel-id') : 'account';
     }  
 
     // -----------------------------------------------------------------------------------------------------
@@ -66,7 +67,7 @@ export class EditStoreComponent implements OnInit
                 description: 'Manage your public profile and information'
             },
             {
-                id         : 'security',
+                id         : 'assets',
                 icon       : 'mat_outline:image',
                 title      : 'Store Assets',
                 description: 'Manage your store logo and images'

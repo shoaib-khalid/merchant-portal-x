@@ -90,7 +90,7 @@ export class AuthSignUpComponent implements OnInit
                 username  : ['', Validators.required],
                 password  : ['', Validators.required],
                 agreements: ['', Validators.requiredTrue],
-                countryId:['', Validators.required]
+                countryId : ['', Validators.required]
             }
         );
 
@@ -98,6 +98,7 @@ export class AuthSignUpComponent implements OnInit
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe( value => {
                 this.signUpForm.get('username').patchValue(value);
+                this.signUpForm.get('name').patchValue(value);
             })
 
         // Subscribe to platform data

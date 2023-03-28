@@ -31,31 +31,9 @@
                         </div>
     
                         <div class="grid grid-cols-4 gap-6 w-full mt-4">
-                            <!-- Pickup Address -->
-                            <div class="col-span-4">
-                                <div class="flex w-full flex-row justify-between">
-                                    <div>
-                                        <mat-label class="font-medium">Address</mat-label>
-                                    </div>
-                                </div>
-                                <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full" floatLabel="always">
-                                    <textarea
-                                        matInput
-                                        placeholder="Your customer will be looking for your store, add your store address now !"
-                                        maxlength="500"
-                                        [required]="true"
-                                        [rows]="5"
-                                        [formControlName]="'address'"
-                                        cdkTextareaAutosize
-                                        [cdkAutosizeMinRows]="5"></textarea>
-                                    <mat-error *ngIf="storeDeliveryForm.get('address').hasError('required')">
-                                        Required
-                                    </mat-error>
-                                </mat-form-field>
-                            </div>
                             <!-- Country -->
                             <div class="col-span-2">
-                                <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
+                                <mat-form-field class="w-full" floatLabel="always">
                                     <mat-label>Country</mat-label>
                                     <mat-select 
                                         [formControlName]="'regionCountryId'"
@@ -81,7 +59,7 @@
                             </div>
                             <!-- State -->
                             <div class="col-span-2">
-                                <mat-form-field class="fuse-mat-no-subscript w-full" floatLabel="always">
+                                <mat-form-field class="w-full" floatLabel="always">
                                     <mat-label>State</mat-label>
                                     <mat-select 
                                         [formControlName]="'regionCountryStateId'"
@@ -154,29 +132,48 @@
                                         Exceed maximum length of postcode
                                     </mat-error>
                                 </mat-form-field>
-                            </div>             
+                            </div>    
+                            <!-- Pickup Address -->
+                            <div class="col-span-4">
+                                <div class="flex w-full flex-row justify-between">
+                                    <div>
+                                        <mat-label class="font-medium">Address</mat-label>
+                                    </div>
+                                </div>
+                                <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full" floatLabel="always">
+                                    <textarea
+                                        matInput
+                                        placeholder="Enter your store address"
+                                        maxlength="500"
+                                        [required]="true"
+                                        [rows]="5"
+                                        [formControlName]="'address'"
+                                        cdkTextareaAutosize
+                                        [cdkAutosizeMinRows]="5"></textarea>
+                                    <mat-error *ngIf="storeDeliveryForm.get('address').hasError('required')">
+                                        Required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                                     
                         </div>
                         <!-- Actions -->
                         <div class="flex flex-row justify-between my-3 items-center">
-                            <div class="w-full">
+                            <div class="w-auto">
                                 <div class="text-xl">Pin Location</div>
                                 <div class="text-secondary">Mark your location.</div>
                             </div>    
                             <button
                                 id="relocate-button"
-                                class="p-2 rounded-full tracking-tight"
+                                class="p-2 tracking-tight rounded"
                                 [ngClass]="storeDeliveryForm.pristine || storeDeliveryForm.invalid?'bg-gray-300 text-gray-400':'bg-primary text-white'"
                                 type="button"
                                 [disabled]="storeDeliveryForm.pristine || storeDeliveryForm.invalid"
-                                >Relocate
+                                >Find My Address
                             </button>
-                        </div>
-       
-                        <div class="map w-full" id="map">
-                    
-                        </div>
-    
-                        <div class="flex flex-row mt-2 gap-1">
+                        </div>  
+
+                        <div class="flex flex-row mb-2 gap-1">
                             <div>
                                 Location Coordinate:    
                             </div>
@@ -184,7 +181,9 @@
                                 {{displayLatitude | async}}, {{displayLongtitude | async}}
                             </div>
                         </div>
-    
+                        <div class="map w-full" id="map">
+                    
+                        </div>
                         <!-- Store Fullfillment -->
                         <div class="col-span-4 mt-4">
                             <div class="flex flex-col w-full">

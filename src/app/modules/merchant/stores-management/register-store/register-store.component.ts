@@ -333,14 +333,14 @@ export class RegisterStoreComponent implements OnInit
             .pipe(takeUntil(this._onDestroy))
             .subscribe((response: Client)=> {
 
-                if (response['data']) {
+                if (response) {
 
-                    if (response['data'].email)
-                        this.createStoreForm.get('step1').get('email').patchValue(response['data'].email);
+                    if (response.email)
+                        this.createStoreForm.get('step1').get('email').patchValue(response.email);
     
-                    if (response['data'].regionCountry) {
+                    if (response.regionCountry) {
     
-                        let symplifiedCountryId = response['data'].regionCountry.id;
+                        let symplifiedCountryId = response.regionCountry.id;
     
                         let symplifiedCountryStateId = this.createStoreForm.get('step3.regionCountryStateId').value;
     
@@ -470,7 +470,7 @@ export class RegisterStoreComponent implements OnInit
                     // Set Dialing code
                     // -------------------------
                     
-                    let countryId = response['data'].countryId;
+                    let countryId = response.countryId;
                     switch (countryId) {
                         case 'MYS':
                             this.dialingCode = '+60';

@@ -4,7 +4,7 @@ import { ChooseVerticalsResolver } from './edit-store.resolver';
 
 export const editStoreRoutes: Route[] = [
     {
-        path     : 'edit/:storeid',
+        path     : 'edit/:storeid/:panel-id',
         component: EditStoreComponent,
         resolve: {
             verticals: ChooseVerticalsResolver

@@ -35,6 +35,7 @@ import { NgxGalleryModule } from 'ngx-gallery-9';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatMenuModule } from '@angular/material/menu';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
+import { CreateStoreModule } from './create-store/create-store.module';
 
 
 @NgModule({
@@ -72,7 +73,8 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
         NgxGalleryModule,
         FontAwesomeModule,
         MatMenuModule,
-        NgxMatSelectSearchModule 
+        NgxMatSelectSearchModule,
+        CreateStoreModule
 
     ],
     providers: [

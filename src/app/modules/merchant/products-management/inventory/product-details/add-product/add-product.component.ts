@@ -18,43 +18,45 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { MatDrawer, MatDrawerToggleResult } from '@angular/material/sidenav';
 import { ActivatedRoute, Router } from '@angular/router';
 import { InventoryListComponent } from '../../product-list/inventory-list.component';
+import { AddCategoryComponent } from '../../../add-category/add-category.component';
 
 
 @Component({
     selector: 'app-add-product',
-    templateUrl: './add-product.component.html',
+    templateUrl: './add-product-new.component.html',
     styles         : [
         /* language=SCSS */
         `
-            .custom-add-product-dialog {
+            :host ::ng-deep .mat-horizontal-content-container {
+                padding: 0 0px 20px 0px;
+            }
+            :host ::ng-deep .mat-horizontal-stepper-header-container {
+                height: 40px;
+                padding: 0 10px;
+                background-color: var(--fuse-bg-default) !important;
 
-                :host ::ng-deep .mat-horizontal-content-container {
-                    // max-height: 90vh;
-                    padding: 0 0px 20px 0px;
-                    // overflow-y: auto;
-                }
-                :host ::ng-deep .mat-horizontal-stepper-header-container {
-                    height: 60px;
-                }
-                :host ::ng-deep .mat-horizontal-stepper-header {
-                    height: 60px;
-                    padding-left: 8px;
-                    padding-right: 8px;
-                }
-                
-                :host ::ng-deep .mat-paginator .mat-paginator-container {
-                    padding: 0px 16px;
-                    justify-content: center;
-                }
-                :host ::ng-deep .mat-paginator-outer-container {
-                    display: flex;
-                    height: 40px;
+                @screen sm {
+                    padding: 0 40px;
                 }
             }
+            :host ::ng-deep .mat-horizontal-stepper-header {
+                height: 40px;
+                padding: 0 5px;
+                border-radius: 0.5rem !important;
+            }
+            
+            :host ::ng-deep .mat-paginator .mat-paginator-container {
+                padding: 0px 16px;
+                justify-content: center;
+            }
+            :host ::ng-deep .mat-paginator-outer-container {
+                display: flex;
+                height: 40px;
+            }
             :host ::ng-deep .ql-container .ql-editor {
-                min-height: 87px;
-                max-height: 87px;
-                height: 87px;
+                min-height: 80px;
+                max-height: 80px;
+                height: 80px;
             }
 
             //-----------------
@@ -133,6 +135,9 @@ import { InventoryListComponent } from '../../product-list/inventory-list.compon
                 transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
             }
 
+            ::ng-deep .multiline-tooltip{
+                white-space: pre;
+            }
         `
     ],
   })
@@ -195,6 +200,33 @@ export class AddProductComponent2 implements OnInit, OnDestroy
     
     productCategoriesEditMode: boolean = false;
     productCategoriesValueEditMode:any = [];
+
+    arr_ProductVisibilty = [
+        { title: 'Publish', desc: 'Make product visible.' },
+        { title: 'Delist', desc: 'Hide product.' },
+        { title: 'Out-of-Stock', desc: 'No product available.' }
+    ]; 
+    tooltipText_ProductVisibilty = this.arr_ProductVisibilty
+    .map((x) => (x.title + " : " + x.desc))
+    .join("\n");
+
+    arr_ProductType = [
+        { title: 'Normal', desc: 'Regular product.' },
+        { title: 'Variant', desc: 'With options or variants.' },
+        { title: 'Combo', desc: 'Comes as a combo or bundle.' },
+        { title: 'Add-On', desc: 'With additional options or add-ons.' }
+    ]; 
+    tooltipText_ProductType = this.arr_ProductType
+    .map((x) => (x.title + " : " + x.desc))
+    .join("\n");
+
+    arr_ProductPrice_stock = [
+        { title: 'Product Price', desc: 'Price for the product.' },
+        { title: 'Stock Details', desc: 'Update or track stock (for Ecommerce).' }
+    ]; 
+    tooltipText_ProductPrice_stock = this.arr_ProductPrice_stock
+    .map((x) => (x.title + " : " + x.desc))
+    .join("\n");
 
     // product assets
     productImages: {
@@ -355,7 +387,7 @@ export class AddProductComponent2 implements OnInit, OnDestroy
                 trackQuantity    : [false],
                 allowOutOfStockPurchases: [false],
                 minQuantityForAlarm: [-1],
-                packingSize      : ['', [Validators.required]],
+                packingSize      : ['S', [Validators.required]],
                 availableStock   : [1, [Validators.required]],
                 sku              : ['', [Validators.required]],
                 price            : ['', [Validators.required]],
@@ -372,7 +404,8 @@ export class AddProductComponent2 implements OnInit, OnDestroy
                 // form completion
                 valid            : [false],
                 dineInPrice      : ['', [Validators.required]],
-                hasAddOn         : [false]
+                hasAddOn         : [false],
+                barcode          : ['']
             }),
             variantsSection: this._formBuilder.group({
                 firstName: ['', Validators.required],
@@ -677,26 +710,73 @@ export class AddProductComponent2 implements OnInit, OnDestroy
 
     /**
      * Create a new category
-     *
-     * @param title
      */
-    createCategory(name: string, parentCategoryId: string, thumbnailUrl: string): void
-    {
-        const category = {
-            name,
-            storeId: this._storesService.storeId$,
-            parentCategoryId,
-            thumbnailUrl
-        };
+    createCategory() {
 
-        // Create category on the server
-        this._inventoryService.createCategory(category)
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((response) => {
+        const categoriesLimit = this.productCategories$.length;
 
-                // Add the category to the product
-                this.addCategoryToProduct(response["data"]);
+        if (categoriesLimit >= 30) {            
+            // Open the confirmation dialog
+            this._fuseConfirmationService.open({
+                title   : "Categories Limit",
+                message : "Your category creation has reached it's limit of 30 categories!",
+                icon    : {
+                    show    : true,
+                    name    : "heroicons_outline:ban",
+                    color   : "warn" },
+                actions : {
+                    confirm : {
+                        label: 'OK'
+                    },
+                    cancel  : {
+                        show: false,
+                        label: "Cancel"
+                        }
+                    }
             });
+        } else {
+
+            const dialogRef = this._dialog.open(AddCategoryComponent, { disableClose: true });
+            dialogRef.afterClosed().subscribe(result => {
+                
+                if (result.status === true) {
+
+                    let biggestSeq = Math.max(...this.productCategories$.map(x => x.sequenceNumber))
+
+                    let categoryBody = {
+                        name:result.value.name,
+                        storeId: this.store$.id,
+                        parentCategoryId: result.value.parentCategoryId,
+                        thumbnailUrl: null,
+                        sequenceNumber: biggestSeq > -1 ? biggestSeq + 1 : 1
+                    };
+
+                    const formData = new FormData();
+                    formData.append("file", result.value.imagefiles[0]);
+            
+                    // Create category on the server
+                    this._inventoryService.createCategory(categoryBody, formData)
+                    .pipe(takeUntil(this._unsubscribeAll))
+                    .subscribe({
+                        next: (categoryResp: ProductCategory) => {
+                        },
+                        error: (error) => {
+                            if (error.status === 409) {
+                                // Open the confirmation dialog
+                                this._fuseConfirmationService.open({
+                                    title  : 'Name already exist',
+                                    message: 'The category name inserted is already exist, please create a new category with a different name',
+                                    actions: {
+                                        confirm: { label: 'OK' },
+                                        cancel : { show : false }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+        }  
     }
  
      /**
@@ -860,27 +940,18 @@ export class AddProductComponent2 implements OnInit, OnDestroy
      */
     uploadImages(fileList: FileList, images): Promise<void>
     {
+        const maxImage = 10;
+
         // Return if canceled
         if ( !fileList.length )
         {
             return;
         }
 
-        const allowedTypes = ['image/jpeg', 'image/png'];
-        const file = fileList[0];
-
-        // Return if the file is not allowed
-        if ( !allowedTypes.includes(file.type) )
-        {
-            return;
-        }
-
-        // Return and throw warning dialog if image filename is more than 100 characters
-        if ( fileList[0].name.length > 100 )
-        {
+        if ( this.productImages.length >= maxImage) {
             this._fuseConfirmationService.open({
-                title  : 'The file name is too long',
-                message: 'The file name cannot exceed 100 characters (including spaces).',
+                title  : `Max ${maxImage} images`,
+                message: `Cannot be more than ${maxImage} images`,
                 icon       : {
                     show : true,
                     name : 'heroicons_outline:exclamation',
@@ -900,66 +971,101 @@ export class AddProductComponent2 implements OnInit, OnDestroy
 
             return;
         }
-        
 
+        const allowedTypes = ['image/jpeg', 'image/png'];
         // Return and throw warning dialog if image file size is big
-        let maxSize = 1048576;
-        var maxSizeInMB = (maxSize / (1024*1024)).toFixed(2);
-        
-        if (fileList[0].size > maxSize ) {
-            // Show a success message (it can also be an error message)
-            const confirmation = this._fuseConfirmationService.open({
-                title  : 'Image size limit',
-                message: 'Your uploaded image exceeds the maximum size of ' + maxSizeInMB + ' MB!',
-                icon: {
-                    show: true,
-                    name: "image_not_supported",
-                    color: "warn"
-                },
-                actions: {
-                    
-                    cancel: {
-                        label: 'OK',
-                        show: true
-                        },
-                    confirm: {
-                        show: false,
-                    }
-                    }
-            });
-            return;
-        }
-        
-        var reader = new FileReader();
-        reader.readAsDataURL(file); 
-        reader.onload = (_event)  => {
-            if(!images.length === true) {
-                this.productImages.push({preview: reader.result, file: file, isThumbnail: false})
-                this.currentImageIndex = this.productImages.length - 1;
-            } else {
-                this.productImages[this.currentImageIndex].preview = reader.result + "";
+        const maxSize = 1048576;
+        const maxSizeInMB = (maxSize / (1024*1024)).toFixed(2);
+
+        for (let index = 0; index < fileList.length; index++) {
+            const file = fileList[index];
+
+            // Return and throw warning dialog if image filename is more than 100 characters
+            if ( file.name.length > 100 ) {
+                console.warn(`Image ${index + 1}'s name is too long`);
+                
+                // this._fuseConfirmationService.open({
+                //     title  : 'The file name is too long',
+                //     message: 'The file name cannot exceed 100 characters (including spaces).',
+                //     icon       : {
+                //         show : true,
+                //         name : 'heroicons_outline:exclamation',
+                //         color: 'warning'
+                //     },
+                //     actions: {
+                        
+                //         cancel: {
+                //             label: 'OK',
+                //             show: true
+                //             },
+                //         confirm: {
+                //             show: false,
+                //         }
+                //         }
+                // });
+
+                // return;
             }
 
-            // Close edit mode
-            this.toggleImagesEditMode(false, '')
-            // this.imagesAddMode = false;
-            this._changeDetectorRef.markForCheck();
-        }
+            if (file.size > maxSize ) {
+                console.warn(`Image ${index + 1}'s size is too big. Max size is ${maxSizeInMB}MB`);
+            }
+            
+            // Check if the file is an image and allowed type and length not more than 100 chars and not exceed max size
+            if (file.type.match(/^image\//) && allowedTypes.includes(file.type) && file.name.length < 100 && file.size < maxSize) 
+            {
+
+                // // Create an image element to get its dimensions
+                // const img = new Image();
+                // img.src = URL.createObjectURL(file);
+
+                const reader = new FileReader();
+                reader.readAsDataURL(file); 
+                reader.onload = (_event)  => {
+
+                    if (!images.length === true && this.productImages.length < maxImage) {
+
+                        this.productImages.push({preview: reader.result, file: file, isThumbnail: false})
+                        this.currentImageIndex = this.productImages.length - 1;
+
+                    } else {
+
+                        this.productImages[this.currentImageIndex].preview = reader.result + "";
+                    }
+
+        
+                    // Close edit mode
+                    this.toggleImagesEditMode(false, '')
+                    // this.imagesAddMode = false;
+                    this._changeDetectorRef.markForCheck();
+
+                    // // Check if the image resolution is not 500 x 500 pixels
+                    // if (img.width <= 500 && img.height <= 500) {
+                        
+                    // }
+                    // else {
+                    //     console.log(`Image ${index + 1}'s resolution is too big. It should not exceed 500 x 500px`);
+                    // }
+                }
+            }
+        }        
+        
     }
 
     /**
      * Remove the image
      */
-    removeImage(): void
+    removeImage(index: number): void
     {
-        const index = this.currentImageIndex;
+        
+        // const index = this.currentImageIndex;
         if (index > -1) {
             // this.images.splice(index, 1);
             // this.imagesFile.splice(index, 1);
             this.productImages.splice(index, 1);
 
             // Reset current index
-            this.currentImageIndex = 0;
+            // this.currentImageIndex = 0;
 
             // Close edit mode
             this.toggleImagesEditMode(false, '')
@@ -1032,8 +1138,9 @@ export class AddProductComponent2 implements OnInit, OnDestroy
 
         // if the bulk item toggle stays close, then set to 'motorcycle'
         if (this.addProductForm.get('step1').get('isBulkItem').value === false){
-            this.addProductForm.get('step1').get('vehicleType').setValue('MOTORCYCLE')
-        }
+            this.addProductForm.get('step1').get('vehicleType').setValue('MOTORCYCLE');
+        } else 
+            this.addProductForm.get('step1').get('vehicleType').setValue('CAR');
 
         const {valid, ...productBody} = this.addProductForm.get('step1').value
 
@@ -1336,7 +1443,7 @@ export class AddProductComponent2 implements OnInit, OnDestroy
 
         // set all image thumbnail to false first
         this.productImages.map(item => item.isThumbnail = false);
-        if (this.selectedVariantCombos.length > 0) {
+        if (this.selectedVariantCombos && this.selectedVariantCombos.length > 0) {
             this.selectedVariantCombos.map(item => item.image.isThumbnail = false);
         }
 

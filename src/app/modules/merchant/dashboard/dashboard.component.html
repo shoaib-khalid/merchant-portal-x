@@ -55,6 +55,21 @@
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 w-full mt-8">
                 <div class="flex flex-col flex-auto xl:col-span-2 w-full max-w-screen-xl mx-auto">
                     <div class="sm:px-6">
+                        <!-- Shortcut -->
+                        <div class="flex flex-nowrap items-center justify-start overflow-x-auto gap-3">
+                            <ng-container *ngFor="let shortcut of shortcutArr">
+                                <div class="flex flex-col min-w-72 w-full sm:min-w-80 sm:w-80 h-40 sm:h-48 rounded-2xl p-6 cursor-pointer group gap-2 bg-card shadow duration-100 mb-6"
+                                    [routerLink]="shortcut.link">
+                                    <div class="flex w-full items-center justify-center">
+                                        <mat-icon
+                                            class="icon-size-8 sm:icon-size-14 sm:group-hover:scale-110 duration-100"
+                                            [svgIcon]="shortcut.icon"></mat-icon>
+                                    </div>
+                                    <span class="text-base sm:text-lg font-semibold text-center sm:group-hover:scale-105 duration-100">{{shortcut.title}}</span>
+                                    <span class="text-sm sm:text-base text-secondary font-normal text-center sm:group-hover:scale-105 duration-100">{{shortcut.desc}}</span>
+                                </div>
+                            </ng-container>
+                        </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0">
 
                             <!-- Orders summary -->

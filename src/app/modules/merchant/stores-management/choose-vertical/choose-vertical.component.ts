@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewEncapsulation } from '@angular/core';
 import { ChooseVerticalService } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.service';
-import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, forkJoin, Subject } from 'rxjs';
+import { mergeMap, switchMap, takeUntil } from 'rxjs/operators';
 import { Vertical } from 'app/modules/merchant/stores-management/choose-vertical/choose-vertical.types';
 import { MatDialog } from '@angular/material/dialog';
 // import { ChooseCountryComponent } from 'app/layout/common/countries/choose-country/choose-country.component'
@@ -57,25 +57,25 @@ export class ChooseVerticalComponent
      */
     ngOnInit(): void
     {
-        // Get the categories
-        this._chooseVerticalService.verticals$
-        .pipe(takeUntil(this._unsubscribeAll))
-        .subscribe((verticals: Vertical[]) => {
 
-            this._userService.client$.subscribe((response: Client)=>{
-                if (response['data'] && response['data'].regionCountry) {
-                    let regionId = response['data'].regionCountry.region;
-                    if (!response['data'].regionCountry.region) {
-                        console.error("Empty symplifiedRegion")
-                    }
-                    
-                    this.verticals = this.getVerticalByRegionId(verticals,regionId);
+        combineLatest([
+            this._chooseVerticalService.verticals$,
+            this._userService.client$
+        ])
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe(([verticals, client]: [Vertical[], Client]) => {
+
+            if (verticals.length > 0 && client) {
+
+                if (!client.countryId) {
+                    console.error("Empty symplifiedRegion")
                 }
-    
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            });
-        });
+                
+                this.verticals = this.getVerticalByRegionId(verticals, client.regionCountry.region);
+            }
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        })
 
         // check total of stores this account have
         this._storesService.stores$.subscribe((response)=>{
