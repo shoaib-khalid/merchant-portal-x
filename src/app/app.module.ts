@@ -13,7 +13,7 @@ import { LayoutModule } from 'app/layout/layout.module';
 import { AppComponent } from 'app/app.component';
 import { appRoutes } from 'app/app.routing';
 import { AppConfig } from 'app/config/service.config';
-
+import { ToastrModule } from 'ngx-toastr';
 import { GraphHelper } from 'app/modules/merchant/social-media/flow-builder/components/helpers/graph-helper';
 
 const routerConfig: ExtraOptions = {
@@ -43,7 +43,15 @@ const routerConfig: ExtraOptions = {
         LayoutModule,
 
         // 3rd party modules that require global configuration via forRoot
-        MarkdownModule.forRoot({})
+        MarkdownModule.forRoot({}),
+
+        //  Toastr Snackbar
+        ToastrModule.forRoot({
+            maxOpened: 3,
+            autoDismiss: true,
+            preventDuplicates: true,
+            countDuplicates: true
+        })
     ],
     providers: [
         GraphHelper,

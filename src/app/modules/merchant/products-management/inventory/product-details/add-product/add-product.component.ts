@@ -19,6 +19,7 @@ import { MatDrawer, MatDrawerToggleResult } from '@angular/material/sidenav';
 import { ActivatedRoute, Router } from '@angular/router';
 import { InventoryListComponent } from '../../product-list/inventory-list.component';
 import { AddCategoryComponent } from '../../../add-category/add-category.component';
+import { ToastrService } from 'ngx-toastr';
 
 
 @Component({
@@ -349,6 +350,7 @@ export class AddProductComponent2 implements OnInit, OnDestroy
         private _inventoryListComponent: InventoryListComponent,
         private _router: Router,
         private _activatedRoute: ActivatedRoute,
+        private _toastr: ToastrService
 
     )
     {
@@ -950,25 +952,27 @@ export class AddProductComponent2 implements OnInit, OnDestroy
         }
 
         if ( this.productImages.length >= maxImage) {
-            this._fuseConfirmationService.open({
-                title  : `Max ${maxImage} images`,
-                message: `Cannot be more than ${maxImage} images`,
-                icon       : {
-                    show : true,
-                    name : 'heroicons_outline:exclamation',
-                    color: 'warning'
-                },
-                actions: {
+            this._toastr.error(`Max image upload limit reached (${maxImage} images allowed).`, `Max Image Limit Reached`);
+
+            // this._fuseConfirmationService.open({
+            //     title  : `Max ${maxImage} images`,
+            //     message: `Cannot be more than ${maxImage} images`,
+            //     icon       : {
+            //         show : true,
+            //         name : 'heroicons_outline:exclamation',
+            //         color: 'warning'
+            //     },
+            //     actions: {
                     
-                    cancel: {
-                        label: 'OK',
-                        show: true
-                        },
-                    confirm: {
-                        show: false,
-                    }
-                    }
-            });
+            //         cancel: {
+            //             label: 'OK',
+            //             show: true
+            //             },
+            //         confirm: {
+            //             show: false,
+            //         }
+            //         }
+            // });
 
             return;
         }
@@ -983,7 +987,8 @@ export class AddProductComponent2 implements OnInit, OnDestroy
 
             // Return and throw warning dialog if image filename is more than 100 characters
             if ( file.name.length > 100 ) {
-                console.warn(`Image ${index + 1}'s name is too long`);
+                // console.warn(`Image ${index + 1}'s name is too long`);
+                this._toastr.error(`Image filename exceeds max length of 100 characters.`, 'Image Filename Too Long');
                 
                 // this._fuseConfirmationService.open({
                 //     title  : 'The file name is too long',
@@ -1009,7 +1014,9 @@ export class AddProductComponent2 implements OnInit, OnDestroy
             }
 
             if (file.size > maxSize ) {
-                console.warn(`Image ${index + 1}'s size is too big. Max size is ${maxSizeInMB}MB`);
+                // console.warn(`Image ${index + 1}'s size is too big. Max size is ${maxSizeInMB}MB`);
+                this._toastr.error(`Image size exceeds max limit (${maxSizeInMB}MB).`, 'Image Size Too Large');
+
             }
             
             // Check if the file is an image and allowed type and length not more than 100 chars and not exceed max size
