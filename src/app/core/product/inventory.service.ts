@@ -823,12 +823,23 @@ export class InventoryService
         return this.products$.pipe(
             take(1),
             switchMap(products => this._httpClient.post<ProductInventory>(productService +'/stores/'+this.storeId$+'/products/' + productId + "/inventory/bulk", bodies , header).pipe(
-                map((newInventory) => {
+                map((newInventories) => {
 
-                    this._logging.debug("Response from ProductsService (addInventoryToProduct- Bulk)", newInventory);
+                    this._logging.debug("Response from ProductsService (addInventoryToProduct- Bulk)", newInventories);
+
+                    // Find the index of the updated product
+                    const index = products.findIndex(item => item.id === productId);
+                    let updatedProduct = products[index];
+                    updatedProduct.productInventories = newInventories["data"];
+                    
+                    // Update the product
+                    products[index] = { ...products[index], ...updatedProduct};
+
+                    // Update the products
+                    this._products.next(products);
 
                     // Return the new product
-                    return newInventory["data"];
+                    return newInventories["data"];
                 })
             ))
         );
