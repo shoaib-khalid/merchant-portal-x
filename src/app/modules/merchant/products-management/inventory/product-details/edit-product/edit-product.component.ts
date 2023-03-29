@@ -2101,6 +2101,9 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
 
     setThumbnail(currentImageIndex: number, isVariant: boolean = false){
 
+        // find asset with thumbnail true 
+        const thumbnailImage = this.productImages.find(x => x.isThumbnail === true);
+
         // set all image thumbnail to false first
         this.productImages.map(item => item.isThumbnail = false);
         if (this.selectedVariantCombos && this.selectedVariantCombos.length > 0) {
@@ -2165,7 +2168,19 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
                         })
                 }
             }
+            // If the original thumbnail image has assetId, push to update isThumbnail = false
+            if (thumbnailImage && thumbnailImage.assetId) {
+                this.updateThumbnailArray.push(
+                    {
+                        assetId     : thumbnailImage.assetId,
+                        itemCode    : thumbnailImage.itemCode,
+                        isThumbnail : false,    
+                    })
+            }
         }
+        console.log('thumbnailImage', thumbnailImage);
+        console.log(this.updateThumbnailArray);
+        
         
         // set as dirty to remove pristine condition of the form control
         this.addProductForm.get('step1').markAsDirty();
