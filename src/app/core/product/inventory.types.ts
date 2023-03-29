@@ -64,6 +64,7 @@ export interface ProductInventory
     sku: string;
     status: string;
     dineInPrice: number;
+    barcode: string;
 }
 
 

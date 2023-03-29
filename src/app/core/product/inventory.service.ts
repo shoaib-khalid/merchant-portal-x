@@ -901,7 +901,8 @@ export class InventoryService
             quantity: productInventory.quantity,
             sku: productInventory.sku,
             status: productInventory.status? productInventory.status : "NOTAVAILABLE",
-            dineInPrice: productInventory.dineInPrice
+            dineInPrice: productInventory.dineInPrice,
+            barcode: productInventory.barcode
         };
 
         // Delete empty value
@@ -910,6 +911,9 @@ export class InventoryService
         }
         if (productInventory.dineInPrice === null || productInventory.dineInPrice === undefined) {
             delete body.dineInPrice;
+        }
+        if (productInventory.barcode === null || productInventory.barcode === undefined) {
+            delete body.barcode;
         }
 
         return this._products.pipe(

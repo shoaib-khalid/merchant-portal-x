@@ -77,11 +77,10 @@ import { AddCategoryComponent } from '../../../add-category/add-category.compone
                 //     grid-template-columns: 64px 110px 205px 128px 80px 94px;
                 // }
 
-                // No status (temporary!)
-                grid-template-columns: 70px 84px 340px 154px 54px;
+                grid-template-columns: 70px 102px 272px 240px 154px 86px;
 
                 @screen md {
-                    grid-template-columns: 70px 84px 340px 154px 54px;
+                    grid-template-columns: 70px 102px auto 240px 154px 154px;
                 }
 
             }
@@ -304,7 +303,8 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
         sku: string,
         status: string,
         variant: string,
-        dineInPrice: number
+        dineInPrice: number,
+        barcode: string;
     }[]
 
     selectedProductVariant: ProductVariant;
@@ -774,6 +774,7 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
         this.addProductForm.get('step1').get('price').setValue(product.productInventories[0].price);
         this.addProductForm.get('step1').get('availableStock').setValue(this.totalInventories(product.productInventories));
         this.addProductForm.get('step1').get('dineInPrice').setValue(product.productInventories[0].dineInPrice);
+        this.addProductForm.get('step1').get('barcode').setValue(product.productInventories[0].barcode);
 
         // Set original price (No Variants)
         this.oriPriceNoVariants = product.productInventories[0].price;
@@ -813,12 +814,19 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
             this.addProductForm.get('step1').get('dineInPrice').enable(); 
         }
 
+        // Check vertical
+        // if (this.store$.verticalCode === 'FnB' || this.store$.verticalCode === 'FnB_PK') {
+        //     // Disable barcode if Fnb
+        //     this.addProductForm.get('step1').get('barcode').disable();
+        // }
+
         // disable the input if product has variants
         if (product.productVariants.length > 0) {
             this.addProductForm.get('step1').get('sku').disable();
             this.addProductForm.get('step1').get('price').disable();    
             this.addProductForm.get('step1').get('availableStock').disable();  
             this.addProductForm.get('step1').get('dineInPrice').disable();  
+            this.addProductForm.get('step1').get('barcode').disable();  
 
             // Set product type to variant
             this.productType = 'variant';
@@ -1089,7 +1097,7 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
 
     }
 
-    setInventoriesDetails(){
+    setInventoriesDetails(){        
         this.selectedProduct.productInventories.forEach((item: ProductInventory, index) => {
 
             let comboIndex = this.selectedVariantCombos.findIndex(combo => combo.sku === item.sku);
@@ -1105,6 +1113,7 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
                 this.selectedVariantCombos[comboIndex].image.isThumbnail = false;
                 this.selectedVariantCombos[comboIndex].image.file = null;
                 this.selectedVariantCombos[comboIndex].dineInPrice = item.dineInPrice;
+                this.selectedVariantCombos[comboIndex].barcode = item.barcode ? item.barcode : '';
             }
         });        
         const pIdLen = this.selectedProduct.id.length;
@@ -1121,6 +1130,9 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
                 }
             }
         });
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
     }
 
 
@@ -1771,7 +1783,7 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
         const step1FormGroup = this.addProductForm.get('step1') as FormGroup;
         
         // Get the product object
-        const { sku, price, quantity, isCustomNote, ...product} = step1FormGroup.getRawValue();
+        const { sku, price, quantity, isCustomNote, barcode, ...product} = step1FormGroup.getRawValue();
         
         product.seoName = product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
         product.seoUrl = storeFrontURL + '/product/' + product.name.toLowerCase().replace(/ /g, '-').replace(/[-]+/g, '-').replace(/[^\w-]+/g, '');
@@ -1821,7 +1833,8 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
                         status: item.status,
                         SKU: item.sku,
                         productId: this.selectedProduct.id,
-                        dineInPrice: this.store$.isDineIn ? item.dineInPrice : null
+                        dineInPrice: this.store$.isDineIn ? item.dineInPrice : null,
+                        barcode: item.barcode
                     }
                 })
 
@@ -1892,6 +1905,7 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
                     sku: step1FormGroup.value.sku,
                     status: 'AVAILABLE',
                     dineInPrice: step1FormGroup.value.dineInPrice,
+                    barcode: step1FormGroup.value.barcode
                 } 
                 
                 await lastValueFrom(this._inventoryService.updateInventoryToProduct(this.selectedProduct.id, this.productInventories$[0].itemCode, _productInventories)).then((item) => {
@@ -2967,9 +2981,13 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
                 image: { preview: null, file: null, isThumbnail: false, newAsset: false, assetId: null}, 
                 itemCode: itemCode, 
                 variant: nameComboOutput.substring(1), 
-                price: this.store$.isDelivery ? 0 : null, quantity: 0, dineInPrice: this.store$.isDineIn ? 0 : null,
+                price: this.store$.isDelivery ? 0 : null, 
+                quantity: 0, 
+                // dineInPrice null, back end will auto calculate 
+                dineInPrice: this.store$.isDineIn ? 0 : null,
                 sku: nameComboOutput.substring(1).toLowerCase().replace(" / ", "-"), 
-                status: "NOTAVAILABLE" 
+                status: "NOTAVAILABLE" ,
+                barcode: ''
             })
           }
           return nameComboOutput.substring(1);
@@ -3413,6 +3431,11 @@ export class EditProductComponent2 implements OnInit, OnDestroy, AfterViewInit
 
     variantStockChanged(event, i) {
         this.selectedVariantCombos[i].quantity = event.target.value;
+    
+    }
+
+    variantBarcodeChanged(event, i) {
+        this.selectedVariantCombos[i].barcode = event.target.value;
     
     }
 

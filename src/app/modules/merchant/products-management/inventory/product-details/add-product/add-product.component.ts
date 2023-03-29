@@ -75,11 +75,10 @@ import { AddCategoryComponent } from '../../../add-category/add-category.compone
                 //     grid-template-columns: 64px 110px 205px 128px 80px 94px;
                 // }
 
-                // No status (temporary!)
-                grid-template-columns: 70px 84px 340px 154px 54px;
+                grid-template-columns: 70px 102px 272px 240px 154px 86px;
 
                 @screen md {
-                    grid-template-columns: 70px 84px 340px 154px 54px;
+                    grid-template-columns: 70px 102px auto 240px 154px 154px;
                 }
 
             }
@@ -292,7 +291,8 @@ export class AddProductComponent2 implements OnInit, OnDestroy
         sku: string,
         status: string,
         variant: string,
-        dineInPrice: number
+        dineInPrice: number,
+        barcode: string;
     }[]
     selectedProductVariant: ProductVariant;
     // variantImagesToBeDeleted: any = []; // image to be deleted from BE
@@ -1142,9 +1142,11 @@ export class AddProductComponent2 implements OnInit, OnDestroy
             this.addProductForm.get('step1').get('vehicleType').setValue('MOTORCYCLE');
         }
 
-        const {valid, ...productBody} = this.addProductForm.get('step1').value;
+        const step1FormGroup = this.addProductForm.get('step1') as FormGroup;
 
-        const { sku, availableStock, price, images, imagefiles, thumbnailIndex, isCustomNote, dineInPrice, ...newProductBody } = productBody;
+        const {valid, ...productBody} = step1FormGroup.getRawValue();
+
+        const { sku, availableStock, price, images, imagefiles, thumbnailIndex, isCustomNote, dineInPrice, barcode, ...newProductBody } = productBody;
         
         // Get store domain
         let storeFrontURL = 'https://' + this.store$.domain;
@@ -1178,7 +1180,8 @@ export class AddProductComponent2 implements OnInit, OnDestroy
                     compareAtprice: 0,
                     quantity: availableStock,
                     sku: sku,
-                    dineInPrice: dineInPrice
+                    dineInPrice: dineInPrice,
+                    barcode: barcode
                 };
                 
                 // Add Inventory to product
@@ -1244,7 +1247,9 @@ export class AddProductComponent2 implements OnInit, OnDestroy
                         status: item.status,
                         SKU: item.sku,
                         productId: this.selectedProduct.id,
-                        dineInPrice: this.store$.isDineIn ? item.dineInPrice : null
+                        // dineInPrice null, backend will auto calculate
+                        dineInPrice: this.store$.isDineIn ? item.dineInPrice : null,
+                        barcode: item.barcode
                     }
                 })
 
@@ -2110,9 +2115,13 @@ export class AddProductComponent2 implements OnInit, OnDestroy
                 image: { preview: null, file: null, isThumbnail: false, newAsset: false, assetId: null}, 
                 itemCode: itemCode, 
                 variant: nameComboOutput.substring(1), 
-                price: this.store$.isDelivery ? 0 : null, quantity: 0, dineInPrice: this.store$.isDineIn ? 0 : null,
+                price: this.store$.isDelivery ? 0 : null, 
+                quantity: 0, 
+                // dineInPrice null, back end will auto calculate 
+                dineInPrice: this.store$.isDineIn ? 0 : null,
                 sku: nameComboOutput.substring(1).toLowerCase().replace(" / ", "-"), 
-                status: "NOTAVAILABLE" 
+                status: "NOTAVAILABLE" ,
+                barcode: ''
             })
           }
           return nameComboOutput.substring(1);
@@ -2596,6 +2605,11 @@ export class AddProductComponent2 implements OnInit, OnDestroy
         }
     }
 
+    variantBarcodeChanged(event, i) {
+        this.selectedVariantCombos[i].barcode = event.target.value;
+    
+    }
+
     changeProductStatus(value: string) {
 
         this.addProductForm.get('step1').get('status').patchValue(value);
@@ -2916,7 +2930,6 @@ export class AddProductComponent2 implements OnInit, OnDestroy
             this.addProductForm.get('step1').get('isPackage').patchValue(false);
             this.addProductForm.get('step1').get('hasAddOn').patchValue(false);
         }
-        
     }
 
     getDataFromAddOnComponent(value) {
