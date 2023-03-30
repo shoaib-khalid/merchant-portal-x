@@ -60,9 +60,9 @@ import { ToastrService } from 'ngx-toastr';
                 height: 80px;
             }
 
-            //-----------------
+            /* //-----------------
             // variant section
-            //-----------------
+            //----------------- */
 
             .variant-details-grid {
                 height: 62vh;
@@ -70,23 +70,23 @@ import { ToastrService } from 'ngx-toastr';
             }
 
             .variant-grid {
-                // grid-template-columns: 64px 110px 205px 128px 80px 94px;
-
-                // @screen md {
-                //     grid-template-columns: 64px 110px 205px 128px 80px 94px;
-                // }
-
                 grid-template-columns: 70px 102px 272px 240px 154px 86px;
 
                 @screen md {
                     grid-template-columns: 70px 102px auto 240px 154px 154px;
                 }
+            }
+            .variant-grid-no-barcode {
+                grid-template-columns: 70px 102px 272px 154px 86px;
 
+                @screen md {
+                    grid-template-columns: 70px 102px auto 154px 154px;
+                }
             }
             
-            //-----------------
+            /* //-----------------
             // combo section
-            //-----------------
+            //----------------- */
             
             .add-product-list {
                 height: 21vh;
@@ -2859,6 +2859,8 @@ export class AddProductComponent2 implements OnInit, OnDestroy
             } else {
                 // Update the selected product form
                 this.addProductForm.get('step1').get('isVariants').patchValue(true);
+                this.addProductForm.get('step1').get('isPackage').patchValue(false);
+                this.addProductForm.get('step1').get('hasAddOn').patchValue(false);
                 this.productType = 'variant';
                 
                 // Mark for check

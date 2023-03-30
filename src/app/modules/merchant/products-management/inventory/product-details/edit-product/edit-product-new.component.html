@@ -1173,7 +1173,11 @@
                                         <div class="grid overflow-x-auto">
                                             <!-- Header -->
                                             <div
-                                                class="variant-grid z-9 sticky top-0 grid gap-3 py-4 px-3 md:px-3 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                                                class="z-9 sticky top-0 grid gap-3 py-4 px-3 md:px-3 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5"
+                                                [ngClass]="{
+                                                    'variant-grid': store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c', 
+                                                    'variant-grid-no-barcode' : store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK'
+                                                }" 
                                                 matSort
                                                 matSortDisableClear>
                                                 <div>
@@ -1187,10 +1191,8 @@
                                                     [mat-sort-header]="'vname'">
                                                     Name
                                                 </div>
-                                                <div>
-                                                    <div *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'">
-                                                        Barcode
-                                                    </div>
+                                                <div *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'">
+                                                    Barcode
                                                 </div>
                                                 <div
                                                     [mat-sort-header]="'price'">
@@ -1215,7 +1217,11 @@
                                                 *ngIf="selectedVariantCombos">
                                                 <div *ngFor="let variantCombo of selectedVariantCombos; let i = index; trackBy: trackByFn">
                                                     <!-- Variant Header -->
-                                                    <div class="variant-grid grid items-center gap-3 py-3 px-3 md:px-3 border-b">      
+                                                    <div class="grid items-center gap-3 py-3 px-3 md:px-3 border-b"
+                                                        [ngClass]="{
+                                                            'variant-grid': store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c', 
+                                                            'variant-grid-no-barcode' : store$.verticalCode === 'FnB' || store$.verticalCode === 'FnB_PK'
+                                                        }">      
                                                         <!-- Image -->
                                                         <div  class="flex items-center">
                                                             <div>
@@ -1310,13 +1316,11 @@
                                                         </span>
 
                                                         <!-- Barcode -->
-                                                        <div>
-                                                            <div *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'">
-                                                                <input
-                                                                    class="py-1 px-2 border border-gray-400 rounded w-42 bg-white disabled:text-secondary"
-                                                                    (input)="variantBarcodeChanged($event,i)"
-                                                                    [value]="variantCombo.barcode">
-                                                            </div>
+                                                        <div *ngIf="store$.verticalCode === 'E-Commerce' || store$.verticalCode === 'ECommerce_PK' || store$.verticalCode === 'e-commerce-b2b2c'">
+                                                            <input
+                                                                class="py-1 px-2 border border-gray-400 rounded w-42 bg-white disabled:text-secondary"
+                                                                (input)="variantBarcodeChanged($event,i)"
+                                                                [value]="variantCombo.barcode">
                                                         </div>
 
                                                         <!-- Price -->
