@@ -60,8 +60,7 @@ import { ZoneDetailsModalComponent } from './store-dine-in/modal-zone-details/mo
         NgxGalleryModule,
         FontAwesomeModule,
         NgxMatSelectSearchModule,
-        MatTabsModule 
-
+        MatTabsModule
     ],
     exports     : [
         StoreAccountComponent,

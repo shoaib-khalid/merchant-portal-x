@@ -15,8 +15,14 @@ import { Store } from 'app/core/store/store.types';
     selector     : 'edit-store-page',
     templateUrl  : './edit-store.component.html',
     styles       : [
-        `
-            :host ::ng-deep .ql-container { height: 156px; }
+        `            
+            ng-scrollbar.store-settings-scrollbar {
+                /* --scrollbar-size: 8px;
+                --scrollbar-thumb-color: gray; */
+                --scrollbar-hover-size: 12px;
+                /* --scrollbar-track-color: rgba(0, 0, 0, 0.05); */
+                --scrollbar-border-radius: 3px;
+            }
         `
     ],
     encapsulation: ViewEncapsulation.None,

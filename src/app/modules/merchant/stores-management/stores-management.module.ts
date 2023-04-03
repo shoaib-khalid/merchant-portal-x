@@ -36,6 +36,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatMenuModule } from '@angular/material/menu';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { CreateStoreModule } from './create-store/create-store.module';
+import { NgScrollbarModule } from 'ngx-scrollbar';
 
 
 @NgModule({
@@ -74,7 +75,8 @@ import { CreateStoreModule } from './create-store/create-store.module';
         FontAwesomeModule,
         MatMenuModule,
         NgxMatSelectSearchModule,
-        CreateStoreModule
+        CreateStoreModule, 
+        NgScrollbarModule
 
     ],
     providers: [

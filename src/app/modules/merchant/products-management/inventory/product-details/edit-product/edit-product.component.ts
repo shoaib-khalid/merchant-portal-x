@@ -98,6 +98,7 @@ import { ToastrService } from 'ngx-toastr';
             .combo-details-grid {
                 height: 60vh;
                 max-height: 470px;
+                /* max-height: 60vh; */
             }
 
             .option-grid {
@@ -141,6 +142,19 @@ import { ToastrService } from 'ngx-toastr';
             ::ng-deep .multiline-tooltip{
                 white-space: pre;
                 max-width: unset !important;
+            }
+
+            ng-scrollbar {
+                /* --scrollbar-size: 8px;
+                --scrollbar-thumb-color: gray; */
+                --scrollbar-hover-size: 12px;
+                /* --scrollbar-track-color: rgba(0, 0, 0, 0.05); */
+                --scrollbar-border-radius: 3px;
+            }
+
+            /* ng-scrollbar -  This is needed to dirty fix bug in library where the overflow property becomes hidden if use with scrollViewport directive*/
+            ::ng-deep .ng-scroll-viewport-wrapper {
+                overflow: auto !important;
             }
 
         `
