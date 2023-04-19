@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation } from '@
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { UserService } from 'app/core/user/user.service';
+import { ClientPaymentDetails } from '../edit-profile/edit-profile.types';
 
 @Component({
     selector       : 'settings-plan-billing',
@@ -40,14 +41,11 @@ export class EditPlanBillingComponent implements OnInit
     {
         // Create the form
         this.planBillingForm = this._formBuilder.group({
-            plan              : ['team'],
             bankAccountTitle  : ['', Validators.required],
             bankName          : ['', Validators.required],
             bankAccountNumber : ['', Validators.required],
-            cardExpiration    : [''],
-            cardCVC           : [''],
-            country           : ['usa'],
-            zip               : ['']
+            merchantId        : [''],
+            apiKey            : ['']
         });
 
         // Setup the plans
@@ -128,28 +126,27 @@ export class EditPlanBillingComponent implements OnInit
         // Disable the form
         this.planBillingForm.disable();
 
+        const form = this.planBillingForm.getRawValue() as ClientPaymentDetails;
+
         let newBody = {
-            bankAccountNumber: this.planBillingForm.get('bankAccountNumber').value,
-            bankName : this.planBillingForm.get('bankName').value,
-            bankAccountTitle : this.planBillingForm.get('bankAccountTitle').value
+            bankAccountNumber: form.bankAccountNumber,
+            bankName : form.bankName,
+            bankAccountTitle : form.bankAccountTitle
         };
 
-        if(this.clientPaymentId !==null){
+        if (this.clientPaymentId !==null){
             // update payment profile
             this._userService.updatePaymentProfile(this.clientPaymentId, newBody)
-            .subscribe((response) => {
+            .subscribe();
 
-            });
         } else {
             // create payment profile
             this._userService.createPaymentProfile(newBody)
-            .subscribe((response) => {
-
-            });
+            .subscribe();
         }
 
         // Show a success message (it can also be an error message)
-        const confirmation = this._fuseConfirmationService.open({
+        this._fuseConfirmationService.open({
             title  : 'Success',
             message: 'Your bank details has been updated successfully!',
             icon: {
