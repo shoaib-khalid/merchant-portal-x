@@ -328,14 +328,14 @@
                                             <!-- Details button -->
                                             <div class="justify-self-start">
                                                 <input
-                                                    id="product-detail"
+                                                    id="product-detail-{{product.id}}"
                                                     type="button"
                                                     [routerLink]="['./', product.id]"
                                                     class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
                                                     mat-button>
                                                 <label 
                                                     class="flex items-center justify-center min-w-10 min-h-7 h-7 hover:bg-hover rounded-lg cursor-pointer"
-                                                    for="product-detail"
+                                                    for="product-detail-{{product.id}}"
                                                     matRipple>
                                                     <mat-icon
                                                         class=""
