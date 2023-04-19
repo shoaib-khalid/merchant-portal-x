@@ -45,38 +45,40 @@
                 </div>
                 <div class="mt-1 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden">
                     <!-- Add product to option -->
-                    <div class="h-60 max-h-60 leading-none overflow-y-auto border-gray-300 dark:border-gray-500">
-                        <!-- Products -->
-                        <ng-container *ngIf="itemTemplatesList">
-                            <!-- Select All -->
-                            <div *ngIf="selectedGroupTemplate && !selectedGroupOnProduct" class="border-b sticky top-0 z-10 bg-white">
-                                <mat-checkbox
-                                    class="flex items-center h-10 min-h-10 px-4"
-                                    [color]="'primary'"
-                                    (change)="selectAllTemplateItems(itemTemplatesList ? itemTemplatesList : null, $event.checked)"
-                                    [disabled]="selectedGroupOnProduct || !selectedGroupTemplate"
-                                    [checked]="selectedGroupTemplate ? ((selectedItemsTemplates.length !== 0) && 
-                                                    (selectedGroupTemplate.addOnTemplateItem.length === itemTemplatesList.length))
-                                                    : false"
-                                    >
-                                    All
-                                </mat-checkbox>
-                            </div>
-                            <ng-container *ngFor="let item of itemTemplatesList ; let i = index; trackBy: trackByFn;">
-                                <!-- Checkbox -->
-                                <div>
-                                    <!-- [checked]="selection.isSelected(item)" -->
-                                    <!-- (change)="$event ? selection.toggle(item) : null" -->
-                                    <mat-checkbox 
+                    <div class="h-60 max-h-60 leading-none border-gray-300 dark:border-gray-500">
+                        <ng-scrollbar>
+                            <!-- Products -->
+                            <ng-container *ngIf="itemTemplatesList">
+                                <!-- Select All -->
+                                <div *ngIf="selectedGroupTemplate && !selectedGroupOnProduct" class="border-b sticky top-0 z-10 bg-white">
+                                    <mat-checkbox
                                         class="flex items-center h-10 min-h-10 px-4"
-                                        [color]="'primary'" (click)="$event.stopPropagation()"
-                                        (change)="selectedGroupOnProduct ? selectTemplateItemsUpdate(item, $event.checked) : selectTemplateItemsCreate(item, $event.checked)"
-                                        [checked]="selectedGroupOnProduct ? validateCheckbox(item.addonTemplateItemId) : validateAllCheckbox()">
-                                        {{item.name}}
+                                        [color]="'primary'"
+                                        (change)="selectAllTemplateItems(itemTemplatesList ? itemTemplatesList : null, $event.checked)"
+                                        [disabled]="selectedGroupOnProduct || !selectedGroupTemplate"
+                                        [checked]="selectedGroupTemplate ? ((selectedItemsTemplates.length !== 0) && 
+                                                        (selectedGroupTemplate.addOnTemplateItem.length === itemTemplatesList.length))
+                                                        : false"
+                                        >
+                                        All
                                     </mat-checkbox>
                                 </div>
+                                <ng-container *ngFor="let item of itemTemplatesList ; let i = index; trackBy: trackByFn;">
+                                    <!-- Checkbox -->
+                                    <div>
+                                        <!-- [checked]="selection.isSelected(item)" -->
+                                        <!-- (change)="$event ? selection.toggle(item) : null" -->
+                                        <mat-checkbox 
+                                            class="flex items-center h-10 min-h-10 px-4"
+                                            [color]="'primary'" (click)="$event.stopPropagation()"
+                                            (change)="selectedGroupOnProduct ? selectTemplateItemsUpdate(item, $event.checked) : selectTemplateItemsCreate(item, $event.checked)"
+                                            [checked]="selectedGroupOnProduct ? validateCheckbox(item.addonTemplateItemId) : validateAllCheckbox()">
+                                            {{item.name}}
+                                        </mat-checkbox>
+                                    </div>
+                                </ng-container>
                             </ng-container>
-                        </ng-container>
+                        </ng-scrollbar>
                     </div>
                     <!-- <div class="border-t border-gray-300">
                         <mat-paginator

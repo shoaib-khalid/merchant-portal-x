@@ -149,7 +149,7 @@
                                             matRipple>
                                             <span class="underline text-primary hover:cursor-pointer">Select your file</span>
                                         </label>
-                                        <span>&nbsp;or Drop into the box!</span>
+                                        <span>&nbsp;or drop into the box!</span>
                                 </div>
                             </ng-container>
                             <ng-template #noImage>
@@ -158,7 +158,7 @@
                                     <div class="flex items-center justify-center">
                                         <mat-icon
                                             class="icon-size-12 text-slate-500"
-                                            [svgIcon]="'heroicons_outline:upload'"></mat-icon>
+                                            [svgIcon]="'mat_solid:upload'"></mat-icon>
                                     </div>
                                     <div class="flex items-center justify-center mt-2">
                                         <input
@@ -175,7 +175,7 @@
                                             matRipple>
                                             <span class="underline text-primary hover:cursor-pointer">Select your file</span>
                                         </label>
-                                        <span>&nbsp;or Drop it here!</span>
+                                        <span>&nbsp;or drop it here!</span>
                                     </div>
                                     <span class="mt-1 text-center text-secondary text-sm">*Maximum size 1MB and 500 x 500px</span>
                                 </div>
@@ -259,20 +259,22 @@
                                     </div>
                                 </div>
                                 <!-- Available categories -->
-                                <div class="h-30 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
-                                    <!-- Categories -->
-                                    <ng-container *ngIf="!productCategoriesEditMode">
-                                        <ng-container *ngFor="let category of filteredProductCategories; trackBy: trackByFn;">
-                                            <mat-checkbox
-                                                class="flex items-center h-9 min-h-9 px-4"
-                                                [color]="'primary'"
-                                                [checked]="addProductForm.get('step1').get('categoryId').value && addProductForm.get('step1').get('categoryId').value.includes(category.id)"
-                                                (change)="toggleProductCategory(category, $event);"
-                                            >
-                                                {{category.name}}
-                                            </mat-checkbox>
+                                <div class="h-30 leading-none border-t border-gray-300 dark:border-gray-500">
+                                    <ng-scrollbar>
+                                        <!-- Categories -->
+                                        <ng-container *ngIf="!productCategoriesEditMode">
+                                            <ng-container *ngFor="let category of filteredProductCategories; trackBy: trackByFn;">
+                                                <mat-checkbox
+                                                    class="flex items-center h-9 min-h-9 px-4"
+                                                    [color]="'primary'"
+                                                    [checked]="addProductForm.get('step1').get('categoryId').value && addProductForm.get('step1').get('categoryId').value.includes(category.id)"
+                                                    (change)="toggleProductCategory(category, $event);"
+                                                >
+                                                    {{category.name}}
+                                                </mat-checkbox>
+                                            </ng-container>
                                         </ng-container>
-                                    </ng-container>
+                                    </ng-scrollbar>
                                 </div>
                             </div>
                             <mat-error 
@@ -1478,20 +1480,22 @@
                                             </div>
                                         </div>
                                         <!-- Add product to option -->
-                                        <div class="add-product-list pt-2 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
-                                            <!-- Products -->
-                                            <ng-container *ngFor="let product of filteredProductsOptions; let i = index; trackBy: trackByFn;">
-                                                <mat-checkbox
-                                                    class="flex items-center h-10 min-h-10 px-4"
-                                                    [color]="'primary'"
-                                                    (change)="insertProductsInOption(product.id, $event)"
-                                                    [checked]="onChangeSelectProductValue.includes(product.id)"
-                                                    [ngModelOptions]="{standalone: true}"
-                                                    [disabled]="product.isPackage || product.hasAddOn || product.productVariants.length > 0"
-                                                    >
-                                                    <span class="line-clamp-2 tracking-tight">{{product.name}}</span>
-                                                </mat-checkbox>
-                                            </ng-container>
+                                        <div class="add-product-list pt-2 leading-none border-t border-gray-300 dark:border-gray-500">
+                                            <ng-scrollbar>
+                                                <!-- Products -->
+                                                <ng-container *ngFor="let product of filteredProductsOptions; let i = index; trackBy: trackByFn;">
+                                                    <mat-checkbox
+                                                        class="flex items-center h-10 min-h-10 px-4"
+                                                        [color]="'primary'"
+                                                        (change)="insertProductsInOption(product.id, $event)"
+                                                        [checked]="onChangeSelectProductValue.includes(product.id)"
+                                                        [ngModelOptions]="{standalone: true}"
+                                                        [disabled]="product.isPackage || product.hasAddOn || product.productVariants.length > 0"
+                                                        >
+                                                        <span class="line-clamp-2 tracking-tight">{{product.name}}</span>
+                                                    </mat-checkbox>
+                                                </ng-container>
+                                            </ng-scrollbar>
                                         </div>
                                         <div class="border-t border-gray-300">
                                             <mat-paginator
@@ -1596,111 +1600,108 @@
                             <div class="flex flex-col w-full sm:w-3/4 sm:pl-3 py-4 sm:py-0">
                                 <div class="flex flex-auto overflow-x-auto">
                                     <div class="flex flex-col flex-auto sm:mb-8">
-                                        <ng-container>
-                                            <ng-container>
-                                                <div class="grid">
-                                                    <!-- Header -->
-                                                    <div
-                                                        class="option-grid z-9 sticky top-0 grid gap-4 py-4 px-6 md:px-8 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5 items-center"
-                                                        matSort
-                                                        matSortDisableClear>
-                                                        <div class="flex flex-col">
-                                                            <mat-slide-toggle 
-                                                                [color]="'primary'"
-                                                                [(ngModel)]="setOrderEnabled" 
-                                                                [ngModelOptions]="{standalone: true}"
-                                                                (change)='reorderList($event.checked)'></mat-slide-toggle>
-                                                        </div>
-                                                        <div>Option Name</div>
-                                                        <div>Total allowed</div>
-                                                        <div>Products in option</div>
-                                                        <div>Action</div>
-                                                    </div>
-                                                    <!-- Rows -->
-                                                    <div cdkDropList [cdkDropListDisabled]="!setOrderEnabled" (cdkDropListDropped)="dropUpperLevel($event, i)" 
-                                                        [cdkDropListAutoScrollStep]="10" class="combo-details-grid overflow-y-auto">
-                                                        <div cdkDrag *ngFor="let combos of productsCombos$; let i = index; trackBy: trackByFn">
-                                                            <div class="option-grid grid items-center gap-4 py-2 px-6 md:px-8 border-b"
-                                                            [ngClass]="selectedProductsOption && selectedProductsOption.id === combos.id ? 'bg-primary-50' : 'bg-white'">        
-                                                                <!-- Sequence -->
-                                                                <div class="flex items-center" cdkDragHandle>
-                                                                    <mat-icon 
-                                                                        [ngClass]="setOrderEnabled ? 'text-gray-500 cursor-move' : 'text-gray-200 cursor-default'"
-                                                                    svgIcon="mat_solid:drag_handle"></mat-icon>
-                                                                </div>
-    
-                                                                <!-- Option Name -->
-                                                                <div class="truncate">
-                                                                    {{combos.title}}
-                                                                </div>
-                                                                
-                                                                <!-- Total Allowed -->
-                                                                <div class="truncate flex flex-col gap-1">
-                                                                    <div class="grid grid-cols-2">
-                                                                        <span>Min.</span>
-                                                                        <span class="font-medium">: {{combos.minAllow}}</span>
-                                                                    </div>
-                                                                    <div class="grid grid-cols-2">
-                                                                        <span>Max.</span>
-                                                                        <span class="font-medium">: {{combos.totalAllow}}</span>
-                                                                    </div>
-                                                                </div>
-    
-                                                                <!-- Product in option -->
-                                                                <div cdkDropList [cdkDropListDisabled]="selectedProductsOption !== combos" (cdkDropListDropped)="drop($event, i)" class="truncate list-class">
-                                                                    <ng-container *ngIf="combos.productPackageOptionDetail.length">
-                                                                        <ng-container *ngFor="let package of combos.productPackageOptionDetail; trackBy: trackByFn">
-                                                                            <div cdkDrag *ngIf="package.product" 
-                                                                            [ngClass]="selectedProductsOption && selectedProductsOption.id === combos.id ? 'cursor-move bg-gray-200' : 'cursor-default bg-gray-100'"
-                                                                            class="contain-class flex items-center justify-center px-4 my-1.5 rounded-full leading-9 text-gray-500 dark:text-gray-300 dark:bg-gray-700">
-                                                                                <span class="truncate text-md font-medium whitespace-nowrap">{{package.product.name}}</span>
-                                                                            </div>
-                                                                        </ng-container>
-                                                                    </ng-container>
-                                                                </div>
-    
-                                                                <!-- Action -->
-                                                                <div class="flex flex-wrap">
-                                                                    <button
-                                                                        [disabled]="setOrderEnabled || (selectedProductsOption && selectedProductsOption.id === combos.id)"
-                                                                        class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer mr-3 bg-blue-600 disabled:opacity-50 disabled:cursor-default hover:bg-blue-400 disabled:hover:bg-blue-600"
-                                                                        [for]="'select-option-btn' + combos.id"
-                                                                        (click)="(!selectedProductsOption || (selectedProductsOption && selectedProductsOption.id !== combos.id)) ? selectProductOption(combos.id) : ''"
-                                                                        matRipple>
-                                                                        <mat-icon
-                                                                            *ngIf="!selectedProductsOption || (selectedProductsOption && selectedProductsOption.id !== combos.id)"
-                                                                            class="text-white icon-size-5"
-                                                                            [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
-                                                                        <mat-icon
-                                                                            *ngIf="selectedProductsOption && selectedProductsOption.id === combos.id"
-                                                                            class="text-white icon-size-5"
-                                                                            [svgIcon]="'heroicons_outline:check'"></mat-icon>
-                                                                    </button>
-                                                                    <!-- <input
-                                                                        [id]="'delete-option-btn' + combos.id"
-                                                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                                                        type="button"
-                                                                        (click)="deleteProductOption(combos.id)"
-                                                                        > -->
-                                                                    <button
-                                                                        [disabled]="setOrderEnabled || (selectedProductsOption && selectedProductsOption.id === combos.id)"
-                                                                        class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-warn disabled:opacity-50 disabled:cursor-default hover:bg-warn-700 disabled:hover:bg-warn"
-                                                                        [for]="'delete-option-btn' + combos.id"
-                                                                        (click)="deleteProductOption(combos.id)"
-                                                                        matRipple>
-                                                                        <mat-icon
-                                                                            class="text-white icon-size-5"
-                                                                            [svgIcon]="'heroicons_outline:trash'"></mat-icon>
-                                                                    </button>
-                                                                </div>
-                            
+                                        <div class="grid">
+                                            <!-- Header -->
+                                            <div
+                                                class="option-grid z-10 sticky top-0 grid gap-4 py-4 px-6 md:px-8 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5 items-center"
+                                                matSort
+                                                matSortDisableClear>
+                                                <div class="flex flex-col">
+                                                    <mat-slide-toggle 
+                                                        [color]="'primary'"
+                                                        [(ngModel)]="setOrderEnabled" 
+                                                        [ngModelOptions]="{standalone: true}"
+                                                        (change)='reorderList($event.checked)'></mat-slide-toggle>
+                                                </div>
+                                                <div>Option Name</div>
+                                                <div>Total allowed</div>
+                                                <div>Products in option</div>
+                                                <div>Action</div>
+                                            </div>
+                                            <!-- Rows -->
+                                            <ng-scrollbar class="combo-details-grid">
+                                                <div cdkDropList [cdkDropListDisabled]="!setOrderEnabled" (cdkDropListDropped)="dropUpperLevel($event, i)" 
+                                                [cdkDropListAutoScrollStep]="10" scrollViewport>
+                                                    <div cdkDrag *ngFor="let combos of productsCombos$; let i = index; trackBy: trackByFn">
+                                                        <div class="option-grid grid items-center gap-4 py-2 px-6 md:px-8 border-b"
+                                                        [ngClass]="selectedProductsOption && selectedProductsOption.id === combos.id ? 'bg-primary-50' : 'bg-white'">        
+                                                            <!-- Sequence -->
+                                                            <div class="flex items-center" cdkDragHandle>
+                                                                <mat-icon 
+                                                                    [ngClass]="setOrderEnabled ? 'text-gray-500 cursor-move' : 'text-gray-200 cursor-default'"
+                                                                svgIcon="mat_solid:drag_handle"></mat-icon>
                                                             </div>
+    
+                                                            <!-- Option Name -->
+                                                            <div class="truncate">
+                                                                {{combos.title}}
+                                                            </div>
+                                                            
+                                                            <!-- Total Allowed -->
+                                                            <div class="truncate flex flex-col gap-1">
+                                                                <div class="grid grid-cols-2">
+                                                                    <span>Min.</span>
+                                                                    <span class="font-medium">: {{combos.minAllow}}</span>
+                                                                </div>
+                                                                <div class="grid grid-cols-2">
+                                                                    <span>Max.</span>
+                                                                    <span class="font-medium">: {{combos.totalAllow}}</span>
+                                                                </div>
+                                                            </div>
+    
+                                                            <!-- Product in option -->
+                                                            <div cdkDropList [cdkDropListDisabled]="selectedProductsOption !== combos" (cdkDropListDropped)="drop($event, i)" class="truncate list-class">
+                                                                <ng-container *ngIf="combos.productPackageOptionDetail.length">
+                                                                    <ng-container *ngFor="let package of combos.productPackageOptionDetail; trackBy: trackByFn">
+                                                                        <div cdkDrag *ngIf="package.product" 
+                                                                        [ngClass]="selectedProductsOption && selectedProductsOption.id === combos.id ? 'cursor-move bg-gray-200' : 'cursor-default bg-gray-100'"
+                                                                        class="contain-class flex items-center justify-center px-4 my-1.5 rounded-full leading-9 text-gray-500 dark:text-gray-300 dark:bg-gray-700">
+                                                                            <span class="truncate text-md font-medium whitespace-nowrap">{{package.product.name}}</span>
+                                                                        </div>
+                                                                    </ng-container>
+                                                                </ng-container>
+                                                            </div>
+    
+                                                            <!-- Action -->
+                                                            <div class="flex flex-wrap">
+                                                                <button
+                                                                    [disabled]="setOrderEnabled || (selectedProductsOption && selectedProductsOption.id === combos.id)"
+                                                                    class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer mr-3 bg-blue-600 disabled:opacity-50 disabled:cursor-default hover:bg-blue-400 disabled:hover:bg-blue-600"
+                                                                    [for]="'select-option-btn' + combos.id"
+                                                                    (click)="(!selectedProductsOption || (selectedProductsOption && selectedProductsOption.id !== combos.id)) ? selectProductOption(combos.id) : ''"
+                                                                    matRipple>
+                                                                    <mat-icon
+                                                                        *ngIf="!selectedProductsOption || (selectedProductsOption && selectedProductsOption.id !== combos.id)"
+                                                                        class="text-white icon-size-5"
+                                                                        [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
+                                                                    <mat-icon
+                                                                        *ngIf="selectedProductsOption && selectedProductsOption.id === combos.id"
+                                                                        class="text-white icon-size-5"
+                                                                        [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                                                                </button>
+                                                                <!-- <input
+                                                                    [id]="'delete-option-btn' + combos.id"
+                                                                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                                                    type="button"
+                                                                    (click)="deleteProductOption(combos.id)"
+                                                                    > -->
+                                                                <button
+                                                                    [disabled]="setOrderEnabled || (selectedProductsOption && selectedProductsOption.id === combos.id)"
+                                                                    class="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer bg-warn disabled:opacity-50 disabled:cursor-default hover:bg-warn-700 disabled:hover:bg-warn"
+                                                                    [for]="'delete-option-btn' + combos.id"
+                                                                    (click)="deleteProductOption(combos.id)"
+                                                                    matRipple>
+                                                                    <mat-icon
+                                                                        class="text-white icon-size-5"
+                                                                        [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                                                </button>
+                                                            </div>
+                        
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </ng-container>
-                                        </ng-container>
-    
+                                            </ng-scrollbar>
+                                        </div>
                                         <ng-template #noVariants>
                                             <div class="p-8 sm:p-16 border-t text-2xl font-semibold tracking-tight text-center">There are no Variants! Add them now.</div>
                                         </ng-template>
