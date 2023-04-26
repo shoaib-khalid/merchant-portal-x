@@ -39,6 +39,8 @@ export interface ClientPaymentDetails
     stRate?: string,
     taxNumber?: string
     whtRate?: string
+    ansurApiKey?: string
+    ansurMerchantId?: string
 }
 
 export interface ClientPagination

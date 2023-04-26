@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation } from '@
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { UserService } from 'app/core/user/user.service';
-import { ClientPaymentDetails } from '../edit-profile/edit-profile.types';
+import { ClientPaymentDetails } from 'app/core/user/user.types';
 
 @Component({
     selector       : 'settings-plan-billing',
@@ -44,8 +44,8 @@ export class EditPlanBillingComponent implements OnInit
             bankAccountTitle  : ['', Validators.required],
             bankName          : ['', Validators.required],
             bankAccountNumber : ['', Validators.required],
-            merchantId        : [''],
-            apiKey            : ['']
+            ansurMerchantId   : [''],
+            ansurApiKey       : ['']
         });
 
         // Setup the plans
@@ -76,15 +76,17 @@ export class EditPlanBillingComponent implements OnInit
 
         this._userService.clientPaymentDetails$.subscribe(
             (response) => {
-                // Fill the form
-                //response?. to handle if it is undefined
-                this.planBillingForm.get('bankAccountNumber').patchValue(response?.bankAccountNumber?response.bankAccountNumber:null);
-                this.planBillingForm.get('bankName').patchValue(response?.bankName?response.bankName:null);
-                this.planBillingForm.get('bankAccountTitle').patchValue(response?.bankAccountTitle?response.bankAccountTitle:null);
 
-                this.clientPaymentId = response?.id?response.id:null;
-                
-          
+                // Fill the form
+                if (response) {
+                    this.planBillingForm.get('bankAccountNumber').patchValue(response.bankAccountNumber ? response.bankAccountNumber : null);
+                    this.planBillingForm.get('bankName').patchValue(response.bankName ? response.bankName : null);
+                    this.planBillingForm.get('bankAccountTitle').patchValue(response.bankAccountTitle ? response.bankAccountTitle : null);
+                    this.planBillingForm.get('ansurMerchantId').patchValue(response.ansurMerchantId);
+                    this.planBillingForm.get('ansurApiKey').patchValue(response.ansurApiKey);
+    
+                    this.clientPaymentId = response.id ? response.id : null;
+                }
             } 
         );  
     }
@@ -131,10 +133,12 @@ export class EditPlanBillingComponent implements OnInit
         let newBody = {
             bankAccountNumber: form.bankAccountNumber,
             bankName : form.bankName,
-            bankAccountTitle : form.bankAccountTitle
+            bankAccountTitle : form.bankAccountTitle,
+            ansurApiKey : form.ansurApiKey,
+            ansurMerchantId : form.ansurMerchantId
         };
 
-        if (this.clientPaymentId !==null){
+        if (this.clientPaymentId !== null){
             // update payment profile
             this._userService.updatePaymentProfile(this.clientPaymentId, newBody)
             .subscribe();
