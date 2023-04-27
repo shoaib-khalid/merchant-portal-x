@@ -115,15 +115,13 @@ export class EditPlanBillingComponent implements OnInit
             ansurMerchantId : form.ansurMerchantId
         };
 
-        if (this.clientPaymentId !== null){
+        if (this.clientPaymentId){
             // update payment profile
-            this._userService.updatePaymentProfile(this.clientPaymentId, newBody)
-            .subscribe();
+            this._userService.updatePaymentProfile(this.clientPaymentId, newBody).subscribe();
 
         } else {
             // create payment profile
-            this._userService.createPaymentProfile(newBody)
-            .subscribe();
+            this._userService.createPaymentProfile(newBody).subscribe();
         }
 
         // Show a success message (it can also be an error message)
