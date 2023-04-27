@@ -80,19 +80,19 @@ export class EditProfileComponent implements OnInit, OnDestroy
                 id         : 'account',
                 icon       : 'heroicons_outline:user-circle',
                 title      : 'Account',
-                description: 'Manage your public profile and private information'
+                description: 'Manage your profile information'
             },
             {
                 id         : 'security',
                 icon       : 'heroicons_outline:lock-closed',
-                title      : 'Security',
-                description: 'Manage your password'
+                title      : 'Password',
+                description: 'Change your password'
             },
             {
                 id         : 'plan-billing',
                 icon       : 'heroicons_outline:credit-card',
-                title      : 'Plan & Billing',
-                description: 'Manage your subscription plan, payment method and billing information'
+                title      : 'Payment Information',
+                description: 'Manage your bank information for settlement'
             },
             // {
             //     id         : 'notifications',
