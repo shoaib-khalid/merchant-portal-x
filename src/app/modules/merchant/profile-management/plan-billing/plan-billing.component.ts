@@ -13,7 +13,6 @@ import { ClientPaymentDetails } from 'app/core/user/user.types';
 export class EditPlanBillingComponent implements OnInit
 {
     planBillingForm: FormGroup;
-    plans: any[];
 
     alert: any;
     clientPaymentId: string;
@@ -41,34 +40,12 @@ export class EditPlanBillingComponent implements OnInit
     {
         // Create the form
         this.planBillingForm = this._formBuilder.group({
-            bankAccountTitle  : ['', Validators.required],
-            bankName          : ['', Validators.required],
-            bankAccountNumber : ['', Validators.required],
+            bankAccountTitle  : [''],
+            bankName          : [''],
+            bankAccountNumber : [''],
             ansurMerchantId   : [''],
             ansurApiKey       : ['']
         });
-
-        // Setup the plans
-        this.plans = [
-            {
-                value  : 'basic',
-                label  : 'BASIC',
-                details: 'Starter plan for individuals.',
-                price  : '10'
-            },
-            {
-                value  : 'team',
-                label  : 'TEAM',
-                details: 'Collaborate up to 10 people.',
-                price  : '20'
-            },
-            {
-                value  : 'enterprise',
-                label  : 'ENTERPRISE',
-                details: 'For bigger businesses.',
-                price  : '40'
-            }
-        ];
 
         // ----------------------
         // Get client payment Details
@@ -85,7 +62,7 @@ export class EditPlanBillingComponent implements OnInit
                     this.planBillingForm.get('ansurMerchantId').patchValue(response.ansurMerchantId);
                     this.planBillingForm.get('ansurApiKey').patchValue(response.ansurApiKey);
     
-                    this.clientPaymentId = response.id ? response.id : null;
+                    this.clientPaymentId = response.id || null;
                 }
             } 
         );  
