@@ -498,8 +498,8 @@ export class DashboardComponent implements OnInit, OnDestroy
 
                     if (index < 0) {
                         this.shortcutArr.push({
-                            title   : 'Bank Info for Settlement',
-                            desc    : `Add your bank info for settlement and get paid hassle-free.`,
+                            title   : 'For Settlement',
+                            desc    : `Provide relevant information to facilitate the settlement process.`,
                             panelId : 'bank',
                             icon    : 'account_balance',
                             link    : '../profile/plan-billing'

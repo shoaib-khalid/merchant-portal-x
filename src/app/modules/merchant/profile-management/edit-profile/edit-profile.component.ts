@@ -92,7 +92,7 @@ export class EditProfileComponent implements OnInit, OnDestroy
                 id         : 'plan-billing',
                 icon       : 'heroicons_outline:credit-card',
                 title      : 'Payment Information',
-                description: 'Manage your bank information for settlement'
+                description: 'Provide relevant information to facilitate the settlement process'
             },
             // {
             //     id         : 'notifications',
