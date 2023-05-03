@@ -192,7 +192,7 @@
                                     </div>
                                     <div>Name</div>
                                     <div>Total allowed</div>
-                                    <div>Options</div>
+                                    <div class="lg:min-w-[27rem]">Options</div>
                                     <div>Action</div>
                                 </div>
                                 <!-- Rows -->
@@ -229,7 +229,7 @@
 
                                             <!-- Product in option -->
                                             <div cdkDropList [cdkDropListDisabled]="selectedGroupOnProduct !== addOn" (cdkDropListDropped)="drop($event, i)" 
-                                            [cdkDropListAutoScrollStep]="10" class="truncate list-class">
+                                            [cdkDropListAutoScrollStep]="10" class="truncate list-class lg:min-w-[27rem]">
                                                 <ng-container *ngIf="addOn.productAddOnItemDetail.length">
                                                     <ng-container *ngFor="let option of addOn.productAddOnItemDetail; trackBy: trackByFn">
                                                         <div cdkDrag *ngIf="option.name" class="contain-class mb-1 last:mb-0 flex flex-row gap-2">
