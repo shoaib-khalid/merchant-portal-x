@@ -14,7 +14,7 @@
         "locationService"       : "https://api.symplified.it/location-service/v1"
     },
     "storeFrontDomain"          : ".dev-my.symplified.ai",
-    "marketplaceDomain"         : "customer.dev-my.symplified.ai",
+    "marketplaceDomain"         : "dev-my.symplified.ai",
     "merchantPortalDomain"      : "merchant.dev-my.symplified.ai",
     "logging": 0
 }

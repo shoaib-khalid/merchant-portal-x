@@ -14,6 +14,7 @@ import { InventoryService } from 'app/core/product/inventory.service';
 import {environment} from 'environments/environment';
 import { Platform } from 'app/core/platform/platform.types';
 import { PlatformService } from 'app/core/platform/platform.service';
+import { AppConfig } from 'app/config/service.config';
 
 @Component({
     selector     : 'classy-layout',
@@ -243,8 +244,9 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
     }
 
     openStoreFront(){
-        let currentStore = this.store.domain;
-        window.open("https://"+currentStore,'_blank');
+        const currentStore = this.store.domain.split('.')[0];
+        
+        window.open("https://" + AppConfig.settings.marketplaceDomain + "/store/" + currentStore,'_blank');
     }
 
     changeStore(storeId){
