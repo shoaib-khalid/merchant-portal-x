@@ -244,9 +244,18 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy
     }
 
     openStoreFront(){
-        const currentStore = this.store.domain.split('.')[0];
-        
-        window.open("https://" + AppConfig.settings.marketplaceDomain + "/store/" + currentStore,'_blank');
+
+        // Do nothing if no store selected
+        if (!this.store) return
+
+        if (this.platform && this.platform.country === 'PAK') {
+            window.open("https://" + this.store.domain,'_blank');
+        }
+        else {
+            const marketplaceStore = this.store.domain.split('.')[0];
+            
+            window.open("https://" + AppConfig.settings.marketplaceDomain + "/store/" + marketplaceStore,'_blank');
+        }
     }
 
     changeStore(storeId){
