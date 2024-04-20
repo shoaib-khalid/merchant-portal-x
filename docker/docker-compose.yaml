@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  merchant-portal-x:
+    container_name: merchant-portal-x
+    image: merchant-portal-x:$APP_VERSION
+    ports:
+      - 8000:80
+    restart: always

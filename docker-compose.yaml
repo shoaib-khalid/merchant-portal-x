@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  merchant-portal-x:
+    container_name: merchant-portal-x
+    image: merchant-portal-x:1.9.5
+    ports:
+      - 8080:80
+    restart: always
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    platform: "linux/amd64"

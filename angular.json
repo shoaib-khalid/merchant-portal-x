@@ -42,8 +42,7 @@
                                 "glob": "_redirects",
                                 "input": "src",
                                 "output": "/"
-                            },
-                            "src/.htaccess"
+                            }
                         ],
                         "stylePreprocessorOptions": {
                             "includePaths": [
